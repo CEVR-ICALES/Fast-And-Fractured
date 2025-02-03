@@ -1,4 +1,4 @@
-# Welcome to Fast & Fractured Documentation
+# F&F Docs
 
 ## Project layout
 
