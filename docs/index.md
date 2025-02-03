@@ -7,4 +7,4 @@
         index.md  # The documentation homepage.
         ...       # Other markdown pages, images and other files.
 
-This is a test :eyes:
+:eyes: This is a test :eyes:
