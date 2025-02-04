@@ -1,4 +1,4 @@
-# Car Controls
+# CAR CONTROLS
 
 **Default control type:** Gamepad  
 **Other Controller types  (optional):**  Mouse and Keyboard

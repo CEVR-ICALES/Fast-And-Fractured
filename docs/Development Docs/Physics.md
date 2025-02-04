@@ -1,4 +1,4 @@
-# FÍSICAS
+# PHYSICS
 
 Every wheel has its own axis, making it possible to apply forces to each wheel. It is also possible to have different types of traction depending on the axis’ vehicle.
 
