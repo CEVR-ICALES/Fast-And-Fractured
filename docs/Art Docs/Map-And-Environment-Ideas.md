@@ -1,6 +1,6 @@
-# **MAP & ENVIRONMENT IDEAS**
+# MAP & ENVIRONMENT IDEAS
 
-## **(Important) Concepts Used in This Document:**
+## (Important) Concepts Used in This Document
 
 * **TERRAIN:** Everything modeled in the world, including both the playable area (map) and the non-playable area (decoration).  
 * **MAP:** Everything WITHIN the traversable boundaries, meaning the entire playable area where players can move.  
@@ -15,10 +15,10 @@
 * **Size of the MAP:**  
   Approx. 240m x 200m (We can adjust this as needed during development).
 
-* **Shrinking Safe Zone (Sandstorm):**  
+* **Shrinking Safe Zone (Sandstorm):**
   Works similarly to Fortnite’s storm.
 
-## **NON-PLAYABLE AREA STRUCTURE (Decorations):**
+## NON-PLAYABLE AREA STRUCTURE (Decorations)
 
 This area defines the boundaries between where players can and cannot be (going outside results in elimination).
 
@@ -30,11 +30,11 @@ Since the map is set in a village-like environment, the playable boundaries woul
 * **Mountains** (e.g., Sant Pere Màrtir, the one in front of the school).  
 * **Water** (for example, a river with a strong current or broken bridge(s) preventing players from crossing).
 
-## **PLAYABLE AREA STRUCTURE (Map):**
+## PLAYABLE AREA STRUCTURE (Map)
 
 It is divided into three main themes:
 
-## **STRUCTURE OF THE VILLAGE/RURAL AREA:**
+## STRUCTURE OF THE VILLAGE/RURAL AREA
 
 * Open layout with no streets or clutter, featuring scattered houses at different angles (similar to islands).  
 * A **"very typical Spanish"** village style, but not overly spectacular (best references: **Castilla-La Mancha, Extremadura, Lleida, inland Valencia**).  
@@ -43,7 +43,7 @@ It is divided into three main themes:
 * Awnings, balconies, and elevated structures for atmosphere, without blocking paths.  
 * Frequent but avoidable traps (**wells, cemeteries, fragile floors, explosive elements, etc.**).
 
-## **STRUCTURE OF THE INTERMEDIATE/MIXED AREA:**
+## STRUCTURE OF THE INTERMEDIATE/MIXED AREA
 
 * More open and with fewer obstacles to encourage combat and chases.  
 * A significantly higher number of **run-down or abandoned structures**.  
@@ -54,7 +54,7 @@ It is divided into three main themes:
 * **Ramps, unstable platforms, and dynamic structures**.  
 * Possible idea: **the train (PUTA RENFE**).
 
-  ## **SOLUTIONS TO AVOID NARROW STREETS IN THE VILLAGE AREA AND MAKE IT MORE SPACIOUS**
+## SOLUTIONS TO AVOID NARROW STREETS IN THE VILLAGE AREA AND MAKE IT MORE SPACIOUS
 
 1. **Open spaces with scattered layout**
 
@@ -78,9 +78,9 @@ It is divided into three main themes:
    * This would make the area feel more like a dispersed village rather than a compact town.  
 - 
 
-  ## **FUN IDEAS / ADDING DYNAMISM TO THE MAP:**
+## FUN IDEAS / ADDING DYNAMISM TO THE MAP
 
-  #### **PROPS:**
+### PROPS
 
 * Park benches or bar chairs that break when run over. (light props)  
 * Vertical store awnings that players can pass through like a curtain (but slow them down slightly).  
@@ -95,11 +95,10 @@ It is divided into three main themes:
   1. If hit, they spill and create a slippery area of a random color.  
   2. If hit, they cover the player's screen for a few seconds (reference: Blooper MK).
 
-  #### **"Deaf Grandpa's Radio":**
-
+* "Deaf Grandpa's Radio"
 Somewhere on the map, there's an old radio. If a player crashes into it, it starts blasting old-town music (jotas, pasodobles, radio teletaxi, etc.) at full volume, momentarily stunning the player (reference \-\> Engineer from PVZ GW) or revealing their location to other players.
 
-## **OTHER EXTRA ELEMENTS:**
+### OTHER EXTRA ELEMENTS
 
 * Signs with phrases like "Construction sites are for watching, not touching" or "Warning: Elders behind the wheel."  
 * Crosswalks with funny cane drawings on the ground.  
@@ -114,32 +113,32 @@ Somewhere on the map, there's an old radio. If a player crashes into it, it star
 * Drawbridge in the construction zone: Activates after some time, blocking access and forcing players to find another route. (There must always be an alternative path to avoid trapping players.)  
 - 
 
-## **"DYNAMIC EVENTS" THAT OCCUR IN THE MAP**
+### "DYNAMIC EVENTS" THAT OCCUR IN THE MAP
 
 *(One different event per match, making each game feel unique\!)*
 
-### **"Mass Service" (Town Area)**
+#### "Misa" (Town Area)
 
 * Suddenly, the church doors swing open, and a group of elderly NPCs slowly walks out into the plaza, blocking the path.  
 * If players run into them, they bounce off as if they were made of rubber (for a comedic effect).  
 * After a few seconds, the elders scatter and enter nearby houses.
 
-### **"Market Day" (Town Area)**
+#### "Market Day" (Town Area)
 
 * More market stalls than usual appear, taking up extra space.  
 * Some stalls may suddenly collapse, spilling crates onto the road.  
 * Scattered items (like bananas in MK) can make vehicles skid.
 
-### **"Construction Explosion" (Construction Area)**
+#### "Construction Explosion" (Construction Area)
 
 * At a certain moment, a building under construction partially collapses (or explodes), sending debris across the map.  
 * The falling rubble dynamically changes the track, blocking some paths while opening new ones.
 
-### **Train Idea for the Map**
+#### Train Idea for the Map
 
 As in many towns (at least in Catalonia), there's often a train track running through the area, usually with little protection around it (unlike in cities).
 
-### **How It Works**
+##### How It Works
 
 * In the central area of the map, there is a train track (1 or 2 rails). The track could be straight or slightly curved to allow players to anticipate its path.  
 * There are small bridges or elevated crossings that let players safely cross the tracks.  
@@ -148,7 +147,7 @@ As in many towns (at least in Catalonia), there's often a train track running th
 * The train moves fast enough that players don't have time to dodge it at the last second.  
 * Warning lights and train sounds will alert players a few seconds before the train arrives.
 
-### **Possible Variations / Additional Ideas**
+##### Possible Variations / Additional Ideas
 
 * **Double Train:** Sometimes, a second train can appear traveling in the opposite direction, catching players off guard who thought they were safe, potentially covering both tracks (if there are 2 rails).  
 * **Freight Trains:** Some trains may carry containers with cargo, which could be either negative (dealing damage or pushing players) or positive (e.g., power-ups).  
