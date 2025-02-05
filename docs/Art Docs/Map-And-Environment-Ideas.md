@@ -118,28 +118,28 @@ Somewhere on the map, there's an old radio. If a player crashes into it, it star
 
 *(One different event per match, making each game feel unique\!)*
 
-#### **"Mass Service" (Town Area)**
+### **"Mass Service" (Town Area)**
 
 * Suddenly, the church doors swing open, and a group of elderly NPCs slowly walks out into the plaza, blocking the path.  
 * If players run into them, they bounce off as if they were made of rubber (for a comedic effect).  
 * After a few seconds, the elders scatter and enter nearby houses.
 
-#### **"Market Day" (Town Area)**
+### **"Market Day" (Town Area)**
 
 * More market stalls than usual appear, taking up extra space.  
 * Some stalls may suddenly collapse, spilling crates onto the road.  
 * Scattered items (like bananas in MK) can make vehicles skid.
 
-#### **"Construction Explosion" (Construction Area)**
+### **"Construction Explosion" (Construction Area)**
 
 * At a certain moment, a building under construction partially collapses (or explodes), sending debris across the map.  
 * The falling rubble dynamically changes the track, blocking some paths while opening new ones.
 
-  ### **Train Idea for the Map**
+### **Train Idea for the Map**
 
 As in many towns (at least in Catalonia), there's often a train track running through the area, usually with little protection around it (unlike in cities).
 
-#### **How It Works**
+### **How It Works**
 
 * In the central area of the map, there is a train track (1 or 2 rails). The track could be straight or slightly curved to allow players to anticipate its path.  
 * There are small bridges or elevated crossings that let players safely cross the tracks.  
@@ -148,7 +148,7 @@ As in many towns (at least in Catalonia), there's often a train track running th
 * The train moves fast enough that players don't have time to dodge it at the last second.  
 * Warning lights and train sounds will alert players a few seconds before the train arrives.
 
-  #### **Possible Variations / Additional Ideas**
+### **Possible Variations / Additional Ideas**
 
 * **Double Train:** Sometimes, a second train can appear traveling in the opposite direction, catching players off guard who thought they were safe, potentially covering both tracks (if there are 2 rails).  
 * **Freight Trains:** Some trains may carry containers with cargo, which could be either negative (dealing damage or pushing players) or positive (e.g., power-ups).  
