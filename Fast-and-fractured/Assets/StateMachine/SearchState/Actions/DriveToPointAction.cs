@@ -9,7 +9,7 @@ public class DriveToPointAction : Action
 {
     public override void Act(Controller controller)
     {
-        EnemyAIBrain brain = controller.GetComponentInController<EnemyAIBrain>();
+        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
         brain.GoToPosition();
     }

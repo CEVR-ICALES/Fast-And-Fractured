@@ -127,7 +127,9 @@ namespace StateMachine
             }
             return actions;
         }
-        public T GetComponentInController<T>() where T : Behaviour
+
+
+        public T GetBehaviour<T>() where T : Behaviour
         {
             foreach (var behaviour in availableBehaviours)
             {

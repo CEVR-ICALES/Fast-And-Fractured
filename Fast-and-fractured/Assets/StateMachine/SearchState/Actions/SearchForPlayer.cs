@@ -7,7 +7,7 @@ public class SearchForPlayer : Action
 {
     public override void Act(Controller controller)
     {
-        EnemyAIBrain brain = controller.GetComponentInController<EnemyAIBrain>();
+        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
         brain.SearchPlayer();
     }
