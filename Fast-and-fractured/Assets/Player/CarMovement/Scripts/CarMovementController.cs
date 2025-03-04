@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class CarMovementController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public WheelController[] wheels;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("Motor Settings")]
+    [SerializeField] private float _motorTorque;
+
+    [Header("Brake Settings")]
+    [SerializeField] private float _brakeTorque;
 }
