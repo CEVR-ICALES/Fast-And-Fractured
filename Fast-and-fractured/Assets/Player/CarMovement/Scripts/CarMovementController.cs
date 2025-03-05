@@ -21,9 +21,10 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float maxSteerAngle;
     [SerializeField] private float steeringSmoothness;
 
-    [Header("Brake Settings")]
+    [Header("Brake Settings")]//to do try to block input when braking so that the car doesnt keep accelerating when brakin and turning
     public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
     [SerializeField] private float brakeTorque;
+    private bool _isBraking { get; set; } = false;
 
     [Header("Dashing Settings")]
     public bool usingPhysicsDash;
@@ -79,6 +80,15 @@ public class CarMovementController : MonoBehaviour
     {
         steeringInput = _playerInputController.moveInput;
         
+        if(!_isBraking)
+        {
+            float acceleration = steeringInput.y * motorTorque;
+            foreach (var wheel in wheels)
+            {
+                wheel.ApplyMotorTorque(acceleration);
+            }
+        }
+
         if(steeringInput.y < 0.05f)//should create a small threshold to consider if the button is being clicked or not
         {
             foreach (var wheel in wheels)
@@ -87,17 +97,13 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        float acceleration = steeringInput.y * motorTorque;
-        foreach(var wheel in wheels)
-        {
-            wheel.ApplyMotorTorque(acceleration);
-        }
-
         if(_playerInputController.isBraking)
         {
             ApplyBrake();
+            _isBraking = true;
         } else
         {
+            _isBraking= false;
             foreach(var wheel in wheels)
             {
                 wheel.ApplyBrakeTorque(0f); //update brake to 0, if not it will keep applying last brake value
@@ -133,8 +139,8 @@ public class CarMovementController : MonoBehaviour
             case BRAKE_MODE.FrontWheelsStronger:
                 wheels[0].ApplyBrakeTorque(brakeTorque * 0.8f);
                 wheels[1].ApplyBrakeTorque(brakeTorque * 0.8f);
-                //wheels[2].ApplyBrakeTorque(brakeTorque * 0.2f);
-                //wheels[3].ApplyBrakeTorque(brakeTorque * 0.2f);
+                wheels[2].ApplyBrakeTorque(brakeTorque * 0.2f);
+                wheels[3].ApplyBrakeTorque(brakeTorque * 0.2f);
                 break;
         }
     }
