@@ -147,6 +147,7 @@ namespace Game
         private void Dead()
         {
             Debug.Log("Toy Muerto");
+            charDataSO.Dead = true;
         }
         #endregion
 
@@ -179,23 +180,23 @@ namespace Game
             switch (stat)
             {
                 case STATS.MAX_SPEED:
-                    ModCharStat(currentMaxSpeed,mod,charDataSO.MinSpeed,charDataSO.MaxSpeed*charDataSO.MaxSpeedMultiplier,isProduct);
-                    ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
+                   currentMaxSpeed = ModCharStat(currentMaxSpeed,mod,charDataSO.MinSpeed,charDataSO.MaxSpeed*charDataSO.MaxSpeedMultiplier,isProduct);
+                  currentMaxSpeedDashing =  ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
                 case STATS.ACCELERATION:
-                    ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration,isProduct);
+                   currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration,isProduct);
                     return true;
                 case STATS.RESIST:
-                    ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance,isProduct);
+                   currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance,isProduct);
                     return true;
                 case STATS.COOLDOWN_SPEED:
-                    ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed,isProduct);
+                   currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed,isProduct);
                     return true;
                 case STATS.PUSH_DAMAGE:
-                    ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG,isProduct);
+                   currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG,isProduct);
                     return true;
                 case STATS.NORMAL_DAMAGE:
-                    ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
+                   currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
                     return true;
             }
             return false;

@@ -10,6 +10,7 @@ public class PlayerBehaivour : MonoBehaviour
     [SerializeField] private float modMaxSpeed = 0.5f;
      private Rigidbody _rb;
     private StatsController _statsController;
+    [SerializeField]
     private float _speed;
     // Start is called before the first frame update
     void Start()
@@ -24,27 +25,27 @@ public class PlayerBehaivour : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GameObject proyectile = Instantiate(this.proyectile, transform);
+            GameObject proyectile = Instantiate(this.proyectile, transform.position,Quaternion.identity);
             proyectile.GetComponent<Rigidbody>().velocity = transform.forward * proyectileSpeed;
+            Destroy(proyectile,1f);
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift)){
+        if (Input.GetKey(KeyCode.LeftShift)){
+             _speed += _statsController.Acceleration * Time.deltaTime;
+
             if (_speed > _statsController.MaxSpeed)
                 _speed = _statsController.MaxSpeed;
-            else
-            _speed += _statsController.Acceleration * Time.deltaTime;
 
         }
-        if (Input.GetKeyDown(KeyCode.RightShift))
+        if (Input.GetKey(KeyCode.RightShift))
         {
+                _speed -= _statsController.Acceleration * Time.deltaTime;
             if (_speed < _statsController.MinSpeed)
                 _speed = _statsController.MinSpeed;
-            else
-            _speed -= _statsController.Acceleration * Time.deltaTime;
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
             _statsController.UpgradeCharStat(STATS.MAX_SPEED, 0.5f);
         }
-        _rb.velocity = Input.GetAxis("Horizonatl") * _speed * Vector3.right+ Input.GetAxis("Vertical") * _speed * Vector3.up;
+        _rb.velocity = Input.GetAxis("Horizontal") * _speed * Vector3.right + Input.GetAxis("Vertical") * _speed * Vector3.forward;
     }
 }
