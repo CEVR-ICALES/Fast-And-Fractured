@@ -9,9 +9,19 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] NavMeshAgent agent;
 
     private Vector3 _positionToDrive;
+    
     private GameObject _player;
     public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
     public GameObject Player { get => _player; set => _player = value; }
+
+    private void Start()
+    {
+        _player = GameObject.FindGameObjectWithTag("Player");
+        if (!agent)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
+    }
 
     public void GoToPosition()
     {
