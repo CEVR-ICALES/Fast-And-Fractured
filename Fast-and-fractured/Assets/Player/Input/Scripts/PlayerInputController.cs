@@ -81,6 +81,16 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.Dash.canceled += ctx => isDashing = false;
     }
 
+    public void DisableInput()
+    {
+        inputActions.Disable();
+    }
+
+    public void EnableInput()
+    {
+        inputActions.Enable();
+    }
+
     private void OnStartAimingPushShoot()
     {
         isAimingPushShoot = true;

@@ -89,7 +89,10 @@ public class CarMovementController : MonoBehaviour
         {
             if(usingPhysicsDash)
             {
-
+                HandleDashWithPhysics();
+            } else
+            {
+                HandleDahsWithoutPhysics();
             }
         }
 
@@ -148,14 +151,47 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void HandleDahsWithPhysics()
+    private void HandleDahsWithoutPhysics()
     {
-
+        if (!_isDashing)
+        {
+            _playerInputController.DisableInput();
+            _isDashing = true;
+            Vector3 dashDirection = transform.forward;
+            _carRb.isKinematic = true;
+            TimerManager.Instance.StartTimer(0.7f, () =>
+            {
+                _playerInputController.EnableInput();
+                _isDashing = false;
+                _carRb.isKinematic = false;
+            }, (progress) =>
+            {
+                transform.position += dashDirection * dashSpeed * Time.deltaTime;
+            }, "dash", false, false);
+        }
     }
 
-    private void HandleDashWithoutPhysics()
+    private void HandleDashWithPhysics()
     {
+        if (!_isDashing)
+        {
+            _isDashing = true;
+            Vector3 dashDirection = transform.forward.normalized;
+            TimerManager.Instance.StartTimer(1.5f, () =>
+            {
+                _isDashing = false;
+            }, (progress) => {
+                _carRb.AddForce(dashDirection * dashForce, ForceMode.Impulse);
+                Vector3 clampedVelocity = _carRb.velocity;//get current speed
 
+                if (clampedVelocity.magnitude > maxRbVelocityWhileDashing)
+                {
+                    clampedVelocity = clampedVelocity.normalized * maxRbVelocityWhileDashing;//retain direction (normalize) & scale it down to then apply it to rbvelocirty
+                    _carRb.velocity = clampedVelocity;
+                }
+
+            }, "dash", false, false);
+        }
     }
 
     private void UpdateWheelVisuals()
