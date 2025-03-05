@@ -14,11 +14,11 @@ namespace Game
         [Header("Game Object")]
 
         public GameObject Prefab;
-        public GameObject Instance;
+        //public GameObject Instance;
 
         [Header("Health")]
-        public float MaxResits;
-        public float MinResists = 0;
+        public float MaxEndurance;
+        public float MinEndurance = 0;
         public bool Dead;
 
 
@@ -26,15 +26,19 @@ namespace Game
 
         public float MaxSpeed;
         public float MaxSpeedDashing;
-        public float MaxSpeedAscend;
-        public float MaxSpeedDescend;
         public float MaxSpeedMultiplier;
         public float MinSpeed;
         public float MaxAcceleration;
-        public float Acceleration;
         public float MinAcceleration;
+        public float Acceleration;
         public float BrakeTorque;
         public float Handling;
+        public float HandlingSmoothnes;
+        public float AerialRotationSpeed;
+
+        // enum STEERING_MODE
+        // enum BRAKE
+
         //Maybe
         public float DashDistance;
 
@@ -43,6 +47,12 @@ namespace Game
         public float Weight;
         public float Traction;
         public float Damping;
+
+        [Header("RollPreventions")]
+
+        public float BaseDownwardForce;
+        public float TurningForceMultiplier;
+        public float SpeedForceMultiplier;
 
         [Header("DamageAndPushing")]
 

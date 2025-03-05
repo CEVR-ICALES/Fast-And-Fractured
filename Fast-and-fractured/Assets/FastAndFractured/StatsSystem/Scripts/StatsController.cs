@@ -22,7 +22,9 @@ namespace Game
         [Header("Health")]
 
         #region CharStats
-        [SerializeField] private float currentResist;
+        [SerializeField] private float currentEndurance;
+        public float Endurance { get => currentEndurance; }
+        public float MaxEndurance { get => charDataSO.MaxEndurance; }
         public bool IsDead { get => charDataSO.Dead; }
 
         [Header("Movement")]
@@ -99,28 +101,10 @@ namespace Game
             }
        }
 
-        private float ModCharStat(float charStat, float mod, float minVal, float maxVal,bool isProduct)
-        {
-            if (!isProduct)
-            {
-                charStat += mod;
-            }
-            else
-            {
-                charStat *= mod;
-            }
-
-            if (charStat > maxVal)
-                charStat = maxVal;
-            else if (charStat < minVal)
-                charStat = minVal;
-            return charStat;
-        }
-
         private void InitCurrentStats()
         {
             //Health
-            currentResist = 0f;
+            currentEndurance = 0f;
             //Movement
             currentMaxSpeed = 0f;
             currentAcceleration = charDataSO.Acceleration;
@@ -139,7 +123,7 @@ namespace Game
             {
                 if (ChoseCharToMod(STATS.RESIST, subs,isProduct)&&!charDataSO.Dead)
                 {
-                    if (currentResist >= charDataSO.MaxResits)
+                    if (currentEndurance >= charDataSO.MaxEndurance)
                     {
                         Dead();
                     }
@@ -194,15 +178,13 @@ namespace Game
             {
                 case STATS.MAX_SPEED:
                     ModCharStat(currentMaxSpeed,mod,charDataSO.MinSpeed,charDataSO.MaxSpeed*charDataSO.MaxSpeedMultiplier,isProduct);
-                    ModCharStat(currentMaxSpeedAscend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedAscend * charDataSO.MaxSpeedMultiplier, isProduct);
-                    ModCharStat(currentMaxSpeedDescend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDescend * charDataSO.MaxSpeedMultiplier, isProduct);
                     ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
                 case STATS.ACCELERATION:
                     ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration,isProduct);
                     return true;
                 case STATS.RESIST:
-                    ModCharStat(currentResist, mod, charDataSO.MinResists, charDataSO.MaxResits,isProduct);
+                    ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance,isProduct);
                     return true;
                 case STATS.COOLDOWN_SPEED:
                     ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed,isProduct);
@@ -215,6 +197,23 @@ namespace Game
                     return true;
             }
             return false;
+        }
+        private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
+        {
+            if (!isProduct)
+            {
+                charStat += mod;
+            }
+            else
+            {
+                charStat *= mod;
+            }
+
+            if (charStat > maxVal)
+                charStat = maxVal;
+            else if (charStat < minVal)
+                charStat = minVal;
+            return charStat;
         }
         #endregion
     }
