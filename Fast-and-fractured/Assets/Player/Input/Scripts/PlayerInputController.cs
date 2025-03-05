@@ -24,6 +24,8 @@ public class PlayerInputController : MonoBehaviour
     public bool isPausing { get; private set; }
     public bool isResettingCamera { get; private set; }
 
+    public bool isDashing { get; private set; }
+
     private void Awake()
     {
         if (Instance == null)
@@ -74,6 +76,9 @@ public class PlayerInputController : MonoBehaviour
 
         inputActions.PlayerInputActions.ResetCamera.performed += ctx => isResettingCamera = true;
         inputActions.PlayerInputActions.ResetCamera.canceled += ctx => isResettingCamera = false;
+
+        inputActions.PlayerInputActions.Dash.performed += ctx => isDashing = true;
+        inputActions.PlayerInputActions.Dash.canceled += ctx => isDashing = false;
     }
 
     private void OnStartAimingPushShoot()

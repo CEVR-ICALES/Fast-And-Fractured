@@ -125,6 +125,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Dash"",
+                    ""type"": ""Button"",
+                    ""id"": ""382fdf1f-f53c-45a5-8c08-1aac93b6e9e3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -391,6 +400,28 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""30fe1010-b9d7-4840-8fbc-6454373cb051"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b8dd7fcd-cee9-4b84-a153-f5dbf7165f3d"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -410,6 +441,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_ResetCamera = m_PlayerInputActions.FindAction("ResetCamera", throwIfNotFound: true);
         m_PlayerInputActions_ThrowMine = m_PlayerInputActions.FindAction("ThrowMine", throwIfNotFound: true);
         m_PlayerInputActions_Pause = m_PlayerInputActions.FindAction("Pause", throwIfNotFound: true);
+        m_PlayerInputActions_Dash = m_PlayerInputActions.FindAction("Dash", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -487,6 +519,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_ResetCamera;
     private readonly InputAction m_PlayerInputActions_ThrowMine;
     private readonly InputAction m_PlayerInputActions_Pause;
+    private readonly InputAction m_PlayerInputActions_Dash;
     public struct PlayerInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -502,6 +535,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @ResetCamera => m_Wrapper.m_PlayerInputActions_ResetCamera;
         public InputAction @ThrowMine => m_Wrapper.m_PlayerInputActions_ThrowMine;
         public InputAction @Pause => m_Wrapper.m_PlayerInputActions_Pause;
+        public InputAction @Dash => m_Wrapper.m_PlayerInputActions_Dash;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -544,6 +578,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
+            @Dash.started += instance.OnDash;
+            @Dash.performed += instance.OnDash;
+            @Dash.canceled += instance.OnDash;
         }
 
         private void UnregisterCallbacks(IPlayerInputActionsActions instance)
@@ -581,6 +618,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
+            @Dash.started -= instance.OnDash;
+            @Dash.performed -= instance.OnDash;
+            @Dash.canceled -= instance.OnDash;
         }
 
         public void RemoveCallbacks(IPlayerInputActionsActions instance)
@@ -611,5 +651,6 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnResetCamera(InputAction.CallbackContext context);
         void OnThrowMine(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
+        void OnDash(InputAction.CallbackContext context);
     }
 }

@@ -22,6 +22,7 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float brakeTorque;
 
     [Header("Dashing Settings")]
+    public bool usingPhysicsDash;
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashForce;
     [SerializeField] private float maxRbVelocityWhileDashing;
@@ -84,6 +85,14 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
+        if(_playerInputController.isDashing)
+        {
+            if(usingPhysicsDash)
+            {
+
+            }
+        }
+
         targetSteerAngle = maxSteerAngle * steeringInput.x;
     }
 
@@ -137,6 +146,16 @@ public class CarMovementController : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    private void HandleDahsWithPhysics()
+    {
+
+    }
+
+    private void HandleDashWithoutPhysics()
+    {
+
     }
 
     private void UpdateWheelVisuals()
