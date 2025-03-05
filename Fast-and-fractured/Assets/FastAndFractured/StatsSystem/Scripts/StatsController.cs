@@ -81,7 +81,8 @@ namespace Game
         // Start is called before the first frame update
         void Start()
         {
-
+            //For Try Propouses. Delete if game manager call the function SetCharacter()
+            InitCurrentStats();
         }
         #endregion
         // Update is called once per frame
@@ -104,9 +105,10 @@ namespace Game
         private void InitCurrentStats()
         {
             //Health
-            currentEndurance = 0f;
+            currentEndurance = charDataSO.MinEndurance;
             //Movement
-            currentMaxSpeed = 0f;
+            currentMaxSpeed = charDataSO.MaxSpeed;
+            currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
             currentAcceleration = charDataSO.Acceleration;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
@@ -117,11 +119,11 @@ namespace Game
 
 
         #region Health
-        public bool TakeDamage(float subs,bool isProduct)
+        public bool TakeDamage(float sum,bool isProduct)
         {
-            if (subs > 0)
+            if (sum > 0)
             {
-                if (ChoseCharToMod(STATS.RESIST, subs,isProduct)&&!charDataSO.Dead)
+                if (ChoseCharToMod(STATS.RESIST, sum,isProduct)&&!charDataSO.Dead)
                 {
                     if (currentEndurance >= charDataSO.MaxEndurance)
                     {
@@ -135,10 +137,10 @@ namespace Game
             return false;
         }
 
-        public bool RecoverResist(float sum, bool isProduct)
+        public bool RecoverResist(float subs, bool isProduct)
         {
-            if (sum > 0)
-            { return ChoseCharToMod(STATS.RESIST,sum,isProduct); }
+            if (subs > 0)
+            { return ChoseCharToMod(STATS.RESIST,subs*-1,isProduct); }
             return false;
         }
 
