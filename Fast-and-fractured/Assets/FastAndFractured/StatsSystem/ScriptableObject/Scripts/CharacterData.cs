@@ -18,15 +18,21 @@ namespace Game
 
         [Header("Health")]
         public float MaxResits;
+        public float MinResists = 0;
         public bool Dead;
-        public delegate void Died();
-        public Died OnDied; 
+
 
         [Header("Movement")]
 
         public float MaxSpeed;
+        public float MaxSpeedDashing;
+        public float MaxSpeedAscend;
+        public float MaxSpeedDescend;
+        public float MaxSpeedMultiplier;
         public float MinSpeed;
+        public float MaxAcceleration;
         public float Acceleration;
+        public float MinAcceleration;
         public float BrakeTorque;
         public float Handling;
         //Maybe
@@ -43,13 +49,21 @@ namespace Game
         public float NormalShootDMG;
         public float PushShootDMG;
         public float PushShootFORCE;
+        public float MaxNormalShootDMG;
+        public float MinNormalShootDMG;
+        public float MaxPushShootDMG;
+        public float MinPushShootDMG;
+
 
         [Header("COOLDOWNS")]
-
+        
         public float DashCooldown;
         public float PushShootCooldown;
         public float UniqueAbilityCooldown;
         public float NormalShootOverHeat;
-
+        public float RecoveryCooldown;
+        public float CooldownSpeed;
+        public float MinCooldownSpeed;
+        public float MaxCooldownSpeed;
     }
 }
