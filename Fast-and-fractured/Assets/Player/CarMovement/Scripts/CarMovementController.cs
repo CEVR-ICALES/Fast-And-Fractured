@@ -188,6 +188,7 @@ public class CarMovementController : MonoBehaviour
             _playerInputController.DisableInput();
             _isDashing = true;
             Vector3 dashDirection = transform.forward;
+            //_carRb.
             _carRb.isKinematic = true;
             TimerManager.Instance.StartTimer(0.7f, () =>
             {
@@ -208,20 +209,14 @@ public class CarMovementController : MonoBehaviour
             _isDashing = true;
             Vector3 dashDirection = transform.forward.normalized;
             currentRbMaxVelocity = maxRbVelocityWhileDashing;
+            _carRb.constraints = RigidbodyConstraints.FreezeRotation;
             TimerManager.Instance.StartTimer(1.5f, () =>
             {
                 _isDashing = false;
+                _carRb.constraints = RigidbodyConstraints.None;   
                 currentRbMaxVelocity = maxRbVelocity;
             }, (progress) => {
                 _carRb.AddForce(dashDirection * dashForce, ForceMode.Impulse);
-                /*Vector3 clampedVelocity = _carRb.velocity;//get current speed
-
-                if (clampedVelocity.magnitude > maxRbVelocityWhileDashing)
-                {
-                    clampedVelocity = clampedVelocity.normalized * maxRbVelocityWhileDashing;//retain direction (normalize) & scale it down to then apply it to rbvelocirty
-                    _carRb.velocity = clampedVelocity;
-                }*/
-
             }, "dash", false, false);
         }
     }
