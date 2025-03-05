@@ -138,8 +138,8 @@ public class CarMovementController : MonoBehaviour
                 {
                     rearSteerAngle = -currentSteerAngle; //posite direciton wheen going at low speeds
                 }
-                wheels[2].ApplySteering(currentSteerAngle);
-                wheels[3].ApplySteering(currentSteerAngle);
+                wheels[2].ApplySteering(rearSteerAngle);
+                wheels[3].ApplySteering(rearSteerAngle);
                 break;
 
             case STEERING_MODE.AllWheel:
