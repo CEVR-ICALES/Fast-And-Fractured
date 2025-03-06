@@ -9,7 +9,7 @@ public class DashAction : Action
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.NormalShoot();
+        brain.Dash();
     }
 
 }
