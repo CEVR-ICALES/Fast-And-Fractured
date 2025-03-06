@@ -17,14 +17,20 @@ public class CarMovementController : MonoBehaviour
 
     [Header("Motor Settings")]
     public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
-    [SerializeField] private float motorTorque;
+    [SerializeField] private float motorTorque;// how fast the car accelerates, bigger values faster acceleration
     [SerializeField] private float maxSteerAngle;
     [SerializeField] private float steeringSmoothness;
 
-    [Header("Brake Settings")]//to do try to block input when braking so that the car doesnt keep accelerating when brakin and turning
+    [Header("Brake Settings")]
     public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
+    public bool usesCustomBraking = false;
     [SerializeField] private float brakeTorque;
+    [Tooltip("threshold to detect whether the user wants to drift or not, works only on controller")]
+    [SerializeField] private float driftThreshold;
+    [SerializeField] private float driftForce;
     private bool _isBraking { get; set; } = false;
+    private bool _isDrifting = false;
+    private float _driftDirection = 1f;
 
     [Header("Dashing Settings")]
     public bool usingPhysicsDash;
@@ -66,6 +72,7 @@ public class CarMovementController : MonoBehaviour
        
         UpdateWheelVisuals();
         LimitRigidBodySpeed();
+        LimitRigidBodyRotation();
 
     }
 
@@ -74,8 +81,12 @@ public class CarMovementController : MonoBehaviour
         HandleInput();
         ApplySteering();
         UpdateSpeedOverlay();
+
+        Debug.DrawRay(transform.position, _carRb.velocity, Color.red);
+        Debug.DrawRay(transform.position, transform.forward * currentSteerAngle, Color.blue);
     }
 
+    #region Input Handling
     private void HandleInput()
     {
         steeringInput = _playerInputController.moveInput;
@@ -99,10 +110,26 @@ public class CarMovementController : MonoBehaviour
 
         if(_playerInputController.isBraking)
         {
-            ApplyBrake();
+            if(Mathf.Abs(steeringInput.x) > driftThreshold) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
+            {
+                if(!_isDrifting)
+                {
+                    StartDrift();
+                }
+                ApplyDrift();
+            } else
+            {
+                if(_isDrifting)
+                {
+                    EndDrift();
+                }
+                ApplyBrake();
+            }
             _isBraking = true;
         } else
         {
+            if(_isDrifting)
+                EndDrift();
             _isBraking= false;
             foreach(var wheel in wheels)
             {
@@ -124,6 +151,9 @@ public class CarMovementController : MonoBehaviour
         targetSteerAngle = maxSteerAngle * steeringInput.x;
     }
 
+    #endregion
+
+    #region Braking Fcuntions
     private void ApplyBrake()
     {
         //to do add logic for all brake Types
@@ -145,21 +175,46 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void LimitRigidBodySpeed()
+    private void StartDrift()
     {
-        Vector3 clampedVelocity = _carRb.velocity;//get current speed
-
-        if (clampedVelocity.magnitude > (currentRbMaxVelocity / 3.6f))
-        {
-            clampedVelocity = clampedVelocity.normalized * (currentRbMaxVelocity / 3.6f);//retain direction (normalize) & scale it down to then apply it to rbvelocirty
-            _carRb.velocity = clampedVelocity;
-        }
+        _isDrifting = true;
+        _driftDirection = Mathf.Sign(steeringInput.x); //only determine direcition + or -
+        //currentRbMaxVelocity = maxRbVelocity * 0.5f; //recude max speed to ensure that the drift dont feel super fast (decide whther we want to do it or not)
+        _carRb.drag = 1f;
     }
 
+    private void EndDrift() 
+    {
+        _isDrifting = false;
+        //currentRbMaxVelocity = maxRbVelocity;
+        _carRb.drag = 0f;
+        currentSteerAngle = 0f;
+    }
+
+    private void ApplyDrift()
+    {
+        Vector3 driftFinalForce = transform.right * _driftDirection * driftForce;
+        _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
+
+        //rotate the car while drifting
+        float driftTorque = _driftDirection * driftForce; 
+        _carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
+    }
+
+    #endregion
+
+    #region Steering
 
     private void ApplySteering()
     {
-        currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //sñight delelay so that wheel turn are not instanty
+
+        if(_isDrifting)
+        {
+            currentSteerAngle = maxSteerAngle * _driftDirection; // lock steering angle to the drift direction
+        } else
+        {
+            currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //sñight delelay so that wheel turn are not instanty
+        }
 
         switch(SteeringMode)
         {
@@ -187,6 +242,9 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Dash
     private void HandleDahsWithoutPhysics()
     {
         if (!_isDashing)
@@ -226,6 +284,30 @@ public class CarMovementController : MonoBehaviour
             }, "dash", false, false);
         }
     }
+
+    #endregion
+
+    #region rbLimiters
+    private void LimitRigidBodySpeed()
+    {
+        Vector3 clampedVelocity = _carRb.velocity;//get current speed
+
+        if (clampedVelocity.magnitude > (currentRbMaxVelocity / 3.6f))
+        {
+            clampedVelocity = clampedVelocity.normalized * (currentRbMaxVelocity / 3.6f);//retain direction (normalize) & scale it down to then apply it to rbvelocirty
+            _carRb.velocity = clampedVelocity;
+        }
+    }
+
+    private void LimitRigidBodyRotation()
+    {
+        if (_carRb.angularVelocity.magnitude > 2f) //sdjust the threshold as needed
+        {
+            _carRb.angularVelocity = _carRb.angularVelocity.normalized * 2f;
+        }
+    }
+
+    #endregion
 
     private void UpdateWheelVisuals()
     {
