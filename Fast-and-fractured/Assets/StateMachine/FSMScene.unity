@@ -223,7 +223,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -625,7 +625,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableBehaviours:
   - {fileID: 1850853833}
-  firstState: {fileID: 11400000, guid: 88ba942c35e8f654c950b28c72668024, type: 2}
+  firstState: {fileID: 11400000, guid: eb73c52ae863e5948a392e02b83c4faa, type: 2}
 --- !u!114 &1850853833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,6 +639,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 0}
+  fleeMagnitude: 5
 --- !u!54 &1850853834
 Rigidbody:
   m_ObjectHideFlags: 0
