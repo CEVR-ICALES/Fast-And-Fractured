@@ -72,6 +72,8 @@ namespace Game
         public delegate void Died();
         public Died OnDied;
 
+        private float _errorGetStatFloat = -1;
+
 
         #region START EVENTS
         void CustomStart()
@@ -81,7 +83,9 @@ namespace Game
         // Start is called before the first frame update
         void Start()
         {
-            //For Try Propouses. Delete if game manager call the function SetCharacter()
+            //just for try propouses
+            charDataSO.Dead = false;
+            //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
         #endregion
@@ -118,29 +122,38 @@ namespace Game
 
 
         #region Health
-        public bool TakeDamage(float sum,bool isProduct)
+        public void TakeEndurance(float sum,bool isProduct)
         {
             if (sum > 0)
             {
-                if (ChoseCharToMod(STATS.ENDURANCE, sum,isProduct)&&!charDataSO.Dead)
+                if (!charDataSO.Dead)
                 {
-                    if (currentEndurance >= charDataSO.MaxEndurance)
+                    if (ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
                     {
-                        Dead();
+                        //This is not the real dead condition, just an example. 
+                        if (currentEndurance >= charDataSO.MaxEndurance)
+                        {
+                            Dead();
+                        }
                     }
+                    else
+                        Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                            "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
-                else
-                    return false;
-                return true;
             }
-            return false;
+            else Debug.LogError("Value can't be negative.");
         }
 
-        public bool RecoverResist(float subs, bool isProduct)
+        public void RecoverEndurance(float subtrahend, bool isProduct)
         {
-            if (subs > 0)
-            { return ChoseCharToMod(STATS.ENDURANCE,subs*-1,isProduct); }
-            return false;
+            if (subtrahend > 0)
+            {
+                if (!ChoseCharToMod(STATS.ENDURANCE, -subtrahend, isProduct))
+                {
+                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                                            "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
+                }
+            }
         }
 
         private void Dead()
@@ -152,22 +165,44 @@ namespace Game
 
         #region OtherStats
         #region StatsModificators
-        public bool UpgradeCharStat(STATS type, float sum)
+        public void UpgradeCharStat(STATS type, float sum)
         {
-            if (IsStatAndModificatorCorrect(type, sum)) { return ChoseCharToMod(type, sum,false); }
-            return false;
+            if (IsStatAndModificatorCorrect(type, sum)) { 
+                if (!ChoseCharToMod(type, sum, false)) {
+                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
+                }
+            }
+            else
+                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                    " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
+
         }
 
-        public bool ReduceCharStat(STATS type, float subs)
+        public void ReduceCharStat(STATS type, float subtrahend)
         {
-            if (IsStatAndModificatorCorrect(type, subs)) { return ChoseCharToMod(type, subs * -1,false); }
-            return false;
+            if (IsStatAndModificatorCorrect(type, subtrahend)) { if (!ChoseCharToMod(type, -subtrahend, false))
+                {
+                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
+                } 
+            }
+            else
+                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                  " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
-        public bool ProductCharStats(STATS type, float multiplier)
+        public void ProductCharStats(STATS type, float multiplier)
         {
-            if (IsStatAndModificatorCorrect(type, multiplier)){ return ChoseCharToMod(type, multiplier, true); }
-            return false;
+            if (IsStatAndModificatorCorrect(type, multiplier)){ if (!ChoseCharToMod(type, multiplier, true))
+                {
+                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
+                }
+            }
+           else
+                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                 " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
         private bool ChoseCharToMod(STATS stat, float mod, bool isProduct)
@@ -199,15 +234,7 @@ namespace Game
 
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
-            if (!isProduct)
-            {
-                charStat += mod;
-            }
-            else
-            {
-                charStat *= mod;
-            }
-
+            charStat = isProduct ? charStat * mod : charStat + mod; 
             if (charStat > maxVal)
                 charStat = maxVal;
             else if (charStat < minVal)
@@ -216,29 +243,31 @@ namespace Game
         }
         #endregion
         #region TemporalModificators
-        public bool TemporalStatUp(STATS type, float sum,float time)
+        public void TemporalStatUp(STATS type, float sum,float time)
         {
-           return TemporalStatMod(type, sum, time,false);
+            TemporalStatMod(type, sum, time,false);
         }
-         public bool TemporalStatDown(STATS type, float subs, float time)
+         public void TemporalStatDown(STATS type, float subtrahend, float time)
         {
-           return TemporalStatMod(type, subs, time, false);
-        }
-
-        public bool TemporalProductStat(STATS type, float multiplier, float time)
-        {
-           return TemporalStatMod(type, multiplier, time, true);
+            TemporalStatMod(type, -subtrahend, time, false);
         }
 
-        private bool TemporalStatMod(STATS type, float mod, float time, bool isProduct)
+        public void TemporalProductStat(STATS type, float multiplier, float time)
+        {
+            TemporalStatMod(type, multiplier, time, true);
+        }
+
+        private void TemporalStatMod(STATS type, float mod, float time, bool isProduct)
         {
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod,isProduct);
             float currentValue = GetCurrentStat(type);
-            if (previousValue == -1 || currentValue == -1)
-                return false;
+            if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
+            {
+                Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                   "Comprove if GetCurrentStat method of class Stats Controller contains this states");
+            }
             StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
-            return true;
         }
 
         //Coroutine is for try propuses. It will be susbtitute for a Timer. 
@@ -246,7 +275,7 @@ namespace Game
         {
             float mod;
             if (iscurrentBigger)
-                mod = (currentValue - previousValue) * -1;
+                mod = -(currentValue - previousValue);
             else
                 mod = previousValue - currentValue;
             yield return new WaitForSeconds(time);
@@ -268,11 +297,10 @@ namespace Game
                     return currentNormalShootDMG;
                 case STATS.PUSH_DAMAGE:
                     return currentPushShootDMG;
-
                 case STATS.COOLDOWN_SPEED:
                     return currentcooldownSpeed;
             }
-            return -1;
+            return _errorGetStatFloat;
         }
 
             private bool IsStatAndModificatorCorrect(STATS type, float mod)

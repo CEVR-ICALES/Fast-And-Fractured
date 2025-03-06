@@ -5,8 +5,8 @@ using Game;
 
 public class PlayerBehaivour : MonoBehaviour
 {
-    [SerializeField] private GameObject proyectile;
-    [SerializeField] private float proyectileSpeed = 10f;
+    [SerializeField] private GameObject projectile;
+    [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float modMaxSpeed = 0.5f;
     [SerializeField] private float bulletDamage = 10f;
     [SerializeField]
@@ -25,6 +25,14 @@ public class PlayerBehaivour : MonoBehaviour
         _rb = transform.GetComponent<Rigidbody>();
         _speed = _statsController.MinSpeed;
         bulletDamage = _statsController.NormalShootDamage;
+        Debug.Log("Controllers");
+        Debug.Log("RightMouse: Shoot");
+        Debug.Log("LeftShit: Accelerate");
+        Debug.Log("LeftControll: Deccelerate");
+        Debug.Log("E: AugmentMaxSpeed");
+        Debug.Log("Q: AugmentShootDamage");
+        Debug.Log("Space: TemporalAugmentShootDamage");
+        Debug.Log("F: Temporal MaxSpeed Down");
     }
 
     // Update is called once per frame
@@ -32,10 +40,8 @@ public class PlayerBehaivour : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GameObject proyectile = Instantiate(this.proyectile, transform.position,Quaternion.identity);
-            proyectile.GetComponent<PlayerProyectile>().damage = bulletDamage;
-            proyectile.GetComponent<Rigidbody>().velocity = transform.forward * proyectileSpeed;
-            Destroy(proyectile,1f);
+            GameObject proyectile = Instantiate(this.projectile, transform.position, Quaternion.identity);
+            proyectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed,_statsController.NormalShootDamage,transform.forward);
         }
         if (Input.GetKey(KeyCode.LeftShift)){
              _speed += _statsController.Acceleration * Time.deltaTime;
@@ -44,7 +50,7 @@ public class PlayerBehaivour : MonoBehaviour
                 _speed = _statsController.MaxSpeed;
 
         }
-        if (Input.GetKey(KeyCode.RightShift))
+        if (Input.GetKey(KeyCode.LeftControl))
         {
                 _speed -= _statsController.Acceleration * Time.deltaTime;
             if (_speed < _statsController.MinSpeed)
@@ -66,10 +72,18 @@ public class PlayerBehaivour : MonoBehaviour
             _statsController.TemporalStatUp(STATS.NORMAL_DAMAGE,temporalBulletDamage,temporalTimer);
             bulletDamage = _statsController.NormalShootDamage;
         }
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.F))
         {
             _statsController.TemporalStatDown(STATS.MAX_SPEED, temporalMaxSpeedDow, temporalTimer);
         }
+        if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        {
+            if (_speed > _statsController.MaxSpeed)
+                _speed = _statsController.MaxSpeed;
+            else if (_speed < _statsController.MinSpeed)
+                    _speed = _statsController.MinSpeed;
+        }
+
         _rb.velocity = Input.GetAxis("Horizontal") * _speed * Vector3.right + Input.GetAxis("Vertical") * _speed * Vector3.forward;
     }
 }
