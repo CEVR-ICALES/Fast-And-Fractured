@@ -154,7 +154,7 @@ public class CarMovementController : MonoBehaviour
     #endregion
 
     #region Braking Fcuntions
-    private void ApplyBrake()
+    private void ApplyBrake() //regular brake (user is not drifting)
     {
         //to do add logic for all brake Types
         switch (brakeMode)
@@ -197,7 +197,7 @@ public class CarMovementController : MonoBehaviour
         _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
-        float driftTorque = _driftDirection * driftForce; 
+        float driftTorque = _driftDirection * driftForce * 1.2f; 
         _carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
     }
 
