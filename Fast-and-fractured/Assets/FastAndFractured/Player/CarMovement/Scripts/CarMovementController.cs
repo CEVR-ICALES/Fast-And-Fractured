@@ -31,9 +31,12 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float driftThreshold;
     [SerializeField] private float driftForce; //custom drift force, values should be low
     [SerializeField] private float driftingSmoothFactor;
+    [Tooltip("Top speed at which the drift will Clamp to determine how effective the drift has to be, higher value means that a higher speed will be nedded for the drift to be really efective")]
+    [SerializeField] private float driftingFactorTopSpeed;
     private bool _isBraking { get; set; } = false;
     private bool _isDrifting = false;
     private float _driftDirection = 1f;
+    private float _initialSpeedWhenDrifting;
 
     [Header("Dashing Settings")]
     public bool usingPhysicsDash;
@@ -121,7 +124,7 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if(steeringInput.y < 0.05f)//should create a small threshold to consider if the button is being clicked or not
+        if(steeringInput.y == 0)//should create a small threshold to consider if the button is being clicked or not
         {
             foreach (var wheel in wheels)
             {
@@ -207,18 +210,21 @@ public class CarMovementController : MonoBehaviour
         _driftDirection = Mathf.Sign(steeringInput.x); //only determine direcition + or -
         //currentRbMaxVelocity = maxRbVelocity * 0.5f; //recude max speed to ensure that the drift dont feel super fast (decide whther we want to do it or not)
         _carRb.drag = 1f;
+        _initialSpeedWhenDrifting = _carRb.velocity.magnitude;
     }
 
     private void EndDrift() 
     {
         _isDrifting = false;
         //currentRbMaxVelocity = maxRbVelocity;
-        _carRb.drag = 0f;
+        _carRb.drag = 0.08f;
         currentSteerAngle = 0f;
     }
 
-    private void ApplyDrift()
+    private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
     {
+        float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (driftingFactorTopSpeed / 3.6f));
+
         Vector3 targetDriftDirection = transform.right * _driftDirection;
 
         //smoothly interpolate between the car's forward direction and the target drift direction
@@ -226,11 +232,11 @@ public class CarMovementController : MonoBehaviour
         Vector3 currentDriftDirection = Vector3.Slerp(transform.forward, targetDriftDirection, driftProgress);
 
         //aapply the drift force in the interpolated direction
-        Vector3 driftFinalForce = currentDriftDirection * driftForce;
+        Vector3 driftFinalForce = currentDriftDirection * driftForce * speedFactor;
         _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
-        float driftTorque = _driftDirection * driftForce * 1.2f; 
+        float driftTorque = _driftDirection * driftForce * 0.8f * speedFactor; 
         _carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
     }
 
