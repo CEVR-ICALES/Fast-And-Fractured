@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -14,6 +15,7 @@ public class CarMovementController : MonoBehaviour
     private PlayerInputController _playerInputController;
     private RollPrevention _rollPrevention;
     private Rigidbody _carRb;
+    private bool _usingController { get; set; } = false;
 
     [Header("Motor Settings")]
     public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
@@ -54,12 +56,12 @@ public class CarMovementController : MonoBehaviour
     }
     private void OnEnable()
     {
-
+        PlayerInputController.OnInputDeviceChanged += HandleInputDeviceChanged;
     }
 
     private void OnDisable()
     {
-        
+        PlayerInputController.OnInputDeviceChanged -= HandleInputDeviceChanged;
     }
 
     private void FixedUpdate()
@@ -78,7 +80,13 @@ public class CarMovementController : MonoBehaviour
 
     private void Update()
     {
-        HandleInput();
+        if(!_usingController)
+        {
+            HandleInput();
+        } else
+        {
+            HandleInputController();
+        }
         ApplySteering();
         UpdateSpeedOverlay();
 
@@ -87,6 +95,18 @@ public class CarMovementController : MonoBehaviour
     }
 
     #region Input Handling
+
+    private void HandleInputDeviceChanged(INPUT_DEVICE_TYPE deviceType)
+    {
+        if(deviceType == INPUT_DEVICE_TYPE.KeyboardMouse)
+        {
+            _usingController = false;
+        } else
+        {
+            _usingController = true;
+        }
+    }
+
     private void HandleInput()
     {
         steeringInput = _playerInputController.moveInput;
@@ -149,6 +169,11 @@ public class CarMovementController : MonoBehaviour
         }
 
         targetSteerAngle = maxSteerAngle * steeringInput.x;
+    }
+
+    private void HandleInputController()
+    {
+
     }
 
     #endregion
@@ -318,7 +343,7 @@ public class CarMovementController : MonoBehaviour
     }
 
     private void UpdateSpeedOverlay()
-    {
+    { 
         float speedZ = Mathf.Abs(_carRb.velocity.z);
         float speedKmh = speedZ * 3.6f;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";

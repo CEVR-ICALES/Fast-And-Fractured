@@ -1,11 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.InputSystem.XInput;
 
 public class PlayerInputController : MonoBehaviour
 {
     public static PlayerInputController Instance { get; private set; }
-    
+
+    public delegate void InputDeviceChanged(INPUT_DEVICE_TYPE deviceType);
+    public static event InputDeviceChanged OnInputDeviceChanged;
+
     PlayerInputAction inputActions;
 
     //movement & Camera Inputs
@@ -25,6 +31,8 @@ public class PlayerInputController : MonoBehaviour
     public bool isResettingCamera { get; private set; }
 
     public bool isDashing { get; private set; }
+
+    private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
     private void Awake()
     {
@@ -81,6 +89,39 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.Dash.canceled += ctx => isDashing = false;
     }
 
+    private void OnDisable()
+    {
+        inputActions.Disable();
+    }
+
+    private void Update()
+    {
+        CheckForInputDeviceChange();    
+    }
+
+    private void CheckForInputDeviceChange()
+    {
+        if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
+        {
+            _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
+            OnInputDeviceChanged?.Invoke(_currentInputDevice);
+        }
+
+        if (Gamepad.current != null)
+        {
+            if (Gamepad.current is DualShockGamepad)
+            {
+                _currentInputDevice = INPUT_DEVICE_TYPE.PSController;
+                OnInputDeviceChanged?.Invoke(_currentInputDevice);
+            }
+            else if (Gamepad.current is XInputController)
+            {
+                _currentInputDevice = INPUT_DEVICE_TYPE.XboxController;
+                OnInputDeviceChanged?.Invoke(_currentInputDevice);
+            }
+        }
+    }
+
     public void DisableInput()
     {
         inputActions.Disable();
@@ -103,8 +144,5 @@ public class PlayerInputController : MonoBehaviour
         isPushShootReleased = true;
     }
 
-    private void OnDisable()
-    {
-        inputActions.Disable();
-    }
+    
 }
