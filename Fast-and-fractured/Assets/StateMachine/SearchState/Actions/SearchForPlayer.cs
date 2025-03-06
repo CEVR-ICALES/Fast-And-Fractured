@@ -11,6 +11,6 @@ public class SearchForPlayer : Action
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.SearchPlayer();
+        brain.SearchPlayerPosition();
     }
 }
