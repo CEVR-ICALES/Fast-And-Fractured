@@ -18,25 +18,25 @@ public class CarMovementController : MonoBehaviour
     [Header("Motor Settings")]
     public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
     [SerializeField] private float motorTorque;// how fast the car accelerates, bigger values faster acceleration
-    [SerializeField] private float maxSteerAngle;
-    [SerializeField] private float steeringSmoothness;
+    [SerializeField] private float maxSteerAngle; //max angle to witch the car wheel can rotate. bigger values faster and more agressive turns, should be between 30 & 45
+    [SerializeField] private float steeringSmoothness; //smoothness so that the wheel doesnt instantly go form 1 angle to the other
 
     [Header("Brake Settings")]
     public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
     public bool usesCustomBraking = false;
-    [SerializeField] private float brakeTorque;
+    [SerializeField] private float brakeTorque;// regular braking force, bigger values faster stoppage
     [Tooltip("threshold to detect whether the user wants to drift or not, works only on controller")]
     [SerializeField] private float driftThreshold;
-    [SerializeField] private float driftForce;
+    [SerializeField] private float driftForce; //custom drift force, values should be low
     private bool _isBraking { get; set; } = false;
     private bool _isDrifting = false;
     private float _driftDirection = 1f;
 
     [Header("Dashing Settings")]
     public bool usingPhysicsDash;
-    [SerializeField] private float dashSpeed;
-    [SerializeField] private float dashForce;
-    [SerializeField] private float maxRbVelocityWhileDashing;
+    [SerializeField] private float dashSpeed; // dash speed for dash without physics
+    [SerializeField] private float dashForce; //force for the dash with phyisics
+    [SerializeField] private float maxRbVelocityWhileDashing; //limit the speed so the car doesnt accelerate infinetly
     private bool _isDashing { get; set; } = false;
 
     private float targetSteerAngle;
