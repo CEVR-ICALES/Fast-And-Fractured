@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnemyProyectile : MonoBehaviour
 {
-    [SerializeField] private float damage = 10f;
+    public float damage = 10f;
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<PlayerBehaivour>(out var target))

@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4888035746443333248}
   - component: {fileID: 5197329351588518678}
   - component: {fileID: 6577998108315055370}
+  - component: {fileID: 2957766015219122114}
+  - component: {fileID: 2288621546770701347}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -130,3 +132,46 @@ MonoBehaviour:
   currentNormalShootDMG: 0
   currentPushShootDMG: 0
   currentcooldownSpeed: 0
+--- !u!114 &2957766015219122114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092736892885731432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 554b9578483b9a242a9b2332f50aeff4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  proyectile: {fileID: 0}
+  proyectileSpeed: 10
+  modMaxSpeed: 0.5
+  _speed: 0
+--- !u!54 &2288621546770701347
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092736892885731432}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0

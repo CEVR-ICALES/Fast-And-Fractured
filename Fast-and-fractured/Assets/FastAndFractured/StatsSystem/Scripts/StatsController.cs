@@ -101,7 +101,6 @@ namespace Game
                 InitCurrentStats();
             }
        }
-
         private void InitCurrentStats()
         {
             //Health
@@ -152,6 +151,7 @@ namespace Game
         #endregion
 
         #region OtherStats
+        #region StatsModificators
         public bool UpgradeCharStat(STATS type, float sum)
         {
             if (IsStatAndModificatorCorrect(type, sum)) { return ChoseCharToMod(type, sum,false); }
@@ -170,37 +170,33 @@ namespace Game
             return false;
         }
 
-        private bool IsStatAndModificatorCorrect(STATS type, float mod)
-        {
-            return mod > 0 && type != STATS.RESIST;
-        }
-
         private bool ChoseCharToMod(STATS stat, float mod, bool isProduct)
         {
             switch (stat)
             {
                 case STATS.MAX_SPEED:
-                   currentMaxSpeed = ModCharStat(currentMaxSpeed,mod,charDataSO.MinSpeed,charDataSO.MaxSpeed*charDataSO.MaxSpeedMultiplier,isProduct);
-                  currentMaxSpeedDashing =  ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
+                    currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
+                    currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
                 case STATS.ACCELERATION:
-                   currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration,isProduct);
+                    currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
                 case STATS.RESIST:
-                   currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance,isProduct);
+                    currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     return true;
                 case STATS.COOLDOWN_SPEED:
-                   currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed,isProduct);
+                    currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed, isProduct);
                     return true;
                 case STATS.PUSH_DAMAGE:
-                   currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG,isProduct);
+                    currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
                     return true;
                 case STATS.NORMAL_DAMAGE:
-                   currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
+                    currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
                     return true;
             }
             return false;
         }
+
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
             if (!isProduct)
@@ -219,5 +215,70 @@ namespace Game
             return charStat;
         }
         #endregion
+        #region TemporalModificators
+        public bool TemporalStatUp(STATS type, float sum,float time)
+        {
+           return TemporalStatMod(type, sum, time,false);
+        }
+         public bool TemporalStatDown(STATS type, float subs, float time)
+        {
+           return TemporalStatMod(type, subs, time, false);
+        }
+
+        public bool TemporalProductStat(STATS type, float multiplier, float time)
+        {
+           return TemporalStatMod(type, multiplier, time, true);
+        }
+
+        private bool TemporalStatMod(STATS type, float mod, float time, bool isProduct)
+        {
+            float previousValue = GetCurrentStat(type);
+            ChoseCharToMod(type, mod,isProduct);
+            float currentValue = GetCurrentStat(type);
+            if (previousValue == -1 || currentValue == -1)
+                return false;
+            StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            return true;
+        }
+
+        //Coroutine is for try propuses. It will be susbtitute for a Timer. 
+        private IEnumerator WaitTimeToModStat(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
+        {
+            float mod;
+            if (iscurrentBigger)
+                mod = (currentValue - previousValue) * -1;
+            else
+                mod = previousValue - currentValue;
+            yield return new WaitForSeconds(time);
+            ChoseCharToMod(stat, mod, false);
+        }
+        #endregion  
+
+        private float GetCurrentStat(STATS type)
+        {
+            switch (type)
+            {
+                case STATS.MAX_SPEED:
+                    return currentMaxSpeed;
+                case STATS.ACCELERATION:
+                    return currentAcceleration;
+                case STATS.RESIST:
+                    return currentEndurance;
+                case STATS.NORMAL_DAMAGE:
+                    return currentNormalShootDMG;
+                case STATS.PUSH_DAMAGE:
+                    return currentPushShootDMG;
+
+                case STATS.COOLDOWN_SPEED:
+                    return currentcooldownSpeed;
+            }
+            return -1;
+        }
+
+            private bool IsStatAndModificatorCorrect(STATS type, float mod)
+        {
+            return mod > 0 && type != STATS.RESIST;
+        }
+            #endregion
+        }
     }
-}
