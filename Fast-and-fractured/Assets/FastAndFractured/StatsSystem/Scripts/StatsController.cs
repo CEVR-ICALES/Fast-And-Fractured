@@ -7,7 +7,7 @@ namespace Game
     {
         MAX_SPEED,
         ACCELERATION,
-        RESIST,
+        ENDURANCE,
         NORMAL_DAMAGE,
         PUSH_DAMAGE,
         COOLDOWN_SPEED
@@ -122,7 +122,7 @@ namespace Game
         {
             if (sum > 0)
             {
-                if (ChoseCharToMod(STATS.RESIST, sum,isProduct)&&!charDataSO.Dead)
+                if (ChoseCharToMod(STATS.ENDURANCE, sum,isProduct)&&!charDataSO.Dead)
                 {
                     if (currentEndurance >= charDataSO.MaxEndurance)
                     {
@@ -139,7 +139,7 @@ namespace Game
         public bool RecoverResist(float subs, bool isProduct)
         {
             if (subs > 0)
-            { return ChoseCharToMod(STATS.RESIST,subs*-1,isProduct); }
+            { return ChoseCharToMod(STATS.ENDURANCE,subs*-1,isProduct); }
             return false;
         }
 
@@ -181,7 +181,7 @@ namespace Game
                 case STATS.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
-                case STATS.RESIST:
+                case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     return true;
                 case STATS.COOLDOWN_SPEED:
@@ -262,7 +262,7 @@ namespace Game
                     return currentMaxSpeed;
                 case STATS.ACCELERATION:
                     return currentAcceleration;
-                case STATS.RESIST:
+                case STATS.ENDURANCE:
                     return currentEndurance;
                 case STATS.NORMAL_DAMAGE:
                     return currentNormalShootDMG;
@@ -277,7 +277,7 @@ namespace Game
 
             private bool IsStatAndModificatorCorrect(STATS type, float mod)
         {
-            return mod > 0 && type != STATS.RESIST;
+            return mod > 0 && type != STATS.ENDURANCE;
         }
             #endregion
         }
