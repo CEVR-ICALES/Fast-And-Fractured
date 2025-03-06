@@ -30,6 +30,7 @@ public class CarMovementController : MonoBehaviour
     [Tooltip("threshold to detect whether the user wants to drift or not, works only on controller")]
     [SerializeField] private float driftThreshold;
     [SerializeField] private float driftForce; //custom drift force, values should be low
+    [SerializeField] private float driftingSmoothFactor;
     private bool _isBraking { get; set; } = false;
     private bool _isDrifting = false;
     private float _driftDirection = 1f;
@@ -130,7 +131,7 @@ public class CarMovementController : MonoBehaviour
 
         if(_playerInputController.isBraking)
         {
-            if(Mathf.Abs(steeringInput.x) > driftThreshold) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
+            if(Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
             {
                 if(!_isDrifting)
                 {
@@ -218,7 +219,14 @@ public class CarMovementController : MonoBehaviour
 
     private void ApplyDrift()
     {
-        Vector3 driftFinalForce = transform.right * _driftDirection * driftForce;
+        Vector3 targetDriftDirection = transform.right * _driftDirection;
+
+        //smoothly interpolate between the car's forward direction and the target drift direction
+        float driftProgress = Mathf.Clamp01(Time.deltaTime * driftingSmoothFactor); //asdjust smoothing factor as needed
+        Vector3 currentDriftDirection = Vector3.Slerp(transform.forward, targetDriftDirection, driftProgress);
+
+        //aapply the drift force in the interpolated direction
+        Vector3 driftFinalForce = currentDriftDirection * driftForce;
         _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
