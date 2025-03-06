@@ -8,7 +8,10 @@ public class EnemyAIBrain : MonoBehaviour
 {
     //Setted in inspector
     [SerializeField] NavMeshAgent agent;
-    [SerializeField] float fleeMagnitude = 5;
+    [SerializeField] float fleeMagnitude = 5f;
+    [SerializeField] float sweepRadius = 20f;
+    [SerializeField] float damageThreshold = 20f;
+    [SerializeField] LayerMask sweepLayerMask;
 
     private Vector3 _positionToDrive;
     private GameObject _player;
@@ -73,6 +76,24 @@ public class EnemyAIBrain : MonoBehaviour
 
         _positionToDrive = targetDirection * fleeMagnitude;
     }
+    public bool IsDashFinished()
+    {
+        return false;
+    }
+
+    public bool EnemySweep()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, sweepRadius, sweepLayerMask);
+     
+        return colliders.Length > 0;
+    }
+
+    public bool IsAboveDamageThreshold()
+    {
+        //TODO
+        //Get endurance and check if is above damageThreshold
+        return false;
+    }
 
 
     private void AssignTarget(GameObject target)
@@ -80,8 +101,4 @@ public class EnemyAIBrain : MonoBehaviour
         _targetToShoot = target;
     }
 
-    internal bool IsDashFinished()
-    {
-        return false;
-    }
 }
