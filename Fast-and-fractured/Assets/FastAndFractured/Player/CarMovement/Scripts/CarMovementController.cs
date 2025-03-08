@@ -75,7 +75,7 @@ public class CarMovementController : MonoBehaviour
             float steeringInputMagnitude = steeringInput.y;
             _rollPrevention.ApplyRollPrevention(_carRb, steeringInputMagnitude);
         }
-       
+
         UpdateWheelVisuals();
         LimitRigidBodySpeed();
         LimitRigidBodyRotation();
@@ -84,7 +84,7 @@ public class CarMovementController : MonoBehaviour
 
     private void Update()
     {
-        if(!_usingController)
+        if (!_usingController)
         {
             HandleInput();
         } else
@@ -102,7 +102,7 @@ public class CarMovementController : MonoBehaviour
 
     private void HandleInputDeviceChanged(INPUT_DEVICE_TYPE deviceType)
     {
-        if(deviceType == INPUT_DEVICE_TYPE.KeyboardMouse)
+        if (deviceType == INPUT_DEVICE_TYPE.KeyboardMouse)
         {
             _usingController = false;
         } else
@@ -114,8 +114,8 @@ public class CarMovementController : MonoBehaviour
     private void HandleInput()
     {
         steeringInput = _playerInputController.moveInput;
-        
-        if(!_isBraking)
+
+        if (!_isBraking)
         {
             float acceleration = steeringInput.y * motorTorque;
             foreach (var wheel in wheels)
@@ -124,7 +124,7 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if(steeringInput.y == 0)//should create a small threshold to consider if the button is being clicked or not
+        if (steeringInput.y == 0)//should create a small threshold to consider if the button is being clicked or not
         {
             foreach (var wheel in wheels)
             {
@@ -132,18 +132,18 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if(_playerInputController.isBraking)
+        if (_playerInputController.isBraking)
         {
-            if(Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
+            if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
             {
-                if(!_isDrifting)
+                if (!_isDrifting)
                 {
                     StartDrift();
                 }
                 ApplyDrift();
             } else
             {
-                if(_isDrifting)
+                if (_isDrifting)
                 {
                     EndDrift();
                 }
@@ -152,18 +152,18 @@ public class CarMovementController : MonoBehaviour
             _isBraking = true;
         } else
         {
-            if(_isDrifting)
+            if (_isDrifting)
                 EndDrift();
-            _isBraking= false;
-            foreach(var wheel in wheels)
+            _isBraking = false;
+            foreach (var wheel in wheels)
             {
                 wheel.ApplyBrakeTorque(0f); //update brake to 0, if not it will keep applying last brake value
             }
         }
 
-        if(_playerInputController.isDashing)
+        if (_playerInputController.isDashing)
         {
-            if(usingPhysicsDash)
+            if (usingPhysicsDash)
             {
                 HandleDashWithPhysics();
             } else
@@ -177,7 +177,67 @@ public class CarMovementController : MonoBehaviour
 
     private void HandleInputController()
     {
+        steeringInput = _playerInputController.moveInput;
 
+        float acceleration = 0f;
+        if (_playerInputController.isAccelerating)
+        {
+            acceleration = motorTorque;
+        }
+        else if (_playerInputController.isReversing)
+        {
+            acceleration = -motorTorque;
+        }
+
+        foreach (var wheel in wheels)
+        {
+            wheel.ApplyMotorTorque(acceleration);
+        }
+
+        if (_playerInputController.isBraking)
+        {
+            if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking)
+            {
+                if (!_isDrifting)
+                {
+                    StartDrift();
+                }
+                ApplyDrift();
+            }
+            else
+            {
+                if (_isDrifting)
+                {
+                    EndDrift();
+                }
+                ApplyBrake();
+            }
+            _isBraking = true;
+        }
+        else
+        {
+            if (_isDrifting)
+                EndDrift();
+            _isBraking = false;
+            foreach (var wheel in wheels)
+            {
+                wheel.ApplyBrakeTorque(0f); 
+            }
+        }
+
+        if (_playerInputController.isDashing)
+        {
+            if (usingPhysicsDash)
+            {
+                HandleDashWithPhysics();
+            }
+            else
+            {
+                HandleDahsWithoutPhysics();
+            }
+        }
+
+        targetSteerAngle = maxSteerAngle * steeringInput.x;
     }
 
     #endregion
