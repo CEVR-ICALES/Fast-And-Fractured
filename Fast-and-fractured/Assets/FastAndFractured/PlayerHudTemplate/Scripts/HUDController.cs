@@ -9,6 +9,12 @@ namespace Game
         [Header("Health Bar")]
         [SerializeField] private Image healthBar;
 
+        [Header("Abilities")]
+        [SerializeField] private Image dashIcon;
+        [SerializeField] private Image ultIcon;
+        [SerializeField] private Image pushIcon;
+        [SerializeField] private Image shootIcon;
+
         [Header("Abilities Cooldowns")]
         [SerializeField] private Image dashCooldownImage;
         [SerializeField] private Image ultCooldownImage;
@@ -62,6 +68,29 @@ namespace Game
             healthBar.fillAmount = Mathf.Clamp01(currentHealth / maxHealth);
         }
 
+        #endregion
+
+        #region Abilities
+        public void SetDashIcon(Sprite icon)
+        {
+            dashIcon.sprite = icon;
+        }
+        
+        public void SetUltIcon(Sprite icon)
+        {
+            ultIcon.sprite = icon;
+        }
+
+        public void SetPushIcon(Sprite icon)
+        {
+            pushIcon.sprite = icon;
+        }
+
+        public void SetShootIcon(Sprite icon)
+        {
+            shootIcon.sprite = icon;
+        }
+        
         #endregion
 
         #region Abilities Cooldowns
@@ -126,7 +155,7 @@ namespace Game
                 case 6: player6Image.sprite = playerSprite; break;
                 case 7: player7Image.sprite = playerSprite; break;
                 case 8: player8Image.sprite = playerSprite; break;
-                default: Debug.LogWarning("Invalid player index!"); break;
+                default: Debug.LogWarning("Invalid player index!!"); break;
             }
         }
 
