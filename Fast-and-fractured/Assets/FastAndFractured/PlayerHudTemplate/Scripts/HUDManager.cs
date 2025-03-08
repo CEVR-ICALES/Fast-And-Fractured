@@ -66,15 +66,30 @@ namespace Game
 
         private void Start()
         {
-            // Suscribe to events if necessary
-
             // Register all UI elements
             RegisterUIElements();
         }
 
-        private void OnDestroy()
+        private void OnEnable()
+        {
+            // Subscribe to events if necessary
+            
+            // Example
+            // EventManager.OnHealthUpdate += UpdateHealthBar;
+            // EventManager.OnCooldownUpdate += UpdateCooldown;
+            // EventManager.OnTimerUpdate += UpdateTimer;
+            // EventManager.OnEventTitleUpdate += UpdateEventTitle;
+        }
+
+        private void OnDisable()
         {
             // Unsubscribe from events if necessary
+            
+            // Example
+            // EventManager.OnHealthUpdate -= UpdateHealthBar;
+            // EventManager.OnCooldownUpdate -= UpdateCooldown;
+            // EventManager.OnTimerUpdate -= UpdateTimer;
+            // EventManager.OnEventTitleUpdate -= UpdateEventTitle;
         }
 
         #endregion
@@ -104,6 +119,7 @@ namespace Game
         /// </summary>
         /// <param name="type">The type of the UI element.</param>
         /// <param name="currentValue">The fill amount value.</param>
+        /// <param name="maxValue">The maximum value for the fill amount.</param>
         public void UpdateUIImageFillAmount(UIElementType type, float currentValue, float maxValue)
         {
             if (_images.TryGetValue(type, out Image img))
@@ -143,6 +159,32 @@ namespace Game
                 txt.text = content;
             }
         }
+
+        #endregion
+
+        #region Event Handlers
+
+        // Placeholder methods for future event handling
+
+        // private void UpdateHealthBar()
+        // {
+        //     UpdateUIImageFillAmount(UIElementType.HealthBar, Player.currentHealth, Player.maxHealth);
+        // }
+
+        // private void UpdateCooldown(UIElementType type, float currentCooldown, float maxCooldown)
+        // {
+        //     UpdateUIImageFillAmount(type, currentCooldown, maxCooldown);
+        // }
+
+        // private void UpdateTimer(float time)
+        // {
+        //     UpdateUITextString(UIElementType.TimerText, time.ToString("F2"));
+        // }
+
+        // private void UpdateEventTitle(string title)
+        // {
+        //     UpdateUITextString(UIElementType.EventText, title);
+        // }
 
         #endregion
     }
