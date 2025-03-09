@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 
-public class PlayerBehaivour : MonoBehaviour
+public class PlayerBehaivour : MonoBehaviour, IRequestPool
 {
     [SerializeField] private GameObject projectile;
     [SerializeField] private float projectileSpeed = 10f;
@@ -18,6 +18,19 @@ public class PlayerBehaivour : MonoBehaviour
     private StatsController _statsController;
     [SerializeField]
     private float _speed;
+    [SerializeField]
+    private Pooltype _pooltype;
+    public Pooltype PoolType { get => _pooltype; }
+
+
+    public GameObject RequestPool()
+    {
+        return ObjectPoolManager.Instance.GivePooledObject(PoolType);
+    }
+
+
+
+    #region UnityEvents
     // Start is called before the first frame update
     void Start()
     {
@@ -40,7 +53,8 @@ public class PlayerBehaivour : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GameObject proyectile = Instantiate(this.projectile, transform.position, Quaternion.identity);
+            GameObject proyectile = RequestPool();
+            proyectile.transform.position = transform.position;
             proyectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed,_statsController.NormalShootDamage,transform.forward);
         }
         if (Input.GetKey(KeyCode.LeftShift)){
@@ -86,4 +100,7 @@ public class PlayerBehaivour : MonoBehaviour
 
         _rb.velocity = Input.GetAxis("Horizontal") * _speed * Vector3.right + Input.GetAxis("Vertical") * _speed * Vector3.forward;
     }
+    #endregion
+
+
 }
