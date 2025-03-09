@@ -54,8 +54,11 @@ public class PlayerBehaivour : MonoBehaviour, IRequestPool
         if (Input.GetMouseButtonDown(0))
         {
             GameObject proyectile = RequestPool();
-            proyectile.transform.position = transform.position;
-            proyectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed,_statsController.NormalShootDamage,transform.forward);
+            if (proyectile != null)
+            {
+                proyectile.transform.position = transform.position;
+                proyectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
+            }
         }
         if (Input.GetKey(KeyCode.LeftShift)){
              _speed += _statsController.Acceleration * Time.deltaTime;

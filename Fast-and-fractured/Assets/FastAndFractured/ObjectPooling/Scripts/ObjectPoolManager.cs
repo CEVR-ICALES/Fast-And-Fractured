@@ -31,7 +31,6 @@ namespace Game
         }
 
         private List<ObjectPool> _objectPools = new List<ObjectPool>();
-
         // Start is called before the first frame update
         void Start()
         {
@@ -46,10 +45,9 @@ namespace Game
 
         public void CreateObjectPool(ObjectPoolSO objectPoolSO)
         {
-            var poolParent = Instantiate(new GameObject(), transform);
-            poolParent.name = objectPoolSO.PoolName;
-            GameObject[] pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.Prefab, objectPoolSO.PoolNum,poolParent.transform);
-            _objectPools.Add(new ObjectPool(objectPoolSO.Pooltype));
+            var poolGameObject = new GameObject(objectPoolSO.PoolName);
+            GameObject[] pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.Prefab, objectPoolSO.PoolNum,poolGameObject.transform);
+            _objectPools.Add(new ObjectPool(objectPoolSO.Pooltype,objectPoolSO.PoolNum));
             foreach (GameObject pooledGameObject in pooledGameObjectList)
             {
                 _objectPools[^1].AddObject(pooledGameObject);
@@ -60,7 +58,8 @@ namespace Game
         {
             GameObject[] gameObjectsPooled = new GameObject[num];
             for (int i = 0; i < num; i++) {
-                var gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                var gameObjectPooled = Instantiate(gameobjectToPool);
+                gameObjectPooled.transform.parent = parent;
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
             }
@@ -71,19 +70,27 @@ namespace Game
         {
              GameObject objectPooled = FindObjectPoolInList(pooltype).GetFirstObject();
              if(objectPooled.TryGetComponent<IPooledObject>(out var pooledGameObject)) {
-                pooledGameObject.Pooltype = pooltype;
-                pooledGameObject.OnEndAction += ReturnPooledObjectToQueue;
-                objectPooled.SetActive(true);
-                return objectPooled;
+                if (!objectPooled.activeSelf)
+                {
+                    pooledGameObject.Pooltype = pooltype;
+                    objectPooled.SetActive(true);
+                    return objectPooled;
+                }
               }
             return null;
         }
 
-        private void ReturnPooledObjectToQueue(GameObject objectPooled, Pooltype type)
+        public void ReturnPooledObjectToQueue(IPooledObject pooledObject,GameObject instance)
         {
-            objectPooled.SetActive(false);
-            ObjectPool objectPool = FindObjectPoolInList(type);
-            objectPool.AddObject(objectPooled);
+            ObjectPool objectPool = FindObjectPoolInList(pooledObject.Pooltype);
+            if (objectPool.MaxCapacity>objectPool.NumOfPooledObjects)
+            {
+                if (!objectPool.isIntheQueue(instance))
+                {
+                    instance.SetActive(false);
+                    objectPool.AddObject(instance);
+                }
+            }
         }
 
         private ObjectPool FindObjectPoolInList(Pooltype type)

@@ -13,8 +13,13 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
     public IPooledObject.EndAction OnEndAction { get => onEndaction; set => onEndaction += value; }
     public Pooltype Pooltype { get => _pooltype; set => _pooltype = value; }
     private Pooltype _pooltype;
+    private float _time = 0;
 
     public IPooledObject.EndAction onEndaction;
+    private void OnEnable()
+    {
+        _time = 0;
+    }
     private void Start()
     {
     }
@@ -24,7 +29,15 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
         _speed = speed;
         _rb = GetComponent<Rigidbody>();
         _rb.velocity = direction * speed;
-        Destroy(gameObject, destroyTime);
+    }
+    private void Update()
+    {
+        if (_time >= destroyTime)
+        {
+            ObjectPoolManager.Instance.ReturnPooledObjectToQueue(this,gameObject);
+        }
+        else
+            _time += Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -34,7 +47,7 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
             if(target.TryGetComponent<StatsController>(out var targetHP))
             {
                 targetHP.TakeEndurance(_damage,false);
-                onEndaction(gameObject,_pooltype);
+                ObjectPoolManager.Instance.ReturnPooledObjectToQueue(this, gameObject);
             }
         }
     }
