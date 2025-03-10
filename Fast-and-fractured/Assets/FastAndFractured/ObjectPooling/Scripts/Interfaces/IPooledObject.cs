@@ -7,8 +7,5 @@ namespace Game {
     {
         public Pooltype Pooltype { get; set; }
         //private Pooltype _pooltype;
-        public delegate void EndAction(GameObject instance, Pooltype type,IPooledObject pooledObject);
-        public EndAction OnEndAction { get; set; }
-        //public IPooledObject.EndAction onEndaction;
     }
 }

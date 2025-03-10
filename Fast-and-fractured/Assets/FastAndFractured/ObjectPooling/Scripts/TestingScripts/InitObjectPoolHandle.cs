@@ -6,12 +6,13 @@ using UnityEngine;
 public class InitObjectPoolHandle : MonoBehaviour
 {
     [SerializeField]
-    private List<ObjectPoolSO> poolSOs;
+    private List<ObjectPoolSO> poolSOList;
     // Start is called before the first frame update
     void Start()
     {
-        foreach (var poolSO in poolSOs)
+        foreach (var poolSO in poolSOList)
         {
+            ObjectPoolManager.Instance.CustomStart();
             ObjectPoolManager.Instance.CreateObjectPool(poolSO);
         }
     }

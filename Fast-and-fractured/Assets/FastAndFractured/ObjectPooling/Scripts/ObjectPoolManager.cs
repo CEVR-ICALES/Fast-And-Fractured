@@ -18,42 +18,46 @@ namespace Game
                 return _instance;
             }
         }
-        //Function in customstart
+        //Function in custom start
         private void Awake()
         {
             if (_instance != null)
                 Destroy(gameObject);
             else
             {
-                DontDestroyOnLoad(gameObject);
                 _instance = this;
             }
         }
 
         private List<ObjectPool> _objectPools = new List<ObjectPool>();
-        // Start is called before the first frame update
-        void Start()
-        {
+        private Transform _parentGameObjectOfPools;
+        [SerializeField]
+        private string parentGameObjectOfPoolsName = "ObjectPools";
 
+        public void CustomStart()
+        {
+            _parentGameObjectOfPools = new GameObject(parentGameObjectOfPoolsName).transform;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
+        //Method called in Level Controller or Game Manager. One of them will handle a list of ScriptableObjects with the differents pools
         public void CreateObjectPool(ObjectPoolSO objectPoolSO)
         {
             var poolGameObject = new GameObject(objectPoolSO.PoolName);
-            GameObject[] pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.Prefab, objectPoolSO.PoolNum,poolGameObject.transform);
-            _objectPools.Add(new ObjectPool(objectPoolSO.Pooltype,objectPoolSO.PoolNum));
-            foreach (GameObject pooledGameObject in pooledGameObjectList)
+            poolGameObject.transform.parent = _parentGameObjectOfPools;
+            if (objectPoolSO.Prefab != null)
             {
-                _objectPools[^1].AddObject(pooledGameObject);
+                GameObject[] pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.Prefab, objectPoolSO.PoolNum, poolGameObject.transform);
+                _objectPools.Add(new ObjectPool(objectPoolSO.Pooltype, objectPoolSO.PoolNum,objectPoolSO.PoolNum)); 
+                foreach (GameObject pooledGameObject in pooledGameObjectList)
+                {
+                    _objectPools[^1].AddObject(pooledGameObject);
+                }
             }
+            else
+                Debug.LogError("ObjectPoolSO " + objectPoolSO.name + "have a empty prefab.");
         }
-
+        
+        //Create and prepare the GameObjects of a pool in scene
         private GameObject[] InstanceObjectPoolGameObjects(GameObject gameobjectToPool, int num, Transform parent)
         {
             GameObject[] gameObjectsPooled = new GameObject[num];
@@ -66,18 +70,23 @@ namespace Game
             return gameObjectsPooled;
         }
 
+        //Give a Pooled Object to a IRequestPool if the current is not active. 
         public GameObject GivePooledObject(Pooltype pooltype)
         {
             var objectPool = FindObjectPoolInList(pooltype);
-            if (!objectPool.IsNextObjectActive()) {
-                objectPool.NextIndex();
-                GameObject objectPooled = objectPool.GetCurrentObject(out var IpooledObject);
-                if (IpooledObject!=null)
+            if (objectPool != null)
+            {
+                if (!objectPool.IsNextObjectActive())
                 {
-                    if (!objectPooled.activeSelf)
+                    objectPool.NextIndex();
+                    GameObject objectPooled = objectPool.GetCurrentObject(out var IpooledObject);
+                    if (IpooledObject != null)
                     {
-                        objectPooled.SetActive(true);
-                        return objectPooled;
+                        if (!objectPooled.activeSelf)
+                        {
+                            objectPooled.SetActive(true);
+                            return objectPooled;
+                        }
                     }
                 }
             }
@@ -100,7 +109,7 @@ namespace Game
                 if (objectPool.Type == type)
                     return objectPool;
             }
-            Debug.LogError("ObjectPool list don't exist or it's type is wrong");
+            Debug.LogError("ObjectPool list of type " + type + " not exist.");
             return null;
         }
     }

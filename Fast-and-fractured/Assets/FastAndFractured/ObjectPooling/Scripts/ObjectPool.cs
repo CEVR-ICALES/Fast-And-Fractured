@@ -14,19 +14,14 @@ namespace Game
         private List<IPooledObject> _IpooledObjectsList;
         private int _maxCapacity;
         private int _index;
-        public int MaxCapacity { get => _maxCapacity; }
-        public int NumOfPooledObjects { get => _objPoolList.Count; }
 
-        private bool _firstTime;
-
-        public ObjectPool(Pooltype type, int maxCapacity)
+        public ObjectPool(Pooltype type, int maxCapacity, int indexInitValue)
         {
             _type = type;
             _objPoolList = new List<GameObject>();
             _IpooledObjectsList = new List<IPooledObject>();
             _maxCapacity = maxCapacity;
-            _index = 0;
-            _firstTime = true;
+            _index = indexInitValue;
         }
 
         public GameObject GetCurrentObject(out IPooledObject IpooledObject)
@@ -42,22 +37,18 @@ namespace Game
             }
             else
             {
-                Debug.LogError("ObjectPool of type " + _type + " list doesn't have any gameObject.");
+                Debug.LogError("ObjectPool of type " + _type + " list can't return any gameObject because is empty.");
                 return null;
             }
         }
 
         public void NextIndex()
         {
-            if (!_firstTime)
+           _index++;
+            if (_index >= _maxCapacity)
             {
-                _index++;
-                if (_index >= _maxCapacity)
-                {
-                    _index = 0;
-                }
+                _index = 0;
             }
-            else _firstTime = false; 
         }
 
         public bool IsNextObjectActive()
@@ -67,7 +58,12 @@ namespace Game
             {
                 nextIndex = 0;
             }
-            return _objPoolList[nextIndex].activeSelf;
+            if (_objPoolList.Count > 0)
+            {
+                return _objPoolList[nextIndex].activeSelf;
+            }
+            Debug.LogError("Object Pool List of type " + _type + " is empty");
+            return false;
         }
 
         public void AddObject(GameObject obj)

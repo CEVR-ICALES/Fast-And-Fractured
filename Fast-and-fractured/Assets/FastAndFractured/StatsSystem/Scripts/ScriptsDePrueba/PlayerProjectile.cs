@@ -10,12 +10,9 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
     private float _speed;
     [SerializeField]
     private float destroyTime = 3.5f;
-    public IPooledObject.EndAction OnEndAction { get => onEndaction; set => onEndaction += value; }
     public Pooltype Pooltype { get => _pooltype; set => _pooltype = value; }
     private Pooltype _pooltype;
     private float _time = 0;
-
-    public IPooledObject.EndAction onEndaction;
     private void OnEnable()
     {
         _time = 0;
