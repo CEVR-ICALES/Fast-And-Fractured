@@ -1,7 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
-using TMPro;
 
 namespace Game
 {
@@ -45,8 +43,7 @@ namespace Game
 
         #region Private Fields
 
-        private Dictionary<UIElementType, Image> _images = new Dictionary<UIElementType, Image>();
-        private Dictionary<UIElementType, TextMeshProUGUI> _texts = new Dictionary<UIElementType, TextMeshProUGUI>();
+        private Dictionary<UIElementType, UIElement> _uiElements = new Dictionary<UIElementType, UIElement>();
 
         #endregion
 
@@ -98,16 +95,20 @@ namespace Game
 
         void RegisterUIElements()
         {
-            UIElement[] uiElements = FindObjectsOfType<UIElement>();
-
-            foreach (UIElement element in uiElements)
+            foreach (UIElement element in FindObjectsOfType<UIElement>())
             {
-                if (element.imageReference != null)
-                    _images[element.elementType] = element.imageReference;
-
-                if (element.textReference != null)
-                    _texts[element.elementType] = element.textReference;
+                _uiElements[element.elementType] = element;
             }
+        }
+
+        private bool TryGetUIElement(UIElementType type, out UIElement element)
+        {
+            if (!_uiElements.TryGetValue(type, out element))
+            {
+                Debug.LogWarning($"UI Element not found: {type}");
+                return false;
+            }
+            return true;
         }
 
         #endregion
@@ -115,48 +116,36 @@ namespace Game
         #region Public Methods
 
         /// <summary>
-        /// Updates the fill amount of an Image UI element.
+        /// Updates the specified UI element.
+        /// <para>Accepts New Text, Sprite, or current and max value for Fill Amount.</para>
         /// </summary>
-        /// <param name="type">The type of the UI element.</param>
-        /// <param name="currentValue">The fill amount value.</param>
-        /// <param name="maxValue">The maximum value for the fill amount.</param>
-        public void UpdateUIImageFillAmount(UIElementType type, float currentValue, float maxValue)
+        public void UpdateUIElement(UIElementType type, string newText)
         {
-            if (_images.TryGetValue(type, out Image img))
+            if (TryGetUIElement(type, out UIElement element) && element.textReference != null)
+            {
+                element.textReference.text = newText;
+            }
+        }
+
+        public void UpdateUIElement(UIElementType type, Sprite newSprite)
+        {
+            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
+            {
+                element.imageReference.sprite = newSprite;
+            }
+        }
+
+        public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
+        {
+            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
             {
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
-                img.fillAmount = fillAmount;
+                element.imageReference.fillAmount = fillAmount;
 
                 if (type == UIElementType.HealthBar)
                 {
-                    img.color = Color.Lerp(Color.red, Color.green, fillAmount);
+                    element.imageReference.color = Color.Lerp(Color.red, Color.green, fillAmount);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Updates the sprite of an Image UI element.
-        /// </summary>
-        /// <param name="type">The type of the UI element.</param>
-        /// <param name="sprite">The new sprite.</param>
-        public void UpdateUIImageSprite(UIElementType type, Sprite sprite)
-        {
-            if (_images.TryGetValue(type, out Image img))
-            {
-                img.sprite = sprite;
-            }
-        }
-
-        /// <summary>
-        /// Updates the text content of a Text UI element.
-        /// </summary>
-        /// <param name="type">The type of the UI element.</param>
-        /// <param name="content">The new text content.</param>
-        public void UpdateUITextString(UIElementType type, string content)
-        {
-            if (_texts.TryGetValue(type, out TextMeshProUGUI txt))
-            {
-                txt.text = content;
             }
         }
 
