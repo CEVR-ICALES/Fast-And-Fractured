@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -15,6 +12,7 @@ public class CarMovementController : MonoBehaviour
     private PlayerInputController _playerInputController;
     private RollPrevention _rollPrevention;
     private Rigidbody _carRb;
+    private PhysicsBehaviour _physicsBehaviour;
     private bool _usingController { get; set; } = false;
 
     [Header("Motor Settings")]
@@ -22,6 +20,7 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float motorTorque;// how fast the car accelerates, bigger values faster acceleration
     [SerializeField] private float maxSteerAngle; //max angle to witch the car wheel can rotate. bigger values faster and more agressive turns, should be between 30 & 45
     [SerializeField] private float steeringSmoothness; //smoothness so that the wheel doesnt instantly go form 1 angle to the other
+
 
     [Header("Brake Settings")]
     public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
@@ -87,7 +86,8 @@ public class CarMovementController : MonoBehaviour
         if (!_usingController)
         {
             HandleInput();
-        } else
+        }
+        else
         {
             HandleInputController();
         }
@@ -105,7 +105,8 @@ public class CarMovementController : MonoBehaviour
         if (deviceType == INPUT_DEVICE_TYPE.KeyboardMouse)
         {
             _usingController = false;
-        } else
+        }
+        else
         {
             _usingController = true;
         }
@@ -141,7 +142,8 @@ public class CarMovementController : MonoBehaviour
                     StartDrift();
                 }
                 ApplyDrift();
-            } else
+            }
+            else
             {
                 if (_isDrifting)
                 {
@@ -150,7 +152,8 @@ public class CarMovementController : MonoBehaviour
                 ApplyBrake();
             }
             _isBraking = true;
-        } else
+        }
+        else
         {
             if (_isDrifting)
                 EndDrift();
@@ -166,7 +169,8 @@ public class CarMovementController : MonoBehaviour
             if (usingPhysicsDash)
             {
                 HandleDashWithPhysics();
-            } else
+            }
+            else
             {
                 HandleDahsWithoutPhysics();
             }
@@ -221,7 +225,7 @@ public class CarMovementController : MonoBehaviour
             _isBraking = false;
             foreach (var wheel in wheels)
             {
-                wheel.ApplyBrakeTorque(0f); 
+                wheel.ApplyBrakeTorque(0f);
             }
         }
 
@@ -273,7 +277,7 @@ public class CarMovementController : MonoBehaviour
         _initialSpeedWhenDrifting = _carRb.velocity.magnitude;
     }
 
-    private void EndDrift() 
+    private void EndDrift()
     {
         _isDrifting = false;
         //currentRbMaxVelocity = maxRbVelocity;
@@ -296,7 +300,7 @@ public class CarMovementController : MonoBehaviour
         _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
-        float driftTorque = _driftDirection * driftForce * 0.8f * speedFactor; 
+        float driftTorque = _driftDirection * driftForce * 0.8f * speedFactor;
         _carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
     }
 
@@ -307,15 +311,16 @@ public class CarMovementController : MonoBehaviour
     private void ApplySteering()
     {
 
-        if(_isDrifting)
+        if (_isDrifting)
         {
             currentSteerAngle = maxSteerAngle * _driftDirection; // lock steering angle to the drift direction
-        } else
+        }
+        else
         {
             currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //sñight delelay so that wheel turn are not instanty
         }
 
-        switch(SteeringMode)
+        switch (SteeringMode)
         {
             case STEERING_MODE.FrontWheel:
                 wheels[0].ApplySteering(currentSteerAngle);
@@ -324,7 +329,7 @@ public class CarMovementController : MonoBehaviour
 
             case STEERING_MODE.RearWheel:
                 float rearSteerAngle = currentSteerAngle;
-                if(_carRb.velocity.magnitude < 10f)
+                if (_carRb.velocity.magnitude < 10f)
                 {
                     rearSteerAngle = -currentSteerAngle; //posite direciton wheen going at low speeds
                 }
@@ -333,7 +338,7 @@ public class CarMovementController : MonoBehaviour
                 break;
 
             case STEERING_MODE.AllWheel:
-                foreach(var wheel in wheels)
+                foreach (var wheel in wheels)
                 {
                     wheel.ApplySteering(currentSteerAngle);
                 }
@@ -376,7 +381,7 @@ public class CarMovementController : MonoBehaviour
             TimerManager.Instance.StartTimer(1.5f, () =>
             {
                 _isDashing = false;
-                _carRb.constraints = RigidbodyConstraints.None;   
+                _carRb.constraints = RigidbodyConstraints.None;
                 currentRbMaxVelocity = maxRbVelocity;
             }, (progress) => {
                 _carRb.AddForce(dashDirection * dashForce, ForceMode.Impulse);
@@ -410,14 +415,14 @@ public class CarMovementController : MonoBehaviour
 
     private void UpdateWheelVisuals()
     {
-        foreach(var wheel in wheels)
+        foreach (var wheel in wheels)
         {
             wheel.UpdateWheelVisuals();
         }
     }
 
     private void UpdateSpeedOverlay()
-    { 
+    {
         float speedZ = Mathf.Abs(_carRb.velocity.z);
         float speedKmh = speedZ * 3.6f;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
