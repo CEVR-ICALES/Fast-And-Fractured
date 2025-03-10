@@ -5,9 +5,9 @@ using UnityEngine;
 public class PhysicsBehaviour : MonoBehaviour
 {
     [Header("Provisional Values")] //values that are not going to be on this script (player stats / car stats)
+    public float _maxEndurance;
+    public float _endurance;
     [SerializeField] private float _frontalHitAnlgeThreshold; // angle to detect whether the dash hit was frontal or not
-    public float _maxEndurance { get; private set; }
-    public float _endurance { get; private set; }
     
     public float weight { get; private set; }
     [SerializeField] private float _baseForce;
@@ -35,16 +35,20 @@ public class PhysicsBehaviour : MonoBehaviour
         {
             ContactPoint contactPoint = collision.contacts[0];
             Vector3 collisionPos = contactPoint.point;
-            Vector3 ownDirection = transform.forward;
+            Vector3 collisionNormal = contactPoint.normal;
             float otherCarEnduranceFactor = otherComponenPhysicsBehaviours._endurance / otherComponenPhysicsBehaviours._maxEndurance; // calculate current value of the other car endurance
             float otherCarWeight = otherComponenPhysicsBehaviours.weight;
             //detect if the contact was frontal
             if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= _frontalHitAnlgeThreshold)
             {
                 // logic to determine forc 
+                float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                ApplyForce(collisionNormal, collisionPos, forceToApply);
+               
             } else
             {
-
+                float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                ApplyForce(collisionNormal, collisionPos, forceToApply);
             }
         }
         
@@ -58,9 +62,11 @@ public class PhysicsBehaviour : MonoBehaviour
     }
 
 
-    private void CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
+    private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
     {
-
+        float force = _baseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 10);
+        Debug.Log(force);
+        return force;
     }
 
     public void BlockRigidBodyRotations()
