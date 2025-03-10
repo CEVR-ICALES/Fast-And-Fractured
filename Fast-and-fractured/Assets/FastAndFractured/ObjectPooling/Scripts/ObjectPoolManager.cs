@@ -68,29 +68,29 @@ namespace Game
 
         public GameObject GivePooledObject(Pooltype pooltype)
         {
-             GameObject objectPooled = FindObjectPoolInList(pooltype).GetFirstObject();
-             if(objectPooled.TryGetComponent<IPooledObject>(out var pooledGameObject)) {
-                if (!objectPooled.activeSelf)
+            var objectPool = FindObjectPoolInList(pooltype);
+            if (!objectPool.IsNextObjectActive()) {
+                objectPool.NextIndex();
+                GameObject objectPooled = objectPool.GetCurrentObject(out var IpooledObject);
+                if (IpooledObject!=null)
                 {
-                    pooledGameObject.Pooltype = pooltype;
-                    objectPooled.SetActive(true);
-                    return objectPooled;
+                    if (!objectPooled.activeSelf)
+                    {
+                        objectPooled.SetActive(true);
+                        return objectPooled;
+                    }
                 }
-              }
+            }
             return null;
         }
 
-        public void ReturnPooledObjectToQueue(IPooledObject pooledObject,GameObject instance)
+        public void DesactivePooledObject(IPooledObject pooledObject,GameObject instance)
         {
             ObjectPool objectPool = FindObjectPoolInList(pooledObject.Pooltype);
-            if (objectPool.MaxCapacity>objectPool.NumOfPooledObjects)
-            {
-                if (!objectPool.isIntheQueue(instance))
+                if (objectPool.IsIntheList(instance))
                 {
                     instance.SetActive(false);
-                    objectPool.AddObject(instance);
                 }
-            }
         }
 
         private ObjectPool FindObjectPoolInList(Pooltype type)

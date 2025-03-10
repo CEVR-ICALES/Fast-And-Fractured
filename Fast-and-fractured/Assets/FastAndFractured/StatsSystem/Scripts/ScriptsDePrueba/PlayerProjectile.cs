@@ -34,7 +34,7 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
     {
         if (_time >= destroyTime)
         {
-            ObjectPoolManager.Instance.ReturnPooledObjectToQueue(this,gameObject);
+            ObjectPoolManager.Instance.DesactivePooledObject(this,gameObject);
         }
         else
             _time += Time.deltaTime;
@@ -47,7 +47,7 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
             if(target.TryGetComponent<StatsController>(out var targetHP))
             {
                 targetHP.TakeEndurance(_damage,false);
-                ObjectPoolManager.Instance.ReturnPooledObjectToQueue(this, gameObject);
+                ObjectPoolManager.Instance.DesactivePooledObject(this, gameObject);
             }
         }
     }
