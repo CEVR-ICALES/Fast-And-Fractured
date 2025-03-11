@@ -64,7 +64,7 @@ public class PhysicsBehaviour : MonoBehaviour
 
     private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
     {
-        float force = _baseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 10);
+        float force = _baseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20);
         Debug.Log(force);
         return force;
     }
