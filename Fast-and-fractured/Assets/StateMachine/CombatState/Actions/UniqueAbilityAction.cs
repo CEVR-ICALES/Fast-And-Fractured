@@ -9,7 +9,7 @@ public class UniqueAbilityAction : Action
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.NormalShoot();
+        brain.UseUniqueAbility();
     }
 
 }

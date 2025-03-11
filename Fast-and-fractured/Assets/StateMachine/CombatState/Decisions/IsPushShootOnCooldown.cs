@@ -10,6 +10,6 @@ public class IsPushShootOnCooldown : Decision
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        return brain.IsPushShootOnCooldown();
+        return brain.IsPushShootReady();
     }
 }
