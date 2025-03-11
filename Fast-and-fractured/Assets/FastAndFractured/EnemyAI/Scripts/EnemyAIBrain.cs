@@ -118,7 +118,12 @@ public class EnemyAIBrain : MonoBehaviour
         //Ask if shoot is overheated
         return false;
     }
-
+    public bool IsUniqueAbilityFinished()
+    {
+        //TODO
+        //Ask if unique ability is finished
+        return true;
+    }
     #endregion
 
     #region Helpers
@@ -128,9 +133,6 @@ public class EnemyAIBrain : MonoBehaviour
         _targetToShoot = target;
     }
 
-    internal void IsUniqueAbilityFinished()
-    {
-        throw new NotImplementedException();
-    }
+   
     #endregion
 }
