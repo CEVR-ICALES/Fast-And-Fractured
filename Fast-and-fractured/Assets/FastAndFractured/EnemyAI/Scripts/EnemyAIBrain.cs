@@ -88,12 +88,7 @@ public class EnemyAIBrain : MonoBehaviour
 
         _positionToDrive = targetDirection * fleeMagnitude;
     }
-    public bool IsDashFinished()
-    {
-        //TODO
-        //Has dash finished
-        return false;
-    }
+   
     #endregion
     #endregion
 
@@ -105,11 +100,11 @@ public class EnemyAIBrain : MonoBehaviour
         return colliders.Length > 0;
     }
 
-    public bool IsPushShootOnCooldown()
+    public bool IsPushShootReady()
     {
         //TODO
-        //Ask if push shoot is on cooldown
-        return false;
+        //Ask if push shoot is ready
+        return true;
     }
 
     public bool IsShootOverheated()
@@ -123,6 +118,20 @@ public class EnemyAIBrain : MonoBehaviour
         //TODO
         //Ask if unique ability is finished
         return true;
+    }
+
+    public bool IsDashReady()
+    {
+        //TODO
+        //Ask if dash is ready
+        return true;
+    }
+
+    public bool IsDashFinished()
+    {
+        //TODO
+        //Has dash finished
+        return false;
     }
     #endregion
 
