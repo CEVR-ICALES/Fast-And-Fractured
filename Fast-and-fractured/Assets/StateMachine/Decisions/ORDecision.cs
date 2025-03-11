@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
-[CreateAssetMenu(fileName = nameof(ORDecision), menuName = "StateMachine/Decision/ORDecision")]
-public class ORDecision : Decision
+namespace StateMachine
 {
-    [SerializeField] Decision[] decisions;
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(ORDecision), menuName = "StateMachine/Decision/ORDecision")]
+    public class ORDecision : Decision
     {
-        bool success = false; 
-        for (int i = 0; i < decisions.Length && !success; i++)
+        [SerializeField] Decision[] decisions;
+
+        public override bool Decide(Controller controller)
         {
-            success = decisions[i].Decide(controller);
+            bool success = false;
+            for (int i = 0; i < decisions.Length && !success; i++)
+            {
+                success = decisions[i].Decide(controller);
+            }
+
+            return success;
         }
-        return success;
     }
 }
