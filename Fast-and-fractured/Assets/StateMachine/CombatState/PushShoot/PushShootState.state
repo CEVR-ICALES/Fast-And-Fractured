@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: PushShootState
   m_EditorClassIdentifier: 
   enterActions: []
-  actions: []
+  actions:
+  - {fileID: 11400000, guid: 594daf70a51beea4f94044d704f6bbe3, type: 2}
   exitActions: []
-  transitions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
+    trueState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 1
