@@ -10,6 +10,7 @@ namespace Game
         [Header("Identificators")]
         public int Id;
         public string Name;
+        public Pooltype PoolType;
 
         [Header("Game Object")]
 

@@ -235,10 +235,7 @@ namespace Game
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
             charStat = isProduct ? charStat * mod : charStat + mod; 
-            if (charStat > maxVal)
-                charStat = maxVal;
-            else if (charStat < minVal)
-                charStat = minVal;
+            charStat = Mathf.Clamp(charStat, minVal, maxVal);
             return charStat;
         }
         #endregion

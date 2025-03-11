@@ -3,13 +3,20 @@ using System.Collections.Generic;
 using Game;
 using UnityEngine;
 
-public class PlayerProjectile : MonoBehaviour
+public class PlayerProjectile : MonoBehaviour, IPooledObject
 {
     private float _damage;
     private Rigidbody _rb;
     private float _speed;
     [SerializeField]
     private float destroyTime = 3.5f;
+    public Pooltype Pooltype { get => _pooltype; set => _pooltype = value; }
+    private Pooltype _pooltype;
+    private float _time = 0;
+    private void OnEnable()
+    {
+        _time = 0;
+    }
     private void Start()
     {
     }
@@ -19,7 +26,15 @@ public class PlayerProjectile : MonoBehaviour
         _speed = speed;
         _rb = GetComponent<Rigidbody>();
         _rb.velocity = direction * speed;
-        Destroy(gameObject, destroyTime);
+    }
+    private void Update()
+    {
+        if (_time >= destroyTime)
+        {
+            ObjectPoolManager.Instance.DesactivatePooledObject(this,gameObject);
+        }
+        else
+            _time += Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -29,7 +44,7 @@ public class PlayerProjectile : MonoBehaviour
             if(target.TryGetComponent<StatsController>(out var targetHP))
             {
                 targetHP.TakeEndurance(_damage,false);
-                Destroy(gameObject);
+                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
             }
         }
     }
