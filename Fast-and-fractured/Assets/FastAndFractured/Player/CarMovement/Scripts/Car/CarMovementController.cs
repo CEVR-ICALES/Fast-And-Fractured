@@ -389,6 +389,15 @@ public class CarMovementController : MonoBehaviour
 
     #endregion
 
+    public void StopAllCarMovement()
+    {
+        foreach (var wheel in wheels)
+        {
+            wheel.ApplyBrakeTorque(0f);
+            wheel.ApplyMotorTorque(0f);
+        }
+    }
+
     private void UpdateWheelVisuals()
     {
         foreach (var wheel in wheels)

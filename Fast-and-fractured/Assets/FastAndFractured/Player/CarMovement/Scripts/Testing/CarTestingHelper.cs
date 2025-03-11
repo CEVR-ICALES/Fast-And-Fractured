@@ -9,30 +9,32 @@ public class CarTestingHelper : MonoBehaviour
     public GameObject openButton;
 
     public Transform[] zones;
+    public GameObject[] staticObjects;
+    public GameObject[] carSimulationObjects;
     public Transform pusheableSpawnPoint;
     public Transform carSpawnPoint;
 
     public Transform player;
     public Transform spawnObjectsParent;
 
-    public InputField massInputField;
+    public Dropdown objectDropdown;
+    public Slider massSlider;
     public InputField maxEnduranceInputField;
-    public InputField enduranceInputField;
+    public Slider enduranceInputField;
     public InputField enduranceFactorImporantceInputField;
 
     private int selectedObjectType;
     private int selectedObjectIndex;
     private bool isWindowOpen = false;
+    
 
     public void GoToZone(int zoneIndex)
     {
-        if(zoneIndex >= 0 && zoneIndex < zones.Length)
-        {
-            player.position = zones[zoneIndex].position;
-            player.rotation = zones[zoneIndex].rotation;
+        player.position = zones[zoneIndex].position;
+        player.rotation = zones[zoneIndex].rotation;
 
-            player.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        }
+        player.gameObject.GetComponent<CarMovementController>().StopAllCarMovement();
+        player.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
     }
 
     public void WindowClicked()
@@ -58,5 +60,10 @@ public class CarTestingHelper : MonoBehaviour
     public void SetObjectIndex(int index)
     {
         selectedObjectIndex = index;
+    }
+
+    public void SpawnObject()
+    {
+
     }
 }
