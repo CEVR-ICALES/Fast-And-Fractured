@@ -12,9 +12,9 @@ namespace Game
     [CreateAssetMenu(fileName = "ObjectPool.asset", menuName = "ObjectPool")]
     public class ObjectPoolSO : ScriptableObject
     {
-        public Pooltype Pooltype;
-        public string PoolName;
-        public GameObject Prefab;
-        public int PoolNum;
+        public Pooltype pooltype;
+        public string poolName;
+        public GameObject prefab;
+        public int poolNum;
     }
 }
