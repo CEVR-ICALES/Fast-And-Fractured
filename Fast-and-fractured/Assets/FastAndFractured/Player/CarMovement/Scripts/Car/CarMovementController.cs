@@ -281,7 +281,6 @@ public class CarMovementController : MonoBehaviour
     {
         _isDrifting = false;
         _carRb.drag = 0.08f;
-        currentSteerAngle = 0f;
     }
 
     private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
@@ -296,12 +295,10 @@ public class CarMovementController : MonoBehaviour
 
         //aapply the drift force in the interpolated direction
         Vector3 driftFinalForce = currentDriftDirection * driftForce * speedFactor;
-        //_carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
         _physicsBehaviour.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
         float driftTorque = _driftDirection * driftForce * 0.8f * speedFactor;
-        //_carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
         _physicsBehaviour.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
     }
 
@@ -359,7 +356,7 @@ public class CarMovementController : MonoBehaviour
             Vector3 dashDirection = transform.forward;
             //_carRb.
             _carRb.isKinematic = true;
-            TimerManager.Instance.StartTimer(0.7f, () =>
+            TimerManager.Instance.StartTimer(2f, () =>
             {
                 _playerInputController.EnableInput();
                 _isDashing = false;
@@ -378,14 +375,14 @@ public class CarMovementController : MonoBehaviour
             _isDashing = true;
             Vector3 dashDirection = transform.forward.normalized;
             currentRbMaxVelocity = maxRbVelocityWhileDashing;
-            _carRb.constraints = RigidbodyConstraints.FreezeRotation;
+            _physicsBehaviour.BlockRigidBodyRotations();
             TimerManager.Instance.StartTimer(1.5f, () =>
             {
                 _isDashing = false;
-                _carRb.constraints = RigidbodyConstraints.None;
+                _physicsBehaviour.UnblockRigidBodyRotations();
                 currentRbMaxVelocity = maxRbVelocity;
             }, (progress) => {
-                _carRb.AddForce(dashDirection * dashForce, ForceMode.Impulse);
+                _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
             }, "dash", false, false);
         }
     }
@@ -402,7 +399,7 @@ public class CarMovementController : MonoBehaviour
 
     private void UpdateSpeedOverlay()
     {
-        float speedZ = Mathf.Abs(_carRb.velocity.z);
+        float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
         float speedKmh = speedZ * 3.6f;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
     }
