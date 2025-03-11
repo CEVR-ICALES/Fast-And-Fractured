@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: "\xDAniqueAbilityState"
+  m_EditorClassIdentifier: 
+  enterActions: []
+  actions:
+  - {fileID: 11400000, guid: bf690a73bc786c9459b45d986846c483, type: 2}
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 5fd46d8bdb53c7d49a8065dddba81cb1, type: 2}
+    trueState: {fileID: 11400000, guid: ed599a34f3769df49a78d82fc5b3b206, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
