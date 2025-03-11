@@ -61,6 +61,15 @@ public class PhysicsBehaviour : MonoBehaviour
         _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
     }
 
+    public void AddForce(Vector3 force, ForceMode forceMode)
+    {
+        _rb.AddForce(force, forceMode);
+    }
+
+    public void AddTorque(Vector3 torque, ForceMode forceMode)
+    {
+        _rb.AddTorque(torque, forceMode);
+    }
 
     private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
     {
@@ -69,17 +78,40 @@ public class PhysicsBehaviour : MonoBehaviour
         return force;
     }
 
+    public void LimitRigidBodySpeed(float maxSpeed)
+    {
+        Vector3 clampedVelocity = _rb.velocity;
+
+        if (clampedVelocity.magnitude > (maxSpeed / 3.6f))
+        {
+            clampedVelocity = clampedVelocity.normalized * (maxSpeed / 3.6f);
+            _rb.velocity = clampedVelocity;
+        }
+    }
+
+    public void LimitRigidBodyRotation(float maxAngularVelocity)
+    {
+        if (_rb.angularVelocity.magnitude > maxAngularVelocity)
+        {
+            _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularVelocity;
+        }
+    }
+
+    public void SetKinematic(bool isKinematic)
+    {
+        _rb.isKinematic = isKinematic;
+    }
+
     public void BlockRigidBodyRotations()
     {
-
+        _rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     public void UnblockRigidBodyRotations()
     {
-
+        _rb.constraints = RigidbodyConstraints.None;
     }
 
 
-    
 
 }

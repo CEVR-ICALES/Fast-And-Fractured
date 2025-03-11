@@ -55,6 +55,7 @@ public class CarMovementController : MonoBehaviour
         _playerInputController = GetComponent<PlayerInputController>();
         _rollPrevention = GetComponent<RollPrevention>();
         _carRb = GetComponent<Rigidbody>();
+        _physicsBehaviour = GetComponent<PhysicsBehaviour>();
         currentRbMaxVelocity = maxRbVelocity;
     }
     private void OnEnable()
@@ -76,8 +77,8 @@ public class CarMovementController : MonoBehaviour
         }
 
         UpdateWheelVisuals();
-        LimitRigidBodySpeed();
-        LimitRigidBodyRotation();
+        _physicsBehaviour.LimitRigidBodySpeed(currentRbMaxVelocity);
+        _physicsBehaviour.LimitRigidBodyRotation(2f);
 
     }
 
@@ -272,7 +273,6 @@ public class CarMovementController : MonoBehaviour
     {
         _isDrifting = true;
         _driftDirection = Mathf.Sign(steeringInput.x); //only determine direcition + or -
-        //currentRbMaxVelocity = maxRbVelocity * 0.5f; //recude max speed to ensure that the drift dont feel super fast (decide whther we want to do it or not)
         _carRb.drag = 1f;
         _initialSpeedWhenDrifting = _carRb.velocity.magnitude;
     }
@@ -280,7 +280,6 @@ public class CarMovementController : MonoBehaviour
     private void EndDrift()
     {
         _isDrifting = false;
-        //currentRbMaxVelocity = maxRbVelocity;
         _carRb.drag = 0.08f;
         currentSteerAngle = 0f;
     }
@@ -297,11 +296,13 @@ public class CarMovementController : MonoBehaviour
 
         //aapply the drift force in the interpolated direction
         Vector3 driftFinalForce = currentDriftDirection * driftForce * speedFactor;
-        _carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
+        //_carRb.AddForce(driftFinalForce, ForceMode.Acceleration);
+        _physicsBehaviour.AddForce(driftFinalForce, ForceMode.Acceleration);
 
         //rotate the car while drifting
         float driftTorque = _driftDirection * driftForce * 0.8f * speedFactor;
-        _carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
+        //_carRb.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
+        _physicsBehaviour.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
     }
 
     #endregion
@@ -386,28 +387,6 @@ public class CarMovementController : MonoBehaviour
             }, (progress) => {
                 _carRb.AddForce(dashDirection * dashForce, ForceMode.Impulse);
             }, "dash", false, false);
-        }
-    }
-
-    #endregion
-
-    #region rbLimiters
-    private void LimitRigidBodySpeed()
-    {
-        Vector3 clampedVelocity = _carRb.velocity;//get current speed
-
-        if (clampedVelocity.magnitude > (currentRbMaxVelocity / 3.6f))
-        {
-            clampedVelocity = clampedVelocity.normalized * (currentRbMaxVelocity / 3.6f);//retain direction (normalize) & scale it down to then apply it to rbvelocirty
-            _carRb.velocity = clampedVelocity;
-        }
-    }
-
-    private void LimitRigidBodyRotation()
-    {
-        if (_carRb.angularVelocity.magnitude > 2f) //sdjust the threshold as needed
-        {
-            _carRb.angularVelocity = _carRb.angularVelocity.normalized * 2f;
         }
     }
 
