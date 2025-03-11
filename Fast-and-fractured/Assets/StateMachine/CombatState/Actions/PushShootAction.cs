@@ -9,7 +9,7 @@ public class PushShootAction : Action
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.UseUniqueAbility();
+        brain.PushShoot();
     }
 
 }

@@ -10,7 +10,6 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] NavMeshAgent agent;
     [SerializeField] float fleeMagnitude = 5f;
     [SerializeField] float sweepRadius = 20f;
-    [SerializeField] float damageThreshold = 20f;
     [SerializeField] LayerMask sweepLayerMask;
 
     private Vector3 _positionToDrive;
@@ -31,6 +30,9 @@ public class EnemyAIBrain : MonoBehaviour
         }
     }
 
+    #region Actions
+    #region SearchState
+
     public void GoToPosition()
     {
         agent.SetDestination(_positionToDrive);
@@ -41,23 +43,21 @@ public class EnemyAIBrain : MonoBehaviour
         AssignTarget(_player);
         _positionToDrive = _player.transform.position;
     }
+    #endregion
 
+    #region CombatState
     public void NormalShoot()
     {
         //TODO
         //Shoot normal bullet to target
+        //if target and target is nearby and shoot is not overheated
     }
 
     public void PushShoot()
     {
         //TODO
         //Shoot pushign bullet to target
-    }
-
-    public void Dash()
-    {
-        //TODO
-        //Dash
+        //if target and target is nearby
     }
 
     public void UseUniqueAbility()
@@ -65,11 +65,23 @@ public class EnemyAIBrain : MonoBehaviour
         //TODO
         //Use unique ability
     }
+    #endregion
+
+    #region DashState
+    public void Dash()
+    {
+        //TODO
+        //Dash
+    }
     public bool IsDashAvailable()
     {
+        //TODO
+        //Is dash off cooldown
         return false;
     }
+    #endregion
 
+    #region FleeState
     public void RunAwayFromCurrentTarget()
     {
        Vector3 targetDirection = (transform.position - _targetToShoot.transform.position).normalized;
@@ -78,9 +90,14 @@ public class EnemyAIBrain : MonoBehaviour
     }
     public bool IsDashFinished()
     {
+        //TODO
+        //Has dash finished
         return false;
     }
+    #endregion
+    #endregion
 
+    #region Decisions
     public bool EnemySweep()
     {
         Collider[] colliders = Physics.OverlapSphere(transform.position, sweepRadius, sweepLayerMask);
@@ -88,17 +105,34 @@ public class EnemyAIBrain : MonoBehaviour
         return colliders.Length > 0;
     }
 
-    public bool IsAboveDamageThreshold()
+    public bool IsPushShootOnCooldown()
     {
         //TODO
-        //Get endurance and check if is above damageThreshold
+        //Ask if push shoot is on cooldown
         return false;
     }
 
+    public bool IsShootOverheated()
+    {
+        //TODO
+        //Ask if shoot is overheated
+        return false;
+    }
+    public bool IsUniqueAbilityFinished()
+    {
+        //TODO
+        //Ask if unique ability is finished
+        return true;
+    }
+    #endregion
+
+    #region Helpers
 
     private void AssignTarget(GameObject target)
     {
         _targetToShoot = target;
     }
 
+   
+    #endregion
 }

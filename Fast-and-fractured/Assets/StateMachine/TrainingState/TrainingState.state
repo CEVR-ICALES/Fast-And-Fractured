@@ -10,17 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: CombatState
+  m_Name: TrainingState
   m_EditorClassIdentifier: 
   enterActions: []
-  actions: []
+  actions:
+  - {fileID: 11400000, guid: 35fe1bd95cdd5e64382961c9b9d86e3e, type: 2}
   exitActions: []
-  transitions:
-  - decision: {fileID: 11400000, guid: c7453756625900c44950727a91c63eac, type: 2}
-    trueState: {fileID: 11400000, guid: 130b3d096bd40d6479cd3560d5fe6a35, type: 2}
-    falseState: {fileID: 0}
-    hasExitTime: 0
-  - decision: {fileID: 0}
-    trueState: {fileID: 0}
-    falseState: {fileID: 0}
-    hasExitTime: 0
+  transitions: []
