@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
-
+[CreateAssetMenu(fileName = nameof(ORDecision), menuName = "StateMachine/Decision/ORDecision")]
 public class ORDecision : Decision
 {
     [SerializeField] Decision[] decisions;

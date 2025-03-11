@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
+[CreateAssetMenu(fileName = nameof(ANDDecision), menuName = "StateMachine/Decision/ANDDecision")]
+
 public class ANDDecision : Decision
 {
     [SerializeField] Decision[] decisions;
