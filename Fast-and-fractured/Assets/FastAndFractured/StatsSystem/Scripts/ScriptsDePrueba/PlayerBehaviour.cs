@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 
-public class PlayerBehaviour : MonoBehaviour, IRequestPool
+public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField] private GameObject projectile;
     [SerializeField] private float projectileSpeed = 10f;
@@ -51,7 +51,7 @@ public class PlayerBehaviour : MonoBehaviour, IRequestPool
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             //GameObject projectile = RequestPool(pooltype);
             //if (projectile != null)

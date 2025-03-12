@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace Game {
-    public abstract class ShootingHandle : MonoBehaviour, IRequestPool
+    public abstract class ShootingHandle : MonoBehaviour
     {
         [SerializeField]
         protected StatsController characterStatsController;
@@ -29,10 +29,10 @@ namespace Game {
         {
             _velocity = velocity;
             _range = range;
-            GameObject bullet = RequestPool(pooltype);
-            bullet.transform.position = shootPoint.position;
+            GameObject bullet = ObjectPoolManager.Instance.GivePooledObject(pooltype);
             if (bullet != null)
             {
+                bullet.transform.position = shootPoint.position;
                 if (bullet.TryGetComponent<BulletBehaivour>(out var bulletBehaivour))
                 {
                     SetBulletStats(bulletBehaivour);
@@ -52,14 +52,13 @@ namespace Game {
         {
             return ObjectPoolManager.Instance.GivePooledObject(pooltype);
         }
-        protected bool Timer(ref float currentTime, float timeToReach,bool logic)
+        protected bool Timer(ref float currentTime,bool logic,float resetValue)
         {
             if (logic)
             {
-                currentTime = 0;
+                currentTime = resetValue;
                 return true;
             }
-            currentTime += Time.deltaTime;
             return false;
         }
     }

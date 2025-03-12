@@ -71,7 +71,6 @@ namespace Game
             return gameObjectsPooled;
         }
 
-        //Give a Pooled Object to a IRequestPool if the current is not active. 
         public GameObject GivePooledObject(Pooltype pooltype)
         {
             var objectPool = FindObjectPoolInList(pooltype);
