@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(SearchForPlayer), menuName = "EnemyStateMachine/Actions/SearchForPlayer")]
+[CreateAssetMenu(fileName = nameof(SearchForPlayerAction), menuName = "EnemyStateMachine/Actions/SearchForPlayerAction")]
 
-public class SearchForPlayer : Action
+public class SearchForPlayerAction : Action
 {
     public override void Act(Controller controller)
     {
