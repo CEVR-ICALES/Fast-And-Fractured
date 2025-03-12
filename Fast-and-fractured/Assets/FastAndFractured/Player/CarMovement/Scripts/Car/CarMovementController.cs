@@ -13,7 +13,7 @@ public class CarMovementController : MonoBehaviour
     private RollPrevention _rollPrevention;
     private Rigidbody _carRb;
     private PhysicsBehaviour _physicsBehaviour;
-    private bool _usingController { get; set; } = false;
+    private bool _usingController = false;
 
     [Header("Motor Settings")]
     public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
@@ -26,13 +26,15 @@ public class CarMovementController : MonoBehaviour
     public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
     public bool usesCustomBraking = false;
     [SerializeField] private float brakeTorque;// regular braking force, bigger values faster stoppage
+    [SerializeField] private float frontWheelsStrenghtFactor;
+    [SerializeField] private float rearWheelsStrenghtFactor;
     [Tooltip("threshold to detect whether the user wants to drift or not, works only on controller")]
     [SerializeField] private float driftThreshold;
     [SerializeField] private float driftForce; //custom drift force, values should be low
     [SerializeField] private float driftingSmoothFactor;
     [Tooltip("Top speed at which the drift will Clamp to determine how effective the drift has to be, higher value means that a higher speed will be nedded for the drift to be really efective")]
     [SerializeField] private float driftingFactorTopSpeed;
-    private bool _isBraking { get; set; } = false;
+    private bool _isBraking = false;
     private bool _isDrifting = false;
     private float _driftDirection = 1f;
     private float _initialSpeedWhenDrifting;
@@ -43,12 +45,13 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float dashForce; //force for the dash with phyisics
     [SerializeField] private float maxRbVelocityWhileDashing; //limit the speed so the car doesnt accelerate infinetly
     [SerializeField] private float dashTimer; // how long the dash lasts
-    private bool _isDashing { get; set; } = false;
+    private bool _isDashing = false;
 
     private float targetSteerAngle;
     private float currentSteerAngle;
     private Vector2 steeringInput;
     private float currentRbMaxVelocity;
+    const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
 
     private void Start()
@@ -116,7 +119,7 @@ public class CarMovementController : MonoBehaviour
 
     private void HandleInput()
     {
-        steeringInput = _playerInputController.moveInput;
+        steeringInput = _playerInputController.MoveInput;
 
         if (!_isBraking)
         {
@@ -135,7 +138,7 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if (_playerInputController.isBraking)
+        if (_playerInputController.IsBraking)
         {
             if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
             {
@@ -166,7 +169,7 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if (_playerInputController.isDashing)
+        if (_playerInputController.IsDashing)
         {
             if (usingPhysicsDash)
             {
@@ -183,14 +186,14 @@ public class CarMovementController : MonoBehaviour
 
     private void HandleInputController()
     {
-        steeringInput = _playerInputController.moveInput;
+        steeringInput = _playerInputController.MoveInput;
 
         float acceleration = 0f;
-        if (_playerInputController.isAccelerating)
+        if (_playerInputController.IsAccelerating)
         {
             acceleration = motorTorque;
         }
-        else if (_playerInputController.isReversing)
+        else if (_playerInputController.IsReversing)
         {
             acceleration = -motorTorque;
         }
@@ -200,7 +203,7 @@ public class CarMovementController : MonoBehaviour
             wheel.ApplyMotorTorque(acceleration);
         }
 
-        if (_playerInputController.isBraking)
+        if (_playerInputController.IsBraking)
         {
             if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking)
             {
@@ -231,7 +234,7 @@ public class CarMovementController : MonoBehaviour
             }
         }
 
-        if (_playerInputController.isDashing)
+        if (_playerInputController.IsDashing)
         {
             if (usingPhysicsDash)
             {
@@ -248,7 +251,7 @@ public class CarMovementController : MonoBehaviour
 
     #endregion
 
-    #region Braking Fcuntions
+    #region Braking Functions
     private void ApplyBrake() //regular brake (user is not drifting)
     {
         //to do add logic for all brake Types
@@ -262,10 +265,10 @@ public class CarMovementController : MonoBehaviour
                 break;
 
             case BRAKE_MODE.FrontWheelsStronger:
-                wheels[0].ApplyBrakeTorque(brakeTorque * 0.8f);
-                wheels[1].ApplyBrakeTorque(brakeTorque * 0.8f);
-                wheels[2].ApplyBrakeTorque(brakeTorque * 0.2f);
-                wheels[3].ApplyBrakeTorque(brakeTorque * 0.2f);
+                wheels[0].ApplyBrakeTorque(brakeTorque * frontWheelsStrenghtFactor);
+                wheels[1].ApplyBrakeTorque(brakeTorque * frontWheelsStrenghtFactor);
+                wheels[2].ApplyBrakeTorque(brakeTorque * rearWheelsStrenghtFactor);
+                wheels[3].ApplyBrakeTorque(brakeTorque * rearWheelsStrenghtFactor);
                 break;
         }
     }
@@ -286,7 +289,7 @@ public class CarMovementController : MonoBehaviour
 
     private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
     {
-        float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (driftingFactorTopSpeed / 3.6f));
+        float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (driftingFactorTopSpeed / SPEED_TO_METERS_PER_SECOND));
 
         Vector3 targetDriftDirection = transform.right * _driftDirection;
 
@@ -359,10 +362,7 @@ public class CarMovementController : MonoBehaviour
             _carRb.isKinematic = true;
             TimerManager.Instance.StartTimer(dashTimer, () =>
             {
-                _playerInputController.EnableInput();
-                _isDashing = false;
-                _carRb.isKinematic = false;
-                _physicsBehaviour.isCurrentlyDashing = false;
+                FinishDash();
             }, (progress) =>
             {
                 transform.position += dashDirection * dashSpeed * Time.deltaTime;
@@ -381,23 +381,24 @@ public class CarMovementController : MonoBehaviour
             _physicsBehaviour.isCurrentlyDashing = true;
             TimerManager.Instance.StartTimer(dashTimer, () =>
             {
-                _isDashing = false;
-                _physicsBehaviour.UnblockRigidBodyRotations();
-                currentRbMaxVelocity = maxRbVelocity;
-                _physicsBehaviour.isCurrentlyDashing = false;    
+                FinishDash();   
             }, (progress) => {
                 _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
             }, "dash", false, true);
         }
     }
 
-    public void CancleDash()
+    private void FinishDash()
     {
-        TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
         _isDashing = false;
         _physicsBehaviour.UnblockRigidBodyRotations();
         currentRbMaxVelocity = maxRbVelocity;
         _physicsBehaviour.isCurrentlyDashing = false;
+    }
+    public void CancleDash()
+    {
+        TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
+        FinishDash();
     }
 
     #endregion
@@ -422,7 +423,7 @@ public class CarMovementController : MonoBehaviour
     private void UpdateSpeedOverlay()
     {
         float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
-        float speedKmh = speedZ * 3.6f;
+        float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
     }
 }

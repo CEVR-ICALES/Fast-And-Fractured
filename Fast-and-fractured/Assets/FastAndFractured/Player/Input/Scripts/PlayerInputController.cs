@@ -14,23 +14,46 @@ public class PlayerInputController : MonoBehaviour
 
     PlayerInputAction inputActions;
 
-    //movement & Camera Inputs
-    public Vector2 moveInput { get; private set; }
-    public Vector2 cameraInput { get; private set; }
+    // Movement & Camera Inputs with private backing fields
+    public Vector2 MoveInput => _moveInput;
+    private Vector2 _moveInput;
 
-    //action Flags
-    public bool isAccelerating { get; private set; }
-    public bool isBraking { get; private set; }
-    public bool isReversing { get; private set; }
-    public bool isShooting { get; private set; }
-    public bool isAimingPushShoot { get; private set; }
-    public bool isPushShootReleased { get; private set; }
-    public bool isUsingAbility { get; private set; }
-    public bool isThrowingMine { get; private set; }
-    public bool isPausing { get; private set; }
-    public bool isResettingCamera { get; private set; }
+    public Vector2 CameraInput => _cameraInput;
+    private Vector2 _cameraInput;
 
-    public bool isDashing { get; private set; }
+    // Action Flags with private backing fields
+    public bool IsAccelerating => _isAccelerating;
+    private bool _isAccelerating;
+
+    public bool IsBraking => _isBraking;
+    private bool _isBraking;
+
+    public bool IsReversing => _isReversing;
+    private bool _isReversing;
+
+    public bool IsShooting => _isShooting;
+    private bool _isShooting;
+
+    public bool IsAimingPushShoot => _isAimingPushShoot;
+    private bool _isAimingPushShoot;
+
+    public bool IsPushShootReleased => _isPushShootReleased;
+    private bool _isPushShootReleased;
+
+    public bool IsUsingAbility => _isUsingAbility;
+    private bool _isUsingAbility;
+
+    public bool IsThrowingMine => _isThrowingMine;
+    private bool _isThrowingMine;
+
+    public bool IsPausing => _isPausing;
+    private bool _isPausing;
+
+    public bool IsResettingCamera => _isResettingCamera;
+    private bool _isResettingCamera;
+
+    public bool IsDashing => _isDashing;
+    private bool _isDashing;
 
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
@@ -52,41 +75,44 @@ public class PlayerInputController : MonoBehaviour
     {
         inputActions.Enable();
 
-        inputActions.PlayerInputActions.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerInputActions.Movement.canceled += ctx => moveInput = Vector2.zero;
+        // Movement Input
+        inputActions.PlayerInputActions.Movement.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
+        inputActions.PlayerInputActions.Movement.canceled += ctx => _moveInput = Vector2.zero;
 
-        inputActions.PlayerInputActions.CameraMove.performed += ctx => cameraInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerInputActions.CameraMove.canceled += ctx => cameraInput = Vector2.zero;
+        // Camera Input
+        inputActions.PlayerInputActions.CameraMove.performed += ctx => _cameraInput = ctx.ReadValue<Vector2>();
+        inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
 
-        inputActions.PlayerInputActions.Accelerate.performed += ctx => isAccelerating = true;
-        inputActions.PlayerInputActions.Accelerate.canceled += ctx => isAccelerating = false;
+        // Action Inputs
+        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = true;
+        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = false;
 
-        inputActions.PlayerInputActions.Reverse.performed += ctx => isReversing = true;
-        inputActions.PlayerInputActions.Reverse.canceled += ctx => isReversing = false;
+        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = true;
+        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = false;
 
-        inputActions.PlayerInputActions.Brake.performed += ctx => isBraking = true;
-        inputActions.PlayerInputActions.Brake.canceled += ctx => isBraking = false;
+        inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
+        inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
 
-        inputActions.PlayerInputActions.RegularShoot.performed += ctx => isShooting = true;
-        inputActions.PlayerInputActions.RegularShoot.canceled += ctx => isShooting = false;
+        inputActions.PlayerInputActions.RegularShoot.performed += ctx => _isShooting = true;
+        inputActions.PlayerInputActions.RegularShoot.canceled += ctx => _isShooting = false;
 
         inputActions.PlayerInputActions.PushShoot.performed += ctx => OnStartAimingPushShoot();
         inputActions.PlayerInputActions.PushShoot.canceled += ctx => OnReleasedPushShoot();
 
-        inputActions.PlayerInputActions.SpecialAbility.performed += ctx => isUsingAbility = true;
-        inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => isUsingAbility = false;
+        inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
+        inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
 
-        inputActions.PlayerInputActions.ThrowMine.performed += ctx => isThrowingMine = true;
-        inputActions.PlayerInputActions.ThrowMine.canceled += ctx => isThrowingMine = false;
+        inputActions.PlayerInputActions.ThrowMine.performed += ctx => _isThrowingMine = true;
+        inputActions.PlayerInputActions.ThrowMine.canceled += ctx => _isThrowingMine = false;
 
-        inputActions.PlayerInputActions.Pause.performed += ctx => isPausing = true;
-        inputActions.PlayerInputActions.Pause.canceled += ctx => isPausing = false;
+        inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
+        inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
-        inputActions.PlayerInputActions.ResetCamera.performed += ctx => isResettingCamera = true;
-        inputActions.PlayerInputActions.ResetCamera.canceled += ctx => isResettingCamera = false;
+        inputActions.PlayerInputActions.ResetCamera.performed += ctx => _isResettingCamera = true;
+        inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
 
-        inputActions.PlayerInputActions.Dash.performed += ctx => isDashing = true;
-        inputActions.PlayerInputActions.Dash.canceled += ctx => isDashing = false;
+        inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
+        inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
     }
 
     private void OnDisable()
@@ -96,7 +122,7 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
-        CheckForInputDeviceChange();    
+        CheckForInputDeviceChange();
     }
 
     private void CheckForInputDeviceChange()
@@ -134,15 +160,15 @@ public class PlayerInputController : MonoBehaviour
 
     private void OnStartAimingPushShoot()
     {
-        isAimingPushShoot = true;
-        isPushShootReleased = false;
+        _isAimingPushShoot = true;
+        _isPushShootReleased = false;
     }
 
     private void OnReleasedPushShoot()
     {
-        isAimingPushShoot = false;
-        isPushShootReleased = true;
+        _isAimingPushShoot = false;
+        _isPushShootReleased = true;
     }
 
-    
+
 }

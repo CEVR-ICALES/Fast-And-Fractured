@@ -24,7 +24,7 @@ public class Timer
         this.id = id;
     }
 
-    public float getProgress()
+    public float GetProgress()
     {
         //return duration > 0 ? duration / elapsedTime : 1f;
         return elapsedTime / duration;

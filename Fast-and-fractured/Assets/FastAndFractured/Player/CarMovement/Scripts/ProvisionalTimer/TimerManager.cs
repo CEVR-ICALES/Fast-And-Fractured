@@ -99,7 +99,7 @@ public class TimerManager : MonoBehaviour
         foreach (var timer in new LinkedList<Timer>(activeTimers)) //create a copy to ensure safety while iteratoin over the list
         {
             timer.elapsedTime += Time.deltaTime;
-            timer.timerUpdate?.Invoke(timer.getProgress());//call progress if it has content on it
+            timer.timerUpdate?.Invoke(timer.GetProgress());//call progress if it has content on it
 
             if (timer.elapsedTime >= timer.duration)
             {

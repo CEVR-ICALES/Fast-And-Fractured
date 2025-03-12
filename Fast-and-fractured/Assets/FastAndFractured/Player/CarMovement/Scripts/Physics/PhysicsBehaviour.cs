@@ -9,19 +9,22 @@ public class PhysicsBehaviour : MonoBehaviour
     public float _endurance;
     [SerializeField] private float _frontalHitAnlgeThreshold; // angle to detect whether the dash hit was frontal or not
     
-    public float weight { get; private set; }
+    public float Weight { get => _weight; }
     [SerializeField] private float _baseForce;
 
     public bool isCurrentlyDashing = false;
     private CarMovementController _carMovementController;
     private Rigidbody _rb;
 
+    const float SPEED_TO_METER_PER_SECOND = 3.6f;
+    private float _weight;
+
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();   
         _carMovementController = GetComponent<CarMovementController>();
-        weight = _rb.mass;
+        _weight = _rb.mass;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -42,7 +45,7 @@ public class PhysicsBehaviour : MonoBehaviour
                 Vector3 collisionPos = contactPoint.point;
                 Vector3 collisionNormal = contactPoint.normal;
                 float otherCarEnduranceFactor = otherComponenPhysicsBehaviours._endurance / otherComponenPhysicsBehaviours._maxEndurance; // calculate current value of the other car endurance
-                float otherCarWeight = otherComponenPhysicsBehaviours.weight;
+                float otherCarWeight = otherComponenPhysicsBehaviours.Weight;
                 //detect if the contact was frontal
                 if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= _frontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
                 {
@@ -97,9 +100,9 @@ public class PhysicsBehaviour : MonoBehaviour
     {
         Vector3 clampedVelocity = _rb.velocity;
 
-        if (clampedVelocity.magnitude > (maxSpeed / 3.6f))
+        if (clampedVelocity.magnitude > (maxSpeed / SPEED_TO_METER_PER_SECOND))
         {
-            clampedVelocity = clampedVelocity.normalized * (maxSpeed / 3.6f);
+            clampedVelocity = clampedVelocity.normalized * (maxSpeed / SPEED_TO_METER_PER_SECOND);
             _rb.velocity = clampedVelocity;
         }
     }
