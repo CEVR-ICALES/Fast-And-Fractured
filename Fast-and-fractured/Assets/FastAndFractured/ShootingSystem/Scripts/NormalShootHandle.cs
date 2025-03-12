@@ -30,7 +30,7 @@ namespace Game
             {
                     if (!Timer(ref countOverHeat, countOverHeat <= 0, 0))
                     {
-                        ModOverHeat(-_overHeatUpModificator*Time.deltaTime);
+                        ModOverHeat(-_overHeatDownModificator*Time.deltaTime);
                     }
                     else
                     {
