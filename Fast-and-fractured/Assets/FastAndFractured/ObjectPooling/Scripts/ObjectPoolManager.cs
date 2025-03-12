@@ -42,16 +42,18 @@ namespace Game
         //Method called in Level Controller or Game Manager. One of them will handle a list of ScriptableObjects with the differents pools
         public void CreateObjectPool(ObjectPoolSO objectPoolSO)
         {
-            var poolGameObject = new GameObject(objectPoolSO.PoolName);
+
+            var poolGameObject = new GameObject(objectPoolSO.poolName);
             poolGameObject.transform.parent = _parentGameObjectOfPools;
-            if (objectPoolSO.Prefab != null)
+            if (objectPoolSO.prefab != null)
             {
-                GameObject[] pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.Prefab, objectPoolSO.PoolNum, poolGameObject.transform);
-                _objectPools.Add(new ObjectPool(objectPoolSO.Pooltype, objectPoolSO.PoolNum,objectPoolSO.PoolNum)); 
+                ObjectPool newObjectPool = new ObjectPool(objectPoolSO.pooltype, objectPoolSO.poolNum, objectPoolSO.poolNum);
+                var pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.prefab, objectPoolSO.poolNum, poolGameObject.transform);
                 foreach (GameObject pooledGameObject in pooledGameObjectList)
                 {
-                    _objectPools[^1].AddObject(pooledGameObject);
+                    newObjectPool.AddObject(pooledGameObject);
                 }
+                _objectPools.Add(newObjectPool);
             }
             else
                 Debug.LogError("ObjectPoolSO " + objectPoolSO.name + "have a empty prefab.");
@@ -62,8 +64,7 @@ namespace Game
         {
             GameObject[] gameObjectsPooled = new GameObject[num];
             for (int i = 0; i < num; i++) {
-                var gameObjectPooled = Instantiate(gameobjectToPool);
-                gameObjectPooled.transform.parent = parent;
+                var gameObjectPooled = Instantiate(gameobjectToPool, parent);
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
             }
@@ -87,13 +88,16 @@ namespace Game
                             objectPooled.SetActive(true);
                             return objectPooled;
                         }
+                        return null;
                     }
+                    return null;
                 }
+                return null;
             }
             return null;
         }
 
-        public void DesactivePooledObject(IPooledObject pooledObject,GameObject instance)
+        public void DesactivatePooledObject(IPooledObject pooledObject,GameObject instance)
         {
             ObjectPool objectPool = FindObjectPoolInList(pooledObject.Pooltype);
                 if (objectPool.IsIntheList(instance))

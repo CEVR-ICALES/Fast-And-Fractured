@@ -13,7 +13,8 @@ namespace Game
         /// The function inherit must have "return ObjectPoolManager.Instance.GivePooledObject(PoolType);"
         /// </summary>
         /// <returns>The current pooled GameObject. It will return null if something happen. Consult the Console to see the problem</returns>
-        public GameObject RequestPool();
-        //return ObjectPoolManager.Instance.GivePooledObject(PoolType);
+        public GameObject RequestPool(); //Could be improven 
+         //return ObjectPoolManager.Instance.GivePooledObject(PoolType);
+         
     }
 }
