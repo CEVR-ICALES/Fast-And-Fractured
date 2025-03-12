@@ -6,9 +6,7 @@ using Game;
 public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField] private GameObject projectile;
-    [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float modMaxSpeed = 0.5f;
-    [SerializeField] private float bulletDamage = 10f;
     [SerializeField]
     private float bulletMult = 1.5f;
     [SerializeField] private float temporalBulletDamage = 5f;
@@ -20,14 +18,6 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private Pooltype pooltype;
     [SerializeField] private NormalShootHandle normalShootHandle;
 
-    public GameObject RequestPool(Pooltype pooltype)
-    {
-        throw new System.NotImplementedException();
-    }
-
-
-
-
     #region UnityEvents
     // Start is called before the first frame update
     void Start()
@@ -35,7 +25,6 @@ public class PlayerBehaviour : MonoBehaviour
         _statsController = transform.GetComponent<StatsController>();
         _rb = transform.GetComponent<Rigidbody>();
         _speed = _statsController.MinSpeed;
-        bulletDamage = _statsController.NormalShootDamage;
         Debug.Log("Controllers");
         Debug.Log("RightMouse: Shoot");
         Debug.Log("LeftShit: Accelerate");
@@ -83,13 +72,11 @@ public class PlayerBehaviour : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             _statsController.ProductCharStats(STATS.NORMAL_DAMAGE,bulletMult);
-            bulletDamage = _statsController.NormalShootDamage;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             _statsController.TemporalStatUp(STATS.NORMAL_DAMAGE,temporalBulletDamage,temporalTimer);
-            bulletDamage = _statsController.NormalShootDamage;
         }
         if (Input.GetKeyDown(KeyCode.F))
         {

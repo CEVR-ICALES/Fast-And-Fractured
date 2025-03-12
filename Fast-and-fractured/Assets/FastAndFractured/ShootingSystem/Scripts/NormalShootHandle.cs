@@ -6,13 +6,17 @@ namespace Game
     public class NormalShootHandle : ShootingHandle
     {
         private float _countCadenceTime;
-        private float _countOverHeat;
-        private float _overHeatModificator = 1.5f;
+        [SerializeField]
+        private float countOverHeat;
+        private float _overHeatUpModificator = 1.5f;
+        private float _overHeatDownModificator = 0.5f;
+        //Provisional flag
+        private bool _isOverHeat = false;
+
+        #region UnityEvents
         private void Start()
         {
             CustomStart();
-            _countCadenceTime = characterStatsController.NormalShootCadenceTime;
-            _countOverHeat = 0;
         }
         private void Update()
         {
@@ -20,13 +24,27 @@ namespace Game
             {
                 _countCadenceTime += Time.deltaTime;
             }
+
+            //In the real method, the overHeat should be reduce after some time
             if (!Input.GetKey(KeyCode.Mouse0))
             {
-                if (!Timer(ref _countOverHeat, _countOverHeat <= 0, 0))
-                {
-                    ModOverHeat(-_overHeatModificator);
-                }
+                    if (!Timer(ref countOverHeat, countOverHeat <= 0, 0))
+                    {
+                        ModOverHeat(-_overHeatUpModificator*Time.deltaTime);
+                    }
+                    else
+                    {
+                        _isOverHeat = false;
+                    }
             }
+        }
+        #endregion
+
+        protected override void CustomStart()
+        {
+            base.CustomStart();
+            _countCadenceTime = characterStatsController.NormalShootCadenceTime;
+            countOverHeat = 0;
         }
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
@@ -35,8 +53,8 @@ namespace Game
 
         public void NormalShooting()
         {
-            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHead, 
-                characterStatsController.NormalOverHead))
+            if (!Timer(ref countOverHeat, countOverHeat >= characterStatsController.NormalOverHead,
+                characterStatsController.NormalOverHead) && !_isOverHeat)
             {
                 if (Timer(ref _countCadenceTime, _countCadenceTime >= characterStatsController.NormalShootCadenceTime, 0))
                 {
@@ -46,13 +64,19 @@ namespace Game
                 }
             }
             else
-                Debug.Log("OVER HEAT");
-            ModOverHeat(_overHeatModificator * Time.deltaTime);
+            {
+                _isOverHeat = true;
+            }
+            if (!_isOverHeat)
+            {
+                ModOverHeat(_overHeatUpModificator * Time.deltaTime);
+            }
         }
 
         private void ModOverHeat(float modificator)
         {
-            _countOverHeat += modificator;
+            countOverHeat += modificator;
         }
+
     }
 }

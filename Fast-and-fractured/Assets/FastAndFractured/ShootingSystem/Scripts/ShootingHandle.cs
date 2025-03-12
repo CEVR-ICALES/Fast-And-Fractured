@@ -22,6 +22,7 @@ namespace Game {
             //Provisional, this will be replace
             if (characterStatsController == null)
                 Debug.LogError("Character " + gameObject.name + " needs a StatsController for  " + name + " Script");
+            //Provisional Camera
             mainCamera = Camera.main;
         }
 
@@ -29,6 +30,7 @@ namespace Game {
         {
             _velocity = velocity;
             _range = range;
+            _damage = characterStatsController.NormalShootDamage;
             GameObject bullet = ObjectPoolManager.Instance.GivePooledObject(pooltype);
             if (bullet != null)
             {
@@ -48,10 +50,7 @@ namespace Game {
             bulletBehaivour.Damage = _damage;
         }
 
-        public GameObject RequestPool(Pooltype pooltype)
-        {
-            return ObjectPoolManager.Instance.GivePooledObject(pooltype);
-        }
+        //Provisional Timer
         protected bool Timer(ref float currentTime,bool logic,float resetValue)
         {
             if (logic)

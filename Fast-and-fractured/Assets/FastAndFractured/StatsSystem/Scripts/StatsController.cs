@@ -148,7 +148,7 @@ namespace Game
                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
-            else Debug.LogError("Value can't be negative.");
+            else Debug.LogError("Value can't be negative or 0.");
         }
 
         public void RecoverEndurance(float subtrahend, bool isProduct)

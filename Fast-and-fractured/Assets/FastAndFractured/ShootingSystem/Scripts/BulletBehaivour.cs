@@ -8,17 +8,18 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     protected Rigidbody rb;
     [SerializeField]
     protected Pooltype pooltype;
-    public Pooltype Pooltype { get => pooltype; set => pooltype = value;}
-    public Vector3 Velocity {set => velocity = value;}   
+    public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
+    public Vector3 Velocity { set => velocity = value; }
     protected Vector3 velocity;
-    public float Range { set => range = value;}
+    public float Range { set => range = value; }
     protected float range;
     public float Damage { set => damage = value; }
     protected float damage;
+    //ForPushShoot Handle class
     //public float PushStrengh { set => pushStrengh = value; }
     //protected float pushStrengh;
     // Update is called once per frame
-    protected abstract void FixedUpdate();  
+    protected abstract void FixedUpdate();
 
     public virtual void InitBulletTrayectory()
     {
@@ -27,7 +28,8 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 
     protected void OnBulletEndTrayectory()
     {
-        ObjectPoolManager.Instance.DesactivatePooledObject(this,gameObject);
+        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
     }
 
+    protected abstract void OnTriggerEnter(Collider other);
 }
