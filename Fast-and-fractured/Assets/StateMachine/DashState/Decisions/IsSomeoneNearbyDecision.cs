@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
-[CreateAssetMenu(fileName = nameof(IsSomeoneNearby), menuName = "EnemyStateMachine/Decisions/IsSomeoneNearby")]
-public class IsSomeoneNearby : Decision
+[CreateAssetMenu(fileName = nameof(IsSomeoneNearbyDecision), menuName = "EnemyStateMachine/Decisions/IsSomeoneNearbyDecision")]
+public class IsSomeoneNearbyDecision : Decision
 {
     public override bool Decide(Controller controller)
     {
