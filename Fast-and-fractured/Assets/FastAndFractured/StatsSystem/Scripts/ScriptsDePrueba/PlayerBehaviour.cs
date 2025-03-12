@@ -3,29 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 
-public class PlayerBehaviour  : MonoBehaviour, IRequestPool
+public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField] private GameObject projectile;
-    [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float modMaxSpeed = 0.5f;
-    [SerializeField] private float bulletDamage = 10f;
     [SerializeField]
     private float bulletMult = 1.5f;
     [SerializeField] private float temporalBulletDamage = 5f;
     [SerializeField] private float temporalMaxSpeedDow = 5f;
     [SerializeField] private float temporalTimer = 0.5f;
-     private Rigidbody _rb;
+    private Rigidbody _rb;
     private StatsController _statsController;
     [SerializeField] private float _speed;
     [SerializeField] private Pooltype pooltype;
-    public Pooltype PoolType { get => pooltype; }
-
-    public GameObject RequestPool()
-    {
-        return ObjectPoolManager.Instance.GivePooledObject(PoolType);
-    }
-
-
+    [SerializeField] private NormalShootHandle normalShootHandle;
 
     #region UnityEvents
     // Start is called before the first frame update
@@ -34,7 +25,6 @@ public class PlayerBehaviour  : MonoBehaviour, IRequestPool
         _statsController = transform.GetComponent<StatsController>();
         _rb = transform.GetComponent<Rigidbody>();
         _speed = _statsController.MinSpeed;
-        bulletDamage = _statsController.NormalShootDamage;
         Debug.Log("Controllers");
         Debug.Log("RightMouse: Shoot");
         Debug.Log("LeftShit: Accelerate");
@@ -50,14 +40,16 @@ public class PlayerBehaviour  : MonoBehaviour, IRequestPool
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
-            GameObject projectile = RequestPool();
-            if (projectile != null)
-            {
-                projectile.transform.position = transform.position;
-                projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
-            }
+            //GameObject projectile = RequestPool(pooltype);
+            //if (projectile != null)
+            //{
+            //    projectile.transform.position = transform.position;
+            //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
+            //}
+            normalShootHandle.NormalShooting();
+
         }
         if (Input.GetKey(KeyCode.LeftShift)){
              _speed += _statsController.Acceleration * Time.deltaTime;
@@ -80,13 +72,11 @@ public class PlayerBehaviour  : MonoBehaviour, IRequestPool
         if (Input.GetKeyDown(KeyCode.Q))
         {
             _statsController.ProductCharStats(STATS.NORMAL_DAMAGE,bulletMult);
-            bulletDamage = _statsController.NormalShootDamage;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             _statsController.TemporalStatUp(STATS.NORMAL_DAMAGE,temporalBulletDamage,temporalTimer);
-            bulletDamage = _statsController.NormalShootDamage;
         }
         if (Input.GetKeyDown(KeyCode.F))
         {
