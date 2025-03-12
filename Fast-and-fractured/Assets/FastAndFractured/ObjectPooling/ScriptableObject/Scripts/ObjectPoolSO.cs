@@ -7,7 +7,9 @@ namespace Game
     public enum Pooltype
     {
         BULLET,
-        INTERACTOR
+        INTERACTOR,
+        NORMAL_BULLET,
+        PUSH_BULLET
     }
     [CreateAssetMenu(fileName = "ObjectPool.asset", menuName = "ObjectPool")]
     public class ObjectPoolSO : ScriptableObject

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 
-public class PlayerBehaviour  : MonoBehaviour, IRequestPool
+public class PlayerBehaviour : MonoBehaviour, IRequestPool
 {
     [SerializeField] private GameObject projectile;
     [SerializeField] private float projectileSpeed = 10f;
@@ -14,16 +14,17 @@ public class PlayerBehaviour  : MonoBehaviour, IRequestPool
     [SerializeField] private float temporalBulletDamage = 5f;
     [SerializeField] private float temporalMaxSpeedDow = 5f;
     [SerializeField] private float temporalTimer = 0.5f;
-     private Rigidbody _rb;
+    private Rigidbody _rb;
     private StatsController _statsController;
     [SerializeField] private float _speed;
     [SerializeField] private Pooltype pooltype;
-    public Pooltype PoolType { get => pooltype; }
+    [SerializeField] private NormalShootHandle normalShootHandle;
 
-    public GameObject RequestPool()
+    public GameObject RequestPool(Pooltype pooltype)
     {
-        return ObjectPoolManager.Instance.GivePooledObject(PoolType);
+        throw new System.NotImplementedException();
     }
+
 
 
 
@@ -52,12 +53,14 @@ public class PlayerBehaviour  : MonoBehaviour, IRequestPool
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GameObject projectile = RequestPool();
-            if (projectile != null)
-            {
-                projectile.transform.position = transform.position;
-                projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
-            }
+            //GameObject projectile = RequestPool(pooltype);
+            //if (projectile != null)
+            //{
+            //    projectile.transform.position = transform.position;
+            //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
+            //}
+            normalShootHandle.NormalShooting();
+
         }
         if (Input.GetKey(KeyCode.LeftShift)){
              _speed += _statsController.Acceleration * Time.deltaTime;
