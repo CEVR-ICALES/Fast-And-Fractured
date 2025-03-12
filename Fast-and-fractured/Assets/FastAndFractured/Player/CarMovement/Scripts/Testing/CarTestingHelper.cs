@@ -22,11 +22,10 @@ public class CarTestingHelper : MonoBehaviour
     public Slider massSlider;
     public TMP_InputField maxEnduranceInputField;
     public Slider enduranceSlider;
-    public TMP_InputField enduranceFactorImporantceInputField;
     public Button updateEnduranceButton;
+    public TextMeshProUGUI massText;
+    public TextMeshProUGUI enduranceText;
 
-    private int selectedObjectType;
-    private int selectedObjectIndex;
     private bool isWindowOpen = false;
     private float currentMaxEndurance = 0f;
     private List<GameObject> spawnedObjectsList = new List<GameObject>();
@@ -42,6 +41,12 @@ public class CarTestingHelper : MonoBehaviour
         enduranceSlider.maxValue = currentMaxEndurance;
 
         updateEnduranceButton.onClick.AddListener(UpdateEnduranceSlider);
+    }
+
+    private void Update()
+    {
+        massText.text = massSlider.value.ToString();
+        enduranceText.text = enduranceSlider.value.ToString();  
     }
 
     private void InitializeDropdown()
@@ -163,15 +168,5 @@ public class CarTestingHelper : MonoBehaviour
         }
 
         isWindowOpen = !isWindowOpen;
-    }
-
-    public void SetObjectType(int type)
-    {
-        selectedObjectType = type;
-    }
-
-    public void SetObjectIndex(int index)
-    {
-        selectedObjectIndex = index;
     }
 }
