@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
-[CreateAssetMenu(fileName = "PushShoot", menuName = "EnemyStateMachine/Actions/PushShoot")]
+[CreateAssetMenu(fileName = nameof(PushShootAction), menuName = "EnemyStateMachine/Actions/PushShootAction")]
 public class PushShootAction : Action
 {
     public override void Act(Controller controller)

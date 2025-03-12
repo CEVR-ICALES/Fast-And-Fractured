@@ -2,7 +2,7 @@ using StateMachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName = "FleeFromTarget", menuName = "EnemyStateMachine/Actions/FleeFromTarget")]
+[CreateAssetMenu(fileName = nameof(FleeFromTargetAction), menuName = "EnemyStateMachine/Actions/FleeFromTargetAction")]
 
 public class FleeFromTargetAction : Action
 {
