@@ -42,6 +42,7 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float dashSpeed; // dash speed for dash without physics
     [SerializeField] private float dashForce; //force for the dash with phyisics
     [SerializeField] private float maxRbVelocityWhileDashing; //limit the speed so the car doesnt accelerate infinetly
+    [SerializeField] private float dashTimer; // how long the dash lasts
     private bool _isDashing { get; set; } = false;
 
     private float targetSteerAngle;
@@ -354,13 +355,14 @@ public class CarMovementController : MonoBehaviour
             _playerInputController.DisableInput();
             _isDashing = true;
             Vector3 dashDirection = transform.forward;
-            //_carRb.
+            _physicsBehaviour.isCurrentlyDashing = true;
             _carRb.isKinematic = true;
-            TimerManager.Instance.StartTimer(2f, () =>
+            TimerManager.Instance.StartTimer(dashTimer, () =>
             {
                 _playerInputController.EnableInput();
                 _isDashing = false;
                 _carRb.isKinematic = false;
+                _physicsBehaviour.isCurrentlyDashing = false;
             }, (progress) =>
             {
                 transform.position += dashDirection * dashSpeed * Time.deltaTime;
@@ -376,15 +378,22 @@ public class CarMovementController : MonoBehaviour
             Vector3 dashDirection = transform.forward.normalized;
             currentRbMaxVelocity = maxRbVelocityWhileDashing;
             _physicsBehaviour.BlockRigidBodyRotations();
-            TimerManager.Instance.StartTimer(1.5f, () =>
+            _physicsBehaviour.isCurrentlyDashing = true;
+            TimerManager.Instance.StartTimer(dashTimer, () =>
             {
                 _isDashing = false;
                 _physicsBehaviour.UnblockRigidBodyRotations();
                 currentRbMaxVelocity = maxRbVelocity;
+                _physicsBehaviour.isCurrentlyDashing = false;    
             }, (progress) => {
                 _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
             }, "dash", false, false);
         }
+    }
+
+    public void CancleDash()
+    {
+        TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
     }
 
     #endregion

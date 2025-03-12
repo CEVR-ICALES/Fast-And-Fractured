@@ -12,6 +12,7 @@ public class PhysicsBehaviour : MonoBehaviour
     public float weight { get; private set; }
     [SerializeField] private float _baseForce;
 
+    public bool isCurrentlyDashing = false;
     private CarMovementController _carMovementController;
     private Rigidbody _rb;
 
@@ -30,30 +31,47 @@ public class PhysicsBehaviour : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        PhysicsBehaviour otherComponenPhysicsBehaviours;
-        if(collision.gameObject.TryGetComponent(out otherComponenPhysicsBehaviours))
+        if(isCurrentlyDashing)
         {
-            ContactPoint contactPoint = collision.contacts[0];
-            Vector3 collisionPos = contactPoint.point;
-            Vector3 collisionNormal = contactPoint.normal;
-            float otherCarEnduranceFactor = otherComponenPhysicsBehaviours._endurance / otherComponenPhysicsBehaviours._maxEndurance; // calculate current value of the other car endurance
-            float otherCarWeight = otherComponenPhysicsBehaviours.weight;
-            //detect if the contact was frontal
-            if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= _frontalHitAnlgeThreshold)
+            PhysicsBehaviour otherComponenPhysicsBehaviours;
+            if (collision.gameObject.TryGetComponent(out otherComponenPhysicsBehaviours))
             {
-                // logic to determine forc 
-                float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
-                ApplyForce(collisionNormal, collisionPos, forceToApply);
-               
-            } else
-            {
-                float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
-                ApplyForce(collisionNormal, collisionPos, forceToApply);
+                ContactPoint contactPoint = collision.contacts[0];
+                Vector3 collisionPos = contactPoint.point;
+                Vector3 collisionNormal = contactPoint.normal;
+                float otherCarEnduranceFactor = otherComponenPhysicsBehaviours._endurance / otherComponenPhysicsBehaviours._maxEndurance; // calculate current value of the other car endurance
+                float otherCarWeight = otherComponenPhysicsBehaviours.weight;
+                //detect if the contact was frontal
+                if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= _frontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
+                {
+                    // logic to determine forc 
+                    float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                    otherComponenPhysicsBehaviours.ApplyForce(collisionNormal, collisionPos, forceToApply);
+
+                }
+                else
+                {
+                    float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                    otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
+                }
+
+                
+                otherComponenPhysicsBehaviours.CancelDash();
+
+                CancelDash();
             }
+        
         }
         
-       
 
+    }
+
+    public void CancelDash()
+    {
+        if(isCurrentlyDashing)
+        {
+            _carMovementController.CancleDash();
+        }
     }
 
     public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
