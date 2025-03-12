@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
+[CreateAssetMenu(fileName = nameof(EmergencyTargetAction), menuName = "EnemyStateMachine/Actions/EmergencyTargetAction")]
 
 public class EmergencyTargetAction : Action
 {

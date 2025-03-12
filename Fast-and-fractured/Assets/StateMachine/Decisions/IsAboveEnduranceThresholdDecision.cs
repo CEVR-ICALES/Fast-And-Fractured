@@ -6,7 +6,8 @@ using StateMachine;
 [CreateAssetMenu(fileName = nameof(IsAboveEnduranceThresholdDecision), menuName = "EnemyStateMachine/Decisions/IsAboveEnduranceThreshold")]
 public class IsAboveEnduranceThresholdDecision : Decision
 {
-    [SerializeField] float enduranceThreshold = 20f;
+    [SerializeField] float enduranceThreshold = -1f
+        ;
     [SerializeField] bool selfEndurance = true;
     public override bool Decide(Controller controller)
     {
@@ -19,7 +20,7 @@ public class IsAboveEnduranceThresholdDecision : Decision
         {
             EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
             //TODO
-            //get target health
+            //get target health from target
         }
         
 

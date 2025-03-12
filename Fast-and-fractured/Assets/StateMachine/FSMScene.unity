@@ -239,7 +239,6 @@ GameObject:
   - component: {fileID: 666765804}
   - component: {fileID: 666765803}
   - component: {fileID: 666765802}
-  - component: {fileID: 666765805}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -321,18 +320,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &666765805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 666765801}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &771394731
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,7 +356,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -625,7 +612,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableBehaviours:
   - {fileID: 1850853833}
-  firstState: {fileID: 11400000, guid: eb73c52ae863e5948a392e02b83c4faa, type: 2}
+  firstState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
 --- !u!114 &1850853833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -638,10 +625,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e482beda192a4e43951227d293c1fcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agent: {fileID: 0}
+  agent: {fileID: 1850853831}
   fleeMagnitude: 5
   sweepRadius: 20
-  damageThreshold: 20
+  healthTest: 20
   sweepLayerMask:
     serializedVersion: 2
     m_Bits: 64

@@ -12,16 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
   m_Name: NormalShootState
   m_EditorClassIdentifier: 
-  enterActions: []
+  enterActions:
+  - {fileID: 11400000, guid: 9d9599646b52dd049b2c022a5b3daca8, type: 2}
   actions:
+  - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
   - {fileID: 11400000, guid: d2d8916a861b0664cb6bebf7f28c1580, type: 2}
   exitActions: []
   transitions:
-  - decision: {fileID: 0}
-    trueState: {fileID: 0}
-    falseState: {fileID: 0}
-    hasExitTime: 0
-  - decision: {fileID: 0}
-    trueState: {fileID: 0}
+  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
+    trueState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0

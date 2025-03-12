@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
-[CreateAssetMenu(fileName = "DriveToPoint", menuName = "EnemyStateMachine/Actions/DriveToPoint")]
+[CreateAssetMenu(fileName = nameof(DriveToPointAction), menuName = "EnemyStateMachine/Actions/DriveToPointAction")]
 
 public class DriveToPointAction : Action
 {
