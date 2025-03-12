@@ -366,7 +366,7 @@ public class CarMovementController : MonoBehaviour
             }, (progress) =>
             {
                 transform.position += dashDirection * dashSpeed * Time.deltaTime;
-            }, "dash", false, false);
+            }, "dash", false, true);
         }
     }
 
@@ -387,13 +387,17 @@ public class CarMovementController : MonoBehaviour
                 _physicsBehaviour.isCurrentlyDashing = false;    
             }, (progress) => {
                 _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
-            }, "dash", false, false);
+            }, "dash", false, true);
         }
     }
 
     public void CancleDash()
     {
         TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
+        _isDashing = false;
+        _physicsBehaviour.UnblockRigidBodyRotations();
+        currentRbMaxVelocity = maxRbVelocity;
+        _physicsBehaviour.isCurrentlyDashing = false;
     }
 
     #endregion

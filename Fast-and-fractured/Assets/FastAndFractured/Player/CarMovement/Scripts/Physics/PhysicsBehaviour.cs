@@ -36,6 +36,8 @@ public class PhysicsBehaviour : MonoBehaviour
             PhysicsBehaviour otherComponenPhysicsBehaviours;
             if (collision.gameObject.TryGetComponent(out otherComponenPhysicsBehaviours))
             {
+                CancelDash();
+                otherComponenPhysicsBehaviours.CancelDash();
                 ContactPoint contactPoint = collision.contacts[0];
                 Vector3 collisionPos = contactPoint.point;
                 Vector3 collisionNormal = contactPoint.normal;
@@ -54,11 +56,6 @@ public class PhysicsBehaviour : MonoBehaviour
                     float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
                 }
-
-                
-                otherComponenPhysicsBehaviours.CancelDash();
-
-                CancelDash();
             }
         
         }
@@ -91,7 +88,7 @@ public class PhysicsBehaviour : MonoBehaviour
 
     private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
     {
-        float force = _baseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20);
+        float force = _baseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20); // this 20 value should become a variable as to how important the weight is going to be, the bigger the number the less important the weight
         Debug.Log(force);
         return force;
     }
