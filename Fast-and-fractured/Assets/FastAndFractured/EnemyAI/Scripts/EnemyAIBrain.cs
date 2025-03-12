@@ -23,6 +23,7 @@ public class EnemyAIBrain : MonoBehaviour
 
     private void Start()
     {
+        // TODO change this to the correct way of referencing the player
         _player = GameObject.FindGameObjectWithTag("Player");
         if (!agent)
         {
