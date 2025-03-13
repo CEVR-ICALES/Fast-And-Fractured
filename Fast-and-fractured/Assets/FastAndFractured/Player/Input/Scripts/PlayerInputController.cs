@@ -55,6 +55,9 @@ public class PlayerInputController : MonoBehaviour
     public bool IsDashing => _isDashing;
     private bool _isDashing;
 
+    public bool IsUsingController => _isUsingController;
+    private bool _isUsingController;
+
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
     private void Awake()
@@ -130,6 +133,7 @@ public class PlayerInputController : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
         {
             _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
+            _isUsingController = false;
             OnInputDeviceChanged?.Invoke(_currentInputDevice);
         }
 
@@ -145,6 +149,8 @@ public class PlayerInputController : MonoBehaviour
                 _currentInputDevice = INPUT_DEVICE_TYPE.XboxController;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
             }
+
+            _isUsingController = true;
         }
     }
 
@@ -170,5 +176,5 @@ public class PlayerInputController : MonoBehaviour
         _isPushShootReleased = true;
     }
 
-
+    public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;
 }

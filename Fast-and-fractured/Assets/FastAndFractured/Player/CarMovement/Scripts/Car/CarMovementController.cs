@@ -117,7 +117,7 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void HandleInput()
+    public void HandleInput()
     {
         steeringInput = _playerInputController.MoveInput;
 
@@ -249,6 +249,53 @@ public class CarMovementController : MonoBehaviour
         targetSteerAngle = maxSteerAngle * steeringInput.x;
     }
 
+
+
+    #endregion
+
+    #region Refactorized Code
+
+    public void HandleSteeringInput(Vector2 steeringInput, bool isUsingController)
+    {
+        if (!isUsingController && !_isBraking)
+        {
+            float acceleration = steeringInput.y * motorTorque;
+            ApplyMotorTorque(acceleration);  
+            // Possible set motor torque to 0 if no input (w,s)
+        } 
+        targetSteerAngle = maxSteerAngle * steeringInput.x;
+        ApplySteering();
+    }
+
+    public void HandleAccelerateInput(/*float acceleration*/ bool isAccelerating)
+    {
+        // To do (change the input to the given float)
+        if(isAccelerating)
+        {
+            ApplyMotorTorque(motorTorque);
+        }
+    }
+
+    public void HandleDeaccelerateInput(/*float acceleration*/ bool isDeaccelerating)
+    {
+        // To do (change the input to the given float)
+        if(isDeaccelerating)
+        {
+            ApplyMotorTorque(motorTorque);
+        }
+        ApplyMotorTorque(-motorTorque);
+    }
+
+    private void ApplyMotorTorque(float acceleration)
+    {
+        foreach (var wheel in wheels)
+        {
+            wheel.ApplyMotorTorque(acceleration);
+        }
+    }
+
+
+
     #endregion
 
     #region Braking Functions
@@ -319,7 +366,7 @@ public class CarMovementController : MonoBehaviour
         }
         else
         {
-            currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //sñight delelay so that wheel turn are not instanty
+            currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //slight delelay so that wheel turn are not instanty
         }
 
         switch (SteeringMode)
@@ -381,8 +428,9 @@ public class CarMovementController : MonoBehaviour
             _physicsBehaviour.isCurrentlyDashing = true;
             TimerManager.Instance.StartTimer(dashTimer, () =>
             {
-                FinishDash();   
-            }, (progress) => {
+                FinishDash();
+            }, (progress) =>
+            {
                 _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
             }, "dash", false, true);
         }

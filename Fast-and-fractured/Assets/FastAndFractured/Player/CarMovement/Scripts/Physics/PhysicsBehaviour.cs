@@ -11,9 +11,11 @@ public class PhysicsBehaviour : MonoBehaviour
     
     public float Weight { get => _weight; }
     [SerializeField] private float _baseForce;
+    [SerializeField] private float isMovingThreshold;
 
     public bool isCurrentlyDashing = false;
     private CarMovementController _carMovementController;
+    public Rigidbody Rb { get => _rb; }
     private Rigidbody _rb;
 
     const float SPEED_TO_METER_PER_SECOND = 3.6f;
@@ -130,6 +132,17 @@ public class PhysicsBehaviour : MonoBehaviour
         _rb.constraints = RigidbodyConstraints.None;
     }
 
+    public Vector3 GetCurrentRbVelocity()
+    {
+        return _rb.velocity;
+    }
 
-
+    public bool IsVehicleMoving()
+    {
+        if (_rb.velocity.magnitude > isMovingThreshold)
+        {
+            return true;
+        }
+        else return false;
+    }
 }
