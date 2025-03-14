@@ -51527,9 +51527,7 @@ MonoBehaviour:
   characterStatsController: {fileID: 1850853836}
   shootPoint: {fileID: 1184623821}
   pooltype: 2
-  cameraCenterOffSet: {x: 0, y: 0.4, z: 0}
-  countOverHeat: 0
-  _isOverHeat: 0
+  directionOffset: {x: 0, y: 0, z: 0}
 --- !u!1001 &1188848419
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -90537,6 +90535,10 @@ PrefabInstance:
       propertyPath: speedOverlay
       value: 
       objectReference: {fileID: 654847390}
+    - target: {fileID: 8891519341558237503, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: shootingMarginErrorAngle
+      value: 0.2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

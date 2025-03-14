@@ -51,7 +51,7 @@ namespace Game
                 if (canShoot)
                 {
                     Debug.Log("Shoot");
-                    Vector3 velocity = (currentShootDirection + cameraCenterOffSet) * characterStatsController.NormalShootSpeed;
+                    Vector3 velocity = (currentShootDirection + directionOffset) * characterStatsController.NormalShootSpeed;
                     ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
                     canShoot = false;
                     TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,

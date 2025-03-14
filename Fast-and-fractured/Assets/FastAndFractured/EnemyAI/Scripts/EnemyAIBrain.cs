@@ -11,6 +11,7 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] NavMeshAgent agent;
     [SerializeField] float fleeMagnitude = 5f;
     [SerializeField] float sweepRadius = 20f;
+    [SerializeField] float shootingMarginErrorAngle = 2f;
     [SerializeField] LayerMask sweepLayerMask;
 
     private Vector3 _positionToDrive;
@@ -26,6 +27,9 @@ public class EnemyAIBrain : MonoBehaviour
     {
         // TODO change this to the correct way of referencing the player
         _player = GameObject.FindGameObjectWithTag("Player");
+
+        //Testing 
+        _targetToShoot = _player;
         if (!agent)
         {
             agent = GetComponent<NavMeshAgent>();
@@ -54,6 +58,13 @@ public class EnemyAIBrain : MonoBehaviour
     #region CombatState
     public void NormalShoot()
     {
+        Vector3 shootingDirection = CalcNormalizedTargetDirection();
+
+        //Add shooting error 
+        shootingDirection += new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
+            UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
+
+        normalShootHandle.CurrentShootDirection = shootingDirection;
         normalShootHandle.NormalShooting();
     }
 
@@ -88,9 +99,7 @@ public class EnemyAIBrain : MonoBehaviour
     #region FleeState
     public void RunAwayFromCurrentTarget()
     {
-       Vector3 targetDirection = (transform.position - _targetToShoot.transform.position).normalized;
-
-        _positionToDrive = targetDirection * fleeMagnitude;
+        _positionToDrive = -CalcNormalizedTargetDirection() * fleeMagnitude;  
     }
    
     #endregion
@@ -144,6 +153,10 @@ public class EnemyAIBrain : MonoBehaviour
         _targetToShoot = target;
     }
 
-   
+    private Vector3 CalcNormalizedTargetDirection()
+    {
+        return (_targetToShoot.transform.position - transform.position).normalized;
+    }
+
     #endregion
 }

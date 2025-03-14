@@ -15,7 +15,7 @@ namespace Game {
         private float _range;
         private float _damage;
         [SerializeField]
-        protected Vector3 cameraCenterOffSet;
+        protected Vector3 directionOffset;
         protected bool canShoot = true;
 
         protected virtual void CustomStart()

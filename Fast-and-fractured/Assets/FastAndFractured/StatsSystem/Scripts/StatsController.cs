@@ -53,7 +53,7 @@ namespace Game
 
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
-        public float NormalShootCadenceTime { get => charDataSO.NormalShootRateOfFire; }
+        public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
         public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
         public float PushShootRange {get => charDataSO.PushShootRange;}
