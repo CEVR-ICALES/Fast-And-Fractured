@@ -12,19 +12,17 @@ public class InteractableHandler : AbstractSingleton<InteractableHandler>
     [SerializeField] private int numberOfItemsActiveAtSameTime = 8;
     [SerializeField] float itemCooldownAfterPick = 2f;
     
-    List<GameObject> _shuffledInteractables = new();
-    List<GameObject> _itemsOnCooldown = new();
+    List<GameObject> _shuffledActivePool = new();
+    List<GameObject> _interactablesOnCooldown = new();
     protected override void Awake()
     {
         base.Awake();
         foreach (var item in interactablesToToggle)
         {
-            var interectable = item.GetComponentInParent<GenericInteractable>();
-            if (interectable)
-            {
-                interectable.disableGameObjectOnInteract = true;
-                interectable.onInteract.AddListener(RemoveInteractableFromPool);
-            }
+            var interactable = item.GetComponentInParent<GenericInteractable>();
+            if (!interactable) continue;
+            interactable.disableGameObjectOnInteract = true;
+            interactable.onInteract.AddListener(RemoveInteractableFromPool);
         }
         MakeInitialPool();
 
@@ -33,36 +31,37 @@ public class InteractableHandler : AbstractSingleton<InteractableHandler>
 
     void MakeInitialPool()
     {
-        _shuffledInteractables = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
-        UpdateVisibleInteractablesList();
+        _shuffledActivePool = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
+        UpdateVisibleInteractableList();
     }
-    void UpdateVisibleInteractablesList(int index = 0)
+    void UpdateVisibleInteractableList(int index = 0)
     {
-        for (int i = index; i < _shuffledInteractables.Count && i < numberOfItemsActiveAtSameTime; i++)
+        for (int i = index; i < _shuffledActivePool.Count && i < numberOfItemsActiveAtSameTime; i++)
         {
-            GameObject item = _shuffledInteractables[i];
-            item.SetActive(true);
+            GameObject interactable = _shuffledActivePool[i];
+            interactable.SetActive(true);
         }
-        for (int i = numberOfItemsActiveAtSameTime; i < _shuffledInteractables.Count; i++)
+        for (int i = numberOfItemsActiveAtSameTime; i < _shuffledActivePool.Count; i++)
         {
-            GameObject item = _shuffledInteractables[i];
-            item.SetActive(false);
+            GameObject interactable = _shuffledActivePool[i];
+            interactable.SetActive(false);
 
         }
     }
-    private void RemoveInteractableFromPool(GameObject interactionFrom, GameObject intearactionTo)
+    private void RemoveInteractableFromPool(GameObject interactionFrom, GameObject interactionTo)
     {
-        _itemsOnCooldown.Add(intearactionTo);
-        TimerManager.Instance.StartTimer(itemCooldownAfterPick, () => ConvertItemOnCooldownToPool(intearactionTo), null, new Guid().ToString());
-        _shuffledInteractables.Remove(intearactionTo);
-        intearactionTo.gameObject.SetActive(false);
-        UpdateVisibleInteractablesList();
+        _interactablesOnCooldown.Add(interactionTo);
+        TimerManager.Instance.StartTimer(itemCooldownAfterPick, () => ReAddInteractableFromCooldownToPool(interactionTo), null, new Guid().ToString());
+        _shuffledActivePool.Remove(interactionTo);
+        interactionTo.gameObject.SetActive(false);
+        UpdateVisibleInteractableList();
     }
 
-    private void ConvertItemOnCooldownToPool(GameObject arg0)
+    private void ReAddInteractableFromCooldownToPool(GameObject interactableOnCooldownToReAdd)
     {
-        _itemsOnCooldown.Remove(arg0);
-        _shuffledInteractables.Add(arg0);
+        _interactablesOnCooldown.Remove(interactableOnCooldownToReAdd);
+        _shuffledActivePool.Add(interactableOnCooldownToReAdd);
+        UpdateVisibleInteractableList();
     }
 }
 
