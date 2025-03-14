@@ -10,7 +10,7 @@ public class StatsBoostInteractable : GenericInteractable
 
     public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
     {
-        var statsController = interactionFrom.GetComponentInParent<StatsController>();
+        StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
         if (!statsController) return;
 
         base.OnInteract(interactionFrom, intearactionTo);
