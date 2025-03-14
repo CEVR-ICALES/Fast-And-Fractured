@@ -10,46 +10,48 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 21ff3bb6b84fcd04c9a4584674e1d6f9, type: 3}
-  m_Name: PlayerPruebaData
+  m_Name: CarPruebaIA
   m_EditorClassIdentifier: 
   Id: 0
   Name: Prueba
-  MaxEndurance: 100
+  MaxEndurance: 500
   MinEndurance: 0
   Dead: 0
-  MaxSpeed: 10
-  MaxSpeedDashing: 0
+  MaxSpeed: 100
+  MaxSpeedDashing: 100
   MaxSpeedMultiplier: 1.5
   MinSpeed: 0
-  MaxAcceleration: 0
+  MaxAcceleration: 70
   MinAcceleration: 0
-  Acceleration: 1.5
-  BrakeTorque: 12000
-  Handling: 35
+  Acceleration: 50
+  BrakeTorque: 100
+  Handling: 0
   HandlingSmoothnes: 0
-  AerialRotationSpeed: 180
+  AerialRotationSpeed: 0
   DashDistance: 0
-  Weight: 100
-  Traction: 100
-  Damping: 100
-  BaseDownwardForce: 9.81
-  TurningForceMultiplier: 1
-  SpeedForceMultiplier: 1
-  NormalShootDMG: 3
-  PushShootDMG: 2
-  PushShootFORCE: 50
-  MaxNormalShootDMG: 300
+  Weight: 0
+  Traction: 0
+  Damping: 0
+  BaseDownwardForce: 0
+  TurningForceMultiplier: 0
+  SpeedForceMultiplier: 0
+  NormalShootDMG: 2
+  PushShootDMG: 1
+  PushShootFORCE: 0
+  MaxNormalShootDMG: 25
   MinNormalShootDMG: 0
-  MaxPushShootDMG: 300
+  MaxPushShootDMG: 0
   MinPushShootDMG: 0
   NormalShootSpeed: 5
-  NormalShootRateOfFire: 0
+  NormalShootCadenceTime: 0.5
   NormalShootMaxRange: 8
-  PushShootSpeed: 5
+  PushShootSpeed: 0
   PushShootMaxRange: 0
-  DashCooldown: 5
-  PushShootCooldown: 9
-  UniqueAbilityCooldown: 100
-  NormalShootOverHeat: 3
+  DashCooldown: 0
+  PushShootCooldown: 0
+  UniqueAbilityCooldown: 0
+  NormalShootOverHeat: 10
   RecoveryCooldown: 0
-  FromTopSpeedToMaxSpeed: 0
+  CooldownSpeed: 0
+  MinCooldownSpeed: 0
+  MaxCooldownSpeed: 0

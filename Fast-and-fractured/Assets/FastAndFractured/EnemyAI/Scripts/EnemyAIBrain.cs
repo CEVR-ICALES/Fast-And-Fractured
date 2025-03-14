@@ -1,3 +1,4 @@
+using Game;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ public class EnemyAIBrain : MonoBehaviour
     public GameObject Player { get => _player; set => _player = value; }
     public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
 
-
+    [SerializeField] NormalShootHandle normalShootHandle;
 
     private void Start()
     {
@@ -28,6 +29,10 @@ public class EnemyAIBrain : MonoBehaviour
         if (!agent)
         {
             agent = GetComponent<NavMeshAgent>();
+        }
+        if (!normalShootHandle)
+        {
+            normalShootHandle = GetComponentInChildren<NormalShootHandle>();
         }
     }
 
@@ -49,9 +54,7 @@ public class EnemyAIBrain : MonoBehaviour
     #region CombatState
     public void NormalShoot()
     {
-        //TODO
-        //Shoot normal bullet to target
-        //if target and target is nearby and shoot is not overheated
+        normalShootHandle.NormalShooting();
     }
 
     public void PushShoot()
@@ -109,10 +112,8 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     public bool IsShootOverheated()
-    {
-        //TODO
-        //Ask if shoot is overheated
-        return false;
+    { 
+        return normalShootHandle.IsOverHeat;
     }
     public bool IsUniqueAbilityFinished()
     {

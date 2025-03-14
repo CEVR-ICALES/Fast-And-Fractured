@@ -53,7 +53,7 @@ namespace Game
 
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
-        public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
+        public float NormalShootCadenceTime { get => charDataSO.NormalShootRateOfFire; }
         public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
         public float PushShootMaxRange {get => charDataSO.PushShootMaxRange;}
@@ -65,9 +65,9 @@ namespace Game
 
         [Header("COOLDOWNS")]
 
-        [SerializeField] private float currentcooldownSpeed;
+        [SerializeField] private float currentCooldownSpeed;
 
-        public float CooldownSpeed { get => currentcooldownSpeed; }
+        public float CooldownSpeed { get => currentCooldownSpeed; }
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
@@ -124,7 +124,7 @@ namespace Game
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootDMG = charDataSO.PushShootDMG;
             //Cooldowns
-            currentcooldownSpeed = charDataSO.CooldownSpeed;
+            currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
 
 
@@ -226,9 +226,6 @@ namespace Game
                 case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     return true;
-                case STATS.COOLDOWN_SPEED:
-                    currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed, isProduct);
-                    return true;
                 case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
                     return true;
@@ -302,7 +299,7 @@ namespace Game
                 case STATS.PUSH_DAMAGE:
                     return currentPushShootDMG;
                 case STATS.COOLDOWN_SPEED:
-                    return currentcooldownSpeed;
+                    return currentCooldownSpeed;
             }
             return _errorGetStatFloat;
         }
