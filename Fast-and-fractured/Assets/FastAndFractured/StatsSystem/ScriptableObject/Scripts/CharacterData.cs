@@ -65,7 +65,8 @@ namespace Game
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootRateOfFire;
         public float NormalShootMaxRange;
         public float PushShootSpeed;
-        public float PushShootMaxRange;
+        public float PushShootAngle;
+        public float PushShootRange;
 
 
         [Header("Cooldowns")]

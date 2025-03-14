@@ -10,9 +10,9 @@ public class InitObjectPoolHandle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        ObjectPoolManager.Instance.CustomStart();
         foreach (var poolSO in poolSOList)
         {
-            ObjectPoolManager.Instance.CustomStart();
             ObjectPoolManager.Instance.CreateObjectPool(poolSO);
         }
     }
