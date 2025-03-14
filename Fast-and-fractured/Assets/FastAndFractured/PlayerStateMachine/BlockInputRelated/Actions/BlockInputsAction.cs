@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class BlockInputsAction : Action
 {
+    public InputBlockTypes InputBlockType;
     public override void Act(Controller controller)
     {
-        // To do
+        controller.GetBehaviour<PlayerInputController>().BlockInput(InputBlockType);
     }
 }

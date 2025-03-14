@@ -6,7 +6,6 @@ public class IsPushShootInputDecision : Decision
 {
     public override bool Decide(Controller controller)
     {
-        // to do
-        return true;
+        return controller.GetBehaviour<PlayerInputController>().IsAimingPushShoot;
     }
 }

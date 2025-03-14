@@ -19941,6 +19941,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4327670655549164, guid: 9390e70d13c7e454f8022d50d0112dc7, type: 3}
   m_PrefabInstance: {fileID: 416632944}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &417406645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 417406646}
+  - component: {fileID: 417406647}
+  m_Layer: 0
+  m_Name: ShootingController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &417406646
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417406645}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.64, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 402578958445625783}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &417406647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417406645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94a128f3883087b42aeb9a9b6ad30382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableBehaviours:
+  - {fileID: 2478150487228601159}
+  - {fileID: 4994779648886708114}
+  - {fileID: 7917500339781435167}
+  firstState: {fileID: 11400000, guid: ed599a34f3769df49a78d82fc5b3b206, type: 2}
 --- !u!1001 &420303590
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -89900,6 +89949,7 @@ Transform:
   m_Children:
   - {fileID: 7092917100820369124}
   - {fileID: 8447966479964321636}
+  - {fileID: 417406646}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &495384137502809352
@@ -90449,6 +90499,10 @@ PrefabInstance:
     - target: {fileID: 7212860845051920763, guid: bcf25edf42293eb47806ee48e3f47b38, type: 3}
       propertyPath: m_Name
       value: CarPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 7212860845051920763, guid: bcf25edf42293eb47806ee48e3f47b38, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

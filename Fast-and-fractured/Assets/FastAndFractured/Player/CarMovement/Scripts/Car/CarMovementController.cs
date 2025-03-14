@@ -45,6 +45,7 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float dashForce; //force for the dash with phyisics
     [SerializeField] private float maxRbVelocityWhileDashing; //limit the speed so the car doesnt accelerate infinetly
     [SerializeField] private float dashTimer; // how long the dash lasts
+    public bool IsDashing => _isDashing;
     private bool _isDashing = false;
 
     private float targetSteerAngle;
@@ -74,11 +75,11 @@ public class CarMovementController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (applyRollPrevention)
+        /*if (applyRollPrevention)
         {
             float steeringInputMagnitude = steeringInput.y;
             _rollPrevention.ApplyRollPrevention(_carRb, steeringInputMagnitude);
-        }
+        }*/
 
         UpdateWheelVisuals();
         _physicsBehaviour.LimitRigidBodySpeed(currentRbMaxVelocity);
@@ -88,7 +89,7 @@ public class CarMovementController : MonoBehaviour
 
     private void Update()
     {
-        if (!_usingController)
+        /*if (!_usingController)
         {
             HandleInput();
         }
@@ -96,7 +97,7 @@ public class CarMovementController : MonoBehaviour
         {
             HandleInputController();
         }
-        ApplySteering();
+        ApplySteering();*/
         UpdateSpeedOverlay();
 
         Debug.DrawRay(transform.position, _carRb.velocity, Color.red);
@@ -144,7 +145,7 @@ public class CarMovementController : MonoBehaviour
             {
                 if (!_isDrifting)
                 {
-                    StartDrift();
+                    //StartDrift();
                 }
                 ApplyDrift();
             }
@@ -209,7 +210,7 @@ public class CarMovementController : MonoBehaviour
             {
                 if (!_isDrifting)
                 {
-                    StartDrift();
+                    //StartDrift();
                 }
                 ApplyDrift();
             }
@@ -288,13 +289,51 @@ public class CarMovementController : MonoBehaviour
 
     private void ApplyMotorTorque(float acceleration)
     {
-        foreach (var wheel in wheels)
+        foreach (WheelController wheel in wheels)
         {
             wheel.ApplyMotorTorque(acceleration);
         }
     }
 
+    private void ApplyBrakeTorque(float brakeTorque)
+    {
+        foreach(WheelController wheel in wheels)
+        {
+            wheel.ApplyBrakeTorque(brakeTorque);
+        }
+    }
 
+    public void HandleBrakingInput(bool isBraking, Vector2 steeringInput)
+    {
+        _isBraking = isBraking;
+        if (_isBraking)
+        {
+            if (Mathf.Abs(steeringInput.x) > driftThreshold)
+            {
+                if (!_isDrifting)
+                {
+                    StartDrift(steeringInput.x);
+                }
+                ApplyDrift();
+            }
+            else
+            {
+                if (_isDrifting)
+                {
+                    EndDrift();
+                }
+                ApplyBrake();
+            }
+            _isBraking = true;
+        }
+        else
+        {
+            if (_isDrifting)
+                EndDrift();
+            _isBraking = false;
+            ApplyBrakeTorque(0f);
+        }
+    }
 
     #endregion
 
@@ -305,10 +344,7 @@ public class CarMovementController : MonoBehaviour
         switch (brakeMode)
         {
             case BRAKE_MODE.AllWheels:
-                foreach (var wheel in wheels)
-                {
-                    wheel.ApplyBrakeTorque(brakeTorque);
-                }
+                ApplyBrakeTorque(brakeTorque);
                 break;
 
             case BRAKE_MODE.FrontWheelsStronger:
@@ -320,18 +356,18 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void StartDrift()
+    private void StartDrift(float steeringInput)
     {
         _isDrifting = true;
-        _driftDirection = Mathf.Sign(steeringInput.x); //only determine direcition + or -
-        _carRb.drag = 1f;
-        _initialSpeedWhenDrifting = _carRb.velocity.magnitude;
+        _driftDirection = Mathf.Sign(steeringInput); //only determine direcition + or -
+        _physicsBehaviour.Rb.drag = 1f;
+        _initialSpeedWhenDrifting = _physicsBehaviour.Rb.velocity.magnitude;
     }
 
     private void EndDrift()
     {
         _isDrifting = false;
-        _carRb.drag = 0.08f;
+        _physicsBehaviour.Rb.drag = 0.08f;
     }
 
     private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
@@ -378,7 +414,7 @@ public class CarMovementController : MonoBehaviour
 
             case STEERING_MODE.RearWheel:
                 float rearSteerAngle = currentSteerAngle;
-                if (_carRb.velocity.magnitude < 10f)
+                if (_physicsBehaviour.Rb.velocity.magnitude < 10f)
                 {
                     rearSteerAngle = -currentSteerAngle; //posite direciton wheen going at low speeds
                 }
@@ -417,14 +453,14 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void HandleDashWithPhysics()
+    public void HandleDashWithPhysics()
     {
         if (!_isDashing)
         {
             _isDashing = true;
+            _physicsBehaviour.BlockRigidBodyRotations();
             Vector3 dashDirection = transform.forward.normalized;
             currentRbMaxVelocity = maxRbVelocityWhileDashing;
-            _physicsBehaviour.BlockRigidBodyRotations();
             _physicsBehaviour.isCurrentlyDashing = true;
             TimerManager.Instance.StartTimer(dashTimer, () =>
             {
@@ -443,7 +479,7 @@ public class CarMovementController : MonoBehaviour
         currentRbMaxVelocity = maxRbVelocity;
         _physicsBehaviour.isCurrentlyDashing = false;
     }
-    public void CancleDash()
+    public void CancelDash()
     {
         TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
         FinishDash();
@@ -470,7 +506,7 @@ public class CarMovementController : MonoBehaviour
 
     private void UpdateSpeedOverlay()
     {
-        float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
+        float speedZ = Mathf.Abs(_physicsBehaviour.Rb.velocity.magnitude);
         float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
     }

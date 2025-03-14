@@ -5,6 +5,13 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 
+public enum InputBlockTypes // this enum need to be added to the enum library
+{
+    ALL_MECHANICS,
+    MOVEMENT_MECHANICS,
+    SHOOTING_MECHANICS
+}
+
 public class PlayerInputController : MonoBehaviour
 {
     public static PlayerInputController Instance { get; private set; }
@@ -57,6 +64,15 @@ public class PlayerInputController : MonoBehaviour
 
     public bool IsUsingController => _isUsingController;
     private bool _isUsingController;
+
+    public bool IsAllMechanicsInputsBlocked => _isAllMechanicsInputsBlocked;
+    private bool _isAllMechanicsInputsBlocked;
+
+    public bool IsMovementInputsBlocked => _isMovementInputsBlocked;
+    private bool _isMovementInputsBlocked;
+
+    public bool IsShootingInputsBlocked => _isShootingInputsBlocked;
+    private bool _isShootingInputsBlocked;
 
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
@@ -162,6 +178,42 @@ public class PlayerInputController : MonoBehaviour
     public void EnableInput()
     {
         inputActions.Enable();
+    }
+
+    public void BlockInput(InputBlockTypes inputBlockType)
+    {
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = true;
+                break;
+        }
+    }
+    
+    public void EnableInput(InputBlockTypes inputBlockType)
+    {
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = false;
+                break;
+        }
     }
 
     private void OnStartAimingPushShoot()
