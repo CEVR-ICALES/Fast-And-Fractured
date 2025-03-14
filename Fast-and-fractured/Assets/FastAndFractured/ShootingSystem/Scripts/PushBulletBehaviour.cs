@@ -8,6 +8,8 @@ public class PushBulletBehaviour : BulletBehaivour
     [SerializeField] private LayerMask characterLayers;
     public float Angle { set { _angle = value; } }
     private float _angle;
+    private float _bouncingNum;
+    private float _bounceStrenght;
     protected override void FixedUpdate()
     {
 
@@ -23,8 +25,9 @@ public class PushBulletBehaviour : BulletBehaivour
 
     private void OnCollisionEnter(Collision collision)
     {
-            var newDirection = Vector3.ProjectOnPlane(velocity,collision.GetContact(0).normal);
+            var newDirection = collision.GetContact(0).normal * 10f;
             rb.velocity += newDirection;
+        Debug.Log(rb.velocity);
     }
 
     // Start is called before the first frame update
