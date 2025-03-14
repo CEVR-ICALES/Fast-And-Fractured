@@ -54,9 +54,10 @@ namespace Game
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
         public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
-        public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
+        public float NormalShootMaxRange {get => charDataSO.NormalShootRange;}
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
-        public float PushShootMaxRange {get => charDataSO.PushShootMaxRange;}
+        public float PushShootRange {get => charDataSO.PushShootRange;}
+        public float PushShootAngle { get => charDataSO.PushShootAngle; }
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
@@ -271,19 +272,24 @@ namespace Game
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
             }
-            StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            //StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            RemoveStatModificationByTimer(previousValue, currentValue, type, previousValue < currentValue, time);
         }
 
         //Coroutine is for try propuses. It will be susbtitute for a Timer. 
-        private IEnumerator WaitTimeToModStat(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
+        private void RemoveStatModificationByTimer(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
         {
             float mod;
             if (iscurrentBigger)
                 mod = -(currentValue - previousValue);
             else
                 mod = previousValue - currentValue;
-            yield return new WaitForSeconds(time);
-            ChoseCharToMod(stat, mod, false);
+
+            TimerManager.Instance.StartTimer(time, () =>
+            {
+                ChoseCharToMod(stat, mod, false);
+            },
+            null, "Temporal " + stat + " Mod", false, false);
         }
         #endregion  
 

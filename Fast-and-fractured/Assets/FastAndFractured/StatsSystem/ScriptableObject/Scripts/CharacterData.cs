@@ -68,9 +68,10 @@ namespace Game
         [Header("ShootMovement")]
         public float NormalShootSpeed;
         public float NormalShootCadenceTime;
-        public float NormalShootMaxRange;
+        public float NormalShootRange;
         public float PushShootSpeed;
-        public float PushShootMaxRange;
+        public float PushShootAngle;
+        public float PushShootRange;
 
 
         [Header("COOLDOWNS")]

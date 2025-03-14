@@ -6,8 +6,7 @@ using UnityEngine;
 public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 {
     protected Rigidbody rb;
-    [SerializeField]
-    protected Pooltype pooltype;
+    [SerializeField] protected Pooltype pooltype;
     public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
     public Vector3 Velocity { set => velocity = value; }
     protected Vector3 velocity;
@@ -15,6 +14,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     protected float range;
     public float Damage { set => damage = value; }
     protected float damage;
+    [SerializeField] protected ParticleSystem particles;
     //ForPushShoot Handle class
     //public float PushStrengh { set => pushStrengh = value; }
     //protected float pushStrengh;

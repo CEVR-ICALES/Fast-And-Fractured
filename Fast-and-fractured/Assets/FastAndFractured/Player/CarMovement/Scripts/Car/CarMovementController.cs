@@ -422,8 +422,8 @@ public class CarMovementController : MonoBehaviour
 
     private void UpdateSpeedOverlay()
     {
-        float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
-        float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-        speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
+        //float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
+        //float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
+        //speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
     }
 }

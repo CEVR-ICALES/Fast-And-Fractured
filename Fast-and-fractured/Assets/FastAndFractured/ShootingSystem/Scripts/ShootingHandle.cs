@@ -16,8 +16,9 @@ namespace Game {
         private float _damage;
         [SerializeField]
         protected Vector3 cameraCenterOffSet;
-    
-    protected virtual void CustomStart()
+        protected bool canShoot = true;
+
+        protected virtual void CustomStart()
         {
             //Provisional, this will be replace
             if (characterStatsController == null)

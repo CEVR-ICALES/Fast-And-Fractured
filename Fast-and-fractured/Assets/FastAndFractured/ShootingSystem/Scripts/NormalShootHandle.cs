@@ -56,11 +56,18 @@ namespace Game
             if (!Timer(ref countOverHeat, countOverHeat >= characterStatsController.NormalOverHead,
                 characterStatsController.NormalOverHead) && !_isOverHeat)
             {
-                if (Timer(ref _countCadenceTime, _countCadenceTime >= characterStatsController.NormalShootCadenceTime, 0))
+                if (canShoot)
                 {
                     Debug.Log("Shoot");
                     Vector3 velocity = (mainCamera.transform.forward + cameraCenterOffSet) * characterStatsController.NormalShootSpeed;
                     ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
+                    canShoot = false;
+                    TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
+                        () => { canShoot = true; },
+                        null, "CadenceTimeNormalShoot " + characterStatsController.name,
+                        false,
+                        false)
+                        ;
                 }
             }
             else
