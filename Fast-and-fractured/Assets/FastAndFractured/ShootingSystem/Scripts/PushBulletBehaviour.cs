@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class PushBulletBehaviour : BulletBehaivour
 {
+    [SerializeField] private LayerMask bouncingLayers;
+    [SerializeField] private LayerMask characterLayers;
+    public float Angle { set { _angle = value; } }
+    private float _angle;
     protected override void FixedUpdate()
     {
 
@@ -11,7 +15,16 @@ public class PushBulletBehaviour : BulletBehaivour
 
     protected override void OnTriggerEnter(Collider other)
     {
-       ,¡
+       if(other.gameObject.layer == bouncingLayers)
+        {
+            
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+            var newDirection = Vector3.ProjectOnPlane(velocity,collision.GetContact(0).normal);
+            rb.velocity += newDirection;
     }
 
     // Start is called before the first frame update

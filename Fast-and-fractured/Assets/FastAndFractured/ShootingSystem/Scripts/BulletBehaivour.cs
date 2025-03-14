@@ -14,6 +14,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     protected float range;
     public float Damage { set => damage = value; }
     protected float damage;
+    protected Vector3 initPosition;
     [SerializeField] protected ParticleSystem particles;
     //ForPushShoot Handle class
     //public float PushStrengh { set => pushStrengh = value; }
@@ -24,6 +25,8 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     public virtual void InitBulletTrayectory()
     {
         rb = GetComponent<Rigidbody>();
+        initPosition = transform.position;
+        rb.velocity = velocity;
     }
 
     protected void OnBulletEndTrayectory()

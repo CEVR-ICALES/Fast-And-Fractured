@@ -227,9 +227,6 @@ namespace Game
                 case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     return true;
-                case STATS.COOLDOWN_SPEED:
-                    currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed, isProduct);
-                    return true;
                 case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
                     return true;

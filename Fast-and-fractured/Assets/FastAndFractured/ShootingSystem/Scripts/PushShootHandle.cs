@@ -24,6 +24,7 @@ namespace Game {
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
+            PushBulletBehaviour pushBulletBehaviour = (PushBulletBehaviour)bulletBehaivour;
         }
 
         public void PushShooting()
