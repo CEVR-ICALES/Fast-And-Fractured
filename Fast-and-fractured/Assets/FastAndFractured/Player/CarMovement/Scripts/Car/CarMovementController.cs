@@ -73,6 +73,11 @@ public class CarMovementController : MonoBehaviour
         PlayerInputController.OnInputDeviceChanged -= HandleInputDeviceChanged;
     }
 
+    private void OnDestroy()
+    {
+        TimerManager.Instance.StopTimer("dash");
+    }
+
     private void FixedUpdate()
     {
         /*if (applyRollPrevention)
@@ -274,6 +279,9 @@ public class CarMovementController : MonoBehaviour
         if(isAccelerating)
         {
             ApplyMotorTorque(motorTorque);
+        } else
+        {
+            ApplyMotorTorque(0f);
         }
     }
 
@@ -282,9 +290,11 @@ public class CarMovementController : MonoBehaviour
         // To do (change the input to the given float)
         if(isDeaccelerating)
         {
-            ApplyMotorTorque(motorTorque);
+            ApplyMotorTorque(-motorTorque);
+        } else
+        {
+            ApplyMotorTorque(0f);
         }
-        ApplyMotorTorque(-motorTorque);
     }
 
     private void ApplyMotorTorque(float acceleration)
@@ -306,6 +316,7 @@ public class CarMovementController : MonoBehaviour
     public void HandleBrakingInput(bool isBraking, Vector2 steeringInput)
     {
         _isBraking = isBraking;
+        Debug.Log(isBraking);
         if (_isBraking)
         {
             if (Mathf.Abs(steeringInput.x) > driftThreshold)
