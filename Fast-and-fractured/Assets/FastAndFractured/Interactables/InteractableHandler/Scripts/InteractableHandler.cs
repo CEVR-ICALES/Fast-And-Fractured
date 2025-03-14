@@ -19,7 +19,7 @@ public class InteractableHandler : AbstractSingleton<InteractableHandler>
         base.Awake();
         foreach (var item in interactablesToToggle)
         {
-            var interactable = item.GetComponentInParent<GenericInteractable>();
+            GenericInteractable interactable = item.GetComponentInParent<GenericInteractable>();
             if (!interactable) continue;
             interactable.disableGameObjectOnInteract = true;
             interactable.onInteract.AddListener(RemoveInteractableFromPool);
