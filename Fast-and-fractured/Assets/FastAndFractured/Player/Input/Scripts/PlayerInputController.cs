@@ -29,14 +29,14 @@ public class PlayerInputController : MonoBehaviour
     private Vector2 _cameraInput;
 
     // Action Flags with private backing fields
-    public bool IsAccelerating => _isAccelerating;
-    private bool _isAccelerating;
+    public float IsAccelerating => _isAccelerating;
+    private float _isAccelerating;
 
     public bool IsBraking => _isBraking;
     private bool _isBraking;
 
-    public bool IsReversing => _isReversing;
-    private bool _isReversing;
+    public float IsReversing => _isReversing;
+    private float _isReversing;
 
     public bool IsShooting => _isShooting;
     private bool _isShooting;
@@ -103,11 +103,11 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
 
         // Action Inputs
-        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = true;
-        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = false;
+        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = 0f;
 
-        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = true;
-        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = false;
+        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = 0f;
 
         inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
         inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;

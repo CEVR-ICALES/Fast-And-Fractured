@@ -40,7 +40,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""name"": ""Accelerate"",
                     ""type"": ""Value"",
                     ""id"": ""2f11717d-ef60-4557-bdaa-c65a52510283"",
-                    ""expectedControlType"": ""Double"",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -49,7 +49,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""name"": ""Reverse"",
                     ""type"": ""Value"",
                     ""id"": ""38a23e7d-4f3d-4eda-bf26-222fccc54458"",
-                    ""expectedControlType"": ""Double"",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
