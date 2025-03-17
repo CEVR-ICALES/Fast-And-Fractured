@@ -1,11 +1,13 @@
-using StateMachine;
+using Game;
 using UnityEngine;
-
-[CreateAssetMenu(fileName = nameof(DashEndedDecision), menuName = "PlayerShootingStateMachine/Decisions/DashEndedDecision")]
-public class DashEndedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(DashEndedDecision), menuName = "PlayerShootingStateMachine/Decisions/DashEndedDecision")]
+    public class DashEndedDecision : Decision
     {
-        return !controller.GetBehaviour<CarMovementController>().IsDashing;
+        public override bool Decide(Controller controller)
+        {
+            return !controller.GetBehaviour<CarMovementController>().IsDashing;
+        }
     }
 }

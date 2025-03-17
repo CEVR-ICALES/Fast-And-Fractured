@@ -1,11 +1,14 @@
-using StateMachine;
+using Game;
 using UnityEngine;
-[CreateAssetMenu(fileName = "ApplyDashAction", menuName = "PlayerShootingStateMachine/Actions/ApplyDashAction")]
-
-public class ApplyDashAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "ApplyDashAction", menuName = "PlayerShootingStateMachine/Actions/ApplyDashAction")]
+
+    public class ApplyDashAction : Action
     {
-        controller.GetBehaviour<CarMovementController>().HandleDashWithPhysics();
+        public override void Act(Controller controller)
+        {
+            controller.GetBehaviour<CarMovementController>().HandleDashWithPhysics();
+        }
     }
 }
