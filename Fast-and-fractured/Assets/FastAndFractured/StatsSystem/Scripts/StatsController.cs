@@ -79,6 +79,7 @@ namespace Game
         public float Damping { get => charDataSO.Damping; }
         public float BaseForce { get => charDataSO.BaseForce; }
         public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
+        public float EnduranceImportanceWhenColliding { get => charDataSO.EnduranceImportanceWhenColliding; }
 
         [Header("COOLDOWNS")]
 

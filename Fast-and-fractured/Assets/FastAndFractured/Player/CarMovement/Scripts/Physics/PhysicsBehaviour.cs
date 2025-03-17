@@ -43,19 +43,29 @@ namespace Game
                     Vector3 collisionNormal = contactPoint.normal;
                     float otherCarEnduranceFactor = otherComponenPhysicsBehaviours.StatsController.Endurance / otherComponenPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
                     float otherCarWeight = otherComponenPhysicsBehaviours.StatsController.Weight;
+                    float forceToApply;
                     //detect if the contact was frontal
                     if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
                     {
-                        // logic to determine forc 
-                        float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
-                        otherComponenPhysicsBehaviours.ApplyForce(collisionNormal, collisionPos, forceToApply);
-
+                        if(otherComponenPhysicsBehaviours.isCurrentlyDashing)
+                        {
+                            /*if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, ));
+                            {
+                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision();
+                            }*/
+                            forceToApply = 0f;
+                            
+                        } else
+                        {
+                            forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                        }
                     }
                     else
                     {
-                        float forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
-                        otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
+                        forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     }
+
+                    otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
                 }
 
             }
@@ -92,6 +102,25 @@ namespace Game
             Debug.Log(force);
             return force;
         }
+
+        private float CalculateForceToApplyToOtherCarWhenFrontalCollision()
+        {
+            return 0f;
+        }
+
+        private void DecideIfWinsFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance)
+        {
+            
+        }
+
+        /*private float CalculateCurrentSimulationWeight(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float currentRbSpeed) // will return a "fake weight" considering the car weight, its endureance factor(current endurance / maxEndurance) and how important rhe endurance is
+        {
+            float simulatedWeightImportance = oCarWeight * oEnduranceImportance; // get how much weight is affected by the endurance
+            float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
+
+
+            return oCarWeight - (minSimulatedWeight + (min));
+        }*/
 
         public void LimitRigidBodySpeed(float maxSpeed)
         {

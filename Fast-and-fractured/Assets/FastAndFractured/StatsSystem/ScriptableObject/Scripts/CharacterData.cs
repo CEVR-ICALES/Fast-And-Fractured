@@ -53,6 +53,7 @@ namespace Game
         public float Damping;
         public float BaseForce;
         public float FrontalHitAnlgeThreshold;
+        public float EnduranceImportanceWhenColliding;
 
         [Header("RollPreventions")]
 
