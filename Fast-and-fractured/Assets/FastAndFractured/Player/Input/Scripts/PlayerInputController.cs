@@ -41,11 +41,11 @@ public class PlayerInputController : MonoBehaviour
     public bool IsShooting => _isShooting;
     private bool _isShooting;
 
-    public bool IsAimingPushShoot => _isAimingPushShoot;
-    private bool _isAimingPushShoot;
+    public bool IsPushShootMode => _isPushShootMode;
+    private bool _isPushShootMode;
 
-    public bool IsPushShootReleased => _isPushShootReleased;
-    private bool _isPushShootReleased;
+    public bool IsPushShooting => _isPushShooting;
+    private bool _isPushShooting;
 
     public bool IsUsingAbility => _isUsingAbility;
     private bool _isUsingAbility;
@@ -197,7 +197,28 @@ public class PlayerInputController : MonoBehaviour
                 break;
         }
     }
-    
+
+    public void BlockInput(InputBlockTypes inputBlockType, float timeBlocked)
+    {
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = true;
+                //TimerManager.Instance.StartTimer();
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = true;
+                //TimerManager.Instance.StartTimer();
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = true;
+                //TimerManager.Instance.StartTimer();
+                break;
+        }
+    }
+
     public void EnableInput(InputBlockTypes inputBlockType)
     {
         switch (inputBlockType)
@@ -218,14 +239,14 @@ public class PlayerInputController : MonoBehaviour
 
     private void OnStartAimingPushShoot()
     {
-        _isAimingPushShoot = true;
-        _isPushShootReleased = false;
+        _isPushShootMode = true;
+        _isPushShooting = false;
     }
 
     private void OnReleasedPushShoot()
     {
-        _isAimingPushShoot = false;
-        _isPushShootReleased = true;
+        _isPushShootMode = false;
+        _isPushShooting = true;
     }
 
     public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;
