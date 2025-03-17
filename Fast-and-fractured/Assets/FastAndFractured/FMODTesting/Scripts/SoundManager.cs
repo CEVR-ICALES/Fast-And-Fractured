@@ -9,6 +9,7 @@ namespace Game
     public class SoundManager : AbstractSingleton<SoundManager>
     {
         public StudioEventEmitter studioEmitter;
+        public GameObject cameraObject;
 
         private Dictionary<string, Queue<EventInstance>> _eventPool = new Dictionary<string, Queue<EventInstance>>();
         private Dictionary<string, EventInstance> _activeEvents = new Dictionary<string, EventInstance>();

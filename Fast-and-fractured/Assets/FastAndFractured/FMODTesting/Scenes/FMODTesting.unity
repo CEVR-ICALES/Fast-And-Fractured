@@ -20968,8 +20968,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 444015325}
-  - component: {fileID: 444015326}
-  - component: {fileID: 444015327}
+  - component: {fileID: 444015328}
+  - component: {fileID: 444015329}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -20986,13 +20986,27 @@ Transform:
   m_GameObject: {fileID: 444015324}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -35.5, y: 8.9, z: -16.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &444015326
+--- !u!114 &444015328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 444015324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f26019d0bd8986d409035f36735a6962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  studioEmitter: {fileID: 3623355403463596530}
+  cameraObject: {fileID: 1386190897}
+--- !u!114 &444015329
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -21007,40 +21021,9 @@ MonoBehaviour:
   LoadEvent: 1
   UnloadEvent: 2
   Banks:
-  - Master
+  - SFXBank
   CollisionTag: 
   PreloadSamples: 0
---- !u!114 &444015327
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 444015324}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CollisionTag: 
-  EventReference:
-    Guid:
-      Data1: -524896162
-      Data2: 1157054263
-      Data3: 1836290983
-      Data4: -610731094
-    Path: event:/GolfCartEngine
-  Event: 
-  EventPlayTrigger: 1
-  EventStopTrigger: 2
-  AllowFadeout: 1
-  TriggerOnce: 0
-  Preload: 0
-  NonRigidbodyVelocity: 0
-  Params: []
-  OverrideAttenuation: 0
-  OverrideMinDistance: 1
-  OverrideMaxDistance: 20
 --- !u!1001 &445180069
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -90132,7 +90115,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 531254896719203172, guid: 2110f540f04491843a4757b2add17ffd, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -90204,8 +90188,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7212860845051920763, guid: bcf25edf42293eb47806ee48e3f47b38, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3623355403463596530}
   m_SourcePrefab: {fileID: 100100000, guid: bcf25edf42293eb47806ee48e3f47b38, type: 3}
+--- !u!1 &3623355403463596521 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7212860845051920763, guid: bcf25edf42293eb47806ee48e3f47b38, type: 3}
+  m_PrefabInstance: {fileID: 3623355403463596520}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3623355403463596530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3623355403463596521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -524896162
+      Data2: 1157054263
+      Data3: 1836290983
+      Data4: -610731094
+    Path: event:/GolfCartEngine
+  Event: 
+  EventPlayTrigger: 1
+  EventStopTrigger: 2
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
