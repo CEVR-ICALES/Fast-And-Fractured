@@ -6,7 +6,6 @@ public class IsUniqueAbilityInputDecision : Decision
 {
     public override bool Decide(Controller controller)
     {
-        // to do
-        return true;
+        return controller.GetBehaviour<PlayerInputController>().IsUsingAbility;
     }
 }

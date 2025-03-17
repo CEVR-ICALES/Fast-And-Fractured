@@ -72,7 +72,7 @@ public class PhysicsBehaviour : MonoBehaviour
     {
         if(isCurrentlyDashing)
         {
-            _carMovementController.CancleDash();
+            _carMovementController.CancelDash();
         }
     }
 

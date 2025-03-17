@@ -9,11 +9,7 @@ public class CarMovementController : MonoBehaviour
     [Tooltip("Value on km/h, in code has to be / 3.6 to be converted to m/s")]
     public float maxRbVelocity;
 
-    private PlayerInputController _playerInputController;
-    private RollPrevention _rollPrevention;
-    private Rigidbody _carRb;
     private PhysicsBehaviour _physicsBehaviour;
-    private bool _usingController = false;
 
     [Header("Motor Settings")]
     public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
@@ -45,256 +41,143 @@ public class CarMovementController : MonoBehaviour
     [SerializeField] private float dashForce; //force for the dash with phyisics
     [SerializeField] private float maxRbVelocityWhileDashing; //limit the speed so the car doesnt accelerate infinetly
     [SerializeField] private float dashTimer; // how long the dash lasts
+    public bool IsDashing => _isDashing;
     private bool _isDashing = false;
 
-    private float targetSteerAngle;
-    private float currentSteerAngle;
-    private Vector2 steeringInput;
-    private float currentRbMaxVelocity;
+    private float _targetSteerAngle;
+    private float _currentSteerAngle;
+    private float _currentRbMaxVelocity;
+    public bool _isUsingController = false;
     const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
 
     private void Start()
     {
-        _playerInputController = GetComponent<PlayerInputController>();
-        _rollPrevention = GetComponent<RollPrevention>();
-        _carRb = GetComponent<Rigidbody>();
         _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-        currentRbMaxVelocity = maxRbVelocity;
+        _currentRbMaxVelocity = maxRbVelocity;
     }
     private void OnEnable()
     {
-        PlayerInputController.OnInputDeviceChanged += HandleInputDeviceChanged;
+        PlayerInputController.OnInputDeviceChanged += HandleInputChange; 
     }
 
     private void OnDisable()
     {
-        PlayerInputController.OnInputDeviceChanged -= HandleInputDeviceChanged;
+        PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
+    }
+
+    private void OnDestroy()
+    {
+        TimerManager.Instance.StopTimer("dash");
     }
 
     private void FixedUpdate()
     {
-        if (applyRollPrevention)
-        {
-            float steeringInputMagnitude = steeringInput.y;
-            _rollPrevention.ApplyRollPrevention(_carRb, steeringInputMagnitude);
-        }
 
         UpdateWheelVisuals();
-        _physicsBehaviour.LimitRigidBodySpeed(currentRbMaxVelocity);
+        _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
         _physicsBehaviour.LimitRigidBodyRotation(2f);
 
     }
 
     private void Update()
     {
-        if (!_usingController)
-        {
-            HandleInput();
-        }
-        else
-        {
-            HandleInputController();
-        }
-        ApplySteering();
         UpdateSpeedOverlay();
 
-        Debug.DrawRay(transform.position, _carRb.velocity, Color.red);
-        Debug.DrawRay(transform.position, transform.forward * currentSteerAngle, Color.blue);
+        Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
+        Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
     }
 
-    #region Input Handling
-
-    private void HandleInputDeviceChanged(INPUT_DEVICE_TYPE deviceType)
+    public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
     {
-        if (deviceType == INPUT_DEVICE_TYPE.KeyboardMouse)
+        Debug.Log(inputType);
+        if(inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
         {
-            _usingController = false;
-        }
-        else
+            _isUsingController = false;
+        } else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
         {
-            _usingController = true;
+            _isUsingController = true;
         }
     }
 
-    public void HandleInput()
-    {
-        steeringInput = _playerInputController.MoveInput;
-
-        if (!_isBraking)
-        {
-            float acceleration = steeringInput.y * motorTorque;
-            foreach (var wheel in wheels)
-            {
-                wheel.ApplyMotorTorque(acceleration);
-            }
-        }
-
-        if (steeringInput.y == 0)//should create a small threshold to consider if the button is being clicked or not
-        {
-            foreach (var wheel in wheels)
-            {
-                wheel.ApplyMotorTorque(0f);
-            }
-        }
-
-        if (_playerInputController.IsBraking)
-        {
-            if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking) //only works on controller, threshold that will determine how much you have to move the joystick to enter threshold instead of regular braking
-            {
-                if (!_isDrifting)
-                {
-                    StartDrift();
-                }
-                ApplyDrift();
-            }
-            else
-            {
-                if (_isDrifting)
-                {
-                    EndDrift();
-                }
-                ApplyBrake();
-            }
-            _isBraking = true;
-        }
-        else
-        {
-            if (_isDrifting)
-                EndDrift();
-            _isBraking = false;
-            foreach (var wheel in wheels)
-            {
-                wheel.ApplyBrakeTorque(0f); //update brake to 0, if not it will keep applying last brake value
-            }
-        }
-
-        if (_playerInputController.IsDashing)
-        {
-            if (usingPhysicsDash)
-            {
-                HandleDashWithPhysics();
-            }
-            else
-            {
-                HandleDahsWithoutPhysics();
-            }
-        }
-
-        targetSteerAngle = maxSteerAngle * steeringInput.x;
-    }
-
-    private void HandleInputController()
-    {
-        steeringInput = _playerInputController.MoveInput;
-
-        float acceleration = 0f;
-        if (_playerInputController.IsAccelerating)
-        {
-            acceleration = motorTorque;
-        }
-        else if (_playerInputController.IsReversing)
-        {
-            acceleration = -motorTorque;
-        }
-
-        foreach (var wheel in wheels)
-        {
-            wheel.ApplyMotorTorque(acceleration);
-        }
-
-        if (_playerInputController.IsBraking)
-        {
-            if (Mathf.Abs(steeringInput.x) > driftThreshold && usesCustomBraking)
-            {
-                if (!_isDrifting)
-                {
-                    StartDrift();
-                }
-                ApplyDrift();
-            }
-            else
-            {
-                if (_isDrifting)
-                {
-                    EndDrift();
-                }
-                ApplyBrake();
-            }
-            _isBraking = true;
-        }
-        else
-        {
-            if (_isDrifting)
-                EndDrift();
-            _isBraking = false;
-            foreach (var wheel in wheels)
-            {
-                wheel.ApplyBrakeTorque(0f);
-            }
-        }
-
-        if (_playerInputController.IsDashing)
-        {
-            if (usingPhysicsDash)
-            {
-                HandleDashWithPhysics();
-            }
-            else
-            {
-                HandleDahsWithoutPhysics();
-            }
-        }
-
-        targetSteerAngle = maxSteerAngle * steeringInput.x;
-    }
-
-
-
-    #endregion
 
     #region Refactorized Code
 
-    public void HandleSteeringInput(Vector2 steeringInput, bool isUsingController)
+    public void HandleSteeringInput(Vector2 steeringInput)
     {
-        if (!isUsingController && !_isBraking)
+        if (!_isUsingController && !_isBraking)
         {
             float acceleration = steeringInput.y * motorTorque;
             ApplyMotorTorque(acceleration);  
             // Possible set motor torque to 0 if no input (w,s)
         } 
-        targetSteerAngle = maxSteerAngle * steeringInput.x;
+        _targetSteerAngle = maxSteerAngle * steeringInput.x;
         ApplySteering();
     }
 
-    public void HandleAccelerateInput(/*float acceleration*/ bool isAccelerating)
+    public void HandleAccelerateInput(float acceleration)
     {
-        // To do (change the input to the given float)
-        if(isAccelerating)
+        if (_isUsingController && !_isBraking)
         {
-            ApplyMotorTorque(motorTorque);
+            ApplyMotorTorque(acceleration);
         }
     }
 
-    public void HandleDeaccelerateInput(/*float acceleration*/ bool isDeaccelerating)
+    public void HandleDeaccelerateInput(float acceleration)
     {
-        // To do (change the input to the given float)
-        if(isDeaccelerating)
+        if (_isUsingController && !_isBraking)
         {
-            ApplyMotorTorque(motorTorque);
+            ApplyMotorTorque(-acceleration);
         }
-        ApplyMotorTorque(-motorTorque);
     }
 
     private void ApplyMotorTorque(float acceleration)
     {
-        foreach (var wheel in wheels)
+        foreach (WheelController wheel in wheels)
         {
             wheel.ApplyMotorTorque(acceleration);
         }
     }
 
+    private void ApplyBrakeTorque(float brakeTorque)
+    {
+        foreach(WheelController wheel in wheels)
+        {
+            wheel.ApplyBrakeTorque(brakeTorque);
+        }
+    }
 
+    public void HandleBrakingInput(bool isBraking, Vector2 steeringInput)
+    {
+        _isBraking = isBraking;
+        if (_isBraking)
+        {
+            if (Mathf.Abs(steeringInput.x) > driftThreshold)
+            {
+                if (!_isDrifting)
+                {
+                    StartDrift(steeringInput.x);
+                }
+                ApplyDrift();
+            }
+            else
+            {
+                if (_isDrifting)
+                {
+                    EndDrift();
+                }
+                ApplyBrake();
+            }
+            _isBraking = true;
+        }
+        else
+        {
+            if (_isDrifting)
+                EndDrift();
+            _isBraking = false;
+            ApplyBrakeTorque(0f);
+        }
+    }
 
     #endregion
 
@@ -305,10 +188,7 @@ public class CarMovementController : MonoBehaviour
         switch (brakeMode)
         {
             case BRAKE_MODE.AllWheels:
-                foreach (var wheel in wheels)
-                {
-                    wheel.ApplyBrakeTorque(brakeTorque);
-                }
+                ApplyBrakeTorque(brakeTorque);
                 break;
 
             case BRAKE_MODE.FrontWheelsStronger:
@@ -320,18 +200,18 @@ public class CarMovementController : MonoBehaviour
         }
     }
 
-    private void StartDrift()
+    private void StartDrift(float steeringInput)
     {
         _isDrifting = true;
-        _driftDirection = Mathf.Sign(steeringInput.x); //only determine direcition + or -
-        _carRb.drag = 1f;
-        _initialSpeedWhenDrifting = _carRb.velocity.magnitude;
+        _driftDirection = Mathf.Sign(steeringInput); //only determine direcition + or -
+        _physicsBehaviour.Rb.drag = 1f;
+        _initialSpeedWhenDrifting = _physicsBehaviour.Rb.velocity.magnitude;
     }
 
     private void EndDrift()
     {
         _isDrifting = false;
-        _carRb.drag = 0.08f;
+        _physicsBehaviour.Rb.drag = 0.08f;
     }
 
     private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
@@ -362,25 +242,25 @@ public class CarMovementController : MonoBehaviour
 
         if (_isDrifting)
         {
-            currentSteerAngle = maxSteerAngle * _driftDirection; // lock steering angle to the drift direction
+            _currentSteerAngle = maxSteerAngle * _driftDirection; // lock steering angle to the drift direction
         }
         else
         {
-            currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetSteerAngle, Time.deltaTime * steeringSmoothness); //slight delelay so that wheel turn are not instanty
+            _currentSteerAngle = Mathf.Lerp(_currentSteerAngle, _targetSteerAngle, Time.deltaTime * steeringSmoothness); //slight delelay so that wheel turn are not instanty
         }
 
         switch (SteeringMode)
         {
             case STEERING_MODE.FrontWheel:
-                wheels[0].ApplySteering(currentSteerAngle);
-                wheels[1].ApplySteering(currentSteerAngle);
+                wheels[0].ApplySteering(_currentSteerAngle);
+                wheels[1].ApplySteering(_currentSteerAngle);
                 break;
 
             case STEERING_MODE.RearWheel:
-                float rearSteerAngle = currentSteerAngle;
-                if (_carRb.velocity.magnitude < 10f)
+                float rearSteerAngle = _currentSteerAngle;
+                if (_physicsBehaviour.Rb.velocity.magnitude < 10f)
                 {
-                    rearSteerAngle = -currentSteerAngle; //posite direciton wheen going at low speeds
+                    rearSteerAngle = -_currentSteerAngle; //posite direciton wheen going at low speeds
                 }
                 wheels[2].ApplySteering(rearSteerAngle);
                 wheels[3].ApplySteering(rearSteerAngle);
@@ -389,7 +269,7 @@ public class CarMovementController : MonoBehaviour
             case STEERING_MODE.AllWheel:
                 foreach (var wheel in wheels)
                 {
-                    wheel.ApplySteering(currentSteerAngle);
+                    wheel.ApplySteering(_currentSteerAngle);
                 }
                 break;
         }
@@ -398,33 +278,15 @@ public class CarMovementController : MonoBehaviour
     #endregion
 
     #region Dash
-    private void HandleDahsWithoutPhysics()
-    {
-        if (!_isDashing)
-        {
-            _playerInputController.DisableInput();
-            _isDashing = true;
-            Vector3 dashDirection = transform.forward;
-            _physicsBehaviour.isCurrentlyDashing = true;
-            _carRb.isKinematic = true;
-            TimerManager.Instance.StartTimer(dashTimer, () =>
-            {
-                FinishDash();
-            }, (progress) =>
-            {
-                transform.position += dashDirection * dashSpeed * Time.deltaTime;
-            }, "dash", false, true);
-        }
-    }
 
-    private void HandleDashWithPhysics()
+    public void HandleDashWithPhysics()
     {
         if (!_isDashing)
         {
             _isDashing = true;
-            Vector3 dashDirection = transform.forward.normalized;
-            currentRbMaxVelocity = maxRbVelocityWhileDashing;
             _physicsBehaviour.BlockRigidBodyRotations();
+            Vector3 dashDirection = transform.forward.normalized;
+            _currentRbMaxVelocity = maxRbVelocityWhileDashing;
             _physicsBehaviour.isCurrentlyDashing = true;
             TimerManager.Instance.StartTimer(dashTimer, () =>
             {
@@ -440,10 +302,10 @@ public class CarMovementController : MonoBehaviour
     {
         _isDashing = false;
         _physicsBehaviour.UnblockRigidBodyRotations();
-        currentRbMaxVelocity = maxRbVelocity;
+        _currentRbMaxVelocity = maxRbVelocity;
         _physicsBehaviour.isCurrentlyDashing = false;
     }
-    public void CancleDash()
+    public void CancelDash()
     {
         TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
         FinishDash();
@@ -470,7 +332,7 @@ public class CarMovementController : MonoBehaviour
 
     private void UpdateSpeedOverlay()
     {
-        float speedZ = Mathf.Abs(_carRb.velocity.magnitude);
+        float speedZ = Mathf.Abs(_physicsBehaviour.Rb.velocity.magnitude);
         float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
         speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
     }

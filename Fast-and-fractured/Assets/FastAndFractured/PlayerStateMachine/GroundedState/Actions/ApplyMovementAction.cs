@@ -10,7 +10,7 @@ public class ApplyMovementAction : Action
         CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
         Vector2 moveInput = playerInputController.MoveInput;
         
-        carMovementController.HandleSteeringInput(moveInput, playerInputController.IsUsingController);
+        carMovementController.HandleSteeringInput(moveInput); // maybe we will need to send the current input device when calling these functions
 
         carMovementController.HandleAccelerateInput(playerInputController.IsAccelerating);
         carMovementController.HandleDeaccelerateInput(playerInputController.IsReversing);

@@ -5,6 +5,13 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 
+public enum InputBlockTypes // this enum need to be added to the enum library
+{
+    ALL_MECHANICS,
+    MOVEMENT_MECHANICS,
+    SHOOTING_MECHANICS
+}
+
 public class PlayerInputController : MonoBehaviour
 {
     public static PlayerInputController Instance { get; private set; }
@@ -22,14 +29,14 @@ public class PlayerInputController : MonoBehaviour
     private Vector2 _cameraInput;
 
     // Action Flags with private backing fields
-    public bool IsAccelerating => _isAccelerating;
-    private bool _isAccelerating;
+    public float IsAccelerating => _isAccelerating;
+    private float _isAccelerating;
 
     public bool IsBraking => _isBraking;
     private bool _isBraking;
 
-    public bool IsReversing => _isReversing;
-    private bool _isReversing;
+    public float IsReversing => _isReversing;
+    private float _isReversing;
 
     public bool IsShooting => _isShooting;
     private bool _isShooting;
@@ -57,6 +64,15 @@ public class PlayerInputController : MonoBehaviour
 
     public bool IsUsingController => _isUsingController;
     private bool _isUsingController;
+
+    public bool IsAllMechanicsInputsBlocked => _isAllMechanicsInputsBlocked;
+    private bool _isAllMechanicsInputsBlocked;
+
+    public bool IsMovementInputsBlocked => _isMovementInputsBlocked;
+    private bool _isMovementInputsBlocked;
+
+    public bool IsShootingInputsBlocked => _isShootingInputsBlocked;
+    private bool _isShootingInputsBlocked;
 
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
@@ -87,11 +103,11 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
 
         // Action Inputs
-        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = true;
-        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = false;
+        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = 0f;
 
-        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = true;
-        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = false;
+        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = 0f;
 
         inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
         inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
@@ -162,6 +178,42 @@ public class PlayerInputController : MonoBehaviour
     public void EnableInput()
     {
         inputActions.Enable();
+    }
+
+    public void BlockInput(InputBlockTypes inputBlockType)
+    {
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = true;
+                break;
+        }
+    }
+    
+    public void EnableInput(InputBlockTypes inputBlockType)
+    {
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = false;
+                break;
+        }
     }
 
     private void OnStartAimingPushShoot()
