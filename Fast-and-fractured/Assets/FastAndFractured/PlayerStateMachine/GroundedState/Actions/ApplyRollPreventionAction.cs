@@ -1,11 +1,14 @@
-using StateMachine;
+using Game;
 using UnityEngine;
-[CreateAssetMenu(fileName = "ApplyRollPreventionAction", menuName = "PlayerStateMachine/Actions/ApplyRollPreventionAction")]
-
-public class ApplyRollPreventionAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "ApplyRollPreventionAction", menuName = "PlayerStateMachine/Actions/ApplyRollPreventionAction")]
+
+    public class ApplyRollPreventionAction : Action
     {
-        controller.GetBehaviour<RollPrevention>().ApplyRollPrevention(controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
+        public override void Act(Controller controller)
+        {
+            controller.GetBehaviour<RollPrevention>().ApplyRollPrevention(controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
+        }
     }
 }

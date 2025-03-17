@@ -33,7 +33,7 @@ namespace Game
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
-        public float MaxSpeed { get => currentMaxSpeed;}
+        public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
@@ -42,7 +42,21 @@ namespace Game
         public float Acceleration { get => currentAcceleration; }
         public float BrakeTorque { get => charDataSO.BrakeTorque; }
         public float Handling { get => charDataSO.Handling; }
-        public float DashDistance { get => charDataSO.DashDistance; }
+        public float HandlingSmothnees { get => charDataSO.HandlingSmoothnes; }
+        public float DashTime { get => charDataSO.DashTime; }
+        public float DriftThreshold { get => charDataSO.DriftThreshold; }
+        public float DriftingFactorToSpeed { get => charDataSO.DriftingFactorToSpeed; }
+        public float DriftingSmoothFactor { get => charDataSO.DriftingSmoothFactor; }
+        public float DriftForce { get => charDataSO.DriftForce; }
+
+        //Wheels
+        public float FrontWheelsStrenghtFactor { get => charDataSO.FrontWheelsStrenghtFactor; }
+        public float RearWheelsStrenghtFactor { get => charDataSO.RearWheelsStrenghtFactor; }
+
+        //Roll Prevention
+        public float BaseDownwardForce { get => charDataSO.BaseDownwardForce; }
+        public float TurningForceMultiplier { get => charDataSO.TurningForceMultiplier; }
+        public float SpeedForceMultiplier { get => charDataSO.SpeedForceMultiplier; }
 
         [Header("Damage")]
 
@@ -63,6 +77,8 @@ namespace Game
         public float Weight { get => charDataSO.Weight; }
         public float Traction { get => charDataSO.Traction; }
         public float Damping { get => charDataSO.Damping; }
+        public float BaseForce { get => charDataSO.BaseForce; }
+        public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
 
         [Header("COOLDOWNS")]
 
@@ -130,16 +146,16 @@ namespace Game
 
 
         #region Health
-        public void TakeEndurance(float sum,bool isProduct)
+        public void TakeEndurance(float substract,bool isProduct)
         {
-            if (sum > 0)
+            if (substract > 0)
             {
                 if (!charDataSO.Dead)
                 {
-                    if (ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
+                    if (ChoseCharToMod(STATS.ENDURANCE, -substract, isProduct))
                     {
                         //This is not the real dead condition, just an example. 
-                        if (currentEndurance >= charDataSO.MaxEndurance)
+                        if (currentEndurance <= charDataSO.MinEndurance)
                         {
                             Dead();
                         }
@@ -152,11 +168,11 @@ namespace Game
             else Debug.LogError("Value can't be negative or 0.");
         }
 
-        public void RecoverEndurance(float subtrahend, bool isProduct)
+        public void RecoverEndurance(float sum, bool isProduct)
         {
-            if (subtrahend > 0)
+            if (sum > 0)
             {
-                if (!ChoseCharToMod(STATS.ENDURANCE, -subtrahend, isProduct))
+                if (!ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");

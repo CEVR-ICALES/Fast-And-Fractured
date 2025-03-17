@@ -31,18 +31,28 @@ namespace Game
         [Tooltip("Max angle that the wheels can rotate")] public float Handling;
         [Tooltip("To avoid sudden changes at the handling")] public float HandlingSmoothnes;
         public float AerialRotationSpeed;
+        [Tooltip("Threshold to determine how much you have to move the joystick to start drifting")] public float DriftThreshold;
+        [Tooltip("Top speed at which the drift will Clamp to determine how effective the drift has to be, higher value means that a higher speed will be nedded for the drift to be really efective")]
+        public float DriftingFactorToSpeed;
+        public float DriftingSmoothFactor;
+        public float DriftForce;
+        public float DashTime;
+
+        [Header("Wheels")]
+        public float FrontWheelsStrenghtFactor;
+        public float RearWheelsStrenghtFactor;
 
         // enum STEERING_MODE
         // enum BRAKE
 
-        //Maybe
-        public float DashDistance;
 
 
         [Header("Physics")]
         public float Weight;
         public float Traction;
         public float Damping;
+        public float BaseForce;
+        public float FrontalHitAnlgeThreshold;
 
         [Header("RollPreventions")]
 
