@@ -58,6 +58,9 @@ namespace Game
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
         public float PushShootRange {get => charDataSO.PushShootRange;}
         public float PushShootAngle { get => charDataSO.PushShootAngle; }
+        public float PushShootGravityMultiplier { get=> charDataSO.PushShootGravityMultiplier;}
+        public int PushShootBounceNum {get=> charDataSO.PushShootBounceNum;}
+        public float PushShootBounceForce {get=> charDataSO.PushShootBounceForce;}
 
         //Physics
         public float Weight { get => charDataSO.Weight; }

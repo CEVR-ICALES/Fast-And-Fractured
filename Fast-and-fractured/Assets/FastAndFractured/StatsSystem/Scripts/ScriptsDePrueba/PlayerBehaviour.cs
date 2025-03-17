@@ -43,7 +43,7 @@ public class PlayerBehaviour : MonoBehaviour
             //}
             normalShootHandle.NormalShooting();
         }
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButtonUp(1))
         {
             pushShootHandle.PushShooting();
         }

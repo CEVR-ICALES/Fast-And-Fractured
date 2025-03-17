@@ -72,6 +72,10 @@ namespace Game
         public float PushShootSpeed;
         public float PushShootAngle;
         public float PushShootRange;
+        public float PushShootGravityMultiplier;
+        public int PushShootBounceNum;
+        public float PushShootBounceForce;
+
 
 
         [Header("COOLDOWNS")]

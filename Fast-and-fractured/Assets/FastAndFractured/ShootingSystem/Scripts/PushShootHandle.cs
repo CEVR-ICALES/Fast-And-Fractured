@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 namespace Game {
     public class PushShootHandle : ShootingHandle
     {
@@ -24,7 +26,10 @@ namespace Game {
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
-            PushBulletBehaviour pushBulletBehaviour = (PushBulletBehaviour)bulletBehaivour;
+            PushBulletBehaviour pushBulletBehaviour = (PushBulletBehaviour)bulletBehaivour; 
+            pushBulletBehaviour.CustomGravity = Physics.gravity * characterStatsController.PushShootGravityMultiplier;
+            pushBulletBehaviour.BouncingNum = characterStatsController.PushShootBounceNum;
+            pushBulletBehaviour.BouncingStrenght = characterStatsController.PushShootBounceForce;
         }
 
         public void PushShooting()
@@ -32,12 +37,15 @@ namespace Game {
             if (canShoot)
             {
                 float range = characterStatsController.PushShootRange;
-                // Calculate the velocity needed to throw the object to the target at specified angle.
                 float angle = characterStatsController.PushShootAngle;
-                float projectile_Velocity = range / (Mathf.Sin(2 * angle * Mathf.Deg2Rad) / -Physics.gravity.y);
-                // Extract the X  Y componenent of the velocity
-                float Vx = Mathf.Sqrt(projectile_Velocity) * Mathf.Cos(angle * Mathf.Deg2Rad);
-                float Vy = Mathf.Sqrt(projectile_Velocity) * Mathf.Sin(angle * Mathf.Deg2Rad);
+                // Aumentar la velocidad inicial
+                float projectile_Velocity = Mathf.Sqrt((range * Mathf.Abs(Physics.gravity.y* characterStatsController.PushShootGravityMultiplier)) / Mathf.Sin(2 * angle * Mathf.Deg2Rad));
+
+                // Calcular las componentes de la velocidad con el nuevo ángulo
+                float Vx = projectile_Velocity * Mathf.Cos(angle * Mathf.Deg2Rad);
+                float Vy = projectile_Velocity * Mathf.Sin(angle * Mathf.Deg2Rad);
+
+                // Vector de velocidad final
                 Vector3 velocity = transform.forward * Vx + transform.up * Vy;
                 ShootBullet(velocity, range);
                 canShoot = false;
