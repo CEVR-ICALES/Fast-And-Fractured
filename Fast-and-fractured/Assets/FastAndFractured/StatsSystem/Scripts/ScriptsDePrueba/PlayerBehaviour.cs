@@ -18,6 +18,7 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private Pooltype pooltype;
     [SerializeField] private NormalShootHandle normalShootHandle;
     [SerializeField] private PushShootHandle pushShootHandle;
+    [SerializeField] private Camera mainCamera;
 
     #region UnityEvents
     // Start is called before the first frame update
@@ -41,10 +42,12 @@ public class PlayerBehaviour : MonoBehaviour
             //    projectile.transform.position = transform.position;
             //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
             //}
+            normalShootHandle.CurrentShootDirection = mainCamera.transform.forward;
             normalShootHandle.NormalShooting();
         }
         if (Input.GetMouseButtonUp(1))
         {
+            pushShootHandle.CurrentShootDirection = mainCamera.transform.forward;
             pushShootHandle.PushShooting();
         }
         //if (Input.GetKey(KeyCode.LeftShift)){

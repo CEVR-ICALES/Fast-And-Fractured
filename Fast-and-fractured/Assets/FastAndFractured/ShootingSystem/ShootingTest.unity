@@ -649,7 +649,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &444392233
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1594,8 +1594,7 @@ MonoBehaviour:
   characterStatsController: {fileID: 1312719055}
   shootPoint: {fileID: 2144668315}
   pooltype: 3
-  cameraCenterOffSet: {x: 0, y: 0, z: 0}
-  timeReductionFactor: 1
+  directionCenterOffSet: {x: 0, y: 0, z: 0}
 --- !u!1001 &2085124482891733177
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1762,12 +1761,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 117669176812604351, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 384814941}
+    - target: {fileID: 117669176812604351, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
       propertyPath: pushShootHandle
       value: 
       objectReference: {fileID: 2144668316}
     - target: {fileID: 209909903970719724, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
       propertyPath: cameraCenterOffSet.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 209909903970719724, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
+      propertyPath: directionCenterOffSet.y
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 1136032595087298130, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1810,8 +1817,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2967575090505332539, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.71
+      objectReference: {fileID: 0}
+    - target: {fileID: 2967575090505332539, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.08
+      value: 0.11
       objectReference: {fileID: 0}
     - target: {fileID: 3604132122788126543, guid: 8ceee456d2241f042a6f5a84d3f1f0bf, type: 3}
       propertyPath: m_Name

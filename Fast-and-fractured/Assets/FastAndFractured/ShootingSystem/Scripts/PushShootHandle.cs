@@ -55,7 +55,7 @@ namespace Game {
                     "PushShootCooldown of " + characterStatsController.name,
                     false,
                     false
-                    ) ;
+                    );
             }
         }
     }
