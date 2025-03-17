@@ -10,12 +10,7 @@ namespace Game
         [Header("Identificators")]
         public int Id;
         public string Name;
-        public Pooltype PoolType;
-
-        [Header("Game Object")]
-
-        public GameObject Prefab;
-        //public GameObject Instance;
+         
 
         [Header("Health")]
         public float MaxEndurance;
@@ -27,14 +22,14 @@ namespace Game
 
         public float MaxSpeed;
         public float MaxSpeedDashing;
-        public float MaxSpeedMultiplier;
+        [Tooltip("Top speed permitted which vehicle can achieve")]  public float MaxSpeedMultiplier;
         public float MinSpeed;
         public float MaxAcceleration;
         public float MinAcceleration;
         public float Acceleration;
-        public float BrakeTorque;
-        public float Handling;
-        public float HandlingSmoothnes;
+        [Tooltip("Slowing force")] public float BrakeTorque;
+        [Tooltip("Max angle that the wheels can rotate")] public float Handling;
+        [Tooltip("To avoid sudden changes at the handling")] public float HandlingSmoothnes;
         public float AerialRotationSpeed;
 
         // enum STEERING_MODE
@@ -67,21 +62,20 @@ namespace Game
 
         [Header("ShootMovement")]
         public float NormalShootSpeed;
-        public float NormalShootCadenceTime;
+        [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime;
         public float NormalShootMaxRange;
         public float PushShootSpeed;
-        public float PushShootMaxRange;
+        public float PushShootAngle;
+        public float PushShootRange;
 
 
-        [Header("COOLDOWNS")]
+        [Header("Cooldowns")]
         
         public float DashCooldown;
         public float PushShootCooldown;
         public float UniqueAbilityCooldown;
         public float NormalShootOverHeat;
-        public float RecoveryCooldown;
-        public float CooldownSpeed;
-        public float MinCooldownSpeed;
-        public float MaxCooldownSpeed;
+        [Tooltip("When in flipped state, how much time is needed to return to normal state")] public float RecoveryCooldown;
+        [Tooltip("Time to go from top speed to max speed")] public float FromTopSpeedToMaxSpeed;
     }
 }

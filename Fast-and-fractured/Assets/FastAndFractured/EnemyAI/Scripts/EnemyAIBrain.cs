@@ -1,3 +1,4 @@
+using Game;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] NavMeshAgent agent;
     [SerializeField] float fleeMagnitude = 5f;
     [SerializeField] float sweepRadius = 20f;
+    [SerializeField] float shootingMarginErrorAngle = 2f;
     [SerializeField] LayerMask sweepLayerMask;
 
     private Vector3 _positionToDrive;
@@ -19,15 +21,22 @@ public class EnemyAIBrain : MonoBehaviour
     public GameObject Player { get => _player; set => _player = value; }
     public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
 
-
+    [SerializeField] NormalShootHandle normalShootHandle;
 
     private void Start()
     {
         // TODO change this to the correct way of referencing the player
         _player = GameObject.FindGameObjectWithTag("Player");
+
+        //Testing 
+        _targetToShoot = _player;
         if (!agent)
         {
             agent = GetComponent<NavMeshAgent>();
+        }
+        if (!normalShootHandle)
+        {
+            normalShootHandle = GetComponentInChildren<NormalShootHandle>();
         }
     }
 
@@ -49,9 +58,14 @@ public class EnemyAIBrain : MonoBehaviour
     #region CombatState
     public void NormalShoot()
     {
-        //TODO
-        //Shoot normal bullet to target
-        //if target and target is nearby and shoot is not overheated
+        Vector3 shootingDirection = CalcNormalizedTargetDirection();
+
+        //Add shooting error 
+        shootingDirection += new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
+            UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
+
+        normalShootHandle.CurrentShootDirection = shootingDirection;
+        normalShootHandle.NormalShooting();
     }
 
     public void PushShoot()
@@ -85,9 +99,7 @@ public class EnemyAIBrain : MonoBehaviour
     #region FleeState
     public void RunAwayFromCurrentTarget()
     {
-       Vector3 targetDirection = (transform.position - _targetToShoot.transform.position).normalized;
-
-        _positionToDrive = targetDirection * fleeMagnitude;
+        _positionToDrive = -CalcNormalizedTargetDirection() * fleeMagnitude;  
     }
    
     #endregion
@@ -109,10 +121,8 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     public bool IsShootOverheated()
-    {
-        //TODO
-        //Ask if shoot is overheated
-        return false;
+    { 
+        return normalShootHandle.IsOverHeat;
     }
     public bool IsUniqueAbilityFinished()
     {
@@ -143,6 +153,10 @@ public class EnemyAIBrain : MonoBehaviour
         _targetToShoot = target;
     }
 
-   
+    private Vector3 CalcNormalizedTargetDirection()
+    {
+        return (_targetToShoot.transform.position - transform.position).normalized;
+    }
+
     #endregion
 }

@@ -6,8 +6,6 @@ namespace Game
 {
     public class NormalBulletBehaivour : BulletBehaivour
     {
-        private Vector3 initPosition;
-
         private void Start()
         {
         }
@@ -17,13 +15,6 @@ namespace Game
             {
                 OnBulletEndTrayectory();
             }
-        }
-
-        public override void InitBulletTrayectory()
-        {
-            base.InitBulletTrayectory();
-            initPosition = transform.position;
-            rb.velocity = velocity;
         }
 
         protected override void OnTriggerEnter(Collider other)

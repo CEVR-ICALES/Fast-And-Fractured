@@ -56,7 +56,8 @@ namespace Game
         public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
         public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
-        public float PushShootMaxRange {get => charDataSO.PushShootMaxRange;}
+        public float PushShootRange {get => charDataSO.PushShootRange;}
+        public float PushShootAngle { get => charDataSO.PushShootAngle; }
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
@@ -65,9 +66,9 @@ namespace Game
 
         [Header("COOLDOWNS")]
 
-        [SerializeField] private float currentcooldownSpeed;
+        [SerializeField] private float currentCooldownSpeed;
 
-        public float CooldownSpeed { get => currentcooldownSpeed; }
+        public float CooldownSpeed { get => currentCooldownSpeed; }
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
@@ -124,7 +125,7 @@ namespace Game
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootDMG = charDataSO.PushShootDMG;
             //Cooldowns
-            currentcooldownSpeed = charDataSO.CooldownSpeed;
+            currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
 
 
@@ -226,9 +227,6 @@ namespace Game
                 case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     return true;
-                case STATS.COOLDOWN_SPEED:
-                    currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed, isProduct);
-                    return true;
                 case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
                     return true;
@@ -271,19 +269,24 @@ namespace Game
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
             }
-            StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            //StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            RemoveStatModificationByTimer(previousValue, currentValue, type, previousValue < currentValue, time);
         }
 
         //Coroutine is for try propuses. It will be susbtitute for a Timer. 
-        private IEnumerator WaitTimeToModStat(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
+        private void RemoveStatModificationByTimer(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
         {
             float mod;
             if (iscurrentBigger)
                 mod = -(currentValue - previousValue);
             else
                 mod = previousValue - currentValue;
-            yield return new WaitForSeconds(time);
-            ChoseCharToMod(stat, mod, false);
+
+            TimerManager.Instance.StartTimer(time, () =>
+            {
+                ChoseCharToMod(stat, mod, false);
+            },
+            null, "Temporal " + stat + " Mod", false, false);
         }
         #endregion  
 
@@ -302,7 +305,7 @@ namespace Game
                 case STATS.PUSH_DAMAGE:
                     return currentPushShootDMG;
                 case STATS.COOLDOWN_SPEED:
-                    return currentcooldownSpeed;
+                    return currentCooldownSpeed;
             }
             return _errorGetStatFloat;
         }

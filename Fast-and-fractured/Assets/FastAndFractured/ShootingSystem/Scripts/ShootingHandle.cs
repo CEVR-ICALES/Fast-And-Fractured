@@ -4,26 +4,25 @@ using UnityEngine;
 namespace Game {
     public abstract class ShootingHandle : MonoBehaviour
     {
-        [SerializeField]
-        protected StatsController characterStatsController;
+        public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
+        protected Vector3 currentShootDirection;
+       [SerializeField] protected StatsController characterStatsController;
         [SerializeField]
         protected Transform shootPoint;
         [SerializeField]
         protected Pooltype pooltype;
-        protected Camera mainCamera;
         private Vector3 _velocity;
         private float _range;
         private float _damage;
         [SerializeField]
-        protected Vector3 cameraCenterOffSet;
-    
-    protected virtual void CustomStart()
+        protected Vector3 directionOffset;
+        protected bool canShoot = true;
+
+        protected virtual void CustomStart()
         {
             //Provisional, this will be replace
             if (characterStatsController == null)
                 Debug.LogError("Character " + gameObject.name + " needs a StatsController for  " + name + " Script");
-            //Provisional Camera
-            mainCamera = Camera.main;
         }
 
         protected void ShootBullet(Vector3 velocity, float range)
