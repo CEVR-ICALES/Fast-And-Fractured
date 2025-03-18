@@ -15,16 +15,19 @@ public class PhysicsBehaviour : MonoBehaviour
 
     public bool isCurrentlyDashing = false;
     private CarMovementController _carMovementController;
-    public Rigidbody Rb { get => _rb; }
+    public Rigidbody Rb { get => _rb; set => _rb = value; }
     private Rigidbody _rb;
 
     const float SPEED_TO_METER_PER_SECOND = 3.6f;
     private float _weight;
 
 
-    private void Awake()
+    private void Start()
     {
-        _rb = GetComponent<Rigidbody>();   
+        if (!_rb)
+        {
+            _rb = GetComponent<Rigidbody>();   
+        }
         _carMovementController = GetComponent<CarMovementController>();
         _weight = _rb.mass;
     }
