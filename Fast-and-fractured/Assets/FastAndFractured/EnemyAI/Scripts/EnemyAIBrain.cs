@@ -9,10 +9,12 @@ public class EnemyAIBrain : MonoBehaviour
 {
     //Setted in inspector
     [SerializeField] NavMeshAgent agent;
+    NavMeshPath path;
     [SerializeField] float fleeMagnitude = 5f;
     [SerializeField] float sweepRadius = 20f;
     [SerializeField] float shootingMarginErrorAngle = 2f;
     [SerializeField] LayerMask sweepLayerMask;
+
 
     private Vector3 _positionToDrive;
     private GameObject _player;
@@ -22,8 +24,21 @@ public class EnemyAIBrain : MonoBehaviour
     public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
 
     [SerializeField] NormalShootHandle normalShootHandle;
+    [SerializeField] CarMovementController carMovementController;
+    [SerializeField] PhysicsBehaviour physicsBehaviour;
+    [SerializeField] StatsController statsController;
 
-    private void Start()
+    public enum PathMode
+    {
+        SIMPLE,
+        ADVANCED
+    }
+
+    PathMode pathMode = PathMode.SIMPLE;
+
+    const float MAX_ANGLE_DIRECTION = 90f;
+    const float FRONT_ANGLE = 12f;
+    private void Awake()
     {
         // TODO change this to the correct way of referencing the player
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -38,12 +53,58 @@ public class EnemyAIBrain : MonoBehaviour
         {
             normalShootHandle = GetComponentInChildren<NormalShootHandle>();
         }
+        if (!carMovementController)
+        {
+            carMovementController = GetComponentInChildren<CarMovementController>();
+        }
+        if (!physicsBehaviour)
+        {
+            physicsBehaviour = GetComponentInChildren<PhysicsBehaviour>();
+        }
+        if (!statsController)
+        {
+            statsController = GetComponentInChildren<StatsController>();
+        }
+        physicsBehaviour.Rb = GetComponent<Rigidbody>();
+        path = new NavMeshPath();
+
+    }
+
+    public float GetHealth()
+    {
+        return statsController.Endurance;
     }
 
     #region Actions
+
+    #region Common 
+    public void GoToPosition()
+    {
+  
+        //If it's negative, go left
+        //If it's positive, go right
+        float angle = GetAngleDirection();
+
+        //Left/Right
+        float inputX = Mathf.Min(angle / MAX_ANGLE_DIRECTION, 1f);
+        //Forward/Backward
+        float inputY = 1f;
+        //Debug.Log("DIRECTION:" + direction);
+        //Debug.Log("XXXXXXXXXX:" + inputX);
+        //Debug.Log("YYYYYYYYYY:" + inputY);
+
+        Vector2 input = new Vector2(inputX, inputY);
+
+
+        carMovementController.HandleSteeringInput(input);
+    }
+
+    #endregion
+
     #region SearchState
 
-    public void GoToPosition()
+    [Obsolete("We don't use setDestination anymore")]
+    public void GoToPositionDeprecated()
     {
         agent.SetDestination(_positionToDrive);
     }
@@ -86,14 +147,9 @@ public class EnemyAIBrain : MonoBehaviour
     public void Dash()
     {
         //TODO
-        //Dash
+        carMovementController.HandleDashWithPhysics();
     }
-    public bool IsDashAvailable()
-    {
-        //TODO
-        //Is dash off cooldown
-        return false;
-    }
+   
     #endregion
 
     #region FleeState
@@ -144,6 +200,20 @@ public class EnemyAIBrain : MonoBehaviour
         //Has dash finished
         return false;
     }
+
+    public bool IsInValidRange(float distance)
+    {
+        float d = Vector3.Distance(transform.position, _positionToDrive);
+        bool b = distance > Vector3.Distance(transform.position, _positionToDrive);
+        return distance > Vector3.Distance(transform.position, _positionToDrive);
+    }
+
+    public bool IsInFront()
+    {
+        float angle = GetAngleDirection();
+        bool b = (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
+        return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
+    }
     #endregion
 
     #region Helpers
@@ -151,11 +221,38 @@ public class EnemyAIBrain : MonoBehaviour
     private void AssignTarget(GameObject target)
     {
         _targetToShoot = target;
+        _positionToDrive = _targetToShoot.transform.position;
     }
 
     private Vector3 CalcNormalizedTargetDirection()
     {
         return (_targetToShoot.transform.position - transform.position).normalized;
+    }
+
+    private float GetAngleDirection()
+    {
+        Vector3 direction;
+        switch (pathMode)
+        {
+            default:
+            case PathMode.SIMPLE:
+                direction = CalcNormalizedTargetDirection();
+                break;
+            case PathMode.ADVANCED:
+                NavMesh.SamplePosition(transform.position, out NavMeshHit hitA, 10f, NavMesh.AllAreas);
+                NavMesh.SamplePosition(_positionToDrive, out NavMeshHit hitB, 10f, NavMesh.AllAreas);
+
+                NavMesh.CalculatePath(hitA.position, hitB.position, NavMesh.AllAreas, path);
+                for (int i = 0; i < path.corners.Length - 1; i++)
+                    Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.yellow);
+
+                direction = path.corners[0] - transform.position;
+                break;
+        }
+
+        //If it's negative, go left
+        //If it's positive, go right
+        return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
     }
 
     #endregion
