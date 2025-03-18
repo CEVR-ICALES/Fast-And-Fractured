@@ -25,11 +25,7 @@ namespace Game {
             }
         }
 
-        protected override void OnTriggerEnter(Collider other)
-        {
-        }
-
-        private void OnCollisionEnter(Collision collision)
+        protected override void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.layer != characterLayers)
             {

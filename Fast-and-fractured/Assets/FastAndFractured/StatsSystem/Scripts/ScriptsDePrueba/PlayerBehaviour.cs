@@ -43,7 +43,7 @@ public class PlayerBehaviour : MonoBehaviour
             //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
             //}
             normalShootHandle.CurrentShootDirection = mainCamera.transform.forward;
-            normalShootHandle.NormalShooting();
+            normalShootHandle.NormalShooting(transform.parent.GetComponent<Collider>());
         }
         if (Input.GetMouseButtonUp(1))
         {

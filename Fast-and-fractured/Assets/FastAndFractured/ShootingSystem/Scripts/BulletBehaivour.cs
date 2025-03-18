@@ -21,10 +21,12 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     //protected float pushStrengh;
     // Update is called once per frame
     protected abstract void FixedUpdate();
-
-    public virtual void InitBulletTrayectory()
+    protected virtual void Start()
     {
         rb = GetComponent<Rigidbody>();
+    }
+    public virtual void InitBulletTrayectory()
+    {
         initPosition = transform.position;
         rb.velocity = velocity;
     }
@@ -34,5 +36,13 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
         ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
     }
 
-    protected abstract void OnTriggerEnter(Collider other);
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+
+    }
+
+    protected virtual void OnCollisionEnter(Collision collision)
+    {
+        
+    }
 }
