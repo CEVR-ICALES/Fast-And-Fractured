@@ -313,7 +313,7 @@ namespace Game {
         }
         public void CancelDash()
         {
-            TimerManager.Instance.StopTimer("dash"); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
+            TimerManager.Instance.StopTimer(gameObject.name); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
             FinishDash();
         }
 

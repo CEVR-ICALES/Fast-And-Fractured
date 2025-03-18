@@ -8,6 +8,7 @@ namespace Game
     {
         [SerializeField] private float isMovingThreshold;
         public bool IsCurrentlyDashing = false;
+        public AnimationCurve pushingForceEvaluate;
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
         const float SPEED_TO_METER_PER_SECOND = 3.6f;
@@ -69,7 +70,7 @@ namespace Game
                         forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     }
 
-                    otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
+                    otherComponenPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up  * 0.3f).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
                     otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
                 }
 
@@ -107,6 +108,7 @@ namespace Game
             {
                 oCarEnduranceFactor = 0.95f; // provisional
             }
+
             float force = statsController.BaseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20); // this 20 value should become a variable as to how important the weight is going to be, the bigger the number the less important the weight
             Debug.Log(force);
             return force;
