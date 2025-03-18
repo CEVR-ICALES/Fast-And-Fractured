@@ -8,13 +8,6 @@ namespace Game
     {
         public Collider IgnoreCollider { set => _ignoreCollider = value; }
         private Collider _ignoreCollider;
-        private Collider ownCollider;
-
-        public override void InitializeValues()
-        {
-            base.InitializeValues();
-            ownCollider = GetComponent<Collider>();
-        }
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
@@ -31,7 +24,7 @@ namespace Game
         {
             if ((transform.position - initPosition).magnitude >= range)
             {
-                OnBulletEndTrayectory();
+                OnBulletEndTrayectory(null);
             }
         }
 
@@ -41,7 +34,7 @@ namespace Game
                 if (other.TryGetComponent<StatsController>(out var statsController))
                 {
                     statsController.TakeEndurance(damage, false);
-                    OnBulletEndTrayectory();
+                    OnBulletEndTrayectory(null);
                 }
         }
     }
