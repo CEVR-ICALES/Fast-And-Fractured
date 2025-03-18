@@ -1,8 +1,8 @@
 using StateMachine;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsPushShootInputDecision), menuName = "PlayerShootingStateMachine/Decisions/IsPushShootInputDecision")]
-public class IsPushShootInputDecision : Decision
+[CreateAssetMenu(fileName = nameof(IsPushShootModeDecision), menuName = "PlayerShootingStateMachine/Decisions/IsPushShootModeDecision")]
+public class IsPushShootModeDecision : Decision
 {
     public override bool Decide(Controller controller)
     {

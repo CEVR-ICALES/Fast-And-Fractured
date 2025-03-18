@@ -41,7 +41,7 @@ public class PlayerInputController : MonoBehaviour
     public bool IsShooting => _isShooting;
     private bool _isShooting;
 
-    public bool IsPushShootMode => _isPushShootMode;
+    public bool IsPushShootMode { get { return _isPushShootMode; } set { _isPushShootMode = value; } }
     private bool _isPushShootMode;
 
     public bool IsPushShooting => _isPushShooting;
