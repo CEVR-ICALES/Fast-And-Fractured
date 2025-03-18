@@ -11,6 +11,9 @@ namespace Game
         public StudioEventEmitter studioEmitter;
         public GameObject cameraObject;
 
+        [Range(0f, 1f)]
+        public float masterVolume = 1f;
+
         private Dictionary<string, Queue<EventInstance>> _eventPool = new Dictionary<string, Queue<EventInstance>>();
         private Dictionary<string, EventInstance> _activeEvents = new Dictionary<string, EventInstance>();
 
@@ -19,6 +22,11 @@ namespace Game
             base.Awake();
 
             DontDestroyOnLoad(gameObject);
+        }
+
+        private void Start()
+        {
+            SetVolume("Volume", masterVolume);
         }
 
         #region Event Pooling Methodss

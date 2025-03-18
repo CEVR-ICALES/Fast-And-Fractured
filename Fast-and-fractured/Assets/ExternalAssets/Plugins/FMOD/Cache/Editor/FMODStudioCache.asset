@@ -1,25 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6699046062579904751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/SFXBank.bank
-  m_EditorClassIdentifier: 
-  Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/SFXBank.bank
-  Name: SFXBank
-  StudioPath: bank:/SFXBank
-  lastModified: 638778370519070056
-  FileSizes:
-  - Name: Desktop
-    Value: 2064288
-  Exists: 1
 --- !u!114 &-4803690650134879307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39,15 +19,15 @@ MonoBehaviour:
     Data3: 1836290983
     Data4: -610731094
   Banks:
+  - {fileID: -349671237487772621}
   - {fileID: 2727504660809320080}
-  - {fileID: -6699046062579904751}
   IsStream: 1
   Is3D: 1
-  IsOneShot: 1
+  IsOneShot: 0
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 140914
+  Length: 140000
 --- !u!114 &-4521841262526498116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,10 +63,30 @@ MonoBehaviour:
   Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 638778370518840643
+  lastModified: 638779260100271625
   FileSizes:
   - Name: Desktop
-    Value: 814
+    Value: 878
+  Exists: 1
+--- !u!114 &-349671237487772621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/CarRelatedSoundsBank.bank
+  m_EditorClassIdentifier: 
+  Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/CarRelatedSoundsBank.bank
+  Name: CarRelatedSoundsBank
+  StudioPath: bank:/CarRelatedSoundsBank
+  lastModified: 638779260101539691
+  FileSizes:
+  - Name: Desktop
+    Value: 2084480
   Exists: 1
 --- !u!114 &11400000
 MonoBehaviour:
@@ -103,15 +103,16 @@ MonoBehaviour:
   EditorBanks:
   - {fileID: -4301353942344211320}
   - {fileID: 2727504660809320080}
-  - {fileID: -6699046062579904751}
+  - {fileID: -349671237487772621}
   EditorEvents:
   - {fileID: -4803690650134879307}
+  - {fileID: 7346192620935083472}
   EditorParameters: []
   MasterBanks:
   - {fileID: 2727504660809320080}
   StringsBanks:
   - {fileID: -4301353942344211320}
-  cacheTime: 638778370519070056
+  cacheTime: 638779260101539691
   cacheVersion: 131623
 --- !u!114 &776819482619325684
 MonoBehaviour:
@@ -176,10 +177,10 @@ MonoBehaviour:
   Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 638778370518820682
+  lastModified: 638779260100261643
   FileSizes:
   - Name: Desktop
-    Value: 2064800
+    Value: 2065088
   Exists: 1
 --- !u!114 &4987906167015319541
 MonoBehaviour:
@@ -201,3 +202,30 @@ MonoBehaviour:
   - Name: Desktop
     Value: 2064288
   Exists: 1
+--- !u!114 &7346192620935083472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SoftCrash
+  m_EditorClassIdentifier: 
+  Path: event:/SoftCrash
+  Guid:
+    Data1: 1994126807
+    Data2: 1240602782
+    Data3: 980190859
+    Data4: -2084362241
+  Banks:
+  - {fileID: -349671237487772621}
+  IsStream: 0
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1765

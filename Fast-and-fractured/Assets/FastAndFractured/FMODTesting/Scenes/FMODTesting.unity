@@ -20968,8 +20968,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 444015325}
-  - component: {fileID: 444015328}
   - component: {fileID: 444015329}
+  - component: {fileID: 444015328}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -21006,6 +21006,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   studioEmitter: {fileID: 3623355403463596530}
   cameraObject: {fileID: 1386190897}
+  masterVolume: 1
 --- !u!114 &444015329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21021,7 +21022,7 @@ MonoBehaviour:
   LoadEvent: 1
   UnloadEvent: 2
   Banks:
-  - SFXBank
+  - CarRelatedSoundsBank
   CollisionTag: 
   PreloadSamples: 0
 --- !u!1001 &445180069
