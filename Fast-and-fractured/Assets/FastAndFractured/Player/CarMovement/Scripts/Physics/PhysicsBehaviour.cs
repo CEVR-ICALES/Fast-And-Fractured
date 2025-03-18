@@ -49,11 +49,13 @@ namespace Game
                     {
                         if(otherComponenPhysicsBehaviours.isCurrentlyDashing)
                         {
-                            /*if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, ));
+                            if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponenPhysicsBehaviours.Rb.velocity.magnitude))
                             {
-                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision();
-                            }*/
-                            forceToApply = 0f;
+                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight);
+                            } else
+                            {
+                                forceToApply = 0f;
+                            }
                             
                         } else
                         {
@@ -103,24 +105,39 @@ namespace Game
             return force;
         }
 
-        private float CalculateForceToApplyToOtherCarWhenFrontalCollision()
+        private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight)
         {
-            return 0f;
+            float baseFrontalForce = statsController.BaseForce * 2f; // double the base force for frontal collisions
+
+            // factor in the other car's endurance and weight
+            float enduranceWeightFactor = (1 - oCarEnduranceFactor) * (oCarWeight / 20f); // if we end up using this formula this 20 sholb become a "weightImportanceFactor varialbe in the statsController o physicsBehaviour"
+
+            // factor in the speed of the other car (higher speed = more force)
+            float speedFactor = _rb.velocity.magnitude / SPEED_TO_METER_PER_SECOND;
+
+            float force = baseFrontalForce * enduranceWeightFactor * speedFactor;
+
+            Debug.Log("Frontal collision force: " + force);
+            return force;
         }
 
-        private void DecideIfWinsFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance)
+        private bool DecideIfWinsFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float oCurrentRbSpeed)
         {
-            
+            if(CalculateCurrentSimulationWeight((statsController.MaxEndurance / statsController.Endurance), statsController.Weight, statsController.EnduranceImportanceWhenColliding, _rb.velocity.magnitude) > CalculateCurrentSimulationWeight(oCarEnduranceFactor, oCarWeight, oEnduranceImportance, oCurrentRbSpeed))
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
         }
 
-        /*private float CalculateCurrentSimulationWeight(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float currentRbSpeed) // will return a "fake weight" considering the car weight, its endureance factor(current endurance / maxEndurance) and how important rhe endurance is
+        private float CalculateCurrentSimulationWeight(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float currentRbSpeed) // will return a "fake weight" considering the car weight, its endureance factor(current endurance / maxEndurance) and how important rhe endurance is
         {
             float simulatedWeightImportance = oCarWeight * oEnduranceImportance; // get how much weight is affected by the endurance
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
-
-
-            return oCarWeight - (minSimulatedWeight + (min));
-        }*/
+            return finalSimulatedWeight + currentRbSpeed;
+        }
 
         public void LimitRigidBodySpeed(float maxSpeed)
         {

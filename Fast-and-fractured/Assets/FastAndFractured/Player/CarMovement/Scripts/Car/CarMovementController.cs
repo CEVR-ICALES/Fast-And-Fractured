@@ -41,7 +41,7 @@ namespace Game {
         private void Start()
         {
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            _currentRbMaxVelocity = statsController.MaxSpeed;
+            Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
         }
         private void OnEnable()
         {
@@ -70,10 +70,16 @@ namespace Game {
         private void Update()
         {
             UpdateSpeedOverlay();
-
+            Debug.Log(_currentRbMaxVelocity);
             Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
             Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
         }
+
+        private void SetMaxRbSpeedDelayed()
+        {
+            _currentRbMaxVelocity = statsController.MaxSpeed;
+        }
+
 
         public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
         {
@@ -323,7 +329,8 @@ namespace Game {
         {
             float speedZ = Mathf.Abs(_physicsBehaviour.Rb.velocity.magnitude);
             float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-            speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
+            if(speedOverlay != null)
+                speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
         }
     }
 }
