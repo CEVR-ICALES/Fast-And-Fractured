@@ -9,7 +9,8 @@ public class EnemyAIBrain : MonoBehaviour
 {
     //Setted in inspector
     [SerializeField] NavMeshAgent agent;
-    NavMeshPath path;
+    NavMeshPath _currentPath;
+    Vector3[] _previousPath;
     [SerializeField] float fleeMagnitude = 5f;
     [SerializeField] float sweepRadius = 20f;
     [SerializeField] float shootingMarginErrorAngle = 2f;
@@ -19,6 +20,9 @@ public class EnemyAIBrain : MonoBehaviour
     private Vector3 _positionToDrive;
     private GameObject _player;
     private GameObject _targetToShoot;
+    //path index starts at 1 because 0 is their actual position
+    private int _pathIndex = START_CORNER_INDEX;
+    private float _minDistanceUntilNextCorner = 3f;
     public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
     public GameObject Player { get => _player; set => _player = value; }
     public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
@@ -34,10 +38,11 @@ public class EnemyAIBrain : MonoBehaviour
         ADVANCED
     }
 
-    PathMode pathMode = PathMode.SIMPLE;
+    PathMode pathMode = PathMode.ADVANCED;
 
     const float MAX_ANGLE_DIRECTION = 90f;
     const float FRONT_ANGLE = 12f;
+    const int START_CORNER_INDEX = 1;
     private void Awake()
     {
         // TODO change this to the correct way of referencing the player
@@ -47,7 +52,7 @@ public class EnemyAIBrain : MonoBehaviour
         _targetToShoot = _player;
         if (!agent)
         {
-            agent = GetComponent<NavMeshAgent>();
+            agent = GetComponentInChildren<NavMeshAgent>();
         }
         if (!normalShootHandle)
         {
@@ -66,8 +71,10 @@ public class EnemyAIBrain : MonoBehaviour
             statsController = GetComponentInChildren<StatsController>();
         }
         physicsBehaviour.Rb = GetComponent<Rigidbody>();
-        path = new NavMeshPath();
-
+        _currentPath = new NavMeshPath();
+        _previousPath = new Vector3[0];
+        //agent.updatePosition = false;
+        //agent.updateRotation = false;
     }
 
     public float GetHealth()
@@ -230,7 +237,7 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     private float GetAngleDirection()
-    {
+    { 
         Vector3 direction;
         switch (pathMode)
         {
@@ -239,21 +246,52 @@ public class EnemyAIBrain : MonoBehaviour
                 direction = CalcNormalizedTargetDirection();
                 break;
             case PathMode.ADVANCED:
-                NavMesh.SamplePosition(transform.position, out NavMeshHit hitA, 10f, NavMesh.AllAreas);
-                NavMesh.SamplePosition(_positionToDrive, out NavMeshHit hitB, 10f, NavMesh.AllAreas);
+                if (agent.CalculatePath(_positionToDrive, _currentPath))
+                {
+                    if (_previousPath.Length != _currentPath.corners.Length)
+                    {
+                        ResetIndexPath();
+                    }
+                    
+                    for (int i = 0; i < _currentPath.corners.Length - 1; i++)
+                        Debug.DrawLine(_currentPath.corners[i], _currentPath.corners[i + 1], Color.yellow);
 
-                NavMesh.CalculatePath(hitA.position, hitB.position, NavMesh.AllAreas, path);
-                for (int i = 0; i < path.corners.Length - 1; i++)
-                    Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.yellow);
-
-                direction = path.corners[0] - transform.position;
+                    _positionToDrive = GetActivePathPoint();
+                    CheckIfGoToNextPathPoint();
+                }
+                else
+                {
+                    Debug.LogError("No path to follow" + _currentPath.ToString());
+                };
+          
                 break;
         }
+        direction = GetActivePathPoint() - transform.position;
 
         //If it's negative, go left
         //If it's positive, go right
         return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
     }
+    Vector3 GetActivePathPoint()
+    {
+        if (_currentPath.corners.Length > 0)
+            return _currentPath.corners[_pathIndex];
+        else return Vector3.zero;
+    }
 
+    void CheckIfGoToNextPathPoint()
+    {
+        if (Vector3.Distance(transform.position, _currentPath.corners[_pathIndex]) < _minDistanceUntilNextCorner && 
+            (_pathIndex +1) < _currentPath.corners.Length )
+        {
+            _pathIndex++;
+        }
+    }
+
+    void ResetIndexPath()
+    {
+        _pathIndex = START_CORNER_INDEX;
+        _previousPath = _currentPath.corners;
+    }
     #endregion
 }
