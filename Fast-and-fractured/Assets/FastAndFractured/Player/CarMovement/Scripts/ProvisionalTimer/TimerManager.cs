@@ -118,10 +118,9 @@ public class TimerManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (var timer in activeTimers)
-        {
-            RemoveTimer(timer);
-        }
+        if (activeTimers == null) return;
+        activeTimers.Clear();
+        accessibleTimers.Clear();
 
     }
 }
