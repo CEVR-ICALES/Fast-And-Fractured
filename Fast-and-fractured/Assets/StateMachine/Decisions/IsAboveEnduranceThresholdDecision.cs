@@ -11,20 +11,19 @@ public class IsAboveEnduranceThresholdDecision : Decision
     [SerializeField] bool selfEndurance = true;
     public override bool Decide(Controller controller)
     {
-        float health = 0;
+        float health = 100;
         if (selfEndurance)
         {
-            //TODO
-            //get health of self
+            EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
+            health = brain.GetHealth();
         } else
         {
-            EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
             //TODO
-            //get target health from target
+            //get target endurance
         }
         
 
-        return health >= enduranceThreshold;
+        return health <= enduranceThreshold;
     }
 
     
