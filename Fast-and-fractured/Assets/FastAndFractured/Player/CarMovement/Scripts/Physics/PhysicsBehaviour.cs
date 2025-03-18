@@ -8,6 +8,8 @@ namespace Game
     {
         [SerializeField] private float isMovingThreshold;
         public bool IsCurrentlyDashing = false;
+        public bool HasBeenPushed { get => _hasBeenPushed; }
+        private bool _hasBeenPushed = false;
         const float SPEED_TO_METER_PER_SECOND = 3.6f;
 
         [Header("Reference")]
@@ -54,7 +56,7 @@ namespace Game
                                 forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight);
                             } else
                             {
-                                forceToApply = 0f;
+                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own)
                             }
                             
                         } else
@@ -68,6 +70,7 @@ namespace Game
                     }
 
                     otherComponenPhysicsBehaviours.ApplyForce(-collisionNormal, collisionPos, forceToApply);
+                    otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
                 }
 
             }
@@ -100,6 +103,10 @@ namespace Game
 
         private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
         {
+            if(oCarEnduranceFactor == 0)
+            {
+                oCarEnduranceFactor = 0.95f; // provisional
+            }
             float force = statsController.BaseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20); // this 20 value should become a variable as to how important the weight is going to be, the bigger the number the less important the weight
             Debug.Log(force);
             return force;
@@ -107,6 +114,10 @@ namespace Game
 
         private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight)
         {
+            if(oCarEnduranceFactor == 0)
+            {
+                oCarEnduranceFactor = 0.95f;
+            }
             float baseFrontalForce = statsController.BaseForce * 2f; // double the base force for frontal collisions
 
             // factor in the other car's endurance and weight
@@ -137,6 +148,17 @@ namespace Game
             float simulatedWeightImportance = oCarWeight * oEnduranceImportance; // get how much weight is affected by the endurance
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
             return finalSimulatedWeight + currentRbSpeed;
+        }
+
+        public void OnCarHasBeenPushed()
+        {
+            _hasBeenPushed = true;
+            TimerManager.Instance.StartTimer(1.5f, () =>
+            {
+                _hasBeenPushed = false;
+            }, (progress) => {
+
+            }, "pushed", false, false);
         }
 
         public void LimitRigidBodySpeed(float maxSpeed)
