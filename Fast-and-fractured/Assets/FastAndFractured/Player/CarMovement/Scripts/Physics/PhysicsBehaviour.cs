@@ -7,7 +7,7 @@ namespace Game
     public class PhysicsBehaviour : MonoBehaviour
     {
         [SerializeField] private float isMovingThreshold;
-        public bool isCurrentlyDashing = false;
+        public bool IsCurrentlyDashing = false;
         const float SPEED_TO_METER_PER_SECOND = 3.6f;
 
         [Header("Reference")]
@@ -31,7 +31,7 @@ namespace Game
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (isCurrentlyDashing)
+            if (IsCurrentlyDashing)
             {
                 PhysicsBehaviour otherComponenPhysicsBehaviours;
                 if (collision.gameObject.TryGetComponent(out otherComponenPhysicsBehaviours))
@@ -47,7 +47,7 @@ namespace Game
                     //detect if the contact was frontal
                     if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
                     {
-                        if(otherComponenPhysicsBehaviours.isCurrentlyDashing)
+                        if(otherComponenPhysicsBehaviours.IsCurrentlyDashing)
                         {
                             if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponenPhysicsBehaviours.Rb.velocity.magnitude))
                             {
@@ -77,7 +77,7 @@ namespace Game
 
         public void CancelDash()
         {
-            if (isCurrentlyDashing)
+            if (IsCurrentlyDashing)
             {
                 _carMovementController.CancelDash();
             }

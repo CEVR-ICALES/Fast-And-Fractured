@@ -28,6 +28,9 @@ namespace Game {
         public bool IsDashing => _isDashing;
         private bool _isDashing = false;
 
+        public bool CanDash { get => _canDash; }
+        private bool _canDash = true;
+
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
@@ -276,13 +279,14 @@ namespace Game {
 
         public void HandleDashWithPhysics()
         {
-            if (!_isDashing)
+            if (!_isDashing && _canDash)
             {
                 _isDashing = true;
                 _physicsBehaviour.BlockRigidBodyRotations();
                 Vector3 dashDirection = transform.forward.normalized;
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
-                _physicsBehaviour.isCurrentlyDashing = true;
+                _physicsBehaviour.IsCurrentlyDashing = true;
+                _canDash = false;
                 TimerManager.Instance.StartTimer(statsController.DashTime, () =>
                 {
                     FinishDash();
@@ -298,7 +302,14 @@ namespace Game {
             _isDashing = false;
             _physicsBehaviour.UnblockRigidBodyRotations();
             _currentRbMaxVelocity = statsController.MaxSpeed;
-            _physicsBehaviour.isCurrentlyDashing = false;
+            _physicsBehaviour.IsCurrentlyDashing = false;
+            TimerManager.Instance.StartTimer(statsController.DashCooldown, () =>
+            {
+                _canDash = true;
+            }, (progress) =>
+            {
+
+            }, "dashCooldown", false, true);
         }
         public void CancelDash()
         {
