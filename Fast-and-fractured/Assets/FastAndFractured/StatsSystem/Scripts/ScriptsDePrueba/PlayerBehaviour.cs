@@ -27,6 +27,7 @@ public class PlayerBehaviour : MonoBehaviour
         _statsController = transform.GetComponent<StatsController>();
         _rb = transform.GetComponent<Rigidbody>();
         _speed = _statsController.MinSpeed;
+        normalShootHandle.IgnoreCollider(transform.parent.GetComponent<Collider>());
     }
 
     
@@ -43,7 +44,7 @@ public class PlayerBehaviour : MonoBehaviour
             //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
             //}
             normalShootHandle.CurrentShootDirection = mainCamera.transform.forward;
-            normalShootHandle.NormalShooting(transform.parent.GetComponent<Collider>());
+            normalShootHandle.NormalShooting();
         }
         if (Input.GetMouseButtonUp(1))
         {

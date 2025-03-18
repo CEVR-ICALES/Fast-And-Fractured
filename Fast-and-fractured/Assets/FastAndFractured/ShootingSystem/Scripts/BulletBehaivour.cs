@@ -16,24 +16,39 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     protected float damage;
     protected Vector3 initPosition;
     [SerializeField] protected ParticleSystem particles;
-    //ForPushShoot Handle class
-    //public float PushStrengh { set => pushStrengh = value; }
-    //protected float pushStrengh;
+    public bool InitValues => initValues;
+    [SerializeField ]private bool initValues = true;
+    [SerializeField] private ParticleSystem ownParticles;
+    [SerializeField] private float delayProyectileEnd = 1.5f;
+   
     // Update is called once per frame
     protected abstract void FixedUpdate();
-    protected virtual void Start()
+    public virtual void InitializeValues()
     {
         rb = GetComponent<Rigidbody>();
     }
     public virtual void InitBulletTrayectory()
     {
+        if (ownParticles != null)
+        {
+            ownParticles.gameObject.SetActive(false);
+        }
         initPosition = transform.position;
         rb.velocity = velocity;
     }
 
     protected void OnBulletEndTrayectory()
     {
-        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+        if (ownParticles != null)
+        {
+            ownParticles.gameObject.SetActive(true);
+            TimerManager.Instance.StartTimer(delayProyectileEnd, () =>
+            {
+                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+            }, null, "BulletTimerTillParticles " + gameObject.name, false, false);
+        }
+        else
+            ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
     }
 
     protected virtual void OnTriggerEnter(Collider other)
@@ -45,4 +60,6 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     {
         
     }
+
+
 }

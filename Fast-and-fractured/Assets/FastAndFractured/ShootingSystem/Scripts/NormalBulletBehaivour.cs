@@ -6,25 +6,24 @@ namespace Game
 {
     public class NormalBulletBehaivour : BulletBehaivour
     {
-        public Collider[] IgnoreColliders { set => _ignoreColliders = value; }
-        private Collider[] _ignoreColliders;
+        public Collider IgnoreCollider { set => _ignoreCollider = value; }
+        private Collider _ignoreCollider;
         private Collider ownCollider;
-        private bool _ignoreColliderDone = false;
 
-        protected override void Start()
+        public override void InitializeValues()
         {
+            base.InitializeValues();
             ownCollider = GetComponent<Collider>();
         }
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
-            if (!_ignoreColliderDone)
+            if (_ignoreCollider != null)
             {
-                foreach (var collider in _ignoreColliders)
+                if (!Physics.GetIgnoreCollision(_ignoreCollider, ownCollider))
                 {
-                    Physics.IgnoreCollision(ownCollider, collider, true);
+                    Physics.IgnoreCollision(_ignoreCollider, ownCollider);
                 }
-                _ignoreColliderDone = true;
             }
         }
 
@@ -42,7 +41,7 @@ namespace Game
                 if (other.TryGetComponent<StatsController>(out var statsController))
                 {
                     statsController.TakeEndurance(damage, false);
-                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                    OnBulletEndTrayectory();
                 }
         }
     }

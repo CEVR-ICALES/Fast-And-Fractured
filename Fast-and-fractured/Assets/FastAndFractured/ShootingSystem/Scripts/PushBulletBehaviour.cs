@@ -37,7 +37,7 @@ namespace Game {
 
         private void Explosion()
         {
-            ObjectPoolManager.Instance.DesactivatePooledObject(this,gameObject);
+            OnBulletEndTrayectory();
         }
 
         private void BouncingHandle(Collision collision)

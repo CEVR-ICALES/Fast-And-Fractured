@@ -7,5 +7,7 @@ namespace Game {
     {
         public Pooltype Pooltype { get; set; }
         //private Pooltype _pooltype;
+        public bool InitValues { get;}
+        public abstract void InitializeValues();
     }
 }

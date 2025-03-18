@@ -5,7 +5,7 @@ namespace Game
 {
     public class NormalShootHandle : ShootingHandle
     {
-        private Collider _userCollider;
+        private Collider _ignoredCollider;
         public float CountOverHeat { get => _countOverHeat; }
         private float _countOverHeat;
         public bool IsOverHeat { get => _isOverHeat; }
@@ -42,14 +42,18 @@ namespace Game
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaivour)bulletBehaivour).IgnoreColliders = new Collider[] {_userCollider};
+            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider =_ignoredCollider;
         }
 
-        public void NormalShooting(Collider userCollider)
+        public void IgnoreCollider(Collider collider)
         {
-            _userCollider = userCollider;
-            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHead,
-                characterStatsController.NormalOverHead) && !_isOverHeat)
+            _ignoredCollider = collider;
+        }
+
+        public void NormalShooting()
+        {
+            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHeat,
+                characterStatsController.NormalOverHeat) && !_isOverHeat)
             {
                 if (canShoot)
                 {

@@ -11,6 +11,9 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
     [SerializeField]
     private float destroyTime = 3.5f;
     public Pooltype Pooltype { get => _pooltype; set => _pooltype = value; }
+
+    public bool InitValues => false;
+
     private Pooltype _pooltype;
     private float _time = 0;
     private void OnEnable()
@@ -47,5 +50,10 @@ public class PlayerProjectile : MonoBehaviour, IPooledObject
                 ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
             }
         }
+    }
+
+    public void InitializeValues()
+    {
+        throw new System.NotImplementedException();
     }
 }
