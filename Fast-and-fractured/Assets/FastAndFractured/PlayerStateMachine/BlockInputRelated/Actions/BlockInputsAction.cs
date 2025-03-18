@@ -10,14 +10,11 @@ public class BlockInputsAction : Action
     
     public override void Act(Controller controller)
     {
+        controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
+
         if(hasTime)
         {
-            controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType, _blockTime);
+            controller.GetBehaviour<PlayerInputController>().EnableInput(inputBlockType, _blockTime);
         }
-        else
-        {
-            controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
-        }
-        
     }
 }

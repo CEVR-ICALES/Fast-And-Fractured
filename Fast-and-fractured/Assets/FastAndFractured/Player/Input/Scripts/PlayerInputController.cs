@@ -74,6 +74,9 @@ public class PlayerInputController : MonoBehaviour
     public bool IsShootingInputsBlocked => _isShootingInputsBlocked;
     private bool _isShootingInputsBlocked;
 
+    public bool IsAbilityFinished => _isAbilityFinished;
+    private bool _isAbilityFinished;
+
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
     private void Awake()
@@ -198,26 +201,6 @@ public class PlayerInputController : MonoBehaviour
         }
     }
 
-    public void BlockInput(InputBlockTypes inputBlockType, float timeBlocked)
-    {
-        switch (inputBlockType)
-        {
-            case InputBlockTypes.ALL_MECHANICS:
-                _isAllMechanicsInputsBlocked = true;
-                //TimerManager.Instance.StartTimer();
-                break;
-
-            case InputBlockTypes.MOVEMENT_MECHANICS:
-                _isMovementInputsBlocked = true;
-                //TimerManager.Instance.StartTimer();
-                break;
-
-            case InputBlockTypes.SHOOTING_MECHANICS:
-                _isShootingInputsBlocked = true;
-                //TimerManager.Instance.StartTimer();
-                break;
-        }
-    }
 
     public void EnableInput(InputBlockTypes inputBlockType)
     {
@@ -235,6 +218,36 @@ public class PlayerInputController : MonoBehaviour
                 _isShootingInputsBlocked = false;
                 break;
         }
+    }
+    
+    public void EnableInput(InputBlockTypes inputBlockType, float timeTillEnable)
+    {
+        if (_isUsingAbility)
+        {
+            _isAbilityFinished = false;
+        }
+        TimerManager.Instance.StartTimer(timeTillEnable, () =>
+        {
+            if (!_isAbilityFinished)
+            {
+                _isAbilityFinished = true;
+            }
+            switch (inputBlockType)
+            {
+                case InputBlockTypes.ALL_MECHANICS:
+                    _isAllMechanicsInputsBlocked = false;
+                    break;
+
+                case InputBlockTypes.MOVEMENT_MECHANICS:
+                    _isMovementInputsBlocked = false;
+                    break;
+
+                case InputBlockTypes.SHOOTING_MECHANICS:
+                    _isShootingInputsBlocked = false;
+                    break;
+            }
+        }, null, gameObject.name + Time.time, false, true);
+        
     }
 
     private void OnStartAimingPushShoot()
