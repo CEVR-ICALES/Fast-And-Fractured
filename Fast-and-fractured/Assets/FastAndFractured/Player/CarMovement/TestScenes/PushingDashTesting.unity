@@ -28072,6 +28072,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isMovingThreshold: 0.5
   IsCurrentlyDashing: 1
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1000
+  carWeightImportance: 0
+  applyForceYOffset: 0
+  PushApplyPoint: {fileID: 0}
   statsController: {fileID: 591146335}
 --- !u!114 &591146338
 MonoBehaviour:
@@ -40380,6 +40390,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4327670655549164, guid: 9390e70d13c7e454f8022d50d0112dc7, type: 3}
   m_PrefabInstance: {fileID: 906427612}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &907238226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 907238227}
+  m_Layer: 0
+  m_Name: PushApplyPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &907238227
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907238226}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.7, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1848933871}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &907294015
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52920,6 +52961,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isMovingThreshold: 0.5
   IsCurrentlyDashing: 1
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1000
+  carWeightImportance: 0
+  applyForceYOffset: 0
+  PushApplyPoint: {fileID: 0}
   statsController: {fileID: 1282090783}
 --- !u!114 &1282090786
 MonoBehaviour:
@@ -68100,6 +68151,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4327670655549164, guid: 9390e70d13c7e454f8022d50d0112dc7, type: 3}
   m_PrefabInstance: {fileID: 1602605610}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1607589580
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1607589581}
+  m_Layer: 0
+  m_Name: PushApplyPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 4422084297763085224, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1607589581
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1607589580}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 402578958445625783}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1612247896
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79639,7 +79721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f4e7a82cec0746488928af33708bad2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 500
+  damageAmount: 650
 --- !u!114 &1848933861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79691,8 +79773,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db449586d91ae8349a505d9a5a990687, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMovingThreshold: 0.5
-  IsCurrentlyDashing: 1
+  isMovingThreshold: 0.2
+  IsCurrentlyDashing: 0
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1150
+  carWeightImportance: 0.2
+  applyForceYOffset: 0.2
+  PushApplyPoint: {fileID: 907238227}
   statsController: {fileID: 1848933861}
 --- !u!114 &1848933864
 MonoBehaviour:
@@ -79854,7 +79946,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1848933859}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.9996944, z: -0, w: 0.024720885}
+  m_LocalRotation: {x: -0, y: -0.8061663, z: -0, w: -0.5916891}
   m_LocalPosition: {x: -34.05, y: 1.7, z: 29.76}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -79863,8 +79955,9 @@ Transform:
   - {fileID: 206261125}
   - {fileID: 931662131}
   - {fileID: 642580388}
+  - {fileID: 907238227}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -177.167, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -252.554, z: 0}
 --- !u!1 &1851798852
 GameObject:
   m_ObjectHideFlags: 0
@@ -93277,6 +93370,7 @@ Transform:
   - {fileID: 8447966479964321636}
   - {fileID: 417406646}
   - {fileID: 1105712236}
+  - {fileID: 1607589581}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &495384137502809352
@@ -93434,6 +93528,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isMovingThreshold: 0.5
   IsCurrentlyDashing: 0
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.2704706
+      value: 0.95520526
+      inSlope: -0.76847494
+      outSlope: -0.76847494
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.24718261
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1150
+  carWeightImportance: 0.2
+  applyForceYOffset: 0.2
+  PushApplyPoint: {fileID: 1607589581}
   statsController: {fileID: 7917500339781435169}
 --- !u!4 &2666327574952729700
 Transform:
@@ -94194,7 +94325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f4e7a82cec0746488928af33708bad2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 100
+  damageAmount: 390
 --- !u!4 &8447966479964321636
 Transform:
   m_ObjectHideFlags: 0
