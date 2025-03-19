@@ -26,7 +26,15 @@ namespace Game
 
         private void Start()
         {
-            SetVolume("Volume", masterVolume);
+            //SetVolume("Volume", masterVolume);
+            SetSFXVolume(masterVolume);
+
+        }
+
+        private void Update()
+        {
+            //SetVolume("Volume", masterVolume);
+            SetSFXVolume(masterVolume);
         }
 
         #region Event Pooling Methodss
@@ -155,6 +163,30 @@ namespace Game
         {
             RuntimeManager.StudioSystem.setParameterByName(parameterName, value);
         }
+
+        public void SetSFXVolume(float value)
+        {
+            SetVCAVolume("vca:/SFX", value);
+        }
+
+        public void SetMusicVolume(float value)
+        {
+            SetVCAVolume("vca:/Music", value);
+        }
+
+        public void SetGeneralVolume(float value)
+        {
+            SetVCAVolume("vca:/General", value);
+
+        }
+
+        public void SetVCAVolume(string vcaPath, float value)
+        {
+            VCA sfxVCA = RuntimeManager.GetVCA(vcaPath);
+            sfxVCA.setVolume(value);
+        }
+
+
         #endregion
     }
 }
