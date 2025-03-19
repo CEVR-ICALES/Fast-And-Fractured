@@ -79,6 +79,7 @@ namespace Game
         public float Damping { get => charDataSO.Damping; }
         public float BaseForce { get => charDataSO.BaseForce; }
         public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
+        public float EnduranceImportanceWhenColliding { get => charDataSO.EnduranceImportanceWhenColliding; }
 
         [Header("COOLDOWNS")]
 
@@ -132,7 +133,7 @@ namespace Game
         private void InitCurrentStats()
         {
             //Health
-            currentEndurance = charDataSO.MinEndurance;
+            currentEndurance = charDataSO.MaxEndurance;
             //Movement
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
@@ -155,10 +156,10 @@ namespace Game
                     if (ChoseCharToMod(STATS.ENDURANCE, -substract, isProduct))
                     {
                         //This is not the real dead condition, just an example. 
-                        if (currentEndurance <= charDataSO.MinEndurance)
+                        /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
                             Dead();
-                        }
+                        }*/
                     }
                     else
                         Debug.LogError("Stat selected doesn't exist or can't be modified. " +

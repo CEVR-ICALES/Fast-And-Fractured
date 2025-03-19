@@ -20,6 +20,7 @@ namespace Game {
             //apply force
             Vector3 forceDirection = -rb.transform.up;
             rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
+            Debug.Log("Roll Prevention" + gameObject.name);
         }
     }
 }
