@@ -133,7 +133,14 @@ public class EnemyAIBrain : MonoBehaviour
         normalShootHandle.CurrentShootDirection = shootingDirection;
         normalShootHandle.NormalShooting();
     }
-
+    public void StopDelayDecreaseOveheat()
+    {
+        normalShootHandle.StopDelayDecreaseOveheat();
+    }
+    public void DecreaseOverheatTime()
+    {
+        normalShootHandle.DecreaseOverheatTime();
+    }
     public void PushShoot()
     {
         //TODO
@@ -272,14 +279,21 @@ public class EnemyAIBrain : MonoBehaviour
     }
     Vector3 GetActivePathPoint()
     {
-        if (_currentPath.corners.Length > 0)
-            return _currentPath.corners[_pathIndex];
-        else return Vector3.zero;
+        switch (_currentPath.corners.Length)
+        {
+            case 1:
+                Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground");
+                return _currentPath.corners[0];
+            case > 0:
+                return _currentPath.corners[_pathIndex];
+            default:
+                return Vector3.zero;
+        }
     }
 
     void CheckIfGoToNextPathPoint()
     {
-        if (Vector3.Distance(transform.position, _currentPath.corners[_pathIndex]) < _minDistanceUntilNextCorner && 
+        if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner && 
             (_pathIndex +1) < _currentPath.corners.Length )
         {
             _pathIndex++;

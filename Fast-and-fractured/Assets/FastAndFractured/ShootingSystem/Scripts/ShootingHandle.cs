@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Game {
+namespace Game
+{
     public abstract class ShootingHandle : MonoBehaviour
     {
         public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
@@ -47,17 +48,6 @@ namespace Game {
             bulletBehaivour.Velocity = _velocity;
             bulletBehaivour.Range = _range;
             bulletBehaivour.Damage = _damage;
-        }
-
-        //Provisional Timer
-        protected bool Timer(ref float currentTime,bool logic,float resetValue)
-        {
-            if (logic)
-            {
-                currentTime = resetValue;
-                return true;
-            }
-            return false;
         }
     }
 }
