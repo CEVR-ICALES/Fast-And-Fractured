@@ -58,12 +58,14 @@ namespace Game
         [Header("DamageAndPushing")]
 
         public float NormalShootDMG;
-        public float PushShootDMG;
-        public float PushShootFORCE;
         public float MaxNormalShootDMG;
         public float MinNormalShootDMG;
+        public float PushShootDMG;
+        public float PushShootFORCE;
         public float MaxPushShootDMG;
         public float MinPushShootDMG;
+        public float ExplosionRadius;
+        public Vector3 ExplosionCenterOffset;
 
         [Header("ShootMovement")]
         public float NormalShootSpeed;

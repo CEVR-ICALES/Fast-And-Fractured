@@ -41,7 +41,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
         rb.velocity = velocity;
     }
 
-    protected virtual void OnBulletEndTrayectory(Action<float> updateAction)
+    protected virtual void OnBulletEndTrayectory()
     {
         if (particles != null)
         {
@@ -57,7 +57,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
                 ownCollider.enabled = true;
                 _meshRenderer.enabled = true;
                 rb.constraints = RigidbodyConstraints.None;
-            }, updateAction, "BulletTimerTillParticles " + gameObject.name, false, false);
+            }, null, "BulletTimerTillParticles " + gameObject.name, false, false);
         }
         else
             ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);

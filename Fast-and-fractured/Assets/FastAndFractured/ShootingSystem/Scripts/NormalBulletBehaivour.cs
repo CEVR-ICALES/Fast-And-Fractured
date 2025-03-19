@@ -24,7 +24,7 @@ namespace Game
         {
             if ((transform.position - initPosition).magnitude >= range)
             {
-                OnBulletEndTrayectory(null);
+                OnBulletEndTrayectory();
             }
         }
 
@@ -34,7 +34,7 @@ namespace Game
                 if (other.TryGetComponent<StatsController>(out var statsController))
                 {
                     statsController.TakeEndurance(damage, false);
-                    OnBulletEndTrayectory(null);
+                    OnBulletEndTrayectory();
                 }
         }
     }

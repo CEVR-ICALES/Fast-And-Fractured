@@ -9,6 +9,11 @@ namespace Game {
         [SerializeField] private LayerMask characterLayers;
         public float PushForce {set=> _pushForce = value; }
         private float _pushForce;
+        public float ExplosionRadius { set => _explosionRadius = value; }
+        private float _explosionRadius;
+
+        public Vector3 ExplosionCenterOffset { set => _explosionCenterOffset = value; }
+        private Vector3 _explosionCenterOffset;
         public int BouncingNum { set => _bouncingNum = value; }
         private int _bouncingNum;
         private int _currentBouncingNum;
@@ -20,9 +25,7 @@ namespace Game {
         public Vector3 CustomGravity { set => _customGravity = value; }
         private Vector3 _customGravity;
         private bool _useCustomGravity;
-       [SerializeField] private ParticleSystem _explosionFlash;
-       [SerializeField] private SphereCollider _explosionCollider;
-        [SerializeField] private float _explosionRadius;
+        [SerializeField] private ExplosionForce _explosionHitbox;
         protected override void FixedUpdate()
         {
             if (_useCustomGravity)
@@ -31,32 +34,22 @@ namespace Game {
             }
         }
 
-        protected override void OnTriggerEnter(Collider other)
-        {
-            if (other.TryGetComponent<StatsController>(out var statsController))
-            {
-                float oCarWeight = statsController.Weight;
-                float oCarEnduranceFactor = statsController.Endurance;
-                float force = _pushForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20);
-                //other.GetComponent<Rigidbody>().AddForce();
-            }
-        }
-
         protected override void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.layer != characterLayers)
+            if (!((characterLayers & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer))
             {
                 BouncingHandle(collision);
             }
             else
+            {
                 Explosion();
+            }
         }
 
         private void Explosion()
         {
-            //OnBulletEndTrayectory(() => {
-            //    _explosionCollider.radius += _explosionRadius * _explosionFlash.sizeOverLifetime.xMultiplier;
-            //});
+            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius,_pushForce,_explosionCenterOffset);
+            OnBulletEndTrayectory();
         }
 
         private void BouncingHandle(Collision collision)
@@ -83,21 +76,27 @@ namespace Game {
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
+            initialPosition = transform.position;
             _currentBounceStrenght = _bounceStrenght;
             _currentBouncingNum = 0;
             _useCustomGravity = true;
+            _explosionHitbox.DesactivateExplostionHitbox();
+        }
+        public override void InitializeValues()
+        {
+            base.InitializeValues();
+            _explosionHitbox.ExplosionCollider = _explosionHitbox.GetComponent<SphereCollider>();
         }
 
-        protected override void OnBulletEndTrayectory(Action<float> action)
+        protected override void OnBulletEndTrayectory()
         {
             _useCustomGravity = false;
-            base.OnBulletEndTrayectory(action);
+            base.OnBulletEndTrayectory();
         }
 
         // Start is called before the first frame update
         void Start()
         {
-            initialPosition = transform.position;
         }
 
         // Update is called once per frame

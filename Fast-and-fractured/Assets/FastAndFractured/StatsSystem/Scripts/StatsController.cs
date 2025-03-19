@@ -50,6 +50,9 @@ namespace Game
         [SerializeField] private float currentPushShootDMG;
         public float NormalShootDamage { get => currentNormalShootDMG; }
         public float PushShootDamage { get => currentPushShootDMG; }
+        public float PushShootForce { get => charDataSO.PushShootFORCE; }
+        public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
+        public Vector3 ExplosionCenterOffset { get => charDataSO.ExplosionCenterOffset; }
 
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
