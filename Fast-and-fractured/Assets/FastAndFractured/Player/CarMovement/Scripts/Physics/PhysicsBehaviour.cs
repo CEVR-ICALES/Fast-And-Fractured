@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 namespace Game
@@ -23,7 +22,7 @@ namespace Game
         
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
-        public Rigidbody Rb { get => _rb; }
+        public Rigidbody Rb { get => _rb; set => _rb = value; }
         private Rigidbody _rb;
         private CarMovementController _carMovementController;
         public StatsController StatsController { get => statsController;}
