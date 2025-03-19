@@ -36,8 +36,7 @@ namespace Game
                     OverheatDone();
                 }
             }
-
-        
+  
         }
         #endregion
 

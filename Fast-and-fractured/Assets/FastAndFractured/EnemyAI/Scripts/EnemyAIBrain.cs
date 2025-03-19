@@ -41,7 +41,7 @@ public class EnemyAIBrain : MonoBehaviour
     PathMode pathMode = PathMode.ADVANCED;
 
     const float MAX_ANGLE_DIRECTION = 90f;
-    const float FRONT_ANGLE = 12f;
+    const float FRONT_ANGLE = 20f;
     const int START_CORNER_INDEX = 1;
     private void Awake()
     {
@@ -200,17 +200,13 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     public bool IsDashReady()
-    {
-        //TODO
-        //Ask if dash is ready
-        return true;
+    { 
+        return carMovementController.CanDash;
     }
 
     public bool IsDashFinished()
     {
-        //TODO
-        //Has dash finished
-        return false;
+        return !carMovementController.IsDashing;
     }
 
     public bool IsInValidRange(float distance)
@@ -271,7 +267,7 @@ public class EnemyAIBrain : MonoBehaviour
           
                 break;
         }
-        direction = GetActivePathPoint() - transform.position;
+        direction = (GetActivePathPoint() - transform.position).normalized;
 
         //If it's negative, go left
         //If it's positive, go right
