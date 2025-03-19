@@ -42,7 +42,7 @@ public class PlayerInputController : MonoBehaviour
     private bool _isShooting;
 
     public bool IsPushShootMode { get { return _isPushShootMode; } set { _isPushShootMode = value; } }
-    private bool _isPushShootMode;
+    private bool _isPushShootMode = false;
 
     public bool IsPushShooting => _isPushShooting;
     private bool _isPushShooting;
@@ -115,11 +115,10 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
         inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
 
-        inputActions.PlayerInputActions.RegularShoot.performed += ctx => _isShooting = true;
-        inputActions.PlayerInputActions.RegularShoot.canceled += ctx => _isShooting = false;
+        inputActions.PlayerInputActions.ShootingMode.started += ctx => ChangeShootMode();
 
-        inputActions.PlayerInputActions.PushShoot.performed += ctx => OnStartAimingPushShoot();
-        inputActions.PlayerInputActions.PushShoot.canceled += ctx => OnReleasedPushShoot();
+        inputActions.PlayerInputActions.Shoot.performed += ctx => SetShootTypeBool(true);
+        inputActions.PlayerInputActions.Shoot.canceled += ctx => SetShootTypeBool(false);
 
         inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
         inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
@@ -250,16 +249,28 @@ public class PlayerInputController : MonoBehaviour
         
     }
 
-    private void OnStartAimingPushShoot()
+    private void SetShootTypeBool(bool isShooting)
     {
-        _isPushShootMode = true;
-        _isPushShooting = false;
+        if (_isPushShootMode)
+        {
+            _isPushShooting = isShooting;
+        }
+        else
+        {
+            _isShooting = isShooting;
+        }
     }
 
-    private void OnReleasedPushShoot()
+    private void ChangeShootMode()
     {
-        _isPushShootMode = false;
-        _isPushShooting = true;
+        if(!_isPushShootMode)
+        {
+            _isPushShootMode = true;
+        }
+        else
+        {
+            _isPushShootMode = false;
+        }
     }
 
     public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;

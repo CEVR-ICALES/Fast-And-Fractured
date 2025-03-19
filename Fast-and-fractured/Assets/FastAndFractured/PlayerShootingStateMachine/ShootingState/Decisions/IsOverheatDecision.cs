@@ -7,6 +7,7 @@ public class IsOverheatDecision : Decision
 {
     public override bool Decide(Controller controller)
     {
-       return controller.GetBehaviour<NormalShootHandle>().IsOverHeat;
+        return false;
+        // return controller.GetBehaviour<NormalShootHandle>().IsOverHeat;
     }
 }

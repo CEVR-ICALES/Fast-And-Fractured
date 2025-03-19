@@ -77,7 +77,7 @@ namespace Game {
 
         public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
         {
-            Debug.Log(inputType);
+            // Debug.Log(inputType);
             if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
             {
                 _isUsingController = false;

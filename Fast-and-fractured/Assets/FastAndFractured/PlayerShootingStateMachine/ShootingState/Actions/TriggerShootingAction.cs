@@ -9,6 +9,7 @@ public class TriggerShootingAction : Action
     {
         if (controller.GetBehaviour<PlayerInputController>().IsShooting)
         {
+            Debug.Log("Shooting Bullets");
             controller.GetBehaviour<NormalShootHandle>().NormalShooting();
         }   
     }
