@@ -73,8 +73,6 @@ public class EnemyAIBrain : MonoBehaviour
         physicsBehaviour.Rb = GetComponent<Rigidbody>();
         _currentPath = new NavMeshPath();
         _previousPath = new Vector3[0];
-        //agent.updatePosition = false;
-        //agent.updateRotation = false;
     }
 
     public float GetHealth()
