@@ -10,12 +10,7 @@ namespace Game
         [Header("Identificators")]
         public int Id;
         public string Name;
-        public Pooltype PoolType;
-
-        [Header("Game Object")]
-
-        public GameObject Prefab;
-        //public GameObject Instance;
+         
 
         [Header("Health")]
         public float MaxEndurance;
@@ -27,27 +22,38 @@ namespace Game
 
         public float MaxSpeed;
         public float MaxSpeedDashing;
-        public float MaxSpeedMultiplier;
+        [Tooltip("Top speed permitted which vehicle can achieve")]  public float MaxSpeedMultiplier;
         public float MinSpeed;
         public float MaxAcceleration;
         public float MinAcceleration;
         public float Acceleration;
-        public float BrakeTorque;
-        public float Handling;
-        public float HandlingSmoothnes;
+        [Tooltip("Slowing force")] public float BrakeTorque;
+        [Tooltip("Max angle that the wheels can rotate")] public float Handling;
+        [Tooltip("To avoid sudden changes at the handling")] public float HandlingSmoothnes;
         public float AerialRotationSpeed;
+        [Tooltip("Threshold to determine how much you have to move the joystick to start drifting")] public float DriftThreshold;
+        [Tooltip("Top speed at which the drift will Clamp to determine how effective the drift has to be, higher value means that a higher speed will be nedded for the drift to be really efective")]
+        public float DriftingFactorToSpeed;
+        public float DriftingSmoothFactor;
+        public float DriftForce;
+        public float DashTime;
+
+        [Header("Wheels")]
+        public float FrontWheelsStrenghtFactor;
+        public float RearWheelsStrenghtFactor;
 
         // enum STEERING_MODE
         // enum BRAKE
 
-        //Maybe
-        public float DashDistance;
 
 
         [Header("Physics")]
         public float Weight;
         public float Traction;
         public float Damping;
+        public float BaseForce;
+        public float FrontalHitAnlgeThreshold;
+        public float EnduranceImportanceWhenColliding;
 
         [Header("RollPreventions")]
 
@@ -69,8 +75,8 @@ namespace Game
 
         [Header("ShootMovement")]
         public float NormalShootSpeed;
-        public float NormalShootCadenceTime;
-        public float NormalShootRange;
+        [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime;
+        public float NormalShootMaxRange;
         public float PushShootSpeed;
         [Tooltip("The angle include from 10º to 89º. 90º will return infinity.")]
         public float PushShootAngle;
@@ -83,15 +89,13 @@ namespace Game
 
 
 
-        [Header("COOLDOWNS")]
+        [Header("Cooldowns")]
         
         public float DashCooldown;
         public float PushShootCooldown;
         public float UniqueAbilityCooldown;
         public float NormalShootOverHeat;
-        public float RecoveryCooldown;
-        public float CooldownSpeed;
-        public float MinCooldownSpeed;
-        public float MaxCooldownSpeed;
+        [Tooltip("When in flipped state, how much time is needed to return to normal state")] public float RecoveryCooldown;
+        [Tooltip("Time to go from top speed to max speed")] public float FromTopSpeedToMaxSpeed;
     }
 }

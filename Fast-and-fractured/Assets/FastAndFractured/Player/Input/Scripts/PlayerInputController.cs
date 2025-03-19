@@ -5,6 +5,13 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 
+public enum InputBlockTypes // this enum need to be added to the enum library
+{
+    ALL_MECHANICS,
+    MOVEMENT_MECHANICS,
+    SHOOTING_MECHANICS
+}
+
 public class PlayerInputController : MonoBehaviour
 {
     public static PlayerInputController Instance { get; private set; }
@@ -22,23 +29,23 @@ public class PlayerInputController : MonoBehaviour
     private Vector2 _cameraInput;
 
     // Action Flags with private backing fields
-    public bool IsAccelerating => _isAccelerating;
-    private bool _isAccelerating;
+    public float IsAccelerating => _isAccelerating;
+    private float _isAccelerating;
 
     public bool IsBraking => _isBraking;
     private bool _isBraking;
 
-    public bool IsReversing => _isReversing;
-    private bool _isReversing;
+    public float IsReversing => _isReversing;
+    private float _isReversing;
 
     public bool IsShooting => _isShooting;
     private bool _isShooting;
 
-    public bool IsAimingPushShoot => _isAimingPushShoot;
-    private bool _isAimingPushShoot;
+    public bool IsPushShootMode { get { return _isPushShootMode; } set { _isPushShootMode = value; } }
+    private bool _isPushShootMode = false;
 
-    public bool IsPushShootReleased => _isPushShootReleased;
-    private bool _isPushShootReleased;
+    public bool IsPushShooting => _isPushShooting;
+    private bool _isPushShooting;
 
     public bool IsUsingAbility => _isUsingAbility;
     private bool _isUsingAbility;
@@ -55,6 +62,21 @@ public class PlayerInputController : MonoBehaviour
     public bool IsDashing => _isDashing;
     private bool _isDashing;
 
+    public bool IsUsingController => _isUsingController;
+    private bool _isUsingController;
+
+    public bool IsAllMechanicsInputsBlocked => _isAllMechanicsInputsBlocked;
+    private bool _isAllMechanicsInputsBlocked;
+
+    public bool IsMovementInputsBlocked => _isMovementInputsBlocked;
+    private bool _isMovementInputsBlocked;
+
+    public bool IsShootingInputsBlocked => _isShootingInputsBlocked;
+    private bool _isShootingInputsBlocked;
+
+    public bool IsAbilityFinished => _isAbilityFinished;
+    private bool _isAbilityFinished;
+
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
     private void Awake()
@@ -65,7 +87,7 @@ public class PlayerInputController : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
 
         inputActions = new PlayerInputAction();
@@ -84,20 +106,19 @@ public class PlayerInputController : MonoBehaviour
         inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
 
         // Action Inputs
-        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = true;
-        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = false;
+        inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = 0f;
 
-        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = true;
-        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = false;
+        inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = ctx.ReadValue<float>();
+        inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = 0f;
 
         inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
         inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
 
-        inputActions.PlayerInputActions.RegularShoot.performed += ctx => _isShooting = true;
-        inputActions.PlayerInputActions.RegularShoot.canceled += ctx => _isShooting = false;
+        inputActions.PlayerInputActions.ShootingMode.started += ctx => ChangeShootMode();
 
-        inputActions.PlayerInputActions.PushShoot.performed += ctx => OnStartAimingPushShoot();
-        inputActions.PlayerInputActions.PushShoot.canceled += ctx => OnReleasedPushShoot();
+        inputActions.PlayerInputActions.Shoot.started += ctx => SetShootType();
+        inputActions.PlayerInputActions.Shoot.canceled += ctx => UnsetShootType();
 
         inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
         inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
@@ -130,6 +151,7 @@ public class PlayerInputController : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
         {
             _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
+            _isUsingController = false;
             OnInputDeviceChanged?.Invoke(_currentInputDevice);
         }
 
@@ -145,6 +167,8 @@ public class PlayerInputController : MonoBehaviour
                 _currentInputDevice = INPUT_DEVICE_TYPE.XboxController;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
             }
+
+            _isUsingController = true;
         }
     }
 
@@ -158,17 +182,109 @@ public class PlayerInputController : MonoBehaviour
         inputActions.Enable();
     }
 
-    private void OnStartAimingPushShoot()
+    public void BlockInput(InputBlockTypes inputBlockType)
     {
-        _isAimingPushShoot = true;
-        _isPushShootReleased = false;
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = true;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = true;
+                break;
+        }
     }
 
-    private void OnReleasedPushShoot()
+
+    public void EnableInput(InputBlockTypes inputBlockType)
     {
-        _isAimingPushShoot = false;
-        _isPushShootReleased = true;
+        switch (inputBlockType)
+        {
+            case InputBlockTypes.ALL_MECHANICS:
+                _isAllMechanicsInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.MOVEMENT_MECHANICS:
+                _isMovementInputsBlocked = false;
+                break;
+
+            case InputBlockTypes.SHOOTING_MECHANICS:
+                _isShootingInputsBlocked = false;
+                break;
+        }
+    }
+    
+    public void EnableInput(InputBlockTypes inputBlockType, float timeTillEnable)
+    {
+        if (_isUsingAbility)
+        {
+            _isAbilityFinished = false;
+        }
+        TimerManager.Instance.StartTimer(timeTillEnable, () =>
+        {
+            if (!_isAbilityFinished)
+            {
+                _isAbilityFinished = true;
+            }
+            switch (inputBlockType)
+            {
+                case InputBlockTypes.ALL_MECHANICS:
+                    _isAllMechanicsInputsBlocked = false;
+                    break;
+
+                case InputBlockTypes.MOVEMENT_MECHANICS:
+                    _isMovementInputsBlocked = false;
+                    break;
+
+                case InputBlockTypes.SHOOTING_MECHANICS:
+                    _isShootingInputsBlocked = false;
+                    break;
+            }
+        }, null, gameObject.name + Time.time, false, true);
+        
     }
 
+    private void SetShootType()
+    {
+        if (_isPushShootMode)
+        {
+            _isPushShooting = true;
+        }
+        else
+        {
+            _isShooting = true;
+        }
+    }
 
+    private void UnsetShootType()
+    {
+        if (_isPushShootMode)
+        {
+            _isPushShooting = false;
+            _isPushShootMode = false;
+        }
+        else
+        {
+            _isShooting = false;
+        }
+    }
+
+    private void ChangeShootMode()
+    {
+        if(!_isPushShootMode)
+        {
+            _isPushShootMode = true;
+        }
+        else
+        {
+            _isPushShootMode = false;
+        }
+    }
+
+    public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;
 }

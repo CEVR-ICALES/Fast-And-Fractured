@@ -6,7 +6,7 @@ namespace Game {
     {
         public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
         protected Vector3 currentShootDirection;
-       [SerializeField] protected StatsController characterStatsController;
+        [SerializeField] protected StatsController characterStatsController;
         [SerializeField]
         protected Transform shootPoint;
         [SerializeField]

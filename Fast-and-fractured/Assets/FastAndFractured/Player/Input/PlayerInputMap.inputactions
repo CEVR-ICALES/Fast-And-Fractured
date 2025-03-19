@@ -16,21 +16,21 @@
                 },
                 {
                     "name": "Accelerate",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "2f11717d-ef60-4557-bdaa-c65a52510283",
-                    "expectedControlType": "",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Reverse",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "38a23e7d-4f3d-4eda-bf26-222fccc54458",
-                    "expectedControlType": "",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Brake",
@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RegularShoot",
+                    "name": "ShootingMode",
                     "type": "Button",
                     "id": "df5a71de-dd17-4098-8f91-0ae3a2194ab2",
                     "expectedControlType": "",
@@ -60,7 +60,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "PushShoot",
+                    "name": "Shoot",
                     "type": "Button",
                     "id": "2c14d8bd-8915-44fd-8137-042f895d90b5",
                     "expectedControlType": "",
@@ -221,18 +221,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RegularShoot",
+                    "action": "ShootingMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "c29a6517-5e5e-4bfe-bbf8-1c3669ccf9f7",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RegularShoot",
+                    "action": "ShootingMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -265,18 +265,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PushShoot",
+                    "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "3b408e85-b686-48f5-8201-fb1966f6901e",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PushShoot",
+                    "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
