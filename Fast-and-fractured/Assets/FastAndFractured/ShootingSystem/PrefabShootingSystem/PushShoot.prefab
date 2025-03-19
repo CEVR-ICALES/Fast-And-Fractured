@@ -46,6 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _explosionVFX: {fileID: 7742055987007160812}
+  forwardTo: 45
+  rightTo: 135
+  backTo: -135
+  leftTo: -45
 --- !u!135 &5384367818190901466
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -202,7 +206,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &-1545520480643349451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,13 +220,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pooltype: 3
-  particles: {fileID: 7271843766761087530}
   initValues: 1
+  particles: {fileID: 7271843766761087530}
   delayProyectileEnd: 1.5
+  _explosionHitbox: {fileID: 7493075962908273155}
   characterLayers:
     serializedVersion: 2
     m_Bits: 64
-  _explosionHitbox: {fileID: 7493075962908273155}
 --- !u!1001 &3826154811773690714
 PrefabInstance:
   m_ObjectHideFlags: 0
