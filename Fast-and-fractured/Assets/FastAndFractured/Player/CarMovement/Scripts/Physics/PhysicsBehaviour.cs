@@ -17,8 +17,9 @@ namespace Game
         [SerializeField] private AnimationCurve enduranceFactorEvaluate;
         [SerializeField] private float averageCarWeight = 1150f;
         [SerializeField] private float carWeightImportance = 0.2f;
+        [Tooltip("Small offset that will be applied to the vector of the direction so that the car doesnt stop fast by dragging through the floor")] 
         [SerializeField] private float applyForceYOffset = 0.2f;
-        public Transform PushApplyPoint;
+        public Transform PushApplyPoint; // if we decide to not use the collision point as the starting point to generate the force this variable will be used
         
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
@@ -56,7 +57,7 @@ namespace Game
                     float otherCarEnduranceImportance = otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
                     float forceToApply;
                     //detect if the contact was frontal
-                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
+                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
                     {
                         if(otherComponenPhysicsBehaviours.IsCurrentlyDashing)
                         {
@@ -65,7 +66,7 @@ namespace Game
                                 forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                             } else
                             {
-                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own)
+                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
                             }
                             
                         } else
@@ -81,8 +82,10 @@ namespace Game
                     }
 
                     if(!otherComponenPhysicsBehaviours.HasBeenPushed)
+                    {
                         otherComponenPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                    otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
+                        otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
+                    }
                 }
 
             }
@@ -128,7 +131,7 @@ namespace Game
             float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
             float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
 
-            float force = statsController.BaseForce * weightFactor * enduranceContribution;
+            float force = statsController.BaseForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
 
             Debug.Log(force);
             return force;
