@@ -10,8 +10,9 @@ public class TriggerPushShootAction : Action
     {
         if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
         {
+            Debug.Log("Push Shooting");
             // to do (call push shooting method)
-            controller.GetBehaviour<PlayerInputController>().IsPushShootMode = false;
+            // controller.GetBehaviour<PlayerInputController>().IsPushShootMode = false;
         }
     }
 }

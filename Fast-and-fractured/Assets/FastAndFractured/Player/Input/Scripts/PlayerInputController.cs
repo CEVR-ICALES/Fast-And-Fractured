@@ -117,8 +117,8 @@ public class PlayerInputController : MonoBehaviour
 
         inputActions.PlayerInputActions.ShootingMode.started += ctx => ChangeShootMode();
 
-        inputActions.PlayerInputActions.Shoot.performed += ctx => SetShootTypeBool(true);
-        inputActions.PlayerInputActions.Shoot.canceled += ctx => SetShootTypeBool(false);
+        inputActions.PlayerInputActions.Shoot.started += ctx => SetShootType();
+        inputActions.PlayerInputActions.Shoot.canceled += ctx => UnsetShootType();
 
         inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
         inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
@@ -249,15 +249,28 @@ public class PlayerInputController : MonoBehaviour
         
     }
 
-    private void SetShootTypeBool(bool isShooting)
+    private void SetShootType()
     {
         if (_isPushShootMode)
         {
-            _isPushShooting = isShooting;
+            _isPushShooting = true;
         }
         else
         {
-            _isShooting = isShooting;
+            _isShooting = true;
+        }
+    }
+
+    private void UnsetShootType()
+    {
+        if (_isPushShootMode)
+        {
+            _isPushShooting = false;
+            _isPushShootMode = false;
+        }
+        else
+        {
+            _isShooting = false;
         }
     }
 
