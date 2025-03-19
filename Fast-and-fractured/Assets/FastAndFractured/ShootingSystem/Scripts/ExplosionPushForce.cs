@@ -1,68 +1,81 @@
 using System.Collections;
 using System.Collections.Generic;
-using Game;
 using UnityEngine;
-
-public class ExplosionForce : MonoBehaviour
+namespace Game
 {
-    private float _pushForce;
-    public SphereCollider ExplosionCollider {set=> _explosionCollider = value; }
-    private SphereCollider _explosionCollider;
-    [SerializeField] private Transform _explosionVFX;
+    public class ExplosionForce : MonoBehaviour
+    {
+        private float _pushForce;
+        public SphereCollider ExplosionCollider { set => _explosionCollider = value; }
+        private SphereCollider _explosionCollider;
+        [SerializeField] private Transform _explosionVFX;
 
-    public void DesactivateExplostionHitbox()
-    {
-        gameObject.SetActive(false);
-    }
-    public void ActivateExplosionHitbox(float radius,float pushForce,Vector3 center)
-    {
-        if (_explosionCollider != null)
+        [Header("Explosion Angles")]
+        [Header("Forward")]
+        [SerializeField] private float forwardTo = 45f;
+        [Header("Right")]
+        [SerializeField] private float rightTo = 135f;
+        [Header("Back")]
+        [SerializeField] private float backTo = -135f;
+        [Header("Left")]
+        [SerializeField] private float leftTo = -45f;
+
+        public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center)
         {
-            gameObject.SetActive(true);
-            _pushForce = pushForce;
-            _explosionCollider.center = center;
-            _explosionCollider.radius = radius;
-            _explosionVFX.localScale = Vector3.one * radius;
+            if (_explosionCollider != null)
+            {
+                gameObject.SetActive(true);
+                _pushForce = pushForce;
+                _explosionCollider.center = center;
+                _explosionCollider.radius = radius;
+                _explosionVFX.localScale = Vector3.one * radius;
+            }
         }
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<StatsController>(out var statsController))
+        public void DesactivateExplostionHitbox()
         {
-            float oCarWeight = statsController.Weight;
-            float oCarEnduranceFactor = statsController.Endurance;
-            float force = _pushForce * (1 - oCarEnduranceFactor) * (/*oCarWeight*/ other.GetComponent<Rigidbody>().mass / 20);
-            Vector3 direction = CalculateDirectionByRegion(other.transform);
+            gameObject.SetActive(false);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.TryGetComponent<StatsController>(out var statsController))
+            {
+                //float oCarWeight = statsController.Weight;
+                Rigidbody oRB = other.GetComponent<Rigidbody>();
+                float oCarEnduranceFactor = statsController.Endurance / statsController.MaxEndurance;
+                //Provisional Formula till real implentation
+                float force = _pushForce * (1 - oCarEnduranceFactor) * (/*oCarWeight*/ oRB.mass / 20);
+                Vector3 direction = CalculateDirectionByRegion(other.transform);
                 float distanceToCenter = Vector3.Distance(other.transform.position, transform.position + _explosionCollider.center);
-                other.GetComponent<Rigidbody>().AddForce(direction * force * (1 - (distanceToCenter / _explosionCollider.radius)));
+                oRB.AddForce(direction * force * (1 - (distanceToCenter / _explosionCollider.radius)));
+            }
         }
-    }
 
-    private Vector3 CalculateDirectionByRegion(Transform target)
-    {
-        var directionToObject = (target.position - (transform.position * _explosionCollider.radius)).normalized;
-        // Determinar la región del objeto
-        Vector3 forwardDirection = transform.forward;
-        float angle = Vector3.SignedAngle(forwardDirection, directionToObject, Vector3.up);
-        // Aplicar fuerza adicional según la región
-        Vector3 regionDirection = Vector3.zero;
-        if (angle >= -45f && angle < 45f) // Forward
+        private Vector3 CalculateDirectionByRegion(Transform target)
         {
-            return transform.forward;
+            var directionToObject = (target.position - (transform.position * _explosionCollider.radius)).normalized;
+
+            Vector3 forwardDirection = transform.forward;
+            float angle = Vector3.SignedAngle(forwardDirection, directionToObject, Vector3.up);
+
+            if (angle >= leftTo && angle < forwardTo) // Forward
+            {
+                return transform.forward;
+            }
+            else if (angle >= forwardTo && angle < rightTo) // Right
+            {
+                return transform.right;
+            }
+            else if (angle >= rightTo || angle < backTo) // Back
+            {
+                return -transform.forward;
+            }
+            else if (angle >= backTo && angle < leftTo) // Left
+            {
+                return -transform.right;
+            }
+            else
+                return transform.forward;
         }
-        else if (angle >= 45f && angle < 135f) // Right
-        {
-            return transform.right;
-        }
-        else if (angle >= 135f || angle < -135f) // Back
-        {
-           return -transform.forward;
-        }
-        else if (angle >= -135f && angle < -45f) // Left
-        {
-           return -transform.right;
-        }
-        else 
-            return transform.forward;
     }
 }

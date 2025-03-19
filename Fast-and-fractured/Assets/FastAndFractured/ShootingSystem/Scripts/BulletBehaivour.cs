@@ -6,9 +6,7 @@ using UnityEngine;
 
 public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 {
-    protected Rigidbody rb;
-    protected Collider ownCollider;
-    private MeshRenderer _meshRenderer;
+   
     [SerializeField] protected Pooltype pooltype;
     public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
     public Vector3 Velocity { set => velocity = value; }
@@ -18,11 +16,16 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     public float Damage { set => damage = value; }
     protected float damage;
     protected Vector3 initPosition;
-    [SerializeField] protected GameObject particles;
+
     public bool InitValues => initValues;
-    [SerializeField ]private bool initValues = true;
-    [SerializeField] private float delayProyectileEnd = 1.5f;
-   
+    [SerializeField] private bool initValues = true;
+    //References
+    protected Rigidbody rb;
+    protected Collider ownCollider;
+    private MeshRenderer _meshRenderer;
+    [SerializeField] protected GameObject particles;
+    [Tooltip("Time delay to allow particles to show up")] [SerializeField] private float delayProyectileEnd = 1.5f;
+
     // Update is called once per frame
     protected abstract void FixedUpdate();
     public virtual void InitializeValues()
@@ -49,7 +52,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
             _meshRenderer.enabled = false;
             rb.constraints = RigidbodyConstraints.FreezePosition;
             rb.constraints = RigidbodyConstraints.FreezeRotation;
-            transform.rotation = new Quaternion(0,0,0,0);
+            transform.rotation = new Quaternion(0, 0, 0, 0);
             particles.SetActive(true);
             TimerManager.Instance.StartTimer(delayProyectileEnd, () =>
             {

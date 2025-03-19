@@ -45,6 +45,9 @@ namespace Game
             ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider =_ignoredCollider;
         }
 
+        /// <summary>
+        /// Send the shoot user collider at the start for the projectiles to ignore it's own collider
+        /// </summary>
         public void IgnoreCollider(Collider collider)
         {
             _ignoredCollider = collider;

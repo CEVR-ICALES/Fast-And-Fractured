@@ -72,8 +72,11 @@ namespace Game
         public float NormalShootCadenceTime;
         public float NormalShootRange;
         public float PushShootSpeed;
+        [Tooltip("The angle include from 10º to 89º. 90º will return infinity.")]
         public float PushShootAngle;
+     [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")] 
         public float PushShootRange;
+        [Tooltip("Bigger the gravity multiplier faster the projectile.")]
         public float PushShootGravityMultiplier;
         public int PushShootBounceNum;
         public float PushShootBounceForce;
