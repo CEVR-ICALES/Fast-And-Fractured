@@ -84,7 +84,7 @@ public class PlayerInputController : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
 
         inputActions = new PlayerInputAction();
