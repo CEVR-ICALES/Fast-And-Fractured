@@ -42,7 +42,7 @@ namespace Game
             {
                 //float oCarWeight = statsController.Weight;
                 Rigidbody oRB = other.GetComponent<Rigidbody>();
-                float oCarEnduranceFactor = statsController.Endurance / statsController.MaxEndurance;
+                float oCarEnduranceFactor = statsController.Endurance;
                 //Provisional Formula till real implentation
                 float force = _pushForce * (1 - oCarEnduranceFactor) * (/*oCarWeight*/ oRB.mass / 20);
                 Vector3 direction = CalculateDirectionByRegion(other.transform);
