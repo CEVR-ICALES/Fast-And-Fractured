@@ -5,6 +5,7 @@ namespace Game
 {
     public class NormalShootHandle : ShootingHandle
     {
+        private Collider _ignoredCollider;
         public float CountOverHeat { get => _countOverHeat; }
         private float _countOverHeat;
         public bool IsOverHeat { get => _isOverHeat; }
@@ -41,17 +42,26 @@ namespace Game
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
+            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider =_ignoredCollider;
+        }
+
+        /// <summary>
+        /// Send the shoot user collider at the start for the projectiles to ignore it's own collider
+        /// </summary>
+        public void IgnoreCollider(Collider collider)
+        {
+            _ignoredCollider = collider;
         }
 
         public void NormalShooting()
         {
-            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHead,
-                characterStatsController.NormalOverHead) && !_isOverHeat)
+            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHeat,
+                characterStatsController.NormalOverHeat) && !_isOverHeat)
             {
                 if (canShoot)
                 {
                     Debug.Log("Shoot");
-                    Vector3 velocity = (currentShootDirection + directionOffset) * characterStatsController.NormalShootSpeed;
+                    Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
                     ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
                     canShoot = false;
                     TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,

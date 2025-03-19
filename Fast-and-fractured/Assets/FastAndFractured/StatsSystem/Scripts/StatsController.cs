@@ -64,6 +64,9 @@ namespace Game
         [SerializeField] private float currentPushShootDMG;
         public float NormalShootDamage { get => currentNormalShootDMG; }
         public float PushShootDamage { get => currentPushShootDMG; }
+        public float PushShootForce { get => charDataSO.PushShootFORCE; }
+        public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
+        public Vector3 ExplosionCenterOffset { get => charDataSO.ExplosionCenterOffset; }
 
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
@@ -72,6 +75,9 @@ namespace Game
         public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
         public float PushShootRange {get => charDataSO.PushShootRange;}
         public float PushShootAngle { get => charDataSO.PushShootAngle; }
+        public float PushShootGravityMultiplier { get=> charDataSO.PushShootGravityMultiplier;}
+        public int PushShootBounceNum {get=> charDataSO.PushShootBounceNum;}
+        public float PushShootBounceForce {get=> charDataSO.PushShootBounceForce;}
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
@@ -89,7 +95,7 @@ namespace Game
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
-        public float NormalOverHead { get => charDataSO.NormalShootOverHeat;}
+        public float NormalOverHeat { get => charDataSO.NormalShootOverHeat;}
         public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
 
         #endregion

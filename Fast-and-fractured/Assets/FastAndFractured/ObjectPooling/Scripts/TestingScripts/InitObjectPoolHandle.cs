@@ -15,5 +15,6 @@ public class InitObjectPoolHandle : MonoBehaviour
         {
             ObjectPoolManager.Instance.CreateObjectPool(poolSO);
         }
+        Cursor.lockState = CursorLockMode.Locked;
     }
 }
