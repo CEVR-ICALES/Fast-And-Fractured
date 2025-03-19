@@ -72,6 +72,54 @@ public class TimerManager : MonoBehaviour
         return timer;
     }
 
+    public void PauseTimer(string id)
+    {
+        if (accessibleTimers.TryGetValue(id, out var timer))
+        {
+            timer.Pause(); ;
+        }
+        else
+        {
+            Debug.LogWarning($"{id} is not accessible");
+        }
+    }
+
+    public void PauseTimer(Timer timer)
+    {
+        if (timer != null)
+        {
+            timer.Pause(); ;
+        }
+        else
+        {
+            Debug.LogWarning("Trying to pause a null timer");
+        }
+    }
+
+    public void ResumeTimer(string id)
+    {
+        if (accessibleTimers.TryGetValue(id, out var timer))
+        {
+            timer.Resume(); ;
+        }
+        else
+        {
+            Debug.LogWarning($"{id} is not accessible");
+        }
+    }
+
+    public void ResumeTimer(Timer timer)
+    {
+        if (timer != null)
+        {
+            timer.Resume(); ;
+        }
+        else
+        {
+            Debug.LogWarning("Trying to resume a null timer");
+        }
+    }
+
     public void StopTimer(string id)
     {
         if (accessibleTimers.TryGetValue(id, out var timer))
@@ -84,6 +132,87 @@ public class TimerManager : MonoBehaviour
         }
     }
 
+    public void StopTimer(Timer timer)
+    {
+        if (timer != null)
+        {
+            RemoveTimer(timer);
+        }
+        else
+        {
+            Debug.LogWarning("Trying to stop a null timer");
+        }
+    }
+    public void SetElapsedTimeToTimer(string id,float newElapsedTime) {
+
+        if (accessibleTimers.TryGetValue(id, out var timer))
+        {
+            timer.SetElapsedTime(newElapsedTime);
+        }
+        else
+        {
+            Debug.LogWarning($"{id} is not accessible");
+        }
+    }
+    public void SetElapsedTimeToTimer(Timer timer, float newElapsedTime)
+    {
+        if (timer != null)
+        {
+            timer.SetElapsedTime(newElapsedTime);
+        }
+        else
+        {
+            Debug.LogWarning("Trying to modify the elapsed time of a null timer");
+        }
+    }
+
+    public void ReverseTimer(string id)
+    {
+        if (accessibleTimers.TryGetValue(id, out var timer))
+        {
+            timer.Reverse();
+        }
+        else
+        {
+            Debug.LogWarning($"{id} is not accessible");
+        }
+    }
+    public void ReverseTimer(Timer timer)
+    {
+        if (timer != null)
+        {
+            timer.Reverse();
+        }
+        else
+        {
+            Debug.LogWarning("Trying to reverse a null timer");
+        }
+    }
+
+    public void UnreverseTimer(string id)
+    {
+        if (accessibleTimers.TryGetValue(id, out var timer))
+        {
+            timer.Unreverse();
+        }
+        else
+        {
+            Debug.LogWarning($"{id} is not accessible");
+        }
+    }
+    public void UnreverseTimer(Timer timer)
+    {
+        if (timer != null)
+        {
+            timer.Unreverse();
+        }
+        else
+        {
+            Debug.LogWarning("Trying to unreverse a null timer");
+        }
+    }
+
+
     private void RemoveTimer(Timer timer)
     {
         activeTimers.Remove(timer);
@@ -94,14 +223,28 @@ public class TimerManager : MonoBehaviour
         timersPool.AddLast(timer);
     }
 
+    
+
     private void Update()
     {
         foreach (var timer in new LinkedList<Timer>(activeTimers)) //create a copy to ensure safety while iteratoin over the list
         {
-            timer.elapsedTime += Time.deltaTime;
+            if (timer.isPaused) continue;
+
+            if (timer.isReversed)
+            {
+                timer.elapsedTime -= Time.deltaTime;
+            }
+            else
+            {
+                timer.elapsedTime += Time.deltaTime;
+            }
+
             timer.timerUpdate?.Invoke(timer.GetProgress());//call progress if it has content on it
 
-            if (timer.elapsedTime >= timer.duration)
+            bool finished = timer.isReversed ? timer.elapsedTime <= 0 : timer.elapsedTime >= timer.duration;
+
+            if (finished)
             {
                 timer.callback?.Invoke(); //the ? (non-conditional operator) this expression evaluates to null if no callback has been assigned to prevent NullReferences
                 if (timer.isRepeating)
