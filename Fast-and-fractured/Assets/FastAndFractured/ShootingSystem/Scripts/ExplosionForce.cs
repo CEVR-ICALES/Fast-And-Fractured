@@ -38,7 +38,7 @@ namespace Game
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<StatsController>(out var statsController))
+            if (other.TryGetComponent(out StatsController statsController))
             {
                 //float oCarWeight = statsController.Weight;
                 Rigidbody oRB = other.GetComponent<Rigidbody>();
