@@ -89,7 +89,7 @@ namespace Game
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
-        public float NormalOverHead { get => charDataSO.NormalShootOverHeat;}
+        public float NormalOverHeat { get => charDataSO.NormalShootOverHeat;}
         public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
 
         #endregion
