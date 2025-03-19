@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: "\xDAniqueAbilityState"
+  m_Name: UniqueAbilityState
   m_EditorClassIdentifier: 
-  enterActions: []
-  actions:
+  enterActions:
+  - {fileID: 11400000, guid: 20ebf1ffaa1a0094b89361e9fb1a610d, type: 2}
   - {fileID: 11400000, guid: bf690a73bc786c9459b45d986846c483, type: 2}
+  actions: []
   exitActions: []
   transitions:
-  - decision: {fileID: 11400000, guid: 5fd46d8bdb53c7d49a8065dddba81cb1, type: 2}
+  - decision: {fileID: 11400000, guid: 6bbcd96b9f7d7a64980d7d33a2b54d4d, type: 2}
     trueState: {fileID: 11400000, guid: ed599a34f3769df49a78d82fc5b3b206, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0

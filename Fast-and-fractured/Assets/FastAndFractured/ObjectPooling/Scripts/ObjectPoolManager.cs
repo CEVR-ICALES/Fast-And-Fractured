@@ -65,6 +65,13 @@ namespace Game
             GameObject[] gameObjectsPooled = new GameObject[num];
             for (int i = 0; i < num; i++) {
                 var gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                if (gameObjectPooled.TryGetComponent<IPooledObject>(out var pooledObject))
+                {
+                    if (pooledObject.InitValues)
+                    {
+                        pooledObject.InitializeValues();
+                    }
+                }
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
             }

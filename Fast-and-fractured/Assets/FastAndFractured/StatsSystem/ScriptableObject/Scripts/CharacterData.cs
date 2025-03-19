@@ -64,20 +64,29 @@ namespace Game
         [Header("DamageAndPushing")]
 
         public float NormalShootDMG;
-        public float PushShootDMG;
-        public float PushShootFORCE;
         public float MaxNormalShootDMG;
         public float MinNormalShootDMG;
+        public float PushShootDMG;
+        public float PushShootFORCE;
         public float MaxPushShootDMG;
         public float MinPushShootDMG;
+        public float ExplosionRadius;
+        public Vector3 ExplosionCenterOffset;
 
         [Header("ShootMovement")]
         public float NormalShootSpeed;
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime;
         public float NormalShootMaxRange;
         public float PushShootSpeed;
+        [Tooltip("The angle include from 10º to 89º. 90º will return infinity.")]
         public float PushShootAngle;
+     [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")] 
         public float PushShootRange;
+        [Tooltip("Bigger the gravity multiplier faster the projectile.")]
+        public float PushShootGravityMultiplier;
+        public int PushShootBounceNum;
+        public float PushShootBounceForce;
+
 
 
         [Header("Cooldowns")]
