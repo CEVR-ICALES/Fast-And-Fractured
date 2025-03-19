@@ -26,7 +26,7 @@ namespace Game {
 
         public void PushShooting()
         {
-            if (canShoot)
+            if (CanShoot)
             {
                 float range = characterStatsController.PushShootRange;
                 float angle = characterStatsController.PushShootAngle;

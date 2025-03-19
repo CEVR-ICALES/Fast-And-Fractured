@@ -6,6 +6,8 @@ namespace Game
     public abstract class ShootingHandle : MonoBehaviour
     {
         public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
+        public bool CanShoot { get => canShoot;   }
+
         protected Vector3 currentShootDirection;
         [SerializeField] protected StatsController characterStatsController;
         [SerializeField]

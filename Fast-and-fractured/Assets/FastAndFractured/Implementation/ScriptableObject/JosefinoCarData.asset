@@ -45,20 +45,25 @@ MonoBehaviour:
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
   NormalShootDMG: 2
-  PushShootDMG: 0
-  PushShootFORCE: 0
   MaxNormalShootDMG: 0
   MinNormalShootDMG: 0
+  PushShootDMG: 0
+  PushShootFORCE: 100
   MaxPushShootDMG: 0
   MinPushShootDMG: 0
+  ExplosionRadius: 0
+  ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 300
   PushShootSpeed: 0
-  PushShootAngle: 0
-  PushShootRange: 0
+  PushShootAngle: 20
+  PushShootRange: 15
+  PushShootGravityMultiplier: 30
+  PushShootBounceNum: 4
+  PushShootBounceForce: 15
   DashCooldown: 2
-  PushShootCooldown: 0
+  PushShootCooldown: 3
   UniqueAbilityCooldown: 0
   NormalShootOverHeat: 5
   RecoveryCooldown: 0

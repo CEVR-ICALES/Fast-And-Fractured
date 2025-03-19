@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3861146883688809599}
   - component: {fileID: 3650285029984363615}
   - component: {fileID: 1462976936281334799}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FrontRightWheelMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6621392812936458013}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CameraLookAtPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 5703304132694787634}
   - component: {fileID: 4571509030277317915}
   - component: {fileID: 275862309066683088}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ShootingController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,8 @@ MonoBehaviour:
   characterStatsController: {fileID: 6322013904652725692}
   shootPoint: {fileID: 5594866425516494345}
   pooltype: 2
-  directionOffset: {x: 0, y: 0, z: 0}
+  directionCenterOffSet: {x: 0, y: 0, z: 0}
+  ignoredCollider: {fileID: 0}
 --- !u!1 &2266527031095279384
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +193,7 @@ GameObject:
   - component: {fileID: 7364250427497882821}
   - component: {fileID: 3304668357125392640}
   - component: {fileID: 6392456736375715799}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RearRightWheelCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -289,7 +290,7 @@ GameObject:
   - component: {fileID: 2756210924247118650}
   - component: {fileID: 6322013904652725692}
   - component: {fileID: 4447401545063152010}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DevPlayer19-3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -550,7 +551,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 26251699727227035}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: WheelMeshes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -587,7 +588,7 @@ GameObject:
   - component: {fileID: 1943993727024099250}
   - component: {fileID: 2172018270497406488}
   - component: {fileID: 4254501082061527197}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RearLeftWheelMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -670,7 +671,7 @@ GameObject:
   - component: {fileID: 4322049873420734438}
   - component: {fileID: 6190021323098410739}
   - component: {fileID: 57574021310502980}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RearLeftWheelCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -758,7 +759,7 @@ GameObject:
   - component: {fileID: 185696210661361874}
   - component: {fileID: 2290299218186157932}
   - component: {fileID: 4509823443621973599}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FrontLeftWheelCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -844,7 +845,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5594866425516494345}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ShootPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -877,7 +878,7 @@ GameObject:
   - component: {fileID: 5219421703639874498}
   - component: {fileID: 4757443189089006529}
   - component: {fileID: 7853407177305914177}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RearRightWheelMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -958,7 +959,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4454925188061373315}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: WheelColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -995,7 +996,7 @@ GameObject:
   - component: {fileID: 3243689473404361304}
   - component: {fileID: 6109715392060491221}
   - component: {fileID: 8395346975851115850}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FrontLeftWheelMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1078,7 +1079,7 @@ GameObject:
   - component: {fileID: 7759846871643708226}
   - component: {fileID: 8922755473117020367}
   - component: {fileID: 1698939130069611608}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FrontRightWheelCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

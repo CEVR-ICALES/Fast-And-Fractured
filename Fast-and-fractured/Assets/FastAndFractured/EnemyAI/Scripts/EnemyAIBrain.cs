@@ -28,6 +28,7 @@ public class EnemyAIBrain : MonoBehaviour
     public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
 
     [SerializeField] NormalShootHandle normalShootHandle;
+    [SerializeField] PushShootHandle pushShootHandle;
     [SerializeField] CarMovementController carMovementController;
     [SerializeField] PhysicsBehaviour physicsBehaviour;
     [SerializeField] StatsController statsController;
@@ -57,6 +58,10 @@ public class EnemyAIBrain : MonoBehaviour
         if (!normalShootHandle)
         {
             normalShootHandle = GetComponentInChildren<NormalShootHandle>();
+        }
+        if (!pushShootHandle)
+        {
+            pushShootHandle = GetComponentInChildren<PushShootHandle>();
         }
         if (!carMovementController)
         {
@@ -124,13 +129,7 @@ public class EnemyAIBrain : MonoBehaviour
     #region CombatState
     public void NormalShoot()
     {
-        Vector3 shootingDirection = CalcNormalizedTargetDirection();
-
-        //Add shooting error 
-        shootingDirection += new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
-            UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
-
-        normalShootHandle.CurrentShootDirection = shootingDirection;
+        normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
         normalShootHandle.NormalShooting();
     }
     public void StopDelayDecreaseOveheat()
@@ -143,9 +142,8 @@ public class EnemyAIBrain : MonoBehaviour
     }
     public void PushShoot()
     {
-        //TODO
-        //Shoot pushign bullet to target
-        //if target and target is nearby
+        pushShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
+        pushShootHandle.PushShooting();
     }
 
     public void UseUniqueAbility()
@@ -182,10 +180,8 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     public bool IsPushShootReady()
-    {
-        //TODO
-        //Ask if push shoot is ready
-        return true;
+    {  
+        return pushShootHandle.CanShoot;
     }
 
     public bool IsShootOverheated()
@@ -219,7 +215,6 @@ public class EnemyAIBrain : MonoBehaviour
     public bool IsInFront()
     {
         float angle = GetAngleDirection();
-        bool b = (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
         return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
     }
     #endregion
@@ -273,7 +268,7 @@ public class EnemyAIBrain : MonoBehaviour
         //If it's positive, go right
         return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
     }
-    Vector3 GetActivePathPoint()
+    private Vector3 GetActivePathPoint()
     {
         switch (_currentPath.corners.Length)
         {
@@ -287,7 +282,7 @@ public class EnemyAIBrain : MonoBehaviour
         }
     }
 
-    void CheckIfGoToNextPathPoint()
+    private void CheckIfGoToNextPathPoint()
     {
         if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner && 
             (_pathIndex +1) < _currentPath.corners.Length )
@@ -296,10 +291,19 @@ public class EnemyAIBrain : MonoBehaviour
         }
     }
 
-    void ResetIndexPath()
+    private void ResetIndexPath()
     {
         _pathIndex = START_CORNER_INDEX;
         _previousPath = _currentPath.corners;
+    }
+     
+    private Vector3 GetShootingDirectionWithError()
+    {
+        Vector3 shootingDirection = CalcNormalizedTargetDirection();
+
+        //Add shooting error 
+        return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
+            UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
     }
     #endregion
 }

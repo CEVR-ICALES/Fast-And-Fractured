@@ -9,6 +9,7 @@ namespace Game
     {
         public float CountOverHeat { get => _countOverHeat; }
         private float _countOverHeat;
+        [SerializeField]private Collider ignoredCollider;
 
         public bool IsOverHeat { get => _isOverHeat; }
         private bool _isOverHeat = false;
@@ -48,6 +49,15 @@ namespace Game
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
+            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+        }
+
+        /// <summary>
+        /// Send the shoot user collider at the start for the projectiles to ignore it's own collider
+        /// </summary>
+        public void IgnoreCollider(Collider collider)
+        {
+            ignoredCollider = collider;
         }
 
         public void NormalShooting()
@@ -71,7 +81,7 @@ namespace Game
 
             if (canShoot)
             {
-                Vector3 velocity = (currentShootDirection + directionOffset) * characterStatsController.NormalShootSpeed;
+                Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
                 canShoot = false;
                 TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
