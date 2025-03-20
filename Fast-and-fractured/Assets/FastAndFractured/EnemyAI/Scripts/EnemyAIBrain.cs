@@ -44,6 +44,7 @@ public class EnemyAIBrain : MonoBehaviour
     const float MAX_ANGLE_DIRECTION = 90f;
     const float FRONT_ANGLE = 20f;
     const int START_CORNER_INDEX = 1;
+    Vector3 startPosition;
     private void Awake()
     {
         // TODO change this to the correct way of referencing the player
@@ -78,8 +79,13 @@ public class EnemyAIBrain : MonoBehaviour
         physicsBehaviour.Rb = GetComponent<Rigidbody>();
         _currentPath = new NavMeshPath();
         _previousPath = new Vector3[0];
+        startPosition=  this.transform.position;
     }
-
+    public void ReturnToStartPosition()
+    {
+        this.transform.position = startPosition;
+        StopMovement();
+    }
     public float GetHealth()
     {
         return statsController.Endurance;
@@ -302,6 +308,13 @@ public class EnemyAIBrain : MonoBehaviour
         //Add shooting error 
         return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
             UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
+    }
+
+    public void StopMovement()
+    {
+        physicsBehaviour.Rb.angularVelocity = Vector3.zero;
+        physicsBehaviour.Rb.velocity = Vector3.zero;
+        carMovementController.StopAllCarMovement();
     }
     #endregion
 }
