@@ -140,5 +140,10 @@ namespace StateMachine
             }
             return null;
         }
+
+        public void ForceState(State newState)
+        {
+            ChangeState(newState);
+        }
     }
 }
