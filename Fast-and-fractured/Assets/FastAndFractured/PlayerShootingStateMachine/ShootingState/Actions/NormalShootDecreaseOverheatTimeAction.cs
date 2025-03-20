@@ -9,7 +9,7 @@ public class PauseOverheatTimeAction : Action
 {
     public override void Act(Controller controller)
     {
-        NormalShootHandle normalShootHandle= controller.GetBehaviour<NormalShootHandle>();
+        NormalShootHandle normalShootHandle = controller.GetBehaviour<NormalShootHandle>();
         normalShootHandle.PauseOverheatTime();
     }
 }
