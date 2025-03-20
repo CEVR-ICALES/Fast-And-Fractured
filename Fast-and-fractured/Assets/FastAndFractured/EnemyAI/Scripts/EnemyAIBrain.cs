@@ -207,8 +207,6 @@ public class EnemyAIBrain : MonoBehaviour
 
     public bool IsInValidRange(float distance)
     {
-        float d = Vector3.Distance(transform.position, _positionToDrive);
-        bool b = distance > Vector3.Distance(transform.position, _positionToDrive);
         return distance > Vector3.Distance(transform.position, _positionToDrive);
     }
 
