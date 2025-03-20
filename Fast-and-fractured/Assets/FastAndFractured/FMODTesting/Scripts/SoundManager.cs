@@ -20,24 +20,19 @@ namespace Game
         protected override void Awake()
         {
             base.Awake();
-
-            DontDestroyOnLoad(gameObject);
         }
 
         private void Start()
         {
-            //SetVolume("Volume", masterVolume);
             SetSFXVolume(masterVolume);
-
         }
 
         private void Update()
         {
-            //SetVolume("Volume", masterVolume);
             SetSFXVolume(masterVolume);
         }
 
-        #region Event Pooling Methodss
+        #region Event Pooling Methods
         /// <summary>
         /// Retrieves an EventInstance from the pool if available; otherwise, create a new one
         /// </summary>
@@ -177,7 +172,6 @@ namespace Game
         public void SetGeneralVolume(float value)
         {
             SetVCAVolume("vca:/General", value);
-
         }
 
         public void SetVCAVolume(string vcaPath, float value)
@@ -185,8 +179,6 @@ namespace Game
             VCA sfxVCA = RuntimeManager.GetVCA(vcaPath);
             sfxVCA.setVolume(value);
         }
-
-
         #endregion
     }
 }
