@@ -37,7 +37,6 @@ public class IsBelowEnduranceThresholdDecision : Decision
                 }
             }
         }
-        health = 40;
 
         return health <= enduranceThreshold;
     }

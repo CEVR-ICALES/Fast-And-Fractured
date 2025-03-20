@@ -99,25 +99,18 @@ namespace Game
 
         #endregion
 
-        public delegate void Died();
-        public Died OnDied;
-
         private float _errorGetStatFloat = -1;
 
 
         #region START EVENTS
-        void CustomStart()
-        {
-
-        }
-        // Start is called before the first frame update
-        void Start()
+    public void CustomStart()
         {
             //just for try propouses
             charDataSO.Dead = false;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
+
         #endregion
         // Update is called once per frame
         void Update()
@@ -186,10 +179,11 @@ namespace Game
             }
         }
 
-        private void Dead()
+        public float Dead()
         {
-            Debug.Log("Toy Muerto");
+            Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Dead = true;
+            return charDataSO.DeadDelay;
         }
         #endregion
 
