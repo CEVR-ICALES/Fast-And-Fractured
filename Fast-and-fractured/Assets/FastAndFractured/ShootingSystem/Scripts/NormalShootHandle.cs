@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using UnityEditor;
 using UnityEngine;
 namespace Game
 {
@@ -21,6 +20,7 @@ namespace Game
         private bool _shouldIncreaseOverheat = false;
 
         private Timer _overheatTimer;
+        private Timer _decreaseOverheatTimer;
 
         #region UnityEvents
         private void Start()
@@ -62,6 +62,8 @@ namespace Game
 
         public void NormalShooting()
         {
+            // Debug.Log(_isOverHeat);
+            // Debug.Log(_overheatTimer.id);
             if (_isOverHeat) return;
 
             if (_overheatTimer == null)
@@ -73,14 +75,14 @@ namespace Game
                 {
                     _countOverHeat = progress * characterStatsController.NormalOverHeat;
                 },
-                nameof(NormalShooting),
+                nameof(NormalShooting) + "kiasdnkkds",
                 false,
                 true);
             }
 
-
             if (canShoot)
             {
+                // Debug.Log("can shoot");
                 Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
                 canShoot = false;
@@ -97,22 +99,29 @@ namespace Game
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
         {
-            TimerManager.Instance.StartTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
+            _decreaseOverheatTimer = TimerManager.Instance.StartTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
             {
                 _shouldDecreaseOverheat = true;
                 TimerManager.Instance.SetElapsedTimeToTimer(_overheatTimer, _countOverHeat);
                 TimerManager.Instance.ReverseTimer(_overheatTimer);
             },
             null,
-            nameof(DecreaseOverheatTime),
+            nameof(DecreaseOverheatTime) + "kiasdnkkdsjhdfj",
             false,
             true);
+        }
+
+        //When player exits normal shoot state
+        public void PauseOverheatTime()
+        {
+            TimerManager.Instance.PauseTimer(_overheatTimer);
         }
 
         //When user enters normal shoot state
         public void StopDelayDecreaseOveheat()
         {
-            TimerManager.Instance.StopTimer(nameof(DecreaseOverheatTime));
+            TimerManager.Instance.ResumeTimer(_overheatTimer);
+            TimerManager.Instance.StopTimer(_decreaseOverheatTimer);
             TimerManager.Instance.UnreverseTimer(_overheatTimer);
         }
 
@@ -125,6 +134,7 @@ namespace Game
         {
             _isOverHeat = false;
             _shouldDecreaseOverheat = false;
+            TimerManager.Instance.StopTimer(_overheatTimer);
             _overheatTimer = null;
         }
 

@@ -20096,7 +20096,8 @@ MonoBehaviour:
   characterStatsController: {fileID: 7917500339781435169}
   shootPoint: {fileID: 280322767}
   pooltype: 2
-  directionOffset: {x: 0, y: 0, z: 0}
+  directionCenterOffSet: {x: 0, y: 0, z: 0}
+  ignoredCollider: {fileID: 3435760893268628249}
 --- !u!1001 &420303590
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30998,7 +30999,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isMovingThreshold: 0
-  isCurrentlyDashing: 0
+  IsCurrentlyDashing: 0
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1150
+  carWeightImportance: 0.2
+  applyForceYOffset: 0.2
+  PushApplyPoint: {fileID: 0}
   statsController: {fileID: 3469287836822692578}
 --- !u!1001 &705643921
 PrefabInstance:
@@ -54567,9 +54578,13 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 974663299248581994, guid: ae2409dd2d68da0459093ffb1ce2c5ce, type: 3}
+      propertyPath: poolSOList.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 974663299248581994, guid: ae2409dd2d68da0459093ffb1ce2c5ce, type: 3}
       propertyPath: poolSOList.Array.data[0]
       value: 
-      objectReference: {fileID: 11400000, guid: 219c6127e5e008a43bcbd8a5c46e650c, type: 2}
+      objectReference: {fileID: 11400000, guid: c5f07de82e315184e95e65afb647ebd2, type: 2}
     - target: {fileID: 2057355190036813191, guid: ae2409dd2d68da0459093ffb1ce2c5ce, type: 3}
       propertyPath: m_LocalPosition.x
       value: -13.571774
@@ -55486,7 +55501,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386190897}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17321894, y: -0.000000029351815, z: 0.0000000051623275, w: 0.98488337}
+  m_LocalRotation: {x: 0.17321892, y: 0, z: 0, w: 0.98488337}
   m_LocalPosition: {x: -35.5, y: 9.07, z: -15.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -90520,7 +90535,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isMovingThreshold: 0.5
-  isCurrentlyDashing: 0
+  IsCurrentlyDashing: 0
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1150
+  carWeightImportance: 0.2
+  applyForceYOffset: 0.2
+  PushApplyPoint: {fileID: 0}
   statsController: {fileID: 7917500339781435169}
 --- !u!1001 &2488488687816084863
 PrefabInstance:

@@ -1,3 +1,4 @@
+using Game;
 using StateMachine;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ public class DecreaseOverheatTimeAction : Action
 {
     public override void Act(Controller controller)
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        brain.DecreaseOverheatTime();
+        NormalShootHandle shootHandle = controller.GetBehaviour<NormalShootHandle>();
+        shootHandle.DecreaseOverheatTime();
     }
 }

@@ -1,3 +1,4 @@
+using Game;
 using StateMachine;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,8 +9,8 @@ public class StopDelayDecreaseOveheatAction : Action
 {
     public override void Act(Controller controller)
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        brain.StopDelayDecreaseOveheat();
+        NormalShootHandle shootingHandle = controller.GetBehaviour<NormalShootHandle>();
+        shootingHandle.StopDelayDecreaseOveheat();
     }
 
 
