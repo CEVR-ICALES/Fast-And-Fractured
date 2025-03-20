@@ -1,5 +1,32 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5299580285013877468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ShootingSFX
+  m_EditorClassIdentifier: 
+  Path: event:/ShootingSFX
+  Guid:
+    Data1: -1426590782
+    Data2: 1159805714
+    Data3: 2001885093
+    Data4: -2108599820
+  Banks:
+  - {fileID: -1652092905031659353}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 850
 --- !u!114 &-4803690650134879307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,10 +90,30 @@ MonoBehaviour:
   Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 638780109760634299
+  lastModified: 638780939593376182
   FileSizes:
   - Name: Desktop
-    Value: 1120
+    Value: 1222
+  Exists: 1
+--- !u!114 &-1652092905031659353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/ShootingSoundsBank.bank
+  m_EditorClassIdentifier: 
+  Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/ShootingSoundsBank.bank
+  Name: ShootingSoundsBank
+  StudioPath: bank:/ShootingSoundsBank
+  lastModified: 638780939594959042
+  FileSizes:
+  - Name: Desktop
+    Value: 26688
   Exists: 1
 --- !u!114 &-349671237487772621
 MonoBehaviour:
@@ -104,16 +151,18 @@ MonoBehaviour:
   - {fileID: -4301353942344211320}
   - {fileID: 2727504660809320080}
   - {fileID: -349671237487772621}
+  - {fileID: -1652092905031659353}
   EditorEvents:
   - {fileID: -4803690650134879307}
   - {fileID: 7346192620935083472}
   - {fileID: 4491108853055891816}
+  - {fileID: -5299580285013877468}
   EditorParameters: []
   MasterBanks:
   - {fileID: 2727504660809320080}
   StringsBanks:
   - {fileID: -4301353942344211320}
-  cacheTime: 638780109760634299
+  cacheTime: 638780939594959042
   cacheVersion: 131623
 --- !u!114 &776819482619325684
 MonoBehaviour:
@@ -178,7 +227,7 @@ MonoBehaviour:
   Path: ../FMOD-Project/FastAndFracture_FMOD/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 638780109760624324
+  lastModified: 638780939593356292
   FileSizes:
   - Name: Desktop
     Value: 2065792
