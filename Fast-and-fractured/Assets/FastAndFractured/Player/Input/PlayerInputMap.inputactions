@@ -112,6 +112,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DebugAIChangeState",
+                    "type": "Button",
+                    "id": "c7948b44-ab46-4ca0-8db2-ff3bf4abe4d5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugAIResetPosition",
+                    "type": "Button",
+                    "id": "6cff68b6-f007-416e-bcfa-1fa0a926af41",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -217,7 +235,7 @@
                 {
                     "name": "",
                     "id": "406dea28-aafa-44ce-8e1f-54249e513c07",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -398,6 +416,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f8ded8af-b478-41fe-b47d-4a1371bd43be",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugAIChangeState",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "edc1bed8-d6d1-4c51-b2d2-d576811dfeac",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugAIResetPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

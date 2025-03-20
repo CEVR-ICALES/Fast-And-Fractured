@@ -134,6 +134,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugAIChangeState"",
+                    ""type"": ""Button"",
+                    ""id"": ""c7948b44-ab46-4ca0-8db2-ff3bf4abe4d5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugAIResetPosition"",
+                    ""type"": ""Button"",
+                    ""id"": ""6cff68b6-f007-416e-bcfa-1fa0a926af41"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -239,7 +257,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""406dea28-aafa-44ce-8e1f-54249e513c07"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -422,6 +440,28 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Dash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8ded8af-b478-41fe-b47d-4a1371bd43be"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugAIChangeState"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""edc1bed8-d6d1-4c51-b2d2-d576811dfeac"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugAIResetPosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -442,6 +482,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_ThrowMine = m_PlayerInputActions.FindAction("ThrowMine", throwIfNotFound: true);
         m_PlayerInputActions_Pause = m_PlayerInputActions.FindAction("Pause", throwIfNotFound: true);
         m_PlayerInputActions_Dash = m_PlayerInputActions.FindAction("Dash", throwIfNotFound: true);
+        m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
+        m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -520,6 +562,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_ThrowMine;
     private readonly InputAction m_PlayerInputActions_Pause;
     private readonly InputAction m_PlayerInputActions_Dash;
+    private readonly InputAction m_PlayerInputActions_DebugAIChangeState;
+    private readonly InputAction m_PlayerInputActions_DebugAIResetPosition;
     public struct PlayerInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -536,6 +580,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @ThrowMine => m_Wrapper.m_PlayerInputActions_ThrowMine;
         public InputAction @Pause => m_Wrapper.m_PlayerInputActions_Pause;
         public InputAction @Dash => m_Wrapper.m_PlayerInputActions_Dash;
+        public InputAction @DebugAIChangeState => m_Wrapper.m_PlayerInputActions_DebugAIChangeState;
+        public InputAction @DebugAIResetPosition => m_Wrapper.m_PlayerInputActions_DebugAIResetPosition;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -581,6 +627,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dash.started += instance.OnDash;
             @Dash.performed += instance.OnDash;
             @Dash.canceled += instance.OnDash;
+            @DebugAIChangeState.started += instance.OnDebugAIChangeState;
+            @DebugAIChangeState.performed += instance.OnDebugAIChangeState;
+            @DebugAIChangeState.canceled += instance.OnDebugAIChangeState;
+            @DebugAIResetPosition.started += instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.performed += instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.canceled += instance.OnDebugAIResetPosition;
         }
 
         private void UnregisterCallbacks(IPlayerInputActionsActions instance)
@@ -621,6 +673,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dash.started -= instance.OnDash;
             @Dash.performed -= instance.OnDash;
             @Dash.canceled -= instance.OnDash;
+            @DebugAIChangeState.started -= instance.OnDebugAIChangeState;
+            @DebugAIChangeState.performed -= instance.OnDebugAIChangeState;
+            @DebugAIChangeState.canceled -= instance.OnDebugAIChangeState;
+            @DebugAIResetPosition.started -= instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.performed -= instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.canceled -= instance.OnDebugAIResetPosition;
         }
 
         public void RemoveCallbacks(IPlayerInputActionsActions instance)
@@ -652,5 +710,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnThrowMine(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
+        void OnDebugAIChangeState(InputAction.CallbackContext context);
+        void OnDebugAIResetPosition(InputAction.CallbackContext context);
     }
 }
