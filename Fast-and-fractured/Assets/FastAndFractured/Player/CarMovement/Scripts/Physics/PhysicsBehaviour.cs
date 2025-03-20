@@ -8,11 +8,18 @@ namespace Game
     {
         [SerializeField] private float isMovingThreshold;
         public bool IsCurrentlyDashing = false;
-        public AnimationCurve pushingForceEvaluate;
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
         const float SPEED_TO_METER_PER_SECOND = 3.6f;
 
+        [Header("Provisional Values for Calculate Force")]
+        [SerializeField] private AnimationCurve enduranceFactorEvaluate;
+        [SerializeField] private float averageCarWeight = 1150f;
+        [SerializeField] private float carWeightImportance = 0.2f;
+        [Tooltip("Small offset that will be applied to the vector of the direction so that the car doesnt stop fast by dragging through the floor")] 
+        [SerializeField] private float applyForceYOffset = 0.2f;
+        public Transform PushApplyPoint; // if we decide to not use the collision point as the starting point to generate the force this variable will be used
+        
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public Rigidbody Rb { get => _rb; set => _rb = value;}
@@ -50,32 +57,38 @@ namespace Game
                     Vector3 collisionNormal = contactPoint.normal;
                     float otherCarEnduranceFactor = otherComponenPhysicsBehaviours.StatsController.Endurance / otherComponenPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
                     float otherCarWeight = otherComponenPhysicsBehaviours.StatsController.Weight;
+                    float otherCarEnduranceImportance = otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
                     float forceToApply;
                     //detect if the contact was frontal
-                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit, to add how we are going to exatly handle who wins the frontal hit
+                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
                     {
                         if(otherComponenPhysicsBehaviours.IsCurrentlyDashing)
                         {
                             if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponenPhysicsBehaviours.Rb.velocity.magnitude))
                             {
-                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight);
+                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                             } else
                             {
-                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own)
+                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
                             }
                             
                         } else
                         {
-                            forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                            //forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                            forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                         }
                     }
                     else
                     {
-                        forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
+                        forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                        //forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     }
 
-                    otherComponenPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up  * 0.3f).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                    otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
+                    if(!otherComponenPhysicsBehaviours.HasBeenPushed)
+                    {
+                        otherComponenPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                        otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
+                    }
                 }
 
             }
@@ -94,6 +107,7 @@ namespace Game
         public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
         {
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
+            Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
         }
 
         public void AddForce(Vector3 force, ForceMode forceMode)
@@ -105,36 +119,24 @@ namespace Game
         {
             _rb.AddTorque(torque, forceMode);
         }
-
-        private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight)
+        private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
         {
-            if(oCarEnduranceFactor == 0)
-            {
-                oCarEnduranceFactor = 0.95f; // provisional
-            }
-
-            float force = statsController.BaseForce * (1 - oCarEnduranceFactor) * (oCarWeight / 20); // this 20 value should become a variable as to how important the weight is going to be, the bigger the number the less important the weight
-            Debug.Log(force);
+            float force = CalculateForceToApplyToOtherCar(oCarEnduranceFactor, oCarWeight, oCarEnduranceImportance);
+            // TO DO decide how we want this to behave (stronger push for the one who looses, more equitative approach¿?)
+            Debug.Log("This is a frontal Push");
             return force;
         }
 
-        private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight)
+        private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
         {
-            if(oCarEnduranceFactor == 0)
-            {
-                oCarEnduranceFactor = 0.95f;
-            }
-            float baseFrontalForce = statsController.BaseForce * 2f; // double the base force for frontal collisions
+            float weightFactor = 1 + ((oCarWeight - averageCarWeight) / averageCarWeight) * carWeightImportance; // is for example the car importance is 0.2 (20 %) and the car weights 1200 the final force will be multiplied by 1.05 or something close to that value since the car is heavier (number will be big so a 0.05 is enough for now)
+                                                                                                                 
+            float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
+            float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
 
-            // factor in the other car's endurance and weight
-            float enduranceWeightFactor = (1 - oCarEnduranceFactor) * (oCarWeight / 20f); // if we end up using this formula this 20 sholb become a "weightImportanceFactor varialbe in the statsController o physicsBehaviour"
+            float force = statsController.BaseForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
 
-            // factor in the speed of the other car (higher speed = more force)
-            float speedFactor = _rb.velocity.magnitude / SPEED_TO_METER_PER_SECOND;
-
-            float force = baseFrontalForce * enduranceWeightFactor * speedFactor;
-
-            Debug.Log("Frontal collision force: " + force);
+            Debug.Log(force);
             return force;
         }
 
