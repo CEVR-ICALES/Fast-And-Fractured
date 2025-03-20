@@ -72,7 +72,6 @@ namespace Game
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
         public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
         public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
-        public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
         public float PushShootRange {get => charDataSO.PushShootRange;}
         public float PushShootAngle { get => charDataSO.PushShootAngle; }
         public float PushShootGravityMultiplier { get=> charDataSO.PushShootGravityMultiplier;}
