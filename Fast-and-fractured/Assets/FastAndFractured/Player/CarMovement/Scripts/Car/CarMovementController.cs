@@ -113,7 +113,7 @@ namespace Game {
 
         public void HandleAccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking)
+            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
@@ -122,7 +122,7 @@ namespace Game {
 
         public void HandleDeaccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking)
+            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(-acceleration);

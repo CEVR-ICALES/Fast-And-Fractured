@@ -10,6 +10,7 @@ public class TriggerShootingAction : Action
         if (controller.GetBehaviour<PlayerInputController>().IsShooting)
         {
             Debug.Log("Shooting Bullets");
+            controller.GetBehaviour<NormalShootHandle>().CurrentShootDirection = Camera.main.transform.forward;
             controller.GetBehaviour<NormalShootHandle>().NormalShooting();
         }   
     }
