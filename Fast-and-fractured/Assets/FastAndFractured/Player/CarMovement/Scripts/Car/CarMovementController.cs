@@ -293,7 +293,7 @@ namespace Game {
                 }, (progress) =>
                 {
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
-                }, gameObject.name , false, true);
+                }, gameObject.name , false,  isAccessible: true);
             }
         }
 
