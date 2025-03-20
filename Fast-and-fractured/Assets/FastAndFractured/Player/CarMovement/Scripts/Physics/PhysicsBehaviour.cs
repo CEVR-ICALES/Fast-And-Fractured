@@ -22,14 +22,18 @@ namespace Game
         
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
-        public Rigidbody Rb { get => _rb; set => _rb = value; }
+        public Rigidbody Rb { get => _rb; set => _rb = value;}
         private Rigidbody _rb;
         private CarMovementController _carMovementController;
         public StatsController StatsController { get => statsController;}
 
-        private void Awake()
+        private void Start()
         {
-            _rb = GetComponent<Rigidbody>();
+            if (!_rb)
+            {
+                _rb = GetComponent<Rigidbody>();
+            }
+
             _carMovementController = GetComponent<CarMovementController>();
             _rb.mass = StatsController.Weight;
         }
@@ -118,7 +122,7 @@ namespace Game
         private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
         {
             float force = CalculateForceToApplyToOtherCar(oCarEnduranceFactor, oCarWeight, oCarEnduranceImportance);
-            // TO DO decide how we want this to behave (stronger push for the one who looses, more equitative approach¿?)
+            // TO DO decide how we want this to behave (stronger push for the one who looses, more equitative approachÂ¿?)
             Debug.Log("This is a frontal Push");
             return force;
         }

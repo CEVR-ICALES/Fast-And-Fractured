@@ -1,15 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using UnityEngine;
 namespace Game
 {
     public class NormalShootHandle : ShootingHandle
     {
-        private Collider _ignoredCollider;
         public float CountOverHeat { get => _countOverHeat; }
         private float _countOverHeat;
+        [SerializeField]private Collider ignoredCollider;
+
         public bool IsOverHeat { get => _isOverHeat; }
         private bool _isOverHeat = false;
+
+        //Delay before overheat variable starts to dwindle down
+        private const float DELAY_BEFORE_COOLING_SHOOT = 0.75f;
+
+        private bool _shouldDecreaseOverheat = false;
+        private bool _shouldIncreaseOverheat = false;
+
+        private Timer _overheatTimer;
 
         #region UnityEvents
         private void Start()
@@ -18,19 +29,15 @@ namespace Game
         }
         private void Update()
         {
-
-            //In the real method, the overHeat should be reduce after some time
-            if (!Input.GetKey(KeyCode.Mouse0))
+            if (_shouldDecreaseOverheat)
             {
-                    if (!Timer(ref _countOverHeat, _countOverHeat <= 0, 0))
-                    {
-                        ModOverHeat(-Time.deltaTime);
-                    }
-                    else
-                    {
-                        _isOverHeat = false;
-                    }
+                ModOverHeat(-Time.deltaTime);
+                if (_countOverHeat <= 0)
+                {
+                    OverheatDone();
+                }
             }
+  
         }
         #endregion
 
@@ -42,7 +49,7 @@ namespace Game
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider =_ignoredCollider;
+            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
         }
 
         /// <summary>
@@ -50,41 +57,75 @@ namespace Game
         /// </summary>
         public void IgnoreCollider(Collider collider)
         {
-            _ignoredCollider = collider;
+            ignoredCollider = collider;
         }
 
         public void NormalShooting()
         {
-            if (!Timer(ref _countOverHeat, _countOverHeat >= characterStatsController.NormalOverHeat,
-                characterStatsController.NormalOverHeat) && !_isOverHeat)
+            if (_isOverHeat) return;
+
+            if (_overheatTimer == null)
             {
-                if (canShoot)
+                _overheatTimer = TimerManager.Instance.StartTimer(characterStatsController.NormalOverHeat, () =>
                 {
-                    Debug.Log("Shoot");
-                    Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
-                    ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
-                    canShoot = false;
-                    TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
+                    _isOverHeat = true;
+                }, (progress) =>
+                {
+                    _countOverHeat = progress * characterStatsController.NormalOverHeat;
+                },
+                nameof(NormalShooting),
+                false,
+                true);
+            }
+
+
+            if (canShoot)
+            {
+                Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
+                ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
+                canShoot = false;
+                TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
                         () => { canShoot = true; },
                         null, "CadenceTimeNormalShoot " + characterStatsController.name,
                         false,
-                        false)
-                        ;
-                }
+                        false);
             }
-            else
+
+            
+        }
+
+        //When user exits normal shoot state
+        public void DecreaseOverheatTime()
+        {
+            TimerManager.Instance.StartTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
             {
-                _isOverHeat = true;
-            }
-            if (!_isOverHeat)
-            {
-                ModOverHeat(Time.deltaTime);
-            }
+                _shouldDecreaseOverheat = true;
+                TimerManager.Instance.SetElapsedTimeToTimer(_overheatTimer, _countOverHeat);
+                TimerManager.Instance.ReverseTimer(_overheatTimer);
+            },
+            null,
+            nameof(DecreaseOverheatTime),
+            false,
+            true);
+        }
+
+        //When user enters normal shoot state
+        public void StopDelayDecreaseOveheat()
+        {
+            TimerManager.Instance.StopTimer(nameof(DecreaseOverheatTime));
+            TimerManager.Instance.UnreverseTimer(_overheatTimer);
         }
 
         private void ModOverHeat(float modificator)
         {
             _countOverHeat += modificator;
+        }
+
+        private void OverheatDone()
+        {
+            _isOverHeat = false;
+            _shouldDecreaseOverheat = false;
+            _overheatTimer = null;
         }
 
     }
