@@ -14,7 +14,7 @@ public class BlockInputsAction : Action
 
         if(hasTime)
         {
-            controller.GetBehaviour<PlayerInputController>().EnableInput(inputBlockType, _blockTime);
+            controller.GetBehaviour<PlayerInputController>()?.EnableInput(inputBlockType, _blockTime);
         }
     }
 }
