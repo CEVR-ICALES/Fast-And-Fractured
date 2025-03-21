@@ -1,60 +1,64 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using System;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Utilities;
+
 namespace Game
 {
     public class NormalShootHandle : ShootingHandle
     {
-        public float CountOverHeat { get => _countOverHeat; }
-        private float _countOverHeat;
-        [SerializeField]private Collider ignoredCollider;
+        #region VARIABLES
 
-        public bool IsOverHeat { get => _isOverHeat; }
+        public float CountOverHeat
+        {
+            get => _countOverHeat;
+        }
+
+        private float _countOverHeat;
+        public float previousCountOverHeat;
+        [SerializeField] private Collider ignoredCollider;
+
+        public bool IsOverHeat
+        {
+            get => _isOverHeat;
+        }
+
         private bool _isOverHeat = false;
 
         //Delay before overheat variable starts to dwindle down
-        private const float DELAY_BEFORE_COOLING_SHOOT = 0.75f;
+        private const float DELAY_BEFORE_COOLING_SHOOT = 2f;
 
-        private bool _shouldDecreaseOverheat = false;
-        private bool _shouldIncreaseOverheat = false;
+        private ITimer _overheatTimer;
+        private string _delayUntilStartDecreaseTimerId;
 
-        private Timer _overheatTimer;
+        #endregion
 
-        #region UnityEvents
+        #region UNITY_EVENTS
+
         private void Start()
         {
             CustomStart();
         }
-        private void Update()
-        {
-            if (_shouldDecreaseOverheat)
-            {
-                ModOverHeat(-Time.deltaTime);
-                if (_countOverHeat <= 0)
-                {
-                    OverheatDone();
-                }
-            }
-  
-        }
+
         #endregion
+
+        #region OVERRIDE_METHODS
 
         protected override void CustomStart()
         {
             base.CustomStart();
             _countOverHeat = 0;
         }
+
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
             ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
         }
 
-        /// <summary>
-        /// Send the shoot user collider at the start for the projectiles to ignore it's own collider
-        /// </summary>
+        #endregion
+
+
         public void IgnoreCollider(Collider collider)
         {
             ignoredCollider = collider;
@@ -62,71 +66,132 @@ namespace Game
 
         public void NormalShooting()
         {
-            if (_isOverHeat) return;
-
-            if (_overheatTimer == null)
+            if (_isOverHeat)
             {
-                _overheatTimer = TimerManager.Instance.StartTimer(characterStatsController.NormalOverHeat, () =>
-                {
-                    _isOverHeat = true;
-                }, (progress) =>
-                {
-                    _countOverHeat = progress * characterStatsController.NormalOverHeat;
-                },
-                nameof(NormalShooting),
-                false,
-                true);
+                return;
             }
-
 
             if (canShoot)
             {
-                Vector3 velocity = (currentShootDirection + directionCenterOffSet) * characterStatsController.NormalShootSpeed;
+                Vector3 velocity = (currentShootDirection + directionCenterOffSet) *
+                                   characterStatsController.NormalShootSpeed;
+
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
+
                 canShoot = false;
-                TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
-                        () => { canShoot = true; },
-                        null, "CadenceTimeNormalShoot " + characterStatsController.name,
-                        false,
-                        false);
+
+                //Normal Cadence TImer 
+                TimerSystem.Instance.CreateTimer(characterStatsController.NormalShootCadenceTime,
+                    TimerDirection.Increase,
+                    () => { canShoot = true; }
+                );
             }
 
-            
+
         }
 
-        //When user exits normal shoot state
-        public void DecreaseOverheatTime()
+        #region CALLBACKS
+
+        private void OnOverheatComplete()
         {
-            TimerManager.Instance.StartTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
-            {
-                _shouldDecreaseOverheat = true;
-                TimerManager.Instance.SetElapsedTimeToTimer(_overheatTimer, _countOverHeat);
-                TimerManager.Instance.ReverseTimer(_overheatTimer);
-            },
-            null,
-            nameof(DecreaseOverheatTime),
-            false,
-            true);
+
+            _isOverHeat = true;
+            DecreaseOverheatTime();
         }
 
-        //When user enters normal shoot state
-        public void StopDelayDecreaseOveheat()
-        {
-            TimerManager.Instance.StopTimer(nameof(DecreaseOverheatTime));
-            TimerManager.Instance.UnreverseTimer(_overheatTimer);
-        }
-
-        private void ModOverHeat(float modificator)
-        {
-            _countOverHeat += modificator;
-        }
-
-        private void OverheatDone()
+        private void OnCoolingComplete()
         {
             _isOverHeat = false;
-            _shouldDecreaseOverheat = false;
             _overheatTimer = null;
         }
 
+
+        private void OnOverHeatUpdateIncrease(float currentTimerValue)
+        {
+            previousCountOverHeat = _countOverHeat;
+            _countOverHeat = currentTimerValue;
+        }
+
+        private void OnOverHeatUpdateDecrease(float currentTimerValue)
+        {
+            _countOverHeat = currentTimerValue;
+        }
+
+        #endregion
+
+        public bool isInState;
+        //When user exits normal shoot state
+        public void DecreaseOverheatTime()
+        {
+
+            if (_overheatTimer != null)
+            {
+                if (_overheatTimer.GetData().IsRunning && !_isOverHeat && isInState)
+                {
+                    TimerSystem.Instance.PauseTimer(_overheatTimer.GetData().ID);
+                }
+                if (string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
+                {
+                    _delayUntilStartDecreaseTimerId = TimerSystem.Instance.CreateTimer(DELAY_BEFORE_COOLING_SHOOT,
+                        TimerDirection.Decrease, onTimerDecreaseComplete: () =>
+                        {
+                            if (_overheatTimer != null)
+                            {
+                                _overheatTimer = TimerSystem.Instance.CreateTimer(_overheatTimer);
+                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Decrease, isRunning: true);
+
+                                _overheatTimer.ResumeTimer(); //And Call All The Resumes 
+
+                            }
+
+                            _delayUntilStartDecreaseTimerId = string.Empty;
+                        }).GetData().ID;
+
+                }
+
+                isInState = false;
+            }
+        }
+
+        //When user enters normal shoot state
+        public void StopDelayDecreaseOverheat()
+        {
+            //If is overheated, don't stop the decrease
+            if (_isOverHeat) return;
+
+            if (!string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
+            {
+                TimerSystem.Instance.StopTimer(
+                    _delayUntilStartDecreaseTimerId);
+                _delayUntilStartDecreaseTimerId = string.Empty;
+            }
+
+            if (_overheatTimer == null)
+            {
+                _overheatTimer = TimerSystem.Instance.CreateTimer(characterStatsController.NormalOverHeat,
+                    TimerDirection.Increase,
+                    onTimerIncreaseComplete: OnOverheatComplete,
+                    onTimerDecreaseComplete: OnCoolingComplete,
+                    onTimerIncreaseUpdate: OnOverHeatUpdateIncrease,
+                    onTimerDecreaseUpdate: OnOverHeatUpdateDecrease
+                );
+            }
+            else
+            {
+                if (_overheatTimer.GetData().IsRunning)
+                {
+                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase, isRunning: true);
+
+                }
+                else
+                {
+                    TimerSystem.Instance.CreateTimer(_overheatTimer);
+                }
+                TimerSystem.Instance.ResumeTimer(_overheatTimer.GetData().ID);
+            }
+
+            isInState = true;
+            return;
+        }
     }
 }

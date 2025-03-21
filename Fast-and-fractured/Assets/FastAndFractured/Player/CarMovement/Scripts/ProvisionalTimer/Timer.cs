@@ -55,4 +55,9 @@ public class Timer
     {
         isReversed = false;
     }
+
+    public override string ToString()
+    {
+        return "Timer: " + id + " Duration: " + duration + " ElapsedTime: " + elapsedTime + " IsRepeating: " + isRepeating + " IsPaused: " + isPaused + " IsReversed: " + isReversed ;
+    }
 }

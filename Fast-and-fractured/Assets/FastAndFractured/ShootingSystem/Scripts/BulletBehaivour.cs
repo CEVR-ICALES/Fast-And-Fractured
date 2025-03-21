@@ -60,7 +60,7 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
                 ownCollider.enabled = true;
                 _meshRenderer.enabled = true;
                 rb.constraints = RigidbodyConstraints.None;
-            }, null, "BulletTimerTillParticles " + gameObject.name, false, false);
+            }, null, "BulletTimerTillParticles " + Guid.NewGuid().ToString(), false, false);
         }
         else
             ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);

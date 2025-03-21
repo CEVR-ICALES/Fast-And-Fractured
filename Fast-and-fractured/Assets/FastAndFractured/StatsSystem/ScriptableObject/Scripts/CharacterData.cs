@@ -10,7 +10,7 @@ namespace Game
         [Header("Identificators")]
         public int Id;
         public string Name;
-         
+
 
         [Header("Health")]
         public float MaxEndurance;
@@ -22,7 +22,7 @@ namespace Game
 
         public float MaxSpeed;
         public float MaxSpeedDashing;
-        [Tooltip("Top speed permitted which vehicle can achieve")]  public float MaxSpeedMultiplier;
+        [Tooltip("Top speed permitted which vehicle can achieve")] public float MaxSpeedMultiplier;
         public float MinSpeed;
         public float MaxAcceleration;
         public float MinAcceleration;
@@ -77,10 +77,9 @@ namespace Game
         public float NormalShootSpeed;
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime;
         public float NormalShootMaxRange;
-        public float PushShootSpeed;
         [Tooltip("The angle include from 10º to 89º. 90º will return infinity.")]
         public float PushShootAngle;
-     [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")] 
+        [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")]
         public float PushShootRange;
         [Tooltip("Bigger the gravity multiplier faster the projectile.")]
         public float PushShootGravityMultiplier;
@@ -90,12 +89,13 @@ namespace Game
 
 
         [Header("Cooldowns")]
-        
+
         public float DashCooldown;
         public float PushShootCooldown;
         public float UniqueAbilityCooldown;
         public float NormalShootOverHeat;
         [Tooltip("When in flipped state, how much time is needed to return to normal state")] public float RecoveryCooldown;
         [Tooltip("Time to go from top speed to max speed")] public float FromTopSpeedToMaxSpeed;
+        public float DeadDelay;
     }
 }

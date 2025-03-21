@@ -30,12 +30,13 @@ namespace Game
 
         protected override void OnTriggerEnter(Collider other)
         {
-            //Provisional till layer decision
-                if (other.TryGetComponent<StatsController>(out var statsController))
-                {
-                    statsController.TakeEndurance(damage, false);
-                    OnBulletEndTrayectory();
-                }
+            if (other.TryGetComponent<StatsController>(out var statsController))
+            {
+                statsController.TakeEndurance(damage, false);
+                OnBulletEndTrayectory();
+            }
+            else
+                OnBulletEndTrayectory();
         }
     }
 }

@@ -8,7 +8,10 @@ namespace StateMachine
         public override void Act(Controller controller)
         {
             PlayerInputController playerInputController = controller.GetBehaviour<PlayerInputController>();
-            controller.GetBehaviour<CarMovementController>().HandleBrakingInput(playerInputController.IsBraking, playerInputController.MoveInput);
+            if (!playerInputController.IsMovementInputsBlocked)
+            {
+                controller.GetBehaviour<CarMovementController>().HandleBrakingInput(playerInputController.IsBraking, playerInputController.MoveInput);
+            }
         }
     }
 }

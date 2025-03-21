@@ -73,9 +73,9 @@ namespace Game {
         private void Update()
         {
             UpdateSpeedOverlay();
-            Debug.Log(_currentRbMaxVelocity);
-            Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
-            Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
+            //Debug.Log(_currentRbMaxVelocity);
+            //Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
+            //Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -113,7 +113,7 @@ namespace Game {
 
         public void HandleAccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking)
+            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
@@ -122,7 +122,7 @@ namespace Game {
 
         public void HandleDeaccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking)
+            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(-acceleration);

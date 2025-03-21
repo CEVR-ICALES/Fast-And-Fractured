@@ -11,8 +11,8 @@ public class TriggerPushShootAction : Action
         if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
         {
             Debug.Log("Push Shooting");
-            // to do (call push shooting method)
-            // controller.GetBehaviour<PlayerInputController>().IsPushShootMode = false;
+            controller.GetBehaviour<PushShootHandle>().CurrentShootDirection = Camera.main.transform.forward;
+            controller.GetBehaviour<PushShootHandle>().PushShooting();
         }
     }
 }

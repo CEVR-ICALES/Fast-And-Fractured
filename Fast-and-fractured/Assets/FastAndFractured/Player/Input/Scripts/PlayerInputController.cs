@@ -187,14 +187,18 @@ public class PlayerInputController : MonoBehaviour
         switch (inputBlockType)
         {
             case InputBlockTypes.ALL_MECHANICS:
+                ToggleMovementInputs(false);
+                ToggleShootingInputs(false);
                 _isAllMechanicsInputsBlocked = true;
                 break;
 
             case InputBlockTypes.MOVEMENT_MECHANICS:
+                ToggleMovementInputs(false);
                 _isMovementInputsBlocked = true;
                 break;
 
             case InputBlockTypes.SHOOTING_MECHANICS:
+                ToggleShootingInputs(false);
                 _isShootingInputsBlocked = true;
                 break;
         }
@@ -206,14 +210,18 @@ public class PlayerInputController : MonoBehaviour
         switch (inputBlockType)
         {
             case InputBlockTypes.ALL_MECHANICS:
+                ToggleMovementInputs(true);
+                ToggleShootingInputs(true);
                 _isAllMechanicsInputsBlocked = false;
                 break;
 
             case InputBlockTypes.MOVEMENT_MECHANICS:
+                ToggleMovementInputs(true);
                 _isMovementInputsBlocked = false;
                 break;
 
             case InputBlockTypes.SHOOTING_MECHANICS:
+                ToggleShootingInputs(true);
                 _isShootingInputsBlocked = false;
                 break;
         }
@@ -231,22 +239,47 @@ public class PlayerInputController : MonoBehaviour
             {
                 _isAbilityFinished = true;
             }
-            switch (inputBlockType)
-            {
-                case InputBlockTypes.ALL_MECHANICS:
-                    _isAllMechanicsInputsBlocked = false;
-                    break;
-
-                case InputBlockTypes.MOVEMENT_MECHANICS:
-                    _isMovementInputsBlocked = false;
-                    break;
-
-                case InputBlockTypes.SHOOTING_MECHANICS:
-                    _isShootingInputsBlocked = false;
-                    break;
-            }
+            EnableInput(inputBlockType);
         }, null, gameObject.name + Time.time, false, true);
         
+    }
+
+    private void ToggleMovementInputs(bool enable)
+    {
+        if (enable)
+        {
+            inputActions.PlayerInputActions.Accelerate.Enable();
+            inputActions.PlayerInputActions.Movement.Enable();
+            inputActions.PlayerInputActions.Brake.Enable();
+            inputActions.PlayerInputActions.Reverse.Enable();
+        }
+        else
+        {
+            inputActions.PlayerInputActions.Accelerate.Disable();
+            inputActions.PlayerInputActions.Movement.Disable();
+            inputActions.PlayerInputActions.Brake.Disable();
+            inputActions.PlayerInputActions.Reverse.Disable();
+        }
+    }
+
+    private void ToggleShootingInputs(bool enable)
+    {
+        if (enable)
+        {
+            inputActions.PlayerInputActions.Dash.Enable();
+            inputActions.PlayerInputActions.Shoot.Enable();
+            inputActions.PlayerInputActions.ShootingMode.Enable();
+            inputActions.PlayerInputActions.ThrowMine.Enable();
+            inputActions.PlayerInputActions.SpecialAbility.Enable();
+        }
+        else
+        {
+            inputActions.PlayerInputActions.Dash.Disable();
+            inputActions.PlayerInputActions.Shoot.Disable();
+            inputActions.PlayerInputActions.ShootingMode.Disable();
+            inputActions.PlayerInputActions.ThrowMine.Disable();
+            inputActions.PlayerInputActions.SpecialAbility.Disable();
+        }
     }
 
     private void SetShootType()
