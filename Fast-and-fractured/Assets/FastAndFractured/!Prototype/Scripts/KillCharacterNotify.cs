@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Game;
-public class KillCharacterHandle : MonoBehaviour
+public class KillCharacterNotify : MonoBehaviour
 {
     public delegate void TouchCharacter(StatsController statsController);
     public event TouchCharacter onTouchCharacter;

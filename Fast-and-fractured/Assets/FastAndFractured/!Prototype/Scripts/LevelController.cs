@@ -9,7 +9,7 @@ public class LevelController : MonoBehaviour
        
     [SerializeField] private List<ObjectPoolSO> poolSOList;
     [SerializeField] private List<StatsController> characters;
-        [SerializeField] private List<KillCharacterHandle> killCharacterHandles;
+        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
     // Start is called before the first frame update
     void Start()
     {
