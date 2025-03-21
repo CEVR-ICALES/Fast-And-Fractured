@@ -119,14 +119,15 @@ namespace Game
 
         #endregion
 
+        public bool isInState;
         //When user exits normal shoot state
          public void DecreaseOverheatTime()
         {
             if (_overheatTimer != null)  
             {
-                if (_overheatTimer.GetData().IsRunning&& !_isOverHeat)
+                if (_overheatTimer.GetData().IsRunning&& !_isOverHeat && isInState)
                 {
-             //      TimerSystem.Instance.PauseTimer(_overheatTimer.GetData().ID);
+                   TimerSystem.Instance.PauseTimer(_overheatTimer.GetData().ID);
                 }
                 if (string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
                 {
@@ -145,7 +146,9 @@ namespace Game
                             _delayUntilStartDecreaseTimerId = string.Empty;
                         }).GetData().ID;
                     
-                }  
+                }
+
+                isInState = false;
             }
         }
         [Obsolete("Remove this")]
@@ -176,20 +179,29 @@ namespace Game
                 ); 
             }
             else
-            { 
-                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase,isRunning:true);
+            {
+                if (_overheatTimer.GetData().IsRunning)
+                {
+                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase,isRunning:true);
+
+                }
+                else
+                {
+                    TimerSystem.Instance.CreateTimer(_overheatTimer);
+                }
                 TimerSystem.Instance.ResumeTimer(_overheatTimer.GetData().ID);
             }
+
+            isInState = true;
             return;
-            if (_overheatTimer != null && !_isOverHeat) //Ensure and Check
+            if (_overheatTimer != null && !_isOverHeat)  
             {
                if (_overheatTimer.GetData()
-                    .IsPaused) //Resume IF Time, StillCounting ,Resume, OtherWise if  is Decreasing Not problem
+                    .IsPaused)  
                 {
-                    //IsPause . And Starts Counting UP the 
+ 
 
-
-                    _overheatTimer.ResumeTimer(); // No pause , Start Increasin If Pause
+                    _overheatTimer.ResumeTimer();  
                 }
 
 
