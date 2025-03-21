@@ -2655,8 +2655,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4f758e675657af4da9046cf4bed7632, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxPoolSize: 50
-  initalPoolSize: 20
+  maxPoolSize: 1000
+  initalPoolSize: 1000
 --- !u!4 &1259201455
 Transform:
   m_ObjectHideFlags: 0
@@ -2687,6 +2687,10 @@ PrefabInstance:
     - target: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_Name
       value: PlayerPrototype
+      objectReference: {fileID: 0}
+    - target: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_TagString
@@ -4123,6 +4127,10 @@ PrefabInstance:
       propertyPath: carMovementController
       value: 
       objectReference: {fileID: 1821999351}
+    - target: {fileID: 8891519341558237503, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: shootingMarginErrorAngle
+      value: 0.01
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3497318847665758181, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
     - {fileID: 4948899933148016471, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
