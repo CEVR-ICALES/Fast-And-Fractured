@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,7 +10,9 @@ public class LevelController : MonoBehaviour
        
     [SerializeField] private List<ObjectPoolSO> poolSOList;
     [SerializeField] private List<StatsController> characters;
-        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
+    [SerializeField] private EnemyAIBrain ai;
+    [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
+    [SerializeField] private List<Controller> controllers;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,11 +35,19 @@ public class LevelController : MonoBehaviour
         foreach(var character in characters)
         {
            character.CustomStart();
+                if (character.CompareTag("Player"))
+                {
+                    ai.Player = character.gameObject;
+                }
         }
             foreach (var killCharacterHandle in killCharacterHandles)
             {
                 killCharacterHandle.onTouchCharacter += EliminatePlayer;
             }
+       foreach(var controller  in controllers)
+        {
+            controller.CustomStart();
+        }
     }
 
     public void EliminatePlayer(StatsController characterstats)
