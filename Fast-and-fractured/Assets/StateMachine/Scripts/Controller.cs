@@ -102,7 +102,7 @@ namespace StateMachine
             newState.enterActions = InstantiateActions(newState.enterActions);
             newState.actions = InstantiateActions(newState.actions);
             newState.exitActions = InstantiateActions(newState.exitActions);
-
+            newState.name = newState.name.Replace("(Clone)", "");
             return newState;
         }
 

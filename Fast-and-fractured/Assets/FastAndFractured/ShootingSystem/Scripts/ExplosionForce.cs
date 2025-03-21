@@ -41,7 +41,7 @@ namespace Game
             if (other.TryGetComponent(out StatsController statsController))
             {
                 //float oCarWeight = statsController.Weight;
-                Rigidbody oRB = other.GetComponent<Rigidbody>();
+                Rigidbody oRB = other.GetComponentInParent<Rigidbody>();
                 float oCarEnduranceFactor = statsController.Endurance;
                 //Provisional Formula till real implentation
                 float force = _pushForce * (1 - oCarEnduranceFactor) * (/*oCarWeight*/ oRB.mass / 20);
