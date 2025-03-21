@@ -36,8 +36,7 @@ public class IsBelowEnduranceThresholdDecision : Decision
                     Debug.LogError("No endurance found!!!!!");
                 }
             }
-        } 
-
+        }
         return health <= enduranceThreshold;
     }
 

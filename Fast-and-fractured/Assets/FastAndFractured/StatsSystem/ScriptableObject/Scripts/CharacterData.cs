@@ -96,5 +96,6 @@ namespace Game
         public float NormalShootOverHeat;
         [Tooltip("When in flipped state, how much time is needed to return to normal state")] public float RecoveryCooldown;
         [Tooltip("Time to go from top speed to max speed")] public float FromTopSpeedToMaxSpeed;
+        public float DeadDelay;
     }
 }

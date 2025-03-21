@@ -32,6 +32,7 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] CarMovementController carMovementController;
     [SerializeField] PhysicsBehaviour physicsBehaviour;
     [SerializeField] StatsController statsController;
+    [SerializeField] LayerMask ignoreLayerMask;
 
     public enum PathMode
     {
@@ -45,6 +46,7 @@ public class EnemyAIBrain : MonoBehaviour
     const float FRONT_ANGLE = 20f;
     const int START_CORNER_INDEX = 1;
     Vector3 startPosition;
+    Quaternion startRotation;
     private void Awake()
     {
         // TODO change this to the correct way of referencing the player
@@ -79,11 +81,13 @@ public class EnemyAIBrain : MonoBehaviour
         physicsBehaviour.Rb = GetComponent<Rigidbody>();
         _currentPath = new NavMeshPath();
         _previousPath = new Vector3[0];
-        startPosition=  this.transform.position;
+        startPosition = this.transform.position;
+        startRotation = this.transform.rotation;
     }
     public void ReturnToStartPosition()
     {
         this.transform.position = startPosition;
+        this.transform.rotation =  startRotation;
         StopMovement();
     }
     public float GetHealth()
@@ -96,7 +100,7 @@ public class EnemyAIBrain : MonoBehaviour
     #region Common 
     public void GoToPosition()
     {
-  
+
         //If it's negative, go left
         //If it's positive, go right
         float angle = GetAngleDirection();
@@ -165,15 +169,15 @@ public class EnemyAIBrain : MonoBehaviour
         //TODO
         carMovementController.HandleDashWithPhysics();
     }
-   
+
     #endregion
 
     #region FleeState
     public void RunAwayFromCurrentTarget()
     {
-        _positionToDrive = -CalcNormalizedTargetDirection() * fleeMagnitude;  
+        _positionToDrive = -CalcNormalizedTargetDirection() * fleeMagnitude;
     }
-   
+
     #endregion
     #endregion
 
@@ -181,17 +185,17 @@ public class EnemyAIBrain : MonoBehaviour
     public bool EnemySweep()
     {
         Collider[] colliders = Physics.OverlapSphere(transform.position, sweepRadius, sweepLayerMask);
-     
+
         return colliders.Length > 0;
     }
 
     public bool IsPushShootReady()
-    {  
+    {
         return pushShootHandle.CanShoot;
     }
 
     public bool IsShootOverheated()
-    { 
+    {
         return normalShootHandle.IsOverHeat;
     }
     public bool IsUniqueAbilityFinished()
@@ -202,7 +206,7 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     public bool IsDashReady()
-    { 
+    {
         return carMovementController.CanDash;
     }
 
@@ -237,7 +241,7 @@ public class EnemyAIBrain : MonoBehaviour
     }
 
     private float GetAngleDirection()
-    { 
+    {
         Vector3 direction;
         switch (pathMode)
         {
@@ -246,24 +250,24 @@ public class EnemyAIBrain : MonoBehaviour
                 direction = CalcNormalizedTargetDirection();
                 break;
             case PathMode.ADVANCED:
-                if (agent.CalculatePath(_positionToDrive, _currentPath))
+                if (TryToCalculatePath())
                 {
-                    if (_previousPath.Length != _currentPath.corners.Length)
-                    {
-                        ResetIndexPath();
-                    }
-                    
-                    for (int i = 0; i < _currentPath.corners.Length - 1; i++)
-                        Debug.DrawLine(_currentPath.corners[i], _currentPath.corners[i + 1], Color.yellow);
-
-                    _positionToDrive = GetActivePathPoint();
                     CheckIfGoToNextPathPoint();
                 }
                 else
                 {
                     Debug.LogError("No path to follow" + _currentPath.ToString());
+                    if (Physics.Raycast(_positionToDrive, Vector3.down,out var hit, float.MaxValue,ignoreLayerMask))
+                    {
+                        Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
+
+                        _positionToDrive = hit.point;
+                        TryToCalculatePath();
+                        CheckIfGoToNextPathPoint();
+
+                    }
                 };
-          
+
                 break;
         }
         direction = (GetActivePathPoint() - transform.position).normalized;
@@ -272,12 +276,37 @@ public class EnemyAIBrain : MonoBehaviour
         //If it's positive, go right
         return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
     }
+
+    bool TryToCalculatePath()
+    {
+        if (agent.CalculatePath(_positionToDrive, _currentPath))
+        {
+            if (_previousPath.Length != _currentPath.corners.Length)
+            {
+                ResetIndexPath();
+            }
+            if (_currentPath.corners.Length == 1) return false;
+
+            for (int i = 0; i < _currentPath.corners.Length - 1; i++)
+                Debug.DrawLine(_currentPath.corners[i], _currentPath.corners[i + 1], Color.yellow);
+
+            _positionToDrive = GetActivePathPoint();
+            CheckIfGoToNextPathPoint();
+            return true;
+        }
+        else
+        {
+            Debug.LogError("No path to follow" + _currentPath.ToString());
+            return false;
+        };
+    }
     private Vector3 GetActivePathPoint()
     {
         switch (_currentPath.corners.Length)
         {
             case 1:
                 Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground");
+
                 return _currentPath.corners[0];
             case > 0:
                 return _currentPath.corners[_pathIndex];
@@ -288,8 +317,8 @@ public class EnemyAIBrain : MonoBehaviour
 
     private void CheckIfGoToNextPathPoint()
     {
-        if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner && 
-            (_pathIndex +1) < _currentPath.corners.Length )
+        if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            (_pathIndex + 1) < _currentPath.corners.Length)
         {
             _pathIndex++;
         }
@@ -300,7 +329,7 @@ public class EnemyAIBrain : MonoBehaviour
         _pathIndex = START_CORNER_INDEX;
         _previousPath = _currentPath.corners;
     }
-     
+
     private Vector3 GetShootingDirectionWithError()
     {
         Vector3 shootingDirection = CalcNormalizedTargetDirection();
