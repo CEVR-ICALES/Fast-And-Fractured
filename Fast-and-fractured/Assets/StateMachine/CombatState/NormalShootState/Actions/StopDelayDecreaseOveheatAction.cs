@@ -10,7 +10,7 @@ public class StopDelayDecreaseOveheatAction : Action
     public override void Act(Controller controller)
     {
         NormalShootHandle shootingHandle = controller.GetBehaviour<NormalShootHandle>();
-        shootingHandle.StopDelayDecreaseOveheat();
+        shootingHandle.StopDelayDecreaseOverheat();
     }
 
 

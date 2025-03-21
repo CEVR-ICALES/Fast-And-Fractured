@@ -35,7 +35,17 @@ public class TimerManager : MonoBehaviour
             timersPool.AddLast(Timer);
         }
     }
-
+    public void AddTimer(Timer timer)
+    {
+        if (timer != null  && !activeTimers.Contains(timer))
+        {
+            activeTimers.AddLast(timer);
+        }
+        else
+        {
+            Debug.LogWarning("Trying to add a null timer");
+        }
+    }
     public Timer StartTimer(float duration, Action callback, Action<float> timerUpdate, string id, bool isRepating = false, bool isAccessible = false)
     {
         Timer timer;
@@ -241,12 +251,15 @@ public class TimerManager : MonoBehaviour
             }
 
             timer.timerUpdate?.Invoke(timer.GetProgress());//call progress if it has content on it
+            if (  timer.id.Contains("c344"))
+            {
+                Debug.Log(timer.ToString());
+            }
 
             bool finished = timer.isReversed ? timer.elapsedTime <= 0 : timer.elapsedTime >= timer.duration;
 
             if (finished)
             {
-                timer.callback?.Invoke(); //the ? (non-conditional operator) this expression evaluates to null if no callback has been assigned to prevent NullReferences
                 if (timer.isRepeating)
                 {
                     timer.elapsedTime = 0;
@@ -255,6 +268,8 @@ public class TimerManager : MonoBehaviour
                 {
                     RemoveTimer(timer);
                 }
+                timer.callback?.Invoke(); //the ? (non-conditional operator) this expression evaluates to null if no callback has been assigned to prevent NullReferences
+
             }
         }
     }

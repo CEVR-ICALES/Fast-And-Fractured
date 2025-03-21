@@ -61,7 +61,7 @@ public class EnemyAIBrain : MonoBehaviour
         if (!normalShootHandle)
         {
             normalShootHandle = GetComponentInChildren<NormalShootHandle>();
-        }
+        }   
         if (!pushShootHandle)
         {
             pushShootHandle = GetComponentInChildren<PushShootHandle>();
@@ -144,7 +144,7 @@ public class EnemyAIBrain : MonoBehaviour
     }
     public void StopDelayDecreaseOveheat()
     {
-        normalShootHandle.StopDelayDecreaseOveheat();
+        normalShootHandle.StopDelayDecreaseOverheat();
     }
     public void DecreaseOverheatTime()
     {
