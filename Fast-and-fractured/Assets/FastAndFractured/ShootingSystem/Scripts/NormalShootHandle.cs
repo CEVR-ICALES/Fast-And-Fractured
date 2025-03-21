@@ -1,7 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 namespace Game
 {
     public class NormalShootHandle : ShootingHandle
@@ -19,8 +23,8 @@ namespace Game
         private bool _shouldDecreaseOverheat = false;
         private bool _shouldIncreaseOverheat = false;
 
-        private Timer _overheatTimer;
-        private Timer _decreaseOverheatTimer;
+     [SerializeField]   private TimerSystem.Timer _overheatTimer;
+     [FormerlySerializedAs("_decreaseOverheatTimer")] [SerializeField]     private TimerSystem.Timer _delayUntilStartDecreaseTimer;
 
         #region UnityEvents
         private void Start()
@@ -29,14 +33,14 @@ namespace Game
         }
         private void Update()
         {
-            if (_shouldDecreaseOverheat)
-            {
-                ModOverHeat(-Time.deltaTime);
-                if (_countOverHeat <= 0)
-                {
-                    OverheatDone();
-                }
-            }
+            //if (_shouldDecreaseOverheat)
+            //{
+            //    ModOverHeat(-Time.deltaTime);
+            //    if (_countOverHeat <= 0)
+            //    {
+            //        OverheatDone();
+            //    }
+            //}
   
         }
         #endregion
@@ -45,13 +49,15 @@ namespace Game
         {
             base.CustomStart();
             _countOverHeat = 0;
+            _delayUntilStartDecreaseTimer.Id = null;
+            _overheatTimer.Id = null;
         }
         protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
             ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
         }
-
+        public float previousCountOverHeat;
         /// <summary>
         /// Send the shoot user collider at the start for the projectiles to ignore it's own collider
         /// </summary>
@@ -64,20 +70,34 @@ namespace Game
         {
             // Debug.Log(_isOverHeat);
             // Debug.Log(_overheatTimer.id);
-            if (_isOverHeat) return;
-
-            if (_overheatTimer == null)
+            if (_isOverHeat)
             {
-                _overheatTimer = TimerManager.Instance.StartTimer(characterStatsController.NormalOverHeat, () =>
+                return;
+            }
+            if (_overheatTimer.Id ==null)
+            {
+                _overheatTimer = TimerSystem.CreateIncreasingTimer(characterStatsController.NormalOverHeat,()=>
                 {
-                    _isOverHeat = true;
-                }, (progress) =>
+                    if (_overheatTimer.TimerType == TimerSystem.TimerType.Increase)
+                    {
+                        _isOverHeat = true;
+                        _shouldDecreaseOverheat = true;
+                        DecreaseOverheatTime();
+                    } else
+                    {
+                        OverheatDone();
+                    }
+                }, (deltaTime,progress) =>
                 {
-                    _countOverHeat = progress * characterStatsController.NormalOverHeat;
+                    previousCountOverHeat = _countOverHeat;
+                    _countOverHeat = progress ;
                 },
-                nameof(NormalShooting) + "kiasdnkkds",
-                false,
-                true);
+                nameof(NormalShooting) + Guid.NewGuid().ToString());
+            }else
+            {
+                _overheatTimer.TimerType = TimerSystem.TimerType.Increase;
+                _overheatTimer.IsComplete = false;
+                 TimerSystem.ReAddTimer(_overheatTimer);
             }
 
             if (canShoot)
@@ -88,41 +108,76 @@ namespace Game
                 canShoot = false;
                 TimerManager.Instance.StartTimer(characterStatsController.NormalShootCadenceTime,
                         () => { canShoot = true; },
-                        null, "CadenceTimeNormalShoot " + characterStatsController.name,
+                        null, "CadenceTimeNormalShoot c34" + Guid.NewGuid().ToString(),
                         false,
                         false);
             }
 
-            
+            _shouldIncreaseOverheat = true;
         }
 
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
-        {
-            _decreaseOverheatTimer = TimerManager.Instance.StartTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
-            {
+        { 
+            _shouldIncreaseOverheat = false;
+            TimerSystem.PauseTimer(_overheatTimer.Id);
+            if (_delayUntilStartDecreaseTimer.Id != null)
+            { 
+               // TimerManager.Instance.ResumeTimer(_overheatTimer);
+               // TimerManager.Instance.ReverseTimer(_overheatTimer);
+               // TimerManager.Instance.AddTimer(_overheatTimer);
+                return;
+                /*
+                TimerManager.Instance.StopTimer(_decreaseOverheatTimer);
+                _decreaseOverheatTimer = null;
+           */ }
+
+            _delayUntilStartDecreaseTimer = TimerSystem.CreateDecreasingTimer(DELAY_BEFORE_COOLING_SHOOT, () =>
+                {
                 _shouldDecreaseOverheat = true;
-                TimerManager.Instance.SetElapsedTimeToTimer(_overheatTimer, _countOverHeat);
-                TimerManager.Instance.ReverseTimer(_overheatTimer);
+//                TimerManager.Instance.SetElapsedTimeToTimer(_overheatTimer, _countOverHeat);
+                _overheatTimer.TimeRemaining = _countOverHeat;
+                _overheatTimer.TimerType = TimerSystem.TimerType.Decrease;
+                _overheatTimer.IsComplete = false;
+                _overheatTimer.Resume();
+                TimerSystem.ReAddTimer(_overheatTimer);
+               // TimerManager.Instance.ReverseTimer(_overheatTimer);
+               // TimerManager.Instance.ResumeTimer(_overheatTimer);
+               // TimerManager.Instance.AddTimer(_overheatTimer);
+
+               _delayUntilStartDecreaseTimer.Id = null;
             },
             null,
-            nameof(DecreaseOverheatTime) + "kiasdnkkdsjhdfj",
-            false,
-            true);
-        }
+            nameof(DecreaseOverheatTime) +"c34"+ Guid.NewGuid().ToString()
+            );
+         }
 
         //When player exits normal shoot state
         public void PauseOverheatTime()
         {
-            TimerManager.Instance.PauseTimer(_overheatTimer);
+             // TimerSystem.PauseTimer(_overheatTimer.Id);
+//            TimerManager.Instance.PauseTimer(_overheatTimer);
         }
 
         //When user enters normal shoot state
         public void StopDelayDecreaseOveheat()
         {
-            TimerManager.Instance.ResumeTimer(_overheatTimer);
-            TimerManager.Instance.StopTimer(_decreaseOverheatTimer);
-            TimerManager.Instance.UnreverseTimer(_overheatTimer);
+            _shouldDecreaseOverheat = false;
+            _shouldIncreaseOverheat = true;
+            if (_delayUntilStartDecreaseTimer.Id!=null)
+            {
+                TimerSystem.RemoveTimer(_delayUntilStartDecreaseTimer);
+                _delayUntilStartDecreaseTimer.Id=null;   
+                
+            }
+            if (_overheatTimer.Id != null && !_isOverHeat) 
+            { 
+                _overheatTimer.TimerType = TimerSystem.TimerType.Increase;
+              TimerSystem.ResumeTimer(_overheatTimer.Id);
+                // TimerManager.Instance.UnreverseTimer(_overheatTimer);
+               // TimerManager.Instance.ResumeTimer(_overheatTimer);
+              //  TimerManager.Instance.AddTimer(_overheatTimer);
+            }
         }
 
         private void ModOverHeat(float modificator)
@@ -133,9 +188,7 @@ namespace Game
         private void OverheatDone()
         {
             _isOverHeat = false;
-            _shouldDecreaseOverheat = false;
-            TimerManager.Instance.StopTimer(_overheatTimer);
-            _overheatTimer = null;
+            _shouldDecreaseOverheat = false; 
         }
 
     }
