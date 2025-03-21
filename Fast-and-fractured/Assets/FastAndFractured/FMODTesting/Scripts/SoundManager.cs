@@ -8,9 +8,6 @@ namespace Game
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        public StudioEventEmitter studioEmitter;
-        public GameObject cameraObject;
-
         [Range(0f, 1f)]
         public float masterVolume = 1f;
 
