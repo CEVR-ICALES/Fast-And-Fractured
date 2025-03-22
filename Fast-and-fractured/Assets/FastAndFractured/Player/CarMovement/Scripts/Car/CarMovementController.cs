@@ -34,7 +34,8 @@ namespace Game {
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
-        public bool _isUsingController = false;
+        private bool _isUsingController = false;
+        [SerializeField] private bool isAi = false;
         const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
         [Header("References")]
@@ -87,12 +88,19 @@ namespace Game {
         public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
         {
             // Debug.Log(inputType);
-            if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
+            if (isAi)
             {
-                _isUsingController = false;
-            } else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
+                _isUsingController = false; 
+            } else
             {
-                _isUsingController = true;
+                if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
+                {
+                    _isUsingController = false;
+                }
+                else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
+                {
+                    _isUsingController = true;
+                }
             }
         }
 
