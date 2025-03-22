@@ -80,16 +80,16 @@ public class MainMenuManager : MonoBehaviour
     // THIS SHOULD BE ON A FUTURE GAME MANAGER OR CUSTOM SCENE MANAGER
     #region Scene Management Methods
 
-    public void LoadScene(string sceneName)
+    public void LoadScene(int sceneIndex)
     {
-        if(SceneManager.GetSceneByName(sceneName).IsValid())
-        {
-            SceneManager.LoadScene(sceneName);
-        }
-        else
-        {
-            Debug.LogWarning($"Scene '{sceneName}' not found");
-        }
+        //if(SceneManager.GetSceneByBuildIndex(sceneIndex).IsValid())
+        //{
+            SceneManager.LoadScene(sceneIndex);
+        //}
+        //else
+        //{
+        //    Debug.LogWarning($"Scene '{sceneIndex}' not found");
+        //}
     }
 
     #endregion

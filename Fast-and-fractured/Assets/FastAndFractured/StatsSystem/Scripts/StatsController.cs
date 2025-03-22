@@ -242,7 +242,10 @@ namespace Game
                     return true;
                 case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
-                    HUDManager.Instance.UpdateUIElement(UIElementType.HealthBar, currentEndurance, charDataSO.MaxEndurance);
+                    if (gameObject.TryGetComponent<PlayerInputController>(out var playerInputController)) //Provisional Refactoring
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HealthBar, currentEndurance, charDataSO.MaxEndurance);
+                    }
                     return true;
                 case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);

@@ -95,7 +95,7 @@ namespace Game
 
         void RegisterUIElements()
         {
-            foreach (UIElement element in FindObjectsOfType<UIElement>())
+            foreach (UIElement element in FindObjectsOfType<UIElement>(true))
             {
                 _uiElements[element.elementType] = element;
             }
