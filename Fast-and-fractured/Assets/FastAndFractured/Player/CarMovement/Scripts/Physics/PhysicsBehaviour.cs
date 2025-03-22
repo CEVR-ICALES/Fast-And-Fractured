@@ -47,24 +47,24 @@ namespace Game
         {
             if (IsCurrentlyDashing)
             {
-                PhysicsBehaviour otherComponenPhysicsBehaviours;
-                if (collision.gameObject.TryGetComponent(out otherComponenPhysicsBehaviours))
+                PhysicsBehaviour otherComponentPhysicsBehaviours = collision.gameObject.GetComponentInChildren<PhysicsBehaviour>();
+                if (otherComponentPhysicsBehaviours!=null)
                 {
                     CancelDash();
-                    otherComponenPhysicsBehaviours.CancelDash();
+                    otherComponentPhysicsBehaviours.CancelDash();
                     ContactPoint contactPoint = collision.contacts[0];
                     Vector3 collisionPos = contactPoint.point;
                     Vector3 collisionNormal = contactPoint.normal;
-                    float otherCarEnduranceFactor = otherComponenPhysicsBehaviours.StatsController.Endurance / otherComponenPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
-                    float otherCarWeight = otherComponenPhysicsBehaviours.StatsController.Weight;
-                    float otherCarEnduranceImportance = otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
+                    float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
+                    float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
+                    float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
                     float forceToApply;
                     //detect if the contact was frontal
                     if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
                     {
-                        if(otherComponenPhysicsBehaviours.IsCurrentlyDashing)
+                        if(otherComponentPhysicsBehaviours.IsCurrentlyDashing)
                         {
-                            if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponenPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponenPhysicsBehaviours.Rb.velocity.magnitude))
+                            if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponentPhysicsBehaviours.Rb.velocity.magnitude))
                             {
                                 forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                             } else
@@ -84,10 +84,10 @@ namespace Game
                         //forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     }
 
-                    if(!otherComponenPhysicsBehaviours.HasBeenPushed)
+                    if(!otherComponentPhysicsBehaviours.HasBeenPushed)
                     {
-                        otherComponenPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                        otherComponenPhysicsBehaviours.OnCarHasBeenPushed();
+                        otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                        otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
                     }
                 }
 
