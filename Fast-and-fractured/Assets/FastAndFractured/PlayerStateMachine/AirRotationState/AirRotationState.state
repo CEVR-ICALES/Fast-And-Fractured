@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: AirRotationState
+  m_EditorClassIdentifier: 
+  enterActions: []
+  actions:
+  - {fileID: 11400000, guid: eea757783e440444fb90a76a5a10f012, type: 2}
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 5208e2392e499844b924031183fbc251, type: 2}
+    trueState: {fileID: 11400000, guid: a0a7ddfc6453dd7428b912ea6d9a5201, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: 9d5d5a51644ed094485aa91b18a3a2c8, type: 2}
+    trueState: {fileID: 0}
+    falseState: {fileID: 11400000, guid: 163aee610dc857e4dac16e9d8fc39acf, type: 2}
+    hasExitTime: 0
