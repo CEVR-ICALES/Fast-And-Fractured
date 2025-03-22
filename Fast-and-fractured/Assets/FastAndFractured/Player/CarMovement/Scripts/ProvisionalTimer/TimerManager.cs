@@ -18,7 +18,7 @@ public class TimerManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
             InitializePool();
         }
         else
@@ -279,6 +279,5 @@ public class TimerManager : MonoBehaviour
         if (activeTimers == null) return;
         activeTimers.Clear();
         accessibleTimers.Clear();
-
     }
 }
