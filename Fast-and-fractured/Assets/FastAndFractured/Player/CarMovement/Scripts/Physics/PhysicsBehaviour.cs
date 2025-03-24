@@ -28,6 +28,7 @@ namespace Game
         private CarMovementController _carMovementController;
         public StatsController StatsController { get => statsController;}
 
+        const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
         private void Start()
         {
             if (!_rb)
@@ -158,11 +159,10 @@ namespace Game
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
             return finalSimulatedWeight + currentRbSpeed;
         }
-        const float timeUntilCarPushStateReset = 1.5f;
         public void OnCarHasBeenPushed()
         {
             _hasBeenPushed = true;
-            TimerSystem.Instance.CreateTimer(timeUntilCarPushStateReset, onTimerDecreaseComplete: () =>
+            TimerSystem.Instance.CreateTimer(TIME_UNTIL_CAR_PUSH_STATE_RESET, onTimerDecreaseComplete: () =>
             {
                 _hasBeenPushed = false;
             }, onTimerDecreaseUpdate: (progress) => {
