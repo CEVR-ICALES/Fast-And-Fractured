@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
-
+using Utilities;
 public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 {
    
