@@ -5,110 +5,112 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
 
-namespace Game { 
-public class LevelController : AbstractSingleton<LevelController>
+namespace Game
 {
-    public bool usingController;
-    [SerializeField] private List<ObjectPoolSO> poolSOList;
-    [SerializeField] private List<StatsController> characters;
-    [SerializeField] private EnemyAIBrain ai;
-    [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
-    [SerializeField] private List<Controller> controllers;
-    // Start is called before the first frame update
-    protected override void Awake()
+    public class LevelController : AbstractSingleton<LevelController>
     {
-        base.Awake();   
-    }
-
-    void Start()
-    {
-        StartLevel();
-    }
-    // this will be moved to gameManaager once its created
-
-    private void OnEnable()
-    {
-        PlayerInputController.OnInputDeviceChanged += HandleInputChange;
-    }
-
-    private void OnDisable()
-    {
-        PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
-    }
-
-    public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
-    {  
-        if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
+        public bool usingController;
+        [SerializeField] private List<ObjectPoolSO> poolSOList;
+        [SerializeField] private List<StatsController> characters;
+        [SerializeField] private EnemyAIBrain ai;
+        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
+        [SerializeField] private List<Controller> controllers;
+        // Start is called before the first frame update
+        protected override void Awake()
         {
-            usingController = false;
-        }
-        else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
-        {
-            usingController = true;
+            base.Awake();
         }
 
-        foreach (StatsController character in characters) // for now when inoput changed its detected it will only notify the carMovementController of the player
+        void Start()
         {
-            if (character.CompareTag("Player"))
+            StartLevel();
+        }
+        // this will be moved to gameManaager once its created
+
+        private void OnEnable()
+        {
+            PlayerInputController.OnInputDeviceChanged += HandleInputChange;
+        }
+
+        private void OnDisable()
+        {
+            PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
+        }
+
+        public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
+        {
+            if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
             {
-                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(usingController);
+                usingController = false;
             }
-        }
+            else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
+            {
+                usingController = true;
+            }
 
-    }
-    // will be moved to gameManager
+            foreach (StatsController character in characters) // for now when inoput changed its detected it will only notify the carMovementController of the player
+            {
+                if (character.CompareTag("Player"))
+                {
+                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(usingController);
+                }
+            }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-    public void StartLevel()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        ObjectPoolManager.Instance.CustomStart();
-        foreach (var poolSO in poolSOList)
-        {
-            ObjectPoolManager.Instance.CreateObjectPool(poolSO);
         }
-        foreach(var character in characters)
+        // will be moved to gameManager
+
+        // Update is called once per frame
+        void Update()
         {
-           character.CustomStart();
+
+        }
+        public void StartLevel()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            ObjectPoolManager.Instance.CustomStart();
+            foreach (var poolSO in poolSOList)
+            {
+                ObjectPoolManager.Instance.CreateObjectPool(poolSO);
+            }
+            foreach (var character in characters)
+            {
+                character.CustomStart();
                 if (character.CompareTag("Player"))
                 {
                     ai.Player = character.gameObject;
                 }
-        }
+            }
             foreach (var killCharacterHandle in killCharacterHandles)
             {
                 killCharacterHandle.onTouchCharacter += EliminatePlayer;
             }
-       foreach(var controller  in controllers)
-        {
-            controller.CustomStart();
+            foreach (var controller in controllers)
+            {
+                controller.CustomStart();
+            }
         }
-    }
 
-    public void EliminatePlayer(StatsController characterstats)
-    {
-        string currentSceneName = SceneManager.GetActiveScene().name;
+        public void EliminatePlayer(StatsController characterstats)
+        {
+            string currentSceneName = SceneManager.GetActiveScene().name;
             float delay = characterstats.Dead();
-            TimerManager.Instance.StartTimer(delay, () => {
+            TimerManager.Instance.StartTimer(delay, () =>
+            {
                 if (IsThePlayer(characterstats.gameObject))
                 {
                     SceneManager.LoadScene(currentSceneName);
                 }
                 else
                     characterstats.gameObject.SetActive(false);
-            },null,"Character " + characterstats.name + " Dead",false);
-    }
+            }, null, "Character " + characterstats.name + " Dead", false);
+        }
 
-    private bool IsThePlayer(GameObject character)
-    {
-      if (character.CompareTag("Player"))
-           return true;
-      return false;
+        private bool IsThePlayer(GameObject character)
+        {
+            if (character.CompareTag("Player"))
+                return true;
+            return false;
+        }
     }
-  }
 }
 
