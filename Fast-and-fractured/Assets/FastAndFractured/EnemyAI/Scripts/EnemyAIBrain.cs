@@ -18,6 +18,7 @@ public class EnemyAIBrain : MonoBehaviour
 
 
     private Vector3 _positionToDrive;
+    //Reference is obtained via LevelController
     private GameObject _player;
     private GameObject _targetToShoot;
     //path index starts at 1 because 0 is their actual position
@@ -49,15 +50,13 @@ public class EnemyAIBrain : MonoBehaviour
     Quaternion startRotation;
     private void Awake()
     {
-        // TODO change this to the correct way of referencing the player
-        _player = GameObject.FindGameObjectWithTag("Player");
-
         //Testing 
         _targetToShoot = _player;
         if (!agent)
         {
             agent = GetComponentInChildren<NavMeshAgent>();
         }
+
         if (!normalShootHandle)
         {
             normalShootHandle = GetComponentInChildren<NormalShootHandle>();
