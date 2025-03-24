@@ -33,6 +33,12 @@ namespace Game
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
 
+        [Header("Slope")]
+        [SerializeField] private float slopeAngleThreshold;
+
+        private float _currentSlopeAngle;
+        private bool _isGoingUphill;
+        private bool _isGoingDownhill;
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
@@ -54,7 +60,7 @@ namespace Game
 
         private void FixedUpdate()
         {
-
+            CheckSlope();
             UpdateWheelVisuals();
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
@@ -67,6 +73,15 @@ namespace Game
             //Debug.Log(_currentRbMaxVelocity);
             //Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
             //Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
+
+            if (_isGoingUphill)
+            {
+                Debug.Log($"Climbing {_currentSlopeAngle}° slope");
+            }
+            else if (_isGoingDownhill)
+            {
+                Debug.Log($"Descending {_currentSlopeAngle}° slope");
+            }
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -309,6 +324,34 @@ namespace Game
         }
 
         #endregion
+
+        public void CheckSlope()
+        {
+            _currentSlopeAngle = 0;
+            int groundedWheels = 0;
+
+            foreach(WheelController wheel in wheels)
+            {
+                if(wheel.IsGroundedWithAngle(out float angle))
+                {
+                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle);
+                    groundedWheels++;
+                }
+            }
+
+            if(groundedWheels > 2 && _currentSlopeAngle > slopeAngleThreshold)
+            {
+                Vector3 localVelocity = transform.InverseTransformDirection(_physicsBehaviour.Rb.velocity);
+
+                _isGoingUphill = localVelocity.z > 1f; // moving forward to relative cars orientation 
+
+                _isGoingDownhill = localVelocity.z < -0.5f; // moving backweard relative to cars orientation
+            } else
+            {
+                _isGoingDownhill = false;
+                _isGoingUphill = false;
+            }
+        }
 
         public void StopAllCarMovement()
         {

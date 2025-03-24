@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WheelController : MonoBehaviour
@@ -48,6 +46,19 @@ public class WheelController : MonoBehaviour
         }
 
     }
+
+    public bool IsGroundedWithAngle(out float slopeAngle) // return true and and the slope angle 
+    {
+        slopeAngle = 0f;
+        if(wheelCollider.GetGroundHit(out WheelHit hit))
+        {
+            slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+            return true;
+        } 
+
+        return false;
+    }
+
 
     //currently not being used
     public void ApplySteeringResistance(Rigidbody carRb)//each wheel inividually applies a little bit of force on the oposite direction of its movement
