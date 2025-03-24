@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+[Obsolete("Use timer system instead")]
 public class TimerManager : MonoBehaviour
 {
     public static TimerManager Instance { get; private set; }
