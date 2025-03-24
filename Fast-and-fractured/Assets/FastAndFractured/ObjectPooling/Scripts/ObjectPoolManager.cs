@@ -1,32 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 namespace Game
 {
-    public class ObjectPoolManager : MonoBehaviour
+    public class ObjectPoolManager : AbstractSingleton<ObjectPoolManager>
     {
-        private static ObjectPoolManager _instance;
-
-        public static ObjectPoolManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    Debug.LogError("ObjectPoolManager is NULL");
-                }
-                return _instance;
-            }
-        }
         //Function in custom start
-        private void Awake()
+        protected override void Awake()
         {
-            if (_instance != null)
-                Destroy(gameObject);
-            else
-            {
-                _instance = this;
-            }
+            base.Awake();
         }
 
         private List<ObjectPool> _objectPools = new List<ObjectPool>();
