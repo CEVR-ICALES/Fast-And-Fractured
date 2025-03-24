@@ -49,15 +49,6 @@ namespace Game
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
         }
-        private void OnEnable()
-        {
-            PlayerInputController.OnInputDeviceChanged += HandleInputChange;
-        }
-
-        private void OnDisable()
-        {
-            PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
-        }
 
 
 
@@ -84,23 +75,15 @@ namespace Game
         }
 
 
-        public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
+        public void HandleInputChange(bool usingController)
         {
-            // Debug.Log(inputType);
             if (isAi)
             {
                 _isUsingController = false;
             }
             else
             {
-                if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
-                {
-                    _isUsingController = false;
-                }
-                else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
-                {
-                    _isUsingController = true;
-                }
+                _isUsingController = usingController;
             }
         }
 

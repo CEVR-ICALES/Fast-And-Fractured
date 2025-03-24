@@ -13,10 +13,8 @@ public enum InputBlockTypes // this enum need to be added to the enum library
     SHOOTING_MECHANICS
 }
 
-public class PlayerInputController : MonoBehaviour
+public class PlayerInputController : AbstractSingleton<PlayerInputController>
 {
-    public static PlayerInputController Instance { get; private set; }
-
     public delegate void InputDeviceChanged(INPUT_DEVICE_TYPE deviceType);
     public static event InputDeviceChanged OnInputDeviceChanged;
 
@@ -80,17 +78,9 @@ public class PlayerInputController : MonoBehaviour
 
     private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            //Destroy(gameObject);
-        }
-
+        base.Awake();
         inputActions = new PlayerInputAction();
     }
 
