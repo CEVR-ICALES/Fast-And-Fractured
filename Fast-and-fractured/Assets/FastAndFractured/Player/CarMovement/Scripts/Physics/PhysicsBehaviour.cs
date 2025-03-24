@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 namespace Game
 {
@@ -27,6 +28,7 @@ namespace Game
         private CarMovementController _carMovementController;
         public StatsController StatsController { get => statsController;}
 
+        const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
         private void Start()
         {
             if (!_rb)
@@ -157,16 +159,15 @@ namespace Game
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
             return finalSimulatedWeight + currentRbSpeed;
         }
-
         public void OnCarHasBeenPushed()
         {
             _hasBeenPushed = true;
-            TimerManager.Instance.StartTimer(1.5f, () =>
+            TimerSystem.Instance.CreateTimer(TIME_UNTIL_CAR_PUSH_STATE_RESET, onTimerDecreaseComplete: () =>
             {
                 _hasBeenPushed = false;
-            }, (progress) => {
+            }, onTimerDecreaseUpdate: (progress) => {
 
-            }, "pushed", false, false);
+            });
         }
 
         public void LimitRigidBodySpeed(float maxSpeed)

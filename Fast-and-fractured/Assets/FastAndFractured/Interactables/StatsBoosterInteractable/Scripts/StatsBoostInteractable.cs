@@ -2,6 +2,7 @@ using Game;
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using Utilities;
 
 public class StatsBoostInteractable : GenericInteractable
 {
@@ -37,7 +38,7 @@ public class StatsBoostInteractable : GenericInteractable
 
             boost.OnBoostStartEvent?.Invoke();
             if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
-            TimerManager.Instance.StartTimer(boost.BoostTime, () =>
+            TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
             {
                 if (boost.StatToBoost == STATS.ENDURANCE)
                 {
@@ -56,7 +57,7 @@ public class StatsBoostInteractable : GenericInteractable
                 }
 
                 boost.OnBoostEndEvent?.Invoke();
-            }, null, Guid.NewGuid().ToString());
+            });
         }
 
         onInteractEmpty?.Invoke();

@@ -224,14 +224,14 @@ public class PlayerInputController : AbstractSingleton<PlayerInputController>
         {
             _isAbilityFinished = false;
         }
-        TimerManager.Instance.StartTimer(timeTillEnable, () =>
+        TimerSystem.Instance.CreateTimer(timeTillEnable,  onTimerDecreaseComplete: () =>
         {
             if (!_isAbilityFinished)
             {
                 _isAbilityFinished = true;
             }
             EnableInput(inputBlockType);
-        }, null, gameObject.name + Time.time, false, true);
+        });
         
     }
 

@@ -1,7 +1,9 @@
 using TMPro;
 using UnityEngine;
+using Utilities;
 
-namespace Game {
+namespace Game
+{
     public class CarMovementController : MonoBehaviour
     {
         public WheelController[] wheels;
@@ -48,10 +50,7 @@ namespace Game {
             Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
         }
 
-        private void OnDestroy()
-        {
-            TimerManager.Instance.StopTimer("dash");
-        }
+
 
         private void FixedUpdate()
         {
@@ -80,8 +79,9 @@ namespace Game {
         {
             if (isAi)
             {
-                _isUsingController = false; 
-            } else
+                _isUsingController = false;
+            }
+            else
             {
                 _isUsingController = usingController;
             }
@@ -267,7 +267,7 @@ namespace Game {
         #endregion
 
         #region Dash
-
+        ITimer _dashTimer;
         public void HandleDashWithPhysics()
         {
             if (!_isDashing && _canDash)
@@ -278,33 +278,33 @@ namespace Game {
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
                 _physicsBehaviour.IsCurrentlyDashing = true;
                 _canDash = false;
-                TimerManager.Instance.StartTimer(statsController.DashTime, () =>
+                _dashTimer=  TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
                     FinishDash();
-                }, (progress) =>
+                }, onTimerDecreaseUpdate: (progress) =>
                 {
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
-                }, gameObject.name , false,  isAccessible: true);
+                });
             }
         }
-
+        ITimer _dashCooldown;
         private void FinishDash()
         {
             _isDashing = false;
             _physicsBehaviour.UnblockRigidBodyRotations();
             _currentRbMaxVelocity = statsController.MaxSpeed;
             _physicsBehaviour.IsCurrentlyDashing = false;
-            TimerManager.Instance.StartTimer(statsController.DashCooldown, () =>
-            {
-                _canDash = true;
-            }, (progress) =>
-            {
+            _dashCooldown = TimerSystem.Instance.CreateTimer(statsController.DashCooldown, onTimerDecreaseComplete: () =>
+             {
+                 _canDash = true;
+             }, onTimerDecreaseUpdate: (progress) =>
+             {
 
-            }, "dashCooldown", false, true);
+             });
         }
         public void CancelDash()
         {
-            TimerManager.Instance.StopTimer(gameObject.name); //shouldnt be hard coded, but since i dont know how the final structure is going to be i just put it like this
+            TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
             FinishDash();
         }
 
@@ -331,7 +331,7 @@ namespace Game {
         {
             float speedZ = Mathf.Abs(_physicsBehaviour.Rb.velocity.magnitude);
             float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-            if(speedOverlay != null)
+            if (speedOverlay != null)
                 speedOverlay.text = "Speed: " + speedKmh.ToString("F1") + " km/h";
         }
     }

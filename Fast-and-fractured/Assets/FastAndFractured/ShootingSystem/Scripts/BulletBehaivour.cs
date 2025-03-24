@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Game;
 using UnityEngine;
 using Utilities;
+
 public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 {
    
@@ -54,13 +55,13 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
             rb.constraints = RigidbodyConstraints.FreezeRotation;
             transform.rotation = new Quaternion(0, 0, 0, 0);
             particles.SetActive(true);
-            TimerManager.Instance.StartTimer(delayProyectileEnd, () =>
+            TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
             {
                 ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                 ownCollider.enabled = true;
                 _meshRenderer.enabled = true;
                 rb.constraints = RigidbodyConstraints.None;
-            }, null, "BulletTimerTillParticles " + Guid.NewGuid().ToString(), false, false);
+            });
         }
         else
             ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);

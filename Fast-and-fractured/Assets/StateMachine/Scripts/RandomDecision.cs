@@ -12,8 +12,7 @@ public class DecisionRandomDecision : Decision
 
         if (seed != -1)
         {
-            UnityEngine
-                .Random.seed = seed;
+            UnityEngine.Random.InitState(seed);
 
         }
         return  UnityEngine.Random.Range(0, 2)==1; 

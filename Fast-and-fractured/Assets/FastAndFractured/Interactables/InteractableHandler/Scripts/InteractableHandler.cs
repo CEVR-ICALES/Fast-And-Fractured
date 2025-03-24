@@ -51,7 +51,7 @@ public class InteractableHandler : AbstractSingleton<InteractableHandler>
     private void RemoveInteractableFromPool(GameObject interactionFrom, GameObject interactionTo)
     {
         _interactablesOnCooldown.Add(interactionTo);
-        TimerManager.Instance.StartTimer(itemCooldownAfterPick, () => ReAddInteractableFromCooldownToPool(interactionTo), null, new Guid().ToString());
+        TimerSystem.Instance.CreateTimer(itemCooldownAfterPick, onTimerDecreaseComplete: () => ReAddInteractableFromCooldownToPool(interactionTo));
         _shuffledActivePool.Remove(interactionTo);
         interactionTo.gameObject.SetActive(false);
         UpdateVisibleInteractableList();
