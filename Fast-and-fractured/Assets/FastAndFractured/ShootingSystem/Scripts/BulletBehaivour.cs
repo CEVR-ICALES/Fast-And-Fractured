@@ -1,13 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
+using Utilities;
 
 public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
 {
-    protected Rigidbody rb;
-    [SerializeField]
-    protected Pooltype pooltype;
+   
+    [SerializeField] protected Pooltype pooltype;
     public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
     public Vector3 Velocity { set => velocity = value; }
     protected Vector3 velocity;
@@ -15,21 +16,66 @@ public abstract class BulletBehaivour : MonoBehaviour, IPooledObject
     protected float range;
     public float Damage { set => damage = value; }
     protected float damage;
-    //ForPushShoot Handle class
-    //public float PushStrengh { set => pushStrengh = value; }
-    //protected float pushStrengh;
+    protected Vector3 initPosition;
+
+    public bool InitValues => initValues;
+    [SerializeField] private bool initValues = true;
+    //References
+    protected Rigidbody rb;
+    protected Collider ownCollider;
+    private MeshRenderer _meshRenderer;
+    [SerializeField] protected GameObject particles;
+    [Tooltip("Time delay to allow particles to show up")] [SerializeField] private float delayProyectileEnd = 1.5f;
+
     // Update is called once per frame
     protected abstract void FixedUpdate();
-
-    public virtual void InitBulletTrayectory()
+    public virtual void InitializeValues()
     {
         rb = GetComponent<Rigidbody>();
+        ownCollider = GetComponent<Collider>();
+        _meshRenderer = GetComponent<MeshRenderer>();
     }
-
-    protected void OnBulletEndTrayectory()
+    public virtual void InitBulletTrayectory()
     {
-        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+        if (particles != null)
+        {
+            particles.SetActive(false);
+        }
+        initPosition = transform.position;
+        rb.velocity = velocity;
     }
 
-    protected abstract void OnTriggerEnter(Collider other);
+    protected virtual void OnBulletEndTrayectory()
+    {
+        if (particles != null)
+        {
+            ownCollider.enabled = false;
+            _meshRenderer.enabled = false;
+            rb.constraints = RigidbodyConstraints.FreezePosition;
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            transform.rotation = new Quaternion(0, 0, 0, 0);
+            particles.SetActive(true);
+            TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
+            {
+                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                ownCollider.enabled = true;
+                _meshRenderer.enabled = true;
+                rb.constraints = RigidbodyConstraints.None;
+            });
+        }
+        else
+            ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+    }
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+
+    }
+
+    protected virtual void OnCollisionEnter(Collision collision)
+    {
+        
+    }
+
+
 }

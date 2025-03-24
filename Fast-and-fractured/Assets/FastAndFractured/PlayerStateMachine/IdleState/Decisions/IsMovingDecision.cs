@@ -1,11 +1,14 @@
 using StateMachine;
 using UnityEngine;
-
-[CreateAssetMenu(fileName = nameof(IsMovingDecision), menuName = "PlayerStateMachine/Decisions/IsMovingDecision")]
-public class IsMovingDecision : Decision
+using Game;
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsMovingDecision), menuName = "PlayerStateMachine/Decisions/IsMovingDecision")]
+    public class IsMovingDecision : Decision
     {
-        return controller.GetBehaviour<PhysicsBehaviour>().IsVehicleMoving();
+        public override bool Decide(Controller controller)
+        {
+            return controller.GetBehaviour<PhysicsBehaviour>().IsVehicleMoving();
+        }
     }
 }

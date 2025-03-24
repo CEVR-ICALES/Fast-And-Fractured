@@ -13,7 +13,7 @@ namespace StateMachine
         State currentState;
 
         // Start is called before the first frame update
-        void Start()
+       public void CustomStart()
         { 
             LoadFirsState();
         }
@@ -102,7 +102,7 @@ namespace StateMachine
             newState.enterActions = InstantiateActions(newState.enterActions);
             newState.actions = InstantiateActions(newState.actions);
             newState.exitActions = InstantiateActions(newState.exitActions);
-
+            newState.name = newState.name.Replace("(Clone)", "");
             return newState;
         }
 
@@ -139,6 +139,11 @@ namespace StateMachine
                 }
             }
             return null;
+        }
+
+        public void ForceState(State newState)
+        {
+            ChangeState(newState);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 namespace Game
 {
     public enum STATS
@@ -33,7 +34,7 @@ namespace Game
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
-        public float MaxSpeed { get => currentMaxSpeed;}
+        public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
@@ -42,7 +43,21 @@ namespace Game
         public float Acceleration { get => currentAcceleration; }
         public float BrakeTorque { get => charDataSO.BrakeTorque; }
         public float Handling { get => charDataSO.Handling; }
-        public float DashDistance { get => charDataSO.DashDistance; }
+        public float HandlingSmothnees { get => charDataSO.HandlingSmoothnes; }
+        public float DashTime { get => charDataSO.DashTime; }
+        public float DriftThreshold { get => charDataSO.DriftThreshold; }
+        public float DriftingFactorToSpeed { get => charDataSO.DriftingFactorToSpeed; }
+        public float DriftingSmoothFactor { get => charDataSO.DriftingSmoothFactor; }
+        public float DriftForce { get => charDataSO.DriftForce; }
+
+        //Wheels
+        public float FrontWheelsStrenghtFactor { get => charDataSO.FrontWheelsStrenghtFactor; }
+        public float RearWheelsStrenghtFactor { get => charDataSO.RearWheelsStrenghtFactor; }
+
+        //Roll Prevention
+        public float BaseDownwardForce { get => charDataSO.BaseDownwardForce; }
+        public float TurningForceMultiplier { get => charDataSO.TurningForceMultiplier; }
+        public float SpeedForceMultiplier { get => charDataSO.SpeedForceMultiplier; }
 
         [Header("Damage")]
 
@@ -50,51 +65,53 @@ namespace Game
         [SerializeField] private float currentPushShootDMG;
         public float NormalShootDamage { get => currentNormalShootDMG; }
         public float PushShootDamage { get => currentPushShootDMG; }
+        public float PushShootForce { get => charDataSO.PushShootFORCE; }
+        public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
+        public Vector3 ExplosionCenterOffset { get => charDataSO.ExplosionCenterOffset; }
 
         //Shoot Movement
         public float NormalShootSpeed { get => charDataSO.NormalShootSpeed; }
         public float NormalShootCadenceTime { get => charDataSO.NormalShootCadenceTime; }
-        public float NormalShootMaxRange {get => charDataSO.NormalShootMaxRange;}
-        public float PushShootSpeed { get => charDataSO.PushShootSpeed; }
-        public float PushShootMaxRange {get => charDataSO.PushShootMaxRange;}
+        public float NormalShootMaxRange { get => charDataSO.NormalShootMaxRange; }
+        public float PushShootRange { get => charDataSO.PushShootRange; }
+        public float PushShootAngle { get => charDataSO.PushShootAngle; }
+        public float PushShootGravityMultiplier { get => charDataSO.PushShootGravityMultiplier; }
+        public int PushShootBounceNum { get => charDataSO.PushShootBounceNum; }
+        public float PushShootBounceForce { get => charDataSO.PushShootBounceForce; }
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
         public float Traction { get => charDataSO.Traction; }
         public float Damping { get => charDataSO.Damping; }
+        public float BaseForce { get => charDataSO.BaseForce; }
+        public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
+        public float EnduranceImportanceWhenColliding { get => charDataSO.EnduranceImportanceWhenColliding; }
 
         [Header("COOLDOWNS")]
 
-        [SerializeField] private float currentcooldownSpeed;
+        [SerializeField] private float currentCooldownSpeed;
 
-        public float CooldownSpeed { get => currentcooldownSpeed; }
+        public float CooldownSpeed { get => currentCooldownSpeed; }
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
-        public float NormalOverHead { get => charDataSO.NormalShootOverHeat;}
+        public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
         public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
 
         #endregion
-
-        public delegate void Died();
-        public Died OnDied;
 
         private float _errorGetStatFloat = -1;
 
 
         #region START EVENTS
-        void CustomStart()
-        {
-
-        }
-        // Start is called before the first frame update
-        void Start()
+        public void CustomStart()
         {
             //just for try propouses
             charDataSO.Dead = false;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
+
         #endregion
         // Update is called once per frame
         void Update()
@@ -102,8 +119,8 @@ namespace Game
 
         }
 
-       public void SetCharacter(CharacterData charData)
-       {
+        public void SetCharacter(CharacterData charData)
+        {
             var copyOfCharData = Instantiate(charData);
             if (copyOfCharData != null)
             {
@@ -111,11 +128,11 @@ namespace Game
                 //OnDied += Dead;
                 InitCurrentStats();
             }
-       }
+        }
         private void InitCurrentStats()
         {
             //Health
-            currentEndurance = charDataSO.MinEndurance;
+            currentEndurance = charDataSO.MaxEndurance;
             //Movement
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
@@ -124,24 +141,24 @@ namespace Game
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootDMG = charDataSO.PushShootDMG;
             //Cooldowns
-            currentcooldownSpeed = charDataSO.CooldownSpeed;
+            currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
 
 
         #region Health
-        public void TakeEndurance(float sum,bool isProduct)
+        public void TakeEndurance(float substract, bool isProduct)
         {
-            if (sum > 0)
+            if (substract > 0)
             {
                 if (!charDataSO.Dead)
                 {
-                    if (ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
+                    if (ChoseCharToMod(STATS.ENDURANCE, -substract, isProduct))
                     {
                         //This is not the real dead condition, just an example. 
-                        if (currentEndurance >= charDataSO.MaxEndurance)
+                        /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
                             Dead();
-                        }
+                        }*/
                     }
                     else
                         Debug.LogError("Stat selected doesn't exist or can't be modified. " +
@@ -151,11 +168,11 @@ namespace Game
             else Debug.LogError("Value can't be negative or 0.");
         }
 
-        public void RecoverEndurance(float subtrahend, bool isProduct)
+        public void RecoverEndurance(float sum, bool isProduct)
         {
-            if (subtrahend > 0)
+            if (sum > 0)
             {
-                if (!ChoseCharToMod(STATS.ENDURANCE, -subtrahend, isProduct))
+                if (!ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
@@ -163,10 +180,11 @@ namespace Game
             }
         }
 
-        private void Dead()
+        public float Dead()
         {
-            Debug.Log("Toy Muerto");
+            Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Dead = true;
+            return charDataSO.DeadDelay;
         }
         #endregion
 
@@ -174,8 +192,10 @@ namespace Game
         #region StatsModificators
         public void UpgradeCharStat(STATS type, float sum)
         {
-            if (IsStatAndModificatorCorrect(type, sum)) { 
-                if (!ChoseCharToMod(type, sum, false)) {
+            if (IsStatAndModificatorCorrect(type, sum))
+            {
+                if (!ChoseCharToMod(type, sum, false))
+                {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                      "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
@@ -188,11 +208,13 @@ namespace Game
 
         public void ReduceCharStat(STATS type, float subtrahend)
         {
-            if (IsStatAndModificatorCorrect(type, subtrahend)) { if (!ChoseCharToMod(type, -subtrahend, false))
+            if (IsStatAndModificatorCorrect(type, subtrahend))
+            {
+                if (!ChoseCharToMod(type, -subtrahend, false))
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
-                } 
+                }
             }
             else
                 Debug.LogError("Value can't be positive or you are trying to change the endurance." +
@@ -201,13 +223,15 @@ namespace Game
 
         public void ProductCharStats(STATS type, float multiplier)
         {
-            if (IsStatAndModificatorCorrect(type, multiplier)){ if (!ChoseCharToMod(type, multiplier, true))
+            if (IsStatAndModificatorCorrect(type, multiplier))
+            {
+                if (!ChoseCharToMod(type, multiplier, true))
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
-           else
+            else
                 Debug.LogError("Value can't be positive or you are trying to change the endurance." +
                  " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
@@ -225,9 +249,10 @@ namespace Game
                     return true;
                 case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
-                    return true;
-                case STATS.COOLDOWN_SPEED:
-                    currentcooldownSpeed = ModCharStat(currentcooldownSpeed, mod, charDataSO.MinCooldownSpeed, charDataSO.MinCooldownSpeed, isProduct);
+                    if (gameObject.TryGetComponent<PlayerInputController>(out var playerInputController)) //Provisional Refactoring
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HealthBar, currentEndurance, charDataSO.MaxEndurance);
+                    }
                     return true;
                 case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
@@ -241,17 +266,17 @@ namespace Game
 
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
-            charStat = isProduct ? charStat * mod : charStat + mod; 
+            charStat = isProduct ? charStat * mod : charStat + mod;
             charStat = Mathf.Clamp(charStat, minVal, maxVal);
             return charStat;
         }
         #endregion
         #region TemporalModificators
-        public void TemporalStatUp(STATS type, float sum,float time)
+        public void TemporalStatUp(STATS type, float sum, float time)
         {
-            TemporalStatMod(type, sum, time,false);
+            TemporalStatMod(type, sum, time, false);
         }
-         public void TemporalStatDown(STATS type, float subtrahend, float time)
+        public void TemporalStatDown(STATS type, float subtrahend, float time)
         {
             TemporalStatMod(type, -subtrahend, time, false);
         }
@@ -264,26 +289,30 @@ namespace Game
         private void TemporalStatMod(STATS type, float mod, float time, bool isProduct)
         {
             float previousValue = GetCurrentStat(type);
-            ChoseCharToMod(type, mod,isProduct);
+            ChoseCharToMod(type, mod, isProduct);
             float currentValue = GetCurrentStat(type);
             if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
             {
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
             }
-            StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            //StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
+            RemoveStatModificationByTimer(previousValue, currentValue, type, previousValue < currentValue, time);
         }
 
         //Coroutine is for try propuses. It will be susbtitute for a Timer. 
-        private IEnumerator WaitTimeToModStat(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
+        private void RemoveStatModificationByTimer(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
         {
             float mod;
             if (iscurrentBigger)
                 mod = -(currentValue - previousValue);
             else
                 mod = previousValue - currentValue;
-            yield return new WaitForSeconds(time);
-            ChoseCharToMod(stat, mod, false);
+
+            TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
+            {
+                ChoseCharToMod(stat, mod, false);
+            });
         }
         #endregion  
 
@@ -302,15 +331,15 @@ namespace Game
                 case STATS.PUSH_DAMAGE:
                     return currentPushShootDMG;
                 case STATS.COOLDOWN_SPEED:
-                    return currentcooldownSpeed;
+                    return currentCooldownSpeed;
             }
             return _errorGetStatFloat;
         }
 
-            private bool IsStatAndModificatorCorrect(STATS type, float mod)
+        private bool IsStatAndModificatorCorrect(STATS type, float mod)
         {
             return mod > 0 && type != STATS.ENDURANCE;
         }
-            #endregion
-        }
+        #endregion
     }
+}

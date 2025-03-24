@@ -1,32 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Game
+namespace Utilities
 {
-    public class ObjectPoolManager : MonoBehaviour
+    public class ObjectPoolManager : AbstractSingleton<ObjectPoolManager>
     {
-        private static ObjectPoolManager _instance;
-
-        public static ObjectPoolManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    Debug.LogError("ObjectPoolManager is NULL");
-                }
-                return _instance;
-            }
-        }
         //Function in custom start
-        private void Awake()
+        protected override void Awake()
         {
-            if (_instance != null)
-                Destroy(gameObject);
-            else
-            {
-                _instance = this;
-            }
+            base.Awake();
         }
 
         private List<ObjectPool> _objectPools = new List<ObjectPool>();
@@ -65,6 +47,13 @@ namespace Game
             GameObject[] gameObjectsPooled = new GameObject[num];
             for (int i = 0; i < num; i++) {
                 var gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                if (gameObjectPooled.TryGetComponent<IPooledObject>(out var pooledObject))
+                {
+                    if (pooledObject.InitValues)
+                    {
+                        pooledObject.InitializeValues();
+                    }
+                }
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
             }
@@ -117,3 +106,4 @@ namespace Game
         }
     }
 }
+

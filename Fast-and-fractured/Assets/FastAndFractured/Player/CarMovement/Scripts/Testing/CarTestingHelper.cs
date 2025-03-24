@@ -4,6 +4,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using Game;
 
 public class CarTestingHelper : MonoBehaviour
 {
@@ -125,8 +126,8 @@ public class CarTestingHelper : MonoBehaviour
         PhysicsBehaviour physicsBehaviour = spawnedObject.GetComponent<PhysicsBehaviour>();
         if (physicsBehaviour != null)
         {
-            physicsBehaviour._maxEndurance = currentMaxEndurance;
-            physicsBehaviour._endurance = enduranceSlider.value;
+            //physicsBehaviour._maxEndurance = currentMaxEndurance;
+            //physicsBehaviour._endurance = enduranceSlider.value;
             Debug.Log($"Max Endurance set to: {currentMaxEndurance}");
             Debug.Log($"Endurance set to: {enduranceSlider.value}");
         }

@@ -10,6 +10,6 @@ public class MakeDashDecision : Decision
     public override bool Decide(Controller controller)
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        return brain.IsDashAvailable();
+        return brain.IsDashReady();
      }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
-
+using Utilities;
 public class InitObjectPoolHandle : MonoBehaviour
 {
     [SerializeField]
@@ -10,10 +10,6 @@ public class InitObjectPoolHandle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        foreach (var poolSO in poolSOList)
-        {
-            ObjectPoolManager.Instance.CustomStart();
-            ObjectPoolManager.Instance.CreateObjectPool(poolSO);
-        }
+
     }
 }

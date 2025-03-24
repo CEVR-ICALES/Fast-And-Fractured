@@ -38,21 +38,21 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Accelerate"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""2f11717d-ef60-4557-bdaa-c65a52510283"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Reverse"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""38a23e7d-4f3d-4eda-bf26-222fccc54458"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Brake"",
@@ -64,7 +64,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""RegularShoot"",
+                    ""name"": ""ShootingMode"",
                     ""type"": ""Button"",
                     ""id"": ""df5a71de-dd17-4098-8f91-0ae3a2194ab2"",
                     ""expectedControlType"": """",
@@ -82,7 +82,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""PushShoot"",
+                    ""name"": ""Shoot"",
                     ""type"": ""Button"",
                     ""id"": ""2c14d8bd-8915-44fd-8137-042f895d90b5"",
                     ""expectedControlType"": """",
@@ -130,6 +130,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""name"": ""Dash"",
                     ""type"": ""Button"",
                     ""id"": ""382fdf1f-f53c-45a5-8c08-1aac93b6e9e3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugAIChangeState"",
+                    ""type"": ""Button"",
+                    ""id"": ""c7948b44-ab46-4ca0-8db2-ff3bf4abe4d5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugAIResetPosition"",
+                    ""type"": ""Button"",
+                    ""id"": ""6cff68b6-f007-416e-bcfa-1fa0a926af41"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -239,22 +257,22 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""406dea28-aafa-44ce-8e1f-54249e513c07"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RegularShoot"",
+                    ""action"": ""ShootingMode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""c29a6517-5e5e-4bfe-bbf8-1c3669ccf9f7"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RegularShoot"",
+                    ""action"": ""ShootingMode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -287,18 +305,18 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PushShoot"",
+                    ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""3b408e85-b686-48f5-8201-fb1966f6901e"",
-                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PushShoot"",
+                    ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -422,6 +440,28 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Dash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8ded8af-b478-41fe-b47d-4a1371bd43be"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugAIChangeState"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""edc1bed8-d6d1-4c51-b2d2-d576811dfeac"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugAIResetPosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -434,14 +474,16 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_Accelerate = m_PlayerInputActions.FindAction("Accelerate", throwIfNotFound: true);
         m_PlayerInputActions_Reverse = m_PlayerInputActions.FindAction("Reverse", throwIfNotFound: true);
         m_PlayerInputActions_Brake = m_PlayerInputActions.FindAction("Brake", throwIfNotFound: true);
-        m_PlayerInputActions_RegularShoot = m_PlayerInputActions.FindAction("RegularShoot", throwIfNotFound: true);
+        m_PlayerInputActions_ShootingMode = m_PlayerInputActions.FindAction("ShootingMode", throwIfNotFound: true);
         m_PlayerInputActions_CameraMove = m_PlayerInputActions.FindAction("CameraMove", throwIfNotFound: true);
-        m_PlayerInputActions_PushShoot = m_PlayerInputActions.FindAction("PushShoot", throwIfNotFound: true);
+        m_PlayerInputActions_Shoot = m_PlayerInputActions.FindAction("Shoot", throwIfNotFound: true);
         m_PlayerInputActions_SpecialAbility = m_PlayerInputActions.FindAction("SpecialAbility", throwIfNotFound: true);
         m_PlayerInputActions_ResetCamera = m_PlayerInputActions.FindAction("ResetCamera", throwIfNotFound: true);
         m_PlayerInputActions_ThrowMine = m_PlayerInputActions.FindAction("ThrowMine", throwIfNotFound: true);
         m_PlayerInputActions_Pause = m_PlayerInputActions.FindAction("Pause", throwIfNotFound: true);
         m_PlayerInputActions_Dash = m_PlayerInputActions.FindAction("Dash", throwIfNotFound: true);
+        m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
+        m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -512,14 +554,16 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_Accelerate;
     private readonly InputAction m_PlayerInputActions_Reverse;
     private readonly InputAction m_PlayerInputActions_Brake;
-    private readonly InputAction m_PlayerInputActions_RegularShoot;
+    private readonly InputAction m_PlayerInputActions_ShootingMode;
     private readonly InputAction m_PlayerInputActions_CameraMove;
-    private readonly InputAction m_PlayerInputActions_PushShoot;
+    private readonly InputAction m_PlayerInputActions_Shoot;
     private readonly InputAction m_PlayerInputActions_SpecialAbility;
     private readonly InputAction m_PlayerInputActions_ResetCamera;
     private readonly InputAction m_PlayerInputActions_ThrowMine;
     private readonly InputAction m_PlayerInputActions_Pause;
     private readonly InputAction m_PlayerInputActions_Dash;
+    private readonly InputAction m_PlayerInputActions_DebugAIChangeState;
+    private readonly InputAction m_PlayerInputActions_DebugAIResetPosition;
     public struct PlayerInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -528,14 +572,16 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Accelerate => m_Wrapper.m_PlayerInputActions_Accelerate;
         public InputAction @Reverse => m_Wrapper.m_PlayerInputActions_Reverse;
         public InputAction @Brake => m_Wrapper.m_PlayerInputActions_Brake;
-        public InputAction @RegularShoot => m_Wrapper.m_PlayerInputActions_RegularShoot;
+        public InputAction @ShootingMode => m_Wrapper.m_PlayerInputActions_ShootingMode;
         public InputAction @CameraMove => m_Wrapper.m_PlayerInputActions_CameraMove;
-        public InputAction @PushShoot => m_Wrapper.m_PlayerInputActions_PushShoot;
+        public InputAction @Shoot => m_Wrapper.m_PlayerInputActions_Shoot;
         public InputAction @SpecialAbility => m_Wrapper.m_PlayerInputActions_SpecialAbility;
         public InputAction @ResetCamera => m_Wrapper.m_PlayerInputActions_ResetCamera;
         public InputAction @ThrowMine => m_Wrapper.m_PlayerInputActions_ThrowMine;
         public InputAction @Pause => m_Wrapper.m_PlayerInputActions_Pause;
         public InputAction @Dash => m_Wrapper.m_PlayerInputActions_Dash;
+        public InputAction @DebugAIChangeState => m_Wrapper.m_PlayerInputActions_DebugAIChangeState;
+        public InputAction @DebugAIResetPosition => m_Wrapper.m_PlayerInputActions_DebugAIResetPosition;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -557,15 +603,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Brake.started += instance.OnBrake;
             @Brake.performed += instance.OnBrake;
             @Brake.canceled += instance.OnBrake;
-            @RegularShoot.started += instance.OnRegularShoot;
-            @RegularShoot.performed += instance.OnRegularShoot;
-            @RegularShoot.canceled += instance.OnRegularShoot;
+            @ShootingMode.started += instance.OnShootingMode;
+            @ShootingMode.performed += instance.OnShootingMode;
+            @ShootingMode.canceled += instance.OnShootingMode;
             @CameraMove.started += instance.OnCameraMove;
             @CameraMove.performed += instance.OnCameraMove;
             @CameraMove.canceled += instance.OnCameraMove;
-            @PushShoot.started += instance.OnPushShoot;
-            @PushShoot.performed += instance.OnPushShoot;
-            @PushShoot.canceled += instance.OnPushShoot;
+            @Shoot.started += instance.OnShoot;
+            @Shoot.performed += instance.OnShoot;
+            @Shoot.canceled += instance.OnShoot;
             @SpecialAbility.started += instance.OnSpecialAbility;
             @SpecialAbility.performed += instance.OnSpecialAbility;
             @SpecialAbility.canceled += instance.OnSpecialAbility;
@@ -581,6 +627,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dash.started += instance.OnDash;
             @Dash.performed += instance.OnDash;
             @Dash.canceled += instance.OnDash;
+            @DebugAIChangeState.started += instance.OnDebugAIChangeState;
+            @DebugAIChangeState.performed += instance.OnDebugAIChangeState;
+            @DebugAIChangeState.canceled += instance.OnDebugAIChangeState;
+            @DebugAIResetPosition.started += instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.performed += instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.canceled += instance.OnDebugAIResetPosition;
         }
 
         private void UnregisterCallbacks(IPlayerInputActionsActions instance)
@@ -597,15 +649,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Brake.started -= instance.OnBrake;
             @Brake.performed -= instance.OnBrake;
             @Brake.canceled -= instance.OnBrake;
-            @RegularShoot.started -= instance.OnRegularShoot;
-            @RegularShoot.performed -= instance.OnRegularShoot;
-            @RegularShoot.canceled -= instance.OnRegularShoot;
+            @ShootingMode.started -= instance.OnShootingMode;
+            @ShootingMode.performed -= instance.OnShootingMode;
+            @ShootingMode.canceled -= instance.OnShootingMode;
             @CameraMove.started -= instance.OnCameraMove;
             @CameraMove.performed -= instance.OnCameraMove;
             @CameraMove.canceled -= instance.OnCameraMove;
-            @PushShoot.started -= instance.OnPushShoot;
-            @PushShoot.performed -= instance.OnPushShoot;
-            @PushShoot.canceled -= instance.OnPushShoot;
+            @Shoot.started -= instance.OnShoot;
+            @Shoot.performed -= instance.OnShoot;
+            @Shoot.canceled -= instance.OnShoot;
             @SpecialAbility.started -= instance.OnSpecialAbility;
             @SpecialAbility.performed -= instance.OnSpecialAbility;
             @SpecialAbility.canceled -= instance.OnSpecialAbility;
@@ -621,6 +673,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dash.started -= instance.OnDash;
             @Dash.performed -= instance.OnDash;
             @Dash.canceled -= instance.OnDash;
+            @DebugAIChangeState.started -= instance.OnDebugAIChangeState;
+            @DebugAIChangeState.performed -= instance.OnDebugAIChangeState;
+            @DebugAIChangeState.canceled -= instance.OnDebugAIChangeState;
+            @DebugAIResetPosition.started -= instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.performed -= instance.OnDebugAIResetPosition;
+            @DebugAIResetPosition.canceled -= instance.OnDebugAIResetPosition;
         }
 
         public void RemoveCallbacks(IPlayerInputActionsActions instance)
@@ -644,13 +702,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnAccelerate(InputAction.CallbackContext context);
         void OnReverse(InputAction.CallbackContext context);
         void OnBrake(InputAction.CallbackContext context);
-        void OnRegularShoot(InputAction.CallbackContext context);
+        void OnShootingMode(InputAction.CallbackContext context);
         void OnCameraMove(InputAction.CallbackContext context);
-        void OnPushShoot(InputAction.CallbackContext context);
+        void OnShoot(InputAction.CallbackContext context);
         void OnSpecialAbility(InputAction.CallbackContext context);
         void OnResetCamera(InputAction.CallbackContext context);
         void OnThrowMine(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
+        void OnDebugAIChangeState(InputAction.CallbackContext context);
+        void OnDebugAIResetPosition(InputAction.CallbackContext context);
     }
 }

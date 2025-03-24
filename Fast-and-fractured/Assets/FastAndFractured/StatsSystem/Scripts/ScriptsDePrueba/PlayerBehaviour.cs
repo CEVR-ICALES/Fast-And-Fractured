@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Game;
-
+using Utilities;
 public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField] private GameObject projectile;
@@ -17,6 +17,8 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private float _speed;
     [SerializeField] private Pooltype pooltype;
     [SerializeField] private NormalShootHandle normalShootHandle;
+    [SerializeField] private PushShootHandle pushShootHandle;
+    [SerializeField] private Camera mainCamera;
 
     #region UnityEvents
     // Start is called before the first frame update
@@ -25,14 +27,7 @@ public class PlayerBehaviour : MonoBehaviour
         _statsController = transform.GetComponent<StatsController>();
         _rb = transform.GetComponent<Rigidbody>();
         _speed = _statsController.MinSpeed;
-        Debug.Log("Controllers");
-        Debug.Log("RightMouse: Shoot");
-        Debug.Log("LeftShit: Accelerate");
-        Debug.Log("LeftControll: Decelerate");
-        Debug.Log("E: AugmentMaxSpeed");
-        Debug.Log("Q: AugmentShootDamage");
-        Debug.Log("Space: TemporalAugmentShootDamage");
-        Debug.Log("F: Temporal MaxSpeed Down");
+        normalShootHandle.IgnoreCollider(transform.parent.GetComponent<Collider>());
     }
 
     
@@ -48,49 +43,54 @@ public class PlayerBehaviour : MonoBehaviour
             //    projectile.transform.position = transform.position;
             //    projectile.GetComponent<PlayerProjectile>().InitProjectile(projectileSpeed, _statsController.NormalShootDamage, transform.forward);
             //}
+            normalShootHandle.CurrentShootDirection = mainCamera.transform.forward;
             normalShootHandle.NormalShooting();
-
         }
-        if (Input.GetKey(KeyCode.LeftShift)){
-             _speed += _statsController.Acceleration * Time.deltaTime;
-
-            if (_speed > _statsController.MaxSpeed)
-                _speed = _statsController.MaxSpeed;
-
-        }
-        if (Input.GetKey(KeyCode.LeftControl))
+        if (Input.GetMouseButtonUp(1))
         {
-                _speed -= _statsController.Acceleration * Time.deltaTime;
-            if (_speed < _statsController.MinSpeed)
-                _speed = _statsController.MinSpeed;
+            pushShootHandle.CurrentShootDirection = mainCamera.transform.forward;
+            pushShootHandle.PushShooting();
         }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            _statsController.UpgradeCharStat(STATS.MAX_SPEED, modMaxSpeed);
-        }
+        //if (Input.GetKey(KeyCode.LeftShift)){
+        //     _speed += _statsController.Acceleration * Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            _statsController.ProductCharStats(STATS.NORMAL_DAMAGE,bulletMult);
-        }
+        //    if (_speed > _statsController.MaxSpeed)
+        //        _speed = _statsController.MaxSpeed;
+
+        //}
+        //if (Input.GetKey(KeyCode.LeftControl))
+        //{
+        //        _speed -= _statsController.Acceleration * Time.deltaTime;
+        //    if (_speed < _statsController.MinSpeed)
+        //        _speed = _statsController.MinSpeed;
+        //}
+        //if (Input.GetKeyDown(KeyCode.E))
+        //{
+        //    _statsController.UpgradeCharStat(STATS.MAX_SPEED, modMaxSpeed);
+        //}
+
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    _statsController.ProductCharStats(STATS.NORMAL_DAMAGE,bulletMult);
+        //}
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             _statsController.TemporalStatUp(STATS.NORMAL_DAMAGE,temporalBulletDamage,temporalTimer);
         }
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            _statsController.TemporalStatDown(STATS.MAX_SPEED, temporalMaxSpeedDow, temporalTimer);
-        }
-        if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
-        {
-            if (_speed > _statsController.MaxSpeed)
-                _speed = _statsController.MaxSpeed;
-            else if (_speed < _statsController.MinSpeed)
-                    _speed = _statsController.MinSpeed;
-        }
+        //if (Input.GetKeyDown(KeyCode.F))
+        //{
+        //    _statsController.TemporalStatDown(STATS.MAX_SPEED, temporalMaxSpeedDow, temporalTimer);
+        //}
+        //if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        //{
+        //    if (_speed > _statsController.MaxSpeed)
+        //        _speed = _statsController.MaxSpeed;
+        //    else if (_speed < _statsController.MinSpeed)
+        //            _speed = _statsController.MinSpeed;
+        //}
 
-        _rb.velocity = Input.GetAxis("Horizontal") * _speed * Vector3.right + Input.GetAxis("Vertical") * _speed * Vector3.forward;
+        //_rb.velocity = Input.GetAxis("Horizontal") * _speed * Vector3.right + Input.GetAxis("Vertical") * _speed * Vector3.forward;
     }
     #endregion
     }

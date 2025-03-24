@@ -16,21 +16,21 @@
                 },
                 {
                     "name": "Accelerate",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "2f11717d-ef60-4557-bdaa-c65a52510283",
-                    "expectedControlType": "",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Reverse",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "38a23e7d-4f3d-4eda-bf26-222fccc54458",
-                    "expectedControlType": "",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Brake",
@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RegularShoot",
+                    "name": "ShootingMode",
                     "type": "Button",
                     "id": "df5a71de-dd17-4098-8f91-0ae3a2194ab2",
                     "expectedControlType": "",
@@ -60,7 +60,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "PushShoot",
+                    "name": "Shoot",
                     "type": "Button",
                     "id": "2c14d8bd-8915-44fd-8137-042f895d90b5",
                     "expectedControlType": "",
@@ -108,6 +108,24 @@
                     "name": "Dash",
                     "type": "Button",
                     "id": "382fdf1f-f53c-45a5-8c08-1aac93b6e9e3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugAIChangeState",
+                    "type": "Button",
+                    "id": "c7948b44-ab46-4ca0-8db2-ff3bf4abe4d5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugAIResetPosition",
+                    "type": "Button",
+                    "id": "6cff68b6-f007-416e-bcfa-1fa0a926af41",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -217,22 +235,22 @@
                 {
                     "name": "",
                     "id": "406dea28-aafa-44ce-8e1f-54249e513c07",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RegularShoot",
+                    "action": "ShootingMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "c29a6517-5e5e-4bfe-bbf8-1c3669ccf9f7",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RegularShoot",
+                    "action": "ShootingMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -265,18 +283,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PushShoot",
+                    "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "3b408e85-b686-48f5-8201-fb1966f6901e",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PushShoot",
+                    "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -398,6 +416,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f8ded8af-b478-41fe-b47d-4a1371bd43be",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugAIChangeState",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "edc1bed8-d6d1-4c51-b2d2-d576811dfeac",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugAIResetPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
