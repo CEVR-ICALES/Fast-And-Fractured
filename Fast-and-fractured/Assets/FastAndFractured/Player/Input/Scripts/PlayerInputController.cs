@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
+using Utilities;
 
 public enum InputBlockTypes // this enum need to be added to the enum library
 {
@@ -233,14 +234,14 @@ public class PlayerInputController : MonoBehaviour
         {
             _isAbilityFinished = false;
         }
-        TimerManager.Instance.StartTimer(timeTillEnable, () =>
+        TimerSystem.Instance.CreateTimer(timeTillEnable,  onTimerDecreaseComplete: () =>
         {
             if (!_isAbilityFinished)
             {
                 _isAbilityFinished = true;
             }
             EnableInput(inputBlockType);
-        }, null, gameObject.name + Time.time, false, true);
+        });
         
     }
 

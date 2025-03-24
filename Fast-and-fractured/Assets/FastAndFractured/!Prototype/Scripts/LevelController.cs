@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Utilities;
 
 namespace Game { 
 public class LevelController : MonoBehaviour
@@ -54,14 +55,14 @@ public class LevelController : MonoBehaviour
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
             float delay = characterstats.Dead();
-            TimerManager.Instance.StartTimer(delay, () => {
+            TimerSystem.Instance.CreateTimer(delay,TimerDirection.Decrease, onTimerDecreaseComplete:  () => {
                 if (IsThePlayer(characterstats.gameObject))
                 {
                     SceneManager.LoadScene(currentSceneName);
                 }
                 else
                     characterstats.gameObject.SetActive(false);
-            },null,"Character " + characterstats.name + " Dead",false);
+            });
     }
 
     private bool IsThePlayer(GameObject character)

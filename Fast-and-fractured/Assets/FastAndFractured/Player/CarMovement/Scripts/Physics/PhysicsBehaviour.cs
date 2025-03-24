@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 namespace Game
 {
@@ -157,16 +158,16 @@ namespace Game
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
             return finalSimulatedWeight + currentRbSpeed;
         }
-
+        const float timeUntilCarPushStateReset = 1.5f;
         public void OnCarHasBeenPushed()
         {
             _hasBeenPushed = true;
-            TimerManager.Instance.StartTimer(1.5f, () =>
+            TimerSystem.Instance.CreateTimer(timeUntilCarPushStateReset, onTimerDecreaseComplete: () =>
             {
                 _hasBeenPushed = false;
-            }, (progress) => {
+            }, onTimerDecreaseUpdate: (progress) => {
 
-            }, "pushed", false, false);
+            });
         }
 
         public void LimitRigidBodySpeed(float maxSpeed)

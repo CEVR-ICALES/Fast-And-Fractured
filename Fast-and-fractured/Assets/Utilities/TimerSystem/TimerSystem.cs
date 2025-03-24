@@ -26,6 +26,10 @@ namespace Utilities
             UpdateAllTimers(Time.deltaTime);
         }
 
+        private void OnDestroy()
+        {
+            _timers.Clear();
+        }
         #endregion
 
         #region TIMER_MANAGEMENT
@@ -50,7 +54,7 @@ namespace Utilities
         }
 
 
-        public ITimer CreateTimer(float duration, TimerDirection direction, Action onTimerIncreaseComplete = null,
+        public ITimer CreateTimer(float duration, TimerDirection direction= TimerDirection.Decrease, Action onTimerIncreaseComplete = null,
             Action onTimerDecreaseComplete = null, bool isDebug = false, Action<float> onTimerIncreaseUpdate = null,
             Action<float> onTimerDecreaseUpdate = null, Action onTimerPause = null, Action onTimerResume = null)
         {
@@ -204,7 +208,7 @@ namespace Utilities
 
         public ITimer GetTimer(string timerId)
         {
-            //More Clear output
+         
             if (string.IsNullOrEmpty(timerId))
             {
                 Debug.LogError(

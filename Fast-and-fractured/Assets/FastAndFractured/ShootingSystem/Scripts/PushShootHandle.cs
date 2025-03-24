@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using Utilities;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 namespace Game {
     public class PushShootHandle : ShootingHandle
@@ -51,12 +52,8 @@ namespace Game {
                 Vector3 rotatedVector = (rotation * velocityVectorX) + transform.up * Vy;
                 ShootBullet(rotatedVector, range);
                 canShoot = false;
-                TimerManager.Instance.StartTimer(characterStatsController.PushCooldown,
-                    () => { canShoot = true; },
-                    null,
-                    "PushShootCooldown of " + characterStatsController.name,
-                    false,
-                    false
+                TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
+                    () => { canShoot = true; }
                     );
             }
         }
