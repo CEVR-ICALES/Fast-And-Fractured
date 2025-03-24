@@ -10,9 +10,9 @@ public class TriggerPushShootAction : Action
     {
         if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
         {
-            Debug.Log("Push Shooting");
-            controller.GetBehaviour<PushShootHandle>().CurrentShootDirection = Camera.main.transform.forward;
-            controller.GetBehaviour<PushShootHandle>().PushShooting();
+            PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
+            pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
+            pushShootHandle.PushShooting();
         }
     }
 }

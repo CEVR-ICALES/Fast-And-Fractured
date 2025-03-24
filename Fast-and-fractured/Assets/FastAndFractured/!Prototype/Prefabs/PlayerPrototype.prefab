@@ -656,6 +656,7 @@ GameObject:
   - component: {fileID: 2458429989511805493}
   - component: {fileID: 6241371975123796762}
   - component: {fileID: 2102361280212250019}
+  - component: {fileID: 2435327966734875818}
   m_Layer: 6
   m_Name: PlayerPrototype
   m_TagString: Player
@@ -905,6 +906,7 @@ MonoBehaviour:
   - {fileID: 6073503923705467187}
   - {fileID: 2701454533516444196}
   - {fileID: 2050233496893708425}
+  - {fileID: 2435327966734875818}
   firstState: {fileID: 11400000, guid: 6170d0348e5e72941aedd8b4fd07c0a3, type: 2}
 --- !u!114 &6241371975123796762
 MonoBehaviour:
@@ -959,6 +961,19 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 20
+--- !u!114 &2435327966734875818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4417372150632784795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58befd0f56a95a44e8ee5591b466bde0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraToHold: {fileID: 0}
 --- !u!1 &4466657202273976813
 GameObject:
   m_ObjectHideFlags: 0
