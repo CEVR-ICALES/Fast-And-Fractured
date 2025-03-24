@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Utilities;
-namespace Game
+namespace Utilities
 {
     public class ObjectPoolManager : AbstractSingleton<ObjectPoolManager>
     {
@@ -107,3 +106,4 @@ namespace Game
         }
     }
 }
+

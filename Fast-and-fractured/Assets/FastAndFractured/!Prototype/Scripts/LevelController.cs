@@ -8,7 +8,7 @@ using Utilities;
 namespace Game { 
 public class LevelController : AbstractSingleton<LevelController>
 {
-    public bool UsingController;
+    public bool usingController;
     [SerializeField] private List<ObjectPoolSO> poolSOList;
     [SerializeField] private List<StatsController> characters;
     [SerializeField] private EnemyAIBrain ai;
@@ -40,18 +40,18 @@ public class LevelController : AbstractSingleton<LevelController>
     {  
         if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
         {
-            UsingController = false;
+            usingController = false;
         }
         else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
         {
-            UsingController = true;
+            usingController = true;
         }
 
         foreach (StatsController character in characters) // for now when inoput changed its detected it will only notify the carMovementController of the player
         {
             if (character.CompareTag("Player"))
             {
-                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(UsingController);
+                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(usingController);
             }
         }
 

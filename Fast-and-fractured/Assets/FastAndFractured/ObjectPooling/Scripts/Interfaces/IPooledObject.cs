@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game {
+namespace Utilities {
     public interface IPooledObject
     {
         public Pooltype Pooltype { get; set; }
