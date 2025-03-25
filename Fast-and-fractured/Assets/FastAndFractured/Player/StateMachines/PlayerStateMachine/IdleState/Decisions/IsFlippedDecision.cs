@@ -1,12 +1,16 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsFlippedDecision), menuName = "PlayerStateMachine/Decisions/IsFlippedDecision")]
-public class IsFlippedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsFlippedDecision), menuName = "PlayerStateMachine/Decisions/IsFlippedDecision")]
+    public class IsFlippedDecision : Decision
     {
-        // to do
-        return false;
+        public override bool Decide(Controller controller)
+        {
+            // to do
+            return false;
+        }
     }
+
 }

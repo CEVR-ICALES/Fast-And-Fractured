@@ -1,11 +1,14 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "GetCarToNormalAction", menuName = "PlayerStateMachine/Actions/GetCarToNormalAction")]
 
-public class GetCarToNormalAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "GetCarToNormalAction", menuName = "PlayerStateMachine/Actions/GetCarToNormalAction")]
+    public class GetCarToNormalAction : Action
     {
-        // To do
+        public override void Act(Controller controller)
+        {
+            // To do
+        }
     }
 }

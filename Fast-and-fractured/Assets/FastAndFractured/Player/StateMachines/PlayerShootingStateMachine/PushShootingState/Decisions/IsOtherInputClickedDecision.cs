@@ -1,12 +1,16 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsOtherInputClickedDecision), menuName = "PlayerShootingStateMachine/Decisions/IsOtherInputClickedDecision")]
-public class IsOtherInputClickedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsOtherInputClickedDecision), menuName = "PlayerShootingStateMachine/Decisions/IsOtherInputClickedDecision")]
+    public class IsOtherInputClickedDecision : Decision
     {
-        // to do
-        return true;
+        public override bool Decide(Controller controller)
+        {
+            // to do
+            return true;
+        }
     }
 }
+

@@ -1,11 +1,13 @@
-using StateMachine;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DecisionAlwaysTrue.asset", menuName = "StateMachine/DecisionAlwaysTrue")]
-public   class DecisionAlwaysTrue : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = "DecisionAlwaysTrue.asset", menuName = "StateMachine/DecisionAlwaysTrue")]
+    public class DecisionAlwaysTrue : Decision
     {
-        return true;
+        public override bool Decide(Controller controller)
+        {
+            return true;
+        }
     }
 }

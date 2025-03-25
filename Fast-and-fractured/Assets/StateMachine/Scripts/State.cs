@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace StateMachine
 {
     [CreateAssetMenu(fileName = "State.state", menuName = "StateMachine/State")]

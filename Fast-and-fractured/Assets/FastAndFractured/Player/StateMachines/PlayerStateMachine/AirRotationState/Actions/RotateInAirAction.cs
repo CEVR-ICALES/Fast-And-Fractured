@@ -1,11 +1,14 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "RotateInAirAction", menuName = "PlayerStateMachine/Actions/RotateInAirAction")]
 
-public class RotateInAirAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "RotateInAirAction", menuName = "PlayerStateMachine/Actions/RotateInAirAction")]
+    public class RotateInAirAction : Action
     {
-        // To do
+        public override void Act(Controller controller)
+        {
+            // To do
+        }
     }
 }

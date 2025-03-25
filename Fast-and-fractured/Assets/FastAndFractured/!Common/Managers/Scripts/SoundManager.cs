@@ -4,7 +4,7 @@ using FMOD.Studio;
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace Game
+namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {

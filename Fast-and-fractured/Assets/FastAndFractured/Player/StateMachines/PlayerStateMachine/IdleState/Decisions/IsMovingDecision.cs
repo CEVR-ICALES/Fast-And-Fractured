@@ -1,6 +1,6 @@
-using StateMachine;
 using UnityEngine;
-using Game;
+using FastAndFractured;
+
 namespace StateMachine
 {
     [CreateAssetMenu(fileName = nameof(IsMovingDecision), menuName = "PlayerStateMachine/Decisions/IsMovingDecision")]

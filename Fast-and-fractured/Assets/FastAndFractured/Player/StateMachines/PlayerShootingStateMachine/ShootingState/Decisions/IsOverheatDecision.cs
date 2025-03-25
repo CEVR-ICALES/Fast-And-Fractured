@@ -1,12 +1,15 @@
-using Game;
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsOverheatDecision), menuName = "PlayerShootingStateMachine/Decisions/IsOverheatDecision")]
-public class IsOverheatDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsOverheatDecision), menuName = "PlayerShootingStateMachine/Decisions/IsOverheatDecision")]
+    public class IsOverheatDecision : Decision
     {
-        return controller.GetBehaviour<NormalShootHandle>().IsOverHeat;
+        public override bool Decide(Controller controller)
+        {
+            return controller.GetBehaviour<NormalShootHandle>().IsOverHeat;
+        }
     }
 }
+

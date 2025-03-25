@@ -1,12 +1,16 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsGroundedDecision), menuName = "PlayerStateMachine/Decisions/IsGroundedDecision")]
-public class IsGroundedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsGroundedDecision), menuName = "PlayerStateMachine/Decisions/IsGroundedDecision")]
+    public class IsGroundedDecision : Decision
     {
-        // to do
-        return true;
+        public override bool Decide(Controller controller)
+        {
+            // to do
+            return true;
+        }
     }
 }
+

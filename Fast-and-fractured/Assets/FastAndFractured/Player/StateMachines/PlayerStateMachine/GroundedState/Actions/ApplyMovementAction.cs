@@ -1,5 +1,6 @@
-using Game;
+using FastAndFractured;
 using UnityEngine;
+
 namespace StateMachine
 {
     [CreateAssetMenu(fileName = "ApplyMovementAction", menuName = "PlayerStateMachine/Actions/ApplyMovementAction")]

@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
-using Game;
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = nameof(PauseOverheatTimeAction), menuName = "PlayerShootingStateMachine/Actions/PauseOverheatTimeAction")]
 
-public class PauseOverheatTimeAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(PauseOverheatTimeAction), menuName = "PlayerShootingStateMachine/Actions/PauseOverheatTimeAction")]
+
+    public class PauseOverheatTimeAction : Action
     {
+        public override void Act(Controller controller)
+        {
+        }
     }
 }
- 
+

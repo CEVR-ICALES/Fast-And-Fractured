@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Utilities;
 
-namespace Game
+namespace FastAndFractured
 {
     public class NormalShootHandle : ShootingHandle
     {
@@ -50,10 +50,10 @@ namespace Game
             _countOverHeat = 0;
         }
 
-        protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+            ((NormalBulletBehaviour)bulletBehaivour).IgnoreCollider = ignoredCollider;
         }
 
         #endregion

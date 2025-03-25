@@ -1,4 +1,4 @@
-using Game;
+using FastAndFractured;
 using StateMachine;
 using UnityEngine;
 [CreateAssetMenu(fileName = nameof(IsUniqueAbilityOnCooldownDecision), menuName = "UniqueAbility/Decisions/IsUniqueAbilityOnCooldownDecision")]

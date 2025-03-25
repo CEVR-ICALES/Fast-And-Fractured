@@ -1,19 +1,21 @@
-using Game;
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 using Utilities;
 
-[CreateAssetMenu(fileName = "TriggerPushShootAction", menuName = "PlayerShootingStateMachine/Actions/TriggerPushShootAction")]
-
-public class TriggerPushShootAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "TriggerPushShootAction", menuName = "PlayerShootingStateMachine/Actions/TriggerPushShootAction")]
+
+    public class TriggerPushShootAction : Action
     {
-        if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
+        public override void Act(Controller controller)
         {
-            PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
-            pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
-            pushShootHandle.PushShooting();
+            if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
+            {
+                PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
+                pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
+                pushShootHandle.PushShooting();
+            }
         }
     }
 }

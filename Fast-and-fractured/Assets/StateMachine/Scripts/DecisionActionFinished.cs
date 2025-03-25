@@ -1,27 +1,28 @@
-using StateMachine;
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DecisionActionFinished", menuName = "StateMachine/DecisionActionFinished")]
-
-public class DecisionActionFinished : Decision
+namespace StateMachine
 {
-    [SerializeField] StateMachine.Action actionToCheck;
-    [SerializeField] bool useOnlyActionType = false;
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = "DecisionActionFinished", menuName = "StateMachine/DecisionActionFinished")]
+    public class DecisionActionFinished : Decision
     {
-        State currentState = controller.GetCurrentState();
-        foreach (var action in currentState.actions)
+        [SerializeField] StateMachine.Action actionToCheck;
+        [SerializeField] bool useOnlyActionType = false;
+        public override bool Decide(Controller controller)
         {
-
-
-            if ((action.GetType() == actionToCheck.GetType() &&useOnlyActionType )||    action.name.Replace("(Clone)", " ") == actionToCheck.name && !useOnlyActionType)
+            State currentState = controller.GetCurrentState();
+            foreach (var action in currentState.actions)
             {
 
-                return action.IsFinished();
 
+                if ((action.GetType() == actionToCheck.GetType() && useOnlyActionType) || action.name.Replace("(Clone)", " ") == actionToCheck.name && !useOnlyActionType)
+                {
+
+                    return action.IsFinished();
+
+                }
             }
+            return false;
         }
-        return false;
     }
 }

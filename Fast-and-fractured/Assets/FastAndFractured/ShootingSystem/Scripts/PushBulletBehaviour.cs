@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game {
-    public class PushBulletBehaviour : BulletBehaivour
+namespace FastAndFractured {
+    public class PushBulletBehaviour : BulletBehaviour
     {
         //Explosion Values
         public float PushForce {set=> _pushForce = value; }

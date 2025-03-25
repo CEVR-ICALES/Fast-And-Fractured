@@ -3,94 +3,98 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum ScreensType
+namespace FastAndFractured
 {
-    MAIN_MENU,
-    SETTINGS,
-    CREDITS,
-    GAMEMODE_SELECTION,
-    CHARACTER_SELECTION,
-    LOADING,
-    SPLASH_SCREEN
-} 
-public class MainMenuManager : MonoBehaviour
-{
-    #region Singleton
-
-    public static MainMenuManager Instance { get; private set; }
-
-    #endregion
-
-    #region Private Fields
-
-    private Dictionary<ScreensType, MenuScreen> _menuScreens = new Dictionary<ScreensType, MenuScreen>();
-    private MenuScreen _currentScreen;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Awake()
+    public enum ScreensType
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        MAIN_MENU,
+        SETTINGS,
+        CREDITS,
+        GAMEMODE_SELECTION,
+        CHARACTER_SELECTION,
+        LOADING,
+        SPLASH_SCREEN
     }
-
-    private void Start()
+    public class MainMenuManager : MonoBehaviour
     {
-        // Register all Screens in scene
-        RegisterScreens();
-        _currentScreen = _menuScreens[ScreensType.MAIN_MENU];
-    }
+        #region Singleton
 
-    #endregion
+        public static MainMenuManager Instance { get; private set; }
 
-    #region Start Methods
+        #endregion
 
-    void RegisterScreens()
-    {
-        foreach (MenuScreen screen in FindObjectsOfType<MenuScreen>(true))
+        #region Private Fields
+
+        private Dictionary<ScreensType, MenuScreen> _menuScreens = new Dictionary<ScreensType, MenuScreen>();
+        private MenuScreen _currentScreen;
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
         {
-            _menuScreens[screen.screenType] = screen;
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-    }
 
-    #endregion
-
-    #region Screen Management Methods
-
-    public void ChangeScreen(ScreensType screenType)
-    {
-        if (_currentScreen != null)
+        private void Start()
         {
-            _currentScreen.gameObject.SetActive(false);
+            // Register all Screens in scene
+            RegisterScreens();
+            _currentScreen = _menuScreens[ScreensType.MAIN_MENU];
         }
-        _currentScreen = _menuScreens[screenType];
-        _currentScreen.gameObject.SetActive(true);
-    }
 
-    #endregion
+        #endregion
 
-    // THIS SHOULD BE ON A FUTURE GAME MANAGER OR CUSTOM SCENE MANAGER
-    #region Scene Management Methods
+        #region Start Methods
 
-    public void LoadScene(int sceneIndex)
-    {
-        //if(SceneManager.GetSceneByBuildIndex(sceneIndex).IsValid())
-        //{
+        void RegisterScreens()
+        {
+            foreach (MenuScreen screen in FindObjectsOfType<MenuScreen>(true))
+            {
+                _menuScreens[screen.screenType] = screen;
+            }
+        }
+
+        #endregion
+
+        #region Screen Management Methods
+
+        public void ChangeScreen(ScreensType screenType)
+        {
+            if (_currentScreen != null)
+            {
+                _currentScreen.gameObject.SetActive(false);
+            }
+            _currentScreen = _menuScreens[screenType];
+            _currentScreen.gameObject.SetActive(true);
+        }
+
+        #endregion
+
+        // THIS SHOULD BE ON A FUTURE GAME MANAGER OR CUSTOM SCENE MANAGER
+        #region Scene Management Methods
+
+        public void LoadScene(int sceneIndex)
+        {
+            //if(SceneManager.GetSceneByBuildIndex(sceneIndex).IsValid())
+            //{
             SceneManager.LoadScene(sceneIndex);
-        //}
-        //else
-        //{
-        //    Debug.LogWarning($"Scene '{sceneIndex}' not found");
-        //}
-    }
+            //}
+            //else
+            //{
+            //    Debug.LogWarning($"Scene '{sceneIndex}' not found");
+            //}
+        }
 
-    #endregion
+        #endregion
+    }
 }
+

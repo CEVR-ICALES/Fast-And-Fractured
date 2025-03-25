@@ -1,11 +1,15 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsUniqueAbilityInputDecision), menuName = "PlayerShootingStateMachine/Decisions/IsUniqueAbilityInputDecision")]
-public class IsUniqueAbilityInputDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsUniqueAbilityInputDecision), menuName = "PlayerShootingStateMachine/Decisions/IsUniqueAbilityInputDecision")]
+    public class IsUniqueAbilityInputDecision : Decision
     {
-        return controller.GetBehaviour<PlayerInputController>().IsUsingAbility;
+        public override bool Decide(Controller controller)
+        {
+            return controller.GetBehaviour<PlayerInputController>().IsUsingAbility;
+        }
     }
+
 }

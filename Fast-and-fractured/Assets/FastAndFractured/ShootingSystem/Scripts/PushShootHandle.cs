@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using Utilities;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-namespace Game {
+
+namespace FastAndFractured {
     public class PushShootHandle : ShootingHandle
     {
         protected override void CustomStart()
@@ -13,7 +13,7 @@ namespace Game {
             base.CustomStart();
         }
 
-        protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
             PushBulletBehaviour pushBulletBehaviour = (PushBulletBehaviour)bulletBehaivour; 

@@ -1,15 +1,18 @@
-using Game;
-using StateMachine;
+using FastAndFractured;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName = nameof(DecreaseOverheatTimeAction), menuName = "EnemyStateMachine/Actions/DecreaseOverheatTimeAction")]
 
-public class DecreaseOverheatTimeAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(DecreaseOverheatTimeAction), menuName = "EnemyStateMachine/Actions/DecreaseOverheatTimeAction")]
+
+    public class DecreaseOverheatTimeAction : Action
     {
-        NormalShootHandle shootHandle = controller.GetBehaviour<NormalShootHandle>();
-        shootHandle.DecreaseOverheatTime();
+        public override void Act(Controller controller)
+        {
+            NormalShootHandle shootHandle = controller.GetBehaviour<NormalShootHandle>();
+            shootHandle.DecreaseOverheatTime();
+        }
     }
 }

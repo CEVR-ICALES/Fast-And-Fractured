@@ -1,7 +1,7 @@
 using FMODUnity;
 using UnityEngine;
 
-namespace Game
+namespace FastAndFractured
 {
     [CreateAssetMenu(fileName = "NewAbilityData", menuName = "Abilities/Ability Data")]
     public class AbilityData : ScriptableObject

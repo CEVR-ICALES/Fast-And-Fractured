@@ -1,12 +1,16 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(BlockInputDecision), menuName = "PlayerStateMachine/Decisions/BlockInputDecision")]
-public class BlockInputDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(BlockInputDecision), menuName = "PlayerStateMachine/Decisions/BlockInputDecision")]
+    public class BlockInputDecision : Decision
     {
-        // to do
-        return false;
+        public override bool Decide(Controller controller)
+        {
+            // to do
+            return false;
+        }
     }
 }
+
