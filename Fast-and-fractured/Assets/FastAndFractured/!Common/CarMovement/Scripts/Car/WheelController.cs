@@ -47,12 +47,14 @@ public class WheelController : MonoBehaviour
 
     }
 
-    public bool IsGroundedWithAngle(out float slopeAngle) // return true and and the slope angle 
+    public bool IsGroundedWithAngle(out float slopeAngle, out Vector3 groundNormal) // returns angle and contact normal, this may be very expensive so maybe we can implement a struct to send the info, WheelGroundInfo that has a public bool, slopeAngle and gorundNormal
     {
         slopeAngle = 0f;
+        groundNormal = Vector3.up;
         if(wheelCollider.GetGroundHit(out WheelHit hit))
         {
             slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+            groundNormal = hit.normal;
             return true;
         } 
 

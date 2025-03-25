@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Utilities;
@@ -33,8 +34,20 @@ namespace Game
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
 
-        [Header("Slope")]
+        [Header("Slope Detecting")]
         [SerializeField] private float slopeAngleThreshold;
+        [Tooltip("Forward speed (m/s) where ratio = 1.0")]
+        [SerializeField] private float forwardSpeedRef = 5f;
+        [Tooltip("Vertical speed (m/s) where ratio = 1.0")]
+        [SerializeField] private float verticalSpeedRef = 2f;
+        [Tooltip("Minimum forward ratio for uphill detection")]
+        [Range(0.1f, 1f)][SerializeField] private float uphillForwardThreshold = -0.3f;
+        [Tooltip("Minimum upward ratio for uphill detection")]
+        [Range(0.1f, 1f)][SerializeField] private float uphillVerticalThreshold = -0.3f;
+        [Tooltip("Maximum forward ratio for downhill detection")]
+        [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
+        [Tooltip("Maximum upward ratio for downhill detection")]
+        [Range(-1f, -0.1f)][SerializeField] private float downhillVerticalThreshold = 0.3f;
 
         private float _currentSlopeAngle;
         private bool _isGoingUphill;
@@ -76,11 +89,11 @@ namespace Game
 
             if (_isGoingUphill)
             {
-                Debug.Log($"Climbing {_currentSlopeAngle}° slope");
+                Debug.Log($"Climbing");
             }
             else if (_isGoingDownhill)
             {
-                Debug.Log($"Descending {_currentSlopeAngle}° slope");
+                Debug.Log($"Descending");
             }
         }
 
@@ -329,28 +342,50 @@ namespace Game
         {
             _currentSlopeAngle = 0;
             int groundedWheels = 0;
+            Vector3 combinedNormal = Vector3.zero;
 
             foreach(WheelController wheel in wheels)
             {
-                if(wheel.IsGroundedWithAngle(out float angle))
+                if(wheel.IsGroundedWithAngle(out float angle, out Vector3 normal))
                 {
-                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle);
+                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle); //steepest angle found
+                    combinedNormal += normal;
                     groundedWheels++;
                 }
             }
 
-            if(groundedWheels > 2 && _currentSlopeAngle > slopeAngleThreshold)
+            // reset states if not on significant slope or not enough wheels on floor
+            if (groundedWheels < 2 || _currentSlopeAngle <= slopeAngleThreshold)
             {
-                Vector3 localVelocity = transform.InverseTransformDirection(_physicsBehaviour.Rb.velocity);
-
-                _isGoingUphill = localVelocity.z > 1f; // moving forward to relative cars orientation 
-
-                _isGoingDownhill = localVelocity.z < -0.5f; // moving backweard relative to cars orientation
-            } else
-            {
-                _isGoingDownhill = false;
                 _isGoingUphill = false;
+                _isGoingDownhill = false;
+                return;
             }
+            // this last part i do not understand, found it on a random post, but basically we convert the world space velocity to relative coordinates, and then compare them to both the forward and vertical ration (negatives values mean uphill since your moving against the slope)
+            // calculate average ground normal (up direction of the surface)
+            Vector3 averageNormal = combinedNormal / groundedWheels;
+
+            // create slope-aligned coordinate system
+            Vector3 slopeRight = Vector3.Cross(averageNormal, Vector3.up).normalized;
+            Vector3 slopeForward = Vector3.Cross(slopeRight, averageNormal).normalized;
+
+            // transform velocity to slope space, 
+            Matrix4x4 slopeMatrix = Matrix4x4.TRS(Vector3.zero,
+                                                Quaternion.LookRotation(slopeForward, averageNormal),
+                                                Vector3.one);
+            Vector3 slopeSpaceVelocity = slopeMatrix.MultiplyVector(_physicsBehaviour.Rb.velocity);
+
+            // calculate movement ratios (clamped to -1..1 range)
+            float forwardRatio = Mathf.Clamp(slopeSpaceVelocity.z / forwardSpeedRef, -1f, 1f);
+            float verticalRatio = Mathf.Clamp(-slopeSpaceVelocity.y / verticalSpeedRef, -1f, 1f);
+
+            // determine slope states
+            _isGoingUphill = (forwardRatio < uphillForwardThreshold) &&
+                            (verticalRatio < uphillVerticalThreshold);
+
+            _isGoingDownhill = (forwardRatio > downhillForwardThreshold) ||
+                              (verticalRatio > downhillVerticalThreshold);
+
         }
 
         public void StopAllCarMovement()
