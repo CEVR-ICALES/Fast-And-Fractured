@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Utilities;
@@ -33,6 +34,17 @@ namespace Game
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
 
+        [Header("Slope Detecting")]
+        [SerializeField] private float slopeAngleThreshold;
+        [Tooltip("Minimum forward ratio for uphill detection")]
+        [Range(0.1f, 1f)][SerializeField] private float uphillForwardThreshold = -0.3f;
+        [Tooltip("Maximum forward ratio for downhill detection")]
+        [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
+        [SerializeField] private float slopeSpeedThreshold;
+
+        private float _currentSlopeAngle;
+        private bool _isGoingUphill;
+        private bool _isGoingDownhill;
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
@@ -54,7 +66,8 @@ namespace Game
 
         private void FixedUpdate()
         {
-
+            CheckSlope();
+            UpdateMaxRbSpeedOnSlopes();
             UpdateWheelVisuals();
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
@@ -67,6 +80,15 @@ namespace Game
             //Debug.Log(_currentRbMaxVelocity);
             //Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
             //Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
+
+            if (_isGoingUphill)
+            {
+                Debug.Log($"Climbing");
+            }
+            else if (_isGoingDownhill)
+            {
+                Debug.Log($"Descending");
+            }
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -306,6 +328,73 @@ namespace Game
         {
             TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
             FinishDash();
+        }
+
+        #endregion
+
+        #region Slopes
+
+        private void UpdateMaxRbSpeedOnSlopes()
+        {
+            if(!IsDashing && !_isBraking)
+            {
+                if(_isGoingUphill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeedAscend;
+                }
+
+                if(_isGoingDownhill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeedDescend;
+                }
+
+                if(!_isGoingDownhill && !_isGoingUphill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeed;
+                }
+            }
+        }
+        private void CheckSlope()
+        {
+            _currentSlopeAngle = 0;
+            int groundedWheels = 0;
+            Vector3 combinedNormal = Vector3.zero;
+
+            foreach(WheelController wheel in wheels)
+            {
+                if(wheel.IsGroundedWithAngle(out float angle, out Vector3 normal))
+                {
+                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle); //steepest angle found
+                    combinedNormal += normal;
+                    groundedWheels++;
+                }
+            }
+
+            // reset states if not on significant slope or not enough wheels on floor
+            if (groundedWheels < 2 || _currentSlopeAngle <= slopeAngleThreshold)
+            {
+                _isGoingUphill = false;
+                _isGoingDownhill = false;
+                return;
+            }
+            
+            // calculate average ground normal (up direction of the surface)
+            Vector3 averageNormal = combinedNormal / groundedWheels;
+            Vector3 carForward = transform.forward;
+
+            // flatten the car's forward vector to ignore vertical component
+            Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
+
+            // calculate how much the slope is aligned with carss forward direction
+            float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
+
+            // prevent change of speed liimtations when not moving enough
+            bool isMoving = _physicsBehaviour.Rb.velocity.magnitude > slopeSpeedThreshold;
+
+            _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
+            _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
+
+
         }
 
         #endregion

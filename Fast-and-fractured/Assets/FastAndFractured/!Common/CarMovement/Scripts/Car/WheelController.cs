@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WheelController : MonoBehaviour
@@ -16,7 +14,6 @@ public class WheelController : MonoBehaviour
     {
         wheelCollider = GetComponent<WheelCollider>();
     }
-
     public void ApplyMotorTorque(float torque)
     {
         if(_isTractionWheel)
@@ -49,13 +46,27 @@ public class WheelController : MonoBehaviour
 
     }
 
+    public bool IsGroundedWithAngle(out float slopeAngle, out Vector3 groundNormal) // returns angle and contact normal, this may be very expensive so maybe we can implement a struct to send the info, WheelGroundInfo that has a public bool, slopeAngle and gorundNormal
+    {
+        slopeAngle = 0f;
+        groundNormal = Vector3.up;
+        if(wheelCollider.GetGroundHit(out WheelHit hit))
+        {
+            slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+            groundNormal = hit.normal;
+            return true;
+        } 
+
+        return false;
+    }
+
     //currently not being used
     public void ApplySteeringResistance(Rigidbody carRb)//each wheel inividually applies a little bit of force on the oposite direction of its movement
     {
         Vector3 steeringDirection = transform.right;//directionm of the steering force
-        Vector3 tireWorldVelocity = carRb.GetPointVelocity(wheelCollider.transform.position);//wheel velocity
+        Vector3 tireWorldVelocity = carRb.GetPointVelocity(wheelCollider.transform.position);// wheel velocity
 
-        float steeringVelocity = Vector3.Dot(steeringDirection, tireWorldVelocity);//velocity in the steering direction
+        float steeringVelocity = Vector3.Dot(steeringDirection, tireWorldVelocity);// velocity in the steering direction
         float desiredVelocityChange = -steeringVelocity * _steeringResistance;// calculate resistance
         float desiredAcceleration = desiredVelocityChange / Time.fixedDeltaTime;//acceleration needed to apply
 
@@ -63,3 +74,5 @@ public class WheelController : MonoBehaviour
         carRb.AddForceAtPosition(resistanceForce, wheelCollider.transform.position);
     }
 }
+
+
