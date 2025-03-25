@@ -36,18 +36,10 @@ namespace Game
 
         [Header("Slope Detecting")]
         [SerializeField] private float slopeAngleThreshold;
-        [Tooltip("Forward speed (m/s) where ratio = 1.0")]
-        [SerializeField] private float forwardSpeedRef = 5f;
-        [Tooltip("Vertical speed (m/s) where ratio = 1.0")]
-        [SerializeField] private float verticalSpeedRef = 2f;
         [Tooltip("Minimum forward ratio for uphill detection")]
         [Range(0.1f, 1f)][SerializeField] private float uphillForwardThreshold = -0.3f;
-        [Tooltip("Minimum upward ratio for uphill detection")]
-        [Range(0.1f, 1f)][SerializeField] private float uphillVerticalThreshold = -0.3f;
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
-        [Tooltip("Maximum upward ratio for downhill detection")]
-        [Range(-1f, -0.1f)][SerializeField] private float downhillVerticalThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
 
         private float _currentSlopeAngle;
@@ -402,27 +394,6 @@ namespace Game
             _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
             _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
 
-            // this last part i do not understand, found it on a random post, but basically we convert the world space velocity to relative coordinates, and then compare them to both the forward and vertical ration (negatives values mean uphill since your moving against the slope)
-            /* create slope-aligned coordinate system
-            Vector3 slopeRight = Vector3.Cross(averageNormal, Vector3.up).normalized;
-            Vector3 slopeForward = Vector3.Cross(slopeRight, averageNormal).normalized;
-
-            // transform velocity to slope space, 
-            Matrix4x4 slopeMatrix = Matrix4x4.TRS(Vector3.zero,
-                                                Quaternion.LookRotation(slopeForward, averageNormal),
-                                                Vector3.one);
-            Vector3 slopeSpaceVelocity = slopeMatrix.MultiplyVector(_physicsBehaviour.Rb.velocity);
-
-            // calculate movement ratios (clamped to -1..1 range)
-            float forwardRatio = Mathf.Clamp(slopeSpaceVelocity.z / forwardSpeedRef, -1f, 1f);
-            float verticalRatio = Mathf.Clamp(-slopeSpaceVelocity.y / verticalSpeedRef, -1f, 1f);
-
-            // determine slope states
-            _isGoingUphill = (forwardRatio < uphillForwardThreshold) &&
-                            (verticalRatio < uphillVerticalThreshold);
-
-            _isGoingDownhill = (forwardRatio > downhillForwardThreshold) ||
-                              (verticalRatio > downhillVerticalThreshold);*/
 
         }
 

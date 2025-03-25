@@ -14,7 +14,6 @@ public class WheelController : MonoBehaviour
     {
         wheelCollider = GetComponent<WheelCollider>();
     }
-
     public void ApplyMotorTorque(float torque)
     {
         if(_isTractionWheel)
@@ -61,14 +60,13 @@ public class WheelController : MonoBehaviour
         return false;
     }
 
-
     //currently not being used
     public void ApplySteeringResistance(Rigidbody carRb)//each wheel inividually applies a little bit of force on the oposite direction of its movement
     {
         Vector3 steeringDirection = transform.right;//directionm of the steering force
-        Vector3 tireWorldVelocity = carRb.GetPointVelocity(wheelCollider.transform.position);//wheel velocity
+        Vector3 tireWorldVelocity = carRb.GetPointVelocity(wheelCollider.transform.position);// wheel velocity
 
-        float steeringVelocity = Vector3.Dot(steeringDirection, tireWorldVelocity);//velocity in the steering direction
+        float steeringVelocity = Vector3.Dot(steeringDirection, tireWorldVelocity);// velocity in the steering direction
         float desiredVelocityChange = -steeringVelocity * _steeringResistance;// calculate resistance
         float desiredAcceleration = desiredVelocityChange / Time.fixedDeltaTime;//acceleration needed to apply
 
@@ -76,3 +74,5 @@ public class WheelController : MonoBehaviour
         carRb.AddForceAtPosition(resistanceForce, wheelCollider.transform.position);
     }
 }
+
+
