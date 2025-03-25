@@ -48,18 +48,22 @@ namespace FastAndFractured
 
         }
 
-        public bool IsGroundedWithAngle(out float slopeAngle, out Vector3 groundNormal) // returns angle and contact normal, this may be very expensive so maybe we can implement a struct to send the info, WheelGroundInfo that has a public bool, slopeAngle and gorundNormal
+        public WheelGroundInfo GetGroundInfo() // returns angle and contact normal
         {
-            slopeAngle = 0f;
-            groundNormal = Vector3.up;
-            if(wheelCollider.GetGroundHit(out WheelHit hit))
+            WheelGroundInfo info = new WheelGroundInfo
             {
-                slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-                groundNormal = hit.normal;
-                return true;
-            } 
+                isGrounded = wheelCollider.GetGroundHit(out WheelHit hit),
+                slopeAngle = 0f,
+                groundNormal = Vector3.up
+            };
 
-            return false;
+            if (info.isGrounded)
+            {
+                info.slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                info.groundNormal = hit.normal;
+            }
+
+            return info;
         }
 
         //currently not being used
@@ -76,7 +80,12 @@ namespace FastAndFractured
             carRb.AddForceAtPosition(resistanceForce, wheelCollider.transform.position);
         }
     }
+}
 
-
+public struct WheelGroundInfo
+{
+    public bool isGrounded;
+    public float slopeAngle;
+    public Vector3 groundNormal;    
 }
 

@@ -76,14 +76,12 @@ namespace FastAndFractured
                             
                         } else
                         {
-                            //forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                             forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                         }
                     }
                     else
                     {
                         forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                        //forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight);
                     }
 
                     if(!otherComponentPhysicsBehaviours.HasBeenPushed)
@@ -94,8 +92,6 @@ namespace FastAndFractured
                 }
 
             }
-
-
         }
 
         public void CancelDash()
@@ -196,7 +192,7 @@ namespace FastAndFractured
 
         public void BlockRigidBodyRotations()
         {
-            _rb.constraints = RigidbodyConstraints.FreezeRotation;
+            _rb.constraints = RigidbodyConstraints.FreezeRotationY;
         }
 
         public void UnblockRigidBodyRotations()
