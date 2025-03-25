@@ -1,16 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(DriveToPointAction), menuName = "EnemyStateMachine/Actions/DriveToPointAction")]
-
-public class DriveToPointAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(DriveToPointAction), menuName = "EnemyStateMachine/Actions/DriveToPointAction")]
+    public class DriveToPointAction : Action
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        public override void Act(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.GoToPosition();
+            brain.GoToPosition();
+        }
     }
 }
+

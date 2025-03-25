@@ -1,11 +1,14 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "IdleAnimationAction", menuName = "PlayerStateMachine/Actions/IdleAnimationAction")]
 
-public class IdleAnimationAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "IdleAnimationAction", menuName = "PlayerStateMachine/Actions/IdleAnimationAction")]
+    public class IdleAnimationAction : Action
     {
-        // To do
+        public override void Act(Controller controller)
+        {
+            // To do
+        }
     }
 }

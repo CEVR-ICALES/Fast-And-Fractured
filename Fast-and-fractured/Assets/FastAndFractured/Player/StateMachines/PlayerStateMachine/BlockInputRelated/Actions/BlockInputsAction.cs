@@ -1,20 +1,23 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "BlockInputsAction", menuName = "PlayerStateMachine/Actions/BlockInputsAction")]
 
-public class BlockInputsAction : Action
+namespace StateMachine
 {
-    public InputBlockTypes inputBlockType;
-    public bool hasTime;
-    private float _blockTime = 1f;
-    
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "BlockInputsAction", menuName = "PlayerStateMachine/Actions/BlockInputsAction")]
+    public class BlockInputsAction : Action
     {
-        //controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
+        public InputBlockTypes inputBlockType;
+        public bool hasTime;
+        private float _blockTime = 1f;
 
-        if(hasTime)
+        public override void Act(Controller controller)
         {
-            controller.GetBehaviour<PlayerInputController>()?.EnableInput(inputBlockType, _blockTime);
+            //controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
+
+            if (hasTime)
+            {
+                controller.GetBehaviour<PlayerInputController>()?.EnableInput(inputBlockType, _blockTime);
+            }
         }
     }
 }

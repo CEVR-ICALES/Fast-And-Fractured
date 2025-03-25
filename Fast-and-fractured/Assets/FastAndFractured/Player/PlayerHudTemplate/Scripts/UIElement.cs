@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-namespace Game
+namespace FastAndFractured
 {
     public class UIElement : MonoBehaviour
     {

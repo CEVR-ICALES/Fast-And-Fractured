@@ -1,11 +1,14 @@
-using StateMachine;
 using UnityEngine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsDashingDecision), menuName = "PlayerShootingStateMachine/Decisions/IsDashingDecision")]
-public class IsDashingDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsDashingDecision), menuName = "PlayerShootingStateMachine/Decisions/IsDashingDecision")]
+    public class IsDashingDecision : Decision
     {
-        return controller.GetBehaviour<PlayerInputController>().IsDashing;
+        public override bool Decide(Controller controller)
+        {
+            return controller.GetBehaviour<PlayerInputController>().IsDashing;
+        }
     }
 }

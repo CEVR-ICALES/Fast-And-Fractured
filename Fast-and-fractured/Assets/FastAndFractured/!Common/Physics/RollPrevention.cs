@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Game {
+
+namespace FastAndFractured {
     public class RollPrevention : MonoBehaviour
     {
         [Header("RollPrevention")]

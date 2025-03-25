@@ -1,18 +1,21 @@
-using StateMachine;
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DecisionAllActionsAreFinished", menuName = "StateMachine/DecisionAllActionsAreFinished")]
-[Obsolete("Not needed anymore")]public class DecisionAllActionsAreFinished : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = "DecisionAllActionsAreFinished", menuName = "StateMachine/DecisionAllActionsAreFinished")]
+    [Obsolete("Not needed anymore")]
+    public class DecisionAllActionsAreFinished : Decision
     {
-      State currentState = controller.GetCurrentState();
-        bool allActionsEnded = true;
-        for (int i = 0;i < currentState.actions.Length && allActionsEnded; i++ )
+        public override bool Decide(Controller controller)
         {
-            allActionsEnded = currentState.actions[i].IsFinished();
+            State currentState = controller.GetCurrentState();
+            bool allActionsEnded = true;
+            for (int i = 0; i < currentState.actions.Length && allActionsEnded; i++)
+            {
+                allActionsEnded = currentState.actions[i].IsFinished();
+            }
+            return allActionsEnded;
         }
-        return allActionsEnded;
     }
 }

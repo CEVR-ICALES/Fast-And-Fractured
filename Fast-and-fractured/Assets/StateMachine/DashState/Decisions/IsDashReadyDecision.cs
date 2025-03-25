@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsDashReadyDecision), menuName = "EnemyStateMachine/Decisions/IsDashReadyDecision")]
-public class IsDashReadyDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsDashReadyDecision), menuName = "EnemyStateMachine/Decisions/IsDashReadyDecision")]
+    public class IsDashReadyDecision : Decision
     {
-        EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
+        public override bool Decide(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
 
-        return brain.IsDashReady();
+            return brain.IsDashReady();
+        }
     }
 }

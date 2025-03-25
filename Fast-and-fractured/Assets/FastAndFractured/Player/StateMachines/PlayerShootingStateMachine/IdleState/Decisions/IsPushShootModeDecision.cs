@@ -1,11 +1,14 @@
-using StateMachine;
 using UnityEngine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsPushShootModeDecision), menuName = "PlayerShootingStateMachine/Decisions/IsPushShootModeDecision")]
-public class IsPushShootModeDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsPushShootModeDecision), menuName = "PlayerShootingStateMachine/Decisions/IsPushShootModeDecision")]
+    public class IsPushShootModeDecision : Decision
     {
-        return controller.GetBehaviour<PlayerInputController>().IsPushShootMode;
+        public override bool Decide(Controller controller)
+        {
+            return controller.GetBehaviour<PlayerInputController>().IsPushShootMode;
+        }
     }
 }

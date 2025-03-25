@@ -1,12 +1,15 @@
-using StateMachine;
 using UnityEngine;
- [CreateAssetMenu(fileName = "ActionDebug", menuName = "StateMachine/ActionDebug")]
-public class ActionDebug : Action
+
+namespace StateMachine
 {
-    public string messageToDebug;
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "ActionDebug", menuName = "StateMachine/ActionDebug")]
+    public class ActionDebug : Action
     {
-        Debug.Log($"{messageToDebug}");
-        FinishAction();
+        public string messageToDebug;
+        public override void Act(Controller controller)
+        {
+            Debug.Log($"{messageToDebug}");
+            FinishAction();
+        }
     }
 }

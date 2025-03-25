@@ -4,7 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
 
-namespace Game
+namespace FastAndFractured
 {
     public abstract class BaseUniqueAbility : MonoBehaviour
     {

@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuTransitionButton : MonoBehaviour
+namespace FastAndFractured
 {
-    public ScreensType screenToOpen;
-    public void OpenScreen()
+    public class MenuTransitionButton : MonoBehaviour
     {
-        MainMenuManager.Instance.ChangeScreen(screenToOpen);
+        public ScreensType screenToOpen;
+        public void OpenScreen()
+        {
+            MainMenuManager.Instance.ChangeScreen(screenToOpen);
+        }
     }
+
 }

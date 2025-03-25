@@ -1,11 +1,15 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "HandlePushShootingAimingAction", menuName = "PlayerShootingStateMachine/Actions/HandlePushShootingAimingAction")]
 
-public class HandlePushShootingAimingAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "HandlePushShootingAimingAction", menuName = "PlayerShootingStateMachine/Actions/HandlePushShootingAimingAction")]
+
+    public class HandlePushShootingAimingAction : Action
     {
-        // To do
+        public override void Act(Controller controller)
+        {
+            // To do
+        }
     }
 }

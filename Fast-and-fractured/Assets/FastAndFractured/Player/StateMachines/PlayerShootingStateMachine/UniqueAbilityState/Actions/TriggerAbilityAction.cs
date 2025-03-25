@@ -1,11 +1,14 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "TriggerAbilityAction", menuName = "PlayerShootingStateMachine/Actions/TriggerAbilityAction")]
 
-public class TriggerAbilityAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "TriggerAbilityAction", menuName = "PlayerShootingStateMachine/Actions/TriggerAbilityAction")]
+    public class TriggerAbilityAction : Action
     {
-        // To do
+        public override void Act(Controller controller)
+        {
+            // To do
+        }
     }
 }

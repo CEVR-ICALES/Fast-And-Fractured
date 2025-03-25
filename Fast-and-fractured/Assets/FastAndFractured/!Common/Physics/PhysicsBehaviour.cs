@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 
-namespace Game
+namespace FastAndFractured
 {
     public class PhysicsBehaviour : MonoBehaviour
     {

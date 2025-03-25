@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game
+namespace FastAndFractured
 {
-    public class NormalBulletBehaivour : BulletBehaivour
+    public class NormalBulletBehaviour : BulletBehaviour
     {
         public Collider IgnoreCollider { set => _ignoreCollider = value; }
         private Collider _ignoreCollider;

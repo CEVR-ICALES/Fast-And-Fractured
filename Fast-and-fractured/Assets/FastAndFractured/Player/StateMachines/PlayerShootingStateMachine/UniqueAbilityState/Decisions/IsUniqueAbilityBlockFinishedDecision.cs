@@ -1,5 +1,6 @@
 using UnityEngine;
-using Game;
+using FastAndFractured;
+
 namespace StateMachine
 {
     [CreateAssetMenu(fileName = nameof(IsUniqueAbilityBlockFinishedDecision), menuName = "PlayerShootingStateMachine/Decisions/IsUniqueAbilityBlockFinishedDecision")]

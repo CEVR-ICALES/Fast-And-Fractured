@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
-[CreateAssetMenu(fileName = nameof(EmergencyTargetAction), menuName = "EnemyStateMachine/Actions/EmergencyTargetAction")]
 
-public class EmergencyTargetAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(EmergencyTargetAction), menuName = "EnemyStateMachine/Actions/EmergencyTargetAction")]
+    public class EmergencyTargetAction : Action
     {
-        throw new System.NotImplementedException();
+        public override void Act(Controller controller)
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
-    
 }

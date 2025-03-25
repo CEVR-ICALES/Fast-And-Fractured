@@ -1,12 +1,15 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
-[CreateAssetMenu(fileName = "UnblockInputAction", menuName = "PlayerStateMachine/Actions/UnblockInputAction")]
 
-public class UnblockInputAction : Action
+namespace StateMachine
 {
-    public InputBlockTypes InputBlockType;
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "UnblockInputAction", menuName = "PlayerStateMachine/Actions/UnblockInputAction")]
+    public class UnblockInputAction : Action
     {
-        controller.GetBehaviour<PlayerInputController>().EnableInput(InputBlockType);
+        public InputBlockTypes InputBlockType;
+        public override void Act(Controller controller)
+        {
+            controller.GetBehaviour<PlayerInputController>().EnableInput(InputBlockType);
+        }
     }
 }

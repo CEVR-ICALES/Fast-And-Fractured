@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-namespace Game
+
+namespace FastAndFractured
 {
     public abstract class ShootingHandle : MonoBehaviour
     {
@@ -38,7 +39,7 @@ namespace Game
             if (bullet != null)
             {
                 bullet.transform.position = shootPoint.position;
-                if (bullet.TryGetComponent<BulletBehaivour>(out var bulletBehaivour))
+                if (bullet.TryGetComponent<BulletBehaviour>(out var bulletBehaivour))
                 {
                     SetBulletStats(bulletBehaivour);
                     bulletBehaivour.InitBulletTrayectory();
@@ -46,7 +47,7 @@ namespace Game
             }
         }
 
-        protected virtual void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected virtual void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             bulletBehaivour.Velocity = _velocity;
             bulletBehaivour.Range = _range;

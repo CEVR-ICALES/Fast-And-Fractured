@@ -1,12 +1,15 @@
-using StateMachine;
+using FastAndFractured;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(IsBackToNormalFinishedDecision), menuName = "PlayerStateMachine/Decisions/IsBackToNormalFinishedDecision")]
-public class IsBackToNormalFinishedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsBackToNormalFinishedDecision), menuName = "PlayerStateMachine/Decisions/IsBackToNormalFinishedDecision")]
+    public class IsBackToNormalFinishedDecision : Decision
     {
-        // to do
-        return true;
+        public override bool Decide(Controller controller)
+        {
+            // to do
+            return true;
+        }
     }
 }

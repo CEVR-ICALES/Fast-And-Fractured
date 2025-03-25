@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsPushShootOnCooldownDecision), menuName = "EnemyStateMachine/Decisions/IsPushShootOnCooldownDecision")]
-public class IsPushShootOnCooldownDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsPushShootOnCooldownDecision), menuName = "EnemyStateMachine/Decisions/IsPushShootOnCooldownDecision")]
+    public class IsPushShootOnCooldownDecision : Decision
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        public override bool Decide(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        return brain.IsPushShootReady();
+            return brain.IsPushShootReady();
+        }
     }
 }

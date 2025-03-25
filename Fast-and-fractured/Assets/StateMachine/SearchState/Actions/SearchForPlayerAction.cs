@@ -1,16 +1,19 @@
-using StateMachine;
+using FastAndFractured;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = nameof(SearchForPlayerAction), menuName = "EnemyStateMachine/Actions/SearchForPlayerAction")]
-
-public class SearchForPlayerAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(SearchForPlayerAction), menuName = "EnemyStateMachine/Actions/SearchForPlayerAction")]
+    public class SearchForPlayerAction : Action
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        public override void Act(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.SearchPlayerPosition();
+            brain.SearchPlayerPosition();
+        }
     }
+
 }

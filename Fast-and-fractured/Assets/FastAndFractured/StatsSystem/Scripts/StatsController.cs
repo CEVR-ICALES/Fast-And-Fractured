@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-namespace Game
+
+namespace FastAndFractured
 {
     public enum STATS
     {

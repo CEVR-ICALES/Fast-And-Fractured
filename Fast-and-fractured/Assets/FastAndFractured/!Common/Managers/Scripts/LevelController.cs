@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
 
-namespace Game
+namespace FastAndFractured
 {
     public class LevelController : AbstractSingleton<LevelController>
     {

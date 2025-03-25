@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace Game
+namespace FastAndFractured
 {
     public enum UIElementType
     {
