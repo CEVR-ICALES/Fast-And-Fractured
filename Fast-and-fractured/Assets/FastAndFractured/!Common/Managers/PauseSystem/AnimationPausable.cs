@@ -3,13 +3,13 @@ using Utilities.Managers.PauseSystem;
 
 public class AnimationPausable : MonoBehaviour, IPausable
 {
-    [SerializeField] private Animator _animator;
+    [SerializeField] private Animator animator;
     private float _originalSpeed;
     void Start()
     {
-        if (_animator == null)
+        if (animator == null)
         {
-            _animator = GetComponentInChildren<Animator>();
+            animator = GetComponentInChildren<Animator>();
 
         }
         PauseManager.Instance.RegisterPausable(this);
@@ -22,7 +22,7 @@ public class AnimationPausable : MonoBehaviour, IPausable
 
     public void OnPause()
     {
-        if (_animator != null)
+        if (animator != null)
         {
             _originalSpeed = _animator.speed;
             _animator.speed = 0f;  
@@ -31,9 +31,9 @@ public class AnimationPausable : MonoBehaviour, IPausable
 
     public void OnResume()
     {
-        if (_animator != null)
+        if (animator != null)
         {
-            _animator.speed = _originalSpeed;  
+            animator.speed = _originalSpeed;  
         }
     }
 }
