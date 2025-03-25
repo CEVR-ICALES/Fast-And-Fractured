@@ -69,6 +69,11 @@ namespace FastAndFractured
             CheckSlope();
             UpdateMaxRbSpeedOnSlopes();
             UpdateWheelVisuals();
+            ApplySteering();
+            if(_isDrifting)
+            {
+                ApplyDrift();
+            }
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
 
@@ -121,7 +126,6 @@ namespace FastAndFractured
                 // Possible set motor torque to 0 if no input (w,s)
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
-            ApplySteering();
         }
 
         public void HandleAccelerateInput(float rawAccelerationInput)
@@ -169,7 +173,6 @@ namespace FastAndFractured
                     {
                         StartDrift(steeringInput.x);
                     }
-                    ApplyDrift();
                 }
                 else
                 {
@@ -177,9 +180,9 @@ namespace FastAndFractured
                     {
                         EndDrift();
                     }
-                    ApplyBrake();
                 }
                 _isBraking = true;
+                ApplyBrake();
             }
             else
             {
