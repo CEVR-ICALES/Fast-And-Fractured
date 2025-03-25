@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7046642322223220061}
   - component: {fileID: 3611309517333482073}
+  - component: {fileID: 7504038349600087380}
   m_Layer: 0
   m_Name: PauseManager
   m_TagString: Untagged
@@ -44,3 +45,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2971857b8254c81b49865d1989562af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onGamePaused:
+    m_PersistentCalls:
+      m_Calls: []
+  onGameResumed:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &7504038349600087380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6279097447322631480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832e173dd0c7ec544ba81de193ece178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputActionReference: {fileID: 1609806632266231290, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
+  onInputPerformedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3611309517333482073}
+        m_TargetAssemblyTypeName: Utilities.Managers.PauseSystem.PauseManager, Assembly-CSharp
+        m_MethodName: TogglePauseGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
