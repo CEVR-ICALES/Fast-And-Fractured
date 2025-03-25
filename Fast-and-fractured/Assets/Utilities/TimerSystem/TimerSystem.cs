@@ -229,7 +229,11 @@ namespace Utilities
                 return null;
             }
         }
-
+        
+        public bool HasTimer(ITimer timer)
+        {
+            return timer != null && _timers.ContainsKey(timer.GetData().ID);
+        }
         
         public void StartTimer(string timerId)
         {
