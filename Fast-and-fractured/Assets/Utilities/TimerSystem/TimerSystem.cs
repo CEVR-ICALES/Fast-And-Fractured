@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using UnityEngine;
+using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class TimerSystem : AbstractSingleton<TimerSystem>
+    public class TimerSystem : AbstractSingleton<TimerSystem> , IPausable
     {
         private Dictionary<string, ITimer> _timers = new Dictionary<string, ITimer>();
 
@@ -17,8 +18,12 @@ namespace Utilities
 
         protected override void Awake()
         {
-            base.Awake();
-            // Additional initialization if needed
+            base.Awake(); 
+        }
+
+        private void Start()
+        {
+            PauseManager.Instance.RegisterPausable(this);
         }
 
         private void Update()
@@ -29,6 +34,7 @@ namespace Utilities
         private void OnDestroy()
         {
             _timers.Clear();
+            PauseManager.Instance.UnregisterPausable(this); 
         }
         #endregion
 
@@ -318,6 +324,21 @@ namespace Utilities
         }
 
         #endregion
+
+        public void OnPause()
+        {
+            foreach (var timer in _timers)
+            {
+                timer.Value.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            foreach (var timer in _timers)
+            {
+                timer.Value.ResumeTimer();
+            }        }
     }
 
    
