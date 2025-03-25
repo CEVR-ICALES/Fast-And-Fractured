@@ -33,6 +33,7 @@ public class EnemyAIBrain : MonoBehaviour
     [SerializeField] CarMovementController carMovementController;
     [SerializeField] PhysicsBehaviour physicsBehaviour;
     [SerializeField] StatsController statsController;
+    [SerializeField] BaseUniqueAbility uniqueAbility;
     [SerializeField] LayerMask ignoreLayerMask;
 
     public enum PathMode
@@ -76,6 +77,11 @@ public class EnemyAIBrain : MonoBehaviour
         if (!statsController)
         {
             statsController = GetComponentInChildren<StatsController>();
+        }
+
+        if (!uniqueAbility)
+        {
+            uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
         }
         physicsBehaviour.Rb = GetComponent<Rigidbody>();
         _currentPath = new NavMeshPath();
@@ -141,7 +147,7 @@ public class EnemyAIBrain : MonoBehaviour
         normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
         normalShootHandle.NormalShooting();
     }
-    public void StopDelayDecreaseOveheat()
+    public void StopDelayDecreaseOverheat()
     {
         normalShootHandle.StopDelayDecreaseOverheat();
     }
@@ -197,11 +203,13 @@ public class EnemyAIBrain : MonoBehaviour
     {
         return normalShootHandle.IsOverHeat;
     }
+    public bool IsUniqueAbilityReady()
+    {
+        return uniqueAbility.IsOnCooldown;
+    }
     public bool IsUniqueAbilityFinished()
     {
-        //TODO
-        //Ask if unique ability is finished
-        return true;
+        return !uniqueAbility.IsAbilityActive;
     }
 
     public bool IsDashReady()
