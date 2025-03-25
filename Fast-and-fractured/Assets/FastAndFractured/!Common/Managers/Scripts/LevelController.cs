@@ -19,6 +19,10 @@ namespace Game
         protected override void Awake()
         {
             base.Awake();
+            if (!ai)
+            {
+                ai = FindObjectOfType<EnemyAIBrain>();
+            }
         }
 
         void Start()
