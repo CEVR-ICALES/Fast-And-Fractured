@@ -24,8 +24,8 @@ public class AnimationPausable : MonoBehaviour, IPausable
     {
         if (animator != null)
         {
-            _originalSpeed = _animator.speed;
-            _animator.speed = 0f;  
+            _originalSpeed = animator.speed;
+            animator.speed = 0f;  
         }
     }
 
