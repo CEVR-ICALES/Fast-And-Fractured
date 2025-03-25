@@ -48,6 +48,7 @@ namespace Game
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [Tooltip("Maximum upward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillVerticalThreshold = 0.3f;
+        [SerializeField] private float slopeSpeedThreshold;
 
         private float _currentSlopeAngle;
         private bool _isGoingUphill;
@@ -384,11 +385,25 @@ namespace Game
                 _isGoingDownhill = false;
                 return;
             }
-            // this last part i do not understand, found it on a random post, but basically we convert the world space velocity to relative coordinates, and then compare them to both the forward and vertical ration (negatives values mean uphill since your moving against the slope)
+            
             // calculate average ground normal (up direction of the surface)
             Vector3 averageNormal = combinedNormal / groundedWheels;
+            Vector3 carForward = transform.forward;
 
-            // create slope-aligned coordinate system
+            // flatten the car's forward vector to ignore vertical component
+            Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
+
+            // calculate how much the slope is aligned with carss forward direction
+            float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
+
+            // prevent change of speed liimtations when not moving enough
+            bool isMoving = _physicsBehaviour.Rb.velocity.magnitude > slopeSpeedThreshold;
+
+            _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
+            _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
+
+            // this last part i do not understand, found it on a random post, but basically we convert the world space velocity to relative coordinates, and then compare them to both the forward and vertical ration (negatives values mean uphill since your moving against the slope)
+            /* create slope-aligned coordinate system
             Vector3 slopeRight = Vector3.Cross(averageNormal, Vector3.up).normalized;
             Vector3 slopeForward = Vector3.Cross(slopeRight, averageNormal).normalized;
 
@@ -407,7 +422,7 @@ namespace Game
                             (verticalRatio < uphillVerticalThreshold);
 
             _isGoingDownhill = (forwardRatio > downhillForwardThreshold) ||
-                              (verticalRatio > downhillVerticalThreshold);
+                              (verticalRatio > downhillVerticalThreshold);*/
 
         }
 
