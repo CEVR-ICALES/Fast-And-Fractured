@@ -20,6 +20,10 @@ namespace FastAndFractured
         [Tooltip("Small offset that will be applied to the vector of the direction so that the car doesnt stop fast by dragging through the floor")] 
         [SerializeField] private float applyForceYOffset = 0.2f;
         public Transform PushApplyPoint; // if we decide to not use the collision point as the starting point to generate the force this variable will be used
+
+        [Header("Wall Collision Detection")]
+        [SerializeField] private float wallCollisionAngleThreshold;
+        [SerializeField] private float wallBounceForce = 12000f;
         
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
@@ -90,8 +94,9 @@ namespace FastAndFractured
                         otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
                     }
                 }
-
+                CheckWallCollision(collision);
             }
+
         }
 
         public void CancelDash()
@@ -102,6 +107,24 @@ namespace FastAndFractured
             }
         }
 
+        #region Dash Collisions Checkers
+
+        private void CheckWallCollision(Collision collision)
+        {
+            ContactPoint contact = collision.contacts[0];
+            float angle = Vector3.Angle(contact.normal, transform.forward); // angle btween collision normal and .forward
+
+            if(angle > wallCollisionAngleThreshold)
+            {
+                _carMovementController.CancelDash();
+                Vector3 bounceDirection = Vector3.Reflect(transform.forward, contact.normal);
+                AddForce(bounceDirection * wallBounceForce, ForceMode.Impulse);
+            }
+        }
+
+        #endregion
+
+        #region Force Applier
         public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
         {
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
@@ -117,6 +140,9 @@ namespace FastAndFractured
         {
             _rb.AddTorque(torque, forceMode);
         }
+        #endregion
+
+        #region Force Calculations
         private float CalculateForceToApplyToOtherCarWhenFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
         {
             float force = CalculateForceToApplyToOtherCar(oCarEnduranceFactor, oCarWeight, oCarEnduranceImportance);
@@ -155,6 +181,9 @@ namespace FastAndFractured
             float finalSimulatedWeight = oCarWeight - (simulatedWeightImportance * oCarEnduranceFactor); // simulated weight
             return finalSimulatedWeight + currentRbSpeed;
         }
+
+        #endregion
+
         public void OnCarHasBeenPushed()
         {
             _hasBeenPushed = true;
