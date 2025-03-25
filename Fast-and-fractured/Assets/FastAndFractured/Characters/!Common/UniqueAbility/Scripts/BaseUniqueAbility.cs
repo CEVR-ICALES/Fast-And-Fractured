@@ -46,7 +46,6 @@ namespace Game
             }
 
             _isAbilityActive = true;
-            _isOnCooldown = true;
             PlayActivateAbilitySound();
             StartAbilityEffects();
             onAbilityActivated?.Invoke();
@@ -56,6 +55,8 @@ namespace Game
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration, onTimerDecreaseComplete:StopCooldown) ;
+            _isOnCooldown = true;
+
         }
 
         protected virtual void PlayActivateAbilitySound()
