@@ -74,6 +74,7 @@ namespace Game
         private void FixedUpdate()
         {
             CheckSlope();
+            UpdateMaxRbSpeedOnSlopes();
             UpdateWheelVisuals();
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
@@ -338,7 +339,29 @@ namespace Game
 
         #endregion
 
-        public void CheckSlope()
+        #region Slopes
+
+        private void UpdateMaxRbSpeedOnSlopes()
+        {
+            if(!IsDashing && !_isBraking)
+            {
+                if(_isGoingUphill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeedAscend;
+                }
+
+                if(_isGoingDownhill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeedDescend;
+                }
+
+                if(!_isGoingDownhill && !_isGoingUphill)
+                {
+                    _currentRbMaxVelocity = statsController.MaxSpeed;
+                }
+            }
+        }
+        private void CheckSlope()
         {
             _currentSlopeAngle = 0;
             int groundedWheels = 0;
@@ -387,6 +410,8 @@ namespace Game
                               (verticalRatio > downhillVerticalThreshold);
 
         }
+
+        #endregion
 
         public void StopAllCarMovement()
         {
