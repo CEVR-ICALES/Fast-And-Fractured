@@ -10,6 +10,7 @@ namespace FastAndFractured
     {
         #region VARIABLES
         public UnityEvent<float, float> onOverheatUpdate;
+        public bool isInState;
         public float CountOverHeat
         {
             get => _countOverHeat;
@@ -95,7 +96,6 @@ namespace FastAndFractured
 
         private void OnOverheatComplete()
         {
-
             _isOverHeat = true;
             DecreaseOverheatTime();
         }
@@ -122,11 +122,9 @@ namespace FastAndFractured
 
         #endregion
 
-        public bool isInState;
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
         {
-
             if (_overheatTimer != null)
             {
                 if (_overheatTimer.GetData().IsRunning && !_isOverHeat && isInState)
@@ -160,7 +158,10 @@ namespace FastAndFractured
         public void StopDelayDecreaseOverheat()
         {
             //If is overheated, don't stop the decrease
-            if (_isOverHeat) return;
+            if (_isOverHeat)
+            {
+                return;
+            }
 
             if (!string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
             {
@@ -194,7 +195,6 @@ namespace FastAndFractured
             }
 
             isInState = true;
-            return;
         }
     }
 }
