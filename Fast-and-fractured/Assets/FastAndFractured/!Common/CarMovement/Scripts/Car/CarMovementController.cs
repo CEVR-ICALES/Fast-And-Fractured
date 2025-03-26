@@ -168,9 +168,9 @@ namespace FastAndFractured
                     {
                         EndDrift();
                     }
+                    ApplyBrake();
                 }
                 _isBraking = true;
-                ApplyBrake();
             }
             else
             {
