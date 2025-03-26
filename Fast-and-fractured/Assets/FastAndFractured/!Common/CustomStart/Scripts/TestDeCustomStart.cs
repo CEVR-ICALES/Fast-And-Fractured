@@ -2,19 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestDeCustomStart : MonoBehaviour
+namespace FastAndFractured
 {
-    void OnEnable()
+    public class TestDeCustomStart : MonoBehaviour
     {
-        CustomStart.OnCustomStart += HandleCustomStart;
-    }
-    void OnDisable()
-    {
-        CustomStart.OnCustomStart -= HandleCustomStart;
-    }
+        void OnEnable()
+        {
+            CustomStart.OnCustomStart += HandleCustomStart;
+        }
+        void OnDisable()
+        {
+            CustomStart.OnCustomStart -= HandleCustomStart;
+        }
 
-    private void HandleCustomStart()
-    {
-        // Code that should run in the start
+        private void HandleCustomStart()
+        {
+            // Code that should run in the start
+        }
     }
 }
