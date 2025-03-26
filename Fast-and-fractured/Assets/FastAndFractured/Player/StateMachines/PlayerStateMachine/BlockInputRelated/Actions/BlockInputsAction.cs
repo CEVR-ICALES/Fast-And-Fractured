@@ -12,7 +12,7 @@ namespace StateMachine
 
         public override void Act(Controller controller)
         {
-            //controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
+            controller.GetBehaviour<PlayerInputController>().BlockInput(inputBlockType);
 
             if (hasTime)
             {
