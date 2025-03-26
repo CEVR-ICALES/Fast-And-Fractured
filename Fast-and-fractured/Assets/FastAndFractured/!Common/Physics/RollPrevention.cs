@@ -5,10 +5,6 @@ using UnityEngine;
 namespace FastAndFractured {
     public class RollPrevention : MonoBehaviour
     {
-        [Header("RollPrevention")]
-        [SerializeField] private float _baseDownardForce; //strenght of the force to apply to keep the car on the ground
-        [SerializeField] private float _turninDownwardForceMultiplier; //multiplier when turnin (force has to be greater since the car tends to roll over)
-        [SerializeField] private float _speedDownwardForceMultiplier; //force based on speed
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
 
