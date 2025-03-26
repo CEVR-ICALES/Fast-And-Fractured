@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
 
@@ -8,7 +9,7 @@ namespace FastAndFractured
     public class NormalShootHandle : ShootingHandle
     {
         #region VARIABLES
-
+        public UnityEvent<float, float> onOverheatUpdate;
         public float CountOverHeat
         {
             get => _countOverHeat;
@@ -110,11 +111,13 @@ namespace FastAndFractured
         {
             previousCountOverHeat = _countOverHeat;
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         private void OnOverHeatUpdateDecrease(float currentTimerValue)
         {
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         #endregion
