@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
 {
     public class CarMovementController : MonoBehaviour
     {
+        public UnityEvent<float, float> onDashCooldownUpdate;
+
         public WheelController[] wheels;
         public TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
@@ -321,7 +324,7 @@ namespace FastAndFractured
                  _canDash = true;
              }, onTimerDecreaseUpdate: (progress) =>
              {
-
+                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
              });
         }
         public void CancelDash()
