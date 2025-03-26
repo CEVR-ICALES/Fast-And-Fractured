@@ -13,7 +13,7 @@ namespace FastAndFractured
             base.InitBulletTrayectory();
                 if (!Physics.GetIgnoreCollision(_ignoreCollider, ownCollider))
                 {
-                    Physics.IgnoreCollision(_ignoreCollider, ownCollider);
+                    Physics.IgnoreCollision(_ignoreCollider, ownCollider,true);
                 }
         }
 
@@ -34,6 +34,11 @@ namespace FastAndFractured
             }
             else
                 OnBulletEndTrayectory();
+        }
+        protected override void OnBulletEndTrayectory()
+        {
+            Physics.IgnoreCollision(_ignoreCollider, ownCollider, false);
+            base.OnBulletEndTrayectory();
         }
     }
 }

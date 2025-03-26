@@ -50,6 +50,7 @@ namespace FastAndFractured
         {
             if (particles != null)
             {
+                rb.velocity = Vector3.zero;
                 ownCollider.enabled = false;
                 _meshRenderer.enabled = false;
                 rb.constraints = RigidbodyConstraints.FreezePosition;
