@@ -11,13 +11,10 @@ namespace FastAndFractured
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
-            if (_ignoreCollider != null)
-            {
                 if (!Physics.GetIgnoreCollision(_ignoreCollider, ownCollider))
                 {
                     Physics.IgnoreCollision(_ignoreCollider, ownCollider);
                 }
-            }
         }
 
         protected override void FixedUpdate()
