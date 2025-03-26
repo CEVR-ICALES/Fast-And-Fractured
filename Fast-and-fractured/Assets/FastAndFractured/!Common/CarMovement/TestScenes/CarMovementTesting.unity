@@ -195,6 +195,37 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2031080442}
   m_SourcePrefab: {fileID: 100100000, guid: ae2409dd2d68da0459093ffb1ce2c5ce, type: 3}
+--- !u!1 &71125102
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 71125103}
+  m_Layer: 0
+  m_Name: UniqueAbilityPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &71125103
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71125102}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.06, z: 2.37}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1401987994}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &141727873
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,7 +284,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   m_PrefabInstance: {fileID: 1401987989}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1401987990}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94a128f3883087b42aeb9a9b6ad30382, type: 3}
@@ -3132,12 +3163,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: availableBehaviours.Array.size
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: availableBehaviours.Array.data[5]
       value: 
       objectReference: {fileID: 1962619357}
+    - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: availableBehaviours.Array.data[6]
+      value: 
+      objectReference: {fileID: 1401987993}
     - target: {fileID: 2435327966734875818, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: cameraToHold
       value: 
@@ -3256,8 +3291,19 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1086786289}
-    m_AddedComponents: []
+    - targetCorrespondingSourceObject: {fileID: 1426858998874784265, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 71125103}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5393281910218630357, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1401987993}
   m_SourcePrefab: {fileID: 100100000, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+--- !u!1 &1401987990 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5393281910218630357, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  m_PrefabInstance: {fileID: 1401987989}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1401987991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7715863799208944345, guid: 894d66a72a5753242b8adf852622d607, type: 3}
@@ -3274,6 +3320,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb199b8e3d92e748aff50c11154d785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1401987993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401987990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae1203818799ec4ab5fff4f90cbd189, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityData: {fileID: 11400000, guid: ca84f24c9af207e4985113d48d2b8fe6, type: 2}
+  onAbilityActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  chickenPrefab: {fileID: 6329937312849806155, guid: b449947509c09c7448f018c968c45f18, type: 3}
+  uniqueAbilityShootPoint: {fileID: 71125103}
+--- !u!4 &1401987994 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1426858998874784265, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  m_PrefabInstance: {fileID: 1401987989}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1455825878
 GameObject:
   m_ObjectHideFlags: 0

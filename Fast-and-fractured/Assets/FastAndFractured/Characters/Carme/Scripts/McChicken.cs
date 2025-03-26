@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class McChicken : MonoBehaviour
 {
-    private void OnEnable()
-    {
-        
-    }
 
     public void InitializeChicken(Vector3 direction)
     {
-
+        //transform.rota(direction);
     }
-
 }
