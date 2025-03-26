@@ -9,6 +9,9 @@ public class McChicken : MonoBehaviour
         
     }
 
-    //public void
+    public void InitializeChicken(Vector3 direction)
+    {
+
+    }
 
 }

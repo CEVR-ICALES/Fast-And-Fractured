@@ -12,7 +12,7 @@ namespace FastAndFractured
         {
             base.ActivateAbility();
             
-
+            //chickenPrefab.GetComponent<>
 
         }
 
