@@ -12,15 +12,40 @@ namespace FastAndFractured {
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
 
-        public void ApplyRollPrevention(Rigidbody rb, float steeringInputMagnitude)
+        private bool _canApplyRollPrevention = false;
+        private Rigidbody _rb;
+        private float _steeringInputMagnitude;
+
+
+        private void FixedUpdate()
+        {
+            if(_canApplyRollPrevention)
+            {
+                ApplyRollPrevention();
+            }
+        }
+
+        public void ToggleRollPrevention(bool canApplyRollPrevention, Rigidbody rb, float steeringInputMagnitude)
+        {
+            _canApplyRollPrevention = canApplyRollPrevention;
+            if(canApplyRollPrevention)
+            {
+                if (_rb == null)
+                    _rb = rb;
+                _steeringInputMagnitude = steeringInputMagnitude;
+            }  
+        }
+
+
+        public void ApplyRollPrevention()
         {
             //calculate downward foce based 
-            float speedFactor = rb.velocity.magnitude * statsController.SpeedForceMultiplier ;
-            float downWardForce = statsController.BaseDownwardForce + (steeringInputMagnitude * statsController.TurningForceMultiplier * speedFactor);
+            float speedFactor = _rb.velocity.magnitude * statsController.SpeedForceMultiplier ;
+            float downWardForce = statsController.BaseDownwardForce + (_steeringInputMagnitude * statsController.TurningForceMultiplier * speedFactor);
 
             //apply force
-            Vector3 forceDirection = -rb.transform.up;
-            rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
+            Vector3 forceDirection = -_rb.transform.up;
+            _rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
             //Debug.Log("Roll Prevention" + gameObject.name);
         }
     }
