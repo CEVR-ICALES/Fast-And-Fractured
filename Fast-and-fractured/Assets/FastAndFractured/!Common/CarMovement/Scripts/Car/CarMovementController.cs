@@ -59,7 +59,7 @@ namespace FastAndFractured
         private void Start()
         {
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
+            SetMaxRbSpeedDelayed();
         }
 
 
