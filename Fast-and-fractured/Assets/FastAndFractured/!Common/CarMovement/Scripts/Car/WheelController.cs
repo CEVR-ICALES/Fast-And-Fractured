@@ -66,6 +66,20 @@ namespace FastAndFractured
             return info;
         }
 
+        public bool IsGrounded()
+        {
+            wheelCollider.GetGroundHit(out WheelHit hit);
+            if (hit.collider != null)
+            {
+                Debug.Log("Ground : " + wheelCollider.isGrounded + " Name : " + hit.collider.gameObject.name);
+            }
+            else
+            {
+                Debug.Log("Ground : " + wheelCollider.isGrounded);
+            }
+           return wheelCollider.isGrounded;
+        }
+
         //currently not being used
         public void ApplySteeringResistance(Rigidbody carRb)//each wheel inividually applies a little bit of force on the oposite direction of its movement
         {
