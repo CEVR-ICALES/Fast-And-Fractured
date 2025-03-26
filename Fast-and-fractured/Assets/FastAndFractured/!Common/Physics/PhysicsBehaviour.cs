@@ -222,6 +222,7 @@ namespace FastAndFractured
         public void BlockRigidBodyRotations()
         {
             _rb.constraints = RigidbodyConstraints.FreezeRotationY;
+            _rb.constraints = RigidbodyConstraints.FreezeRotationZ;
         }
 
         public void UnblockRigidBodyRotations()
