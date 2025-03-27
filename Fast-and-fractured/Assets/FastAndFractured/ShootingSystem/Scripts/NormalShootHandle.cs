@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
 using Enums;
@@ -9,7 +10,8 @@ namespace FastAndFractured
     public class NormalShootHandle : ShootingHandle
     {
         #region VARIABLES
-
+        public UnityEvent<float, float> onOverheatUpdate;
+        public bool isInState;
         public float CountOverHeat
         {
             get => _countOverHeat;
@@ -95,7 +97,6 @@ namespace FastAndFractured
 
         private void OnOverheatComplete()
         {
-
             _isOverHeat = true;
             DecreaseOverheatTime();
         }
@@ -111,20 +112,20 @@ namespace FastAndFractured
         {
             previousCountOverHeat = _countOverHeat;
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         private void OnOverHeatUpdateDecrease(float currentTimerValue)
         {
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         #endregion
 
-        public bool isInState;
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
         {
-
             if (_overheatTimer != null)
             {
                 if (_overheatTimer.GetData().IsRunning && !_isOverHeat && isInState)
@@ -192,7 +193,6 @@ namespace FastAndFractured
             }
 
             isInState = true;
-            return;
         }
     }
 }

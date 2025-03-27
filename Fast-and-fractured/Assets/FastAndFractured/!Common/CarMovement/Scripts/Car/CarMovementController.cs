@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 using Enums;
 
@@ -8,6 +9,8 @@ namespace FastAndFractured
 {
     public class CarMovementController : MonoBehaviour
     {
+        public UnityEvent<float, float> onDashCooldownUpdate;
+
         public WheelController[] wheels;
         public TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
@@ -297,6 +300,7 @@ namespace FastAndFractured
                     FinishDash();
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
+                    onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
             }
@@ -313,7 +317,7 @@ namespace FastAndFractured
                  _canDash = true;
              }, onTimerDecreaseUpdate: (progress) =>
              {
-
+                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
              });
         }
         public void CancelDash()
