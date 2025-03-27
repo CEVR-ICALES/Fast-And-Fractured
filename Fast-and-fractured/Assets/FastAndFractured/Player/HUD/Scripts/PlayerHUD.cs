@@ -1,3 +1,4 @@
+using Enums;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,17 +41,17 @@ namespace FastAndFractured
 
         private void UpdateOverheatHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.ShootCooldown, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIElementType.SHOOT_COOLDOWN, currentValue, maxValue);
         }
 
         private void UpdatePushCooldownHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.PushCooldown, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIElementType.PUSH_COOLDOWN, currentValue, maxValue);
         }
 
         private void UpdateDashCooldownHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.DashCooldown, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIElementType.DASH_COOLDOWN, currentValue, maxValue);
         }
 
     }
