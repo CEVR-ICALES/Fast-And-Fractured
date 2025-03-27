@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.UI.Image;
 
 namespace FastAndFractured
 {
@@ -21,16 +20,17 @@ namespace FastAndFractured
         private Ray _groundRay;
         private RaycastHit _primaryHit;
         private RaycastHit _groundHit;
+
         public override void ActivateAbility()
         {
             base.ActivateAbility();
-            //_aimDirection = 
+            Vector3 carRight = transform.right;
+            _aimDirection = GetComponent<ShootingHandle>().CurrentShootDirection; 
+            // Remove vertical component while maintaining direction relative to car
+            //_aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
+            //_aimDirection = Vector3.ProjectOnPlane(_aimDirection, carRight).normalized;
+            Debug.Log(_aimDirection);
             CalculateLandingPoint();
-
-            // this will be called once the landiong point is calculated
-            //GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.identity);
-            //_aimDirection = GetComponent<ShootingHandle>().CurrentShootDirection;
-            //uniqueAbility.GetComponent<McChicken>().InitializeChicken(_aimDirection);
 
         }
 
@@ -45,7 +45,7 @@ namespace FastAndFractured
 
             if (drawDebugLines)
             {
-                Debug.DrawLine(uniqueAbilityShootPoint.position, checkPoint, hitObstacle ? Color.blue : Color.yellow, 2f);
+                Debug.DrawLine(uniqueAbilityShootPoint.position, checkPoint, Color.green, 8f);
             }
 
             CheckDownwardRaycast(checkPoint);
@@ -61,7 +61,7 @@ namespace FastAndFractured
 
             if (drawDebugLines)
             {
-                Debug.DrawLine(origin, _groundHit.point , hitPoint ? Color.blue : Color.yellow, 2f);
+                Debug.DrawLine(origin, _groundHit.point , Color.blue, 8f);
             }
 
             if (hitPoint)
