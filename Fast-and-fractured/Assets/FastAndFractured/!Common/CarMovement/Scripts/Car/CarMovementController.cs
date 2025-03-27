@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
     public class CarMovementController : MonoBehaviour
     {
+        public UnityEvent<float, float> onDashCooldownUpdate;
+
         public WheelController[] wheels;
         public TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
@@ -14,11 +18,11 @@ namespace FastAndFractured
         private PhysicsBehaviour _physicsBehaviour;
 
         [Header("Motor Settings")]
-        public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
+        public SteeringMode SteeringMode = SteeringMode.FRONT_WHEEL;
 
 
         [Header("Brake Settings")]
-        public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
+        public BrakeMode brakeMode = BrakeMode.ALL_WHEELS;
         public bool usesCustomBraking = false;
         private bool _isBraking = false;
         private bool _isDrifting = false;
@@ -192,11 +196,11 @@ namespace FastAndFractured
             //to do add logic for all brake Types
             switch (brakeMode)
             {
-                case BRAKE_MODE.AllWheels:
+                case BrakeMode.ALL_WHEELS:
                     ApplyBrakeTorque(statsController.BrakeTorque);
                     break;
 
-                case BRAKE_MODE.FrontWheelsStronger:
+                case BrakeMode.FRONT_WHEELS_STRONGER:
                     wheels[0].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[1].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[2].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
@@ -256,12 +260,12 @@ namespace FastAndFractured
 
             switch (SteeringMode)
             {
-                case STEERING_MODE.FrontWheel:
+                case SteeringMode.FRONT_WHEEL:
                     wheels[0].ApplySteering(_currentSteerAngle);
                     wheels[1].ApplySteering(_currentSteerAngle);
                     break;
 
-                case STEERING_MODE.RearWheel:
+                case SteeringMode.REAR_WHEEL:
                     float rearSteerAngle = _currentSteerAngle;
                     if (_physicsBehaviour.Rb.velocity.magnitude < 10f)
                     {
@@ -271,7 +275,7 @@ namespace FastAndFractured
                     wheels[3].ApplySteering(rearSteerAngle);
                     break;
 
-                case STEERING_MODE.AllWheel:
+                case SteeringMode.ALL_WHEEL:
                     foreach (var wheel in wheels)
                     {
                         wheel.ApplySteering(_currentSteerAngle);
@@ -299,6 +303,7 @@ namespace FastAndFractured
                     FinishDash();
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
+                    onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
             }
@@ -315,7 +320,7 @@ namespace FastAndFractured
                  _canDash = true;
              }, onTimerDecreaseUpdate: (progress) =>
              {
-
+                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
              });
         }
         public void CancelDash()
