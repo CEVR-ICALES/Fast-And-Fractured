@@ -4182,6 +4182,15 @@ MonoBehaviour:
       m_Calls: []
   chickenPrefab: {fileID: 6329937312849806155, guid: b449947509c09c7448f018c968c45f18, type: 3}
   uniqueAbilityShootPoint: {fileID: 704339768}
+  rayCastDistance: 15
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 15
+  drawDebugLines: 1
 --- !u!114 &1978648615 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
@@ -4435,7 +4444,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4074861044098169242, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4318798429337923000, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
       propertyPath: m_Size.y

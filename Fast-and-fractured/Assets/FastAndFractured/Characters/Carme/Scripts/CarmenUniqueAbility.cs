@@ -21,7 +21,7 @@ namespace FastAndFractured
         private RaycastHit _primaryHit;
         private RaycastHit _groundHit;
 
-        public override void ActivateAbility()
+        public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
             base.ActivateAbility();
             Vector3 carRight = transform.right;
@@ -73,7 +73,8 @@ namespace FastAndFractured
         private void InitializeAbility(Vector3 landPoint)
         {
             Debug.Log("HITTT");
-            GameObject uniqueAbility = Instantiate(chickenPrefab, landPoint, Quaternion.LookRotation(_aimDirection));
+            GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
+            uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
         }
 
 

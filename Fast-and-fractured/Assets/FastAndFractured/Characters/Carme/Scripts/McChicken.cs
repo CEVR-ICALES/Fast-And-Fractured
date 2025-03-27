@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using Utilities;
 
@@ -8,6 +9,7 @@ public class McChicken : MonoBehaviour
 {
     [Header("Prabole Settings")]
     [SerializeField] private float launchTime;
+    [SerializeField] private float jumpHeight;
     [SerializeField] private LayerMask groundLayerMask;
 
     [Header("Scaling")]
@@ -22,7 +24,10 @@ public class McChicken : MonoBehaviour
     private Rigidbody _rb;
     private bool _hasLanded = false;
     private ITimer _fallTimer;
+    private float _objectBottomOffset;
+    private Vector3 _targetPosition;
     private Quaternion _lockedRotation;
+    private Tween _jumpTween; 
 
     private void Awake()
     {
@@ -48,14 +53,15 @@ public class McChicken : MonoBehaviour
         }
     }
 
-    public void InitializeChicken(Vector3 direction)
+    public void InitializeChicken(Vector3 targetPosition, Vector3 direction)
     {
-        if(direction == Vector3.zero)
-            direction = transform.forward;
 
         _rb.freezeRotation = true;
         _lockedRotation = Quaternion.LookRotation(direction.normalized);
 
+        _jumpTween = transform.DOJump(targetPosition, jumpHeight, 1, launchTime)
+           .SetEase(Ease.InSine)
+           .OnComplete(ForceLanding);
 
         _fallTimer = TimerSystem.Instance.CreateTimer(launchTime, onTimerDecreaseComplete: ForceLanding);
     }
