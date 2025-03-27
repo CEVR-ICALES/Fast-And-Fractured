@@ -60,7 +60,7 @@ namespace FastAndFractured
         private void Start()
         {
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
+            SetMaxRbSpeedDelayed();
         }
 
 
@@ -70,6 +70,11 @@ namespace FastAndFractured
             CheckSlope();
             UpdateMaxRbSpeedOnSlopes();
             UpdateWheelVisuals();
+            ApplySteering();
+            if(_isDrifting)
+            {
+                ApplyDrift();
+            }
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
 
@@ -78,18 +83,6 @@ namespace FastAndFractured
         private void Update()
         {
             UpdateSpeedOverlay();
-            //Debug.Log(_currentRbMaxVelocity);
-            //Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
-            //Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
-
-            if (_isGoingUphill)
-            {
-                Debug.Log($"Climbing");
-            }
-            else if (_isGoingDownhill)
-            {
-                Debug.Log($"Descending");
-            }
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -122,7 +115,6 @@ namespace FastAndFractured
                 // Possible set motor torque to 0 if no input (w,s)
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
-            ApplySteering();
         }
 
         public void HandleAccelerateInput(float rawAccelerationInput)
@@ -170,7 +162,6 @@ namespace FastAndFractured
                     {
                         StartDrift(steeringInput.x);
                     }
-                    ApplyDrift();
                 }
                 else
                 {
@@ -361,12 +352,13 @@ namespace FastAndFractured
             int groundedWheels = 0;
             Vector3 combinedNormal = Vector3.zero;
 
-            foreach(WheelController wheel in wheels)
+            foreach (WheelController wheel in wheels)
             {
-                if(wheel.IsGroundedWithAngle(out float angle, out Vector3 normal))
+                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
+                if (groundInfo.isGrounded)
                 {
-                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle); //steepest angle found
-                    combinedNormal += normal;
+                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, groundInfo.slopeAngle);
+                    combinedNormal += groundInfo.groundNormal;
                     groundedWheels++;
                 }
             }
@@ -383,7 +375,7 @@ namespace FastAndFractured
             Vector3 averageNormal = combinedNormal / groundedWheels;
             Vector3 carForward = transform.forward;
 
-            // flatten the car's forward vector to ignore vertical component
+            // flatten the cars forward vector to ignore vertical component
             Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
 
             // calculate how much the slope is aligned with carss forward direction

@@ -24,11 +24,12 @@ namespace FastAndFractured
             {
                 ai = FindObjectOfType<EnemyAIBrain>();
             }
+            StartLevel();
         }
 
         void Start()
         {
-            StartLevel();
+
         }
         // this will be moved to gameManaager once its created
 

@@ -157,16 +157,6 @@ namespace FastAndFractured
             }
         }
 
-        public void DisableInput()
-        {
-            inputActions.Disable();
-        }
-
-        public void EnableInput()
-        {
-            inputActions.Enable();
-        }
-
         public void BlockInput(InputBlockTypes inputBlockType)
         {
             switch (inputBlockType)

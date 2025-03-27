@@ -40,6 +40,7 @@ namespace FastAndFractured
 
         const float MAX_ANGLE_DIRECTION = 90f;
         const float FRONT_ANGLE = 20f;
+        const float MAX_INPUT_VALUE = 1f;
         const int START_CORNER_INDEX = 1;
         Vector3 startPosition;
         Quaternion startRotation;
@@ -99,18 +100,21 @@ namespace FastAndFractured
         #region Common 
         public void GoToPosition()
         {
-
-            //If it's negative, go left
-            //If it's positive, go right
-            float angle = GetAngleDirection();
+            float angle = GetAngleDirection(Vector3.up);
 
             //Left/Right
-            float inputX = Mathf.Min(angle / MAX_ANGLE_DIRECTION, 1f);
+            //If it's negative, go left
+            //If it's positive, go right
+            float inputX = -Mathf.Min(angle / MAX_ANGLE_DIRECTION, MAX_INPUT_VALUE);
+
             //Forward/Backward
-            float inputY = 1f;
-            //Debug.Log("DIRECTION:" + direction);
-            //Debug.Log("XXXXXXXXXX:" + inputX);
-            //Debug.Log("YYYYYYYYYY:" + inputY);
+            //If angle between 90 and -90 go forward
+            //If angle more than 90 or less than -90 go backwards
+            float inputY = MAX_INPUT_VALUE;
+            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION) 
+            {
+                inputY = -MAX_INPUT_VALUE;
+            }
 
             Vector2 input = new Vector2(inputX, inputY);
 
@@ -223,7 +227,7 @@ namespace FastAndFractured
 
         public bool IsInFront()
         {
-            float angle = GetAngleDirection();
+            float angle = GetAngleDirection(Vector3.up);
             return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
         }
         #endregion
@@ -241,7 +245,7 @@ namespace FastAndFractured
             return (_targetToShoot.transform.position - transform.position).normalized;
         }
 
-        private float GetAngleDirection()
+        private float GetAngleDirection(Vector3 axis)
         {
             Vector3 direction;
             switch (pathMode)
@@ -272,12 +276,13 @@ namespace FastAndFractured
 
                     break;
             }
-            direction = (GetActivePathPoint() - transform.position).normalized;
+            direction = (_positionToDrive - transform.position);
 
             //If it's negative, go left
             //If it's positive, go right
-            return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
+            return Vector3.SignedAngle(direction, transform.forward, axis);
         }
+
 
         bool TryToCalculatePath()
         {
