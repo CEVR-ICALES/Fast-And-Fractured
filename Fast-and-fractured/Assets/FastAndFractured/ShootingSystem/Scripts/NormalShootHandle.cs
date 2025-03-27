@@ -158,10 +158,7 @@ namespace FastAndFractured
         public void StopDelayDecreaseOverheat()
         {
             //If is overheated, don't stop the decrease
-            if (_isOverHeat)
-            {
-                return;
-            }
+            if (_isOverHeat) return;
 
             if (!string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
             {

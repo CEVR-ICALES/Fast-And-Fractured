@@ -308,6 +308,7 @@ namespace FastAndFractured
                     FinishDash();
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
+                    onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
             }

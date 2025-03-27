@@ -8,8 +8,6 @@ namespace FastAndFractured
         [SerializeField] NormalShootHandle normalShootHandle;
         [SerializeField] PushShootHandle pushShootHandle;
         [SerializeField] CarMovementController carMovementController;
-
-        //Implement custom start
         private void Awake()
         {
             if (!normalShootHandle)
