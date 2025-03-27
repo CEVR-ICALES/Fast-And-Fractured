@@ -14,7 +14,9 @@ namespace FastAndFractured {
         private bool _canApplyAirFricction = false;
         private bool _canApplyCustomGravity = false;
 
-        private const float CUSTOM_GRAVITY = 
+        private const float CUSTOM_GRAVITY = 16.8f;
+
+        private const float AIR_FRICTION = 9.8f;
 
 
         private void FixedUpdate()
@@ -22,6 +24,11 @@ namespace FastAndFractured {
             if(_canApplyRollPrevention)
             {
                 ApplyRollPrevention();
+            }
+
+            if (_canApplyCustomGravity)
+            {
+                ApplyCustomGravity();
             }
             
         }
@@ -35,6 +42,16 @@ namespace FastAndFractured {
                     _rb = rb;
                 _steeringInputMagnitude = steeringInputMagnitude;
             }  
+        }
+
+        public void ToogleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
+        {
+            _canApplyCustomGravity = canApplyCustomGravity;
+            if (canApplyCustomGravity)
+            {
+                if (_rb == null)
+                    _rb = rb;
+            }
         }
 
 
@@ -52,7 +69,8 @@ namespace FastAndFractured {
 
         public void ApplyCustomGravity()
         {
-            _rb.AddForce(Vector3.down * )
+            _rb.AddForce(Vector3.down * CUSTOM_GRAVITY, ForceMode.Acceleration);
+            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION);
         }
     }
 }
