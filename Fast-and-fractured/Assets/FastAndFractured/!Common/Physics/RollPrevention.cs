@@ -14,6 +14,8 @@ namespace FastAndFractured {
         private bool _canApplyAirFricction = false;
         private bool _canApplyCustomGravity = false;
 
+        private const float CUSTOM_GRAVITY = 
+
 
         private void FixedUpdate()
         {
@@ -21,6 +23,7 @@ namespace FastAndFractured {
             {
                 ApplyRollPrevention();
             }
+            
         }
 
         public void ToggleRollPrevention(bool canApplyRollPrevention, Rigidbody rb, float steeringInputMagnitude)
@@ -45,6 +48,11 @@ namespace FastAndFractured {
             Vector3 forceDirection = -_rb.transform.up;
             _rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
             //Debug.Log("Roll Prevention" + gameObject.name);
+        }
+
+        public void ApplyCustomGravity()
+        {
+            _rb.AddForce(Vector3.down * )
         }
     }
 }
