@@ -46,6 +46,12 @@ namespace FastAndFractured
         {
             if (collision.gameObject.TryGetComponent(out StatsController statsController))
             {
+                if(statsController.IsInvulnerable)
+                {
+                    statsController.IsInvulnerable=false;
+                }
+                else
+                {
                 //float oCarWeight = statsController.Weight;
                 Rigidbody oRB = collision.gameObject.GetComponentInParent<Rigidbody>();
                 float oCarEnduranceFactor = statsController.Endurance / statsController.MaxEndurance;
@@ -54,6 +60,7 @@ namespace FastAndFractured
                 Vector3 direction = CalculateDirectionByRegion(collision.GetContact(0).point);
                 float distanceToCenter = Vector3.Distance(collision.GetContact(0).point, transform.position + _explosionCollider.center);
                 oRB.AddForceAtPosition(direction * force * (1 - (distanceToCenter / _explosionCollider.radius)) + Vector3.up * applyForceYOffset, collision.GetContact(0).point,ForceMode.Impulse);
+                }
             }
         }
 
