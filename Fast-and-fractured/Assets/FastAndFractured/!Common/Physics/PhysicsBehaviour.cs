@@ -88,9 +88,9 @@ namespace FastAndFractured
 
                     if(!otherComponentPhysicsBehaviours.HasBeenPushed)
                     {
-                        if(StatsController.IsInvulnerable)
+                        if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
                         {
-                            StatsController.IsInvulnerable=false;
+                            otherComponentPhysicsBehaviours.StatsController.IsInvulnerable=false;
                         }
                         else{
                             otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
