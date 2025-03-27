@@ -7,9 +7,7 @@ using Utilities;
 public class McChicken : MonoBehaviour
 {
     [Header("Prabole Settings")]
-    [SerializeField] private float launchForce;
-    [SerializeField] private float gravityScale;
-    [SerializeField] private float maxFallTime;
+    [SerializeField] private float launchTime;
     [SerializeField] private LayerMask groundLayerMask;
 
     [Header("Scaling")]
@@ -36,8 +34,7 @@ public class McChicken : MonoBehaviour
     {
         if (_hasLanded) return;
 
-        _rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
-        _rb.MoveRotation(_lockedRotation);
+        //_rb.MoveRotation(_lockedRotation);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -57,13 +54,12 @@ public class McChicken : MonoBehaviour
             direction = transform.forward;
 
         _rb.freezeRotation = true;
-        _lockedRotation = Quaternion.LookRotation(direction);
+        _lockedRotation = Quaternion.LookRotation(direction.normalized);
 
-        Vector3 force = direction.normalized + Vector3.up * 0.5f * launchForce;
-        _rb.AddForce(force, ForceMode.Impulse);
 
-        _fallTimer = TimerSystem.Instance.CreateTimer(maxFallTime, onTimerDecreaseComplete: ForceLanding);
+        _fallTimer = TimerSystem.Instance.CreateTimer(launchTime, onTimerDecreaseComplete: ForceLanding);
     }
+
 
     private void Land()
     {

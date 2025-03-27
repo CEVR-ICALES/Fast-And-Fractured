@@ -195,37 +195,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2031080442}
   m_SourcePrefab: {fileID: 100100000, guid: ae2409dd2d68da0459093ffb1ce2c5ce, type: 3}
---- !u!1 &71125102
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 71125103}
-  m_Layer: 0
-  m_Name: UniqueAbilityPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &71125103
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71125102}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.06, z: 2.37}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1401987994}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &141727873
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,6 +247,11 @@ MonoBehaviour:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2137050571973748720, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
   m_PrefabInstance: {fileID: 3595311130345356706}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &253070008 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8394388251411407148, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  m_PrefabInstance: {fileID: 1401987989}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &261466097 stripped
 MonoBehaviour:
@@ -3177,6 +3151,10 @@ PrefabInstance:
       propertyPath: cameraToHold
       value: 
       objectReference: {fileID: 1937828692}
+    - target: {fileID: 3897279429079240720, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: uniqueAbilityShootPoint
+      value: 
+      objectReference: {fileID: 253070008}
     - target: {fileID: 3917506753778775166, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
@@ -3285,15 +3263,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8394388251411407148, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394388251411407148, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394388251411407148, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.32
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3897279429079240720, guid: 894d66a72a5753242b8adf852622d607, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1086786289}
-    - targetCorrespondingSourceObject: {fileID: 1426858998874784265, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 71125103}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5393281910218630357, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
@@ -3340,12 +3328,16 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   chickenPrefab: {fileID: 6329937312849806155, guid: b449947509c09c7448f018c968c45f18, type: 3}
-  uniqueAbilityShootPoint: {fileID: 71125103}
---- !u!4 &1401987994 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1426858998874784265, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-  m_PrefabInstance: {fileID: 1401987989}
-  m_PrefabAsset: {fileID: 0}
+  uniqueAbilityShootPoint: {fileID: 253070008}
+  rayCastDistance: 4
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 6
+  drawDebugLines: 1
 --- !u!1 &1455825878
 GameObject:
   m_ObjectHideFlags: 0
