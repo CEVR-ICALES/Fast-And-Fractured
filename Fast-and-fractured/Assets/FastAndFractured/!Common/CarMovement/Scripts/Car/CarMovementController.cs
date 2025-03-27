@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
     public class CarMovementController : MonoBehaviour
     {
+        public UnityEvent<float, float> onDashCooldownUpdate;
+
         public WheelController[] wheels;
         public TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
@@ -14,11 +18,11 @@ namespace FastAndFractured
         private PhysicsBehaviour _physicsBehaviour;
 
         [Header("Motor Settings")]
-        public STEERING_MODE SteeringMode = STEERING_MODE.FrontWheel;
+        public SteeringMode SteeringMode = SteeringMode.FRONT_WHEEL;
 
 
         [Header("Brake Settings")]
-        public BRAKE_MODE brakeMode = BRAKE_MODE.AllWheels;
+        public BrakeMode brakeMode = BrakeMode.ALL_WHEELS;
         public bool usesCustomBraking = false;
         private bool _isBraking = false;
         private bool _isDrifting = false;
@@ -41,6 +45,9 @@ namespace FastAndFractured
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
+        [SerializeField] private float maxGroundAngleThreshold = 90f;
+        private float _currentWheelsAngle;
+        private const float WHEELS_IN_SLOPE = 2; 
 
         private float _currentSlopeAngle;
         private bool _isGoingUphill;
@@ -59,7 +66,7 @@ namespace FastAndFractured
         private void Start()
         {
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            Invoke("SetMaxRbSpeedDelayed", 0.5f); // provisional method, right now the statsController doesnt load on time and the maxRbVeclocity is set to 0 since it cant read the vcalue on start
+            SetMaxRbSpeedDelayed();
         }
 
 
@@ -69,6 +76,11 @@ namespace FastAndFractured
             CheckSlope();
             UpdateMaxRbSpeedOnSlopes();
             UpdateWheelVisuals();
+            ApplySteering();
+            if(_isDrifting)
+            {
+                ApplyDrift();
+            }
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
 
@@ -77,18 +89,6 @@ namespace FastAndFractured
         private void Update()
         {
             UpdateSpeedOverlay();
-            //Debug.Log(_currentRbMaxVelocity);
-            //Debug.DrawRay(transform.position, _physicsBehaviour.Rb.velocity, Color.red);
-            //Debug.DrawRay(transform.position, transform.forward * _currentSteerAngle, Color.blue);
-
-            if (_isGoingUphill)
-            {
-                Debug.Log($"Climbing");
-            }
-            else if (_isGoingDownhill)
-            {
-                Debug.Log($"Descending");
-            }
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -121,7 +121,6 @@ namespace FastAndFractured
                 // Possible set motor torque to 0 if no input (w,s)
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
-            ApplySteering();
         }
 
         public void HandleAccelerateInput(float rawAccelerationInput)
@@ -169,7 +168,6 @@ namespace FastAndFractured
                     {
                         StartDrift(steeringInput.x);
                     }
-                    ApplyDrift();
                 }
                 else
                 {
@@ -198,11 +196,11 @@ namespace FastAndFractured
             //to do add logic for all brake Types
             switch (brakeMode)
             {
-                case BRAKE_MODE.AllWheels:
+                case BrakeMode.ALL_WHEELS:
                     ApplyBrakeTorque(statsController.BrakeTorque);
                     break;
 
-                case BRAKE_MODE.FrontWheelsStronger:
+                case BrakeMode.FRONT_WHEELS_STRONGER:
                     wheels[0].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[1].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[2].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
@@ -262,12 +260,12 @@ namespace FastAndFractured
 
             switch (SteeringMode)
             {
-                case STEERING_MODE.FrontWheel:
+                case SteeringMode.FRONT_WHEEL:
                     wheels[0].ApplySteering(_currentSteerAngle);
                     wheels[1].ApplySteering(_currentSteerAngle);
                     break;
 
-                case STEERING_MODE.RearWheel:
+                case SteeringMode.REAR_WHEEL:
                     float rearSteerAngle = _currentSteerAngle;
                     if (_physicsBehaviour.Rb.velocity.magnitude < 10f)
                     {
@@ -277,7 +275,7 @@ namespace FastAndFractured
                     wheels[3].ApplySteering(rearSteerAngle);
                     break;
 
-                case STEERING_MODE.AllWheel:
+                case SteeringMode.ALL_WHEEL:
                     foreach (var wheel in wheels)
                     {
                         wheel.ApplySteering(_currentSteerAngle);
@@ -305,6 +303,7 @@ namespace FastAndFractured
                     FinishDash();
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
+                    onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
             }
@@ -321,7 +320,7 @@ namespace FastAndFractured
                  _canDash = true;
              }, onTimerDecreaseUpdate: (progress) =>
              {
-
+                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
              });
         }
         public void CancelDash()
@@ -360,18 +359,19 @@ namespace FastAndFractured
             int groundedWheels = 0;
             Vector3 combinedNormal = Vector3.zero;
 
-            foreach(WheelController wheel in wheels)
+            foreach (WheelController wheel in wheels)
             {
-                if(wheel.IsGroundedWithAngle(out float angle, out Vector3 normal))
+                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
+                if (groundInfo.isGrounded)
                 {
-                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, angle); //steepest angle found
-                    combinedNormal += normal;
+                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, groundInfo.slopeAngle);
+                    combinedNormal += groundInfo.groundNormal;
                     groundedWheels++;
                 }
             }
 
             // reset states if not on significant slope or not enough wheels on floor
-            if (groundedWheels < 2 || _currentSlopeAngle <= slopeAngleThreshold)
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentSlopeAngle <= slopeAngleThreshold)
             {
                 _isGoingUphill = false;
                 _isGoingDownhill = false;
@@ -382,7 +382,7 @@ namespace FastAndFractured
             Vector3 averageNormal = combinedNormal / groundedWheels;
             Vector3 carForward = transform.forward;
 
-            // flatten the car's forward vector to ignore vertical component
+            // flatten the cars forward vector to ignore vertical component
             Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
 
             // calculate how much the slope is aligned with carss forward direction
@@ -393,10 +393,50 @@ namespace FastAndFractured
 
             _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
             _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
-
-
         }
 
+        #endregion
+
+        #region Ground_Check
+        public bool IsGrounded()
+        {
+            foreach (var wheel in wheels)
+            {
+                if(wheel.IsGrounded())
+                    return true;
+            }
+            return false;
+        }
+
+        public bool IsInWall()
+        {
+            int groundedWheels = 0;
+            Vector3 combinedNormal = Vector3.zero;
+            foreach (var wheel in wheels)
+            {
+                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
+                if (groundInfo.isGrounded)
+                {
+                    _currentWheelsAngle = Mathf.Max(_currentWheelsAngle, groundInfo.slopeAngle);
+                    combinedNormal += groundInfo.groundNormal;
+                    groundedWheels++;
+                }
+            }
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentWheelsAngle < maxGroundAngleThreshold)
+            {
+                return false;
+            }
+            // calculate average ground normal (up direction of the surface)
+            Vector3 averageNormal = combinedNormal / groundedWheels;
+            Vector3 carForward = transform.forward;
+
+            // flatten the cars forward vector to ignore vertical component
+            Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
+
+            // calculate how much the slope is aligned with carss forward direction
+            float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
+            return slopeAlignment >= maxGroundAngleThreshold;
+        }
         #endregion
 
         public void StopAllCarMovement()

@@ -1,6 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 using Utilities;
 
@@ -50,6 +48,7 @@ namespace FastAndFractured
         {
             if (particles != null)
             {
+                rb.velocity = Vector3.zero;
                 ownCollider.enabled = false;
                 _meshRenderer.enabled = false;
                 rb.constraints = RigidbodyConstraints.FreezePosition;

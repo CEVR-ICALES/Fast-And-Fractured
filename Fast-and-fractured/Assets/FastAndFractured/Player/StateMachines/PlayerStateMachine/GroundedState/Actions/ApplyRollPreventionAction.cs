@@ -11,7 +11,7 @@ namespace StateMachine
         {
             if(!controller.GetBehaviour<PhysicsBehaviour>().HasBeenPushed)
             {
-                controller.GetBehaviour<RollPrevention>().ApplyRollPrevention(controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
+                controller.GetBehaviour<RollPrevention>().ToggleRollPrevention(true, controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
             }
         }
     }
