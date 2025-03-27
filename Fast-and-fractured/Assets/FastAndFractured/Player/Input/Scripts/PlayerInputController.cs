@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
@@ -27,7 +28,7 @@ namespace FastAndFractured
         private Vector2 _moveInput;
 
         public Vector2 CameraInput => _cameraInput;
-        private Vector2 _cameraInput;
+        private Vector2 _cameraInput = Vector2.zero;
 
         // Action Flags with private backing fields
         public float IsAccelerating => _isAccelerating;
@@ -57,7 +58,7 @@ namespace FastAndFractured
         public bool IsPausing => _isPausing;
         private bool _isPausing;
 
-        public bool IsResettingCamera => _isResettingCamera;
+        public bool IsResettingCamera { get { return _isResettingCamera; } set { _isResettingCamera = value; } }
         private bool _isResettingCamera;
 
         public bool IsDashing => _isDashing;
@@ -122,8 +123,8 @@ namespace FastAndFractured
             inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
             inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
-            inputActions.PlayerInputActions.ResetCamera.performed += ctx => _isResettingCamera = true;
-            inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
+            inputActions.PlayerInputActions.ResetCamera.started += ctx => CameraBehaviours.Instance.ResetCameraPosition();
+            // inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
 
             inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
@@ -138,6 +139,7 @@ namespace FastAndFractured
         {
             CheckForInputDeviceChange();
         }
+
 
         private void CheckForInputDeviceChange()
         {
