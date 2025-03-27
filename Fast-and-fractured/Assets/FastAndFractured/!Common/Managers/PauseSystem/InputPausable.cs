@@ -31,4 +31,9 @@ public class InputPausable : MonoBehaviour, IPausable
             playerInputController.InputActions.PlayerInputActions.Enable();
         }
     }
+
+    void OnDestroy()
+    {
+        PauseManager.Instance.UnregisterPausable(this);
+    }
 }
