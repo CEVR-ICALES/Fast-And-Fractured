@@ -3203,11 +3203,13 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3585499942574332199, guid: 053f037cf977f814188d131fa3c728d0, type: 3}
     - target: {fileID: 6073503923705467187, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: 
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6073503923705467187, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: speedOverlay
       value: 
       objectReference: {fileID: 654847390}
-    - target: {fileID: 6073503923705467187, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      objectReference: {fileID: 0}
     - target: {fileID: 7839016628521176550, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -4289,6 +4291,16 @@ MonoBehaviour:
   shootPoint: {fileID: 1499949200}
   pooltype: 3
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1978648618 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4816057949177678881, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
@@ -4556,6 +4568,26 @@ PrefabInstance:
     - target: {fileID: 7784992923006334804, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
       propertyPath: isAi
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: bulletSound.Guid.Data1
+      value: -1426590782
+      objectReference: {fileID: 0}
+    - target: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: bulletSound.Guid.Data2
+      value: 1159805714
+      objectReference: {fileID: 0}
+    - target: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: bulletSound.Guid.Data3
+      value: 2001885093
+      objectReference: {fileID: 0}
+    - target: {fileID: 7991854040479150469, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      propertyPath: bulletSound.Guid.Data4
+      value: -2108599820
       objectReference: {fileID: 0}
     - target: {fileID: 8093089502707808452, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
       propertyPath: m_LocalPosition.x
