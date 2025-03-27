@@ -43,6 +43,7 @@ namespace FastAndFractured
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 90f;
         private float _currentWheelsAngle;
+        private const float WHEELS_IN_SLOPE = 2; 
 
         private float _currentSlopeAngle;
         private bool _isGoingUphill;
@@ -365,7 +366,7 @@ namespace FastAndFractured
             }
 
             // reset states if not on significant slope or not enough wheels on floor
-            if (groundedWheels < 2 || _currentSlopeAngle <= slopeAngleThreshold)
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentSlopeAngle <= slopeAngleThreshold)
             {
                 _isGoingUphill = false;
                 _isGoingDownhill = false;
@@ -416,7 +417,7 @@ namespace FastAndFractured
                     groundedWheels++;
                 }
             }
-            if (groundedWheels < 2 || _currentWheelsAngle < maxGroundAngleThreshold)
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentWheelsAngle < maxGroundAngleThreshold)
             {
                 return false;
             }
