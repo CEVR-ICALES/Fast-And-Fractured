@@ -1,21 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
-    //public enum InputBlockTypes // this enum need to be added to the enum library
-    //{
-    //    ALL_MECHANICS,
-    //    MOVEMENT_MECHANICS,
-    //    SHOOTING_MECHANICS
-    //}
-
     public class PlayerInputController : AbstractSingleton<PlayerInputController>
     {
         public delegate void InputDeviceChanged(InputDeviceType deviceType);

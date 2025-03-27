@@ -1,20 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
-    //public enum STATS
-    //{
-    //    MAX_SPEED,
-    //    ACCELERATION,
-    //    ENDURANCE,
-    //    NORMAL_DAMAGE,
-    //    PUSH_DAMAGE,
-    //    COOLDOWN_SPEED
-    //}
     public class StatsController : MonoBehaviour
     {
         [SerializeField]
