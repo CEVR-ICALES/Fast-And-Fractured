@@ -45,6 +45,9 @@ namespace FastAndFractured
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
+        [SerializeField] private float maxGroundAngleThreshold = 90f;
+        private float _currentWheelsAngle;
+        private const float WHEELS_IN_SLOPE = 2; 
 
         private float _currentSlopeAngle;
         private bool _isGoingUphill;
@@ -368,7 +371,7 @@ namespace FastAndFractured
             }
 
             // reset states if not on significant slope or not enough wheels on floor
-            if (groundedWheels < 2 || _currentSlopeAngle <= slopeAngleThreshold)
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentSlopeAngle <= slopeAngleThreshold)
             {
                 _isGoingUphill = false;
                 _isGoingDownhill = false;
@@ -390,10 +393,50 @@ namespace FastAndFractured
 
             _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
             _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
-
-
         }
 
+        #endregion
+
+        #region Ground_Check
+        public bool IsGrounded()
+        {
+            foreach (var wheel in wheels)
+            {
+                if(wheel.IsGrounded())
+                    return true;
+            }
+            return false;
+        }
+
+        public bool IsInWall()
+        {
+            int groundedWheels = 0;
+            Vector3 combinedNormal = Vector3.zero;
+            foreach (var wheel in wheels)
+            {
+                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
+                if (groundInfo.isGrounded)
+                {
+                    _currentWheelsAngle = Mathf.Max(_currentWheelsAngle, groundInfo.slopeAngle);
+                    combinedNormal += groundInfo.groundNormal;
+                    groundedWheels++;
+                }
+            }
+            if (groundedWheels < WHEELS_IN_SLOPE || _currentWheelsAngle < maxGroundAngleThreshold)
+            {
+                return false;
+            }
+            // calculate average ground normal (up direction of the surface)
+            Vector3 averageNormal = combinedNormal / groundedWheels;
+            Vector3 carForward = transform.forward;
+
+            // flatten the cars forward vector to ignore vertical component
+            Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
+
+            // calculate how much the slope is aligned with carss forward direction
+            float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
+            return slopeAlignment >= maxGroundAngleThreshold;
+        }
         #endregion
 
         public void StopAllCarMovement()

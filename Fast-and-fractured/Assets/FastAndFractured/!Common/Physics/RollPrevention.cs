@@ -11,6 +11,12 @@ namespace FastAndFractured {
         private bool _canApplyRollPrevention = false;
         private Rigidbody _rb;
         private float _steeringInputMagnitude;
+        private bool _canApplyAirFricction = false;
+        private bool _canApplyCustomGravity = false;
+
+        private const float CUSTOM_GRAVITY = 16.8f;
+
+        private const float AIR_FRICTION = 9.8f;
 
 
         private void FixedUpdate()
@@ -19,6 +25,12 @@ namespace FastAndFractured {
             {
                 ApplyRollPrevention();
             }
+
+            if (_canApplyCustomGravity)
+            {
+                ApplyCustomGravity();
+            }
+            
         }
 
         public void ToggleRollPrevention(bool canApplyRollPrevention, Rigidbody rb, float steeringInputMagnitude)
@@ -32,6 +44,16 @@ namespace FastAndFractured {
             }  
         }
 
+        public void ToogleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
+        {
+            _canApplyCustomGravity = canApplyCustomGravity;
+            if (canApplyCustomGravity)
+            {
+                if (_rb == null)
+                    _rb = rb;
+            }
+        }
+
 
         public void ApplyRollPrevention()
         {
@@ -43,6 +65,12 @@ namespace FastAndFractured {
             Vector3 forceDirection = -_rb.transform.up;
             _rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
             //Debug.Log("Roll Prevention" + gameObject.name);
+        }
+
+        public void ApplyCustomGravity()
+        {
+            _rb.AddForce(Vector3.down * CUSTOM_GRAVITY, ForceMode.Acceleration);
+            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION);
         }
     }
 }

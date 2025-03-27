@@ -261,7 +261,7 @@ namespace FastAndFractured
                     }
                     else
                     {
-                        Debug.LogError("No path to follow" + _currentPath.ToString());
+                        Debug.LogWarning("No path to follow" + _currentPath.ToString());
                         if (Physics.Raycast(_positionToDrive, Vector3.down, out var hit, float.MaxValue, ignoreLayerMask))
                         {
                             Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
@@ -303,7 +303,7 @@ namespace FastAndFractured
             }
             else
             {
-                Debug.LogError("No path to follow" + _currentPath.ToString());
+                //Debug.LogError("No path to follow" + _currentPath.ToString());
                 return false;
             }
             ;
