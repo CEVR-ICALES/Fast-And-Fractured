@@ -61,7 +61,7 @@ namespace Utilities
         }
 
 
-        public ITimer CreateTimer(float duration, TimerDirection direction= TimerDirection.Decrease, Action onTimerIncreaseComplete = null,
+        public ITimer CreateTimer(float duration, TimerDirection direction= TimerDirection.DECREASE, Action onTimerIncreaseComplete = null,
             Action onTimerDecreaseComplete = null, bool isDebug = false, Action<float> onTimerIncreaseUpdate = null,
             Action<float> onTimerDecreaseUpdate = null, Action onTimerPause = null, Action onTimerResume = null)
         {

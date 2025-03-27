@@ -143,7 +143,7 @@ namespace FastAndFractured
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
                 element.imageReference.fillAmount = fillAmount;
 
-                if (type == UIElementType.HealthBar)
+                if (type == UIElementType.HEALTH_BAR)
                 {
                     element.imageReference.color = Color.Lerp(Color.red, Color.green, fillAmount);
                 }

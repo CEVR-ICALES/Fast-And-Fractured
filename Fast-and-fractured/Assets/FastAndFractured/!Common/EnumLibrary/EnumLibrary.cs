@@ -1,56 +1,56 @@
 namespace Enums
 {
-    public enum BRAKE_MODE
+    public enum BrakeMode
     {
-        AllWheels,
-        FrontWheels,
-        RearWheel,
-        FrontWheelsStronger,
-        RearWheelsStronger
+        ALL_WHEELS,
+        FRONT_WHEELS,
+        REAR_WHEEL,
+        FRONT_WHEELS_STRONGER,
+        REAR_WHEELS_STRONGER
     }
 
-    public enum INPUT_DEVICE_TYPE
+    public enum InputDeviceType
     {
-        KeyboardMouse,
-        PSController,
-        XboxController
+        KEYBOARD_MOUSE,
+        PS_CONTROLLER,
+        XBOX_CONTROLLER
     }
 
-    public enum STEERING_MODE
+    public enum SteeringMode
     {
-        FrontWheel,
-        RearWheel,
-        AllWheel
+        FRONT_WHEEL,
+        REAR_WHEEL,
+        ALL_WHEEL
     }
 
     public enum UIElementType
     {
-        HealthBar,
-        DashCooldown,
-        UltCooldown,
-        PushCooldown,
-        ShootCooldown,
-        EventText,
-        TimerText,
-        DashIcon,
-        UltIcon,
-        PushIcon,
-        ShootIcon,
-        DashBinding,
-        UltBinding,
-        PushBinding,
-        ShootBinding,
-        Player0,
-        Player1,
-        Player2,
-        Player3,
-        Player4,
-        Player5,
-        Player6,
-        Player7,
-        BadEffects,
-        Effects,
-        GoodEffects
+        HEALTH_BAR,
+        DASH_COOLDOWN,
+        ULT_COOLDOWN,
+        PUSH_COOLDOWN,
+        SHOOT_COOLDOWN,
+        EVENT_TEXT,
+        TIMER_TEXT,
+        DASH_ICON,
+        ULT_ICON,
+        PUSH_ICON,
+        SHOOT_ICON,
+        DASH_BINDING,
+        ULT_BINDING,
+        PUSH_BINDING,
+        SHOOT_BINDING,
+        PLAYER_0,
+        PLAYER_1,
+        PLAYER_2,
+        PLAYER_3,
+        PLAYER_4,
+        PLAYER_5,
+        PLAYER_6,
+        PLAYER_7,
+        BAD_EFFECTS,
+        EFFECTS,
+        GOOD_EFFECTS
     }
 
     public enum ScreensType
@@ -91,7 +91,7 @@ namespace Enums
         SHOOTING_MECHANICS
     }
 
-    public enum STATS
+    public enum Stats
     {
         MAX_SPEED,
         ACCELERATION,
@@ -103,7 +103,7 @@ namespace Enums
 
     public enum TimerDirection
     {
-        Increase,
-        Decrease
+        INCREASE,
+        DECREASE
     }
 }
