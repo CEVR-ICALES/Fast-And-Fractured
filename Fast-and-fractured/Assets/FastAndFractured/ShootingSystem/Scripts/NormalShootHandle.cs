@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -82,7 +83,7 @@ namespace FastAndFractured
 
                 //Normal Cadence TImer 
                 TimerSystem.Instance.CreateTimer(characterStatsController.NormalShootCadenceTime,
-                    TimerDirection.Increase,
+                    TimerDirection.INCREASE,
                     () => { canShoot = true; }
                 );
             }
@@ -133,12 +134,12 @@ namespace FastAndFractured
                 if (string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
                 {
                     _delayUntilStartDecreaseTimerId = TimerSystem.Instance.CreateTimer(DELAY_BEFORE_COOLING_SHOOT,
-                        TimerDirection.Decrease, onTimerDecreaseComplete: () =>
+                        TimerDirection.DECREASE, onTimerDecreaseComplete: () =>
                         {
                             if (_overheatTimer != null)
                             {
                                 _overheatTimer = TimerSystem.Instance.CreateTimer(_overheatTimer);
-                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Decrease, isRunning: true);
+                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.DECREASE, isRunning: true);
 
                                 _overheatTimer.ResumeTimer(); //And Call All The Resumes 
 
@@ -169,7 +170,7 @@ namespace FastAndFractured
             if (_overheatTimer == null)
             {
                 _overheatTimer = TimerSystem.Instance.CreateTimer(characterStatsController.NormalOverHeat,
-                    TimerDirection.Increase,
+                    TimerDirection.INCREASE,
                     onTimerIncreaseComplete: OnOverheatComplete,
                     onTimerDecreaseComplete: OnCoolingComplete,
                     onTimerIncreaseUpdate: OnOverHeatUpdateIncrease,
@@ -180,7 +181,7 @@ namespace FastAndFractured
             {
                 if (_overheatTimer.GetData().IsRunning)
                 {
-                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase, isRunning: true);
+                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.INCREASE, isRunning: true);
 
                 }
                 else

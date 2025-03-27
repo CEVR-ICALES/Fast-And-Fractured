@@ -1,7 +1,5 @@
-using FastAndFractured;
+using Enums;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -37,12 +35,6 @@ namespace FastAndFractured
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] LayerMask ignoreLayerMask;
-
-        public enum PathMode
-        {
-            SIMPLE,
-            ADVANCED
-        }
 
         PathMode pathMode = PathMode.ADVANCED;
 
