@@ -10,13 +10,15 @@ public class McChicken : MonoBehaviour
     [SerializeField] private float launchForce;
     [SerializeField] private float gravityScale;
     [SerializeField] private float maxFallTime;
+    [SerializeField] private LayerMask groundLayerMask;
 
     [Header("Scaling")]
-    [SerializeField] private float scaleDuration;
+    [SerializeField] private float biggerScaleDuration;
+    [SerializeField] private float finalScaleDuration;
+    [SerializeField] private Vector3 biggerScale;
     [SerializeField] private Vector3 finalScale;
 
     [Header("Colliders")]
-    [SerializeField] private Collider footCollider;
     [SerializeField] private Collider mainCollider;
 
     private Rigidbody _rb;
@@ -27,18 +29,26 @@ public class McChicken : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        footCollider.enabled = true;
         mainCollider.enabled = false;
     }
 
     private void FixedUpdate()
     {
+        if (_hasLanded) return;
 
+        _rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
+        _rb.MoveRotation(_lockedRotation);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-
+        if (!_hasLanded)
+        {
+            if ((groundLayerMask.value & (1 << collision.gameObject.layer)) != 0) // layer detection code i got from a forum
+            {
+                Land();
+            }
+        }
     }
 
     public void InitializeChicken(Vector3 direction)
@@ -57,7 +67,22 @@ public class McChicken : MonoBehaviour
 
     private void Land()
     {
+        if (_hasLanded) return;
+        _fallTimer?.StopTimer();
+        _hasLanded = true;
 
+        _rb.velocity = Vector3.zero;
+
+        transform.DOScale(biggerScale, biggerScaleDuration)
+            .OnComplete(() =>
+            {
+                transform.DOScale(finalScale, finalScaleDuration)
+                .OnComplete(() =>
+                {
+
+                });
+            });
+        
     }
 
     private void ForceLanding()
