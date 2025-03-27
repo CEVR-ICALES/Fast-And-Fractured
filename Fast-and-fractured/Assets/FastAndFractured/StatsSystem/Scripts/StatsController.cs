@@ -93,7 +93,6 @@ namespace FastAndFractured
 
         private float _errorGetStatFloat = -1;
 
-
         #region START EVENTS
         public void CustomStart()
         {
@@ -134,7 +133,6 @@ namespace FastAndFractured
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
-
 
         #region Health
         public void TakeEndurance(float substract, bool isProduct)
