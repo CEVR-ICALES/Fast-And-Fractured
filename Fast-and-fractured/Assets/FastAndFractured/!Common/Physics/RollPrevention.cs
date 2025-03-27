@@ -11,6 +11,8 @@ namespace FastAndFractured {
         private bool _canApplyRollPrevention = false;
         private Rigidbody _rb;
         private float _steeringInputMagnitude;
+        private bool _canApplyAirFricction = false;
+        private bool _canApplyCustomGravity = false;
 
 
         private void FixedUpdate()
