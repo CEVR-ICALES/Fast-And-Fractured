@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {

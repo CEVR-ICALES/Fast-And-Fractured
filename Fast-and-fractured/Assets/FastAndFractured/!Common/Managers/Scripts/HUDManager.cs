@@ -1,37 +1,38 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Enums;
 
 namespace FastAndFractured
 {
-    public enum UIElementType
-    {
-        HealthBar,
-        DashCooldown,
-        UltCooldown,
-        PushCooldown,
-        ShootCooldown,
-        EventText,
-        TimerText,
-        DashIcon,
-        UltIcon,
-        PushIcon,
-        ShootIcon,
-        DashBinding,
-        UltBinding,
-        PushBinding,
-        ShootBinding,
-        Player0,
-        Player1,
-        Player2,
-        Player3,
-        Player4,
-        Player5,
-        Player6,
-        Player7,
-        BadEffects,
-        Effects,
-        GoodEffects
-    }
+    //public enum UIElementType
+    //{
+    //    HealthBar,
+    //    DashCooldown,
+    //    UltCooldown,
+    //    PushCooldown,
+    //    ShootCooldown,
+    //    EventText,
+    //    TimerText,
+    //    DashIcon,
+    //    UltIcon,
+    //    PushIcon,
+    //    ShootIcon,
+    //    DashBinding,
+    //    UltBinding,
+    //    PushBinding,
+    //    ShootBinding,
+    //    Player0,
+    //    Player1,
+    //    Player2,
+    //    Player3,
+    //    Player4,
+    //    Player5,
+    //    Player6,
+    //    Player7,
+    //    BadEffects,
+    //    Effects,
+    //    GoodEffects
+    //}
 
     public class HUDManager : MonoBehaviour
     {

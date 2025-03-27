@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -38,11 +39,11 @@ namespace FastAndFractured
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] LayerMask ignoreLayerMask;
 
-        public enum PathMode
-        {
-            SIMPLE,
-            ADVANCED
-        }
+        //public enum PathMode
+        //{
+        //    SIMPLE,
+        //    ADVANCED
+        //}
 
         PathMode pathMode = PathMode.ADVANCED;
 

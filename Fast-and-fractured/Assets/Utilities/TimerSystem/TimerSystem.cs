@@ -4,6 +4,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using UnityEngine;
 using Utilities.Managers.PauseSystem;
+using Enums;
 
 namespace Utilities
 {
@@ -347,8 +348,8 @@ namespace Utilities
 }
  
 
-public enum TimerDirection
-{
-    Increase,
-    Decrease
-}
+//public enum TimerDirection
+//{
+//    Increase,
+//    Decrease
+//}

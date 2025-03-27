@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {

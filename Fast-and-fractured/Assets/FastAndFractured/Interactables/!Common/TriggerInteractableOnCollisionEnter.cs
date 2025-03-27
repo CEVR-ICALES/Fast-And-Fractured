@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -18,10 +19,10 @@ namespace FastAndFractured
             other.gameObject.GetComponentInParent<IInteractable>()?.OnInteract(this.transform.gameObject, other.gameObject.transform.root.gameObject);
         }
     }
-    public enum CollisionType
-    {
-        COLLISION,
-        TRIGGER
-    }
+    //public enum CollisionType
+    //{
+    //    COLLISION,
+    //    TRIGGER
+    //}
 }
 

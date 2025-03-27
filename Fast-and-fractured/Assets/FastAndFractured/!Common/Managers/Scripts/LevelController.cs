@@ -4,6 +4,7 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
