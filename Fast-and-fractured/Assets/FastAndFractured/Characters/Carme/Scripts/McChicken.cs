@@ -37,6 +37,7 @@ namespace FastAndFractured
         [SerializeField] private float bounceCooldown = 0.5f;
         [SerializeField] private float climbStartDelay = 0.3f;
         [SerializeField] private float footPlacementSpeed = 5f;
+        [SerializeField] private float wallDetectionThreshold = 0.7f;
 
         // state variables
         private bool _hasLanded = false;
@@ -62,7 +63,7 @@ namespace FastAndFractured
         private ITimer _climbStartTimer;
         private Tween _jumpTween;
 
-        private const float GROUNDED_GRACE_TIME = 0.2f;
+        private const float GROUNDED_GRACE_TIME = 0.2f; // avoid false true on air when just slightly off the floor for a moment
 
         private void Awake()
         {
@@ -139,7 +140,7 @@ namespace FastAndFractured
         {
             _isGrounded = Time.time < _lastGroundedTime + GROUNDED_GRACE_TIME;
 
-            if (_isClimbing && !_isGrounded && Time.time > _lastGroundedTime + 0.5f)
+            if (_isClimbing && !_isGrounded && Time.time > _lastGroundedTime + 0.5f) // no longer detecting wall as ground so has to start moving forward again
             {
                 StopClimbing();
             }
@@ -154,7 +155,6 @@ namespace FastAndFractured
             {
                 Vector3 climbDir = Vector3.ProjectOnPlane(Vector3.up, _currentWallNormal).normalized;
                 _rb.velocity = climbDir * wallClimbSpeed + _moveDirection * 0.5f;
-                CheckCeilingTransition();
             }
             else if (!_isGrounded)
             {
@@ -181,13 +181,13 @@ namespace FastAndFractured
             Vector3 bounceDir = Vector3.Reflect(_moveDirection, _currentWallNormal);
             _rb.AddForce(bounceDir * bounceForce, ForceMode.Impulse);
 
-            if (Vector3.Dot(_moveDirection, -_currentWallNormal) > 0.7f)
+            if (Vector3.Dot(_moveDirection, -_currentWallNormal) > wallDetectionThreshold) // if this value is 1 it means weve hit a 90 degree wall comparing it to our movement direcition
             {
                 PrepareClimbing();
             }
         }
 
-        private void PrepareClimbing()
+        private void PrepareClimbing() // so that it doesnt directly jump to the weall but theres a small delay for better visuals
         {
             _isPreparingToClimb = true;
             _preClimbRotation = transform.rotation;
@@ -198,7 +198,7 @@ namespace FastAndFractured
             );
         }
 
-        private void StartClimbing()
+        private void StartClimbing() // needs to be upgraded to not just tp it to the position nbut lerp it and properly rotate the obj couse now it isnt doing it
         {
             _isPreparingToClimb = false;
             _isClimbing = true;
@@ -209,7 +209,7 @@ namespace FastAndFractured
             transform.rotation = Quaternion.LookRotation(-_currentWallNormal, Vector3.up);
         }
 
-        private void HandleClimbPreparation()
+        private void HandleClimbPreparation() // not workin properly
         {
             Vector3 targetFootPosition = _wallContactPoint + _currentWallNormal * groundCheckOffset;
             transform.position = Vector3.Lerp(
@@ -231,12 +231,6 @@ namespace FastAndFractured
             _isClimbing = false;
             _rb.useGravity = true;
             transform.DORotateQuaternion(_preClimbRotation, 0.3f).SetEase(Ease.OutBack);
-        }
-
-        private void CheckCeilingTransition()
-        {
-            _isOnCeiling = Vector3.Dot(_currentWallNormal, Vector3.down) > 0.7f;
-            if (_isOnCeiling) _isClimbing = false;
         }
 
         #endregion
