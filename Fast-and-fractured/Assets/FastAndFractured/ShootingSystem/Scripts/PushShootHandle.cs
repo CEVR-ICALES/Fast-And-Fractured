@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured {
     public class PushShootHandle : ShootingHandle
     {
+
+        public UnityEvent<float, float> onCooldownUpdate;
+
         protected override void CustomStart()
         {
             base.CustomStart();
@@ -53,9 +57,15 @@ namespace FastAndFractured {
                 ShootBullet(rotatedVector, range);
                 canShoot = false;
                 TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
-                    () => { canShoot = true; }
+                    () => { canShoot = true; },
+                    onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
             }
+        }
+
+        private void OnPushShootCooldownDecrease(float currentvalue)
+        {
+            onCooldownUpdate?.Invoke(currentvalue, characterStatsController.PushCooldown);
         }
     }
 }

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 
 namespace FastAndFractured
@@ -17,11 +16,6 @@ namespace FastAndFractured
             if (collisionType != CollisionType.TRIGGER || other == null) { return; }
             other.gameObject.GetComponentInParent<IInteractable>()?.OnInteract(this.transform.gameObject, other.gameObject.transform.root.gameObject);
         }
-    }
-    public enum CollisionType
-    {
-        COLLISION,
-        TRIGGER
     }
 }
 

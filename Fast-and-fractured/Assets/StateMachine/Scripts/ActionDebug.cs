@@ -8,7 +8,7 @@ namespace StateMachine
         public string messageToDebug;
         public override void Act(Controller controller)
         {
-            Debug.Log($"{messageToDebug}");
+            //Debug.Log($"{messageToDebug}");
             FinishAction();
         }
     }

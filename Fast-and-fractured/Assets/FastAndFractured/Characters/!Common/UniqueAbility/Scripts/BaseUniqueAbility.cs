@@ -61,11 +61,11 @@ namespace FastAndFractured
 
         protected virtual void PlayActivateAbilitySound()
         {
-            if (abilityData == null || abilityData.FMODEventPath.IsNull)
-            {
-                return;
-            }
-            SoundManager.Instance.PlaySound3D(abilityData.FMODEventPath.Path, this.transform.position);
+            //if (abilityData == null || abilityData.FMODEventPath.IsNull)
+            //{
+            //    return;
+            //}
+            //SoundManager.Instance.PlaySound3D(abilityData.FMODEventPath.Path, this.transform.position);
         }
 
         protected virtual void StartAbilityEffects()
