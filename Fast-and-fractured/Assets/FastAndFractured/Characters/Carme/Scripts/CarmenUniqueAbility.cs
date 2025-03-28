@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -21,6 +23,7 @@ namespace FastAndFractured
         private Ray _groundRay;
         private RaycastHit _primaryHit;
         private RaycastHit _groundHit;
+        private ITimer _durationTimer;
 
         public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
@@ -32,6 +35,26 @@ namespace FastAndFractured
 
         }
 
+        private void InitializeAbility(Vector3 landPoint)
+        {
+            Debug.Log("HITTT");
+            landPoint.y = landPoint.y + landPointYOffset;
+            GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
+            uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
+            _durationTimer = TimerSystem.Instance.CreateTimer(abilityData.Duration, TimerDirection.Increase, () =>
+            {
+                DestroyUniqueAbility(uniqueAbility);
+            });
+        }
+
+        private void DestroyUniqueAbility(GameObject uniqueAbility)
+        {
+            EndAbilityEffects();
+            StopCooldown(); 
+            Destroy(uniqueAbility);
+        }
+
+        #region Calculate Landing Ppint
         private void CalculateLandingPoint()
         {
             _primaryRay.origin = uniqueAbilityShootPoint.position;
@@ -68,16 +91,8 @@ namespace FastAndFractured
             }
         }
 
-        private void InitializeAbility(Vector3 landPoint)
-        {
-            Debug.Log("HITTT");
-            landPoint.y = landPoint.y + landPointYOffset;
-            GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
-            uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
-        }
+        #endregion
 
-
-        
     }
 }
 
