@@ -72,7 +72,7 @@ public class McChicken : MonoBehaviour
         if (_hasLanded) return;
         _fallTimer?.StopTimer();
         _hasLanded = true;
-
+        mainCollider.enabled = true;
         _rb.velocity = Vector3.zero;
 
         transform.DOScale(biggerScale, biggerScaleDuration)

@@ -12,6 +12,7 @@ namespace FastAndFractured
         [SerializeField] private LayerMask obstacleLayerMask;
         [SerializeField] private LayerMask groundLayerMask;
         [SerializeField] private float groundCheckDistance;
+        [SerializeField] private float landPointYOffset;
         public bool drawDebugLines = true;
 
 
@@ -24,12 +25,9 @@ namespace FastAndFractured
         public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
             base.ActivateAbility();
-            Vector3 carRight = transform.right;
-            _aimDirection = GetComponent<ShootingHandle>().CurrentShootDirection; 
-            // Remove vertical component while maintaining direction relative to car
-            //_aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
-            //_aimDirection = Vector3.ProjectOnPlane(_aimDirection, carRight).normalized;
-            Debug.Log(_aimDirection);
+            _aimDirection = GetComponent<ShootingHandle>().CurrentShootDirection;
+            // remove vertical component while maintaining direction relative to car
+            _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
             CalculateLandingPoint();
 
         }
@@ -73,6 +71,7 @@ namespace FastAndFractured
         private void InitializeAbility(Vector3 landPoint)
         {
             Debug.Log("HITTT");
+            landPoint.y = landPoint.y + landPointYOffset;
             GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
             uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
         }
