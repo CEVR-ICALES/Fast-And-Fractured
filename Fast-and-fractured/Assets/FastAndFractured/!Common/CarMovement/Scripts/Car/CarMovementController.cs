@@ -45,7 +45,7 @@ namespace FastAndFractured
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
-        [SerializeField] private float maxGroundAngleThreshold = 90f;
+        [SerializeField] private float maxGroundAngleThreshold = 65;
         private float _currentWheelsAngle;
         private const float WHEELS_IN_SLOPE = 2; 
 
@@ -355,23 +355,10 @@ namespace FastAndFractured
         }
         private void CheckSlope()
         {
-            _currentSlopeAngle = 0;
-            int groundedWheels = 0;
-            Vector3 combinedNormal = Vector3.zero;
-
-            foreach (WheelController wheel in wheels)
-            {
-                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
-                if (groundInfo.isGrounded)
-                {
-                    _currentSlopeAngle = Mathf.Max(_currentSlopeAngle, groundInfo.slopeAngle);
-                    combinedNormal += groundInfo.groundNormal;
-                    groundedWheels++;
-                }
-            }
+            float currentSlopeAngle = ReturnCurrentWheelsAngle(out int groundWheels, out Vector3 combinedNormal);
 
             // reset states if not on significant slope or not enough wheels on floor
-            if (groundedWheels < WHEELS_IN_SLOPE || _currentSlopeAngle <= slopeAngleThreshold)
+            if (groundWheels < WHEELS_IN_SLOPE || currentSlopeAngle <= slopeAngleThreshold)
             {
                 _isGoingUphill = false;
                 _isGoingDownhill = false;
@@ -379,7 +366,7 @@ namespace FastAndFractured
             }
             
             // calculate average ground normal (up direction of the surface)
-            Vector3 averageNormal = combinedNormal / groundedWheels;
+            Vector3 averageNormal = combinedNormal / groundWheels;
             Vector3 carForward = transform.forward;
 
             // flatten the cars forward vector to ignore vertical component
@@ -405,37 +392,41 @@ namespace FastAndFractured
                 if(wheel.IsGrounded())
                     return true;
             }
-            return false;
+            return _physicsBehaviour.IsTouchingGround;
         }
 
         public bool IsInWall()
         {
-            int groundedWheels = 0;
-            Vector3 combinedNormal = Vector3.zero;
+            float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
+            
+            if (groundWheels < WHEELS_IN_SLOPE || currentWheelsAngle < maxGroundAngleThreshold)
+            {
+                return false;
+            }
+
+            return currentWheelsAngle >= maxGroundAngleThreshold;
+        }
+        private float ReturnCurrentWheelsAngle(out int groundWheels)
+        {
+            return ReturnCurrentWheelsAngle(out groundWheels, out Vector3 combinedNormal);
+        }
+
+        private float ReturnCurrentWheelsAngle(out int groundWheels, out Vector3 combinedNormal)
+        {
+            float wheelsAngle = 0;
+            groundWheels = 0;
+            combinedNormal = Vector3.zero;
             foreach (var wheel in wheels)
             {
                 WheelGroundInfo groundInfo = wheel.GetGroundInfo();
                 if (groundInfo.isGrounded)
                 {
-                    _currentWheelsAngle = Mathf.Max(_currentWheelsAngle, groundInfo.slopeAngle);
+                    wheelsAngle = Mathf.Max(wheelsAngle, groundInfo.slopeAngle);
                     combinedNormal += groundInfo.groundNormal;
-                    groundedWheels++;
+                    groundWheels++;
                 }
             }
-            if (groundedWheels < WHEELS_IN_SLOPE || _currentWheelsAngle < maxGroundAngleThreshold)
-            {
-                return false;
-            }
-            //// calculate average ground normal (up direction of the surface)
-            //Vector3 averageNormal = combinedNormal / groundedWheels;
-            //Vector3 carForward = transform.forward;
-
-            //// flatten the cars forward vector to ignore vertical component
-            //Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
-
-            //// calculate how much the slope is aligned with carss forward direction
-            //float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
-            return _currentWheelsAngle >= maxGroundAngleThreshold;
+            return wheelsAngle;
         }
         #endregion
 
