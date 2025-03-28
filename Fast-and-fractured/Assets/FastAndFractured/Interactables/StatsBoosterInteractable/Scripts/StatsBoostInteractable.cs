@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -21,7 +22,7 @@ namespace FastAndFractured
 
             foreach (var boost in boostList)
             {
-                if (boost.StatToBoost == STATS.ENDURANCE)
+                if (boost.StatToBoost == Stats.ENDURANCE)
                 {
                     if (boost.BoostValue < 0)
                     {
@@ -42,7 +43,7 @@ namespace FastAndFractured
                 if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
                 TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
                 {
-                    if (boost.StatToBoost == STATS.ENDURANCE)
+                    if (boost.StatToBoost == Stats.ENDURANCE)
                     {
                         if (boost.BoostValue < 0)
                         {
@@ -70,7 +71,7 @@ namespace FastAndFractured
         [Serializable]
         public class StatsBoost
         {
-            [SerializeField] private STATS _statToBoost;
+            [SerializeField] private Stats _statToBoost;
             [SerializeField] private float _boostValue = -1;
 
             [Tooltip("Use -1 if you want the boost to be permanent")]
@@ -80,7 +81,7 @@ namespace FastAndFractured
             [SerializeField] UnityEvent _onBoostStartEvent;
             [SerializeField] UnityEvent _onBoostEndEvent;
 
-            public STATS StatToBoost
+            public Stats StatToBoost
             {
                 get => _statToBoost;
                 set => _statToBoost = value;

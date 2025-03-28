@@ -4,6 +4,7 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -42,13 +43,13 @@ namespace FastAndFractured
             PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
+        public void HandleInputChange(InputDeviceType inputType)
         {
-            if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
+            if (inputType == InputDeviceType.KEYBOARD_MOUSE)
             {
                 usingController = false;
             }
-            else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
+            else if (inputType == InputDeviceType.XBOX_CONTROLLER || inputType == InputDeviceType.PS_CONTROLLER)
             {
                 usingController = true;
             }
@@ -99,7 +100,7 @@ namespace FastAndFractured
         {
             string currentSceneName = SceneManager.GetActiveScene().name;
             float delay = characterstats.Dead();
-            TimerSystem.Instance.CreateTimer(delay,TimerDirection.Decrease, onTimerDecreaseComplete:  () => {
+            TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
                 if (IsThePlayer(characterstats.gameObject))
                 {
                     SceneManager.LoadScene(currentSceneName);
