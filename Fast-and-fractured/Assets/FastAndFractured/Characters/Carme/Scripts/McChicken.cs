@@ -1,7 +1,5 @@
 using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using FastAndFractured;
 using UnityEngine;
 using Utilities;
 
@@ -11,35 +9,42 @@ public class McChicken : MonoBehaviour
     [SerializeField] private float launchTime;
     [SerializeField] private float jumpHeight;
     [SerializeField] private LayerMask groundLayerMask;
+    [SerializeField] private float maxLaunchTime;
 
     [Header("Scaling")]
-    [SerializeField] private float biggerScaleDuration;
     [SerializeField] private float finalScaleDuration;
-    [SerializeField] private Vector3 biggerScale;
     [SerializeField] private Vector3 finalScale;
 
     [Header("Colliders")]
     [SerializeField] private Collider mainCollider;
 
+    [Header("Movement")]
+    [SerializeField] private float maxSpeed;
+    [SerializeField] private float speedForce;
+
+    [Header("Pushing")]
+
+    //private PhysicsBehaviour _physicsBehaviour;
     private Rigidbody _rb;
     private bool _hasLanded = false;
-    private ITimer _fallTimer;
-    private float _objectBottomOffset;
-    private Vector3 _targetPosition;
     private Quaternion _lockedRotation;
     private Tween _jumpTween; 
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        //_physicsBehaviour = GetComponent<PhysicsBehaviour>();
         mainCollider.enabled = false;
     }
 
     private void FixedUpdate()
     {
-        if (_hasLanded) return;
+        if (!_hasLanded) return;
 
-        //_rb.MoveRotation(_lockedRotation);
+        LimitRbSpeed();
+        Move();
+        //_physicsBehaviour.LimitRigidBodySpeed(maxSpeed);
+
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -61,40 +66,40 @@ public class McChicken : MonoBehaviour
 
         _jumpTween = transform.DOJump(targetPosition, jumpHeight, 1, launchTime)
            .SetEase(Ease.InSine)
-           .OnComplete(ForceLanding);
+           .OnComplete(Land);
 
-        _fallTimer = TimerSystem.Instance.CreateTimer(launchTime, onTimerDecreaseComplete: ForceLanding);
     }
 
 
     private void Land()
     {
         if (_hasLanded) return;
-        _fallTimer?.StopTimer();
-        _hasLanded = true;
         mainCollider.enabled = true;
         _rb.velocity = Vector3.zero;
 
-        transform.DOScale(biggerScale, biggerScaleDuration)
+        transform.DOScale(finalScale, finalScaleDuration)
+            .SetEase(Ease.OutBack)
             .OnComplete(() =>
             {
-                transform.DOScale(finalScale, finalScaleDuration)
-                .OnComplete(() =>
-                {
-
-                });
+               _hasLanded = true;
             });
         
     }
 
-    private void ForceLanding()
+    private void Move()
     {
-        if(!_hasLanded) Land();
+        _rb.AddForce(transform.forward * speedForce, ForceMode.Acceleration);
     }
 
-    private void OnDestroy()
+    private void LimitRbSpeed()
     {
-        _fallTimer?.StopTimer();
+        Vector3 clampedVelocity = _rb.velocity;
+
+        if (clampedVelocity.magnitude > (maxSpeed / 3.6f))
+        {
+            clampedVelocity = clampedVelocity.normalized * (maxSpeed / 3.6f);
+            _rb.velocity = clampedVelocity;
+        }
     }
 
 }

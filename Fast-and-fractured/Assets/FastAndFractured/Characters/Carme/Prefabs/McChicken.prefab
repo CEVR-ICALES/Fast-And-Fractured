@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -508421195463255307}
   - component: {fileID: 1903283053703210985}
   - component: {fileID: -6401039148021604287}
+  - component: {fileID: 7785587234466910430}
   m_Layer: 0
   m_Name: McChicken
   m_TagString: Untagged
@@ -104,11 +105,14 @@ MonoBehaviour:
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 8
+  maxLaunchTime: 3
   biggerScaleDuration: 0.8
-  finalScaleDuration: 0.5
+  finalScaleDuration: 1.1
   biggerScale: {x: 7.5, y: 7.5, z: 7.5}
   finalScale: {x: 6, y: 6, z: 6}
   mainCollider: {fileID: 1903283053703210985}
+  maxSpeed: 70
+  speedForce: 100
 --- !u!65 &1903283053703210985
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -157,6 +161,49 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7785587234466910430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6329937312849806155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db449586d91ae8349a505d9a5a990687, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isMovingThreshold: 0
+  IsCurrentlyDashing: 0
+  enduranceFactorEvaluate:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  averageCarWeight: 1150
+  carWeightImportance: 0.2
+  applyForceYOffset: 0.2
+  PushApplyPoint: {fileID: 0}
+  statsController: {fileID: 0}
 --- !u!1 &8507426364513829898
 GameObject:
   m_ObjectHideFlags: 0
