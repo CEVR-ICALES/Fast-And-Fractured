@@ -325,7 +325,10 @@ namespace FastAndFractured
         }
         public void CancelDash()
         {
-            TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            if (TimerSystem.Instance.HasTimer(_dashTimer))
+            {
+                TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            }
             FinishDash();
         }
 
