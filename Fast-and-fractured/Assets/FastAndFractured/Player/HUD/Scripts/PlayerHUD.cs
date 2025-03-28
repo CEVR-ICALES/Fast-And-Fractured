@@ -1,4 +1,5 @@
 using Enums;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FastAndFractured
@@ -20,7 +21,7 @@ namespace FastAndFractured
             }
             if (!carMovementController)
             {
-                carMovementController = GetComponent<CarMovementController>();
+                carMovementController = GetComponentInChildren<CarMovementController>();
             }
         }
 
