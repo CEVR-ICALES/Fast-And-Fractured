@@ -325,7 +325,10 @@ namespace FastAndFractured
         }
         public void CancelDash()
         {
-            TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            if (TimerSystem.Instance.HasTimer(_dashTimer))
+            {
+                TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            }
             FinishDash();
         }
 
@@ -426,16 +429,16 @@ namespace FastAndFractured
             {
                 return false;
             }
-            // calculate average ground normal (up direction of the surface)
-            Vector3 averageNormal = combinedNormal / groundedWheels;
-            Vector3 carForward = transform.forward;
+            //// calculate average ground normal (up direction of the surface)
+            //Vector3 averageNormal = combinedNormal / groundedWheels;
+            //Vector3 carForward = transform.forward;
 
-            // flatten the cars forward vector to ignore vertical component
-            Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
+            //// flatten the cars forward vector to ignore vertical component
+            //Vector3 carForwardFlat = Vector3.ProjectOnPlane(carForward, Vector3.up).normalized;
 
-            // calculate how much the slope is aligned with carss forward direction
-            float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
-            return slopeAlignment >= maxGroundAngleThreshold;
+            //// calculate how much the slope is aligned with carss forward direction
+            //float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
+            return _currentWheelsAngle >= maxGroundAngleThreshold;
         }
         #endregion
 
