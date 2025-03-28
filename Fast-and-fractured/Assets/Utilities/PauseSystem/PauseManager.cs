@@ -24,7 +24,7 @@ namespace Utilities.Managers.PauseSystem
             if (_isGamePaused) return;  
 
             _isGamePaused = true;
-            Time.timeScale = 0f;   
+            //Time.timeScale = 0f;   
 
             onGamePaused?.Invoke();
             foreach (var pausable in _pausableComponents)

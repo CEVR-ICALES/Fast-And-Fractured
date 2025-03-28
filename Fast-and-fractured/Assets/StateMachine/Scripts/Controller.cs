@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities.Managers.PauseSystem;
 
 namespace StateMachine
 {
-    public class Controller : MonoBehaviour
+    public class Controller : MonoBehaviour, IPausable
     {
         [SerializeField] private List<Behaviour> availableBehaviours = new List<Behaviour>();
 
@@ -12,10 +13,13 @@ namespace StateMachine
 
         State currentState;
 
+        private bool _paused = false;
+
         // Start is called before the first frame update
-       public void CustomStart()
-        { 
+        public void CustomStart()
+        {
             LoadFirsState();
+            PauseManager.Instance.RegisterPausable(this);
         }
         public void LoadFirsState()
         {
@@ -24,6 +28,7 @@ namespace StateMachine
         // Update is called once per frame
         void Update()
         {
+            if (_paused) return;
             UpdateStateActions();
             EvaluateStateTransitions();
         }
@@ -145,5 +150,21 @@ namespace StateMachine
         {
             ChangeState(newState);
         }
+
+        public void OnPause()
+        {
+            _paused = true;
+        }
+
+        public void OnResume()
+        {
+            _paused = false;
+        }
+
+        private void OnDestroy()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
+        }
+
     }
 }
