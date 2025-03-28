@@ -1,0 +1,85 @@
+{
+    "format": {
+        "version": "1.0"
+    },
+    "scene": {
+        "scale_factor": 774.9356689453125
+    },
+    "shaders": {
+        "Main shader": {
+            "displacementTessellation": {
+                "displacement": {
+                    "scale": 0,
+                    "source_channel": 0
+                },
+                "enable": true,
+                "tessellation": {
+                    "max_length": 64,
+                    "subdiv_count": 1,
+                    "subdiv_mode": 0
+                }
+            },
+            "parameters": {
+                "Base Surface": {
+                    "anisotropyEnabled": false,
+                    "ao_intensity": 0.75,
+                    "emissive_intensity": 1,
+                    "horizonFade": 1.2999999523162842,
+                    "nbSamples": 16,
+                    "sheenEnabled": false,
+                    "specularEdgeColorEnabled": false,
+                    "specularIoR": 1.5
+                },
+                "Coat": {
+                    "coatEnabled": false,
+                    "coatIoR": 1.600000023841858
+                },
+                "Geometry": {
+                    "doubleSided": false
+                },
+                "Geometry/Bent Normal": {
+                    "bent_normal_diffuse_amount": 1,
+                    "bent_normal_specular_amount": 1,
+                    "use_bent_normal": false
+                },
+                "Geometry/Opacity": {
+                    "alphaBlendEnabled": false,
+                    "alpha_test_dither": false,
+                    "alpha_test_enabled": false,
+                    "alpha_test_threshold": 0.33000001311302185
+                },
+                "Geometry/Parallax Occlusion Mapping": {
+                    "maxPOMSamples": 16,
+                    "minPOMSamples": 4,
+                    "pomStrength": 1,
+                    "usePOM": false
+                },
+                "Interior": {
+                    "absorptionEnabled": false,
+                    "translucencyEnabled": false
+                },
+                "Interior/Subsurface Scattering Parameters": {
+                    "sssColor": [
+                        0.7009999752044678,
+                        0.3009999990463257,
+                        0.3050000071525574
+                    ],
+                    "sssEnabled": false,
+                    "sssRayleigh": 0,
+                    "sssRedShift": 0,
+                    "sssScale": 0.5,
+                    "sssScatteringColorSource": 0,
+                    "sssScatteringUsesTranslucency": false,
+                    "sssType": 2
+                }
+            },
+            "shader": "asm-metal-rough",
+            "shaderInstance": "Main shader"
+        }
+    },
+    "texturesets": {
+        "Material.003": {
+            "shader": "Main shader"
+        }
+    }
+}
