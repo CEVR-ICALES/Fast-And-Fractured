@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace FastAndFractured {
-    public class RollPrevention : MonoBehaviour
+    public class ApplyForceByState : MonoBehaviour
     {
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
@@ -30,6 +30,11 @@ namespace FastAndFractured {
             {
                 ApplyCustomGravity();
             }
+
+            if (_canApplyAirFricction)
+            {
+                ApplyAirFricction();
+            }
             
         }
 
@@ -44,13 +49,25 @@ namespace FastAndFractured {
             }  
         }
 
-        public void ToogleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
+        public void ToggleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
         {
             _canApplyCustomGravity = canApplyCustomGravity;
             if (canApplyCustomGravity)
             {
                 if (_rb == null)
                     _rb = rb;
+            }
+        }
+
+        public void ToggleAirFriction(bool canApplyAirFriction, Rigidbody rb)
+        {
+            _canApplyAirFricction = canApplyAirFriction;
+            if (canApplyAirFriction)
+            {
+                if(_rb == null)
+                {
+                    _rb = rb;
+                }
             }
         }
 
@@ -70,6 +87,10 @@ namespace FastAndFractured {
         public void ApplyCustomGravity()
         {
             _rb.AddForce(Vector3.down * CUSTOM_GRAVITY, ForceMode.Acceleration);
+        }
+
+        public void ApplyAirFricction()
+        {
             _rb.AddForce(-_rb.transform.forward * AIR_FRICTION);
         }
     }
