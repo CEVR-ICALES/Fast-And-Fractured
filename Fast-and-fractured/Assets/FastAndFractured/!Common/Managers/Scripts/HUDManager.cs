@@ -1,38 +1,9 @@
+using Enums;
 using UnityEngine;
 using System.Collections.Generic;
 
 namespace FastAndFractured
 {
-    public enum UIElementType
-    {
-        HealthBar,
-        DashCooldown,
-        UltCooldown,
-        PushCooldown,
-        ShootCooldown,
-        EventText,
-        TimerText,
-        DashIcon,
-        UltIcon,
-        PushIcon,
-        ShootIcon,
-        DashBinding,
-        UltBinding,
-        PushBinding,
-        ShootBinding,
-        Player0,
-        Player1,
-        Player2,
-        Player3,
-        Player4,
-        Player5,
-        Player6,
-        Player7,
-        BadEffects,
-        Effects,
-        GoodEffects
-    }
-
     public class HUDManager : MonoBehaviour
     {
         #region Singleton
@@ -142,7 +113,7 @@ namespace FastAndFractured
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
                 element.imageReference.fillAmount = fillAmount;
 
-                if (type == UIElementType.HealthBar)
+                if (type == UIElementType.HEALTH_BAR)
                 {
                     element.imageReference.color = Color.Lerp(Color.red, Color.green, fillAmount);
                 }

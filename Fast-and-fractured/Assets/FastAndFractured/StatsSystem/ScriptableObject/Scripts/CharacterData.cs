@@ -42,11 +42,6 @@ namespace FastAndFractured
         public float FrontWheelsStrenghtFactor;
         public float RearWheelsStrenghtFactor;
 
-        // enum STEERING_MODE
-        // enum BRAKE
-
-
-
         [Header("Physics")]
         public float Weight;
         public float Traction;
