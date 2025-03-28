@@ -38,6 +38,12 @@ namespace FastAndFractured
         {
             if(other.TryGetComponent(out PhysicsBehaviour otherComponentPhysicsBehaviours))
             {
+                if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
+                {
+                    otherComponentPhysicsBehaviours.StatsController.IsInvulnerable=false;
+                    return;
+                }
+                
                 otherComponentPhysicsBehaviours.CancelDash();
                 float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
                 float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;

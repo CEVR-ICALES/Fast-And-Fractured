@@ -69,14 +69,6 @@ namespace FastAndFractured
         public bool IsGrounded()
         {
             wheelCollider.GetGroundHit(out WheelHit hit);
-            if (hit.collider != null)
-            {
-                Debug.Log("Ground : " + wheelCollider.isGrounded + " Name : " + hit.collider.gameObject.name);
-            }
-            else
-            {
-                Debug.Log("Ground : " + wheelCollider.isGrounded);
-            }
            return wheelCollider.isGrounded;
         }
     }

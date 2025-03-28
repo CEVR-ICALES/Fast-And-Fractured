@@ -90,8 +90,14 @@ namespace FastAndFractured
 
                     if(!otherComponentPhysicsBehaviours.HasBeenPushed)
                     {
-                        otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                        otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
+                        if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
+                        {
+                            otherComponentPhysicsBehaviours.StatsController.IsInvulnerable=false;
+                        }
+                        else{
+                            otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                            otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
+                        }
                     }
                 }
                 CheckWallCollision(collision);
