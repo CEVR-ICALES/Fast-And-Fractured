@@ -81,9 +81,10 @@ namespace FastAndFractured
             foreach (var character in characters)
             {
                 character.CustomStart();
-                if (character.CompareTag("Player"))
+                Controller controller = character.GetComponentInParent<Controller>();
+                if (controller && controller.CompareTag("Player"))
                 {
-                    ai.Player = character.gameObject;
+                    ai.Player = character.transform.gameObject;
                 }
             }
             foreach (var killCharacterHandle in killCharacterHandles)
