@@ -48,36 +48,35 @@ namespace FastAndFractured
 
         }
 
-        public WheelGroundInfo GetGroundInfo() // returns angle and contact normal
+        public bool IsGroundedWithAngle(out float slopeAngle, out Vector3 groundNormal) // returns angle and contact normal, this may be very expensive so maybe we can implement a struct to send the info, WheelGroundInfo that has a public bool, slopeAngle and gorundNormal
         {
-            WheelGroundInfo info = new WheelGroundInfo
+            slopeAngle = 0f;
+            groundNormal = Vector3.up;
+            if(wheelCollider.GetGroundHit(out WheelHit hit))
             {
-                isGrounded = wheelCollider.GetGroundHit(out WheelHit hit),
-                slopeAngle = 0f,
-                groundNormal = Vector3.up
-            };
+                slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                groundNormal = hit.normal;
+                return true;
+            } 
 
-            if (info.isGrounded)
-            {
-                info.slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-                info.groundNormal = hit.normal;
-            }
-
-            return info;
+            return false;
         }
 
-        public bool IsGrounded()
+        //currently not being used
+        public void ApplySteeringResistance(Rigidbody carRb)//each wheel inividually applies a little bit of force on the oposite direction of its movement
         {
-            wheelCollider.GetGroundHit(out WheelHit hit);
-           return wheelCollider.isGrounded;
+            Vector3 steeringDirection = transform.right;//directionm of the steering force
+            Vector3 tireWorldVelocity = carRb.GetPointVelocity(wheelCollider.transform.position);// wheel velocity
+
+            float steeringVelocity = Vector3.Dot(steeringDirection, tireWorldVelocity);// velocity in the steering direction
+            float desiredVelocityChange = -steeringVelocity * _steeringResistance;// calculate resistance
+            float desiredAcceleration = desiredVelocityChange / Time.fixedDeltaTime;//acceleration needed to apply
+
+            Vector3 resistanceForce = steeringDirection * (wheelCollider.mass * desiredAcceleration); // f = m * a + direction
+            carRb.AddForceAtPosition(resistanceForce, wheelCollider.transform.position);
         }
     }
-}
 
-public struct WheelGroundInfo
-{
-    public bool isGrounded;
-    public float slopeAngle;
-    public Vector3 groundNormal;    
+
 }
 

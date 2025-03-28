@@ -684,7 +684,7 @@ Transform:
   - {fileID: 7715863799208944345}
   - {fileID: 7784836884610744019}
   - {fileID: 3170183670790475399}
-  - {fileID: 5312887738676669610}
+  - {fileID: 6518040408593913301}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &9065697934312642404
@@ -809,6 +809,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb236279b7728c4bb52acc08669e3d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _baseDownardForce: 300
+  _turninDownwardForceMultiplier: 2.5
+  _speedDownwardForceMultiplier: 0.6
   statsController: {fileID: 6241371975123796762}
 --- !u!114 &6073503923705467187
 MonoBehaviour:
@@ -834,10 +837,10 @@ MonoBehaviour:
   usesCustomBraking: 1
   usingPhysicsDash: 1
   dashForce: 400
-  slopeAngleThreshold: 25
-  uphillForwardThreshold: 0.3
-  downhillForwardThreshold: -0.3
-  slopeSpeedThreshold: 3
+  slopeAngleThreshold: 23
+  uphillForwardThreshold: 0.1
+  downhillForwardThreshold: -0.1
+  slopeSpeedThreshold: 0
   isAi: 0
   statsController: {fileID: 6241371975123796762}
 --- !u!114 &333432659559934318
@@ -891,8 +894,6 @@ MonoBehaviour:
   carWeightImportance: 0.2
   applyForceYOffset: 0.2
   PushApplyPoint: {fileID: 7784836884610744019}
-  wallCollisionAngleThreshold: 65
-  wallBounceForce: 30000
   statsController: {fileID: 6241371975123796762}
 --- !u!114 &2458429989511805493
 MonoBehaviour:
@@ -1448,7 +1449,7 @@ MonoBehaviour:
   wheelMesh: {fileID: 3995131416880101337}
   _isTractionWheel: 1
   _steeringResistance: 0.3
---- !u!1001 &5634445423765916481
+--- !u!1001 &6772853409941598782
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1521,8 +1522,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 13aa2a0ed7866c44a9db2fc33d3f6596, type: 3}
---- !u!4 &5312887738676669610 stripped
+--- !u!4 &6518040408593913301 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 13aa2a0ed7866c44a9db2fc33d3f6596, type: 3}
-  m_PrefabInstance: {fileID: 5634445423765916481}
+  m_PrefabInstance: {fileID: 6772853409941598782}
   m_PrefabAsset: {fileID: 0}

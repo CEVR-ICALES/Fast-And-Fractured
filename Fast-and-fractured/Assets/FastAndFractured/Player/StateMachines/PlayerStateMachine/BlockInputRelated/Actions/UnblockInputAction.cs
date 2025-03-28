@@ -1,6 +1,5 @@
 using FastAndFractured;
 using UnityEngine;
-using Enums;
 
 namespace StateMachine
 {

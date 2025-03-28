@@ -1,9 +1,19 @@
-using Enums;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 
 namespace FastAndFractured
 {
+    public enum STATS
+    {
+        MAX_SPEED,
+        ACCELERATION,
+        ENDURANCE,
+        NORMAL_DAMAGE,
+        PUSH_DAMAGE,
+        COOLDOWN_SPEED
+    }
     public class StatsController : MonoBehaviour
     {
         [SerializeField]
@@ -143,7 +153,7 @@ namespace FastAndFractured
             {
                 if (!charDataSO.Dead)
                 {
-                    if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
+                    if (ChoseCharToMod(STATS.ENDURANCE, -substract, isProduct))
                     {
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
@@ -163,7 +173,7 @@ namespace FastAndFractured
         {
             if (sum > 0)
             {
-                if (!ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                if (!ChoseCharToMod(STATS.ENDURANCE, sum, isProduct))
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
@@ -181,7 +191,7 @@ namespace FastAndFractured
 
         #region OtherStats
         #region StatsModificators
-        public void UpgradeCharStat(Stats type, float sum)
+        public void UpgradeCharStat(STATS type, float sum)
         {
             if (IsStatAndModificatorCorrect(type, sum))
             {
@@ -197,7 +207,7 @@ namespace FastAndFractured
 
         }
 
-        public void ReduceCharStat(Stats type, float subtrahend)
+        public void ReduceCharStat(STATS type, float subtrahend)
         {
             if (IsStatAndModificatorCorrect(type, subtrahend))
             {
@@ -212,7 +222,7 @@ namespace FastAndFractured
                   " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
-        public void ProductCharStats(Stats type, float multiplier)
+        public void ProductCharStats(STATS type, float multiplier)
         {
             if (IsStatAndModificatorCorrect(type, multiplier))
             {
@@ -227,28 +237,28 @@ namespace FastAndFractured
                  " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
-        private bool ChoseCharToMod(Stats stat, float mod, bool isProduct)
+        private bool ChoseCharToMod(STATS stat, float mod, bool isProduct)
         {
             switch (stat)
             {
-                case Stats.MAX_SPEED:
+                case STATS.MAX_SPEED:
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
-                case Stats.ACCELERATION:
+                case STATS.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
-                case Stats.ENDURANCE:
+                case STATS.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
                     if (gameObject.TryGetComponent<PlayerInputController>(out var playerInputController)) //Provisional Refactoring
                     {
-                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HealthBar, currentEndurance, charDataSO.MaxEndurance);
                     }
                     return true;
-                case Stats.PUSH_DAMAGE:
+                case STATS.PUSH_DAMAGE:
                     currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
                     return true;
-                case Stats.NORMAL_DAMAGE:
+                case STATS.NORMAL_DAMAGE:
                     currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
                     return true;
             }
@@ -263,21 +273,21 @@ namespace FastAndFractured
         }
         #endregion
         #region TemporalModificators
-        public void TemporalStatUp(Stats type, float sum, float time)
+        public void TemporalStatUp(STATS type, float sum, float time)
         {
             TemporalStatMod(type, sum, time, false);
         }
-        public void TemporalStatDown(Stats type, float subtrahend, float time)
+        public void TemporalStatDown(STATS type, float subtrahend, float time)
         {
             TemporalStatMod(type, -subtrahend, time, false);
         }
 
-        public void TemporalProductStat(Stats type, float multiplier, float time)
+        public void TemporalProductStat(STATS type, float multiplier, float time)
         {
             TemporalStatMod(type, multiplier, time, true);
         }
 
-        private void TemporalStatMod(Stats type, float mod, float time, bool isProduct)
+        private void TemporalStatMod(STATS type, float mod, float time, bool isProduct)
         {
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod, isProduct);
@@ -292,7 +302,7 @@ namespace FastAndFractured
         }
 
         //Coroutine is for try propuses. It will be susbtitute for a Timer. 
-        private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
+        private void RemoveStatModificationByTimer(float previousValue, float currentValue, STATS stat, bool iscurrentBigger, float time)
         {
             float mod;
             if (iscurrentBigger)
@@ -307,29 +317,29 @@ namespace FastAndFractured
         }
         #endregion  
 
-        private float GetCurrentStat(Stats type)
+        private float GetCurrentStat(STATS type)
         {
             switch (type)
             {
-                case Stats.MAX_SPEED:
+                case STATS.MAX_SPEED:
                     return currentMaxSpeed;
-                case Stats.ACCELERATION:
+                case STATS.ACCELERATION:
                     return currentAcceleration;
-                case Stats.ENDURANCE:
+                case STATS.ENDURANCE:
                     return currentEndurance;
-                case Stats.NORMAL_DAMAGE:
+                case STATS.NORMAL_DAMAGE:
                     return currentNormalShootDMG;
-                case Stats.PUSH_DAMAGE:
+                case STATS.PUSH_DAMAGE:
                     return currentPushShootDMG;
-                case Stats.COOLDOWN_SPEED:
+                case STATS.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
             }
             return _errorGetStatFloat;
         }
 
-        private bool IsStatAndModificatorCorrect(Stats type, float mod)
+        private bool IsStatAndModificatorCorrect(STATS type, float mod)
         {
-            return mod > 0 && type != Stats.ENDURANCE;
+            return mod > 0 && type != STATS.ENDURANCE;
         }
         #endregion
     }

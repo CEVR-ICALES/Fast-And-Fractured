@@ -1,4 +1,5 @@
-using Enums;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
@@ -7,9 +8,16 @@ using Utilities;
 
 namespace FastAndFractured
 {
+    public enum InputBlockTypes // this enum need to be added to the enum library
+    {
+        ALL_MECHANICS,
+        MOVEMENT_MECHANICS,
+        SHOOTING_MECHANICS
+    }
+
     public class PlayerInputController : AbstractSingleton<PlayerInputController>
     {
-        public delegate void InputDeviceChanged(InputDeviceType deviceType);
+        public delegate void InputDeviceChanged(INPUT_DEVICE_TYPE deviceType);
         public static event InputDeviceChanged OnInputDeviceChanged;
 
         PlayerInputAction inputActions;
@@ -70,7 +78,7 @@ namespace FastAndFractured
         public bool IsAbilityFinished => _isAbilityFinished;
         private bool _isAbilityFinished;
 
-        private InputDeviceType _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
+        private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
 
         protected override void Awake()
         {
@@ -135,7 +143,7 @@ namespace FastAndFractured
         {
             if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
             {
-                _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
+                _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
             }
@@ -144,17 +152,27 @@ namespace FastAndFractured
             {
                 if (Gamepad.current is DualShockGamepad)
                 {
-                    _currentInputDevice = InputDeviceType.PS_CONTROLLER;
+                    _currentInputDevice = INPUT_DEVICE_TYPE.PSController;
                     OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 }
                 else if (Gamepad.current is XInputController)
                 {
-                    _currentInputDevice = InputDeviceType.XBOX_CONTROLLER;
+                    _currentInputDevice = INPUT_DEVICE_TYPE.XboxController;
                     OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 }
 
                 _isUsingController = true;
             }
+        }
+
+        public void DisableInput()
+        {
+            inputActions.Disable();
+        }
+
+        public void EnableInput()
+        {
+            inputActions.Enable();
         }
 
         public void BlockInput(InputBlockTypes inputBlockType)
@@ -294,7 +312,7 @@ namespace FastAndFractured
             }
         }
 
-        public InputDeviceType GetCurrentInputDevice() => _currentInputDevice;
+        public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;
     }
 
 }

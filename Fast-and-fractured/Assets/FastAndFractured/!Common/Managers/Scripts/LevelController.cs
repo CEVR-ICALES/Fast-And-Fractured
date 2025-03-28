@@ -4,7 +4,6 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
@@ -24,12 +23,11 @@ namespace FastAndFractured
             {
                 ai = FindObjectOfType<EnemyAIBrain>();
             }
-            StartLevel();
         }
 
         void Start()
         {
-
+            StartLevel();
         }
         // this will be moved to gameManaager once its created
 
@@ -43,13 +41,13 @@ namespace FastAndFractured
             PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        public void HandleInputChange(InputDeviceType inputType)
+        public void HandleInputChange(INPUT_DEVICE_TYPE inputType)
         {
-            if (inputType == InputDeviceType.KEYBOARD_MOUSE)
+            if (inputType == INPUT_DEVICE_TYPE.KeyboardMouse)
             {
                 usingController = false;
             }
-            else if (inputType == InputDeviceType.XBOX_CONTROLLER || inputType == InputDeviceType.PS_CONTROLLER)
+            else if (inputType == INPUT_DEVICE_TYPE.XboxController || inputType == INPUT_DEVICE_TYPE.PSController)
             {
                 usingController = true;
             }
@@ -81,10 +79,9 @@ namespace FastAndFractured
             foreach (var character in characters)
             {
                 character.CustomStart();
-                Controller controller = character.GetComponentInParent<Controller>();
-                if (controller && controller.CompareTag("Player"))
+                if (character.CompareTag("Player"))
                 {
-                    ai.Player = character.transform.gameObject;
+                    ai.Player = character.gameObject;
                 }
             }
             foreach (var killCharacterHandle in killCharacterHandles)
@@ -101,7 +98,7 @@ namespace FastAndFractured
         {
             string currentSceneName = SceneManager.GetActiveScene().name;
             float delay = characterstats.Dead();
-            TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
+            TimerSystem.Instance.CreateTimer(delay,TimerDirection.Decrease, onTimerDecreaseComplete:  () => {
                 if (IsThePlayer(characterstats.gameObject))
                 {
                     SceneManager.LoadScene(currentSceneName);

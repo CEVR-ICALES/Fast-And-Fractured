@@ -1,10 +1,20 @@
-using Enums;
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace FastAndFractured
 {
+    public enum ScreensType
+    {
+        MAIN_MENU,
+        SETTINGS,
+        CREDITS,
+        GAMEMODE_SELECTION,
+        CHARACTER_SELECTION,
+        LOADING,
+        SPLASH_SCREEN
+    }
     public class MainMenuManager : MonoBehaviour
     {
         #region Singleton

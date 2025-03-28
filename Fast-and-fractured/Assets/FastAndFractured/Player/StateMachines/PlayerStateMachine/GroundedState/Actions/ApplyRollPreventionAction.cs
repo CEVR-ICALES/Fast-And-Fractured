@@ -9,17 +9,9 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            if (!controller.GetBehaviour<CarMovementController>().IsInWall())
+            if(!controller.GetBehaviour<PhysicsBehaviour>().HasBeenPushed)
             {
-                if (!controller.GetBehaviour<PhysicsBehaviour>().HasBeenPushed)
-                {
-                    controller.GetBehaviour<RollPrevention>().ToggleRollPrevention(true, controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
-                }
-            }
-            else
-            {
-                Debug.Log("In Wall");
-                controller.GetBehaviour<RollPrevention>().ToggleRollPrevention(false, controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
+                controller.GetBehaviour<RollPrevention>().ApplyRollPrevention(controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
             }
         }
     }

@@ -1,17 +1,14 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
     public class NormalShootHandle : ShootingHandle
     {
         #region VARIABLES
-        public UnityEvent<float, float> onOverheatUpdate;
-        public bool isInState;
+
         public float CountOverHeat
         {
             get => _countOverHeat;
@@ -85,7 +82,7 @@ namespace FastAndFractured
 
                 //Normal Cadence TImer 
                 TimerSystem.Instance.CreateTimer(characterStatsController.NormalShootCadenceTime,
-                    TimerDirection.INCREASE,
+                    TimerDirection.Increase,
                     () => { canShoot = true; }
                 );
             }
@@ -97,6 +94,7 @@ namespace FastAndFractured
 
         private void OnOverheatComplete()
         {
+
             _isOverHeat = true;
             DecreaseOverheatTime();
         }
@@ -112,20 +110,20 @@ namespace FastAndFractured
         {
             previousCountOverHeat = _countOverHeat;
             _countOverHeat = currentTimerValue;
-            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         private void OnOverHeatUpdateDecrease(float currentTimerValue)
         {
             _countOverHeat = currentTimerValue;
-            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         #endregion
 
+        public bool isInState;
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
         {
+
             if (_overheatTimer != null)
             {
                 if (_overheatTimer.GetData().IsRunning && !_isOverHeat && isInState)
@@ -135,12 +133,12 @@ namespace FastAndFractured
                 if (string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
                 {
                     _delayUntilStartDecreaseTimerId = TimerSystem.Instance.CreateTimer(DELAY_BEFORE_COOLING_SHOOT,
-                        TimerDirection.DECREASE, onTimerDecreaseComplete: () =>
+                        TimerDirection.Decrease, onTimerDecreaseComplete: () =>
                         {
                             if (_overheatTimer != null)
                             {
                                 _overheatTimer = TimerSystem.Instance.CreateTimer(_overheatTimer);
-                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.DECREASE, isRunning: true);
+                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Decrease, isRunning: true);
 
                                 _overheatTimer.ResumeTimer(); //And Call All The Resumes 
 
@@ -171,7 +169,7 @@ namespace FastAndFractured
             if (_overheatTimer == null)
             {
                 _overheatTimer = TimerSystem.Instance.CreateTimer(characterStatsController.NormalOverHeat,
-                    TimerDirection.INCREASE,
+                    TimerDirection.Increase,
                     onTimerIncreaseComplete: OnOverheatComplete,
                     onTimerDecreaseComplete: OnCoolingComplete,
                     onTimerIncreaseUpdate: OnOverHeatUpdateIncrease,
@@ -182,7 +180,7 @@ namespace FastAndFractured
             {
                 if (_overheatTimer.GetData().IsRunning)
                 {
-                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.INCREASE, isRunning: true);
+                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase, isRunning: true);
 
                 }
                 else
@@ -193,6 +191,7 @@ namespace FastAndFractured
             }
 
             isInState = true;
+            return;
         }
     }
 }

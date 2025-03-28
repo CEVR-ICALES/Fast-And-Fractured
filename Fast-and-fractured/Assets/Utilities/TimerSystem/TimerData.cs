@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Enums;
 
 namespace Utilities
 {
@@ -43,7 +42,7 @@ namespace Utilities
             OnTimerUpdate =
                 onTimerUpdate;  
 
-            CurrentTime = (direction == TimerDirection.INCREASE) ? 0 : duration;
+            CurrentTime = (direction == TimerDirection.Increase) ? 0 : duration;
             IsRunning = false;
             IsPaused = false;
         }
@@ -59,7 +58,7 @@ namespace Utilities
             get
             {
                 if (Duration <= 0) return 1f;
-                return (Direction == TimerDirection.INCREASE)
+                return (Direction == TimerDirection.Increase)
                     ? Mathf.Clamp01(CurrentTime / Duration)
                     : Mathf.Clamp01(1 - (CurrentTime / Duration));
             }
@@ -68,7 +67,7 @@ namespace Utilities
 
         public TimerDirection InvertDirection()  
         {
-            Direction = (Direction == TimerDirection.INCREASE) ? TimerDirection.DECREASE : TimerDirection.INCREASE;
+            Direction = (Direction == TimerDirection.Increase) ? TimerDirection.Decrease : TimerDirection.Increase;
             return Direction;
         }
     }

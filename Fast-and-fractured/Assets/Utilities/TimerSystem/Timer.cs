@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Enums;
 
 namespace Utilities
 {
@@ -23,10 +22,10 @@ namespace Utilities
         {
             if (!_data.IsRunning || _data.IsPaused) return;
 
-            _data.CurrentTime += (_data.Direction == TimerDirection.INCREASE) ? deltaTime : -deltaTime;
+            _data.CurrentTime += (_data.Direction == TimerDirection.Increase) ? deltaTime : -deltaTime;
 
 
-            if (_data.Direction == TimerDirection.INCREASE)
+            if (_data.Direction == TimerDirection.Increase)
             {
                 _data.OnTimerIncreaseUpdate
                     ?.Invoke(_data.CurrentTime);  
@@ -40,7 +39,7 @@ namespace Utilities
                 }
             }
 
-            if (_data.Direction == TimerDirection.DECREASE)
+            if (_data.Direction == TimerDirection.Decrease)
             {
                 _data.OnTimerDecreaseUpdate?.Invoke(_data.CurrentTime);  
 

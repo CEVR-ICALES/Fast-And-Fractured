@@ -1,5 +1,7 @@
-using Enums;
+using FastAndFractured;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -36,11 +38,16 @@ namespace FastAndFractured
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] LayerMask ignoreLayerMask;
 
+        public enum PathMode
+        {
+            SIMPLE,
+            ADVANCED
+        }
+
         PathMode pathMode = PathMode.ADVANCED;
 
         const float MAX_ANGLE_DIRECTION = 90f;
         const float FRONT_ANGLE = 20f;
-        const float MAX_INPUT_VALUE = 1f;
         const int START_CORNER_INDEX = 1;
         Vector3 startPosition;
         Quaternion startRotation;
@@ -81,13 +88,13 @@ namespace FastAndFractured
             physicsBehaviour.Rb = GetComponent<Rigidbody>();
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
-            startPosition = carMovementController.transform.position;
-            startRotation = carMovementController.transform.rotation;
+            startPosition = this.transform.position;
+            startRotation = this.transform.rotation;
         }
         public void ReturnToStartPosition()
         {
-            carMovementController.transform.position = startPosition;
-            carMovementController.transform.rotation = startRotation;
+            this.transform.position = startPosition;
+            this.transform.rotation = startRotation;
             StopMovement();
         }
         public float GetHealth()
@@ -100,21 +107,18 @@ namespace FastAndFractured
         #region Common 
         public void GoToPosition()
         {
-            float angle = GetAngleDirection(Vector3.up);
 
-            //Left/Right
             //If it's negative, go left
             //If it's positive, go right
-            float inputX = -Mathf.Min(angle / MAX_ANGLE_DIRECTION, MAX_INPUT_VALUE);
+            float angle = GetAngleDirection();
 
+            //Left/Right
+            float inputX = Mathf.Min(angle / MAX_ANGLE_DIRECTION, 1f);
             //Forward/Backward
-            //If angle between 90 and -90 go forward
-            //If angle more than 90 or less than -90 go backwards
-            float inputY = MAX_INPUT_VALUE;
-            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION) 
-            {
-                inputY = -MAX_INPUT_VALUE;
-            }
+            float inputY = 1f;
+            //Debug.Log("DIRECTION:" + direction);
+            //Debug.Log("XXXXXXXXXX:" + inputX);
+            //Debug.Log("YYYYYYYYYY:" + inputY);
 
             Vector2 input = new Vector2(inputX, inputY);
 
@@ -187,7 +191,7 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            Collider[] colliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
+            Collider[] colliders = Physics.OverlapSphere(transform.position, sweepRadius, sweepLayerMask);
 
             return colliders.Length > 0;
         }
@@ -222,12 +226,12 @@ namespace FastAndFractured
 
         public bool IsInValidRange(float distance)
         {
-            return distance > Vector3.Distance(carMovementController.transform.position, _positionToDrive);
+            return distance > Vector3.Distance(transform.position, _positionToDrive);
         }
 
         public bool IsInFront()
         {
-            float angle = GetAngleDirection(Vector3.up);
+            float angle = GetAngleDirection();
             return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
         }
         #endregion
@@ -242,10 +246,10 @@ namespace FastAndFractured
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_targetToShoot.transform.position - carMovementController.transform.position).normalized;
+            return (_targetToShoot.transform.position - transform.position).normalized;
         }
 
-        private float GetAngleDirection(Vector3 axis)
+        private float GetAngleDirection()
         {
             Vector3 direction;
             switch (pathMode)
@@ -261,7 +265,7 @@ namespace FastAndFractured
                     }
                     else
                     {
-                        Debug.LogWarning("No path to follow" + _currentPath.ToString());
+                        Debug.LogError("No path to follow" + _currentPath.ToString());
                         if (Physics.Raycast(_positionToDrive, Vector3.down, out var hit, float.MaxValue, ignoreLayerMask))
                         {
                             Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
@@ -276,13 +280,12 @@ namespace FastAndFractured
 
                     break;
             }
-            direction = (_positionToDrive - carMovementController.transform.position);
+            direction = (GetActivePathPoint() - transform.position).normalized;
 
             //If it's negative, go left
             //If it's positive, go right
-            return Vector3.SignedAngle(direction, carMovementController.transform.forward, axis);
+            return Vector3.SignedAngle(transform.forward, direction, Vector3.up);
         }
-
 
         bool TryToCalculatePath()
         {
@@ -303,7 +306,7 @@ namespace FastAndFractured
             }
             else
             {
-                //Debug.LogError("No path to follow" + _currentPath.ToString());
+                Debug.LogError("No path to follow" + _currentPath.ToString());
                 return false;
             }
             ;
@@ -325,7 +328,7 @@ namespace FastAndFractured
 
         private void CheckIfGoToNextPathPoint()
         {
-            if (Vector3.Distance(carMovementController.transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
                 (_pathIndex + 1) < _currentPath.corners.Length)
             {
                 _pathIndex++;
