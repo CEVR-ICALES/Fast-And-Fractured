@@ -253,7 +253,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   m_PrefabInstance: {fileID: 1401987989}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1879010102}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94a128f3883087b42aeb9a9b6ad30382, type: 3}
@@ -1687,6 +1687,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Josefino_Character
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 13aa2a0ed7866c44a9db2fc33d3f6596, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1810,7 +1814,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8677433255735527299, guid: aabadb96d93d2bf4cbfd03ac1a23fd04, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 622.19
+      value: 617.47
       objectReference: {fileID: 0}
     - target: {fileID: 8677433255735527299, guid: aabadb96d93d2bf4cbfd03ac1a23fd04, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3130,14 +3134,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 269260444545454214, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 269260444545454214, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: bulletSound.Guid.Data1
+      value: -1426590782
+      objectReference: {fileID: 0}
+    - target: {fileID: 269260444545454214, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: bulletSound.Guid.Data2
+      value: 1159805714
+      objectReference: {fileID: 0}
+    - target: {fileID: 269260444545454214, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: bulletSound.Guid.Data3
+      value: 2001885093
+      objectReference: {fileID: 0}
+    - target: {fileID: 269260444545454214, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: bulletSound.Guid.Data4
+      value: -2108599820
+      objectReference: {fileID: 0}
     - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: availableBehaviours.Array.size
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: availableBehaviours.Array.data[5]
       value: 
       objectReference: {fileID: 1962619357}
+    - target: {fileID: 1197546914788027864, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: availableBehaviours.Array.data[6]
+      value: 
+      objectReference: {fileID: 1879010106}
     - target: {fileID: 2102361280212250019, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: OverrideMaxDistance
       value: 50
@@ -3146,6 +3174,14 @@ PrefabInstance:
       propertyPath: cameraToHold
       value: 
       objectReference: {fileID: 1937828692}
+    - target: {fileID: 2458429989511805493, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: availableBehaviours.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2458429989511805493, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: availableBehaviours.Array.data[5]
+      value: 
+      objectReference: {fileID: 1962619357}
     - target: {fileID: 3917506753778775166, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
@@ -3162,13 +3198,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerPrototype
       objectReference: {fileID: 0}
+    - target: {fileID: 4823631810798401040, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_LocalPosition.x
       value: 507.32
       objectReference: {fileID: 0}
     - target: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 614.82
+      value: 610.1
       objectReference: {fileID: 0}
     - target: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3214,6 +3254,14 @@ PrefabInstance:
       propertyPath: speedOverlay
       value: 
       objectReference: {fileID: 654847390}
+    - target: {fileID: 6241371975123796762, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: currentMaxSpeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6241371975123796762, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: currentMaxSpeedDashing
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7839016628521176550, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -3236,7 +3284,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1086786289}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5393281910218630357, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1879010106}
   m_SourcePrefab: {fileID: 100100000, guid: 894d66a72a5753242b8adf852622d607, type: 3}
 --- !u!4 &1401987991 stripped
 Transform:
@@ -3742,6 +3793,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65fc8bfb1d92dad46ac749e745cfe6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1879010102 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5393281910218630357, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  m_PrefabInstance: {fileID: 1401987989}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1879010106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1879010102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 009f538feff83894298f43fccaec5563, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityData: {fileID: 11400000, guid: e1e1c1943c0d5054996ba3c2f9cf7d46, type: 2}
+  onAbilityActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  cooldownReductionMultiplier: 2
+  statBoostMultiplier: 2
+  uniqueAbilityDuration: 2
+  ssjUltiReference:
+    Guid:
+      Data1: 526829551
+      Data2: 1239381257
+      Data3: -1023862356
+      Data4: -154867332
+    Path: event:/SuperSaiyanMariaAntonia
 --- !u!1 &1937828688
 GameObject:
   m_ObjectHideFlags: 0
@@ -3984,8 +4069,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1937828688}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.016125588, y: 0.9806064, z: -0.17246653, w: -0.09168651}
-  m_LocalPosition: {x: 509.4926, y: 622.19, z: 99.216866}
+  m_LocalRotation: {x: -0.016125351, y: 0.98060656, z: -0.17246664, w: -0.091685124}
+  m_LocalPosition: {x: 509.4926, y: 617.47, z: 99.216866}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

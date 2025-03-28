@@ -15,7 +15,7 @@ namespace FastAndFractured
         private bool _isAI;
         private GameObject _uniqueUIPrefabInstance;
         private GameObject _particleEffectPrefabInstance;
-         public UnityEvent onAbilityActivated;
+        public UnityEvent onAbilityActivated;
         public UnityEvent onAbilityEnded;
         private bool _isOnCooldown = false; 
         private float _currentCooldownTime = 0f;  
