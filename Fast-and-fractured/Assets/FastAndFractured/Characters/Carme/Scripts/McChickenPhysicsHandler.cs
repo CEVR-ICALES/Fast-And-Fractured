@@ -7,6 +7,8 @@ namespace FastAndFractured
     [RequireComponent(typeof(Collider))]
     public class McChickenPhysicsHandler : MonoBehaviour
     {
+        public bool IsGrounded => _isGrounded;
+
         [Header("Collision Settings")]
         [SerializeField] private LayerMask groundLayerMask;
         [SerializeField] private LayerMask wallLayerMask;
@@ -14,6 +16,7 @@ namespace FastAndFractured
         [SerializeField] private float bounceCooldown = 0.5f;
         [SerializeField] private float groundCheckOffset = 0.1f;
         [SerializeField] private float bounceDuration;
+        [SerializeField] private float climbingDotThreshold = 0.7f;
         private const float GROUNDED_GRACE_TIME = 0.2f;
 
         private Rigidbody _rb;
@@ -30,6 +33,7 @@ namespace FastAndFractured
             _rb = rb;
             _movementHandler = movement;
         }
+
 
         private void OnCollisionEnter(Collision collision)
         {
@@ -53,7 +57,7 @@ namespace FastAndFractured
 
         private void HandleWallCollision(Collision collision)
         {
-            if (Time.time < _lastBounceTime + bounceCooldown) return;
+            if (Time.time < _lastBounceTime + bounceCooldown || Vector3.Dot(_movementHandler.MoveDirection, -collision.contacts[0].normal) < climbingDotThreshold) return;
 
             _lastBounceTime = Time.time;
             _wallNormal = collision.contacts[0].normal;
@@ -85,8 +89,11 @@ namespace FastAndFractured
             if (_movementHandler.IsClimbing) return;
 
             if (!IsInLayerMask(collision.gameObject.layer, groundLayerMask)) return;
+            Debug.Log("True");
             _groundNormal = collision.contacts[0].normal;
+            _isGrounded = true;
             _lastGroundedTime = Time.time;
+              
         }
 
         public void UpdateGroundState()

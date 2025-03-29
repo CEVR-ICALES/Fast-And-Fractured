@@ -22,9 +22,13 @@ namespace FastAndFractured
         [SerializeField] private float jumpDuration = 3f;
         [SerializeField] private float jumpHeight = 3f;
 
+        [Header("Gravity")]
+        [SerializeField] private float customGravity;
+
 
         private Vector3 _moveDirection;
         private bool _isClimbing;
+        private bool _applyCustomGravity = false;
         private bool _isInCeiling = false;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
@@ -46,16 +50,29 @@ namespace FastAndFractured
 
             if (_isClimbing)
             {
-                Debug.Log("Climbing rn");
+
             }
             else
             {
-                Debug.Log("Not Climbing Rn");
                 MoveForward();
+                ApplyCustomGravity();
                 _physicsHandler.LimitRbSpeed(maxSpeed);
                 _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
+
+        private void ApplyCustomGravity()
+        {
+            if(!_physicsHandler.IsGrounded)
+            {
+                Debug.Log("GRAVITY");
+                _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
+            } else
+            {
+                //_rb.velocity.y = 0f
+            }
+        }
+
 
         private void MoveForward()
         {
