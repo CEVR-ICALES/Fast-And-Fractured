@@ -1,5 +1,4 @@
 using Enums;
-using Unity.VisualScripting;
 using UnityEngine;
 using Utilities;
 
@@ -26,17 +25,17 @@ namespace FastAndFractured
         private RaycastHit _groundHit;
         private ITimer _durationTimer;
 
-        private ShootingHandle _shootingHandle;
+        [SerializeField] private ShootingHandle shootingHandle;
 
         private void Awake()
         {
-            //_shootingHandle = 
+
         }
 
         public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
             base.ActivateAbility();
-            _aimDirection = GetComponent<ShootingHandle>().CurrentShootDirection;
+            _aimDirection = shootingHandle.CurrentShootDirection;
             // remove vertical component while maintaining direction relative to car
             _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
             CalculateLandingPoint();
