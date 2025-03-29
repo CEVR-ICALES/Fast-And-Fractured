@@ -9,133 +9,79 @@ namespace FastAndFractured
         public Vector3 MoveDirection => _moveDirection;
         public bool IsClimbing => _isClimbing;
 
+        public bool IsInCeling => _isInCeiling;
+
         [Header("Movement Settings")]
         [SerializeField] private float maxSpeed = 30f;
-        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float moveForce = 5f;
         [SerializeField] private float rotationSpeed = 10f;
-        [SerializeField] private float speedForce = 10f;
 
         [Header("Climbing")]
-        [SerializeField] private float groundCheckOffset = 0.1f;
+        [SerializeField] private float climbLerpSpeed = 2f;
         [SerializeField] private float wallClimbSpeed = 3f;
-        [SerializeField] private float climbStartDelay = 0.3f;
-        [SerializeField] private float footPlacementSpeed = 5f;
+        [SerializeField] private float jumpDuration = 3f;
+        [SerializeField] private float jumpHeight = 3f;
 
-        // movement tracking
+
         private Vector3 _moveDirection;
-        private Vector3 _groundNormal;
-        private Vector3 _currentWallNormal;
-        private Vector3 _wallContactPoint;
-        private Quaternion _preClimbRotation;
-
-        // state variables
-        private bool _hasLanded = false;
-        private bool _isGrounded = false;
-        private bool _isClimbing = false;
-        private bool _isPreparingToClimb = false;
-        private bool _isOnCeiling = false;
-        private bool _canStartMovement = false;
-
+        private bool _isClimbing;
+        private bool _isInCeiling = false;
         private Rigidbody _rb;
-        private McChicken _core;
         private McChickenPhysicsHandler _physicsHandler;
-        private ITimer _climbStartTimer;
 
-        public void Initialize(Rigidbody rb, McChicken core, McChickenPhysicsHandler _physics, Vector3 moveDirection)
+        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
         {
             _rb = rb;
-            _core = core;
-            _physicsHandler = _physics;
-            _moveDirection = moveDirection;
+            _physicsHandler = physics;
         }
 
-        public void CanStartMovement()
+        public void StartMoving(Vector3 direction)
         {
-            _canStartMovement = true;
+            _moveDirection = direction;
         }
 
         private void FixedUpdate()
         {
-            if (!_canStartMovement) return;
-
             _physicsHandler.UpdateGroundState();
 
-            if (_isPreparingToClimb)
-            {
-                HandleClimbPreparation();
-            }
-            else
-            {
-                HandleMovement();
-                _physicsHandler.ApplyRotation(rotationSpeed);
-                _physicsHandler.LimitRbSpeed(maxSpeed);
-            }
-        }
-
-
-
-        private void HandleMovement()
-        {
             if (_isClimbing)
             {
-                Vector3 climbDir = Vector3.ProjectOnPlane(Vector3.up, _currentWallNormal).normalized;
-                _rb.velocity = climbDir * wallClimbSpeed + _moveDirection * 0.5f;
-            }
-            else if (!_isGrounded)
-            {
-                _rb.AddForce(Physics.gravity * 2f + _moveDirection * 2f, ForceMode.Acceleration);
+                Debug.Log("Climbing rn");
             }
             else
             {
-                _rb.velocity = _moveDirection * moveSpeed;
+                Debug.Log("Not Climbing Rn");
+                MoveForward();
+                _physicsHandler.LimitRbSpeed(maxSpeed);
+                _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
 
-
-        public void PrepareClimbing() // so that it doesnt directly jump to the weall but theres a small delay for better visuals
+        private void MoveForward()
         {
-            _isPreparingToClimb = true;
-            _preClimbRotation = transform.rotation;
-
-            _climbStartTimer = TimerSystem.Instance.CreateTimer(
-                climbStartDelay,
-                onTimerDecreaseComplete: StartClimbing
-            );
+           Vector3 finalMoveForce = _moveDirection * moveForce;
+            _rb.AddForce(finalMoveForce, ForceMode.Acceleration);
         }
 
-        public void StartClimbing() // needs to be upgraded to not just tp it to the position nbut lerp it and properly rotate the obj couse now it isnt doing it
+        public void PrepareClimbing(Vector3 climbPoint)
         {
-            _isPreparingToClimb = false;
             _isClimbing = true;
-            _rb.useGravity = false;
-
-            Vector3 footPosition = _wallContactPoint + _currentWallNormal * groundCheckOffset;
-            transform.position = footPosition;
-            transform.rotation = Quaternion.LookRotation(-_currentWallNormal, Vector3.up);
-        }
-
-        private void HandleClimbPreparation() // not workin properly
-        {
-            Vector3 targetFootPosition = _wallContactPoint + _currentWallNormal * groundCheckOffset;
-            transform.position = Vector3.Lerp(
-                transform.position,
-                targetFootPosition,
-                footPlacementSpeed * Time.fixedDeltaTime
-            );
-
-            Quaternion targetRot = Quaternion.LookRotation(-_currentWallNormal, Vector3.up);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRot,
-                rotationSpeed * Time.fixedDeltaTime
-            );
+            _rb.isKinematic = true;
+            _rb.useGravity = true;
+            transform.DOJump(climbPoint, jumpHeight, 1, jumpDuration)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() =>
+                {
+                    StopClimbing();
+                    _isInCeiling = true;
+                });
         }
 
         public void StopClimbing()
         {
             _isClimbing = false;
             _rb.useGravity = true;
-            transform.DORotateQuaternion(_preClimbRotation, 0.3f).SetEase(Ease.OutBack);
+            _rb.isKinematic = false;
         }
     }
 }

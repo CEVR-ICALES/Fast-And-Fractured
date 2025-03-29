@@ -101,7 +101,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2401583521772831399}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 100
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 2.2, z: 0}
@@ -158,24 +158,6 @@ MonoBehaviour:
   maxLaunchTime: 3
   finalScaleDuration: 0.8
   finalScale: {x: 2.6, y: 2.6, z: 2.6}
-  groundLayerMask:
-    serializedVersion: 2
-    m_Bits: 1032
-  wallLayerMask:
-    serializedVersion: 2
-    m_Bits: 1024
-  groundCheckOffset: 0.2
-  maxContacts: 4
-  maxSpeed: 30
-  moveSpeed: 15
-  wallClimbSpeed: 6
-  rotationSpeed: 10
-  speedForce: 10
-  bounceForce: 60
-  bounceCooldown: 0.5
-  climbStartDelay: 0.8
-  footPlacementSpeed: 5
-  wallDetectionThreshold: 0.7
 --- !u!114 &-3549158742622855348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,6 +170,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20cc9b9c931c5e04e81ecc529ba31113, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 30
+  moveForce: 10
+  rotationSpeed: 10
+  climbLerpSpeed: 3
+  wallClimbSpeed: 10
+  jumpDuration: 3
+  jumpHeight: 3
 --- !u!114 &1597403122938751997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,5 +195,7 @@ MonoBehaviour:
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 1024
+  bounceForce: 120
+  bounceCooldown: 0.5
   groundCheckOffset: 0.1
-  maxContacts: 4
+  bounceDuration: 0.6

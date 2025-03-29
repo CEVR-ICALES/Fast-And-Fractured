@@ -18,7 +18,6 @@ namespace FastAndFractured
 
         private Collider _mainCollider;
 
-
         // state variables
         private bool _hasLanded = false;
 
@@ -44,10 +43,8 @@ namespace FastAndFractured
             _mainCollider.enabled = false;
             _rb.isKinematic = true;
 
-            _movementHandler.Initialize(_rb, this, _phyisicsHandler, _moveDirection);
-            _phyisicsHandler.Initialize(_rb, _movementHandler, this);
-            
-            
+            _movementHandler.Initialize(_rb, _phyisicsHandler);
+            _phyisicsHandler.Initialize(_rb, _movementHandler);
         }
 
         public void InitializeChicken(Vector3 targetPosition, Vector3 direction)
@@ -71,7 +68,7 @@ namespace FastAndFractured
 
             transform.DOScale(finalScale, finalScaleDuration)
                 .SetEase(Ease.OutBack)
-                .OnComplete(() => _movementHandler.CanStartMovement());
+                .OnComplete(() => _movementHandler.StartMoving(_moveDirection));
         }
 
         private void OnDestroy()
