@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
+using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
@@ -8,16 +10,9 @@ using Utilities;
 
 namespace FastAndFractured
 {
-    public enum InputBlockTypes // this enum need to be added to the enum library
-    {
-        ALL_MECHANICS,
-        MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
-    }
-
     public class PlayerInputController : AbstractSingleton<PlayerInputController>
     {
-        public delegate void InputDeviceChanged(INPUT_DEVICE_TYPE deviceType);
+        public delegate void InputDeviceChanged(InputDeviceType deviceType);
         public static event InputDeviceChanged OnInputDeviceChanged;
 
         PlayerInputAction inputActions;
@@ -27,7 +22,7 @@ namespace FastAndFractured
         private Vector2 _moveInput;
 
         public Vector2 CameraInput => _cameraInput;
-        private Vector2 _cameraInput;
+        private Vector2 _cameraInput = Vector2.zero;
 
         // Action Flags with private backing fields
         public float IsAccelerating => _isAccelerating;
@@ -57,7 +52,7 @@ namespace FastAndFractured
         public bool IsPausing => _isPausing;
         private bool _isPausing;
 
-        public bool IsResettingCamera => _isResettingCamera;
+        public bool IsResettingCamera { get { return _isResettingCamera; } set { _isResettingCamera = value; } }
         private bool _isResettingCamera;
 
         public bool IsDashing => _isDashing;
@@ -78,7 +73,7 @@ namespace FastAndFractured
         public bool IsAbilityFinished => _isAbilityFinished;
         private bool _isAbilityFinished;
 
-        private INPUT_DEVICE_TYPE _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
+        private InputDeviceType _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
 
         protected override void Awake()
         {
@@ -122,8 +117,8 @@ namespace FastAndFractured
             inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
             inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
-            inputActions.PlayerInputActions.ResetCamera.performed += ctx => _isResettingCamera = true;
-            inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
+            inputActions.PlayerInputActions.ResetCamera.started += ctx => CameraBehaviours.Instance.ResetCameraPosition();
+            // inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
 
             inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
@@ -139,11 +134,12 @@ namespace FastAndFractured
             CheckForInputDeviceChange();
         }
 
+
         private void CheckForInputDeviceChange()
         {
             if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
             {
-                _currentInputDevice = INPUT_DEVICE_TYPE.KeyboardMouse;
+                _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
             }
@@ -152,27 +148,17 @@ namespace FastAndFractured
             {
                 if (Gamepad.current is DualShockGamepad)
                 {
-                    _currentInputDevice = INPUT_DEVICE_TYPE.PSController;
+                    _currentInputDevice = InputDeviceType.PS_CONTROLLER;
                     OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 }
                 else if (Gamepad.current is XInputController)
                 {
-                    _currentInputDevice = INPUT_DEVICE_TYPE.XboxController;
+                    _currentInputDevice = InputDeviceType.XBOX_CONTROLLER;
                     OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 }
 
                 _isUsingController = true;
             }
-        }
-
-        public void DisableInput()
-        {
-            inputActions.Disable();
-        }
-
-        public void EnableInput()
-        {
-            inputActions.Enable();
         }
 
         public void BlockInput(InputBlockTypes inputBlockType)
@@ -312,7 +298,7 @@ namespace FastAndFractured
             }
         }
 
-        public INPUT_DEVICE_TYPE GetCurrentInputDevice() => _currentInputDevice;
+        public InputDeviceType GetCurrentInputDevice() => _currentInputDevice;
     }
 
 }

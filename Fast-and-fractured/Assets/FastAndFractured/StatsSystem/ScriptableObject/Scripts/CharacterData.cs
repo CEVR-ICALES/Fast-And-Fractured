@@ -15,7 +15,7 @@ namespace FastAndFractured
         [Header("Health")]
         public float MaxEndurance;
         public float MinEndurance = 0;
-        public bool Dead;
+        public bool Invulnerable;
 
 
         [Header("Movement")]

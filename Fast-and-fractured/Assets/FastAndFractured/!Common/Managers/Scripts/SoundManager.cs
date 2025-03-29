@@ -11,8 +11,8 @@ namespace Utilities
         [Range(0f, 1f)]
         public float masterVolume = 1f;
 
-        private Dictionary<string, Queue<EventInstance>> _eventPool = new Dictionary<string, Queue<EventInstance>>();
-        private Dictionary<string, EventInstance> _activeEvents = new Dictionary<string, EventInstance>();
+        private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
+        private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
 
         protected override void Awake()
         {
@@ -33,29 +33,29 @@ namespace Utilities
         /// <summary>
         /// Retrieves an EventInstance from the pool if available; otherwise, create a new one
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
+        /// <param name="eventReference">FMOD event reference</param>
         /// <returns>EventInstance to be used</returns>
-        private EventInstance GetPooledEventInstance(string eventPath)
+        private EventInstance GetPooledEventInstance(EventReference eventReference)
         {
-            if (_eventPool.TryGetValue(eventPath, out Queue<EventInstance> eventQueue) && eventQueue.Count > 0)
+            if (_eventPool.TryGetValue(eventReference, out Queue<EventInstance> eventQueue) && eventQueue.Count > 0)
                 return eventQueue.Dequeue();
 
-            return RuntimeManager.CreateInstance(eventPath);
+            return RuntimeManager.CreateInstance(eventReference);
         }
 
         /// <summary>
         /// Stops an EventInstance and returns it to the pool for future reuse
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
+        /// <param name="eventReference">FMOD event reference</param>
         /// <param name="instance">EventInstance to be returned to the pool</param>
-        private void ReturnEventInstanceToPool(string eventPath, EventInstance instance)
+        private void ReturnEventInstanceToPool(EventReference eventReference, EventInstance instance)
         {
-            if (!_eventPool.ContainsKey(eventPath))
-                _eventPool[eventPath] = new Queue<EventInstance>();
+            if (!_eventPool.ContainsKey(eventReference))
+                _eventPool[eventReference] = new Queue<EventInstance>();
 
             instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
             instance.setParameterByName("Volume", 0f);
-            _eventPool[eventPath].Enqueue(instance);
+            _eventPool[eventReference].Enqueue(instance);
         }
         #endregion
 
@@ -63,34 +63,34 @@ namespace Utilities
         /// <summary>
         /// Plays a one-shot sound at a specific world position
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
+        /// <param name="eventReference">Path of the FMOD event</param>
         /// <param name="worldPosition">The world position to play the sound at</param>
-        public void PlayOneShot(string eventPath, Vector3 worldPosition)
+        public void PlayOneShot(EventReference eventReference, Vector3 worldPosition)
         {
-            RuntimeManager.PlayOneShot(eventPath, worldPosition);
+            RuntimeManager.PlayOneShot(eventReference, worldPosition);
         }
 
         /// <summary>
         /// Plays a looping sound event and keeps track of it
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
+        /// <param name="eventReference">Path of the FMOD event</param>
         /// <param name="soundInstance">Created FMOD EventInstance reference</param>
-        public void PlaySound(string eventPath, out EventInstance soundInstance)
+        public void PlaySound(EventReference eventReference, out EventInstance soundInstance)
         {
-            soundInstance = RuntimeManager.CreateInstance(eventPath);
-            _activeEvents[eventPath] = soundInstance;
+            soundInstance = RuntimeManager.CreateInstance(eventReference);
+            _activeEvents[eventReference] = soundInstance;
             soundInstance.start();
         }
 
         /// <summary>
         /// Plays a 3D sound event at a specific world position
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
+        /// <param name="eventReference">Path of the FMOD event</param>
         /// <param name="position">Position in the world space</param>
-        public void PlaySound3D(string eventPath, Vector3 position)
+        public void PlaySound3D(EventReference eventReference, Vector3 position)
         {
-            EventInstance soundInstance = RuntimeManager.CreateInstance(eventPath);
-            _activeEvents[eventPath] = soundInstance;
+            EventInstance soundInstance = RuntimeManager.CreateInstance(eventReference);
+            _activeEvents[eventReference] = soundInstance;
             soundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
             soundInstance.start();
         }
@@ -100,13 +100,13 @@ namespace Utilities
         /// <summary>
         /// Stops a currently playing sound event
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
-        public void StopSound(string eventPath)
+        /// <param name="eventReference">Path of the FMOD event</param>
+        public void StopSound(EventReference eventReference)
         {
-            if (_activeEvents.TryGetValue(eventPath, out EventInstance instance))
+            if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
             {
-                ReturnEventInstanceToPool(eventPath, instance);
-                _activeEvents.Remove(eventPath);
+                ReturnEventInstanceToPool(eventReference, instance);
+                _activeEvents.Remove(eventReference);
             }
         }
 
@@ -127,20 +127,20 @@ namespace Utilities
         /// <summary>
         /// Pauses a playing sound event
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
-        public void PauseAudio(string eventPath)
+        /// <param name="eventReference">Path of the FMOD event</param>
+        public void PauseAudio(EventReference eventReference)
         {
-            if (_activeEvents.TryGetValue(eventPath, out EventInstance instance))
+            if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
                 instance.setPaused(true);
         }
 
         /// <summary>
         /// Resumes a paused sound event
         /// </summary>
-        /// <param name="eventPath">Path of the FMOD event</param>
-        public void ResumeAudio(string eventPath)
+        /// <param name="eventReference">Path of the FMOD event</param>
+        public void ResumeAudio(EventReference eventReference)
         {
-            if (_activeEvents.TryGetValue(eventPath, out EventInstance instance))
+            if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
                 instance.setPaused(false);
         }
         #endregion
