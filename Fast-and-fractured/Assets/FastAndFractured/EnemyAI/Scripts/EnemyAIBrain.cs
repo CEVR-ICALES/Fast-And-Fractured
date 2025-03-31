@@ -81,13 +81,13 @@ namespace FastAndFractured
             physicsBehaviour.Rb = GetComponent<Rigidbody>();
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
-            startPosition = this.transform.position;
-            startRotation = this.transform.rotation;
+            startPosition = carMovementController.transform.position;
+            startRotation = carMovementController.transform.rotation;
         }
         public void ReturnToStartPosition()
         {
-            this.transform.position = startPosition;
-            this.transform.rotation = startRotation;
+            carMovementController.transform.position = startPosition;
+            carMovementController.transform.rotation = startRotation;
             StopMovement();
         }
         public float GetHealth()
@@ -187,7 +187,7 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, sweepRadius, sweepLayerMask);
+            Collider[] colliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
 
             return colliders.Length > 0;
         }
@@ -222,7 +222,7 @@ namespace FastAndFractured
 
         public bool IsInValidRange(float distance)
         {
-            return distance > Vector3.Distance(transform.position, _positionToDrive);
+            return distance > Vector3.Distance(carMovementController.transform.position, _positionToDrive);
         }
 
         public bool IsInFront()
@@ -242,7 +242,7 @@ namespace FastAndFractured
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_targetToShoot.transform.position - transform.position).normalized;
+            return (_targetToShoot.transform.position - carMovementController.transform.position).normalized;
         }
 
         private float GetAngleDirection(Vector3 axis)
@@ -276,11 +276,11 @@ namespace FastAndFractured
 
                     break;
             }
-            direction = (_positionToDrive - transform.position);
+            direction = (_positionToDrive - carMovementController.transform.position);
 
             //If it's negative, go left
             //If it's positive, go right
-            return Vector3.SignedAngle(direction, transform.forward, axis);
+            return Vector3.SignedAngle(direction, carMovementController.transform.forward, axis);
         }
 
 
@@ -325,7 +325,7 @@ namespace FastAndFractured
 
         private void CheckIfGoToNextPathPoint()
         {
-            if (Vector3.Distance(transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            if (Vector3.Distance(carMovementController.transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
                 (_pathIndex + 1) < _currentPath.corners.Length)
             {
                 _pathIndex++;

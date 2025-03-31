@@ -120,6 +120,23 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateUIElement(UIElementType type, bool isActive)
+        {
+            if (TryGetUIElement(type, out UIElement element))
+            {
+                element.gameObject.SetActive(isActive);
+            }
+        }
+
+        public UIElement GetUIElement(UIElementType type)
+        {
+            if (TryGetUIElement(type, out UIElement element))
+            {
+                return element;
+            }
+            else return null;
+        }
+
         #endregion
 
         #region Event Handlers

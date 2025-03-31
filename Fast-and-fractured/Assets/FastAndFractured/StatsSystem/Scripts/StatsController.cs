@@ -17,7 +17,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsDead { get => charDataSO.Dead; }
+        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value;}
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -97,7 +97,7 @@ namespace FastAndFractured
         public void CustomStart()
         {
             //just for try propouses
-            charDataSO.Dead = false;
+            charDataSO.Invulnerable = false;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
@@ -139,7 +139,7 @@ namespace FastAndFractured
         {
             if (substract > 0)
             {
-                if (!charDataSO.Dead)
+                if (!charDataSO.Invulnerable)
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
@@ -152,6 +152,9 @@ namespace FastAndFractured
                     else
                         Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
+                }else
+                {
+                    IsInvulnerable=false;
                 }
             }
             else Debug.LogError("Value can't be negative or 0.");
@@ -172,7 +175,7 @@ namespace FastAndFractured
         public float Dead()
         {
             Debug.Log("He muerto soy " + charDataSO.name);
-            charDataSO.Dead = true;
+            charDataSO.Invulnerable = true;
             return charDataSO.DeadDelay;
         }
         #endregion
@@ -238,7 +241,7 @@ namespace FastAndFractured
                     return true;
                 case Stats.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
-                    if (gameObject.TryGetComponent<PlayerInputController>(out var playerInputController)) //Provisional Refactoring
+                    if (gameObject.TryGetComponent<CarMovementController>(out CarMovementController testCarMController) && !testCarMController.IsAi) //Provisional Refactoring
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }

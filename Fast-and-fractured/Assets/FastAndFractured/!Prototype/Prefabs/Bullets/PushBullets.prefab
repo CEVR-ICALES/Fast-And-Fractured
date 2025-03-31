@@ -83,10 +83,7 @@ MonoBehaviour:
   averageCarWeight: 1150
   carWeightImportance: 0.2
   applyForceYOffset: 0.2
-  isUsingRaycast: 0
-  characterMask:
-    serializedVersion: 2
-    m_Bits: 64
+  isGrounded: 1
 --- !u!135 &5384367818190901466
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -122,6 +119,7 @@ GameObject:
   - component: {fileID: 7068379446203961962}
   - component: {fileID: -1545520480643349451}
   - component: {fileID: 349250238249279075}
+  - component: {fileID: 7978465082485488719}
   m_Layer: 9
   m_Name: PushBullets
   m_TagString: Untagged
@@ -263,6 +261,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 2
+--- !u!114 &7978465082485488719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8225382753086449546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbodyToPause: {fileID: 349250238249279075}
 --- !u!1001 &3826154811773690714
 PrefabInstance:
   m_ObjectHideFlags: 0
