@@ -32,7 +32,6 @@ namespace FastAndFractured
 
         private Vector3 _currentMoveDirection;
         private bool _isClimbing;
-        private bool _applyCustomGravity = false;
         private bool _isInCeiling = false;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
@@ -59,7 +58,6 @@ namespace FastAndFractured
             }
             else
             {
-                //MoveForward();
                 KinematicMovement();
                 ApplyCustomGravity();
                 _physicsHandler.LimitRbSpeed(maxSpeed);
@@ -74,13 +72,6 @@ namespace FastAndFractured
                 Debug.Log("gravity");
                 _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
             }
-        }
-
-
-        private void MoveForward()
-        {
-           Vector3 finalMoveForce = _currentMoveDirection * moveForce;
-            _rb.AddForce(finalMoveForce, ForceMode.Acceleration);
         }
 
         private void KinematicMovement()
