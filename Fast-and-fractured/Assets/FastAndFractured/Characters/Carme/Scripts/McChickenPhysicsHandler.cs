@@ -12,11 +12,13 @@ namespace FastAndFractured
         [Header("Collision Settings")]
         [SerializeField] private LayerMask groundLayerMask;
         [SerializeField] private LayerMask wallLayerMask;
+        [SerializeField] private LayerMask charLayerMask;
         [SerializeField] private float bounceForce = 8f;
         [SerializeField] private float bounceCooldown = 0.5f;
         [SerializeField] private float groundCheckOffset = 0.1f;
         [SerializeField] private float bounceDuration;
         [SerializeField] private float climbingDotThreshold = 0.7f;
+        [SerializeField] private float chickenForce;
         private const float GROUNDED_GRACE_TIME = 0.2f;
 
         private Rigidbody _rb;
@@ -47,6 +49,11 @@ namespace FastAndFractured
 
                 }
             }
+
+            if(IsInLayerMask(collision.gameObject.layer, charLayerMask))
+            {
+                HandleCharCollision(collision);
+            }
             CacheGroundContacts(collision);
         }
 
@@ -72,6 +79,19 @@ namespace FastAndFractured
                     NotifyStartClimbing(climbeable.GetLandingPoint(transform.position));
                 });
             }
+        }
+
+        private void HandleCharCollision(Collision collision)
+        {
+            PhysicsBehaviour physicsBehaviour;
+            if(collision.gameObject.TryGetComponent(out physicsBehaviour))
+            {
+                Debug.Log("Collision");
+                Vector3 collisionNormal = -collision.contacts[0].normal;
+                Vector3 finalForce = collisionNormal * chickenForce;
+                physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
+            }
+
         }
 
         private void NotifyStartClimbing(Vector3 climbPoint)

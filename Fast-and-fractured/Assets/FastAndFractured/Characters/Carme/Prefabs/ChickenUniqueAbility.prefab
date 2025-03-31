@@ -177,7 +177,7 @@ MonoBehaviour:
   wallClimbSpeed: 10
   jumpDuration: 3
   jumpHeight: 3
-  customGravity: 6
+  customGravity: 15
 --- !u!114 &1597403122938751997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,8 +196,12 @@ MonoBehaviour:
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 1024
+  charLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
   bounceForce: 120
   bounceCooldown: 0.5
   groundCheckOffset: 0.1
   bounceDuration: 0.6
   climbingDotThreshold: 0.7
+  chickenForce: 170000
