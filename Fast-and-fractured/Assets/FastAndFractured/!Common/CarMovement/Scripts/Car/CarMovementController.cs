@@ -56,7 +56,10 @@ namespace FastAndFractured
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
         private bool _isUsingController = false;
+
+        public bool IsAi => isAi;
         [SerializeField] private bool isAi = false;
+
         const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
         [Header("References")]
@@ -413,6 +416,7 @@ namespace FastAndFractured
 
         public bool IsInWall()
         {
+            _currentWheelsAngle = 0;
             int groundedWheels = 0;
             Vector3 combinedNormal = Vector3.zero;
             foreach (var wheel in wheels)

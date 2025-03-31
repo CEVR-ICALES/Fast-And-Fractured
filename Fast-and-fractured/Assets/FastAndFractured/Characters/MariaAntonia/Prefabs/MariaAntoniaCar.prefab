@@ -392,6 +392,18 @@ MonoBehaviour:
   shootPoint: {fileID: 5566535153252186841}
   pooltype: 2
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  onOverheatUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  isInState: 0
+  previousCountOverHeat: 0
   ignoredCollider: {fileID: 7647342835738943043}
 --- !u!1 &5590097881041810588
 GameObject:
@@ -602,9 +614,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb236279b7728c4bb52acc08669e3d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseDownardForce: 300
-  _turninDownwardForceMultiplier: 2.5
-  _speedDownwardForceMultiplier: 0.6
   statsController: {fileID: 6373243798035766635}
 --- !u!114 &4451381971860473007
 MonoBehaviour:
@@ -618,6 +627,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65fc8bfb1d92dad46ac749e745cfe6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onDashCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   wheels:
   - {fileID: 7425353018666072591}
   - {fileID: 4701782047866563391}
@@ -630,7 +642,12 @@ MonoBehaviour:
   usesCustomBraking: 1
   usingPhysicsDash: 1
   dashForce: 400
-  _isUsingController: 0
+  slopeAngleThreshold: 0
+  uphillForwardThreshold: 0.1
+  downhillForwardThreshold: -0.1
+  slopeSpeedThreshold: 0
+  maxGroundAngleThreshold: 90
+  isAi: 0
   statsController: {fileID: 6373243798035766635}
 --- !u!114 &1978894455554868747
 MonoBehaviour:
@@ -683,6 +700,8 @@ MonoBehaviour:
   carWeightImportance: 0.2
   applyForceYOffset: 0.2
   PushApplyPoint: {fileID: 5247103481785559947}
+  wallCollisionAngleThreshold: 0
+  wallBounceForce: 12000
   statsController: {fileID: 6373243798035766635}
 --- !u!114 &6373243798035766635
 MonoBehaviour:

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7068379446203961962}
   - component: {fileID: 6328005487138714724}
   - component: {fileID: -8938601088985662934}
+  - component: {fileID: 4982024803897893046}
   m_Layer: 8
   m_Name: NormalBullets
   m_TagString: Untagged
@@ -151,6 +152,19 @@ MonoBehaviour:
   initValues: 1
   particles: {fileID: 812409513775041683}
   delayProyectileEnd: 0.75
+--- !u!114 &4982024803897893046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8225382753086449546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbodyToPause: {fileID: 6328005487138714724}
 --- !u!1001 &417231620036464942
 PrefabInstance:
   m_ObjectHideFlags: 0
