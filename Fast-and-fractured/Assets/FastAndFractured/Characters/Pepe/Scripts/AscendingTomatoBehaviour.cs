@@ -60,7 +60,7 @@ namespace FastAndFractured
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
-            tomato.transform.position = obj.transform.position + new Vector3(0, transform.position.y, 0);;
+            tomato.transform.position = transform.position;
             tomato.transform.rotation = Quaternion.Euler(0, 0, 0);
             DescendingTomatoBehaviour descendingTomatoBehaviour = tomato.GetComponent<DescendingTomatoBehaviour>();
             descendingTomatoBehaviour.speed = descendingTomatoSpeed;
