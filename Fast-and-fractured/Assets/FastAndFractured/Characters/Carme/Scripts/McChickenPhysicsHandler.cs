@@ -20,6 +20,7 @@ namespace FastAndFractured
         [SerializeField] private float bounceDuration;
         [SerializeField] private float climbingDotThreshold = 0.7f;
         [SerializeField] private float chickenForce;
+        [SerializeField] private float charCollisionDuration;
         private const float GROUNDED_GRACE_TIME = 0.2f;
 
         private Rigidbody _rb;
@@ -30,7 +31,9 @@ namespace FastAndFractured
         private float _lastGroundedTime;
         private bool _isGrounded;
 
+
         private ITimer _bounceTimer;
+        private ITimer _charCollisionTimer;
         public void Initialize(Rigidbody rb, McChickenMovement movement)
         {
             _rb = rb;
@@ -87,6 +90,11 @@ namespace FastAndFractured
             PhysicsBehaviour physicsBehaviour;
             if(collision.gameObject.TryGetComponent(out physicsBehaviour))
             {
+                _rb.isKinematic = true;
+                _charCollisionTimer = TimerSystem.Instance.CreateTimer(bounceDuration, TimerDirection.DECREASE, onTimerDecreaseComplete: () =>
+                {
+                    _rb.isKinematic = false;
+                });
                 Debug.Log("Collision");
                 Vector3 collisionNormal = -collision.contacts[0].normal;
                 Vector3 finalForce = collisionNormal * chickenForce;
