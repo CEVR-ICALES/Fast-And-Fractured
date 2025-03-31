@@ -9,7 +9,7 @@ namespace StateMachine
         public override bool Decide(Controller controller)
         {
             // to do
-            return false;
+            return controller.GetBehaviour<CarMovementController>().IsFlipped;
         }
     }
 

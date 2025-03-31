@@ -8,7 +8,8 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            // To do
+            controller.GetBehaviour<ApplyForceByState>().ApplyFlipStateForce();
+            controller.GetBehaviour<CarMovementController>().IsFlipped = false;
         }
     }
 }

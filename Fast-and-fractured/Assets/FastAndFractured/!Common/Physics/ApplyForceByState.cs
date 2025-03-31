@@ -18,6 +18,8 @@ namespace FastAndFractured {
 
         private const float AIR_FRICTION = 9.8f;
 
+        private const float FLIP_FORCE = 35000f;
+
 
         private void FixedUpdate()
         {
@@ -91,7 +93,12 @@ namespace FastAndFractured {
 
         public void ApplyAirFricction()
         {
-            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION);
+            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION, ForceMode.Acceleration);
+        }
+
+        public void ApplyFlipStateForce()
+        {
+            _rb.AddForce(_rb.transform.up * FLIP_FORCE , ForceMode.Impulse);
         }
     }
 }

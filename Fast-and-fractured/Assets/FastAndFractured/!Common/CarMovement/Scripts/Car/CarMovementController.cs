@@ -46,6 +46,12 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
+        public bool IsFlipped { get { return _isFlipped && IsInWall(); } set => _isFlipped = value; }
+        private bool _isFlipped = false;
+        [SerializeField]
+        private float detectFlipTime = 3.5f;
+        private ITimer _flipTimer;
+
         private const float WHEELS_IN_SLOPE = 2; 
 
         private bool _isGoingUphill;
@@ -404,6 +410,20 @@ namespace FastAndFractured
 
             return currentWheelsAngle >= maxGroundAngleThreshold;
         }
+
+        public void StartIsFlippedTimer()
+        {
+          _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE,() => { _isFlipped = true; });
+        }
+
+        public void StopFlippedTimer()
+        {
+            if (_flipTimer != null)
+            {
+                _flipTimer.StopTimer();
+            }
+        }
+
         private float ReturnCurrentWheelsAngle(out int groundWheels)
         {
             return ReturnCurrentWheelsAngle(out groundWheels, out Vector3 combinedNormal);

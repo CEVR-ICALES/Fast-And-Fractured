@@ -18,7 +18,6 @@ namespace StateMachine
             }
             else
             {
-                Debug.Log("In Wall");
                 controller.GetBehaviour<ApplyForceByState>().ToggleRollPrevention(false, controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
             }
         }
