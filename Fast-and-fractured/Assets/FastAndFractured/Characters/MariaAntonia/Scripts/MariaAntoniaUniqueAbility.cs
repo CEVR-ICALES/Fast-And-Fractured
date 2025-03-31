@@ -20,14 +20,6 @@ public class MariaAntoniaUniqueAbility : BaseUniqueAbility
     private StatsController _statsController;
     #endregion
 
-    void Start()
-    {
-        ssjUltiReference = new EventReference
-        {
-            Guid = new FMOD.GUID { Data1 = 526829551, Data2 = 1239381257, Data3 = -1023862356, Data4 = -154867332 }
-        };
-    }
-
     public override void ActivateAbility()
     {
         if (IsAbilityActive || IsOnCooldown)
@@ -41,7 +33,6 @@ public class MariaAntoniaUniqueAbility : BaseUniqueAbility
 
         if (_statsController == null)
         {
-            Debug.LogError("StatsController not found");
             return;
         }
 
@@ -51,24 +42,5 @@ public class MariaAntoniaUniqueAbility : BaseUniqueAbility
         _statsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
         _statsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
         _statsController.TemporalProductStat(Enums.Stats.PUSH_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
-
-        PrintCurrentStats();
-
-        Invoke(nameof(PrintBoostedStats), uniqueAbilityDuration + 0.1f);
-    }
-
-    public void PrintCurrentStats()
-    {
-        //Debug.LogError($"CooldownSpeed: {_statsController.CooldownSpeed}");
-        Debug.LogError($"MaxSpeed: {_statsController.MaxSpeed}");
-        //Debug.LogError($"Acceleration: {_statsController.Acceleration}");
-        //Debug.LogError($"NormalDamage: {_statsController.NormalShootDamage}");
-        //Debug.LogError($"PushDamage: {_statsController.PushShootDamage}");
-    }
-
-    public void PrintBoostedStats()
-    {
-        Debug.LogWarning("VALUES AFTER ULTI------------------");
-        PrintCurrentStats();
     }
 }

@@ -256,7 +256,7 @@ namespace FastAndFractured
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
             charStat = isProduct ? charStat * mod : charStat + mod;
-            charStat = Mathf.Clamp(charStat, minVal, maxVal);
+            //charStat = Mathf.Clamp(charStat, minVal, maxVal);
             return charStat;
         }
         #endregion
@@ -293,14 +293,25 @@ namespace FastAndFractured
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
             float mod;
+
             if (iscurrentBigger)
-                mod = -(currentValue - previousValue);
+            {
+                if (currentValue / previousValue > 1) // Si fue un producto
+                    mod = 1 / (currentValue / previousValue); // Se revierte con una división
+                else
+                    mod = -(currentValue - previousValue); // Si fue una suma/resta, se revierte con resta
+            }
             else
-                mod = previousValue - currentValue;
+            {
+                if (previousValue / currentValue > 1)
+                    mod = previousValue / currentValue;
+                else
+                    mod = previousValue - currentValue;
+            }
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, false);
+                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicación
             });
         }
         #endregion  
