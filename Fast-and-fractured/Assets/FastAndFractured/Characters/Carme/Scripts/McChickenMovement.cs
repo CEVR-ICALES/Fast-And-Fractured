@@ -31,7 +31,6 @@ namespace FastAndFractured
 
 
         private Vector3 _currentMoveDirection;
-        private Vector3 _initialDirection;
         private bool _isClimbing;
         private bool _applyCustomGravity = false;
         private bool _isInCeiling = false;
@@ -47,7 +46,6 @@ namespace FastAndFractured
         public void StartMoving(Vector3 direction)
         {
             _currentMoveDirection = direction;
-            _initialDirection = direction;
             _rb.constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         }
 
@@ -73,10 +71,8 @@ namespace FastAndFractured
         {
             if(!_physicsHandler.IsGrounded)
             {
+                Debug.Log("gravity");
                 _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
-            } else
-            {
-                //_rb.velocity.y = 0f
             }
         }
 
@@ -89,10 +85,7 @@ namespace FastAndFractured
 
         private void KinematicMovement()
         {
-
-            Vector3 targetPosition = _rb.position + _initialDirection * moveForce * Time.fixedDeltaTime;
-
-            // Handle slope rotation
+            // handle slope rotation
             if (_physicsHandler.IsGrounded)
             {
                 float slopeAngle = Vector3.Angle(_physicsHandler.GroundNormal, Vector3.up);
@@ -112,8 +105,7 @@ namespace FastAndFractured
                 ));
             }
 
-            // Move position
-            _rb.MovePosition(targetPosition);
+            transform.position += _currentMoveDirection * moveForce * Time.deltaTime;
 
         }
 
