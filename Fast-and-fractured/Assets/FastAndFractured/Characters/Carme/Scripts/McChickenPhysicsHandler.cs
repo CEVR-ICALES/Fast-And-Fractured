@@ -8,6 +8,7 @@ namespace FastAndFractured
     public class McChickenPhysicsHandler : MonoBehaviour
     {
         public bool IsGrounded => _isGrounded;
+        public Vector3 GroundNormal => _groundNormal;
 
         [Header("Collision Settings")]
         [SerializeField] private LayerMask groundLayerMask;
@@ -109,7 +110,7 @@ namespace FastAndFractured
             if (_movementHandler.IsClimbing) return;
 
             if (!IsInLayerMask(collision.gameObject.layer, groundLayerMask)) return;
-            Debug.Log("True");
+
             _groundNormal = collision.contacts[0].normal;
             _isGrounded = true;
             _lastGroundedTime = Time.time;
@@ -123,8 +124,26 @@ namespace FastAndFractured
 
         public void ApplyRotation(float rotationSpeed)
         {
-            Quaternion targetRot = Quaternion.LookRotation(_movementHandler.MoveDirection, _isGrounded ? _groundNormal : Vector3.up);
-            _rb.rotation = Quaternion.Slerp(_rb.rotation, targetRot, rotationSpeed * Time.fixedDeltaTime);
+            Vector3 currentEuler = _rb.rotation.eulerAngles;
+
+            // calculate only the X rotation we want
+            float slopeAngle = Vector3.Angle(_groundNormal, Vector3.up);
+            float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _groundNormal));
+            float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -45f, 45f);
+
+            // create new rotation (only X changes, Y/Z remain unchanged)
+            Quaternion targetRot = Quaternion.Euler(
+                targetXRotation,  
+                currentEuler.y,   
+                currentEuler.z    
+            );
+
+            // apply the rotation
+            _rb.MoveRotation(Quaternion.Slerp(
+                _rb.rotation,
+                targetRot,
+                rotationSpeed * Time.fixedDeltaTime
+            ));
         }
 
         public void LimitRbSpeed(float maxSpeed)

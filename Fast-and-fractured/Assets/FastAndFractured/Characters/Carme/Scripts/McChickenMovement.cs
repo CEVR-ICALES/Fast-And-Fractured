@@ -6,7 +6,7 @@ namespace FastAndFractured
 {
     public class McChickenMovement : MonoBehaviour
     {
-        public Vector3 MoveDirection => _moveDirection;
+        public Vector3 MoveDirection => _currentMoveDirection;
         public bool IsClimbing => _isClimbing;
 
         public bool IsInCeling => _isInCeiling;
@@ -15,6 +15,9 @@ namespace FastAndFractured
         [SerializeField] private float maxSpeed = 30f;
         [SerializeField] private float moveForce = 5f;
         [SerializeField] private float rotationSpeed = 10f;
+        [SerializeField] private float maxSlopeAngle = 45f;
+
+
 
         [Header("Climbing")]
         [SerializeField] private float climbLerpSpeed = 2f;
@@ -26,7 +29,9 @@ namespace FastAndFractured
         [SerializeField] private float customGravity;
 
 
-        private Vector3 _moveDirection;
+
+        private Vector3 _currentMoveDirection;
+        private Vector3 _initialDirection;
         private bool _isClimbing;
         private bool _applyCustomGravity = false;
         private bool _isInCeiling = false;
@@ -41,7 +46,9 @@ namespace FastAndFractured
 
         public void StartMoving(Vector3 direction)
         {
-            _moveDirection = direction;
+            _currentMoveDirection = direction;
+            _initialDirection = direction;
+            _rb.constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         }
 
         private void FixedUpdate()
@@ -54,7 +61,8 @@ namespace FastAndFractured
             }
             else
             {
-                MoveForward();
+                //MoveForward();
+                KinematicMovement();
                 ApplyCustomGravity();
                 _physicsHandler.LimitRbSpeed(maxSpeed);
                 _physicsHandler.ApplyRotation(rotationSpeed);
@@ -75,8 +83,38 @@ namespace FastAndFractured
 
         private void MoveForward()
         {
-           Vector3 finalMoveForce = _moveDirection * moveForce;
+           Vector3 finalMoveForce = _currentMoveDirection * moveForce;
             _rb.AddForce(finalMoveForce, ForceMode.Acceleration);
+        }
+
+        private void KinematicMovement()
+        {
+
+            Vector3 targetPosition = _rb.position + _initialDirection * moveForce * Time.fixedDeltaTime;
+
+            // Handle slope rotation
+            if (_physicsHandler.IsGrounded)
+            {
+                float slopeAngle = Vector3.Angle(_physicsHandler.GroundNormal, Vector3.up);
+                float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _physicsHandler.GroundNormal));
+                float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -maxSlopeAngle, maxSlopeAngle);
+
+                Quaternion targetRot = Quaternion.Euler(
+                    -targetXRotation,
+                    transform.eulerAngles.y,
+                    transform.eulerAngles.z
+                );
+
+                _rb.MoveRotation(Quaternion.Slerp(
+                    _rb.rotation,
+                    targetRot,
+                    rotationSpeed * Time.fixedDeltaTime
+                ));
+            }
+
+            // Move position
+            _rb.MovePosition(targetPosition);
+
         }
 
         public void PrepareClimbing(Vector3 climbPoint)
