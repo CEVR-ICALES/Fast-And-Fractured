@@ -47,7 +47,7 @@ namespace FastAndFractured
                     HandleWallCollision(collision);
                 } else
                 {
-
+                    // TODO handle collision when climbing
                 }
             }
 
@@ -70,7 +70,7 @@ namespace FastAndFractured
             _lastBounceTime = Time.time;
             _wallNormal = collision.contacts[0].normal;
             Vector3 bounceDir = Vector3.Reflect(_movementHandler.MoveDirection, _wallNormal);
-            Climbeable climbeable;
+            ChickenClimbeable climbeable;
             _rb.AddForce(bounceDir * bounceForce, ForceMode.Impulse);
 
             if(collision.gameObject.TryGetComponent(out climbeable))
@@ -144,14 +144,6 @@ namespace FastAndFractured
                 targetRot,
                 rotationSpeed * Time.fixedDeltaTime
             ));
-        }
-
-        public void LimitRbSpeed(float maxSpeed)
-        {
-            if(_rb.velocity.magnitude > maxSpeed / 3.6f)
-            {
-                _rb.velocity = _rb.velocity.normalized * maxSpeed;
-            }
         }
 
     }

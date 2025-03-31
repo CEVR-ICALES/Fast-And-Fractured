@@ -32,7 +32,7 @@ namespace FastAndFractured
         // timers
         private ITimer _climbStartTimer;
         private Tween _jumpTween;
-
+        private const int NUMBER_OF_JUMPS = 1;
 
         private void Awake()
         {
@@ -52,7 +52,7 @@ namespace FastAndFractured
             _moveDirection = direction.normalized;
             _rb.freezeRotation = true;
 
-            _jumpTween = transform.DOJump(targetPosition, jumpHeight, 1, launchTime)
+            _jumpTween = transform.DOJump(targetPosition, jumpHeight, NUMBER_OF_JUMPS, launchTime)
                .SetEase(Ease.InSine)
                .OnComplete(Land);
         }

@@ -35,6 +35,7 @@ namespace FastAndFractured
         private bool _isInCeiling = false;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
+        private const int NUMBER_OF_JUMPS = 1;
 
         public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
         {
@@ -54,13 +55,12 @@ namespace FastAndFractured
 
             if (_isClimbing)
             {
-
+                // TODO handle effect when climbing
             }
             else
             {
                 KinematicMovement();
                 ApplyCustomGravity();
-                _physicsHandler.LimitRbSpeed(maxSpeed);
                 _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
@@ -96,7 +96,7 @@ namespace FastAndFractured
                 ));
             }
 
-            transform.position += _currentMoveDirection * moveForce * Time.deltaTime;
+            transform.position += _currentMoveDirection * moveForce * Time.fixedDeltaTime;
 
         }
 
@@ -105,7 +105,7 @@ namespace FastAndFractured
             _isClimbing = true;
             _rb.isKinematic = true;
             _rb.useGravity = true;
-            transform.DOJump(climbPoint, jumpHeight, 1, jumpDuration)
+            transform.DOJump(climbPoint, jumpHeight, NUMBER_OF_JUMPS, jumpDuration)
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() =>
                 {

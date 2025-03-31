@@ -27,10 +27,6 @@ namespace FastAndFractured
 
         [SerializeField] private ShootingHandle shootingHandle;
 
-        private void Awake()
-        {
-
-        }
 
         public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
@@ -44,7 +40,6 @@ namespace FastAndFractured
 
         private void InitializeAbility(Vector3 landPoint)
         {
-            Debug.Log("HITTT");
             landPoint.y = landPoint.y + landPointYOffset;
             GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
             uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Climbeable : MonoBehaviour
+public class ChickenClimbeable : MonoBehaviour
 {
     public BoxCollider colliderSurface;
 
