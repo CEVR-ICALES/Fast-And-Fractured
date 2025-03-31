@@ -50,7 +50,8 @@ namespace Enums
         PLAYER_7,
         BAD_EFFECTS,
         EFFECTS,
-        GOOD_EFFECTS
+        GOOD_EFFECTS,
+        SHOOTING_CROSSHAIR
     }
 
     public enum ScreensType

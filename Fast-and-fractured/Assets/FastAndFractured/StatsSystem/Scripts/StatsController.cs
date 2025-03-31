@@ -243,7 +243,7 @@ namespace FastAndFractured
                     return true;
                 case Stats.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
-                    if (gameObject.TryGetComponent<PlayerInputController>(out var playerInputController)) //Provisional Refactoring
+                    if (gameObject.TryGetComponent<CarMovementController>(out CarMovementController testCarMController) && !testCarMController.IsAi) //Provisional Refactoring
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
