@@ -247,7 +247,7 @@ namespace FastAndFractured
             if (enable)
             {
                 _inputActions.PlayerInputActions.Dash.Enable();
-                _inputActions.PlayerInputActions.Shoot.Enable();
+                //_inputActions.PlayerInputActions.Shoot.Enable();
                 _inputActions.PlayerInputActions.ShootingMode.Enable();
                 _inputActions.PlayerInputActions.ThrowMine.Enable();
                 _inputActions.PlayerInputActions.SpecialAbility.Enable();
@@ -255,7 +255,7 @@ namespace FastAndFractured
             else
             {
                 _inputActions.PlayerInputActions.Dash.Disable();
-                _inputActions.PlayerInputActions.Shoot.Disable();
+                //_inputActions.PlayerInputActions.Shoot.Disable();
                 _inputActions.PlayerInputActions.ShootingMode.Disable();
                 _inputActions.PlayerInputActions.ThrowMine.Disable();
                 _inputActions.PlayerInputActions.SpecialAbility.Disable();
