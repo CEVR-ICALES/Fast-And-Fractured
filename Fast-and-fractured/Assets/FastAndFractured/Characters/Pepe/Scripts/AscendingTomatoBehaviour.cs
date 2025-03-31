@@ -29,16 +29,21 @@ namespace FastAndFractured
         {
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
+                //TODO cambiar el FindObjectsOfType cuando el level manager este terminado
                 foreach (GameObject obj in FindObjectsOfType<GameObject>())
                 {
                     if (obj.GetComponent<StatsController>() != null)
                     {
-                        if (!obj.transform.IsChildOf(Caster.transform))
+                        float distance = Vector3.Distance(OriginPosition, obj.transform.position);
+                        if(distance<=effectDistance)
                         {
-                            GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeDescendingTomato);
-                            if(tomato!=null)
+                            if (!obj.transform.IsChildOf(Caster.transform))
                             {
-                                SetTomatoVariables(tomato, obj);
+                                GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeDescendingTomato);
+                                if(tomato!=null)
+                                {
+                                    SetTomatoVariables(tomato, obj);
+                                }
                             }
                         }
                     }
@@ -55,7 +60,7 @@ namespace FastAndFractured
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
-            tomato.transform.position = obj.transform.position + new Vector3(0, 300, 0);;
+            tomato.transform.position = obj.transform.position + new Vector3(0, transform.position.y, 0);;
             tomato.transform.rotation = Quaternion.Euler(0, 0, 0);
             DescendingTomatoBehaviour descendingTomatoBehaviour = tomato.GetComponent<DescendingTomatoBehaviour>();
             descendingTomatoBehaviour.speed = descendingTomatoSpeed;
