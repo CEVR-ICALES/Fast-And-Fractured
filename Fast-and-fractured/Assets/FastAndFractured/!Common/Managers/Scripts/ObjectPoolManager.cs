@@ -11,17 +11,19 @@ namespace Utilities
         protected override void Awake()
         {
             base.Awake();
+            _objectPools = new List<ObjectPool>();
+            _parentGameObjectOfPools = new GameObject(parentGameObjectOfPoolsName).transform;
+            foreach (var poolSO in poolSOList)
+            {
+                CreateObjectPool(poolSO);
+            }
         }
 
-        private List<ObjectPool> _objectPools = new List<ObjectPool>();
+        private List<ObjectPool> _objectPools;
         private Transform _parentGameObjectOfPools;
         [SerializeField]
         private string parentGameObjectOfPoolsName = "ObjectPools";
-
-        public void CustomStart()
-        {
-            _parentGameObjectOfPools = new GameObject(parentGameObjectOfPoolsName).transform;
-        }
+        [SerializeField] private List<ObjectPoolSO> poolSOList;
 
         //Method called in Level Controller or Game Manager. One of them will handle a list of ScriptableObjects with the differents pools
         public void CreateObjectPool(ObjectPoolSO objectPoolSO)

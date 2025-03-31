@@ -2460,6 +2460,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: poolSOList.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: poolSOList.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: c5f07de82e315184e95e65afb647ebd2, type: 2}
+    - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: poolSOList.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 3e1cf9589c24baa47b01f3469ad82b14, type: 2}
     - target: {fileID: 2517803797502007672, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: field of view
       value: 50
@@ -2552,6 +2564,10 @@ PrefabInstance:
       propertyPath: ai
       value: 
       objectReference: {fileID: 3595311130345356716}
+    - target: {fileID: 9080696093257076180, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9080696093257076180, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: characters.Array.data[0]
       value: 
@@ -2672,6 +2688,10 @@ PrefabInstance:
     - target: {fileID: 383719273359173686, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637517078115454852, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+      propertyPath: isAi
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 677652678837832221, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_Follow
@@ -3336,14 +3356,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22fd2d33a7ea7474ba08d8c926e71a2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  abilityData: {fileID: 11400000, guid: a69eccabc14010a4ea4cb7144b25495e, type: 2}
+  abilityData: {fileID: 0}
   onAbilityActivated:
     m_PersistentCalls:
       m_Calls: []
   onAbilityEnded:
     m_PersistentCalls:
       m_Calls: []
-  enduranceRecoveryAmount: 10
+  enduranceRecoveryAmount: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
