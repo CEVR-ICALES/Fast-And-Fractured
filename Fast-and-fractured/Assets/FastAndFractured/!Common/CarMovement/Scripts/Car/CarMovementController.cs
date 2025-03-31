@@ -46,10 +46,8 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
-        private float _currentWheelsAngle;
         private const float WHEELS_IN_SLOPE = 2; 
 
-        private float _currentSlopeAngle;
         private bool _isGoingUphill;
         private bool _isGoingDownhill;
         private float _targetSteerAngle;
