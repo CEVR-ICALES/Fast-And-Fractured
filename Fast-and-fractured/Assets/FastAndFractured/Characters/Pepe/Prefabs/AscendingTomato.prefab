@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &1999187818987476289
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      propertyPath: m_Name
+      value: AscendingTomato
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -8803605013822968256}
+  m_SourcePrefab: {fileID: 100100000, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+--- !u!1 &1693322034857404432 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: eda3731acbc71cc4f80d9ed59a41dfe4, type: 3}
+  m_PrefabInstance: {fileID: 1999187818987476289}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-8803605013822968256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1693322034857404432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edf7d3f9d7dbfb849becbc4ae90d50e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pooltype: 0
+  pooltypeDescendingTomato: 0
+  Caster: {fileID: 0}
+  OriginPosition: {x: 0, y: 0, z: 0}
+  speed: 100
+  effectDistance: 0
+  descendingTomatoSpeed: 100
+  ascendingTime: 3

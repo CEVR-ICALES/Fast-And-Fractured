@@ -18,14 +18,16 @@ namespace FastAndFractured
         public float speed = 100f;
         public float effectDistance;
         public float descendingTomatoSpeed = 100f;
+        public float ascendingTime = 3f;
         public virtual void InitializeValues()
         {
             
         }
         
-        void Start()
+        
+        public void StartTimer()
         {
-            TimerSystem.Instance.CreateTimer(3f, onTimerDecreaseComplete: () =>
+            TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
                 foreach (GameObject obj in FindObjectsOfType<GameObject>())
                 {
@@ -36,12 +38,7 @@ namespace FastAndFractured
                             GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeDescendingTomato);
                             if(tomato!=null)
                             {
-                                tomato.transform.position = obj.transform.position + new Vector3(0, 300, 0);;
-                                tomato.transform.rotation = Quaternion.Euler(0, 0, 0);
-                                DescendingTomatoBehaviour descendingTomatoBehaviour = tomato.GetComponent<DescendingTomatoBehaviour>();
-                                descendingTomatoBehaviour.speed = descendingTomatoSpeed;
-                                descendingTomatoBehaviour.objective = obj;
-                                descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
+                                SetTomatoVariables(tomato, obj);
                             }
                         }
                     }
@@ -55,6 +52,15 @@ namespace FastAndFractured
             transform.position += transform.up * speed * Time.deltaTime;
             // Add a way to alert players in range that a tomato is coming, if the player manages to get out of the
             // range in time the alert disappears
+        }
+        private void SetTomatoVariables(GameObject tomato, GameObject obj)
+        {
+            tomato.transform.position = obj.transform.position + new Vector3(0, 300, 0);;
+            tomato.transform.rotation = Quaternion.Euler(0, 0, 0);
+            DescendingTomatoBehaviour descendingTomatoBehaviour = tomato.GetComponent<DescendingTomatoBehaviour>();
+            descendingTomatoBehaviour.speed = descendingTomatoSpeed;
+            descendingTomatoBehaviour.objective = obj;
+            descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
         }
     }
 }

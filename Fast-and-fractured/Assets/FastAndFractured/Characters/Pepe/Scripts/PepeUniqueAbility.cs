@@ -13,6 +13,7 @@ namespace FastAndFractured
         [SerializeField] private float tomatoSpeed = 100f;
         [SerializeField] private float descendingTomatoSpeed = 100f;
         [SerializeField] private float distanceEffect;
+        [SerializeField] private float ascendingTime = 3f;
         [SerializeField] private Pooltype pooltypeAscendingTomato;
         [SerializeField] private Pooltype pooltypeDescendingTomato;
 
@@ -26,8 +27,12 @@ namespace FastAndFractured
             GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeAscendingTomato);
             if (tomato != null)
             {
+                SetTomatoVariables(tomato);
+            }
+        }
+        private void SetTomatoVariables(GameObject tomato)
+        {
                 Controller controller = GetComponentInParent<Controller>();
-                
                 Vector3 spawnPosition = spawnPoint.transform.position;
                 tomato.transform.position = spawnPosition;
                 tomato.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -39,7 +44,8 @@ namespace FastAndFractured
                 ascendingTomatoBehaviour.descendingTomatoSpeed = descendingTomatoSpeed;
                 ascendingTomatoBehaviour.pooltype = pooltypeAscendingTomato;
                 ascendingTomatoBehaviour.pooltypeDescendingTomato = pooltypeDescendingTomato;
-            }
+                ascendingTomatoBehaviour.ascendingTime = ascendingTime;
+                ascendingTomatoBehaviour.StartTimer();
         }
     }
 
