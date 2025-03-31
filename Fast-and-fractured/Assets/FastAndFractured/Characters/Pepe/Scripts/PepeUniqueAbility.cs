@@ -10,8 +10,6 @@ namespace FastAndFractured
     public class PepeUniqueAbility : BaseUniqueAbility
     {
         [SerializeField] private GameObject spawnPoint;
-        [SerializeField] private GameObject ascendingTomatoPrefab;
-        [SerializeField] private GameObject descendingTomatoPrefab;
         [SerializeField] private float tomatoSpeed = 100f;
         [SerializeField] private float descendingTomatoSpeed = 100f;
         [SerializeField] private float distanceEffect;
@@ -39,7 +37,6 @@ namespace FastAndFractured
                 ascendingTomatoBehaviour.effectDistance = distanceEffect;
                 ascendingTomatoBehaviour.OriginPosition = spawnPosition;
                 ascendingTomatoBehaviour.descendingTomatoSpeed = descendingTomatoSpeed;
-                ascendingTomatoBehaviour.tomatoPrefab = descendingTomatoPrefab;
                 ascendingTomatoBehaviour.pooltype = pooltypeAscendingTomato;
                 ascendingTomatoBehaviour.pooltypeDescendingTomato = pooltypeDescendingTomato;
             }

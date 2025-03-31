@@ -8,10 +8,10 @@ namespace FastAndFractured
 {
     public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject
     {
+        private bool initValues = true;
         public Pooltype pooltype;
         public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
         public bool InitValues => initValues;
-        [SerializeField] private bool initValues = true;
         public GameObject objective;
         public float speed;
         public virtual void InitializeValues()
