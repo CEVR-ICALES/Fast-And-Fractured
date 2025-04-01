@@ -1,18 +1,14 @@
+using FastAndFractured;
+using StateMachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WantsToChangeToFleeState : MonoBehaviour
+public class WantsToChangeToCombatState : Decision
 {
-    // Start is called before the first frame update
-    void Start()
+    public override bool Decide(Controller controller)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        EnemyAIBrain enemyAIBrain = controller.GetBehaviour<EnemyAIBrain>();
+        return enemyAIBrain.WantsToChangeToCombatState();
     }
 }
