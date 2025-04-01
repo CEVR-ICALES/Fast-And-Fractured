@@ -17,7 +17,7 @@ public class MariaAntoniaUniqueAbility : BaseUniqueAbility
 
     public EventReference ssjUltiReference;
 
-    private StatsController _statsController;
+    [SerializeField] private StatsController _statsController;
     #endregion
 
     public override void ActivateAbility()
@@ -26,15 +26,19 @@ public class MariaAntoniaUniqueAbility : BaseUniqueAbility
             return;
 
         base.ActivateAbility();
+        Debug.Log("Boosted Stats!");
 
         SoundManager.Instance.PlayOneShot(ssjUltiReference, transform.position);
 
-        _statsController = GetComponentInParent<StatsController>();
+        //_statsController = GetComponent<StatsController>();
 
         if (_statsController == null)
         {
+            Debug.Log("Stats Controller not Found");
             return;
         }
+
+        Debug.Log("After return");
 
         _statsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
 
