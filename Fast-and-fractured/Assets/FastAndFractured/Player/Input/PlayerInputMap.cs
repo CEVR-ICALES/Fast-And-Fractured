@@ -82,6 +82,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""CameraMoveMouse"",
+                    ""type"": ""Value"",
+                    ""id"": ""09b600ea-96de-494f-b44a-dc12c9db3d30"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Shoot"",
                     ""type"": ""Button"",
                     ""id"": ""2c14d8bd-8915-44fd-8137-042f895d90b5"",
@@ -278,8 +287,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9f34f519-819c-45f9-8987-7379d64c0069"",
-                    ""path"": ""<Mouse>/position"",
+                    ""id"": ""08273a87-ad1d-43ea-84eb-283b1aed8ac2"",
+                    ""path"": ""<Gamepad>/rightStick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -289,12 +298,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""08273a87-ad1d-43ea-84eb-283b1aed8ac2"",
-                    ""path"": ""<Gamepad>/rightStick"",
+                    ""id"": ""b4525a62-2fa9-456d-9156-af301c7b905c"",
+                    ""path"": ""<Mouse>/position"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""CameraMove"",
+                    ""action"": ""CameraMoveMouse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -476,6 +485,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_Brake = m_PlayerInputActions.FindAction("Brake", throwIfNotFound: true);
         m_PlayerInputActions_ShootingMode = m_PlayerInputActions.FindAction("ShootingMode", throwIfNotFound: true);
         m_PlayerInputActions_CameraMove = m_PlayerInputActions.FindAction("CameraMove", throwIfNotFound: true);
+        m_PlayerInputActions_CameraMoveMouse = m_PlayerInputActions.FindAction("CameraMoveMouse", throwIfNotFound: true);
         m_PlayerInputActions_Shoot = m_PlayerInputActions.FindAction("Shoot", throwIfNotFound: true);
         m_PlayerInputActions_SpecialAbility = m_PlayerInputActions.FindAction("SpecialAbility", throwIfNotFound: true);
         m_PlayerInputActions_ResetCamera = m_PlayerInputActions.FindAction("ResetCamera", throwIfNotFound: true);
@@ -556,6 +566,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_Brake;
     private readonly InputAction m_PlayerInputActions_ShootingMode;
     private readonly InputAction m_PlayerInputActions_CameraMove;
+    private readonly InputAction m_PlayerInputActions_CameraMoveMouse;
     private readonly InputAction m_PlayerInputActions_Shoot;
     private readonly InputAction m_PlayerInputActions_SpecialAbility;
     private readonly InputAction m_PlayerInputActions_ResetCamera;
@@ -574,6 +585,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Brake => m_Wrapper.m_PlayerInputActions_Brake;
         public InputAction @ShootingMode => m_Wrapper.m_PlayerInputActions_ShootingMode;
         public InputAction @CameraMove => m_Wrapper.m_PlayerInputActions_CameraMove;
+        public InputAction @CameraMoveMouse => m_Wrapper.m_PlayerInputActions_CameraMoveMouse;
         public InputAction @Shoot => m_Wrapper.m_PlayerInputActions_Shoot;
         public InputAction @SpecialAbility => m_Wrapper.m_PlayerInputActions_SpecialAbility;
         public InputAction @ResetCamera => m_Wrapper.m_PlayerInputActions_ResetCamera;
@@ -609,6 +621,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @CameraMove.started += instance.OnCameraMove;
             @CameraMove.performed += instance.OnCameraMove;
             @CameraMove.canceled += instance.OnCameraMove;
+            @CameraMoveMouse.started += instance.OnCameraMoveMouse;
+            @CameraMoveMouse.performed += instance.OnCameraMoveMouse;
+            @CameraMoveMouse.canceled += instance.OnCameraMoveMouse;
             @Shoot.started += instance.OnShoot;
             @Shoot.performed += instance.OnShoot;
             @Shoot.canceled += instance.OnShoot;
@@ -655,6 +670,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @CameraMove.started -= instance.OnCameraMove;
             @CameraMove.performed -= instance.OnCameraMove;
             @CameraMove.canceled -= instance.OnCameraMove;
+            @CameraMoveMouse.started -= instance.OnCameraMoveMouse;
+            @CameraMoveMouse.performed -= instance.OnCameraMoveMouse;
+            @CameraMoveMouse.canceled -= instance.OnCameraMoveMouse;
             @Shoot.started -= instance.OnShoot;
             @Shoot.performed -= instance.OnShoot;
             @Shoot.canceled -= instance.OnShoot;
@@ -704,6 +722,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnBrake(InputAction.CallbackContext context);
         void OnShootingMode(InputAction.CallbackContext context);
         void OnCameraMove(InputAction.CallbackContext context);
+        void OnCameraMoveMouse(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnSpecialAbility(InputAction.CallbackContext context);
         void OnResetCamera(InputAction.CallbackContext context);

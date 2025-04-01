@@ -60,6 +60,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "CameraMoveMouse",
+                    "type": "Value",
+                    "id": "09b600ea-96de-494f-b44a-dc12c9db3d30",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Shoot",
                     "type": "Button",
                     "id": "2c14d8bd-8915-44fd-8137-042f895d90b5",
@@ -256,8 +265,8 @@
                 },
                 {
                     "name": "",
-                    "id": "9f34f519-819c-45f9-8987-7379d64c0069",
-                    "path": "<Mouse>/position",
+                    "id": "08273a87-ad1d-43ea-84eb-283b1aed8ac2",
+                    "path": "<Gamepad>/rightStick",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -267,12 +276,12 @@
                 },
                 {
                     "name": "",
-                    "id": "08273a87-ad1d-43ea-84eb-283b1aed8ac2",
-                    "path": "<Gamepad>/rightStick",
+                    "id": "b4525a62-2fa9-456d-9156-af301c7b905c",
+                    "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "CameraMove",
+                    "action": "CameraMoveMouse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

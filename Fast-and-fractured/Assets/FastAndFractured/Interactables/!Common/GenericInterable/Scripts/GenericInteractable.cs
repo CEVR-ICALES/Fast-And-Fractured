@@ -1,20 +1,23 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class GenericInteractable : MonoBehaviour, IInteractable
+namespace FastAndFractured
 {
-    public UnityEvent<GameObject,GameObject> onInteract;
-    public UnityEvent onInteractEmpty;
-    public bool disableGameObjectOnInteract = false;
-    public virtual void OnInteract(GameObject interactionFrom, GameObject interactionTo)
+    public class GenericInteractable : MonoBehaviour, IInteractable
     {
-
-        onInteractEmpty?.Invoke();
-        onInteract?.Invoke(interactionFrom,interactionTo);
-        if (disableGameObjectOnInteract)
+        public UnityEvent<GameObject, GameObject> onInteract;
+        public UnityEvent onInteractEmpty;
+        public bool disableGameObjectOnInteract = false;
+        public virtual void OnInteract(GameObject interactionFrom, GameObject interactionTo)
         {
-            gameObject.SetActive(false);    
-        }
 
+            onInteractEmpty?.Invoke();
+            onInteract?.Invoke(interactionFrom, interactionTo);
+            if (disableGameObjectOnInteract)
+            {
+                gameObject.SetActive(false);
+            }
+
+        }
     }
 }

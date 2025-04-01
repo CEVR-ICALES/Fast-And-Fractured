@@ -1,24 +1,30 @@
+using Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using UnityEngine;
+using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class TimerSystem : AbstractSingleton<TimerSystem>
+    public class TimerSystem : AbstractSingleton<TimerSystem>, IPausable
     {
         private Dictionary<string, ITimer> _timers = new Dictionary<string, ITimer>();
 
         private int _nextTimerId = 0;
 
+        private bool _isPaused = false;
 
         #region UNITY_LIFECYCLE
 
         protected override void Awake()
         {
             base.Awake();
-            // Additional initialization if needed
+        }
+
+        private void Start()
+        {
+            PauseManager.Instance.RegisterPausable(this);
         }
 
         private void Update()
@@ -26,6 +32,11 @@ namespace Utilities
             UpdateAllTimers(Time.deltaTime);
         }
 
+        private void OnDestroy()
+        {
+            _timers.Clear();
+            PauseManager.Instance.UnregisterPausable(this);
+        }
         #endregion
 
         #region TIMER_MANAGEMENT
@@ -50,7 +61,7 @@ namespace Utilities
         }
 
 
-        public ITimer CreateTimer(float duration, TimerDirection direction, Action onTimerIncreaseComplete = null,
+        public ITimer CreateTimer(float duration, TimerDirection direction = TimerDirection.DECREASE, Action onTimerIncreaseComplete = null,
             Action onTimerDecreaseComplete = null, bool isDebug = false, Action<float> onTimerIncreaseUpdate = null,
             Action<float> onTimerDecreaseUpdate = null, Action onTimerPause = null, Action onTimerResume = null)
         {
@@ -87,11 +98,11 @@ namespace Utilities
         public ITimer CreateTimer(ITimer existingTimer, Action onTimerIncreaseComplete = null,
             Action onTimerDecreaseComplete = null, bool isDebug = false, Action<float> onTimerIncreaseUpdate = null,
             Action<float> onTimerDecreaseUpdate = null, Action onTimerPause = null, Action onTimerResume = null)
-        { 
+        {
             if (existingTimer == null)
             {
                 Debug.LogError(
-                    "Cannot re-add a null timer.  Use the non-overloaded CreateTimer method.");  
+                    "Cannot re-add a null timer.  Use the non-overloaded CreateTimer method.");
 
                 return null;
             }
@@ -128,11 +139,11 @@ namespace Utilities
             }
 
             ITimer
-                timer = existingTimer;  
+                timer = existingTimer;
             if (isDebug)
             {
                 timer = new DebugTimerDecorator(existingTimer);
-            } 
+            }
 
 
             if (_timers.ContainsKey(existingTimer.GetData().ID))
@@ -140,9 +151,9 @@ namespace Utilities
                 _timers.Remove(existingTimer.GetData().ID);
             }
 
-            _timers.Add(timer.GetData().ID, timer); 
+            _timers.Add(timer.GetData().ID, timer);
 
-            timer.StartTimer();  
+            timer.StartTimer();
 
             return timer;
         }
@@ -152,7 +163,7 @@ namespace Utilities
         public bool ModifyTimer(ITimer timer, float? newDuration = null, Action newOnTimerComplete = null,
             TimerDirection? newDirection = null, float? newCurrentTime = null, bool isRunning = true)
         {
-            if (!_timers.ContainsKey(timer.GetData().ID))   
+            if (!_timers.ContainsKey(timer.GetData().ID))
             {
                 Debug.LogError(
                     $"Tried Modifing time values. Timer you tried Modifiy not Found. If Is not debug and still getting  messages in console probably Is an old Timer ID. If is an User Called Method make sure call StopTimer()");
@@ -164,7 +175,7 @@ namespace Utilities
                 timer.GetData().Duration = newDuration.Value;
             }
 
-            if (newOnTimerComplete != null) 
+            if (newOnTimerComplete != null)
             {
                 timer.GetData().OnTimerComplete = newOnTimerComplete;
             }
@@ -172,16 +183,20 @@ namespace Utilities
 
             if (newDirection.HasValue)
             {
-                timer.GetData().SetTimerDirection(newDirection.Value);  
+                timer.GetData().SetTimerDirection(newDirection.Value);
             }
 
             if (newCurrentTime
-                .HasValue) 
+                .HasValue)
             {
                 timer.GetData().CurrentTime =
-                    newCurrentTime.Value; 
+                    newCurrentTime.Value;
             }
 
+            _timers.TryAdd(timer.GetData().ID, timer);
+
+            if (!_isPaused) return true;
+            
             if (isRunning != timer.GetData().IsRunning)
             {
                 if (isRunning)
@@ -194,17 +209,13 @@ namespace Utilities
                 }
             }
 
-            {
-            }
-
-            _timers.TryAdd(timer.GetData().ID, timer);
-            return true; 
+            return true;
         }
 
 
         public ITimer GetTimer(string timerId)
         {
-            //More Clear output
+
             if (string.IsNullOrEmpty(timerId))
             {
                 Debug.LogError(
@@ -221,46 +232,50 @@ namespace Utilities
             else
             {
                 Debug.LogError(
-                    $"Timer with ID '{timerId}' not found."); 
+                    $"Timer with ID '{timerId}' not found.");
                 return null;
             }
         }
 
-        
+        public bool HasTimer(ITimer timer)
+        {
+            return timer != null && _timers.ContainsKey(timer.GetData().ID);
+        }
+
         public void StartTimer(string timerId)
         {
             if (_timers.TryGetValue(timerId, out ITimer timer))
             {
-                timer.StartTimer(); 
+                timer.StartTimer();
             }
             else
             {
-                 Debug.LogError(
-                    $"Called StarTimer() , but Time Id not exist, Make Sure ID  Time your trying is Called after you CreateTime. Avoid Called In other Class Star(). If not Check for another Timer.App Still Works."); //Precise Error Log. Clear Where we should Call startimer
+                Debug.LogError(
+                   $"Called StarTimer() , but Time Id not exist, Make Sure ID  Time your trying is Called after you CreateTime. Avoid Called In other Class Star(). If not Check for another Timer.App Still Works."); //Precise Error Log. Clear Where we should Call startimer
             }
         }
 
-        
+
         public void StopTimer(string timerId)
         {
             ITimer timer = GetTimer(timerId);
 
-            if (timer != null) 
+            if (timer != null)
 
             {
                 timer.StopTimer();
 
-                _timers.Remove(timerId); 
+                _timers.Remove(timerId);
             }
         }
 
 
-        public void PauseTimer(string timerId) 
+        public void PauseTimer(string timerId)
         {
             if (_timers.TryGetValue(timerId,
-                    out ITimer timer)) 
+                    out ITimer timer))
             {
-                timer.PauseTimer(); 
+                timer.PauseTimer();
             }
             else
             {
@@ -271,6 +286,8 @@ namespace Utilities
 
         public void ResumeTimer(string timerId)
         {
+            if (_isPaused) return;
+
             if (_timers.TryGetValue(timerId, out ITimer timer))
             {
                 timer.ResumeTimer();
@@ -283,13 +300,13 @@ namespace Utilities
         }
 
 
-        public void ChangeTimerDirection(string timerId) 
+        public void ChangeTimerDirection(string timerId)
 
         {
-            if (_timers.TryGetValue(timerId, out ITimer timer))  
+            if (_timers.TryGetValue(timerId, out ITimer timer))
 
             {
-                timer.InvertTimerDirection();  
+                timer.InvertTimerDirection();
             }
             else
 
@@ -301,7 +318,6 @@ namespace Utilities
 
         #endregion
 
-
         #region HELPER_METHODS
 
         private string GenerateTimerId()
@@ -310,16 +326,23 @@ namespace Utilities
         }
 
         #endregion
+
+        public void OnPause()
+        {
+            _isPaused = true;
+            foreach (var timer in _timers)
+            {
+                timer.Value.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
+            foreach (var timer in _timers)
+            {
+                timer.Value.ResumeTimer();
+            }
+        }
     }
-
-   
-
-     
-}
- 
-
-public enum TimerDirection
-{
-    Increase,
-    Decrease
 }

@@ -3,16 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-namespace Game {
+using UnityEngine.Events;
+using Utilities;
+
+namespace FastAndFractured {
     public class PushShootHandle : ShootingHandle
     {
+
+        public UnityEvent<float, float> onCooldownUpdate;
+
         protected override void CustomStart()
         {
             base.CustomStart();
         }
 
-        protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
             PushBulletBehaviour pushBulletBehaviour = (PushBulletBehaviour)bulletBehaivour; 
@@ -51,14 +56,16 @@ namespace Game {
                 Vector3 rotatedVector = (rotation * velocityVectorX) + transform.up * Vy;
                 ShootBullet(rotatedVector, range);
                 canShoot = false;
-                TimerManager.Instance.StartTimer(characterStatsController.PushCooldown,
+                TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
                     () => { canShoot = true; },
-                    null,
-                    "PushShootCooldown of " + characterStatsController.name,
-                    false,
-                    false
+                    onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
             }
+        }
+
+        private void OnPushShootCooldownDecrease(float currentvalue)
+        {
+            onCooldownUpdate?.Invoke(currentvalue, characterStatsController.PushCooldown);
         }
     }
 }

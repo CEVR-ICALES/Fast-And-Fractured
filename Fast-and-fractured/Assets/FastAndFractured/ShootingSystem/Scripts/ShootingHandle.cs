@@ -1,7 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+using Enums;
+using FMODUnity;
 using UnityEngine;
-namespace Game
+using Utilities;
+
+namespace FastAndFractured
 {
     public abstract class ShootingHandle : MonoBehaviour
     {
@@ -20,6 +22,7 @@ namespace Game
         [SerializeField]
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
+        [SerializeField] private EventReference bulletSound;
 
         protected virtual void CustomStart()
         {
@@ -37,15 +40,16 @@ namespace Game
             if (bullet != null)
             {
                 bullet.transform.position = shootPoint.position;
-                if (bullet.TryGetComponent<BulletBehaivour>(out var bulletBehaivour))
+                if (bullet.TryGetComponent<BulletBehaviour>(out var bulletBehaivour))
                 {
                     SetBulletStats(bulletBehaivour);
                     bulletBehaivour.InitBulletTrayectory();
+                    SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
                 }
             }
         }
 
-        protected virtual void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected virtual void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             bulletBehaivour.Velocity = _velocity;
             bulletBehaivour.Range = _range;

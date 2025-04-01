@@ -1,21 +1,21 @@
-using StateMachine;
-using System; 
+using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RandomDecision", menuName = "StateMachine/RandomDecision")]
- 
-public class DecisionRandomDecision : Decision
+namespace StateMachine
 {
-    [SerializeField] int seed=-1;
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = "RandomDecision", menuName = "StateMachine/RandomDecision")]
+    public class DecisionRandomDecision : Decision
     {
-
-        if (seed != -1)
+        [SerializeField] int seed = -1;
+        public override bool Decide(Controller controller)
         {
-            UnityEngine
-                .Random.seed = seed;
 
+            if (seed != -1)
+            {
+                UnityEngine.Random.InitState(seed);
+
+            }
+            return UnityEngine.Random.Range(0, 2) == 1;
         }
-        return  UnityEngine.Random.Range(0, 2)==1; 
     }
 }

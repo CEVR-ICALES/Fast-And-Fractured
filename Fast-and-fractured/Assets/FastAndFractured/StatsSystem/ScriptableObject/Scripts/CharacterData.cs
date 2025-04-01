@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game
+namespace FastAndFractured
 {
     [CreateAssetMenu(fileName = "CharacterData.asset", menuName = "CharacterData")]
     public class CharacterData : ScriptableObject
@@ -15,7 +15,7 @@ namespace Game
         [Header("Health")]
         public float MaxEndurance;
         public float MinEndurance = 0;
-        public bool Dead;
+        public bool Invulnerable;
 
 
         [Header("Movement")]
@@ -41,11 +41,6 @@ namespace Game
         [Header("Wheels")]
         public float FrontWheelsStrenghtFactor;
         public float RearWheelsStrenghtFactor;
-
-        // enum STEERING_MODE
-        // enum BRAKE
-
-
 
         [Header("Physics")]
         public float Weight;
@@ -77,7 +72,7 @@ namespace Game
         public float NormalShootSpeed;
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime;
         public float NormalShootMaxRange;
-        [Tooltip("The angle include from 10º to 89º. 90º will return infinity.")]
+        [Tooltip("The angle include from 10ï¿½ to 89ï¿½. 90ï¿½ will return infinity.")]
         public float PushShootAngle;
         [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")]
         public float PushShootRange;

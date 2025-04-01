@@ -1,16 +1,17 @@
-using StateMachine;
+using FastAndFractured;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName = nameof(FleeFromTargetAction), menuName = "EnemyStateMachine/Actions/FleeFromTargetAction")]
 
-public class FleeFromTargetAction : Action
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(FleeFromTargetAction), menuName = "EnemyStateMachine/Actions/FleeFromTargetAction")]
+    public class FleeFromTargetAction : Action
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        brain.RunAwayFromCurrentTarget();
+        public override void Act(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+            brain.RunAwayFromCurrentTarget();
+        }
     }
-
-
 }

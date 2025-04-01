@@ -1,14 +1,17 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
+using Enums;
 
-namespace Game
+namespace FastAndFractured
 {
     public class NormalShootHandle : ShootingHandle
     {
         #region VARIABLES
-
+        public UnityEvent<float, float> onOverheatUpdate;
+        public bool isInState;
         public float CountOverHeat
         {
             get => _countOverHeat;
@@ -50,10 +53,10 @@ namespace Game
             _countOverHeat = 0;
         }
 
-        protected override void SetBulletStats(BulletBehaivour bulletBehaivour)
+        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaivour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+            ((NormalBulletBehaviour)bulletBehaivour).IgnoreCollider = ignoredCollider;
         }
 
         #endregion
@@ -82,7 +85,7 @@ namespace Game
 
                 //Normal Cadence TImer 
                 TimerSystem.Instance.CreateTimer(characterStatsController.NormalShootCadenceTime,
-                    TimerDirection.Increase,
+                    TimerDirection.INCREASE,
                     () => { canShoot = true; }
                 );
             }
@@ -94,7 +97,6 @@ namespace Game
 
         private void OnOverheatComplete()
         {
-
             _isOverHeat = true;
             DecreaseOverheatTime();
         }
@@ -110,20 +112,20 @@ namespace Game
         {
             previousCountOverHeat = _countOverHeat;
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         private void OnOverHeatUpdateDecrease(float currentTimerValue)
         {
             _countOverHeat = currentTimerValue;
+            onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         #endregion
 
-        public bool isInState;
         //When user exits normal shoot state
         public void DecreaseOverheatTime()
         {
-
             if (_overheatTimer != null)
             {
                 if (_overheatTimer.GetData().IsRunning && !_isOverHeat && isInState)
@@ -133,12 +135,12 @@ namespace Game
                 if (string.IsNullOrEmpty(_delayUntilStartDecreaseTimerId))
                 {
                     _delayUntilStartDecreaseTimerId = TimerSystem.Instance.CreateTimer(DELAY_BEFORE_COOLING_SHOOT,
-                        TimerDirection.Decrease, onTimerDecreaseComplete: () =>
+                        TimerDirection.DECREASE, onTimerDecreaseComplete: () =>
                         {
                             if (_overheatTimer != null)
                             {
                                 _overheatTimer = TimerSystem.Instance.CreateTimer(_overheatTimer);
-                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Decrease, isRunning: true);
+                                TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.DECREASE, isRunning: true);
 
                                 _overheatTimer.ResumeTimer(); //And Call All The Resumes 
 
@@ -169,7 +171,7 @@ namespace Game
             if (_overheatTimer == null)
             {
                 _overheatTimer = TimerSystem.Instance.CreateTimer(characterStatsController.NormalOverHeat,
-                    TimerDirection.Increase,
+                    TimerDirection.INCREASE,
                     onTimerIncreaseComplete: OnOverheatComplete,
                     onTimerDecreaseComplete: OnCoolingComplete,
                     onTimerIncreaseUpdate: OnOverHeatUpdateIncrease,
@@ -180,7 +182,7 @@ namespace Game
             {
                 if (_overheatTimer.GetData().IsRunning)
                 {
-                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.Increase, isRunning: true);
+                    TimerSystem.Instance.ModifyTimer(_overheatTimer, newDirection: TimerDirection.INCREASE, isRunning: true);
 
                 }
                 else
@@ -191,7 +193,6 @@ namespace Game
             }
 
             isInState = true;
-            return;
         }
     }
 }

@@ -1,19 +1,22 @@
-using StateMachine;
 using UnityEngine;
-[CreateAssetMenu(fileName = "ActionWait", menuName = "StateMachine/ActionWait")]
-public class ActionWait : Action
+
+namespace StateMachine
 {
-    public float timeToWait ;
-      float timeCounter;
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = "ActionWait", menuName = "StateMachine/ActionWait")]
+    public class ActionWait : Action
     {
-
-        timeCounter += Time.deltaTime;
-
-        if (timeCounter >= timeToWait)
+        public float timeToWait;
+        float timeCounter;
+        public override void Act(Controller controller)
         {
-            FinishAction();
-        }
 
+            timeCounter += Time.deltaTime;
+
+            if (timeCounter >= timeToWait)
+            {
+                FinishAction();
+            }
+
+        }
     }
 }

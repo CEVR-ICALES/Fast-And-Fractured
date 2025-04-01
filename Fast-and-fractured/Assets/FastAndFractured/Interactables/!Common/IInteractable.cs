@@ -2,8 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IInteractable 
+namespace FastAndFractured
 {
-    void OnInteract(GameObject interactionFrom,GameObject intearactionTo);
+    public interface IInteractable
+    {
+        void OnInteract(GameObject interactionFrom, GameObject intearactionTo);
 
+    }
 }
+

@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
-[CreateAssetMenu(fileName = nameof(PushShootAction), menuName = "EnemyStateMachine/Actions/PushShootAction")]
-public class PushShootAction : Action
+using FastAndFractured;
+
+namespace StateMachine
 {
-    public override void Act(Controller controller)
+    [CreateAssetMenu(fileName = nameof(PushShootAction), menuName = "EnemyStateMachine/Actions/PushShootAction")]
+    public class PushShootAction : Action
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        public override void Act(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        brain.PushShoot();
+            brain.PushShoot();
+        }
     }
-
 }

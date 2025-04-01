@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsInFrontDecision), menuName = "EnemyStateMachine/Decisions/IsInFrontDecision")]
-public class IsInFrontDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsInFrontDecision), menuName = "EnemyStateMachine/Decisions/IsInFrontDecision")]
+    public class IsInFrontDecision : Decision
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        return brain.IsInFront();
-     }
+        public override bool Decide(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+            return brain.IsInFront();
+        }
+    }
 }

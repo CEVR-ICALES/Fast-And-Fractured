@@ -1,15 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using StateMachine;
+using FastAndFractured;
 
-[CreateAssetMenu(fileName = nameof(IsShootOverheatedDecision), menuName = "EnemyStateMachine/Decisions/IsShootOverheatedDecision")]
-public class IsShootOverheatedDecision : Decision
+namespace StateMachine
 {
-    public override bool Decide(Controller controller)
+    [CreateAssetMenu(fileName = nameof(IsShootOverheatedDecision), menuName = "EnemyStateMachine/Decisions/IsShootOverheatedDecision")]
+    public class IsShootOverheatedDecision : Decision
     {
-        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        public override bool Decide(Controller controller)
+        {
+            EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-        return brain.IsShootOverheated();
+            return brain.IsShootOverheated();
+        }
     }
+
 }
