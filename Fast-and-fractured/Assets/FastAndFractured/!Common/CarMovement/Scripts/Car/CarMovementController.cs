@@ -46,8 +46,10 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
+
         public bool IsFlipped { get { return _isFlipped && IsInWall(); } set => _isFlipped = value; }
         private bool _isFlipped = false;
+
         [SerializeField]
         private float detectFlipTime = 3.5f;
         private ITimer _flipTimer;
@@ -413,14 +415,21 @@ namespace FastAndFractured
 
         public void StartIsFlippedTimer()
         {
-          _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE,() => { _isFlipped = true; });
+            if (_flipTimer == null)
+            {
+                Debug.Log("StartTimer");
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE, () => { _isFlipped = true; });
+            }
         }
 
         public void StopFlippedTimer()
         {
             if (_flipTimer != null)
             {
+                Debug.Log("EndTimer");
                 _flipTimer.StopTimer();
+                _flipTimer = null;
+                _isFlipped = false;
             }
         }
 

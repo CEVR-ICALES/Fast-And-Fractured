@@ -20,6 +20,7 @@ namespace FastAndFractured {
 
         private const float FLIP_FORCE = 35000f;
 
+        private const float FLIP_FORCE_OFFSET = 0.4f;
 
         private void FixedUpdate()
         {
@@ -98,7 +99,7 @@ namespace FastAndFractured {
 
         public void ApplyFlipStateForce()
         {
-            _rb.AddForce(_rb.transform.up * FLIP_FORCE , ForceMode.Impulse);
+            _rb.AddForce((_rb.transform.up + FLIP_FORCE_OFFSET * Vector3.up) * FLIP_FORCE , ForceMode.Impulse);
         }
     }
 }
