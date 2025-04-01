@@ -423,7 +423,6 @@ namespace FastAndFractured
         {
             if (_flipTimer == null)
             {
-                Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE, () => { _isFlipped = true; });
             }
         }
@@ -432,7 +431,6 @@ namespace FastAndFractured
         {
             if (_flipTimer != null)
             {
-                Debug.Log("EndTimer");
                 _flipTimer.StopTimer();
                 _flipTimer = null;
                 _isFlipped = false;
