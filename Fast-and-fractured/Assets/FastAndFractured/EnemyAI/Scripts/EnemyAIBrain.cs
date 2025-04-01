@@ -2,6 +2,8 @@ using Enums;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -44,6 +46,24 @@ namespace FastAndFractured
         const int START_CORNER_INDEX = 1;
         Vector3 startPosition;
         Quaternion startRotation;
+        [Header("Aggresivity parameters")]
+        [SerializeField] private float enuduranceSuddentlyLostNeedToChangeToFleeState = 100;
+        [Tooltip("During how many time is needed to suffer damage")][SerializeField] private float suddenlyLostTime = 5f;
+        ITimer suddentlyLostTimer;
+        private float currentSuddenlyLostTimeAmount;
+        [SerializeField] private float enduranceNeededToChangeFromFleeToSearchState;
+        [Tooltip("How much more health more has the AI than the enemy to start attacking him")][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState;
+
+        private void OnEnable()
+        {
+            statsController.onEnduranceDamageTaken.AddListener(HandleTakingEnduranceDamage);
+        }
+
+
+        private void OnDisable()
+        {
+            statsController.onEnduranceDamageTaken.RemoveListener(HandleTakingEnduranceDamage);
+        }
         private void Awake()
         {
             //Testing 
@@ -111,7 +131,7 @@ namespace FastAndFractured
             //If angle between 90 and -90 go forward
             //If angle more than 90 or less than -90 go backwards
             float inputY = MAX_INPUT_VALUE;
-            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION) 
+            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION)
             {
                 inputY = -MAX_INPUT_VALUE;
             }
@@ -121,7 +141,22 @@ namespace FastAndFractured
 
             carMovementController.HandleSteeringInput(input);
         }
-
+        public void RegisterSuddently(float damageTaken)
+        {
+            currentSuddenlyLostTimeAmount += damageTaken;
+            if (suddentlyLostTimer == null)
+            {
+                suddentlyLostTimer = TimerSystem.Instance.CreateTimer(suddenlyLostTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                {
+                    suddentlyLostTimer = null;
+                    currentSuddenlyLostTimeAmount = 0;
+                });
+            }
+            else
+            {
+                TimerSystem.Instance.ModifyTimer(suddentlyLostTimer, newCurrentTime: 0);
+            }
+        }
         #endregion
 
         #region SearchState
@@ -230,8 +265,34 @@ namespace FastAndFractured
             float angle = GetAngleDirection(Vector3.up);
             return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
         }
+
+        public bool WantsToChangeToCombatState()
+        {
+            if (!_targetToShoot)
+            {
+                return false;
+            }
+            var enemyStatsController = _targetToShoot.GetComponent<StatsController>();
+            if (enemyStatsController == null) { return false; }
+            float healthDiference = enemyStatsController.Endurance - enemyStatsController.Endurance;
+            return healthDiference < healthDifferenceNeededToChangeFromFleeToCombatState;
+
+        }
+        public bool WantsToChangeToFleeState()
+        {
+            bool condition = false;
+
+
+
+
+            return condition;
+        }
         #endregion
 
+        private void HandleTakingEnduranceDamage(float damageTaken)
+        {
+            RegisterSuddently(damageTaken);
+        }
         #region Helpers
 
         private void AssignTarget(GameObject target)

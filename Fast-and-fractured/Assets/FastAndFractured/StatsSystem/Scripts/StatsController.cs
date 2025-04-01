@@ -1,5 +1,6 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -90,8 +91,8 @@ namespace FastAndFractured
         public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
 
         #endregion
-
         private float _errorGetStatFloat = -1;
+        public UnityEvent<float> onEnduranceDamageTaken;
 
         #region START EVENTS
         public void CustomStart()
@@ -143,6 +144,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        onEnduranceDamageTaken?.Invoke(currentEndurance);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
