@@ -134,6 +134,12 @@ namespace FastAndFractured
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
+        [ContextMenu(nameof(DebugTake100Endurance))]
+        public void DebugTake100Endurance()
+        {
+            TakeEndurance(100, false);
+        }
+
 
         #region Health
         public void TakeEndurance(float substract, bool isProduct)
@@ -144,7 +150,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
-                        onEnduranceDamageTaken?.Invoke(currentEndurance);
+                        onEnduranceDamageTaken?.Invoke(substract);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {

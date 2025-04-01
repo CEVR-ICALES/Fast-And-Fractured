@@ -50,7 +50,7 @@ namespace FastAndFractured
         [SerializeField] private float enuduranceSuddentlyLostNeedToChangeToFleeState = 100;
         [Tooltip("During how many time is needed to suffer damage")][SerializeField] private float suddenlyLostTime = 5f;
         ITimer suddentlyLostTimer;
-        private float currentSuddenlyLostTimeAmount;
+        [SerializeField] private float currentSuddenlyLostTimeAmount;
         [SerializeField] private float enduranceNeededToChangeFromFleeToSearchState;
         [Tooltip("How much more health more has the AI than the enemy to start attacking him")][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState;
 
@@ -281,6 +281,13 @@ namespace FastAndFractured
         public bool WantsToChangeToFleeState()
         {
             bool condition = false;
+            condition = currentSuddenlyLostTimeAmount >= enuduranceSuddentlyLostNeedToChangeToFleeState;
+            if (condition)
+            {
+                return condition;
+
+            
+            }
 
 
 
