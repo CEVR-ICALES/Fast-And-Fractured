@@ -10,7 +10,7 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            controller.GetBehaviour<ApplyForceByState>().ToggleRollPrevention(false, controller.GetBehaviour<PhysicsBehaviour>().Rb, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
+            controller.GetBehaviour<ApplyForceByState>().ToggleRollPrevention(false, controller.GetBehaviour<PlayerInputController>().MoveInput.magnitude);
         }
     }
 }

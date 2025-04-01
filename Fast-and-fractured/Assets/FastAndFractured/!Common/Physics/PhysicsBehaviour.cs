@@ -63,7 +63,7 @@ namespace FastAndFractured
                 VehicleCollision(collision);
                 CheckWallCollision(collision);
             }
-            GroundChek(collision);
+            GroundCheck(collision);
         }
 
         private void OnCollisionExit(Collision collision)
@@ -126,7 +126,7 @@ namespace FastAndFractured
             }
         }
 
-        private void GroundChek(Collision collision)
+        private void GroundCheck(Collision collision)
         {
             if((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer){
               _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { _isTouchingGround = true; });

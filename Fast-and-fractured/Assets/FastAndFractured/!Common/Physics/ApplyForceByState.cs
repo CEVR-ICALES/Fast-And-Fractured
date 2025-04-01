@@ -22,6 +22,10 @@ namespace FastAndFractured {
 
         private const float FLIP_FORCE_OFFSET = 0.4f;
 
+        private void Start()
+        {
+            _rb = GetComponent<Rigidbody>();
+        }
         private void FixedUpdate()
         {
             if(_canApplyRollPrevention)
@@ -41,37 +45,23 @@ namespace FastAndFractured {
             
         }
 
-        public void ToggleRollPrevention(bool canApplyRollPrevention, Rigidbody rb, float steeringInputMagnitude)
+        public void ToggleRollPrevention(bool canApplyRollPrevention, float steeringInputMagnitude)
         {
             _canApplyRollPrevention = canApplyRollPrevention;
             if(canApplyRollPrevention)
             {
-                if (_rb == null)
-                    _rb = rb;
                 _steeringInputMagnitude = steeringInputMagnitude;
             }  
         }
 
-        public void ToggleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
+        public void ToggleCustomGravity(bool canApplyCustomGravity)
         {
             _canApplyCustomGravity = canApplyCustomGravity;
-            if (canApplyCustomGravity)
-            {
-                if (_rb == null)
-                    _rb = rb;
-            }
         }
 
-        public void ToggleAirFriction(bool canApplyAirFriction, Rigidbody rb)
+        public void ToggleAirFriction(bool canApplyAirFriction)
         {
             _canApplyAirFricction = canApplyAirFriction;
-            if (canApplyAirFriction)
-            {
-                if(_rb == null)
-                {
-                    _rb = rb;
-                }
-            }
         }
 
 

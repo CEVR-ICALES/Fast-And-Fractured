@@ -47,7 +47,7 @@ namespace FastAndFractured
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
 
-        public bool IsFlipped { get { return _isFlipped && IsInWall(); } set => _isFlipped = value; }
+        public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
 
         [SerializeField]
@@ -415,7 +415,6 @@ namespace FastAndFractured
             {
                 return false;
             }
-
             return currentWheelsAngle >= maxGroundAngleThreshold;
         }
 
@@ -423,6 +422,7 @@ namespace FastAndFractured
         {
             if (_flipTimer == null)
             {
+                Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE, () => { _isFlipped = true; });
             }
         }
@@ -431,9 +431,9 @@ namespace FastAndFractured
         {
             if (_flipTimer != null)
             {
+                Debug.Log("StopTimer");
                 _flipTimer.StopTimer();
                 _flipTimer = null;
-                _isFlipped = false;
             }
         }
 
