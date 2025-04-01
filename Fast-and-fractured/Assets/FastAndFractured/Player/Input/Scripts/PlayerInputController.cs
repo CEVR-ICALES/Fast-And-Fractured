@@ -130,6 +130,10 @@ namespace FastAndFractured
             _inputActions.Disable();
         }
 
+        private void Start()
+        {
+        }
+
         private void Update()
         {
             CheckForInputDeviceChange();

@@ -11,7 +11,6 @@ namespace FastAndFractured
     public class LevelController : AbstractSingleton<LevelController>
     {
         public bool usingController;
-        [SerializeField] private List<ObjectPoolSO> poolSOList;
         [SerializeField] private List<StatsController> characters;
         [SerializeField] private EnemyAIBrain ai;
         [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
@@ -73,11 +72,8 @@ namespace FastAndFractured
         public void StartLevel()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            ObjectPoolManager.Instance.CustomStart();
-            foreach (var poolSO in poolSOList)
-            {
-                ObjectPoolManager.Instance.CreateObjectPool(poolSO);
-            }
+            //ObjectPoolManager.Instance.CustomStart();
+
             foreach (var character in characters)
             {
                 character.CustomStart();

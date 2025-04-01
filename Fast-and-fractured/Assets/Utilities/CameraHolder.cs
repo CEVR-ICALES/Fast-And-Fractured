@@ -9,7 +9,7 @@ namespace Utilities
 
         public Camera CameraToHold { get => cameraToHold; set => cameraToHold = value; }
 
-        private void Start()
+        private void Awake()
         {
             if (!cameraToHold)
             {
