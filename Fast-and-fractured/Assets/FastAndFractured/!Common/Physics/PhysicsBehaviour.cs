@@ -24,13 +24,20 @@ namespace FastAndFractured
         [Header("Wall Collision Detection")]
         [SerializeField] private float wallCollisionAngleThreshold;
         [SerializeField] private float wallBounceForce = 12000f;
-        
+
+        [Header("Ground Detection")]
+        [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private float _checkGroundTime = 0.5f;
+        private ITimer _groundTimer;
+        public bool IsTouchingGround { get => _isTouchingGround; }
+        private bool _isTouchingGround = false;
+
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
+        public StatsController StatsController { get => statsController; }
         public Rigidbody Rb { get => _rb; set => _rb = value;}
         private Rigidbody _rb;
         private CarMovementController _carMovementController;
-        public StatsController StatsController { get => statsController;}
 
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
         private void Start()
@@ -53,56 +60,93 @@ namespace FastAndFractured
         {
             if (IsCurrentlyDashing)
             {
-                PhysicsBehaviour otherComponentPhysicsBehaviours = collision.gameObject.GetComponentInChildren<PhysicsBehaviour>();
-                if (otherComponentPhysicsBehaviours!=null)
+                VehicleCollision(collision);
+                CheckWallCollision(collision);
+            }
+            GroundCheck(collision);
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+           ExitGroundCheck(collision);
+        }
+
+        private void VehicleCollision(Collision collision)
+        {
+            PhysicsBehaviour otherComponentPhysicsBehaviours = collision.gameObject.GetComponentInChildren<PhysicsBehaviour>();
+            if (otherComponentPhysicsBehaviours != null)
+            {
+                CancelDash();
+                otherComponentPhysicsBehaviours.CancelDash();
+                ContactPoint contactPoint = collision.contacts[0];
+                Vector3 collisionPos = contactPoint.point;
+                Vector3 collisionNormal = contactPoint.normal;
+                float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
+                float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
+                float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
+                float forceToApply;
+                //detect if the contact was frontal
+                if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
                 {
-                    CancelDash();
-                    otherComponentPhysicsBehaviours.CancelDash();
-                    ContactPoint contactPoint = collision.contacts[0];
-                    Vector3 collisionPos = contactPoint.point;
-                    Vector3 collisionNormal = contactPoint.normal;
-                    float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
-                    float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
-                    float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
-                    float forceToApply;
-                    //detect if the contact was frontal
-                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
+                    if (otherComponentPhysicsBehaviours.IsCurrentlyDashing)
                     {
-                        if(otherComponentPhysicsBehaviours.IsCurrentlyDashing)
+                        if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponentPhysicsBehaviours.Rb.velocity.magnitude))
                         {
-                            if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponentPhysicsBehaviours.Rb.velocity.magnitude))
-                            {
-                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                            } else
-                            {
-                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
-                            }
-                            
-                        } else
-                        {
-                            forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                            forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                         }
+                        else
+                        {
+                            forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
+                        }
+
                     }
                     else
                     {
                         forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                     }
+                }
+                else
+                {
+                    forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                }
 
-                    if(!otherComponentPhysicsBehaviours.HasBeenPushed)
-                    {
-                        if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
+                if (!otherComponentPhysicsBehaviours.HasBeenPushed)
+                {
+                    
+                     if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
                         {
                             otherComponentPhysicsBehaviours.StatsController.IsInvulnerable=false;
                         }
-                        else{
+                        else
+                        {
                             otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
                             otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
                         }
+                }
+            }
+        }
+
+        private void GroundCheck(Collision collision)
+        {
+            if((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer){
+              _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { _isTouchingGround = true; });
+            }
+        }
+
+        private void ExitGroundCheck(Collision collision)
+        {
+            if((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+            {
+                if (_isTouchingGround)
+                    _isTouchingGround = false;
+                else
+                {
+                    if (_groundTimer != null)
+                    {
+                        _groundTimer.StopTimer();
                     }
                 }
-                CheckWallCollision(collision);
             }
-
         }
 
         public void CancelDash()

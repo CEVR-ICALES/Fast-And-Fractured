@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace FastAndFractured {
-    public class RollPrevention : MonoBehaviour
+    public class ApplyForceByState : MonoBehaviour
     {
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
@@ -18,7 +18,14 @@ namespace FastAndFractured {
 
         private const float AIR_FRICTION = 9.8f;
 
+        private const float FLIP_FORCE = 35000f;
 
+        private const float FLIP_FORCE_OFFSET = 0.4f;
+
+        private void Start()
+        {
+            _rb = GetComponent<Rigidbody>();
+        }
         private void FixedUpdate()
         {
             if(_canApplyRollPrevention)
@@ -30,28 +37,31 @@ namespace FastAndFractured {
             {
                 ApplyCustomGravity();
             }
+
+            if (_canApplyAirFricction)
+            {
+                ApplyAirFricction();
+            }
             
         }
 
-        public void ToggleRollPrevention(bool canApplyRollPrevention, Rigidbody rb, float steeringInputMagnitude)
+        public void ToggleRollPrevention(bool canApplyRollPrevention, float steeringInputMagnitude)
         {
             _canApplyRollPrevention = canApplyRollPrevention;
             if(canApplyRollPrevention)
             {
-                if (_rb == null)
-                    _rb = rb;
                 _steeringInputMagnitude = steeringInputMagnitude;
             }  
         }
 
-        public void ToogleCustomGravity(bool canApplyCustomGravity, Rigidbody rb)
+        public void ToggleCustomGravity(bool canApplyCustomGravity)
         {
             _canApplyCustomGravity = canApplyCustomGravity;
-            if (canApplyCustomGravity)
-            {
-                if (_rb == null)
-                    _rb = rb;
-            }
+        }
+
+        public void ToggleAirFriction(bool canApplyAirFriction)
+        {
+            _canApplyAirFricction = canApplyAirFriction;
         }
 
 
@@ -70,7 +80,16 @@ namespace FastAndFractured {
         public void ApplyCustomGravity()
         {
             _rb.AddForce(Vector3.down * CUSTOM_GRAVITY, ForceMode.Acceleration);
-            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION);
+        }
+
+        public void ApplyAirFricction()
+        {
+            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION, ForceMode.Acceleration);
+        }
+
+        public void ApplyFlipStateForce()
+        {
+            _rb.AddForce((_rb.transform.up + FLIP_FORCE_OFFSET * Vector3.up) * FLIP_FORCE , ForceMode.Impulse);
         }
     }
 }

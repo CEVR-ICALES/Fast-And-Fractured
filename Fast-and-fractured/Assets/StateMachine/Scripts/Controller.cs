@@ -64,7 +64,7 @@ namespace StateMachine
         }
         void ChangeState(State newState)
         {
-            //Debug.Log($"Entering state {newState.name}");
+            Debug.Log($"Entering state {newState.name}");
             ExitState(currentState);
             var newlyInstantiatedState = InstantiateCopyOfState(newState);
             EnterState(newlyInstantiatedState);
