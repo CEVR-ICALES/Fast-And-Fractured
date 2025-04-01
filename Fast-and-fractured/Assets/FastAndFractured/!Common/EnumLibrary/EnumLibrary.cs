@@ -50,7 +50,8 @@ namespace Enums
         PLAYER_7,
         BAD_EFFECTS,
         EFFECTS,
-        GOOD_EFFECTS
+        GOOD_EFFECTS,
+        SHOOTING_CROSSHAIR
     }
 
     public enum ScreensType
@@ -69,7 +70,9 @@ namespace Enums
         BULLET,
         INTERACTOR,
         NORMAL_BULLET,
-        PUSH_BULLET
+        PUSH_BULLET,
+        ASCENDING_TOMATO,
+        DESCENDING_TOMATO
     }
 
     public enum PathMode

@@ -13,6 +13,7 @@ namespace Utilities
 
         private int _nextTimerId = 0;
 
+        private bool _isPaused = false;
 
         #region UNITY_LIFECYCLE
 
@@ -192,6 +193,10 @@ namespace Utilities
                     newCurrentTime.Value;
             }
 
+            _timers.TryAdd(timer.GetData().ID, timer);
+
+            if (!_isPaused) return true;
+            
             if (isRunning != timer.GetData().IsRunning)
             {
                 if (isRunning)
@@ -204,10 +209,6 @@ namespace Utilities
                 }
             }
 
-            {
-            }
-
-            _timers.TryAdd(timer.GetData().ID, timer);
             return true;
         }
 
@@ -285,6 +286,8 @@ namespace Utilities
 
         public void ResumeTimer(string timerId)
         {
+            if (_isPaused) return;
+
             if (_timers.TryGetValue(timerId, out ITimer timer))
             {
                 timer.ResumeTimer();
@@ -326,6 +329,7 @@ namespace Utilities
 
         public void OnPause()
         {
+            _isPaused = true;
             foreach (var timer in _timers)
             {
                 timer.Value.PauseTimer();
@@ -334,6 +338,7 @@ namespace Utilities
 
         public void OnResume()
         {
+            _isPaused = false;
             foreach (var timer in _timers)
             {
                 timer.Value.ResumeTimer();

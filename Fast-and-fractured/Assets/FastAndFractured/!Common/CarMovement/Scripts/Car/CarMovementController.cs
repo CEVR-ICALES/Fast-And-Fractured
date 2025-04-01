@@ -62,7 +62,10 @@ namespace FastAndFractured
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
         private bool _isUsingController = false;
+
+        public bool IsAi => isAi;
         [SerializeField] private bool isAi = false;
+
         const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
         [Header("References")]
@@ -331,7 +334,10 @@ namespace FastAndFractured
         }
         public void CancelDash()
         {
-            TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            if (TimerSystem.Instance.HasTimer(_dashTimer))
+            {
+                TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+            }
             FinishDash();
         }
 
@@ -443,6 +449,7 @@ namespace FastAndFractured
             float wheelsAngle = 0;
             groundWheels = 0;
             combinedNormal = Vector3.zero;
+
             foreach (var wheel in wheels)
             {
                 WheelGroundInfo groundInfo = wheel.GetGroundInfo();

@@ -1,4 +1,5 @@
 using Enums;
+using FMODUnity;
 using UnityEngine;
 using Utilities;
 
@@ -21,6 +22,7 @@ namespace FastAndFractured
         [SerializeField]
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
+        [SerializeField] private EventReference bulletSound;
 
         protected virtual void CustomStart()
         {
@@ -42,6 +44,7 @@ namespace FastAndFractured
                 {
                     SetBulletStats(bulletBehaivour);
                     bulletBehaivour.InitBulletTrayectory();
+                    SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
                 }
             }
         }

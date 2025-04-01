@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
+using Cinemachine;
 using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -12,14 +15,16 @@ namespace FastAndFractured
         public delegate void InputDeviceChanged(InputDeviceType deviceType);
         public static event InputDeviceChanged OnInputDeviceChanged;
 
-        PlayerInputAction inputActions;
+        public PlayerInputAction InputActions { get => _inputActions; }
+        private PlayerInputAction _inputActions;
+        
 
         // Movement & Camera Inputs with private backing fields
         public Vector2 MoveInput => _moveInput;
         private Vector2 _moveInput;
 
         public Vector2 CameraInput => _cameraInput;
-        private Vector2 _cameraInput;
+        private Vector2 _cameraInput = Vector2.zero;
 
         // Action Flags with private backing fields
         public float IsAccelerating => _isAccelerating;
@@ -49,7 +54,7 @@ namespace FastAndFractured
         public bool IsPausing => _isPausing;
         private bool _isPausing;
 
-        public bool IsResettingCamera => _isResettingCamera;
+        public bool IsResettingCamera { get { return _isResettingCamera; } set { _isResettingCamera = value; } }
         private bool _isResettingCamera;
 
         public bool IsDashing => _isDashing;
@@ -75,61 +80,65 @@ namespace FastAndFractured
         protected override void Awake()
         {
             base.Awake();
-            inputActions = new PlayerInputAction();
+            _inputActions = new PlayerInputAction();
         }
 
         private void OnEnable()
         {
-            inputActions.Enable();
+            _inputActions.Enable();
 
             // Movement Input
-            inputActions.PlayerInputActions.Movement.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
-            inputActions.PlayerInputActions.Movement.canceled += ctx => _moveInput = Vector2.zero;
+            _inputActions.PlayerInputActions.Movement.performed += ctx => _moveInput = ctx.ReadValue<Vector2>();
+            _inputActions.PlayerInputActions.Movement.canceled += ctx => _moveInput = Vector2.zero;
 
             // Camera Input
-            inputActions.PlayerInputActions.CameraMove.performed += ctx => _cameraInput = ctx.ReadValue<Vector2>();
-            inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
+            _inputActions.PlayerInputActions.CameraMove.performed += ctx => _cameraInput = ctx.ReadValue<Vector2>();
+            _inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
 
             // Action Inputs
-            inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
-            inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = 0f;
+            _inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
+            _inputActions.PlayerInputActions.Accelerate.canceled += ctx => _isAccelerating = 0f;
 
-            inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = ctx.ReadValue<float>();
-            inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = 0f;
+            _inputActions.PlayerInputActions.Reverse.performed += ctx => _isReversing = ctx.ReadValue<float>();
+            _inputActions.PlayerInputActions.Reverse.canceled += ctx => _isReversing = 0f;
 
-            inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
-            inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
+            _inputActions.PlayerInputActions.Brake.performed += ctx => _isBraking = true;
+            _inputActions.PlayerInputActions.Brake.canceled += ctx => _isBraking = false;
 
-            inputActions.PlayerInputActions.ShootingMode.started += ctx => ChangeShootMode();
+            _inputActions.PlayerInputActions.ShootingMode.started += ctx => ChangeShootMode();
 
-            inputActions.PlayerInputActions.Shoot.started += ctx => SetShootType();
-            inputActions.PlayerInputActions.Shoot.canceled += ctx => UnsetShootType();
+            _inputActions.PlayerInputActions.Shoot.started += ctx => SetShootType();
+            _inputActions.PlayerInputActions.Shoot.canceled += ctx => UnsetShootType();
 
-            inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
-            inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
+            _inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
+            _inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
 
-            inputActions.PlayerInputActions.ThrowMine.performed += ctx => _isThrowingMine = true;
-            inputActions.PlayerInputActions.ThrowMine.canceled += ctx => _isThrowingMine = false;
+            _inputActions.PlayerInputActions.ThrowMine.performed += ctx => _isThrowingMine = true;
+            _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => _isThrowingMine = false;
 
-            inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
-            inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
+            _inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
+            _inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
-            inputActions.PlayerInputActions.ResetCamera.performed += ctx => _isResettingCamera = true;
-            inputActions.PlayerInputActions.ResetCamera.canceled += ctx => _isResettingCamera = false;
+            _inputActions.PlayerInputActions.ResetCamera.started += ctx => CameraBehaviours.Instance.ResetCameraPosition();
 
-            inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
-            inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
+            _inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
+            _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
         }
 
         private void OnDisable()
         {
-            inputActions.Disable();
+            _inputActions.Disable();
+        }
+
+        private void Start()
+        {
         }
 
         private void Update()
         {
             CheckForInputDeviceChange();
         }
+
 
         private void CheckForInputDeviceChange()
         {
@@ -223,17 +232,17 @@ namespace FastAndFractured
         {
             if (enable)
             {
-                inputActions.PlayerInputActions.Accelerate.Enable();
-                inputActions.PlayerInputActions.Movement.Enable();
-                inputActions.PlayerInputActions.Brake.Enable();
-                inputActions.PlayerInputActions.Reverse.Enable();
+                _inputActions.PlayerInputActions.Accelerate.Enable();
+                _inputActions.PlayerInputActions.Movement.Enable();
+                _inputActions.PlayerInputActions.Brake.Enable();
+                _inputActions.PlayerInputActions.Reverse.Enable();
             }
             else
             {
-                inputActions.PlayerInputActions.Accelerate.Disable();
-                inputActions.PlayerInputActions.Movement.Disable();
-                inputActions.PlayerInputActions.Brake.Disable();
-                inputActions.PlayerInputActions.Reverse.Disable();
+                _inputActions.PlayerInputActions.Accelerate.Disable();
+                _inputActions.PlayerInputActions.Movement.Disable();
+                _inputActions.PlayerInputActions.Brake.Disable();
+                _inputActions.PlayerInputActions.Reverse.Disable();
             }
         }
 
@@ -241,19 +250,19 @@ namespace FastAndFractured
         {
             if (enable)
             {
-                inputActions.PlayerInputActions.Dash.Enable();
-                inputActions.PlayerInputActions.Shoot.Enable();
-                inputActions.PlayerInputActions.ShootingMode.Enable();
-                inputActions.PlayerInputActions.ThrowMine.Enable();
-                inputActions.PlayerInputActions.SpecialAbility.Enable();
+                _inputActions.PlayerInputActions.Dash.Enable();
+                //_inputActions.PlayerInputActions.Shoot.Enable();
+                _inputActions.PlayerInputActions.ShootingMode.Enable();
+                _inputActions.PlayerInputActions.ThrowMine.Enable();
+                _inputActions.PlayerInputActions.SpecialAbility.Enable();
             }
             else
             {
-                inputActions.PlayerInputActions.Dash.Disable();
-                inputActions.PlayerInputActions.Shoot.Disable();
-                inputActions.PlayerInputActions.ShootingMode.Disable();
-                inputActions.PlayerInputActions.ThrowMine.Disable();
-                inputActions.PlayerInputActions.SpecialAbility.Disable();
+                _inputActions.PlayerInputActions.Dash.Disable();
+                //_inputActions.PlayerInputActions.Shoot.Disable();
+                _inputActions.PlayerInputActions.ShootingMode.Disable();
+                _inputActions.PlayerInputActions.ThrowMine.Disable();
+                _inputActions.PlayerInputActions.SpecialAbility.Disable();
             }
         }
 

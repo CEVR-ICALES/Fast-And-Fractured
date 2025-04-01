@@ -21,7 +21,7 @@ namespace FastAndFractured
             }
             if (!carMovementController)
             {
-                carMovementController = GetComponent<CarMovementController>();
+                carMovementController = GetComponentInChildren<CarMovementController>();
             }
         }
 
