@@ -50,7 +50,7 @@ namespace FastAndFractured {
             _canApplyRollPrevention = canApplyRollPrevention;
             if(canApplyRollPrevention)
             {
-                _steeringInputMagnitude = steeringInputMagnitude;
+                _steeringInputMagnitude = 1;
             }  
         }
 

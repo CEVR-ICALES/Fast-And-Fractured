@@ -415,6 +415,7 @@ namespace FastAndFractured
             {
                 return false;
             }
+            Debug.Log("IsWall");
             return currentWheelsAngle >= maxGroundAngleThreshold;
         }
 
@@ -439,7 +440,19 @@ namespace FastAndFractured
 
         private float ReturnCurrentWheelsAngle(out int groundWheels)
         {
-            return ReturnCurrentWheelsAngle(out groundWheels, out Vector3 combinedNormal);
+            float wheelsAngle = 0;
+            groundWheels = 0;
+
+            foreach (var wheel in wheels)
+            {
+                WheelGroundInfo groundInfo = wheel.GetGroundInfo();
+                if (groundInfo.isGrounded)
+                {
+                    wheelsAngle = Mathf.Max(wheelsAngle, groundInfo.slopeAngle);
+                    groundWheels++;
+                }
+            }
+            return wheelsAngle;
         }
 
         private float ReturnCurrentWheelsAngle(out int groundWheels, out Vector3 combinedNormal)
