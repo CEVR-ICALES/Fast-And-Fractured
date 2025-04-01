@@ -9,7 +9,11 @@ namespace StateMachine
         public override void Act(Controller controller)
         {
             controller.GetBehaviour<ApplyForceByState>().ApplyFlipStateForce();
-            controller.GetBehaviour<CarMovementController>().IsFlipped = false;
+            CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
+            if (!carMovementController.IsInWall())
+            {
+                carMovementController.IsFlipped = false;
+            }
         }
     }
 }
