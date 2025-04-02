@@ -62,8 +62,8 @@ public class CharacterSelectorManager : MonoBehaviour
     public void SelectPreviousSkin()
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
-        _currentSkinIndex = _currentSkinIndex + -1;
-        if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = character.Models.Length -1;
+        _currentSkinIndex = _currentSkinIndex  - 1;
+        if (_currentSkinIndex < 0) _currentSkinIndex = character.Models.Length -1;
         ChangeCurrentDisplayedModel(character);
         ChangePlayerIcon();
     }
@@ -118,7 +118,8 @@ public class CharacterSelectorManager : MonoBehaviour
     {
         if (_currentModelInstance != null)
             Destroy(_currentModelInstance);
-        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition); // instantiate new model
+        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
+        _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
     }
     private void CheckIfSkinUnlocked()
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Utilities;
 
@@ -16,4 +17,10 @@ public class FakeCarMovement : MonoBehaviour
         //TimerSystem.Instance.CreateTimer(forceToApply)
         _rb.AddForce(transform.forward * forceToApply, ForceMode.Impulse);
     }
+
+    public void MoveCarForward()
+    {
+        _rb.AddForce(transform.forward * forceToApply, ForceMode.Impulse);
+    }
 }
+    
