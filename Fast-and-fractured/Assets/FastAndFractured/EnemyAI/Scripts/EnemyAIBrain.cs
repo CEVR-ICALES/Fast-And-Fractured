@@ -276,9 +276,8 @@ namespace FastAndFractured
             if (enemyStatsController == null) { return false; }
 
     
-            float healthDiference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
-            return healthDiference < healthDifferenceNeededToChangeFromFleeToCombatState;
-
+            float healthDifference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
+            return healthDifference < healthDifferenceNeededToChangeFromFleeToCombatState;
         }
         public bool WantsToChangeToFleeState()
         {
