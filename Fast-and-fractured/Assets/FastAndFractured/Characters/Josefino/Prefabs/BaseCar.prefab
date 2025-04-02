@@ -603,6 +603,13 @@ MonoBehaviour:
   shootPoint: {fileID: 2607063736163652628}
   pooltype: 2
   directionCenterOffSet: {x: 0, y: 0.25, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   onOverheatUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -745,6 +752,7 @@ MonoBehaviour:
   downhillForwardThreshold: -0.3
   slopeSpeedThreshold: 3
   maxGroundAngleThreshold: 90
+  detectFlipTime: 3.5
   isAi: 0
   statsController: {fileID: 2898550601115800401}
 --- !u!114 &5672472646167121783
@@ -800,6 +808,10 @@ MonoBehaviour:
   PushApplyPoint: {fileID: 672656252440244910}
   wallCollisionAngleThreshold: 65
   wallBounceForce: 30000
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _checkGroundTime: 0.5
   statsController: {fileID: 2898550601115800401}
 --- !u!114 &2898550601115800401
 MonoBehaviour:
@@ -823,6 +835,9 @@ MonoBehaviour:
   currentNormalShootDMG: 0
   currentPushShootDMG: 0
   currentCooldownSpeed: 0
+  onEnduranceDamageTaken:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &3352713489937622652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -853,7 +868,7 @@ MonoBehaviour:
   Params: []
   OverrideAttenuation: 0
   OverrideMinDistance: 1
-  OverrideMaxDistance: 20
+  OverrideMaxDistance: 50
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,6 +949,13 @@ MonoBehaviour:
   shootPoint: {fileID: 4700368457746794078}
   pooltype: 3
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
