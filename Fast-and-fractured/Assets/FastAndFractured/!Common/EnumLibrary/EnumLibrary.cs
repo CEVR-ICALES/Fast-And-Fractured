@@ -125,4 +125,10 @@ namespace Enums
         PEPE_UA,
         MARIAANTONIA_UA
     }
+
+    public enum ScreenEffects
+    {
+        SPEED_EFFECT,
+        TOMATO_EFFECT
+    }
 }
