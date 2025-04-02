@@ -298,7 +298,7 @@ namespace FastAndFractured
 
         private void OnTakeEnduranceDamage(float damageTaken)
         {
-            RegisterSuddently(damageTaken);
+            RegisterSuddenly(damageTaken);
         }
         #region Helpers
 
