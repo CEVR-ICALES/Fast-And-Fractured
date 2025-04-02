@@ -144,17 +144,17 @@ namespace FastAndFractured
         public void RegisterSuddenly(float damageTaken)
         {
             _currentSuddenlyLostTimeAmount += damageTaken;
-            if (suddentlyLostTimer == null)
+            if (suddenlyLostTimer == null)
             {
-                suddentlyLostTimer = TimerSystem.Instance.CreateTimer(suddenlyLostTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                suddenlyLostTimer = TimerSystem.Instance.CreateTimer(suddenlyLostTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
-                    suddentlyLostTimer = null;
+                    suddenlyLostTimer = null;
                     _currentSuddenlyLostTimeAmount = 0;
                 });
             }
             else
             {
-                TimerSystem.Instance.ModifyTimer(suddentlyLostTimer, newCurrentTime: 0);
+                TimerSystem.Instance.ModifyTimer(suddenlyLostTimer, newCurrentTime: 0);
             }
         }
         #endregion
