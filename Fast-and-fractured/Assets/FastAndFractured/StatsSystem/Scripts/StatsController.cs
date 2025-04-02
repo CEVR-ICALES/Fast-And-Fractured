@@ -91,7 +91,7 @@ namespace FastAndFractured
 
         #endregion
 
-        private float _errorGetStatFloat = -1;
+        private const float ERROR_GET_STAT_FLOAT = -1;
 
         #region START EVENTS
         public void CustomStart()
@@ -283,7 +283,7 @@ namespace FastAndFractured
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod, isProduct);
             float currentValue = GetCurrentStat(type);
-            if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
+            if (previousValue == ERROR_GET_STAT_FLOAT || currentValue == ERROR_GET_STAT_FLOAT)
             {
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
@@ -336,7 +336,7 @@ namespace FastAndFractured
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
             }
-            return _errorGetStatFloat;
+            return ERROR_GET_STAT_FLOAT;
         }
 
         private bool IsStatAndModificatorCorrect(Stats type, float mod)
