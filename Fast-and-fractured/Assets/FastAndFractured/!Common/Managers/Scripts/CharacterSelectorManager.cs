@@ -18,10 +18,12 @@ public class CharacterSelectorManager : MonoBehaviour
     public TextMeshProUGUI charCarManuver;
 
     [SerializeField] private Transform modelSpawnPosition;
+    [SerializeField] private Button selectAndStartButton;
 
     private GameObject _currentModelInstance;
     private int _currentCharacterIndex;
     private int _currentSkinIndex;
+
 
     private const int  FULLY_UNLOCKED_VALUE = 5;
     private const string  SELECTED_PLAYER_KEY = "Selected_Player";
@@ -107,7 +109,7 @@ public class CharacterSelectorManager : MonoBehaviour
     {
         if (_currentModelInstance != null)
             Destroy(_currentModelInstance);
-        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelDisplayParent); // instantiate new model
+        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition); // instantiate new model
     }
     private void CheckIfSkinUnlocked()
     {
