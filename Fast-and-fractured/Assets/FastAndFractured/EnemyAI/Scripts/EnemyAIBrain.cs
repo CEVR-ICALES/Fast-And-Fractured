@@ -46,17 +46,17 @@ namespace FastAndFractured
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
         private Quaternion startRotation;
-        
+
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
-        [SerializeField] private float suddenlyLostTime = 5f;
-        [Range(0, 100)] [SerializeField] private float endurancePercentageSuddenlyLostNeedToChangeToFleeState = 40;
-        private ITimer suddenlyLostTimer;
-        private float _currentSuddenlyLostTimeAmount;
+        [SerializeField] private float damageAccumulationDuration = 5f;
+        [Range(0, 100)][SerializeField] private float fleeTriggerDamageThresholdPercentage = 40;
+        private ITimer damageAccumulationTimer;
+        private float _currentAccumulatedDamageTime;
         [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
-        [Range(0,100)][SerializeField] private float endurancePercentageNeededToChangeFromFleeToSearchState =50;
+        [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
-        [Range(0,100)][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState =60f;
+        [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
         private void OnEnable()
         {
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
@@ -146,18 +146,18 @@ namespace FastAndFractured
         }
         public void RegisterSuddenly(float damageTaken)
         {
-            _currentSuddenlyLostTimeAmount += damageTaken;
-            if (suddenlyLostTimer == null)
+            _currentAccumulatedDamageTime += damageTaken;
+            if (damageAccumulationTimer == null)
             {
-                suddenlyLostTimer = TimerSystem.Instance.CreateTimer(suddenlyLostTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                damageAccumulationTimer = TimerSystem.Instance.CreateTimer(damageAccumulationDuration, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
-                    suddenlyLostTimer = null;
-                    _currentSuddenlyLostTimeAmount = 0;
+                    damageAccumulationTimer = null;
+                    _currentAccumulatedDamageTime = 0;
                 });
             }
             else
             {
-                TimerSystem.Instance.ModifyTimer(suddenlyLostTimer, newCurrentTime: 0);
+                TimerSystem.Instance.ModifyTimer(damageAccumulationTimer, newCurrentTime: 0);
             }
         }
         #endregion
@@ -278,13 +278,13 @@ namespace FastAndFractured
             var enemyStatsController = _targetToShoot.GetComponent<StatsController>();
             if (enemyStatsController == null) { return false; }
 
-    
+
             float healthDifference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
-            return healthDifference < healthDifferenceNeededToChangeFromFleeToCombatState;
+            return healthDifference < _combatHealthAdvantageThreshold;
         }
         public bool WantsToChangeToFleeState()
         {
-            bool condition = _currentSuddenlyLostTimeAmount >= endurancePercentageSuddenlyLostNeedToChangeToFleeState;
+            bool condition = _currentAccumulatedDamageTime >= fleeTriggerDamageThresholdPercentage;
             if (condition)
             {
                 return condition;
@@ -295,7 +295,7 @@ namespace FastAndFractured
 
         public bool WantsToChangeFromFleeToSearchState()
         {
-            return statsController.GetEndurancePercentage() > endurancePercentageNeededToChangeFromFleeToSearchState;
+            return statsController.GetEndurancePercentage() > _recoveryThresholdPercentageForSearch;
         }
         #endregion
 
