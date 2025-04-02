@@ -17,16 +17,16 @@ namespace FastAndFractured
         [Tooltip("Unique ability duration in seconds")]
         public float uniqueAbilityDuration;
 
-        [Tooltip("Number of spheres to spawn around the player")]
-        public int numberOfSpheres = 3;
+        [Tooltip("Number of croquettes to spawn around the player")]
+        public int numberOfCroquettes = 3;
 
-        [Tooltip("Radius of the orbiting spheres")]
+        [Tooltip("Radius of the orbiting croquettes")]
         public float orbitRadius = 2f;
 
-        [Tooltip("Height at which the spheres will orbit")]
+        [Tooltip("Height at which the croquettes will orbit")]
         public float orbitHeight = 2f;
 
-        [Tooltip("Speed of rotation of the spheres")]
+        [Tooltip("Speed of rotation of the croquettes")]
         public float orbitSpeed = 50f;
 
         [Tooltip("Speed of vertical oscillation")]
@@ -38,17 +38,17 @@ namespace FastAndFractured
         [Tooltip("Speed of rotation around the X-axis")]
         public float xRotationSpeed = 40f;
 
-        [Tooltip("Object around which the spheres will rotate")]
+        [Tooltip("Object around which the croquettes will rotate")]
         public Transform orbitCenter;
 
-        public GameObject spherePrefab;
+        public GameObject croquettePrefab;
 
         public EventReference ssjUltiReference;
 
         [SerializeField] private StatsController _statsController;
 
-        private List<GameObject> spheres = new List<GameObject>();
-        private List<float> sphereAngles = new List<float>();
+        private List<GameObject> _croquetteList = new List<GameObject>();
+        private List<float> _croquetteAngleList = new List<float>();
         #endregion
 
         /// <summary>
@@ -62,9 +62,6 @@ namespace FastAndFractured
             }
         }
 
-        /// <summary>
-        /// Activates the unique ability, boosting stats and spawning orbiting spheres.
-        /// </summary>
         public override void ActivateAbility()
         {
             if (IsAbilityActive || IsOnCooldown)
@@ -86,39 +83,40 @@ namespace FastAndFractured
             _statsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
             _statsController.TemporalProductStat(Enums.Stats.PUSH_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
 
-            GenerateSpheres(numberOfSpheres);
+            GenerateCroquettes(numberOfCroquettes);
         }
 
-        /// <summary>
-        /// Updates the rotation and movement of the orbiting spheres.
-        /// </summary>
         private void Update()
         {
-            RotateSpheres();
+            RotateCroquettes();
         }
 
+        #region Croquette Methods
         /// <summary>
-        /// Generates a set number of spheres around the player.
+        /// Generates a set number of croquettes around the player.
         /// </summary>
-        private void GenerateSpheres(int count)
+        /// <param name="count">Number of croquettes that will be instantiated</param>
+        private void GenerateCroquettes(int count)
         {
-            ClearSpheres();
+            ClearCroquettes();
             float angleStep = 360f / count;
             for (int i = 0; i < count; i++)
             {
                 float angle = i * angleStep;
-                sphereAngles.Add(angle);
-                Vector3 position = CalculateSpherePosition(angle, 0);
-                GameObject sphere = Instantiate(spherePrefab, position, Quaternion.identity);
-                sphere.transform.parent = orbitCenter;
-                spheres.Add(sphere);
+                _croquetteAngleList.Add(angle);
+                Vector3 position = CalculateCroquettePosition(angle, 0);
+                GameObject croquette = Instantiate(croquettePrefab, position, Quaternion.identity);
+                croquette.transform.parent = orbitCenter;
+                _croquetteList.Add(croquette);
             }
         }
 
         /// <summary>
-        /// Calculates the position of a sphere based on its angle and time for sinusoidal movement.
+        /// Calculates the position of a croquette based on its angle and time for sinusoidal movement.
         /// </summary>
-        private Vector3 CalculateSpherePosition(float angle, float time)
+        ///<param name="angle"></param> 
+        ///<param name="time"></param> 
+        private Vector3 CalculateCroquettePosition(float angle, float time)
         {
             float radians = angle * Mathf.Deg2Rad;
             float x = orbitCenter.position.x + Mathf.Cos(radians) * orbitRadius;
@@ -129,64 +127,49 @@ namespace FastAndFractured
         }
 
         /// <summary>
-        /// Rotates the spheres around the player with sinusoidal vertical movement.
+        /// Rotates the croquettes around the player with sinusoidal vertical movement.
         /// </summary>
-        private void RotateSpheres()
+        private void RotateCroquettes()
         {
             float time = Time.time;
-            for (int i = 0; i < spheres.Count; i++)
+            for (int i = 0; i < _croquetteList.Count; i++)
             {
-                sphereAngles[i] += orbitSpeed * Time.deltaTime;
-                Vector3 newPosition = CalculateSpherePosition(sphereAngles[i], time);
-                spheres[i].transform.position = newPosition;
-                spheres[i].transform.Rotate(Vector3.right * xRotationSpeed * Time.deltaTime);
+                _croquetteAngleList[i] += orbitSpeed * Time.deltaTime;
+                Vector3 newPosition = CalculateCroquettePosition(_croquetteAngleList[i], time);
+                _croquetteList[i].transform.position = newPosition;
+                _croquetteList[i].transform.Rotate(Vector3.right * xRotationSpeed * Time.deltaTime);
             }
         }
 
         /// <summary>
-        /// Consumes a sphere upon collision, increasing damage and push force.
+        /// Consumes a croquette upon collision, increasing damage and push force.
         /// </summary>
-        public void ConsumeSphere()
+        public void ConsumeCroquette()
         {
-            if (spheres.Count > 0)
+            if (_croquetteList.Count > 0)
             {
-                GameObject sphere = spheres[0];
-                spheres.RemoveAt(0);
-                sphereAngles.RemoveAt(0);
-                Destroy(sphere);
+                GameObject croquette = _croquetteList[0];
+                _croquetteList.RemoveAt(0);
+                _croquetteAngleList.RemoveAt(0);
+                Destroy(croquette);
             }
         }
 
         /// <summary>
-        /// Clears all spawned spheres.
+        /// Clears all spawned croquettes.
         /// </summary>
-        private void ClearSpheres()
+        private void ClearCroquettes()
         {
-            foreach (var sphere in spheres)
+            foreach (var croquette in _croquetteList)
             {
-                Destroy(sphere);
+                Destroy(croquette);
             }
-            spheres.Clear();
-            sphereAngles.Clear();
+            _croquetteList.Clear();
+            _croquetteAngleList.Clear();
         }
 
         /// <summary>
-        /// Detects collision with players or AI and consumes a sphere to increase damage and push force.
-        /// </summary>
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("AI"))
-            {
-                if (spheres.Count > 0)
-                {
-                    ConsumeSphere();
-                    Debug.Log($"Hit {collision.gameObject.name} with increased damage and push force.");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Draws a gizmo representing the orbit path of the spheres.
+        /// Draws a gizmo representing the orbit path of the croquettes.
         /// </summary>
         private void OnDrawGizmosSelected()
         {
@@ -204,5 +187,6 @@ namespace FastAndFractured
                 prevPoint = newPoint;
             }
         }
+        #endregion
     }
 }
