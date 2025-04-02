@@ -142,7 +142,7 @@ namespace FastAndFractured
             //Get items from level manager and choose the closest one
         }
 
-        public void ChooseNearestPlayer()
+        public void ChooseNearestCharacter()
         {
             //TODO
             //Get list of players and choose the nearest one
