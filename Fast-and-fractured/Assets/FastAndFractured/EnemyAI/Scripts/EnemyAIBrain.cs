@@ -142,10 +142,11 @@ namespace FastAndFractured
             //Get items from level manager and choose the closest one
         }
 
-        public void SearchPlayerPosition()
         {
-            AssignTarget(_player);
-            _positionToDrive = _player.transform.position;
+            //TODO
+            //Get list of players and choose the nearest one
+        }
+
         }
         #endregion
 
