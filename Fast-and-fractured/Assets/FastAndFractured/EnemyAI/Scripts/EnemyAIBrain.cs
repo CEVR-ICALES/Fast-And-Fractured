@@ -94,7 +94,6 @@ namespace FastAndFractured
         {
             return statsController.Endurance;
         }
-
         #region Actions
 
         #region Common 
@@ -125,6 +124,12 @@ namespace FastAndFractured
         #endregion
 
         #region SearchState
+        public void SearchPlayerPosition()
+        {
+            AssignTarget(_player);
+            _positionToDrive = _player.transform.position;
+        }
+
 
         [Obsolete("We don't use setDestination anymore")]
         public void GoToPositionDeprecated()
