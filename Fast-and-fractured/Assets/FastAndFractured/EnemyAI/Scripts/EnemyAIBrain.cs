@@ -47,22 +47,22 @@ namespace FastAndFractured
         Vector3 startPosition;
         Quaternion startRotation;
         [Header("Aggresivity parameters")]
-        [SerializeField] private float enuduranceSuddentlyLostNeedToChangeToFleeState = 100;
-        [Tooltip("During how many time is needed to suffer damage")][SerializeField] private float suddenlyLostTime = 5f;
+        [Tooltip("During how much time needs to suffer damage continously until reach this value")][SerializeField] private float suddenlyLostTime = 5f;
+        [Range(0, 100)] [SerializeField] private float enudurancePercentageSuddentlyLostNeedToChangeToFleeState = 40;
         ITimer suddentlyLostTimer;
-        [SerializeField] private float currentSuddenlyLostTimeAmount;
-        [SerializeField] private float enduranceNeededToChangeFromFleeToSearchState;
-        [Tooltip("How much more health more has the AI than the enemy to start attacking him")][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState;
-
+        private float _currentSuddenlyLostTimeAmount;
+        [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")][Range(0,100)][SerializeField] private float endurancePercentageNeededToChangeFromFleeToSearchState =50;
+        [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
+        [Range(0,100)][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState =60f;
         private void OnEnable()
         {
-            statsController.onEnduranceDamageTaken.AddListener(HandleTakingEnduranceDamage);
+            statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
         }
 
 
         private void OnDisable()
         {
-            statsController.onEnduranceDamageTaken.RemoveListener(HandleTakingEnduranceDamage);
+            statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
         }
         private void Awake()
         {
@@ -143,13 +143,13 @@ namespace FastAndFractured
         }
         public void RegisterSuddently(float damageTaken)
         {
-            currentSuddenlyLostTimeAmount += damageTaken;
+            _currentSuddenlyLostTimeAmount += damageTaken;
             if (suddentlyLostTimer == null)
             {
                 suddentlyLostTimer = TimerSystem.Instance.CreateTimer(suddenlyLostTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
                     suddentlyLostTimer = null;
-                    currentSuddenlyLostTimeAmount = 0;
+                    _currentSuddenlyLostTimeAmount = 0;
                 });
             }
             else
@@ -274,29 +274,30 @@ namespace FastAndFractured
             }
             var enemyStatsController = _targetToShoot.GetComponent<StatsController>();
             if (enemyStatsController == null) { return false; }
-            float healthDiference = enemyStatsController.Endurance - enemyStatsController.Endurance;
+
+    
+            float healthDiference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
             return healthDiference < healthDifferenceNeededToChangeFromFleeToCombatState;
 
         }
         public bool WantsToChangeToFleeState()
         {
-            bool condition = false;
-            condition = currentSuddenlyLostTimeAmount >= enuduranceSuddentlyLostNeedToChangeToFleeState;
+            bool condition = _currentSuddenlyLostTimeAmount >= enudurancePercentageSuddentlyLostNeedToChangeToFleeState;
             if (condition)
             {
                 return condition;
-
-            
             }
-
-
-
-
+            //TODO if in the future we need more extra conditions is posible to add them here
             return condition;
+        }
+
+        public bool WantsToChangeFromFleeToSearchState()
+        {
+            return statsController.GetEndurancePercentage() > endurancePercentageNeededToChangeFromFleeToSearchState;
         }
         #endregion
 
-        private void HandleTakingEnduranceDamage(float damageTaken)
+        private void OnTakeEnduranceDamage(float damageTaken)
         {
             RegisterSuddently(damageTaken);
         }
