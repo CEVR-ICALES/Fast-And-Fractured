@@ -130,6 +130,11 @@ namespace FastAndFractured
             _positionToDrive = _player.transform.position;
         }
 
+        public void ChooseItemFromType(Stats statToSearch)
+        {
+            //TODO
+            //Get items from level manager, and choose the nearest from that type of boost
+        }
 
         [Obsolete("We don't use setDestination anymore")]
         public void GoToPositionDeprecated()
