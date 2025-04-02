@@ -141,7 +141,7 @@ namespace FastAndFractured
 
             carMovementController.HandleSteeringInput(input);
         }
-        public void RegisterSuddently(float damageTaken)
+        public void RegisterSuddenly(float damageTaken)
         {
             _currentSuddenlyLostTimeAmount += damageTaken;
             if (suddentlyLostTimer == null)
