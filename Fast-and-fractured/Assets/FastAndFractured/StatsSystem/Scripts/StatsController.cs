@@ -186,6 +186,11 @@ namespace FastAndFractured
             charDataSO.Invulnerable = true;
             return charDataSO.DeadDelay;
         }
+
+        public float GetEndurancePercentage()
+        {
+            return Endurance / MaxEndurance *100;
+        }
         #endregion
 
         #region OtherStats
