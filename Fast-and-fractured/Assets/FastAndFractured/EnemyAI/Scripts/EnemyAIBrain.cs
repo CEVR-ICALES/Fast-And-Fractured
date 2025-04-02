@@ -154,6 +154,12 @@ namespace FastAndFractured
             //Get list of danger zones and choose the nearest one
         }
 
+        public void ChooseNearestSafeZone()
+        {
+            //TODO
+            //Get list of safe zones and choose the nearest one
+        }
+
         }
         #endregion
 
