@@ -40,6 +40,22 @@ public class CharacterSelectorManager : MonoBehaviour
         ChangeCharacter(newIndex);
     }
 
+    public void SlectNextSkin()
+    {
+        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        _currentSkinIndex = _currentSkinIndex + 1;
+        if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = 0;
+        ChangeCurrentDisplayedModel(character);
+    }
+
+    public void SlectPreviousSkin()
+    {
+        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        _currentSkinIndex = _currentSkinIndex + -1;
+        if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = character.Models.Length -1;
+        ChangeCurrentDisplayedModel(character);
+    }
+
     private void ChangeCharacter(int newIndex)
     {
         _currentCharacterIndex = newIndex;
@@ -54,10 +70,16 @@ public class CharacterSelectorManager : MonoBehaviour
 
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
 
-        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelDisplayParent); // instantiate new model
+        ChangeCurrentDisplayedModel(character);
 
         // change icon considering current skin and model by calling the resource manager
 
+        UpdateInformationTexts(character);
+        
+    }
+
+    private void UpdateInformationTexts(CharacterMenuData character)
+    {
         charName.text = character.CharacterName;
         charDescription.text = character.CharacterDescription;
         charCarWeight.text = character.CharacterStats.Weight.ToString();
@@ -65,6 +87,13 @@ public class CharacterSelectorManager : MonoBehaviour
         charCarMaxEndurance.text = character.CharacterStats.MaxEndurance.ToString();
         charCarBaseForce.text = character.CharacterStats.BaseForce.ToString();
     }
+
+    private void ChangeCurrentDisplayedModel(CharacterMenuData character)
+    {
+        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelDisplayParent); // instantiate new model
+    }
+
+    
 
 
 }
