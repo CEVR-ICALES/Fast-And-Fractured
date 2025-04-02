@@ -87,7 +87,6 @@ namespace FastAndFractured
         public void ReturnToStartPosition()
         {
             carMovementController.transform.position = startPosition;
-            carMovementController.transform.rotation = startRotation;
             StopMovement();
         }
         public float GetHealth()
