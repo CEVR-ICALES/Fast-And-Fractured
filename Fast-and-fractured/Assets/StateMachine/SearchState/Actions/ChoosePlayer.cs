@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace StateMachine
 {
-    [CreateAssetMenu(fileName = nameof(SearchForPlayerAction), menuName = "EnemyStateMachine/Actions/SearchForPlayerAction")]
-    public class SearchForPlayerAction : Action
+    [CreateAssetMenu(fileName = nameof(ChoosePlayer), menuName = "EnemyStateMachine/Actions/ChoosePlayer")]
+    public class ChoosePlayer : Action
     {
         public override void Act(Controller controller)
         {
             EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
-            brain.SearchPlayerPosition();
+            brain.ChoosePlayer();
         }
     }
 
