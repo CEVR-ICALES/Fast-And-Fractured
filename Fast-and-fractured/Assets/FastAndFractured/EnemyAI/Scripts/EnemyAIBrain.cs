@@ -160,6 +160,10 @@ namespace FastAndFractured
             //Get list of safe zones and choose the nearest one
         }
 
+        public void ChooseNearestHelpfulNpc()
+        {
+            //TODO
+            //Get list of NPCs and choose the nearest one
         }
         #endregion
 
