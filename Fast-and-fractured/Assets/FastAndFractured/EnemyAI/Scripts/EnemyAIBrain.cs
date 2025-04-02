@@ -142,9 +142,16 @@ namespace FastAndFractured
             //Get items from level manager and choose the closest one
         }
 
+        public void ChooseNearestPlayer()
         {
             //TODO
             //Get list of players and choose the nearest one
+        }
+
+        public void ChooseNearestDangerZone()
+        {
+            //TODO
+            //Get list of danger zones and choose the nearest one
         }
 
         }
