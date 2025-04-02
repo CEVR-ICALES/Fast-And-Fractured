@@ -121,6 +121,11 @@ namespace FastAndFractured
             carMovementController.HandleSteeringInput(input);
         }
 
+        public void UpdateTargetPosition()
+        {
+            _positionToDrive = _targetToShoot.transform.position;
+        }
+
         #endregion
 
         #region SearchState
