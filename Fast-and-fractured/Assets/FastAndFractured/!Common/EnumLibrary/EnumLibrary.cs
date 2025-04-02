@@ -112,10 +112,10 @@ namespace Enums
 
     public enum PlayerIcons
     {
-        CARME_BASE,
-        JOSEFINO_BASE,
-        PEPE_BASE,
-        MARIAANTONIA_BASE
+        CARME_0,
+        JOSEFINO_0,
+        PEPE_0,
+        MARIAANTONIA_0
     }
 
     public enum UniqueAbilitiesIcons

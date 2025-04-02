@@ -31,7 +31,9 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // get character icons from the resourcews manager
+        UpdateCharacterDisplay();
+        _currentCharacterIndex = 0;
+        _currentSkinIndex = 0;
     }
 
     public void SelectNextCharacter()
@@ -54,6 +56,7 @@ public class CharacterSelectorManager : MonoBehaviour
         _currentSkinIndex = _currentSkinIndex + 1;
         if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = 0;
         ChangeCurrentDisplayedModel(character);
+        ChangePlayerIcon();
     }
 
     public void SelectPreviousSkin()
@@ -62,6 +65,7 @@ public class CharacterSelectorManager : MonoBehaviour
         _currentSkinIndex = _currentSkinIndex + -1;
         if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = character.Models.Length -1;
         ChangeCurrentDisplayedModel(character);
+        ChangePlayerIcon();
     }
 
     private void ChangeCharacter(int newIndex)
@@ -102,7 +106,12 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void ChangePlayerIcon()
     {
-        
+        Sprite icon = ResourcesManager.Instance.GetResourcesSprite(allCharacters[_currentCharacterIndex].Models[_currentSkinIndex].name);
+
+        if(icon != null)
+        {
+            charIcon.sprite = icon;
+        }
     }
 
     private void ChangeCurrentDisplayedModel(CharacterMenuData character)

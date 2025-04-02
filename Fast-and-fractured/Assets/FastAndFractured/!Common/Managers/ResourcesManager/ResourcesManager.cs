@@ -120,4 +120,26 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         Debug.LogWarning($"Screen effect sprite for key {spriteKey} not found.");
         return null;
     }
+
+    public Sprite GetResourcesSprite(string spriteKey) // provisional
+    {
+        foreach(Sprite sprite in _playerIconsDictionary.Values)
+        {
+            if(sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        foreach (Sprite sprite in _screenEffectsDictionary.Values)
+        {
+            if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+
+        foreach (Sprite sprite in _uaIconsDictionary.Values)
+        {
+            if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        Debug.LogWarning($"Sprite with name {spriteKey} not found.");
+        return null;
+    }
 }
