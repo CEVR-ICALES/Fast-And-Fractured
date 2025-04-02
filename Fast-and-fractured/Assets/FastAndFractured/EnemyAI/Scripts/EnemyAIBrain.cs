@@ -44,14 +44,17 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const int START_CORNER_INDEX = 1;
-        Vector3 startPosition;
-        Quaternion startRotation;
+        private Vector3 startPosition;
+        private Quaternion startRotation;
+        
         [Header("Aggressiveness parameters")]
-        [Tooltip("Duration of continuous damage required to reach this value")][SerializeField] private float suddenlyLostTime = 5f;
+        [Tooltip("Duration of continuous damage required to reach this value")]
+        [SerializeField] private float suddenlyLostTime = 5f;
         [Range(0, 100)] [SerializeField] private float endurancePercentageSuddenlyLostNeedToChangeToFleeState = 40;
-        ITimer suddenlyLostTimer;
+        private ITimer suddenlyLostTimer;
         private float _currentSuddenlyLostTimeAmount;
-        [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")][Range(0,100)][SerializeField] private float endurancePercentageNeededToChangeFromFleeToSearchState =50;
+        [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
+        [Range(0,100)][SerializeField] private float endurancePercentageNeededToChangeFromFleeToSearchState =50;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
         [Range(0,100)][SerializeField] private float healthDifferenceNeededToChangeFromFleeToCombatState =60f;
         private void OnEnable()
