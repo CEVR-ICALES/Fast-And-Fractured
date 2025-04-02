@@ -281,7 +281,7 @@ namespace FastAndFractured
         }
         public bool WantsToChangeToFleeState()
         {
-            bool condition = _currentSuddenlyLostTimeAmount >= enudurancePercentageSuddentlyLostNeedToChangeToFleeState;
+            bool condition = _currentSuddenlyLostTimeAmount >= endurancePercentageSuddenlyLostNeedToChangeToFleeState;
             if (condition)
             {
                 return condition;
