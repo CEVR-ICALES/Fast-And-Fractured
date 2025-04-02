@@ -10,6 +10,7 @@ public class CharacterMenuData : ScriptableObject
     public GameObject[] Models => models;
 
 
+
     [SerializeField] private CharacterData characterStats;
     [SerializeField] private string characterName;
     [SerializeField] private string characterDescription;

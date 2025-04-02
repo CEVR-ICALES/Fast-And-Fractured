@@ -1,24 +1,30 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterSelectorManager : MonoBehaviour
 {
     public CharacterMenuData[] allCharacters;
 
     // all information we want to show...
-    public Sprite charIcon;
+    public Image charIcon;
     public TextMeshProUGUI charName;
     public TextMeshProUGUI charDescription;
     public TextMeshProUGUI charCarWeight;
     public TextMeshProUGUI charCarMaxSpeed;
     public TextMeshProUGUI charCarMaxEndurance;
     public TextMeshProUGUI charCarBaseForce;
+    public TextMeshProUGUI charCarAcceleration;
+    public TextMeshProUGUI charCarManuver;
 
-    [SerializeField] private Transform modelDisplayParent;
+    [SerializeField] private Transform modelSpawnPosition;
 
     private GameObject _currentModelInstance;
     private int _currentCharacterIndex;
     private int _currentSkinIndex;
+
+    private const int  FULLY_UNLOCKED_VALUE = 5;
+    private const string  SELECTED_PLAYER_KEY = "Selected_Player";
 
 
     private void OnEnable()
@@ -40,7 +46,7 @@ public class CharacterSelectorManager : MonoBehaviour
         ChangeCharacter(newIndex);
     }
 
-    public void SlectNextSkin()
+    public void SelectNextSkin()
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex + 1;
@@ -48,7 +54,7 @@ public class CharacterSelectorManager : MonoBehaviour
         ChangeCurrentDisplayedModel(character);
     }
 
-    public void SlectPreviousSkin()
+    public void SelectPreviousSkin()
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex + -1;
@@ -72,28 +78,56 @@ public class CharacterSelectorManager : MonoBehaviour
 
         ChangeCurrentDisplayedModel(character);
 
-        // change icon considering current skin and model by calling the resource manager
+        ChangePlayerIcon();
 
         UpdateInformationTexts(character);
-        
+
+        CheckIfSkinUnlocked();
+
     }
 
-    private void UpdateInformationTexts(CharacterMenuData character)
+    private void UpdateInformationTexts(CharacterMenuData character) // PROVISIONAL
     {
         charName.text = character.CharacterName;
         charDescription.text = character.CharacterDescription;
-        charCarWeight.text = character.CharacterStats.Weight.ToString();
-        charCarMaxSpeed.text = character.CharacterStats.MaxSpeed.ToString();
-        charCarMaxEndurance.text = character.CharacterStats.MaxEndurance.ToString();
-        charCarBaseForce.text = character.CharacterStats.BaseForce.ToString();
+        charCarWeight.text ="Weight: " + character.CharacterStats.Weight.ToString();
+        charCarMaxSpeed.text = "MaxSpeed: " + character.CharacterStats.MaxSpeed.ToString();
+        charCarMaxEndurance.text = "Endurance: " + character.CharacterStats.MaxEndurance.ToString();
+        charCarBaseForce.text = "Base Force: " + character.CharacterStats.BaseForce.ToString();
+        charCarAcceleration.text = "Acceleration: " + character.CharacterStats.Acceleration.ToString(); //create acceleration distinction 
+        charCarManuver.text = "Manuver: " + character.CharacterStats.DriftingSmoothFactor.ToString(); //create manuver distinction 
+    }
+
+    private void ChangePlayerIcon()
+    {
+        
     }
 
     private void ChangeCurrentDisplayedModel(CharacterMenuData character)
     {
+        if (_currentModelInstance != null)
+            Destroy(_currentModelInstance);
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelDisplayParent); // instantiate new model
     }
+    private void CheckIfSkinUnlocked()
+    {
+        int skinUnlockedValue = PlayerPrefs.GetInt(_currentModelInstance.name);
 
-    
+        if(skinUnlockedValue == FULLY_UNLOCKED_VALUE)
+        {
+            selectAndStartButton.enabled = true;
+        } else
+        {
+            selectAndStartButton.enabled = false;
+        }
+    }
+
+    public void SaveCurrentSelected()
+    {
+        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.name + "_" + _currentSkinIndex);
+    }
+
 
 
 }
