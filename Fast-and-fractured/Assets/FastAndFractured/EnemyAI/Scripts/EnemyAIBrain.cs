@@ -124,7 +124,7 @@ namespace FastAndFractured
         #endregion
 
         #region SearchState
-        public void SearchPlayerPosition()
+        public void ChoosePlayer()
         {
             AssignTarget(_player);
             _positionToDrive = _player.transform.position;
