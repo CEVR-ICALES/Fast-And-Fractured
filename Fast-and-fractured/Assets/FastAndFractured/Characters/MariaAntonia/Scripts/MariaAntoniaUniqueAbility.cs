@@ -20,41 +20,51 @@ namespace FastAndFractured
         [Tooltip("Number of spheres to spawn around the player")]
         public int numberOfSpheres = 3;
 
-        #region Orbit Variables
-        [Header("Orbit Variables")]
         [Tooltip("Radius of the orbiting spheres")]
         public float orbitRadius = 2f;
 
         [Tooltip("Height at which the spheres will orbit")]
-        public float orbitHeight = 10f; 
+        public float orbitHeight = 2f;
 
         [Tooltip("Speed of rotation of the spheres")]
         public float orbitSpeed = 50f;
 
+        [Tooltip("Speed of vertical oscillation")]
+        public float verticalOscillationSpeed = 2f;
+
+        [Tooltip("Amplitude of vertical oscillation")]
+        public float verticalOscillationAmplitude = 0.5f;
+
+        [Tooltip("Speed of rotation around the X-axis")]
+        public float xRotationSpeed = 40f;
+
         [Tooltip("Object around which the spheres will rotate")]
         public Transform orbitCenter;
-        #endregion
 
-        public GameObject croquettePrefab;
+        public GameObject spherePrefab;
 
-        [Header("FMOD Event Reference")]
         public EventReference ssjUltiReference;
 
-        [Header("Stats Controller")]
         [SerializeField] private StatsController _statsController;
 
-        private List<GameObject> _croquetteList = new List<GameObject>();
-        private List<float> _croquetteAngleList = new List<float>(); // Ángulos individuales de cada esfera
+        private List<GameObject> spheres = new List<GameObject>();
+        private List<float> sphereAngles = new List<float>();
         #endregion
 
+        /// <summary>
+        /// Sets the orbit center to the player's transform if not assigned.
+        /// </summary>
         private void Start()
         {
             if (orbitCenter == null)
             {
-                orbitCenter = transform; // Si no se asigna, usa el propio jugador
+                orbitCenter = transform;
             }
         }
 
+        /// <summary>
+        /// Activates the unique ability, boosting stats and spawning orbiting spheres.
+        /// </summary>
         public override void ActivateAbility()
         {
             if (IsAbilityActive || IsOnCooldown)
@@ -79,80 +89,104 @@ namespace FastAndFractured
             GenerateSpheres(numberOfSpheres);
         }
 
+        /// <summary>
+        /// Updates the rotation and movement of the orbiting spheres.
+        /// </summary>
         private void Update()
         {
             RotateSpheres();
         }
 
+        /// <summary>
+        /// Generates a set number of spheres around the player.
+        /// </summary>
         private void GenerateSpheres(int count)
         {
             ClearSpheres();
-            float angleStep = 360f / count; // Espaciado uniforme entre esferas
+            float angleStep = 360f / count;
             for (int i = 0; i < count; i++)
             {
                 float angle = i * angleStep;
-                _croquetteAngleList.Add(angle);
-                Vector3 position = CalculateSpherePosition(angle);
-                GameObject sphere = Instantiate(croquettePrefab, position, Quaternion.identity);
+                sphereAngles.Add(angle);
+                Vector3 position = CalculateSpherePosition(angle, 0);
+                GameObject sphere = Instantiate(spherePrefab, position, Quaternion.identity);
                 sphere.transform.parent = orbitCenter;
-                _croquetteList.Add(sphere);
+                spheres.Add(sphere);
             }
         }
 
-        private Vector3 CalculateSpherePosition(float angle)
+        /// <summary>
+        /// Calculates the position of a sphere based on its angle and time for sinusoidal movement.
+        /// </summary>
+        private Vector3 CalculateSpherePosition(float angle, float time)
         {
             float radians = angle * Mathf.Deg2Rad;
             float x = orbitCenter.position.x + Mathf.Cos(radians) * orbitRadius;
             float z = orbitCenter.position.z + Mathf.Sin(radians) * orbitRadius;
-            float y = orbitCenter.position.y + orbitHeight; //Ajustamos la altura aquí
+            float y = orbitCenter.position.y + orbitHeight + Mathf.Sin(time * verticalOscillationSpeed) * verticalOscillationAmplitude;
+
             return new Vector3(x, y, z);
         }
 
+        /// <summary>
+        /// Rotates the spheres around the player with sinusoidal vertical movement.
+        /// </summary>
         private void RotateSpheres()
         {
-            for (int i = 0; i < _croquetteList.Count; i++)
+            float time = Time.time;
+            for (int i = 0; i < spheres.Count; i++)
             {
-                _croquetteAngleList[i] += orbitSpeed * Time.deltaTime;
-                Vector3 newPosition = CalculateSpherePosition(_croquetteAngleList[i]);
-                _croquetteList[i].transform.position = newPosition;
+                sphereAngles[i] += orbitSpeed * Time.deltaTime;
+                Vector3 newPosition = CalculateSpherePosition(sphereAngles[i], time);
+                spheres[i].transform.position = newPosition;
+                spheres[i].transform.Rotate(Vector3.right * xRotationSpeed * Time.deltaTime);
             }
         }
 
+        /// <summary>
+        /// Consumes a sphere upon collision, increasing damage and push force.
+        /// </summary>
         public void ConsumeSphere()
         {
-            if (_croquetteList.Count > 0)
+            if (spheres.Count > 0)
             {
-                GameObject sphere = _croquetteList[0];
-                _croquetteList.RemoveAt(0);
-                _croquetteAngleList.RemoveAt(0);
+                GameObject sphere = spheres[0];
+                spheres.RemoveAt(0);
+                sphereAngles.RemoveAt(0);
                 Destroy(sphere);
             }
         }
 
+        /// <summary>
+        /// Clears all spawned spheres.
+        /// </summary>
         private void ClearSpheres()
         {
-            foreach (var sphere in _croquetteList)
+            foreach (var sphere in spheres)
             {
                 Destroy(sphere);
             }
-            _croquetteList.Clear();
-            _croquetteAngleList.Clear();
+            spheres.Clear();
+            sphereAngles.Clear();
         }
 
+        /// <summary>
+        /// Detects collision with players or AI and consumes a sphere to increase damage and push force.
+        /// </summary>
         private void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("AI"))
             {
-                if (_croquetteList.Count > 0)
+                if (spheres.Count > 0)
                 {
                     ConsumeSphere();
-                    Debug.Log($"Golpeó a {collision.gameObject.name} con más daño y empuje.");
+                    Debug.Log($"Hit {collision.gameObject.name} with increased damage and push force.");
                 }
             }
         }
 
         /// <summary>
-        /// Dibuja el círculo de rotación de las esferas en la escena.
+        /// Draws a gizmo representing the orbit path of the spheres.
         /// </summary>
         private void OnDrawGizmosSelected()
         {
