@@ -2,6 +2,8 @@ using Enums;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -42,8 +44,29 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const int START_CORNER_INDEX = 1;
-        Vector3 startPosition;
-        Quaternion startRotation;
+        private Vector3 startPosition;
+        private Quaternion startRotation;
+
+        [Header("Aggressiveness parameters")]
+        [Tooltip("Duration of continuous damage required to reach this value")]
+        [SerializeField] private float damageAccumulationDuration = 5f;
+        [Range(0, 100)][SerializeField] private float fleeTriggerDamageThresholdPercentage = 40;
+        private ITimer damageAccumulationTimer;
+        private float _currentAccumulatedDamageTime;
+        [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
+        [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
+        [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
+        [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
+        private void OnEnable()
+        {
+            statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
+        }
+
+
+        private void OnDisable()
+        {
+            statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
+        }
         private void Awake()
         {
             //Testing 
@@ -109,7 +132,7 @@ namespace FastAndFractured
             //If angle between 90 and -90 go forward
             //If angle more than 90 or less than -90 go backwards
             float inputY = MAX_INPUT_VALUE;
-            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION) 
+            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION)
             {
                 inputY = -MAX_INPUT_VALUE;
             }
@@ -125,6 +148,22 @@ namespace FastAndFractured
             _positionToDrive = _targetToShoot.transform.position;
         }
 
+        public void RegisterSuddenly(float damageTaken)
+        {
+            _currentAccumulatedDamageTime += damageTaken;
+            if (damageAccumulationTimer == null)
+            {
+                damageAccumulationTimer = TimerSystem.Instance.CreateTimer(damageAccumulationDuration, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                {
+                    damageAccumulationTimer = null;
+                    _currentAccumulatedDamageTime = 0;
+                });
+            }
+            else
+            {
+                TimerSystem.Instance.ModifyTimer(damageAccumulationTimer, newCurrentTime: 0);
+            }
+        }
         #endregion
 
         #region SearchState
@@ -262,8 +301,41 @@ namespace FastAndFractured
             float angle = GetAngleDirection(Vector3.up);
             return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
         }
+
+        public bool WantsToChangeToCombatState()
+        {
+            if (!_targetToShoot)
+            {
+                return false;
+            }
+            var enemyStatsController = _targetToShoot.GetComponent<StatsController>();
+            if (enemyStatsController == null) { return false; }
+
+
+            float healthDifference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
+            return healthDifference < _combatHealthAdvantageThreshold;
+        }
+        public bool WantsToChangeToFleeState()
+        {
+            bool condition = _currentAccumulatedDamageTime >= fleeTriggerDamageThresholdPercentage;
+            if (condition)
+            {
+                return condition;
+            }
+            //TODO if in the future we need more extra conditions is posible to add them here
+            return condition;
+        }
+
+        public bool WantsToChangeFromFleeToSearchState()
+        {
+            return statsController.GetEndurancePercentage() > _recoveryThresholdPercentageForSearch;
+        }
         #endregion
 
+        private void OnTakeEnduranceDamage(float damageTaken)
+        {
+            RegisterSuddenly(damageTaken);
+        }
         #region Helpers
 
         private void AssignTarget(GameObject target)
