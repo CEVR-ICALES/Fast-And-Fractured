@@ -46,7 +46,7 @@ namespace FastAndFractured
         const int START_CORNER_INDEX = 1;
         Vector3 startPosition;
         Quaternion startRotation;
-        [Header("Aggresivity parameters")]
+        [Header("Aggressiveness parameters")]
         [Tooltip("During how much time needs to suffer damage continously until reach this value")][SerializeField] private float suddenlyLostTime = 5f;
         [Range(0, 100)] [SerializeField] private float endurancePercentageSuddenlyLostNeedToChangeToFleeState = 40;
         ITimer suddentlyLostTimer;
