@@ -109,4 +109,26 @@ namespace Enums
         INCREASE,
         DECREASE
     }
+
+    public enum PlayerIcons
+    {
+        CARME_BASE,
+        JOSEFINO_BASE,
+        PEPE_BASE,
+        MARIAANTONIA_BASE
+    }
+
+    public enum UniqueAbilitiesIcons
+    {
+        CARME_UA,
+        JOSEFINO_UA,
+        PEPE_UA,
+        MARIAANTONIA_UA
+    }
+
+    public enum ScreenEffects
+    {
+        SPEED_EFFECT,
+        TOMATO_EFFECT
+    }
 }
