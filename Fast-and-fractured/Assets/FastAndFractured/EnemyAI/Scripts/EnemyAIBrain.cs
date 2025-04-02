@@ -136,10 +136,10 @@ namespace FastAndFractured
             //Get items from level manager, and choose the nearest from that type of boost
         }
 
-        [Obsolete("We don't use setDestination anymore")]
-        public void GoToPositionDeprecated()
+        public void ChooseNearestItem()
         {
-            agent.SetDestination(_positionToDrive);
+            //TODO
+            //Get items from level manager and choose the closest one
         }
 
         public void SearchPlayerPosition()
