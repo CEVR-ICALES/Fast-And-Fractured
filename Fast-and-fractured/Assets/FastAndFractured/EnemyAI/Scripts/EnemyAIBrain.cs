@@ -47,7 +47,7 @@ namespace FastAndFractured
         Vector3 startPosition;
         Quaternion startRotation;
         [Header("Aggressiveness parameters")]
-        [Tooltip("During how much time needs to suffer damage continously until reach this value")][SerializeField] private float suddenlyLostTime = 5f;
+        [Tooltip("Duration of continuous damage required to reach this value")][SerializeField] private float suddenlyLostTime = 5f;
         [Range(0, 100)] [SerializeField] private float endurancePercentageSuddenlyLostNeedToChangeToFleeState = 40;
         ITimer suddenlyLostTimer;
         private float _currentSuddenlyLostTimeAmount;
