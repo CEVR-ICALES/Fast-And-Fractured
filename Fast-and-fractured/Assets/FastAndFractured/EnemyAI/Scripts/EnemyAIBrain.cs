@@ -49,7 +49,7 @@ namespace FastAndFractured
         [Header("Aggressiveness parameters")]
         [Tooltip("During how much time needs to suffer damage continously until reach this value")][SerializeField] private float suddenlyLostTime = 5f;
         [Range(0, 100)] [SerializeField] private float endurancePercentageSuddenlyLostNeedToChangeToFleeState = 40;
-        ITimer suddentlyLostTimer;
+        ITimer suddenlyLostTimer;
         private float _currentSuddenlyLostTimeAmount;
         [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")][Range(0,100)][SerializeField] private float endurancePercentageNeededToChangeFromFleeToSearchState =50;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
