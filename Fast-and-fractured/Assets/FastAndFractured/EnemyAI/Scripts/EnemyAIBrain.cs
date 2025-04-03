@@ -45,7 +45,7 @@ namespace FastAndFractured
         const float MAX_ANGLE_DIRECTION = 90f;
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
-        const int MAX_PERCENTAGE_100 = 100;
+        const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
         private Quaternion startRotation;
@@ -69,25 +69,28 @@ namespace FastAndFractured
             "--> 25 to 30 if multiple priorities.\n" +
             "--> 50 if one normal priority is needed.\n" +
             "--> 150 for hyperfixation in that stat.")]
-        [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 50;
+        [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageMaxSpeed = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageAcceleration = 10;
-        [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 10;
+        [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
         private int _totalDecisionPercentage = 0;
+        private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
 
         private void OnEnable()
         {
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
+            statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
         }
 
 
         private void OnDisable()
         {
             statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
+            statsController.onEnduranceDamageHealed.RemoveListener(OnTakeEnduranceHealed);
         }
         private void Awake()
         {
@@ -128,7 +131,7 @@ namespace FastAndFractured
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;
             startRotation = carMovementController.transform.rotation;
-
+            _startingPercentageHealth = decisionPercentageHealth;
         }
         public void ReturnToStartPosition()
         {
@@ -386,11 +389,17 @@ namespace FastAndFractured
         }
         #endregion
 
+        #region Helpers
         private void OnTakeEnduranceDamage(float damageTaken)
         {
             RegisterSuddenly(damageTaken);
+            RecalculateDecisionsPercentage();
         }
-        #region Helpers
+
+        private void OnTakeEnduranceHealed(float damageHealed)
+        {
+            RecalculateDecisionsPercentage();
+        }
 
         private void AssignTarget(GameObject target)
         {
@@ -522,7 +531,10 @@ namespace FastAndFractured
                 decisionPercentageCooldown;
         }
 
-        private void Recalculate
+        private void RecalculateDecisionsPercentage()
+        {
+            decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * HEALTH_WEIGHT_PERCENTAGE);
+        }
 
         //Is obsolete but can be used in the future
         //#if UNITY_EDITOR
