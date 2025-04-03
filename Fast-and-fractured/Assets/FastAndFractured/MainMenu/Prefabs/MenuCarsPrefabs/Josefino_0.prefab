@@ -665,9 +665,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7347399327733909978, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 7936382738066159813}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2016302505229785203 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8491794929529004214, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2280124765157583539 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2425374069587955428 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5731704433943934497, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 7936382738066159813}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2552904999676308011 stripped
@@ -687,8 +697,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dec2d4887d88bdf45a92852b1651c84d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceToApply: 500
+  forceToApply: 300
   forceDuration: 0
+  wheelsMeshes:
+  - {fileID: 2016302505229785203}
+  - {fileID: 8627432375565857987}
+  - {fileID: 8794247922804423252}
+  - {fileID: 2425374069587955428}
+  rbSpeedThreshold: 2
+  rotationSpeed: 180
 --- !u!4 &3720275510104103767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -787,3 +804,13 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.98
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &8627432375565857987 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1844644079014972422, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8794247922804423252 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1452626287444148881, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}

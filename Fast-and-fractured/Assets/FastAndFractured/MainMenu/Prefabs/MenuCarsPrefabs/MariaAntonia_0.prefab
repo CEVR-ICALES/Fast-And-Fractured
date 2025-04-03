@@ -198,8 +198,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.032062, y: 2.3550866, z: 5.1134872}
-  m_Center: {x: 0.027987957, y: 1.5906128, z: 0.11011076}
+  m_Size: {x: 3.032062, y: 2.7863383, z: 5.1134872}
+  m_Center: {x: 0.027987957, y: 2.145867, z: 0.11011076}
 --- !u!54 &3177165719080788535
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -239,8 +239,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dec2d4887d88bdf45a92852b1651c84d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceToApply: 500
+  forceToApply: 300
   forceDuration: 0
+  wheelsMeshes:
+  - {fileID: 6959657204643723118}
+  - {fileID: 3513912687708123048}
+  - {fileID: 6260879562174734160}
+  - {fileID: 3571683439158424606}
+  rbSpeedThreshold: 2
+  rotationSpeed: 180
 --- !u!1 &3513912687708123048
 GameObject:
   m_ObjectHideFlags: 0
