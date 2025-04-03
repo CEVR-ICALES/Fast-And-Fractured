@@ -20,6 +20,7 @@ namespace FastAndFractured
 
         public int CurrentPlayers { get=> _currentPlayers; set { _currentPlayers = value; }}
         private int _currentPlayers = 1;
+
         public UnityEvent charactersCustomStart;
         public int TotalCharacters { get => totalCharacters; set => totalCharacters = value; }
         [SerializeField]
@@ -28,6 +29,10 @@ namespace FastAndFractured
         private Dictionary<string, int> _characterSelectedLimit;
 
         private List<string> _inGameCharacters;
+
+        private CarMovementController _playerBindingInputs;
+        [SerializeField]
+        private CameraBehaviours playerCamera;
 
         [SerializeField]
         private GameObject[] spawnPoints;
@@ -75,15 +80,7 @@ namespace FastAndFractured
             {
                 usingController = true;
             }
-
-            foreach (StatsController character in characters) // for now when inoput changed its detected it will only notify the carMovementController of the player
-            {
-                if (character.CompareTag("Player"))
-                {
-                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(usingController);
-                }
-            }
-
+            _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
 
@@ -96,7 +93,7 @@ namespace FastAndFractured
         {
             Cursor.lockState = CursorLockMode.Locked;
 
-            //foreach (var character in characters)
+           // foreach (var character in characters)
             //{
             //    //character.CustomStart();
             //    Controller controller = character.GetComponentInParent<Controller>();
@@ -115,13 +112,12 @@ namespace FastAndFractured
             //}
         }
 
-        #region Characters
-
         private void LoadInGameCharacters()
         {
             _inGameCharacters = new List<string>();
             bool succeded = CreateNotInstanceCharactersListFromPlayerList();
            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+           
             if (succeded = CheckIfCharacterExistInList(selectedPlayer))
             {
                 _inGameCharacters.Add(selectedPlayer);
@@ -141,77 +137,37 @@ namespace FastAndFractured
             }
         }
 
+        #region SpawnCharacters
+
         private void SpawnCharactersInScene()
         {
-           // if (spawnPoints.Length == totalCharacters)
+            if (spawnPoints.Length >= totalCharacters)
             {
                 int allCharacters = _inGameCharacters.Count;
                 int charactersCount = 0;
-                for (; charactersCount < _currentPlayers; charactersCount++)
+                GameObject player = null;
+                for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
                 {
-                    GameObject player = SearchCharacterInList(_inGameCharacters[charactersCount]);
-                   Transform baseForPlayer = Instantiate(playerBasePrefab, spawnPoints[charactersCount].transform.position,Quaternion.identity).transform;
-                    Instantiate(_inGameCharacters[charactersCount], baseForPlayer);
+                    player = SearchCharacterInList(_inGameCharacters[charactersCount],true);
+                    player = Instantiate(player, spawnPoints[charactersCount].transform.position,Quaternion.identity);
+                    _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
+                }
+                for(;charactersCount < allCharacters; charactersCount++)
+                {
+                    GameObject ia = SearchCharacterInList(_inGameCharacters[charactersCount], false);
+                   ia = Instantiate(ia, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    //Provisional
+                    ia.GetComponent<EnemyAIBrain>().Player = player;
                 }
                 if (charactersCustomStart != null)
                 {
                     charactersCustomStart.Invoke();
                 }
+                playerCamera.SetCameraParameters(player.transform, player.transform.Find("CameraLookAtPoint"));
             }
         }
 
-        private void DivideNameCode(string nameCode, out string name, out int skinNum)
-        {
-            name = " ";
-            skinNum = -1;
-            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
-            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
-            {
-                name = dividedNameCode[0];
-                if (_characterSelectedLimit.ContainsKey(name))
-                {
-                    if (_characterSelectedLimit[name] < LIMIT_OF_CHARACTER_SPAWNED)
-                    {
-                        if (int.TryParse(dividedNameCode[1], out skinNum))
-                        {
-
-                        }
-                    }
-                }
-            }
-        }
-
-        private bool CheckIfCharacterExistInList(string nameCode)
-        {
-            if (_notcurrentInstanceCharacters.Contains(nameCode))
-            {
-                return true;
-            }
-            Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
-            return false;
-        }
-
-        private T GetRandomValueFromShuffleList<T>(List<T> list, T defaultValue)
-        {
-            if (list.Count > 0)
-            {
-                //Shuffle the list
-                ShuffleList(list);
-                return list[UnityEngine.Random.Range(0, _notcurrentInstanceCharacters.Count)];
-            }
-            return defaultValue;
-        }
-
-        private void ShuffleList<T>(List<T> list)
-        {
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int j = UnityEngine.Random.Range(0, i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
-            }
-        }
-
-        private GameObject SearchCharacterInList(string nameCode,bool player)
+        private GameObject SearchCharacterInList(string nameCode, bool player)
         {
             DivideNameCode(nameCode, out string name, out int skinNum);
             foreach (var character in charactersData)
@@ -256,11 +212,12 @@ namespace FastAndFractured
             return true;
         }
 
-        private void RemoveSelectedCharacterFromNotInstanceCharacters(string nameCode,string nameWithoutCode)
+        private void RemoveSelectedCharacterFromNotInstanceCharacters(string nameCode, string nameWithoutCode)
         {
             _characterSelectedLimit[nameWithoutCode]++;
             _notcurrentInstanceCharacters.Remove(nameCode);
-            if (_characterSelectedLimit[nameWithoutCode] >= LIMIT_OF_CHARACTER_SPAWNED) {
+            if (_characterSelectedLimit[nameWithoutCode] >= LIMIT_OF_CHARACTER_SPAWNED)
+            {
                 List<string> copyOfnotCurrentInstanceCharacter = new List<string>(_notcurrentInstanceCharacters);
                 for (int notCurrentInstanceCharacterCount = 0; notCurrentInstanceCharacterCount < copyOfnotCurrentInstanceCharacter.Count; notCurrentInstanceCharacterCount++)
                 {
@@ -271,6 +228,76 @@ namespace FastAndFractured
                 }
             }
         }
+
+        private bool CheckIfCharacterExistInList(string nameCode)
+        {
+            if (_notcurrentInstanceCharacters.Contains(nameCode))
+            {
+                DivideNameCode(nameCode,out string name);
+                RemoveSelectedCharacterFromNotInstanceCharacters(nameCode, name);
+                return true;
+            }
+            Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
+            return false;
+        }
+        #endregion
+        #region Resources
+        private T GetRandomValueFromShuffleList<T>(List<T> list, T defaultValue)
+        {
+            if (list.Count > 0)
+            {
+                //Shuffle the list
+                ShuffleList(list);
+                return list[Random.Range(0, _notcurrentInstanceCharacters.Count)];
+            }
+            return defaultValue;
+        }
+
+        private void ShuffleList<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        private void DivideNameCode(string nameCode, out string name, out int skinNum)
+        {
+            name = " ";
+            skinNum = -1;
+            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
+            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
+            {
+                name = dividedNameCode[0];
+                if (_characterSelectedLimit.ContainsKey(name))
+                {
+                    if (!int.TryParse(dividedNameCode[1], out skinNum))
+                    {
+                        skinNum = -1;
+                    }
+                }
+                else
+                {
+                    name = " ";
+                }
+            }
+        }
+
+        private void DivideNameCode(string nameCode, out string name)
+        {
+            name = " ";
+            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
+            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
+            {
+                name = dividedNameCode[0];
+                if (!_characterSelectedLimit.ContainsKey(name))
+                {
+                    name = " ";
+                }
+            }
+        }
+        #endregion
 
         public void EliminatePlayer(StatsController characterstats)
         {
@@ -292,7 +319,6 @@ namespace FastAndFractured
                 return true;
             return false;
         }
-        #endregion
     }
 }
 

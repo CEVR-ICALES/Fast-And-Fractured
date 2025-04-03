@@ -46,6 +46,11 @@ namespace FastAndFractured
         Quaternion startRotation;
         private void Awake()
         {
+            LevelController.Instance.charactersCustomStart.AddListener(InitializeIaValues);
+        }
+
+        private void InitializeIaValues()
+        {
             //Testing 
             _targetToShoot = _player;
             if (!agent)
@@ -78,7 +83,7 @@ namespace FastAndFractured
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
             }
-            physicsBehaviour.Rb = GetComponent<Rigidbody>();
+            //physicsBehaviour.Rb = GetComponent<Rigidbody>();
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;
