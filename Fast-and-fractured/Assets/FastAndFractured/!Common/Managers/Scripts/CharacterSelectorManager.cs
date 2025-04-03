@@ -45,6 +45,7 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectNextCharacter()
     {
+        if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex + 1;
         if (newIndex >= allCharacters.Length) newIndex = 0;
         ChangeCharacter(newIndex);
@@ -52,6 +53,7 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectPreviousCharacter()
     {
+        if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex - 1;
         if (newIndex < 0) newIndex = allCharacters.Length - 1;
         ChangeCharacter(newIndex);
@@ -59,6 +61,7 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectNextSkin()
     {
+        if (_modelChangeTimer != null) return;
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex + 1;
         if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = 0;
@@ -68,6 +71,7 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectPreviousSkin()
     {
+        if (_modelChangeTimer != null) return;
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex  - 1;
         if (_currentSkinIndex < 0) _currentSkinIndex = character.Models.Length -1;
@@ -129,6 +133,7 @@ public class CharacterSelectorManager : MonoBehaviour
             {
                 carStopCollider.enabled = true;
                 Destroy(lastModelInstance);
+                _modelChangeTimer = null;
             });
         }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
