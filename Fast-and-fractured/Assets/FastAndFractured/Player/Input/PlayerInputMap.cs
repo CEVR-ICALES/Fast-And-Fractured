@@ -486,6 +486,60 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LeftDirection"",
+                    ""type"": ""Button"",
+                    ""id"": ""7be6982e-b3c7-4924-8a79-c826534abe31"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightDirection"",
+                    ""type"": ""Button"",
+                    ""id"": ""a6e5a43e-9511-4eae-835c-81da6c831297"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UpDirection"",
+                    ""type"": ""Button"",
+                    ""id"": ""56310f66-7493-403c-94ad-6290033f41dd"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DownDirection"",
+                    ""type"": ""Button"",
+                    ""id"": ""1fda791f-4c80-45e5-8352-428f77afda65"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LeftSwap"",
+                    ""type"": ""Button"",
+                    ""id"": ""8b0383a8-6359-4d59-89ab-0de70f93cd8c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightSwap"",
+                    ""type"": ""Button"",
+                    ""id"": ""d3fc899d-9d86-43ad-89e4-ac4ff6399035"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -508,6 +562,72 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""GoBack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3e8096f5-e15a-49fa-b8f1-0272f1e3a9ac"",
+                    ""path"": ""<Gamepad>/leftStick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LeftDirection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f98998cb-b8b9-42f8-a323-2cea6d38bae7"",
+                    ""path"": ""<Gamepad>/leftStick/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightDirection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9de16999-0a0a-4bc7-b1e8-667d006b1a23"",
+                    ""path"": ""<Gamepad>/leftStick/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""UpDirection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""180fc230-29ee-42f9-9d23-880b70c529e4"",
+                    ""path"": ""<Gamepad>/leftStick/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DownDirection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f1741046-fda7-43da-ad12-07fdf3680267"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LeftSwap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4880748b-afa7-4fe7-a87a-f4778fedad65"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightSwap"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -536,6 +656,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         // MenuInputActions
         m_MenuInputActions = asset.FindActionMap("MenuInputActions", throwIfNotFound: true);
         m_MenuInputActions_GoBack = m_MenuInputActions.FindAction("GoBack", throwIfNotFound: true);
+        m_MenuInputActions_LeftDirection = m_MenuInputActions.FindAction("LeftDirection", throwIfNotFound: true);
+        m_MenuInputActions_RightDirection = m_MenuInputActions.FindAction("RightDirection", throwIfNotFound: true);
+        m_MenuInputActions_UpDirection = m_MenuInputActions.FindAction("UpDirection", throwIfNotFound: true);
+        m_MenuInputActions_DownDirection = m_MenuInputActions.FindAction("DownDirection", throwIfNotFound: true);
+        m_MenuInputActions_LeftSwap = m_MenuInputActions.FindAction("LeftSwap", throwIfNotFound: true);
+        m_MenuInputActions_RightSwap = m_MenuInputActions.FindAction("RightSwap", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -762,11 +888,23 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_MenuInputActions;
     private List<IMenuInputActionsActions> m_MenuInputActionsActionsCallbackInterfaces = new List<IMenuInputActionsActions>();
     private readonly InputAction m_MenuInputActions_GoBack;
+    private readonly InputAction m_MenuInputActions_LeftDirection;
+    private readonly InputAction m_MenuInputActions_RightDirection;
+    private readonly InputAction m_MenuInputActions_UpDirection;
+    private readonly InputAction m_MenuInputActions_DownDirection;
+    private readonly InputAction m_MenuInputActions_LeftSwap;
+    private readonly InputAction m_MenuInputActions_RightSwap;
     public struct MenuInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
         public MenuInputActionsActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
         public InputAction @GoBack => m_Wrapper.m_MenuInputActions_GoBack;
+        public InputAction @LeftDirection => m_Wrapper.m_MenuInputActions_LeftDirection;
+        public InputAction @RightDirection => m_Wrapper.m_MenuInputActions_RightDirection;
+        public InputAction @UpDirection => m_Wrapper.m_MenuInputActions_UpDirection;
+        public InputAction @DownDirection => m_Wrapper.m_MenuInputActions_DownDirection;
+        public InputAction @LeftSwap => m_Wrapper.m_MenuInputActions_LeftSwap;
+        public InputAction @RightSwap => m_Wrapper.m_MenuInputActions_RightSwap;
         public InputActionMap Get() { return m_Wrapper.m_MenuInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -779,6 +917,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @GoBack.started += instance.OnGoBack;
             @GoBack.performed += instance.OnGoBack;
             @GoBack.canceled += instance.OnGoBack;
+            @LeftDirection.started += instance.OnLeftDirection;
+            @LeftDirection.performed += instance.OnLeftDirection;
+            @LeftDirection.canceled += instance.OnLeftDirection;
+            @RightDirection.started += instance.OnRightDirection;
+            @RightDirection.performed += instance.OnRightDirection;
+            @RightDirection.canceled += instance.OnRightDirection;
+            @UpDirection.started += instance.OnUpDirection;
+            @UpDirection.performed += instance.OnUpDirection;
+            @UpDirection.canceled += instance.OnUpDirection;
+            @DownDirection.started += instance.OnDownDirection;
+            @DownDirection.performed += instance.OnDownDirection;
+            @DownDirection.canceled += instance.OnDownDirection;
+            @LeftSwap.started += instance.OnLeftSwap;
+            @LeftSwap.performed += instance.OnLeftSwap;
+            @LeftSwap.canceled += instance.OnLeftSwap;
+            @RightSwap.started += instance.OnRightSwap;
+            @RightSwap.performed += instance.OnRightSwap;
+            @RightSwap.canceled += instance.OnRightSwap;
         }
 
         private void UnregisterCallbacks(IMenuInputActionsActions instance)
@@ -786,6 +942,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @GoBack.started -= instance.OnGoBack;
             @GoBack.performed -= instance.OnGoBack;
             @GoBack.canceled -= instance.OnGoBack;
+            @LeftDirection.started -= instance.OnLeftDirection;
+            @LeftDirection.performed -= instance.OnLeftDirection;
+            @LeftDirection.canceled -= instance.OnLeftDirection;
+            @RightDirection.started -= instance.OnRightDirection;
+            @RightDirection.performed -= instance.OnRightDirection;
+            @RightDirection.canceled -= instance.OnRightDirection;
+            @UpDirection.started -= instance.OnUpDirection;
+            @UpDirection.performed -= instance.OnUpDirection;
+            @UpDirection.canceled -= instance.OnUpDirection;
+            @DownDirection.started -= instance.OnDownDirection;
+            @DownDirection.performed -= instance.OnDownDirection;
+            @DownDirection.canceled -= instance.OnDownDirection;
+            @LeftSwap.started -= instance.OnLeftSwap;
+            @LeftSwap.performed -= instance.OnLeftSwap;
+            @LeftSwap.canceled -= instance.OnLeftSwap;
+            @RightSwap.started -= instance.OnRightSwap;
+            @RightSwap.performed -= instance.OnRightSwap;
+            @RightSwap.canceled -= instance.OnRightSwap;
         }
 
         public void RemoveCallbacks(IMenuInputActionsActions instance)
@@ -824,5 +998,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     public interface IMenuInputActionsActions
     {
         void OnGoBack(InputAction.CallbackContext context);
+        void OnLeftDirection(InputAction.CallbackContext context);
+        void OnRightDirection(InputAction.CallbackContext context);
+        void OnUpDirection(InputAction.CallbackContext context);
+        void OnDownDirection(InputAction.CallbackContext context);
+        void OnLeftSwap(InputAction.CallbackContext context);
+        void OnRightSwap(InputAction.CallbackContext context);
     }
 }
