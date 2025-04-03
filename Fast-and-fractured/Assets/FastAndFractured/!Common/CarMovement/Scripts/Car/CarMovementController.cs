@@ -78,8 +78,6 @@ namespace FastAndFractured
             SetMaxRbSpeedDelayed();
         }
 
-
-
         private void FixedUpdate()
         {
             CheckSlope();

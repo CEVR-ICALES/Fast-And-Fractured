@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
 using Enums;
-using System;
+using UnityEngine.Events;
 
 namespace FastAndFractured
 {
@@ -17,17 +17,17 @@ namespace FastAndFractured
         [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
         [SerializeField] private List<Controller> controllers;
         [SerializeField] private List<CharacterData> charactersData;
-        [SerializeField] private GameObject playerBasePrefab;
-        [SerializeField] private GameObject iaBasePrefab;
+
         public int CurrentPlayers { get=> _currentPlayers; set { _currentPlayers = value; }}
         private int _currentPlayers = 1;
+        public UnityEvent charactersCustomStart;
         public int TotalCharacters { get => totalCharacters; set => totalCharacters = value; }
         [SerializeField]
         private int totalCharacters = 8;
         private List<string> _notcurrentInstanceCharacters;
         private Dictionary<string, int> _characterSelectedLimit;
 
-        private List<GameObject> _inGameCharacters;
+        private List<string> _inGameCharacters;
 
         [SerializeField]
         private GameObject[] spawnPoints;
@@ -119,17 +119,20 @@ namespace FastAndFractured
 
         private void LoadInGameCharacters()
         {
-            _inGameCharacters = new List<GameObject>();
-            CreateNotInstanceCharactersListFromPlayerList();
+            _inGameCharacters = new List<string>();
+            bool succeded = CreateNotInstanceCharactersListFromPlayerList();
            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
-            GameObject player = GetCharacterWithNameCode(selectedPlayer, out bool succeded);
-            _inGameCharacters.Add(player);
+            if (succeded = CheckIfCharacterExistInList(selectedPlayer))
+            {
+                _inGameCharacters.Add(selectedPlayer);
+            }
             int totalIaCharacters = totalCharacters - _currentPlayers;
             for(int iaCharacterCount = 0; iaCharacterCount < totalIaCharacters&&succeded; iaCharacterCount++)
             {
-                GameObject IA = GetCharacterWithNameCode(GetRandomValueFromShuffleList(_notcurrentInstanceCharacters, "empty List"),out succeded);
-                if (IA != null) { 
-                    _inGameCharacters.Add(IA);
+                string iaName = GetRandomValueFromShuffleList(_notcurrentInstanceCharacters, "empty List");
+                if (succeded = CheckIfCharacterExistInList(iaName))
+                {
+                    _inGameCharacters.Add(iaName);
                 }
             }
             if(succeded)
@@ -142,56 +145,50 @@ namespace FastAndFractured
         {
            // if (spawnPoints.Length == totalCharacters)
             {
-                for (int playersCount = 0; playersCount < _currentPlayers; playersCount++)
+                int allCharacters = _inGameCharacters.Count;
+                int charactersCount = 0;
+                for (; charactersCount < _currentPlayers; charactersCount++)
                 {
-                   Transform baseForPlayer = Instantiate(playerBasePrefab, spawnPoints[playersCount].transform.position,Quaternion.identity).transform;
-                    Instantiate(_inGameCharacters[playersCount], baseForPlayer);
+                    GameObject player = SearchCharacterInList(_inGameCharacters[charactersCount]);
+                   Transform baseForPlayer = Instantiate(playerBasePrefab, spawnPoints[charactersCount].transform.position,Quaternion.identity).transform;
+                    Instantiate(_inGameCharacters[charactersCount], baseForPlayer);
+                }
+                if (charactersCustomStart != null)
+                {
+                    charactersCustomStart.Invoke();
                 }
             }
         }
 
-        private GameObject GetCharacterWithNameCode(string nameCode, out bool succeded)
+        private void DivideNameCode(string nameCode, out string name, out int skinNum)
         {
-            ErrorTypeInGettingCharacters errorType = ErrorTypeInGettingCharacters.DONT_EXIST;
+            name = " ";
+            skinNum = -1;
+            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
+            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
+            {
+                name = dividedNameCode[0];
+                if (_characterSelectedLimit.ContainsKey(name))
+                {
+                    if (_characterSelectedLimit[name] < LIMIT_OF_CHARACTER_SPAWNED)
+                    {
+                        if (int.TryParse(dividedNameCode[1], out skinNum))
+                        {
+
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool CheckIfCharacterExistInList(string nameCode)
+        {
             if (_notcurrentInstanceCharacters.Contains(nameCode))
             {
-                errorType = ErrorTypeInGettingCharacters.INCORRECT_NAME_CODE;
-                string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
-                if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
-                {
-                        string name = dividedNameCode[0];
-                        if (int.TryParse(dividedNameCode[1], out int skinNum))
-                        {
-                        errorType = ErrorTypeInGettingCharacters.NOT_FOUND;
-                        var characterPrefab = SearchCharacterInListOfCharacters(name, skinNum);
-                            if (characterPrefab != null)
-                            {
-                                RemoveSelectedCharacterFromNotInstanceCharacters(nameCode, name);
-                                succeded = true;
-                                return characterPrefab;
-                            }
-                        }
-                }
+                return true;
             }
-            DebugWarningErrorsForCharacterList(errorType, nameCode, "Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
-            succeded = false;   
-            return null;
-        }
-
-        private void DebugWarningErrorsForCharacterList(ErrorTypeInGettingCharacters errorType, string nameCode, string genericCorrection)
-        {
-            switch (errorType)
-            {
-                case ErrorTypeInGettingCharacters.DONT_EXIST:
-                    Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. " + genericCorrection);
-                    break;
-                case ErrorTypeInGettingCharacters.INCORRECT_NAME_CODE:
-                    Debug.LogWarning("The format of  " + nameCode + " is incorrect" + genericCorrection);
-                    break;
-                case ErrorTypeInGettingCharacters.NOT_FOUND:
-                    Debug.LogWarning("Character " + nameCode + "was not found in characterData list. " + genericCorrection );
-                    break;
-            }
+            Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
+            return false;
         }
 
         private T GetRandomValueFromShuffleList<T>(List<T> list, T defaultValue)
@@ -214,26 +211,27 @@ namespace FastAndFractured
             }
         }
 
-        private GameObject SearchCharacterInListOfCharacters(string name, int skinNum)
+        private GameObject SearchCharacterInList(string nameCode,bool player)
         {
+            DivideNameCode(nameCode, out string name, out int skinNum);
             foreach (var character in charactersData)
             {
                 if (character.CharacterName == name)
                 {
                     if (skinNum == DEFAULT_SKIN)
                     {
-                        return character.Character_0;
+                        return player ? character.Player_0 : character.IA_0;
                     }
-                    if (skinNum - 1 < character.Character_skins.Count)
+                    if (skinNum - 1 < character.Player_skins.Count)
                     {
-                        return character.Character_skins[skinNum - 1];
+                        return player ? character.Player_skins[skinNum - 1] : character.IA_Skins[skinNum - 1];
                     }
                 }
             }
             return null;
         }
 
-        private void CreateNotInstanceCharactersListFromPlayerList()
+        private bool CreateNotInstanceCharactersListFromPlayerList()
         {
             _notcurrentInstanceCharacters = new List<string>();
             _characterSelectedLimit = new Dictionary<string, int>();
@@ -244,12 +242,18 @@ namespace FastAndFractured
                 characterSkinCount = DEFAULT_SKIN + 1;
                 _notcurrentInstanceCharacters.Add(character.CharacterName + DEMILITER_CHAR_FOR_CHARACTER_NAMES + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
-                foreach (var characterSkin in character.Character_skins)
+                if (character.IA_Skins.Count != character.Player_skins.Count)
+                {
+                    Debug.LogWarning("Player skins and Ia skins of characterData " + character.name + " are different size. Make sure they are the same size.");
+                    return false;
+                }
+                foreach (var characterSkin in character.Player_skins)
                 {
                     _notcurrentInstanceCharacters.Add(character.CharacterName + DEMILITER_CHAR_FOR_CHARACTER_NAMES + characterSkinCount.ToString());
                     characterSkinCount++;
                 }
             }
+            return true;
         }
 
         private void RemoveSelectedCharacterFromNotInstanceCharacters(string nameCode,string nameWithoutCode)

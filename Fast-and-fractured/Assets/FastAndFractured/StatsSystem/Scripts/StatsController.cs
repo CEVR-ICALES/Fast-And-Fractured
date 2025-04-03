@@ -25,10 +25,12 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
+        private float _currentMaxSpeedMultiplier;
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
+        public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
         public float Acceleration { get => currentAcceleration; }
@@ -236,6 +238,9 @@ namespace FastAndFractured
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                    return true;
                 case Stats.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
@@ -335,6 +340,8 @@ namespace FastAndFractured
                     return currentPushShootDMG;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    return _currentMaxSpeedMultiplier;
             }
             return ERROR_GET_STAT_FLOAT;
         }

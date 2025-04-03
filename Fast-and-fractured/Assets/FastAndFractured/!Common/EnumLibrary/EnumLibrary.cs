@@ -101,7 +101,8 @@ namespace Enums
         ENDURANCE,
         NORMAL_DAMAGE,
         PUSH_DAMAGE,
-        COOLDOWN_SPEED
+        COOLDOWN_SPEED,
+        MAX_SPEED_MULTIPLIER
     }
 
     public enum TimerDirection
