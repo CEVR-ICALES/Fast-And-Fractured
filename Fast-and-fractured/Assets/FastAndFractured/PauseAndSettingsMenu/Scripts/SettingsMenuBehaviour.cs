@@ -49,115 +49,60 @@ namespace FastAndFractured
         {
             //Master volume
             float masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.5f);
-            masterVolumeSlider.value = masterVolume;
+            RefreshValue(masterVolumeSlider, masterVolume);
             //Music volume 
             float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.5f);
-            musicVolumeSlider.value = musicVolume;
+            RefreshValue(musicVolumeSlider, musicVolume);
             //SFX volume
             float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
-            sfxVolumeSlider.value = sfxVolume;
+            RefreshValue(sfxVolumeSlider, sfxVolume);
             // Max FPS
             int maxFPS = PlayerPrefs.GetInt("MaxFPS", 120);
-            for (int i = 0; i < fpsDropdown.options.Count; i++)
-            {
-                if (fpsDropdown.options[i].text == maxFPS.ToString())
-                {
-                    fpsDropdown.value = i;
-                    fpsDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            string maxFPSString = maxFPS.ToString();
+            RefreshValue(fpsDropdown, maxFPSString);
             //Resolution
             string resolution = PlayerPrefs.GetString("Resolution","1920x1080");
-            for (int i = 0; i < resolutionDropdown.options.Count; i++)
-            {
-                if (resolutionDropdown.options[i].text == resolution)
-                {
-                    resolutionDropdown.value = i;
-                    resolutionDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(resolutionDropdown, resolution);
             //VSync
             string vsync = PlayerPrefs.GetString("Vsync", "No");
-            for (int i = 0; i < vsyncDropdown.options.Count; i++)
-            {
-                if (vsyncDropdown.options[i].text == vsync)
-                {
-                    vsyncDropdown.value = i;
-                    vsyncDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(vsyncDropdown, vsync);
             //Anti-Aliasing
             string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
-            for (int i = 0; i < antiAliasingDropdown.options.Count; i++)
-            {
-                if (antiAliasingDropdown.options[i].text == antiAliasing)
-                {
-                    antiAliasingDropdown.value = i;
-                    antiAliasingDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(antiAliasingDropdown, antiAliasing);
             //Sharpening
             string sharpening = PlayerPrefs.GetString("Sharpening", "No");
-            for (int i = 0; i < sharpeningDropdown.options.Count; i++)
-            {
-                if (sharpeningDropdown.options[i].text == sharpening)
-                {
-                    sharpeningDropdown.value = i;
-                    sharpeningDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(sharpeningDropdown, sharpening);
             //Ray Tracing
             string rayTracing = PlayerPrefs.GetString("RayTracing", "No");
-            for (int i = 0; i < rayTracingDropdown.options.Count; i++)
-            {
-                if (rayTracingDropdown.options[i].text == rayTracing)
-                {
-                    rayTracingDropdown.value = i;
-                    rayTracingDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(rayTracingDropdown, rayTracing);
             //Brightness
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
-            brightnessSlider.value=brightness;
+            RefreshValue(brightnessSlider, brightness);
             //Colorblind
             string colorblind = PlayerPrefs.GetString("Colorblind", "No");
-            for (int i = 0; i < colorblindDropdown.options.Count; i++)
-            {
-                if (colorblindDropdown.options[i].text == colorblind)
-                {
-                    colorblindDropdown.value = i;
-                    colorblindDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(colorblindDropdown, colorblind);
             //Language
             string language = PlayerPrefs.GetString("Language", "Español");
-            for (int i = 0; i < languageDropdown.options.Count; i++)
-            {
-                if (languageDropdown.options[i].text == language)
-                {
-                    languageDropdown.value = i;
-                    languageDropdown.RefreshShownValue();
-                    break;
-                }
-            }
+            RefreshValue(languageDropdown, language);
             //Subtitles
             string subtitles = PlayerPrefs.GetString("Subtitles", "No");
-            for (int i = 0; i < subtitlesDropdown.options.Count; i++)
+            RefreshValue(subtitlesDropdown, subtitles);
+        }
+        private void RefreshValue(TMP_Dropdown dropdown, string value)
+        {
+            for (int i = 0; i < dropdown.options.Count; i++)
             {
-                if (subtitlesDropdown.options[i].text == subtitles)
+                if (dropdown.options[i].text == value)
                 {
-                    subtitlesDropdown.value = i;
-                    subtitlesDropdown.RefreshShownValue();
+                    dropdown.value = i;
+                    dropdown.RefreshShownValue();
                     break;
                 }
             }
+        }
+        private void RefreshValue(Slider slider, float value)
+        {
+            slider.value = value;
         }
 
         //Change between settings ui
