@@ -14,6 +14,7 @@ namespace StateMachine
         State currentState;
 
         private bool _paused = false;
+        [SerializeField] private bool _isDebugging;
 
         // Start is called before the first frame update
         private void Awake()
@@ -74,7 +75,8 @@ namespace StateMachine
         }
         void ChangeState(State newState)
         {
-            Debug.Log($"Entering state {newState.name}");
+            if(_isDebugging)
+                Debug.Log($"Entering state {newState.name}");
             ExitState(currentState);
             var newlyInstantiatedState = InstantiateCopyOfState(newState);
             EnterState(newlyInstantiatedState);
