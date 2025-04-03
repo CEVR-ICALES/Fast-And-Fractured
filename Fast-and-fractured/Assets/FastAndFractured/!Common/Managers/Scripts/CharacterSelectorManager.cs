@@ -38,6 +38,11 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void OnEnable()
     {
+        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+
         UpdateCharacterDisplay();
         _currentCharacterIndex = 0;
         _currentSkinIndex = 0;
@@ -137,6 +142,7 @@ public class CharacterSelectorManager : MonoBehaviour
             });
         }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
+        _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
     }
     private void CheckIfSkinUnlocked()
