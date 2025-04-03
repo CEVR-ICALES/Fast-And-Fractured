@@ -33,8 +33,11 @@ namespace StateMachine
         void Update()
         {
             if (_paused) return;
-            UpdateStateActions();
-            EvaluateStateTransitions();
+            if (currentState != null)
+            {
+                UpdateStateActions();
+                EvaluateStateTransitions();
+            }
         }
         void UpdateStateActions()
         {
