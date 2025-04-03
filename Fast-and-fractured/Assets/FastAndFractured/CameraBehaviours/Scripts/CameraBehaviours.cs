@@ -19,9 +19,12 @@ namespace FastAndFractured
 
         void Update()
         {
-            if(_inputController.IsUsingController)
+            if (_inputController != null)
             {
-                UpdateCameraMovement();
+                if (_inputController.IsUsingController)
+                {
+                    UpdateCameraMovement();
+                }
             }
         }
 

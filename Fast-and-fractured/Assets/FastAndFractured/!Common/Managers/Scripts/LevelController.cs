@@ -37,7 +37,7 @@ namespace FastAndFractured
         [SerializeField]
         private GameObject[] spawnPoints;
 
-        private const char DEMILITER_CHAR_FOR_CHARACTER_NAMES = '_';
+        private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES = '_';
         private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
         private const int DEFAULT_SKIN = 0;
         private const int LIMIT_OF_CHARACTER_SPAWNED = 2;
@@ -56,7 +56,9 @@ namespace FastAndFractured
         void Start()
         {
             PlayerPrefs.SetString("Selected_Player","Josefino_0");
-            LoadInGameCharacters();
+            LoadInGameCharacters(out bool succeded);
+            if (!succeded)
+                Debug.LogError("Spawning the characters failed.");
         }
         // this will be moved to gameManaager once its created
 
@@ -112,16 +114,19 @@ namespace FastAndFractured
             //}
         }
 
-        private void LoadInGameCharacters()
+        private void LoadInGameCharacters(out bool succeded)
         {
             _inGameCharacters = new List<string>();
-            bool succeded = CreateNotInstanceCharactersListFromPlayerList();
+           succeded = CreateNotInstanceCharactersListFromPlayerList();
            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
-           
+            if (!succeded)
+                return;
             if (succeded = CheckIfCharacterExistInList(selectedPlayer))
             {
                 _inGameCharacters.Add(selectedPlayer);
             }
+            else
+                return;
             int totalIaCharacters = totalCharacters - _currentPlayers;
             for(int iaCharacterCount = 0; iaCharacterCount < totalIaCharacters&&succeded; iaCharacterCount++)
             {
@@ -131,7 +136,7 @@ namespace FastAndFractured
                     _inGameCharacters.Add(iaName);
                 }
             }
-            if(succeded)
+            if (succeded)
             {
                 SpawnCharactersInScene();
             }
@@ -146,6 +151,7 @@ namespace FastAndFractured
                 int allCharacters = _inGameCharacters.Count;
                 int charactersCount = 0;
                 GameObject player = null;
+                ShuffleList(spawnPoints);
                 for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
                 {
                     player = SearchCharacterInList(_inGameCharacters[charactersCount],true);
@@ -196,7 +202,7 @@ namespace FastAndFractured
             foreach (var character in charactersData)
             {
                 characterSkinCount = DEFAULT_SKIN + 1;
-                _notcurrentInstanceCharacters.Add(character.CharacterName + DEMILITER_CHAR_FOR_CHARACTER_NAMES + DEFAULT_SKIN.ToString());
+                _notcurrentInstanceCharacters.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
                 if (character.IA_Skins.Count != character.Player_skins.Count)
                 {
@@ -205,7 +211,7 @@ namespace FastAndFractured
                 }
                 foreach (var characterSkin in character.Player_skins)
                 {
-                    _notcurrentInstanceCharacters.Add(character.CharacterName + DEMILITER_CHAR_FOR_CHARACTER_NAMES + characterSkinCount.ToString());
+                    _notcurrentInstanceCharacters.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES + characterSkinCount.ToString());
                     characterSkinCount++;
                 }
             }
@@ -253,7 +259,7 @@ namespace FastAndFractured
             return defaultValue;
         }
 
-        private void ShuffleList<T>(List<T> list)
+        private void ShuffleList<T>(IList<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
             {
@@ -266,7 +272,7 @@ namespace FastAndFractured
         {
             name = " ";
             skinNum = -1;
-            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
+            string[] dividedNameCode = nameCode.Split(DELIMITER_CHAR_FOR_CHARACTER_NAMES);
             if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
             {
                 name = dividedNameCode[0];
@@ -287,7 +293,7 @@ namespace FastAndFractured
         private void DivideNameCode(string nameCode, out string name)
         {
             name = " ";
-            string[] dividedNameCode = nameCode.Split(DEMILITER_CHAR_FOR_CHARACTER_NAMES);
+            string[] dividedNameCode = nameCode.Split(DELIMITER_CHAR_FOR_CHARACTER_NAMES);
             if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
             {
                 name = dividedNameCode[0];
