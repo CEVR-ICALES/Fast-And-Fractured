@@ -13,5 +13,6 @@ public class ChooseNearestCharacterAction : Action
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
         brain.ChooseNearestCharacter();
+        FinishAction();
     }
 }
