@@ -276,7 +276,7 @@ namespace FastAndFractured
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
             charStat = isProduct ? charStat * mod : charStat + mod;
-            //charStat = Mathf.Clamp(charStat, minVal, maxVal);
+            charStat = Mathf.Clamp(charStat, minVal, maxVal);
             return charStat;
         }
         #endregion
