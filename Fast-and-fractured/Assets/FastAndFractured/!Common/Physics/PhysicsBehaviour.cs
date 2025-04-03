@@ -190,6 +190,11 @@ namespace FastAndFractured
         {
             _rb.AddTorque(torque, forceMode);
         }
+
+        public void SlowDownAngularMomentum()
+        {
+
+        }
         #endregion
 
         #region Force Calculations

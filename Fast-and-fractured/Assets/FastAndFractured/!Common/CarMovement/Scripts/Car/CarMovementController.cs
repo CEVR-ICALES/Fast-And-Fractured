@@ -47,6 +47,9 @@ namespace FastAndFractured
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
 
+        [Header("Air rotation")]
+        [SerializeField] private float airRotationForce;
+
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
 
@@ -70,6 +73,9 @@ namespace FastAndFractured
 
         [Header("References")]
         [SerializeField] private StatsController statsController;
+        [SerializeField] private float slowingDownAngularMomentumTime;
+        private bool _canSlowDownMomentum = false;
+        private ITimer _slowDownAngularMomentumTimer;
 
 
         private void Start()
@@ -475,6 +481,53 @@ namespace FastAndFractured
         }
         #endregion
 
+        #region AirRotation
+        public void HandleInputOnAir(Vector2 steeringInput)
+        {
+
+            if (steeringInput.x == 0 && steeringInput.y == 0)// slow down momentum when rotating in frhe air
+            {
+                if(_canSlowDownMomentum)
+                {
+                    //TO DO slow down angular momentum
+                }
+            }
+            else
+            {
+                _canSlowDownMomentum = true;
+                if (_slowDownAngularMomentumTimer == null)
+                {
+                    _slowDownAngularMomentumTimer = TimerSystem.Instance.CreateTimer(slowingDownAngularMomentumTime, onTimerDecreaseComplete: () =>
+                    {
+                        _canSlowDownMomentum = false;
+                    });
+                } else
+                {
+                    TimerSystem.Instance.ModifyTimer(_slowDownAngularMomentumTimer, slowingDownAngularMomentumTime);
+                }
+                 
+                
+            }
+
+            if (steeringInput.x > 0)
+            {
+                _physicsBehaviour.AddTorque(-transform.forward * airRotationForce, ForceMode.Acceleration);
+            } else if(steeringInput.x < 0)
+            {
+                _physicsBehaviour.AddTorque(transform.forward * airRotationForce, ForceMode.Acceleration);
+            }
+
+            if(steeringInput.y > 0)
+            {
+                _physicsBehaviour.AddTorque(transform.right * airRotationForce, ForceMode.Acceleration);
+                
+            } else if(steeringInput.y < 0)
+            {
+                _physicsBehaviour.AddTorque(-transform.right * airRotationForce, ForceMode.Acceleration);
+            }
+
+        }
+        #endregion
         public void StopAllCarMovement()
         {
             foreach (var wheel in wheels)
