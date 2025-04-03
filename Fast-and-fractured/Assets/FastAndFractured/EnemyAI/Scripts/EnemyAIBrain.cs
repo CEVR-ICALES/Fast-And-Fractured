@@ -1,8 +1,9 @@
 using Enums;
-using System;
+using StateMachine;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 using Utilities;
 
 namespace FastAndFractured
@@ -38,11 +39,13 @@ namespace FastAndFractured
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] LayerMask ignoreLayerMask;
 
+
         PathMode pathMode = PathMode.ADVANCED;
 
         const float MAX_ANGLE_DIRECTION = 90f;
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
+        const int MAX_PERCENTAGE_100 = 100;
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
         private Quaternion startRotation;
@@ -57,6 +60,25 @@ namespace FastAndFractured
         [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
         [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
+
+
+        [Header("Item Type Priority")]
+        
+        [Tooltip("Range of weight on how likely it's going to choose that item type.\n" +
+            "--> 10 is base and the minimum.\n" +
+            "--> 25 to 30 if multiple priorities.\n" +
+            "--> 50 if one normal priority is needed.\n" +
+            "--> 150 for hyperfixation in that stat.")]
+        [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 50;
+        [Range(10, 150)][SerializeField] private int decisionPercentageMaxSpeed = 10;
+        [Range(10, 150)][SerializeField] private int decisionPercentageAcceleration = 10;
+        [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 10;
+        [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
+        [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+        private int _totalDecisionPercentage = 0;
+        public Stats StatToChoose => _statToChoose;
+        private Stats _statToChoose;
+
         private void OnEnable()
         {
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
@@ -106,6 +128,7 @@ namespace FastAndFractured
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;
             startRotation = carMovementController.transform.rotation;
+
         }
         public void ReturnToStartPosition()
         {
@@ -173,10 +196,39 @@ namespace FastAndFractured
             _positionToDrive = _player.transform.position;
         }
 
-        public void ChooseItemFromType(Stats statToSearch)
+        public void ChooseItemFromType()
         {
+            CalculateTotalDecisionPercentage();
+            //+1 because it's max is exclusive
+            int decision = Random.Range(0, _totalDecisionPercentage + 1);
+
+            if (decision <= decisionPercentageHealth)
+            {
+                _statToChoose = Stats.ENDURANCE;
+            } 
+            else if (decision <= decisionPercentageMaxSpeed)
+            {
+                _statToChoose = Stats.MAX_SPEED;
+            }
+            else if (decision <= decisionPercentageAcceleration)
+            {
+                _statToChoose = Stats.ACCELERATION;
+            }
+            else if (decision <= decisionPercentageNormalShoot)
+            {
+                _statToChoose = Stats.NORMAL_DAMAGE;
+            }
+            else if (decision <= decisionPercentagePushShoot)
+            {
+                _statToChoose = Stats.PUSH_DAMAGE;
+            } else
+            {
+                _statToChoose = Stats.COOLDOWN_SPEED;
+            }
+
             //TODO
-            //Get items from level manager, and choose the nearest from that type of boost
+            //Get items from level manager, filter the list to only get that type of stat item,
+            //and choose the nearest from that type of boost
         }
 
         public void ChooseNearestItem()
@@ -208,6 +260,8 @@ namespace FastAndFractured
             //TODO
             //Get list of NPCs and choose the nearest one
         }
+
+
         #endregion
 
         #region CombatState
@@ -457,6 +511,130 @@ namespace FastAndFractured
             physicsBehaviour.Rb.velocity = Vector3.zero;
             carMovementController.StopAllCarMovement();
         }
+
+        private void CalculateTotalDecisionPercentage()
+        {
+            _totalDecisionPercentage += decisionPercentageHealth +
+                decisionPercentageMaxSpeed +
+                decisionPercentageAcceleration +
+                decisionPercentageNormalShoot +
+                decisionPercentagePushShoot +
+                decisionPercentageCooldown;
+        }
+
+        private void Recalculate
+
+        //Is obsolete but can be used in the future
+        //#if UNITY_EDITOR
+        //        // Save their previous values so we can identify which one changed.
+        //        int _checkHealth;
+        //        int _checkSpeed;
+        //        int _checkAcceleration;
+        //        int _checkNormal;
+        //        int _checkPush;
+        //        int _checkCooldown;
+
+        //        void OnValidate()
+        //        {
+
+        //            // Skip this if we haven't cached the values yet.
+        //            if (_checkHealth >= 0)
+        //            {
+
+        //                // Find which value the user changed, and update the rest from it.
+        //                if (_checkHealth != decisionPercentageHealth)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentageHealth, 
+        //                        ref decisionPercentageMaxSpeed, 
+        //                        ref decisionPercentageAcceleration, 
+        //                        ref decisionPercentageNormalShoot, 
+        //                        ref decisionPercentagePushShoot, 
+        //                        ref decisionPercentageCooldown);
+        //                }
+        //                else if (_checkSpeed != decisionPercentageMaxSpeed)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentageMaxSpeed,
+        //                        ref decisionPercentageHealth,
+        //                        ref decisionPercentageAcceleration,
+        //                        ref decisionPercentageNormalShoot,
+        //                        ref decisionPercentagePushShoot,
+        //                        ref decisionPercentageCooldown);
+        //                }
+        //                else if (_checkAcceleration != decisionPercentageAcceleration)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentageAcceleration,
+        //                        ref decisionPercentageHealth,
+        //                        ref decisionPercentageMaxSpeed,
+        //                        ref decisionPercentageNormalShoot,
+        //                        ref decisionPercentagePushShoot,
+        //                        ref decisionPercentageCooldown);
+        //                }
+        //                else if (_checkNormal != decisionPercentageNormalShoot)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentageNormalShoot,
+        //                        ref decisionPercentageHealth,
+        //                        ref decisionPercentageMaxSpeed,
+        //                        ref decisionPercentageAcceleration,
+        //                        ref decisionPercentagePushShoot,
+        //                        ref decisionPercentageCooldown);
+        //                }
+        //                else if (_checkPush != decisionPercentagePushShoot)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentagePushShoot,
+        //                        ref decisionPercentageHealth,
+        //                        ref decisionPercentageMaxSpeed,
+        //                        ref decisionPercentageAcceleration,
+        //                        ref decisionPercentageNormalShoot,
+        //                        ref decisionPercentageCooldown);
+        //                }
+        //                else if (_checkCooldown != decisionPercentageCooldown)
+        //                {
+        //                    DistributeProportionately(ref decisionPercentageCooldown,
+        //                        ref decisionPercentageHealth,
+        //                        ref decisionPercentageMaxSpeed,
+        //                        ref decisionPercentageAcceleration,
+        //                        ref decisionPercentageNormalShoot,
+        //                        ref decisionPercentagePushShoot);
+        //                }
+
+        //            }
+
+        //            _checkHealth = decisionPercentageHealth;
+        //            _checkSpeed = decisionPercentageMaxSpeed;
+        //            _checkAcceleration = decisionPercentageAcceleration;
+        //            _checkNormal = decisionPercentageNormalShoot;
+        //            _checkPush = decisionPercentagePushShoot;
+        //            _checkCooldown = decisionPercentageCooldown;
+        //        }
+
+
+        //        void DistributeProportionately(ref int changed, ref int a, ref int b, ref int c, ref int d, ref int e)
+        //        {
+        //            changed = (int)Mathf.Clamp(changed, 0f, MAX_PERCENTAGE_100);
+        //            int total = MAX_PERCENTAGE_100 - changed;
+
+        //            int oldTotal = a + b + c + d + e;
+        //            Debug.Log(oldTotal);
+        //            if (oldTotal > 0f)
+        //            {
+        //                float fraction = 1f / oldTotal;
+        //                a = Mathf.RoundToInt(total * a * fraction);
+        //                b = Mathf.RoundToInt(total * b * fraction);
+        //                c = Mathf.RoundToInt(total * c * fraction);
+        //                d = Mathf.RoundToInt(total * d * fraction);
+        //                e = Mathf.RoundToInt(total * e * fraction);
+        //            }
+        //            else
+        //            {
+        //                a = b = c = d = e = total / 5;
+        //            }
+
+        //            // Assign any rounding error to the last one, arbitrarily.
+        //            // (Better rounding rules exist, so take this as an example only)
+        //            //a += total - a - b - c - d - e;
+        //        }
+        //#endif
+        
         #endregion
     }
 }
