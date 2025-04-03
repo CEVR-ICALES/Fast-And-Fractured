@@ -66,7 +66,7 @@ namespace FastAndFractured
             {
                 PlayerPrefs.SetString("Selected_Player", "Josefino_0");
                 PlayerPrefs.SetInt("Player_Num", 1);
-                LoadInGameCharacters(out bool succeded);
+                SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
                     Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
             }
@@ -126,7 +126,7 @@ namespace FastAndFractured
              charactersCustomStart?.Invoke();
         }
 
-        private void LoadInGameCharacters(out bool succeded)
+        private void SpawnInGameCharacters(out bool succeded)
         {
             _inGameCharactersNameCodes = new List<string>();
            succeded = CreateNotInstanceCharactersListFromPlayerList();
