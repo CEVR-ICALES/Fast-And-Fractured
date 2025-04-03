@@ -473,6 +473,45 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""MenuInputActions"",
+            ""id"": ""5cd8f628-2a28-4b94-8e1d-cb1598bd9e4b"",
+            ""actions"": [
+                {
+                    ""name"": ""GoBack"",
+                    ""type"": ""Button"",
+                    ""id"": ""6da1b141-dd57-452c-a565-a440677ea960"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""ad7ea959-e90f-4cb8-8fef-592c48f58c15"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GoBack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2164c23c-ec01-4d6a-b1c1-e5f245223429"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GoBack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -494,11 +533,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_Dash = m_PlayerInputActions.FindAction("Dash", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
+        // MenuInputActions
+        m_MenuInputActions = asset.FindActionMap("MenuInputActions", throwIfNotFound: true);
+        m_MenuInputActions_GoBack = m_MenuInputActions.FindAction("GoBack", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
     {
         UnityEngine.Debug.Assert(!m_PlayerInputActions.enabled, "This will cause a leak and performance issues, PlayerInputAction.PlayerInputActions.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_MenuInputActions.enabled, "This will cause a leak and performance issues, PlayerInputAction.MenuInputActions.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -714,6 +757,52 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         }
     }
     public PlayerInputActionsActions @PlayerInputActions => new PlayerInputActionsActions(this);
+
+    // MenuInputActions
+    private readonly InputActionMap m_MenuInputActions;
+    private List<IMenuInputActionsActions> m_MenuInputActionsActionsCallbackInterfaces = new List<IMenuInputActionsActions>();
+    private readonly InputAction m_MenuInputActions_GoBack;
+    public struct MenuInputActionsActions
+    {
+        private @PlayerInputAction m_Wrapper;
+        public MenuInputActionsActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+        public InputAction @GoBack => m_Wrapper.m_MenuInputActions_GoBack;
+        public InputActionMap Get() { return m_Wrapper.m_MenuInputActions; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(MenuInputActionsActions set) { return set.Get(); }
+        public void AddCallbacks(IMenuInputActionsActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MenuInputActionsActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MenuInputActionsActionsCallbackInterfaces.Add(instance);
+            @GoBack.started += instance.OnGoBack;
+            @GoBack.performed += instance.OnGoBack;
+            @GoBack.canceled += instance.OnGoBack;
+        }
+
+        private void UnregisterCallbacks(IMenuInputActionsActions instance)
+        {
+            @GoBack.started -= instance.OnGoBack;
+            @GoBack.performed -= instance.OnGoBack;
+            @GoBack.canceled -= instance.OnGoBack;
+        }
+
+        public void RemoveCallbacks(IMenuInputActionsActions instance)
+        {
+            if (m_Wrapper.m_MenuInputActionsActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IMenuInputActionsActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MenuInputActionsActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MenuInputActionsActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public MenuInputActionsActions @MenuInputActions => new MenuInputActionsActions(this);
     public interface IPlayerInputActionsActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -731,5 +820,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnDash(InputAction.CallbackContext context);
         void OnDebugAIChangeState(InputAction.CallbackContext context);
         void OnDebugAIResetPosition(InputAction.CallbackContext context);
+    }
+    public interface IMenuInputActionsActions
+    {
+        void OnGoBack(InputAction.CallbackContext context);
     }
 }
