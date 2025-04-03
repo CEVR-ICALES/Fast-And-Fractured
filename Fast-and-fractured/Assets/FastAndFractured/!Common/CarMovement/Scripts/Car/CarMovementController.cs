@@ -489,7 +489,7 @@ namespace FastAndFractured
             {
                 if(_canSlowDownMomentum)
                 {
-                    //TO DO slow down angular momentum
+                    _physicsBehaviour.SlowDownAngularMomentum();
                 }
             }
             else

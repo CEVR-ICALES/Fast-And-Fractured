@@ -32,6 +32,9 @@ namespace FastAndFractured
         public bool IsTouchingGround { get => _isTouchingGround; }
         private bool _isTouchingGround = false;
 
+        [Header("Air rotation")]
+        [SerializeField] private float angularSlowdownRate;
+
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public StatsController StatsController { get => statsController; }
@@ -193,7 +196,14 @@ namespace FastAndFractured
 
         public void SlowDownAngularMomentum()
         {
+            Vector3 currentAngularVelocty = _rb.angularVelocity;
+            if(currentAngularVelocty.magnitude < 0.01f)
+            {
+                _rb.angularVelocity = Vector3.zero;
+                return;
+            }
 
+            _rb.angularVelocity *= angularSlowdownRate;
         }
         #endregion
 
