@@ -129,7 +129,7 @@ namespace FastAndFractured
         private void SpawnInGameCharacters(out bool succeded)
         {
             _inGameCharactersNameCodes = new List<string>();
-           succeded = CreateNotInstanceCharactersListFromPlayerList();
+           succeded = CreateAllCharactersNameCodesList();
            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
             if (!succeded)
                 return;
@@ -211,7 +211,7 @@ namespace FastAndFractured
             return null;
         }
 
-        private bool CreateNotInstanceCharactersListFromPlayerList()
+        private bool CreateAllCharactersNameCodesList()
         {
             _allCharactersNameCode = new List<string>();
             _characterSelectedLimit = new Dictionary<string, int>();
@@ -236,7 +236,7 @@ namespace FastAndFractured
             return true;
         }
 
-        private void RemoveSelectedCharacterFromNotInstanceCharacters(string nameCode, string nameWithoutCode)
+        private void RemoveSelectedCharacterFromAllCharactersNameCodes(string nameCode, string nameWithoutCode)
         {
             _characterSelectedLimit[nameWithoutCode]++;
             _allCharactersNameCode.Remove(nameCode);
@@ -259,7 +259,7 @@ namespace FastAndFractured
             if (_allCharactersNameCode.Contains(nameCode))
             {
                 DivideNameCode(nameCode,out string name);
-                RemoveSelectedCharacterFromNotInstanceCharacters(nameCode, name);
+                RemoveSelectedCharacterFromAllCharactersNameCodes(nameCode, name);
                 return true;
             }
             Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
