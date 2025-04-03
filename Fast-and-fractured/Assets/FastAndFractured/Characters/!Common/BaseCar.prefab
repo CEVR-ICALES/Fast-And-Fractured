@@ -605,11 +605,11 @@ MonoBehaviour:
   directionCenterOffSet: {x: 0, y: 0.25, z: 0}
   bulletSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1426590782
+      Data2: 1159805714
+      Data3: 2001885093
+      Data4: -2108599820
+    Path: event:/ShootingSFX
   onOverheatUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -632,9 +632,10 @@ GameObject:
   - component: {fileID: 5672472646167121783}
   - component: {fileID: 2898550601115800401}
   - component: {fileID: 3352713489937622652}
+  - component: {fileID: 4535282352966134131}
   m_Layer: 6
   m_Name: BaseCar
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -866,6 +867,19 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 50
+--- !u!114 &4535282352966134131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbodyToPause: {fileID: 0}
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,11 +962,11 @@ MonoBehaviour:
   directionCenterOffSet: {x: 0, y: 0, z: 0}
   bulletSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1426590782
+      Data2: 1159805714
+      Data3: 2001885093
+      Data4: -2108599820
+    Path: event:/ShootingSFX
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []

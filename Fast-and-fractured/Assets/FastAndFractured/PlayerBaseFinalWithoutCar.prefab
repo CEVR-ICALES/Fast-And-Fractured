@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2435327966734875818}
   - component: {fileID: 383298123130983299}
   - component: {fileID: 3679666603489496442}
-  - component: {fileID: 5398200630256878890}
+  - component: {fileID: 2405317262010205209}
   m_Layer: 6
   m_Name: PlayerBaseFinalWithoutCar
   m_TagString: Player
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInputController: {fileID: 2050233496893708425}
---- !u!114 &5398200630256878890
+--- !u!114 &2405317262010205209
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -120,23 +120,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4417372150632784795}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d42e3d8643af16247b6bfc1843a73a10, type: 3}
+  m_Script: {fileID: 11500000, guid: 7d3b597e20c3a27459727bf43c4ebfb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  abilityData: {fileID: 11400000, guid: 2c0f93fb0b468614e931a853a422dc45, type: 2}
-  onAbilityActivated:
-    m_PersistentCalls:
-      m_Calls: []
-  onAbilityEnded:
-    m_PersistentCalls:
-      m_Calls: []
-  spawnPoint: {fileID: 5168219367193688341}
-  tomatoSpeed: 100
-  descendingTomatoSpeed: 100
-  distanceEffect: 0
-  ascendingTime: 3
-  pooltypeAscendingTomato: 0
-  pooltypeDescendingTomato: 0
+  prefab: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
 --- !u!1 &5079907056069594877
 GameObject:
   m_ObjectHideFlags: 0
