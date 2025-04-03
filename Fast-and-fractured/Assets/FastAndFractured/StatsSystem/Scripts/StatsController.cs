@@ -1,5 +1,6 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -94,6 +95,7 @@ namespace FastAndFractured
         #endregion
 
         private const float ERROR_GET_STAT_FLOAT = -1;
+        public UnityEvent<float> onEnduranceDamageTaken;
 
         #region START EVENTS
         public void CustomStart()
@@ -117,7 +119,6 @@ namespace FastAndFractured
             if (copyOfCharData != null)
             {
                 charDataSO = copyOfCharData;
-                //OnDied += Dead;
                 InitCurrentStats();
             }
         }
@@ -135,6 +136,12 @@ namespace FastAndFractured
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
+        [ContextMenu(nameof(DebugTake100Endurance))]
+        public void DebugTake100Endurance()
+        {
+            TakeEndurance(100, false);
+        }
+
 
         #region Health
         public void TakeEndurance(float substract, bool isProduct)
@@ -145,6 +152,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        onEnduranceDamageTaken?.Invoke(substract);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
@@ -179,6 +187,11 @@ namespace FastAndFractured
             Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Invulnerable = true;
             return charDataSO.DeadDelay;
+        }
+
+        public float GetEndurancePercentage()
+        {
+            return Endurance / MaxEndurance *100;
         }
         #endregion
 
@@ -305,7 +318,7 @@ namespace FastAndFractured
             if (iscurrentBigger)
             {
                 if (currentValue / previousValue > 1) // Si fue un producto
-                    mod = 1 / (currentValue / previousValue); // Se revierte con una división
+                    mod = 1 / (currentValue / previousValue); // Se revierte con una divisiÃ³n
                 else
                     mod = -(currentValue - previousValue); // Si fue una suma/resta, se revierte con resta
             }
@@ -319,7 +332,7 @@ namespace FastAndFractured
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicación
+                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicaciÃ³n
             });
         }
         #endregion  
