@@ -14,8 +14,6 @@ public class FakeCarMovement : MonoBehaviour
     private void OnEnable()
     {
         _rb = GetComponent<Rigidbody>();
-        //TimerSystem.Instance.CreateTimer(forceToApply)
-        _rb.AddForce(transform.forward * forceToApply, ForceMode.Impulse);
     }
 
     public void MoveCarForward()

@@ -1,12 +1,14 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utilities;
 
 public class CharacterSelectorManager : MonoBehaviour
 {
     public CharacterMenuData[] allCharacters;
 
     // all information we want to show...
+    [Header("Canvas")]
     public Image charIcon;
     public TextMeshProUGUI charName;
     public TextMeshProUGUI charDescription;
@@ -17,8 +19,13 @@ public class CharacterSelectorManager : MonoBehaviour
     public TextMeshProUGUI charCarAcceleration;
     public TextMeshProUGUI charCarManuver;
 
+    [Header("Car Anims Related")]
     [SerializeField] private Transform modelSpawnPosition;
     [SerializeField] private Button selectAndStartButton;
+    [SerializeField] private Collider carStopCollider;
+    [SerializeField] private float modelChangeTimerDuration;
+    private ITimer _modelChangeTimer;
+
 
     private GameObject _currentModelInstance;
     private int _currentCharacterIndex;
@@ -77,9 +84,6 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void UpdateCharacterDisplay()
     {
-        if (_currentModelInstance != null)
-            Destroy(_currentModelInstance);
-
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
 
         ChangeCurrentDisplayedModel(character);
@@ -117,7 +121,16 @@ public class CharacterSelectorManager : MonoBehaviour
     private void ChangeCurrentDisplayedModel(CharacterMenuData character)
     {
         if (_currentModelInstance != null)
-            Destroy(_currentModelInstance);
+        {
+            GameObject lastModelInstance = _currentModelInstance.gameObject;
+            carStopCollider.enabled = false;
+            _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+            _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
+            {
+                carStopCollider.enabled = true;
+                Destroy(lastModelInstance);
+            });
+        }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
         _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
     }
