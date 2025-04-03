@@ -8,7 +8,7 @@ namespace FastAndFractured
 {
     public class SettingsMenuBehaviour : MonoBehaviour
     {
-        [Header("Sub menus ui")]
+        [Header("Menus Settings UI")]
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
         [SerializeField] private GameObject accessibilitySettingsUI;
