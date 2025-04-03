@@ -131,4 +131,11 @@ namespace Enums
         SPEED_EFFECT,
         TOMATO_EFFECT
     }
+
+    public enum ErrorTypeInGettingCharacters
+    {
+        DONT_EXIST,
+        INCORRECT_NAME_CODE,
+        NOT_FOUND
+    }
 }
