@@ -524,7 +524,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""LeftSwap"",
+                    ""name"": ""LeftCharacter"",
                     ""type"": ""Button"",
                     ""id"": ""8b0383a8-6359-4d59-89ab-0de70f93cd8c"",
                     ""expectedControlType"": """",
@@ -533,9 +533,36 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""RightSwap"",
+                    ""name"": ""RightCharacter"",
                     ""type"": ""Button"",
                     ""id"": ""d3fc899d-9d86-43ad-89e4-ac4ff6399035"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LeftSkin"",
+                    ""type"": ""Button"",
+                    ""id"": ""4219722f-c485-4e89-ae8e-f7b0438b36c2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightSkin"",
+                    ""type"": ""Button"",
+                    ""id"": ""35e86643-f04e-498b-98b2-0f8363742ebd"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""StartGame"",
+                    ""type"": ""Button"",
+                    ""id"": ""7333155d-fca4-4b9a-90ce-651cb225ccde"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -616,7 +643,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""LeftSwap"",
+                    ""action"": ""LeftCharacter"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -627,7 +654,40 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RightSwap"",
+                    ""action"": ""RightCharacter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b7cd48dd-8f6e-441a-bab7-8d3b650b50bc"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LeftSkin"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1369c782-01f0-4f4f-a784-ece3c5f1c26b"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightSkin"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d9d0fc8-9771-4d06-8e5c-1926098b48f8"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""StartGame"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -660,8 +720,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_MenuInputActions_RightDirection = m_MenuInputActions.FindAction("RightDirection", throwIfNotFound: true);
         m_MenuInputActions_UpDirection = m_MenuInputActions.FindAction("UpDirection", throwIfNotFound: true);
         m_MenuInputActions_DownDirection = m_MenuInputActions.FindAction("DownDirection", throwIfNotFound: true);
-        m_MenuInputActions_LeftSwap = m_MenuInputActions.FindAction("LeftSwap", throwIfNotFound: true);
-        m_MenuInputActions_RightSwap = m_MenuInputActions.FindAction("RightSwap", throwIfNotFound: true);
+        m_MenuInputActions_LeftCharacter = m_MenuInputActions.FindAction("LeftCharacter", throwIfNotFound: true);
+        m_MenuInputActions_RightCharacter = m_MenuInputActions.FindAction("RightCharacter", throwIfNotFound: true);
+        m_MenuInputActions_LeftSkin = m_MenuInputActions.FindAction("LeftSkin", throwIfNotFound: true);
+        m_MenuInputActions_RightSkin = m_MenuInputActions.FindAction("RightSkin", throwIfNotFound: true);
+        m_MenuInputActions_StartGame = m_MenuInputActions.FindAction("StartGame", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -892,8 +955,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_MenuInputActions_RightDirection;
     private readonly InputAction m_MenuInputActions_UpDirection;
     private readonly InputAction m_MenuInputActions_DownDirection;
-    private readonly InputAction m_MenuInputActions_LeftSwap;
-    private readonly InputAction m_MenuInputActions_RightSwap;
+    private readonly InputAction m_MenuInputActions_LeftCharacter;
+    private readonly InputAction m_MenuInputActions_RightCharacter;
+    private readonly InputAction m_MenuInputActions_LeftSkin;
+    private readonly InputAction m_MenuInputActions_RightSkin;
+    private readonly InputAction m_MenuInputActions_StartGame;
     public struct MenuInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -903,8 +969,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @RightDirection => m_Wrapper.m_MenuInputActions_RightDirection;
         public InputAction @UpDirection => m_Wrapper.m_MenuInputActions_UpDirection;
         public InputAction @DownDirection => m_Wrapper.m_MenuInputActions_DownDirection;
-        public InputAction @LeftSwap => m_Wrapper.m_MenuInputActions_LeftSwap;
-        public InputAction @RightSwap => m_Wrapper.m_MenuInputActions_RightSwap;
+        public InputAction @LeftCharacter => m_Wrapper.m_MenuInputActions_LeftCharacter;
+        public InputAction @RightCharacter => m_Wrapper.m_MenuInputActions_RightCharacter;
+        public InputAction @LeftSkin => m_Wrapper.m_MenuInputActions_LeftSkin;
+        public InputAction @RightSkin => m_Wrapper.m_MenuInputActions_RightSkin;
+        public InputAction @StartGame => m_Wrapper.m_MenuInputActions_StartGame;
         public InputActionMap Get() { return m_Wrapper.m_MenuInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -929,12 +998,21 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DownDirection.started += instance.OnDownDirection;
             @DownDirection.performed += instance.OnDownDirection;
             @DownDirection.canceled += instance.OnDownDirection;
-            @LeftSwap.started += instance.OnLeftSwap;
-            @LeftSwap.performed += instance.OnLeftSwap;
-            @LeftSwap.canceled += instance.OnLeftSwap;
-            @RightSwap.started += instance.OnRightSwap;
-            @RightSwap.performed += instance.OnRightSwap;
-            @RightSwap.canceled += instance.OnRightSwap;
+            @LeftCharacter.started += instance.OnLeftCharacter;
+            @LeftCharacter.performed += instance.OnLeftCharacter;
+            @LeftCharacter.canceled += instance.OnLeftCharacter;
+            @RightCharacter.started += instance.OnRightCharacter;
+            @RightCharacter.performed += instance.OnRightCharacter;
+            @RightCharacter.canceled += instance.OnRightCharacter;
+            @LeftSkin.started += instance.OnLeftSkin;
+            @LeftSkin.performed += instance.OnLeftSkin;
+            @LeftSkin.canceled += instance.OnLeftSkin;
+            @RightSkin.started += instance.OnRightSkin;
+            @RightSkin.performed += instance.OnRightSkin;
+            @RightSkin.canceled += instance.OnRightSkin;
+            @StartGame.started += instance.OnStartGame;
+            @StartGame.performed += instance.OnStartGame;
+            @StartGame.canceled += instance.OnStartGame;
         }
 
         private void UnregisterCallbacks(IMenuInputActionsActions instance)
@@ -954,12 +1032,21 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DownDirection.started -= instance.OnDownDirection;
             @DownDirection.performed -= instance.OnDownDirection;
             @DownDirection.canceled -= instance.OnDownDirection;
-            @LeftSwap.started -= instance.OnLeftSwap;
-            @LeftSwap.performed -= instance.OnLeftSwap;
-            @LeftSwap.canceled -= instance.OnLeftSwap;
-            @RightSwap.started -= instance.OnRightSwap;
-            @RightSwap.performed -= instance.OnRightSwap;
-            @RightSwap.canceled -= instance.OnRightSwap;
+            @LeftCharacter.started -= instance.OnLeftCharacter;
+            @LeftCharacter.performed -= instance.OnLeftCharacter;
+            @LeftCharacter.canceled -= instance.OnLeftCharacter;
+            @RightCharacter.started -= instance.OnRightCharacter;
+            @RightCharacter.performed -= instance.OnRightCharacter;
+            @RightCharacter.canceled -= instance.OnRightCharacter;
+            @LeftSkin.started -= instance.OnLeftSkin;
+            @LeftSkin.performed -= instance.OnLeftSkin;
+            @LeftSkin.canceled -= instance.OnLeftSkin;
+            @RightSkin.started -= instance.OnRightSkin;
+            @RightSkin.performed -= instance.OnRightSkin;
+            @RightSkin.canceled -= instance.OnRightSkin;
+            @StartGame.started -= instance.OnStartGame;
+            @StartGame.performed -= instance.OnStartGame;
+            @StartGame.canceled -= instance.OnStartGame;
         }
 
         public void RemoveCallbacks(IMenuInputActionsActions instance)
@@ -1002,7 +1089,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnRightDirection(InputAction.CallbackContext context);
         void OnUpDirection(InputAction.CallbackContext context);
         void OnDownDirection(InputAction.CallbackContext context);
-        void OnLeftSwap(InputAction.CallbackContext context);
-        void OnRightSwap(InputAction.CallbackContext context);
+        void OnLeftCharacter(InputAction.CallbackContext context);
+        void OnRightCharacter(InputAction.CallbackContext context);
+        void OnLeftSkin(InputAction.CallbackContext context);
+        void OnRightSkin(InputAction.CallbackContext context);
+        void OnStartGame(InputAction.CallbackContext context);
     }
 }

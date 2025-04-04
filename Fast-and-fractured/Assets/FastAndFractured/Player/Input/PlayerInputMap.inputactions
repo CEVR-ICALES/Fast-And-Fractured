@@ -502,7 +502,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "LeftSwap",
+                    "name": "LeftCharacter",
                     "type": "Button",
                     "id": "8b0383a8-6359-4d59-89ab-0de70f93cd8c",
                     "expectedControlType": "",
@@ -511,9 +511,36 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RightSwap",
+                    "name": "RightCharacter",
                     "type": "Button",
                     "id": "d3fc899d-9d86-43ad-89e4-ac4ff6399035",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftSkin",
+                    "type": "Button",
+                    "id": "4219722f-c485-4e89-ae8e-f7b0438b36c2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightSkin",
+                    "type": "Button",
+                    "id": "35e86643-f04e-498b-98b2-0f8363742ebd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "StartGame",
+                    "type": "Button",
+                    "id": "7333155d-fca4-4b9a-90ce-651cb225ccde",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -594,7 +621,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "LeftSwap",
+                    "action": "LeftCharacter",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -605,7 +632,40 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RightSwap",
+                    "action": "RightCharacter",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b7cd48dd-8f6e-441a-bab7-8d3b650b50bc",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftSkin",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1369c782-01f0-4f4f-a784-ece3c5f1c26b",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightSkin",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0d9d0fc8-9771-4d06-8e5c-1926098b48f8",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartGame",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

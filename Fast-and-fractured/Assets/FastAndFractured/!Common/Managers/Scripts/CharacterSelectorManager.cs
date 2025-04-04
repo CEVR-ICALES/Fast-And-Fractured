@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 
-public class CharacterSelectorManager : MonoBehaviour
+public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManager>
 {
     public CharacterMenuData[] allCharacters;
 
@@ -145,17 +145,15 @@ public class CharacterSelectorManager : MonoBehaviour
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
     }
-    private void CheckIfSkinUnlocked()
+    public bool CheckIfSkinUnlocked()
     {
         int skinUnlockedValue = PlayerPrefs.GetInt(_currentModelInstance.name);
+        
+        bool isEnabled;
+        isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
 
-        if(skinUnlockedValue == FULLY_UNLOCKED_VALUE)
-        {
-            selectAndStartButton.enabled = true;
-        } else
-        {
-            selectAndStartButton.enabled = false;
-        }
+        selectAndStartButton.enabled = isEnabled;
+        return isEnabled;
     }
 
     public void SaveCurrentSelected()
