@@ -7,6 +7,16 @@ using UnityEngine.Animations;
 public class CarInjector : MonoBehaviour
 {
     [SerializeField] GameObject prefab;
+    [SerializeField] bool autoInject = false;
+
+
+    private void Start()
+    {
+        if (autoInject)
+        {
+            Install(prefab);
+        }
+    }
 
     const float MAX_WEIGHT = 1;
     public virtual GameObject Install(GameObject prefabToInstall)
@@ -18,7 +28,8 @@ public class CarInjector : MonoBehaviour
         //TODO optimize this if posible
         var injectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
         var controllers = GetComponentsInChildren<Controller>();
-        var positionConstraints = transform.GetComponentsInChildren<PositionConstraint>();
+        var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
+    //    var parentConstraints = transform.GetComponentsInChildren<ParentConstraint>();
         foreach (var constraint in positionConstraints)
         {
             var constraintSource = new ConstraintSource();
@@ -26,6 +37,8 @@ public class CarInjector : MonoBehaviour
             constraintSource.weight = MAX_WEIGHT;
             constraint.SetSources(new List<ConstraintSource>() { constraintSource });
         }
+
+     
         foreach (var controller in controllers)
         {
 
@@ -34,6 +47,8 @@ public class CarInjector : MonoBehaviour
                 controller.AddBehaviour(mono);
             }
         }
+          
+
         return injectedCar;
     }
 }
