@@ -168,5 +168,9 @@ namespace StateMachine
             PauseManager.Instance.UnregisterPausable(this);
         }
 
+      public void AddBehaviour(Behaviour monoBehaviour) {
+            availableBehaviours.Add(monoBehaviour);
+
+        }
     }
 }
