@@ -13,6 +13,7 @@ namespace StateMachine
             EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
             brain.ChoosePlayer();
+            FinishAction();
         }
     }
 
