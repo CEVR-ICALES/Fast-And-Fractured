@@ -210,23 +210,29 @@ namespace FastAndFractured
             //+1 because it's max is exclusive
             int decision = Random.Range(0, _totalDecisionPercentage + 1);
 
+            int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
+            int percentageAcceleration = percentageMaxSpeed+ decisionPercentageAcceleration;
+            int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
+            int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
+            int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
+
             if (decision <= decisionPercentageHealth)
             {
                 _statToChoose = Stats.ENDURANCE;
             } 
-            else if (decision <= decisionPercentageMaxSpeed)
+            else if (decision <= percentageMaxSpeed)
             {
                 _statToChoose = Stats.MAX_SPEED;
             }
-            else if (decision <= decisionPercentageAcceleration)
+            else if (decision <= percentageAcceleration)
             {
                 _statToChoose = Stats.ACCELERATION;
             }
-            else if (decision <= decisionPercentageNormalShoot)
+            else if (decision <= percentageNormalShoot)
             {
                 _statToChoose = Stats.NORMAL_DAMAGE;
             }
-            else if (decision <= decisionPercentagePushShoot)
+            else if (decision <= percentagePushShoot)
             {
                 _statToChoose = Stats.PUSH_DAMAGE;
             } else
