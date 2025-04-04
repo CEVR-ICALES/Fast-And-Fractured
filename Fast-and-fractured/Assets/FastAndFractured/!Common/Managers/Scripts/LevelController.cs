@@ -145,8 +145,8 @@ namespace FastAndFractured
                 string iaName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
                 if (iaName==ERROR_STRING_MESSAGE)
                 {
-                    Debug.LogWarning("Error, all characters form list " + _allCharactersNameCode + " where deleted. " +
-                        "Make sure that you are adding more variety of characters or give LIMIT_OF_SAME_CHARACTER_SPAWNED and allCharactersNum the same value.");
+                    Debug.LogWarning("Error, all characters form list _allCharactersNameCode where deleted. " +
+                        "Make sure that you are adding more variety of characters or give LIMIT_OF_SAME_CHARACTER_SPAWNED and maxCharactersInGame the same value.");
                 }
                 if (succeded = CheckIfCharacterExistInList(iaName))
                 {
