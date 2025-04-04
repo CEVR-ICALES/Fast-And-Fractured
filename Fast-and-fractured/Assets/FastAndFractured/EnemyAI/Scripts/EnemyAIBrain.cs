@@ -24,12 +24,14 @@ namespace FastAndFractured
         //Reference is obtained via LevelController
         private GameObject _player;
         private GameObject _targetToShoot;
+        private GameObject _targetToGo;
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
         private float _minDistanceUntilNextCorner = 3f;
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
         public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
+        public GameObject TargetToGo { get => _targetToGo; set => _targetToGo = value; }
 
         [SerializeField] NormalShootHandle normalShootHandle;
         [SerializeField] PushShootHandle pushShootHandle;
@@ -38,7 +40,6 @@ namespace FastAndFractured
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] LayerMask ignoreLayerMask;
-
 
         PathMode pathMode = PathMode.ADVANCED;
 
@@ -63,7 +64,6 @@ namespace FastAndFractured
 
 
         [Header("Item Type Priority")]
-        
         [Tooltip("Range of weight on how likely it's going to choose that item type.\n" +
             "--> 10 is base and the minimum.\n" +
             "--> 25 to 30 if multiple priorities.\n" +
@@ -189,6 +189,11 @@ namespace FastAndFractured
             {
                 TimerSystem.Instance.ModifyTimer(damageAccumulationTimer, newCurrentTime: 0);
             }
+        }
+
+        public bool HasReachedTargetToGoPosition()
+        {
+            return Vector3.Distance(transform.position, _targetToGo.transform.position) < 2;
         }
         #endregion
 
@@ -449,7 +454,6 @@ namespace FastAndFractured
             //If it's positive, go right
             return Vector3.SignedAngle(direction, carMovementController.transform.forward, axis);
         }
-
 
         bool TryToCalculatePath()
         {
