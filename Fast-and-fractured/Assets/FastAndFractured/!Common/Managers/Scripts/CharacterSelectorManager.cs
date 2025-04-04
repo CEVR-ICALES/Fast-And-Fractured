@@ -1,12 +1,14 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utilities;
 
 public class CharacterSelectorManager : MonoBehaviour
 {
     public CharacterMenuData[] allCharacters;
 
     // all information we want to show...
+    [Header("Canvas")]
     public Image charIcon;
     public TextMeshProUGUI charName;
     public TextMeshProUGUI charDescription;
@@ -17,8 +19,13 @@ public class CharacterSelectorManager : MonoBehaviour
     public TextMeshProUGUI charCarAcceleration;
     public TextMeshProUGUI charCarManuver;
 
+    [Header("Car Anims Related")]
     [SerializeField] private Transform modelSpawnPosition;
     [SerializeField] private Button selectAndStartButton;
+    [SerializeField] private Collider carStopCollider;
+    [SerializeField] private float modelChangeTimerDuration;
+    private ITimer _modelChangeTimer;
+
 
     private GameObject _currentModelInstance;
     private int _currentCharacterIndex;
@@ -31,11 +38,14 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // get character icons from the resourcews manager
+        UpdateCharacterDisplay();
+        _currentCharacterIndex = 0;
+        _currentSkinIndex = 0;
     }
 
     public void SelectNextCharacter()
     {
+        if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex + 1;
         if (newIndex >= allCharacters.Length) newIndex = 0;
         ChangeCharacter(newIndex);
@@ -43,6 +53,7 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectPreviousCharacter()
     {
+        if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex - 1;
         if (newIndex < 0) newIndex = allCharacters.Length - 1;
         ChangeCharacter(newIndex);
@@ -50,18 +61,22 @@ public class CharacterSelectorManager : MonoBehaviour
 
     public void SelectNextSkin()
     {
+        if (_modelChangeTimer != null) return;
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex + 1;
         if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = 0;
         ChangeCurrentDisplayedModel(character);
+        ChangePlayerIcon();
     }
 
     public void SelectPreviousSkin()
     {
+        if (_modelChangeTimer != null) return;
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
-        _currentSkinIndex = _currentSkinIndex + -1;
-        if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = character.Models.Length -1;
+        _currentSkinIndex = _currentSkinIndex  - 1;
+        if (_currentSkinIndex < 0) _currentSkinIndex = character.Models.Length -1;
         ChangeCurrentDisplayedModel(character);
+        ChangePlayerIcon();
     }
 
     private void ChangeCharacter(int newIndex)
@@ -73,9 +88,6 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void UpdateCharacterDisplay()
     {
-        if (_currentModelInstance != null)
-            Destroy(_currentModelInstance);
-
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
 
         ChangeCurrentDisplayedModel(character);
@@ -102,14 +114,30 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void ChangePlayerIcon()
     {
-        
+        Sprite icon = ResourcesManager.Instance.GetResourcesSprite(allCharacters[_currentCharacterIndex].Models[_currentSkinIndex].name);
+
+        if(icon != null)
+        {
+            charIcon.sprite = icon;
+        }
     }
 
     private void ChangeCurrentDisplayedModel(CharacterMenuData character)
     {
         if (_currentModelInstance != null)
-            Destroy(_currentModelInstance);
-        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition); // instantiate new model
+        {
+            GameObject lastModelInstance = _currentModelInstance.gameObject;
+            carStopCollider.enabled = false;
+            _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+            _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
+            {
+                carStopCollider.enabled = true;
+                Destroy(lastModelInstance);
+                _modelChangeTimer = null;
+            });
+        }
+        _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
+        _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
     }
     private void CheckIfSkinUnlocked()
     {

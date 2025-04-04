@@ -86,33 +86,33 @@ namespace FastAndFractured
             _currentScreen.SetInteractable(false);
 
             _fadeOutTimer = TimerSystem.Instance.CreateTimer(fadeDuration,
-         onTimerDecreaseComplete: () =>
-         {
-             // when fade out completes, switch screens and start fade in
-             _currentScreen.gameObject.SetActive(false);
-             _currentScreen = _menuScreens[nextScreen];
-             _currentScreen.gameObject.SetActive(true);
-             _currentScreen.SetAlpha(0); 
-             _currentScreen.SetInteractable(false); 
+             onTimerDecreaseComplete: () =>
+             {
+                 // when fade out completes, switch screens and start fade in
+                 _currentScreen.gameObject.SetActive(false);
+                 _currentScreen = _menuScreens[nextScreen];
+                 _currentScreen.gameObject.SetActive(true);
+                 _currentScreen.SetAlpha(0); 
+                 _currentScreen.SetInteractable(false); 
 
-             // fade in new screen
-             _fadeInTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
-                 onTimerIncreaseComplete: () =>
-                 {
+                 // fade in new screen
+                 _fadeInTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
+                     onTimerIncreaseComplete: () =>
+                     {
                      
-                     _currentScreen.SetInteractable(true);
-                 },
-                 onTimerIncreaseUpdate: (progress) =>
-                 {
+                         _currentScreen.SetInteractable(true);
+                     },
+                     onTimerIncreaseUpdate: (progress) =>
+                     {
                      
-                     _currentScreen.SetAlpha(progress / fadeDuration);
-                 });
-         },
-         onTimerDecreaseUpdate: (progress) =>
-         {
+                         _currentScreen.SetAlpha(progress / fadeDuration);
+                     });
+             },
+             onTimerDecreaseUpdate: (progress) =>
+             {
              
-             _currentScreen.SetAlpha(progress / fadeDuration);
-         });
+                 _currentScreen.SetAlpha(progress / fadeDuration);
+             });
         }
 
         #endregion
