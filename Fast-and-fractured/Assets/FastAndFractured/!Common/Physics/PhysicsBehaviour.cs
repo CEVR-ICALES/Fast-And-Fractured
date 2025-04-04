@@ -32,6 +32,9 @@ namespace FastAndFractured
         public bool IsTouchingGround { get => _isTouchingGround; }
         private bool _isTouchingGround = false;
 
+        [Header("Air rotation")]
+        [SerializeField] private float slowDownFactor;
+
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public StatsController StatsController { get => statsController; }
@@ -188,6 +191,18 @@ namespace FastAndFractured
         public void AddTorque(Vector3 torque, ForceMode forceMode)
         {
             _rb.AddTorque(torque, forceMode);
+        }
+
+        public void SlowDownAngularMomentum()
+        {
+            Vector3 initialAngularVelocity = _rb.angularVelocity;
+            if(initialAngularVelocity.magnitude < 0.01f)
+            {
+                _rb.angularVelocity = Vector3.zero;
+                return;
+            }
+
+            _rb.angularVelocity *= slowDownFactor;
         }
         #endregion
 
