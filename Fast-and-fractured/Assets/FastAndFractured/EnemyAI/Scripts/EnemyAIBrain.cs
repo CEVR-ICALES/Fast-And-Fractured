@@ -403,6 +403,12 @@ namespace FastAndFractured
         {
             return statsController.GetEndurancePercentage() > _recoveryThresholdPercentageForSearch;
         }
+
+        public bool HasTargetToShoot()
+        {
+            return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
+        }
+
         #endregion
 
         #region Helpers
