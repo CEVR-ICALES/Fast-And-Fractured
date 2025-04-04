@@ -460,7 +460,7 @@ Transform:
   m_GameObject: {fileID: 4189378566089089508}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.99799865, z: -0, w: -0.063235484}
-  m_LocalPosition: {x: 509.71, y: 613.25, z: 57.25}
+  m_LocalPosition: {x: 0, y: 0.526, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -605,11 +605,11 @@ MonoBehaviour:
   directionCenterOffSet: {x: 0, y: 0.25, z: 0}
   bulletSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1426590782
+      Data2: 1159805714
+      Data3: 2001885093
+      Data4: -2108599820
+    Path: event:/ShootingSFX
   onOverheatUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -632,6 +632,7 @@ GameObject:
   - component: {fileID: 5672472646167121783}
   - component: {fileID: 2898550601115800401}
   - component: {fileID: 3352713489937622652}
+  - component: {fileID: 4535282352966134131}
   m_Layer: 6
   m_Name: BaseCar
   m_TagString: Untagged
@@ -835,9 +836,6 @@ MonoBehaviour:
   currentNormalShootDMG: 0
   currentPushShootDMG: 0
   currentCooldownSpeed: 0
-  onEnduranceDamageTaken:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &3352713489937622652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -869,6 +867,19 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 50
+--- !u!114 &4535282352966134131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbodyToPause: {fileID: 0}
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
@@ -951,11 +962,11 @@ MonoBehaviour:
   directionCenterOffSet: {x: 0, y: 0, z: 0}
   bulletSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1426590782
+      Data2: 1159805714
+      Data3: 2001885093
+      Data4: -2108599820
+    Path: event:/ShootingSFX
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
