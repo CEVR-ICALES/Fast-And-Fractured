@@ -5,7 +5,7 @@ using FastAndFractured;
 
 namespace StateMachine
 {
-    [CreateAssetMenu(fileName = "ApplyAirRotation", menuName = "PlayerStateMachine/Actions/ApplyAirRotation")]
+    [CreateAssetMenu(fileName = "ApplyAirRotationAction", menuName = "PlayerStateMachine/Actions/ApplyAirRotation")]
     public class ApplyAirRotationAction : Action
     {
         private bool _isAirRotationToggled = false;
