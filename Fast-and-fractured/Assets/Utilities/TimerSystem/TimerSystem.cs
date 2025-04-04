@@ -35,7 +35,7 @@ namespace Utilities
         private void OnDestroy()
         {
             _timers.Clear();
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
         #endregion
 

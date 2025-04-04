@@ -17,7 +17,7 @@ public class AnimationPausable : MonoBehaviour, IPausable
 
     void OnDestroy()
     {
-        PauseManager.Instance.UnregisterPausable(this);
+        PauseManager.Instance?.UnregisterPausable(this);
     }
 
     public void OnPause()

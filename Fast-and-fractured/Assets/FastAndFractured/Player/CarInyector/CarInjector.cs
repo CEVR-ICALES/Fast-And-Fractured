@@ -9,20 +9,20 @@ public class CarInjector : MonoBehaviour
     [SerializeField] GameObject prefab;
 
     const float MAX_WEIGHT = 1;
-    public virtual void Install(GameObject prefabToInstall)
+    public virtual GameObject Install(GameObject prefabToInstall)
     {
         if (prefabToInstall != null)
         {
             prefab = prefabToInstall;
         }
         //TODO optimize this if posible
-        var inyectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
+        var injectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
         var controllers = GetComponentsInChildren<Controller>();
         var positionConstraints = transform.GetComponentsInChildren<PositionConstraint>();
         foreach (var constraint in positionConstraints)
         {
             var constraintSource = new ConstraintSource();
-            constraintSource.sourceTransform = inyectedCar.transform;
+            constraintSource.sourceTransform = injectedCar.transform;
             constraintSource.weight = MAX_WEIGHT;
             constraint.SetSources(new List<ConstraintSource>() { constraintSource });
         }
@@ -34,6 +34,6 @@ public class CarInjector : MonoBehaviour
                 controller.AddBehaviour(mono);
             }
         }
-
+        return injectedCar;
     }
 }

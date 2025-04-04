@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,12 +13,9 @@ namespace FastAndFractured
         public bool AI;
 
         [Header("Prefabs")]
-        public GameObject DefaulPlayer;
-        public List<GameObject> PlayerSkins;
-        public GameObject DefaulAI;
-        public List<GameObject> AISkins;
-
-
+        public GameObject CarDefaultPrefab;
+        public List<GameObject> CarWithSkinsPrefabs;
+       
         [Header("Health")]
         public float MaxEndurance;
         public float MinEndurance = 0;

@@ -22,6 +22,7 @@ namespace FastAndFractured
         [Header("Character Spawn")]
         public UnityEvent charactersCustomStart;
         [SerializeField] private List<CharacterData> charactersData;
+        [SerializeField] private string playerCharacter = "Pepe_0";
         private int _currentPlayers = 1;
 
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
@@ -47,7 +48,11 @@ namespace FastAndFractured
         private const string ERROR_STRING_MESSAGE = "empty list";
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
-        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 8;
+        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
+       
+        [Header("Injector prefabs")]
+        [SerializeField] CarInjector PlayerPrefab;
+        [SerializeField] CarInjector AIPrefab;
 
         // Start is called before the first frame update
         protected override void Awake()
@@ -62,9 +67,10 @@ namespace FastAndFractured
         //Maybe in Onenable?
         void Start()
         {
+            Cursor.lockState = CursorLockMode.Locked;
             if (!testing)
             {
-                PlayerPrefs.SetString("Selected_Player", "Josefino_0");
+                PlayerPrefs.SetString("Selected_Player",playerCharacter);
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
@@ -89,26 +95,15 @@ namespace FastAndFractured
 
         public void HandleInputChange(InputDeviceType inputType)
         {
-            if (inputType == InputDeviceType.KEYBOARD_MOUSE)
-            {
-                usingController = false;
-            }
-            else if (inputType == InputDeviceType.XBOX_CONTROLLER || inputType == InputDeviceType.PS_CONTROLLER)
-            {
-                usingController = true;
-            }
+
+            usingController = inputType != InputDeviceType.KEYBOARD_MOUSE;
             _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+    
         public void StartLevel()
         {
-            Cursor.lockState = CursorLockMode.Locked;
 
             foreach (var character in characters)
             {
@@ -139,18 +134,18 @@ namespace FastAndFractured
             }
             else
                 return;
-            int totalIaCharacters = maxCharactersInGame - _currentPlayers;
-            for(int iaCharacterCount = 0; iaCharacterCount < totalIaCharacters&&succeded; iaCharacterCount++)
+            int totalAICharacters = maxCharactersInGame - _currentPlayers;
+            for(int aiCharacterCount = 0; aiCharacterCount < totalAICharacters&&succeded; aiCharacterCount++)
             {
-                string iaName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
-                if (iaName==ERROR_STRING_MESSAGE)
+                string aiName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
+                if (aiName==ERROR_STRING_MESSAGE)
                 {
                     Debug.LogWarning("Error, all characters form list _allCharactersNameCode where deleted. " +
                         "Make sure that you are adding more variety of characters or give LIMIT_OF_SAME_CHARACTER_SPAWNED and maxCharactersInGame the same value.");
                 }
-                if (succeded = CheckIfCharacterExistInList(iaName))
+                if (succeded = CheckIfCharacterExistInList(aiName))
                 {
-                    _inGameCharactersNameCodes.Add(iaName);
+                    _inGameCharactersNameCodes.Add(aiName);
                 }
             }
             if (succeded)
@@ -169,29 +164,34 @@ namespace FastAndFractured
                 _inGameCharacters = new List<GameObject>();
                 int allCharacters = _inGameCharactersNameCodes.Count;
                 int charactersCount = 0;
+                GameObject playerCar = null;
                 GameObject player = null;
                 ShuffleList(spawnPoints);
                 for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
                 {
-                    player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount],true);
-                    player = Instantiate(player, spawnPoints[charactersCount].transform.position,Quaternion.identity);
+                    CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
+                   playerCar= carInjector.Install(player);
+
                     _inGameCharacters.Add(player);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
                 }
                 for(;charactersCount < allCharacters; charactersCount++)
                 {
-                    GameObject ia = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount], false);
-                   ia = Instantiate(ia, spawnPoints[charactersCount].transform.position, Quaternion.identity);
-                    _inGameCharacters.Add(ia);
+                    var aiCharacter = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
+
+                    CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    carInjector.Install(aiCharacter);
+                    _inGameCharacters.Add(aiCharacter);
                     //Provisional
-                    ia.GetComponent<EnemyAIBrain>().Player = player;
+                    carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
                 }
                 charactersCustomStart?.Invoke();
-                playerCamera.SetCameraParameters(player.transform, player.transform.Find("CameraLookAtPoint"));
+              //  playerCamera.SetCameraParameters(player.transform, player.transform.Find("CameraLookAtPoint"));
             }
         }
 
-        private GameObject SearchCharacterInList(string nameCode, bool player)
+        private GameObject SearchCharacterInList(string nameCode)
         {
             DivideNameCode(nameCode, out string name, out int skinNum);
             foreach (var character in charactersData)
@@ -200,11 +200,11 @@ namespace FastAndFractured
                 {
                     if (skinNum == DEFAULT_SKIN)
                     {
-                        return player ? character.DefaulPlayer : character.DefaulAI;
+                        return character.CarDefaultPrefab;
                     }
-                    if (skinNum - 1 < character.PlayerSkins.Count)
+                    if (skinNum - 1 < character.CarWithSkinsPrefabs.Count)
                     {
-                        return player ? character.PlayerSkins[skinNum - 1] : character.AISkins[skinNum - 1];
+                        return character.CarWithSkinsPrefabs[skinNum - 1];
                     }
                 }
             }
@@ -222,12 +222,7 @@ namespace FastAndFractured
                 characterSkinCount = DEFAULT_SKIN + 1;
                 _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
-                if (character.AISkins.Count != character.PlayerSkins.Count)
-                {
-                    Debug.LogWarning("Player skins and Ia skins of characterData " + character.name + " are different size. Make sure they are the same size.");
-                    return false;
-                }
-                foreach (var characterSkin in character.PlayerSkins)
+                foreach (var characterSkin in character.CarWithSkinsPrefabs)
                 {
                     _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
                     characterSkinCount++;
@@ -340,9 +335,7 @@ namespace FastAndFractured
 
         private bool IsThePlayer(GameObject character)
         {
-            if (character.CompareTag("Player"))
-                return true;
-            return false;
+            return character.CompareTag("Player");
         }
     }
 }

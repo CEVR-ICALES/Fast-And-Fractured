@@ -175,7 +175,7 @@ namespace StateMachine
 
         private void OnDestroy()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
       public void AddBehaviour(Behaviour monoBehaviour) {
