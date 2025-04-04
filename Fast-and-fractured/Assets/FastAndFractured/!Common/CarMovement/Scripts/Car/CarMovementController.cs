@@ -74,11 +74,10 @@ namespace FastAndFractured
 
         private void Start()
         {
+            statsController.CustomStart();
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             SetMaxRbSpeedDelayed();
         }
-
-
 
         private void FixedUpdate()
         {
