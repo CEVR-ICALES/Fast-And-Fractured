@@ -500,10 +500,14 @@ namespace FastAndFractured
                     _slowDownAngularMomentumTimer = TimerSystem.Instance.CreateTimer(slowingDownAngularMomentumTime, onTimerDecreaseComplete: () =>
                     {
                         _canSlowDownMomentum = false;
+                        _slowDownAngularMomentumTimer = null;
                     });
                 } else
                 {
-                    TimerSystem.Instance.ModifyTimer(_slowDownAngularMomentumTimer, null, null, null, slowingDownAngularMomentumTime);
+                    if (TimerSystem.Instance.HasTimer(_slowDownAngularMomentumTimer))
+                    {
+                        TimerSystem.Instance.ModifyTimer(_slowDownAngularMomentumTimer, newCurrentTime: slowingDownAngularMomentumTime);
+                    }
                 }
                  
                 
