@@ -22,6 +22,7 @@ namespace FastAndFractured
         [Header("Character Spawn")]
         public UnityEvent charactersCustomStart;
         [SerializeField] private List<CharacterData> charactersData;
+        [SerializeField] private string playerCharacter = "Pepe_0";
         private int _currentPlayers = 1;
 
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
@@ -69,7 +70,7 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!testing)
             {
-                PlayerPrefs.SetString("Selected_Player", "Pepe_0");
+                PlayerPrefs.SetString("Selected_Player",playerCharacter);
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
