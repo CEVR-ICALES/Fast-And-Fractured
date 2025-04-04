@@ -30,7 +30,7 @@ namespace FastAndFractured
         private float _minDistanceUntilNextCorner = 3f;
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
-        public GameObject Target { get => _targetToShoot; set => _targetToShoot = value; }
+        public GameObject TargetToShoot { get => _targetToShoot; set => _targetToShoot = value; }
         public GameObject TargetToGo { get => _targetToGo; set => _targetToGo = value; }
 
         [SerializeField] NormalShootHandle normalShootHandle;
