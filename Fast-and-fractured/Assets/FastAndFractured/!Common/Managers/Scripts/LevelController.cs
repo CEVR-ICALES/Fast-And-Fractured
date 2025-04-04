@@ -24,9 +24,9 @@ namespace FastAndFractured
         [SerializeField] private List<CharacterData> charactersData;
         private int _currentPlayers = 1;
 
-        public int AllCharactersNum { get => allCharactersNum; set => allCharactersNum = value; }
+        public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField]
-        private int allCharactersNum = 8;
+        private int maxCharactersInGame = 8;
         private List<string> _allCharactersNameCode;
         private Dictionary<string, int> _characterSelectedLimit;
 
@@ -139,7 +139,7 @@ namespace FastAndFractured
             }
             else
                 return;
-            int totalIaCharacters = allCharactersNum - _currentPlayers;
+            int totalIaCharacters = maxCharactersInGame - _currentPlayers;
             for(int iaCharacterCount = 0; iaCharacterCount < totalIaCharacters&&succeded; iaCharacterCount++)
             {
                 string iaName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
@@ -164,7 +164,7 @@ namespace FastAndFractured
 
         private void SpawnCharactersInScene()
         {
-            if (spawnPoints.Length >= allCharactersNum)
+            if (spawnPoints.Length >= maxCharactersInGame)
             {
                 _inGameCharacters = new List<GameObject>();
                 int allCharacters = _inGameCharactersNameCodes.Count;
@@ -200,11 +200,11 @@ namespace FastAndFractured
                 {
                     if (skinNum == DEFAULT_SKIN)
                     {
-                        return player ? character.Player_0 : character.IA_0;
+                        return player ? character.DefaulPlayer : character.DefaulAI;
                     }
-                    if (skinNum - 1 < character.Player_skins.Count)
+                    if (skinNum - 1 < character.PlayerSkins.Count)
                     {
-                        return player ? character.Player_skins[skinNum - 1] : character.IA_Skins[skinNum - 1];
+                        return player ? character.PlayerSkins[skinNum - 1] : character.AISkins[skinNum - 1];
                     }
                 }
             }
@@ -222,12 +222,12 @@ namespace FastAndFractured
                 characterSkinCount = DEFAULT_SKIN + 1;
                 _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
-                if (character.IA_Skins.Count != character.Player_skins.Count)
+                if (character.AISkins.Count != character.PlayerSkins.Count)
                 {
                     Debug.LogWarning("Player skins and Ia skins of characterData " + character.name + " are different size. Make sure they are the same size.");
                     return false;
                 }
-                foreach (var characterSkin in character.Player_skins)
+                foreach (var characterSkin in character.PlayerSkins)
                 {
                     _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
                     characterSkinCount++;

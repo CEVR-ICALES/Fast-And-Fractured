@@ -12,10 +12,10 @@ namespace FastAndFractured
         public bool AI;
 
         [Header("Prefabs")]
-        public GameObject Player_0;
-        public GameObject IA_0;
-        public List<GameObject> Player_skins;
-        public List<GameObject> IA_Skins;
+        public GameObject DefaulPlayer;
+        public List<GameObject> PlayerSkins;
+        public GameObject DefaulAI;
+        public List<GameObject> AISkins;
 
 
         [Header("Health")]

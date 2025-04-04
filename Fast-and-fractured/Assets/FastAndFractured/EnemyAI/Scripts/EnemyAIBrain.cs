@@ -69,10 +69,10 @@ namespace FastAndFractured
         }
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(InitializeIaValues);
+            LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
         }
 
-        private void InitializeIaValues()
+        private void InitializeAIValues()
         {
             //Testing 
             _targetToShoot = _player;
