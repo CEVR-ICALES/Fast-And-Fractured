@@ -133,7 +133,7 @@ public class CharacterSelectorManager : MonoBehaviour
         {
             GameObject lastModelInstance = _currentModelInstance.gameObject;
             carStopCollider.enabled = false;
-            _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+            _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
             _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
             {
                 carStopCollider.enabled = true;
@@ -143,7 +143,7 @@ public class CharacterSelectorManager : MonoBehaviour
         }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
-        _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+        _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
     }
     private void CheckIfSkinUnlocked()
     {
