@@ -62,6 +62,11 @@ namespace FastAndFractured
             }
         }
 
+        private void Update()
+        {
+            RotateCroquettes();
+        }
+
         public override void ActivateAbility()
         {
             if (IsAbilityActive || IsOnCooldown)
@@ -84,11 +89,6 @@ namespace FastAndFractured
             _statsController.TemporalProductStat(Enums.Stats.PUSH_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
 
             GenerateCroquettes(numberOfCroquettes);
-        }
-
-        private void Update()
-        {
-            RotateCroquettes();
         }
 
         #region Croquette Methods
@@ -187,6 +187,25 @@ namespace FastAndFractured
                 prevPoint = newPoint;
             }
         }
+        #endregion
+
+        #region VFX and Particles Methods
+        /// <summary>
+        /// Starts the special ability visual effects
+        /// </summary>
+        public void StartVFX()
+        {
+
+        }
+
+        /// <summary>
+        /// Stops the visual effects of the special ability when it ends
+        /// </summary>
+        public void StopVFX()
+        {
+
+        }
+
         #endregion
     }
 }
