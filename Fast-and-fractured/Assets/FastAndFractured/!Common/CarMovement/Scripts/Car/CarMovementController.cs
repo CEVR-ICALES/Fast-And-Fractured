@@ -503,7 +503,7 @@ namespace FastAndFractured
                     });
                 } else
                 {
-                    TimerSystem.Instance.ModifyTimer(_slowDownAngularMomentumTimer, slowingDownAngularMomentumTime);
+                    TimerSystem.Instance.ModifyTimer(_slowDownAngularMomentumTimer, null, null, null, slowingDownAngularMomentumTime);
                 }
                  
                 

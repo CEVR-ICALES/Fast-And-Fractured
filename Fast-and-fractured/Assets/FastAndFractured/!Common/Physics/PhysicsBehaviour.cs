@@ -33,7 +33,7 @@ namespace FastAndFractured
         private bool _isTouchingGround = false;
 
         [Header("Air rotation")]
-        [SerializeField] private float angularSlowdownRate;
+        [SerializeField] private float slowDownFactor;
 
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
@@ -196,14 +196,14 @@ namespace FastAndFractured
 
         public void SlowDownAngularMomentum()
         {
-            Vector3 currentAngularVelocty = _rb.angularVelocity;
-            if(currentAngularVelocty.magnitude < 0.01f)
+            Vector3 initialAngularVelocity = _rb.angularVelocity;
+            if(initialAngularVelocity.magnitude < 0.01f)
             {
                 _rb.angularVelocity = Vector3.zero;
                 return;
             }
 
-            _rb.angularVelocity *= angularSlowdownRate;
+            _rb.angularVelocity *= slowDownFactor;
         }
         #endregion
 
