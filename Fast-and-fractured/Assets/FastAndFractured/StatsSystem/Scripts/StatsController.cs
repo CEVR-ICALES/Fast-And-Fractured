@@ -1,5 +1,6 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -25,10 +26,12 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
+        private float _currentMaxSpeedMultiplier;
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
+        public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
         public float Acceleration { get => currentAcceleration; }
@@ -91,7 +94,8 @@ namespace FastAndFractured
 
         #endregion
 
-        private float _errorGetStatFloat = -1;
+        private const float ERROR_GET_STAT_FLOAT = -1;
+        public UnityEvent<float> onEnduranceDamageTaken;
 
         #region START EVENTS
         public void CustomStart()
@@ -115,7 +119,6 @@ namespace FastAndFractured
             if (copyOfCharData != null)
             {
                 charDataSO = copyOfCharData;
-                //OnDied += Dead;
                 InitCurrentStats();
             }
         }
@@ -133,6 +136,12 @@ namespace FastAndFractured
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
+        [ContextMenu(nameof(DebugTake100Endurance))]
+        public void DebugTake100Endurance()
+        {
+            TakeEndurance(100, false);
+        }
+
 
         #region Health
         public void TakeEndurance(float substract, bool isProduct)
@@ -143,6 +152,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        onEnduranceDamageTaken?.Invoke(substract);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
@@ -178,6 +188,11 @@ namespace FastAndFractured
             Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Invulnerable = true;
             return charDataSO.DeadDelay;
+        }
+
+        public float GetEndurancePercentage()
+        {
+            return Endurance / MaxEndurance * 100;
         }
         #endregion
 
@@ -237,6 +252,9 @@ namespace FastAndFractured
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                    return true;
                 case Stats.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
@@ -284,7 +302,7 @@ namespace FastAndFractured
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod, isProduct);
             float currentValue = GetCurrentStat(type);
-            if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
+            if (previousValue == ERROR_GET_STAT_FLOAT || currentValue == ERROR_GET_STAT_FLOAT)
             {
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
@@ -301,9 +319,9 @@ namespace FastAndFractured
             if (iscurrentBigger)
             {
                 if (currentValue / previousValue > 1) 
-                    mod = 1 / (currentValue / previousValue); 
+                    mod = 1 / (currentValue / previousValue);
                 else
-                    mod = -(currentValue - previousValue);
+                    mod = -(currentValue - previousValue); 
             }
             else
             {
@@ -315,7 +333,7 @@ namespace FastAndFractured
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, true); 
+                ChoseCharToMod(stat, mod, true);
             });
         }
         #endregion  
@@ -336,8 +354,10 @@ namespace FastAndFractured
                     return currentPushShootDMG;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    return _currentMaxSpeedMultiplier;
             }
-            return _errorGetStatFloat;
+            return ERROR_GET_STAT_FLOAT;
         }
 
         private bool IsStatAndModificatorCorrect(Stats type, float mod)
