@@ -17,7 +17,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value;}
+        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value; }
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -152,9 +152,10 @@ namespace FastAndFractured
                     else
                         Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
-                }else
+                }
+                else
                 {
-                    IsInvulnerable=false;
+                    IsInvulnerable = false;
                 }
             }
             else Debug.LogError("Value can't be negative or 0.");
@@ -302,7 +303,7 @@ namespace FastAndFractured
                 if (currentValue / previousValue > 1) 
                     mod = 1 / (currentValue / previousValue); 
                 else
-                    mod = -(currentValue - previousValue); 
+                    mod = -(currentValue - previousValue);
             }
             else
             {
