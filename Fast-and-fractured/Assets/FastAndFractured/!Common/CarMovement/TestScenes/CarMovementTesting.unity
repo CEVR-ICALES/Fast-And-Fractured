@@ -3104,6 +3104,10 @@ PrefabInstance:
       propertyPath: speedOverlay
       value: 
       objectReference: {fileID: 654847390}
+    - target: {fileID: 6073503923705467187, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: maxGroundAngleThreshold
+      value: 65
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4150,6 +4154,9 @@ MonoBehaviour:
   shootPoint: {fileID: 1499949200}
   pooltype: 3
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1978648618 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4816057949177678881, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}

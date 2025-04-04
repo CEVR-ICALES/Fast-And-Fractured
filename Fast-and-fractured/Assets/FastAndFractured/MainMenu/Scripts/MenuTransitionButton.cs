@@ -8,9 +8,11 @@ namespace FastAndFractured
     public class MenuTransitionButton : MonoBehaviour
     {
         public ScreensType screenToOpen;
+        public float fadeDuration = 0.8f;
         public void OpenScreen()
         {
-            MainMenuManager.Instance.ChangeScreen(screenToOpen);
+            //MainMenuManager.Instance.ChangeScreen(screenToOpen);
+            MainMenuManager.Instance.TransitionBetweenScreens(screenToOpen, fadeDuration);
         }
     }
 

@@ -37,6 +37,6 @@ public class CineMachineCameraPausable : MonoBehaviour, IPausable
 
     void OnDestroy()
     {
-        PauseManager.Instance.UnregisterPausable(this);
+        PauseManager.Instance?.UnregisterPausable(this);
     }
 }

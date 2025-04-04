@@ -80,11 +80,14 @@ namespace FastAndFractured
         protected override void Awake()
         {
             base.Awake();
-            _inputActions = new PlayerInputAction();
+            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
+
         }
 
-        private void OnEnable()
+        private void BindActions()
         {
+            _inputActions = new PlayerInputAction();
+
             _inputActions.Enable();
 
             // Movement Input
@@ -125,9 +128,24 @@ namespace FastAndFractured
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
         }
 
+        private void OnEnable()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Enable();
+            }
+        }
+
         private void OnDisable()
         {
-            _inputActions.Disable();
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+            }
+        }
+
+        private void Start()
+        {
         }
 
         private void Update()

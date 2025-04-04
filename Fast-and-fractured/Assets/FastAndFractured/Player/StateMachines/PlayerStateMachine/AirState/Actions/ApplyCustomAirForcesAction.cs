@@ -9,7 +9,8 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            controller.GetBehaviour<RollPrevention>().ToogleCustomGravity(true, controller.GetBehaviour<PhysicsBehaviour>().Rb);
+            controller.GetBehaviour<ApplyForceByState>().ToggleCustomGravity(true);
+            controller.GetBehaviour<ApplyForceByState>().ToggleAirFriction(true);
         }
     }
 }

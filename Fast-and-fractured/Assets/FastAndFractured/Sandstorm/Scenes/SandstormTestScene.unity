@@ -3104,6 +3104,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a2912e1e9da91284fa79dae06324bef4, type: 3}
+--- !u!4 &1363960053 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a2912e1e9da91284fa79dae06324bef4, type: 3}
+  m_PrefabInstance: {fileID: 1363960052}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1401987989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3544,7 +3549,7 @@ MonoBehaviour:
     invertFade: 0
     distanceFadeStart: 10000
     distanceFadeEnd: 10000
-    textureOffset: {x: 0, y: 0, z: 0}
+    textureOffset: {x: -0, y: -0, z: -0}
     falloffMode: 0
     maskMode: 0
     materialMask: {fileID: 0}
@@ -3781,15 +3786,6 @@ MonoBehaviour:
   cooldownReductionMultiplier: 2
   statBoostMultiplier: 2
   uniqueAbilityDuration: 2
-  numberOfCroquettes: 3
-  orbitRadius: 2
-  orbitHeight: 2
-  orbitSpeed: 50
-  verticalOscillationSpeed: 2
-  verticalOscillationAmplitude: 0.5
-  xRotationSpeed: 40
-  orbitCenter: {fileID: 0}
-  croquettePrefab: {fileID: 0}
   ssjUltiReference:
     Guid:
       Data1: 526829551
@@ -3797,7 +3793,6 @@ MonoBehaviour:
       Data3: -1023862356
       Data4: -154867332
     Path: event:/SuperSaiyanMariaAntonia
-  _statsController: {fileID: 0}
 --- !u!1 &1937828688
 GameObject:
   m_ObjectHideFlags: 0
@@ -4647,6 +4642,9 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3139877398891003430, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1363960053}
+    - targetCorrespondingSourceObject: {fileID: 3139877398891003430, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1499949200}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
@@ -4683,7 +4681,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 864845671}
   - {fileID: 1937828693}
-  - {fileID: 1363960052}
   - {fileID: 1455825880}
   - {fileID: 723242466}
   - {fileID: 1401987989}

@@ -27,7 +27,6 @@ namespace FastAndFractured
                 interactable.onInteract.AddListener(RemoveInteractableFromPool);
             }
             MakeInitialPool();
-
         }
 
 

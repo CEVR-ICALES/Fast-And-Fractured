@@ -534,7 +534,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6626373658847031856, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5190605913777753818}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7663214881706065365}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
 --- !u!4 &852454455369511199 stripped
 Transform:
@@ -546,6 +549,31 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 7936382738066159813}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2552904999676308011 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7663214881706065365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2552904999676308011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22fd2d33a7ea7474ba08d8c926e71a2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityData: {fileID: 11400000, guid: a69eccabc14010a4ea4cb7144b25495e, type: 2}
+  onAbilityActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  enduranceRecoveryAmount: 0
 --- !u!4 &3720275510104103767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

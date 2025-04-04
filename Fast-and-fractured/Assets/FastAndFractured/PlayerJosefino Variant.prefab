@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: JosefinoCar Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 4657998732227108537, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      propertyPath: OverrideMaxDistance
+      value: 50
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -224,75 +228,21 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      insertIndex: -1
+      insertIndex: 1
       addedObject: {fileID: 867328030611729649}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2444485942972813521}
-    - targetCorrespondingSourceObject: {fileID: 30289578262314456, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2393191283028215035}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 894d66a72a5753242b8adf852622d607, type: 3}
 --- !u!4 &1262311764758205136 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5665284770835654702, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   m_PrefabInstance: {fileID: 6853216011309775614}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6877031338686007078 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 30289578262314456, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-  m_PrefabInstance: {fileID: 6853216011309775614}
-  m_PrefabAsset: {fileID: 0}
---- !u!1818360608 &2393191283028215035
-PositionConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6877031338686007078}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: 2.37, z: 0.28}
-  m_TranslationOffset: {x: 0, y: 2.37, z: 0.28}
-  m_AffectTranslationX: 1
-  m_AffectTranslationY: 1
-  m_AffectTranslationZ: 1
-  m_Active: 1
-  m_IsLocked: 1
-  m_Sources:
-  - sourceTransform: {fileID: 867328030611729649}
-    weight: 1
---- !u!1 &7085898574978406757 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-  m_PrefabInstance: {fileID: 6853216011309775614}
-  m_PrefabAsset: {fileID: 0}
---- !u!1818360608 &2444485942972813521
-PositionConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7085898574978406757}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: 0, z: 0}
-  m_TranslationOffset: {x: 0, y: 0, z: 0}
-  m_AffectTranslationX: 1
-  m_AffectTranslationY: 1
-  m_AffectTranslationZ: 1
-  m_Active: 0
-  m_IsLocked: 0
-  m_Sources: []
 --- !u!114 &9139921599748441684 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2435327966734875818, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   m_PrefabInstance: {fileID: 6853216011309775614}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7085898574978406757}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58befd0f56a95a44e8ee5591b466bde0, type: 3}

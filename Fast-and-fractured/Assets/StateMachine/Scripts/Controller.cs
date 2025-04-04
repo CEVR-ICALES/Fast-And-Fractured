@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities.Managers.PauseSystem;
-
+using FastAndFractured;
 namespace StateMachine
 {
     public class Controller : MonoBehaviour, IPausable
@@ -14,8 +14,13 @@ namespace StateMachine
         State currentState;
 
         private bool _paused = false;
+        [SerializeField] private bool _isDebugging;
 
         // Start is called before the first frame update
+        private void Awake()
+        {
+            LevelController.Instance.charactersCustomStart.AddListener(CustomStart);
+        }
         public void CustomStart()
         {
             LoadFirsState();
@@ -29,14 +34,20 @@ namespace StateMachine
         void Update()
         {
             if (_paused) return;
-            UpdateStateActions();
-            EvaluateStateTransitions();
+            if (currentState != null)
+            {
+                UpdateStateActions();
+                EvaluateStateTransitions();
+            }
         }
         void UpdateStateActions()
         {
-            foreach (Action action in currentState.actions)
+            if (currentState != null)
             {
-                action.Act(this);
+                foreach (Action action in currentState.actions)
+                {
+                    action.Act(this);
+                }
             }
         }
         void EvaluateStateTransitions()
@@ -64,7 +75,8 @@ namespace StateMachine
         }
         void ChangeState(State newState)
         {
-            //Debug.Log($"Entering state {newState.name}");
+            if(_isDebugging)
+                Debug.Log($"Entering state {newState.name}");
             ExitState(currentState);
             var newlyInstantiatedState = InstantiateCopyOfState(newState);
             EnterState(newlyInstantiatedState);
@@ -163,8 +175,12 @@ namespace StateMachine
 
         private void OnDestroy()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
+      public void AddBehaviour(Behaviour monoBehaviour) {
+            availableBehaviours.Add(monoBehaviour);
+
+        }
     }
 }

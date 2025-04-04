@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,13 @@ namespace FastAndFractured
     public class CharacterData : ScriptableObject
     {
         [Header("Identificators")]
-        public int Id;
-        public string Name;
+        public string CharacterName;
+        public bool AI;
 
-
+        [Header("Prefabs")]
+        public GameObject CarDefaultPrefab;
+        public List<GameObject> CarWithSkinsPrefabs;
+       
         [Header("Health")]
         public float MaxEndurance;
         public float MinEndurance = 0;

@@ -12,11 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ff3bb6b84fcd04c9a4584674e1d6f9, type: 3}
   m_Name: MariaAntoniaCarData
   m_EditorClassIdentifier: 
-  Id: 0
-  Name: 
+  CharacterName: MariaAntonia
+  AI: 0
+  CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
+  CarWithSkinsPrefabs:
+  - {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
   MaxEndurance: 400
   MinEndurance: 0
-  Dead: 0
+  Invulnerable: 0
   MaxSpeed: 100
   MaxSpeedDashing: 140
   MaxSpeedMultiplier: 0
@@ -45,21 +48,26 @@ MonoBehaviour:
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
   NormalShootDMG: 2
-  PushShootDMG: 0
-  PushShootFORCE: 0
   MaxNormalShootDMG: 0
   MinNormalShootDMG: 0
+  PushShootDMG: 0
+  PushShootFORCE: 0
   MaxPushShootDMG: 0
   MinPushShootDMG: 0
+  ExplosionRadius: 0
+  ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 300
-  PushShootSpeed: 0
   PushShootAngle: 0
   PushShootRange: 0
+  PushShootGravityMultiplier: 0
+  PushShootBounceNum: 0
+  PushShootBounceForce: 0
   DashCooldown: 2
   PushShootCooldown: 0
   UniqueAbilityCooldown: 0
   NormalShootOverHeat: 0
   RecoveryCooldown: 0
   FromTopSpeedToMaxSpeed: 0
+  DeadDelay: 0

@@ -12,18 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ff3bb6b84fcd04c9a4584674e1d6f9, type: 3}
   m_Name: JosefinoCarData
   m_EditorClassIdentifier: 
-  Id: 0
-  Name: 
+  CharacterName: Josefino
+  AI: 0
+  CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+  CarWithSkinsPrefabs:
+  - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
   MaxEndurance: 500
   MinEndurance: 0
-  Dead: 0
+  Invulnerable: 0
   MaxSpeed: 100
   MaxSpeedDashing: 140
   MaxSpeedMultiplier: 1
   MinSpeed: 0
   MaxAcceleration: 1500
   MinAcceleration: 0
-  Acceleration: 1500
+  Acceleration: 3500
   BrakeTorque: 12000
   Handling: 35
   HandlingSmoothnes: 6
