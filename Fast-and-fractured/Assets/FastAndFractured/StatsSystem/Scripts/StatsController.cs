@@ -299,10 +299,10 @@ namespace FastAndFractured
 
             if (iscurrentBigger)
             {
-                if (currentValue / previousValue > 1) // Si fue un producto
-                    mod = 1 / (currentValue / previousValue); // Se revierte con una división
+                if (currentValue / previousValue > 1) 
+                    mod = 1 / (currentValue / previousValue); 
                 else
-                    mod = -(currentValue - previousValue); // Si fue una suma/resta, se revierte con resta
+                    mod = -(currentValue - previousValue); 
             }
             else
             {
@@ -314,7 +314,7 @@ namespace FastAndFractured
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicación
+                ChoseCharToMod(stat, mod, true); 
             });
         }
         #endregion  

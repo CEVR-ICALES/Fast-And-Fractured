@@ -41,11 +41,16 @@ namespace FastAndFractured
         [Tooltip("Object around which the croquettes will rotate")]
         public Transform orbitCenter;
 
+        [Tooltip("Parent object that contains all particle systems for the VFX")]
+        [SerializeField] private GameObject _vfxParent;
+
         public GameObject croquettePrefab;
 
         public EventReference ssjUltiReference;
 
         [SerializeField] private StatsController _statsController;
+
+        private ITimer _timer;
 
         private List<GameObject> _croquetteList = new List<GameObject>();
         private List<float> _croquetteAngleList = new List<float>();
@@ -89,6 +94,14 @@ namespace FastAndFractured
             _statsController.TemporalProductStat(Enums.Stats.PUSH_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
 
             GenerateCroquettes(numberOfCroquettes);
+            StartVFX();
+
+            _timer = TimerSystem.Instance.CreateTimer(
+                duration: uniqueAbilityDuration,
+                onTimerDecreaseComplete: () =>
+                {
+                    StopVFX();
+                });
         }
 
         #region Croquette Methods
@@ -195,7 +208,10 @@ namespace FastAndFractured
         /// </summary>
         public void StartVFX()
         {
-
+            foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+            {
+                ps.Play();
+            }
         }
 
         /// <summary>
@@ -203,7 +219,10 @@ namespace FastAndFractured
         /// </summary>
         public void StopVFX()
         {
-
+            foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+            {
+                ps.Stop();
+            }
         }
 
         #endregion

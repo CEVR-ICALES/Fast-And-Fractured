@@ -521,7 +521,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 1
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -5312,7 +5312,7 @@ Transform:
   - {fileID: 1812893185}
   - {fileID: 1469644923}
   - {fileID: 311851057}
-  m_Father: {fileID: 7463472458744269409}
+  m_Father: {fileID: 8799588693811754048}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &643833671
 GameObject:
@@ -5438,7 +5438,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 1
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -10789,7 +10789,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 1
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -15746,7 +15746,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 1
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -79025,6 +79025,7 @@ MonoBehaviour:
   verticalOscillationAmplitude: 0.5
   xRotationSpeed: 40
   orbitCenter: {fileID: 8799588693811754048}
+  _vfxParent: {fileID: 631367123}
   croquettePrefab: {fileID: 3196287454565126686, guid: 0a442841012210a47841e0e2a6ff06bf, type: 3}
   ssjUltiReference:
     Guid:
@@ -81291,7 +81292,6 @@ Transform:
   - {fileID: 4762829205042806934}
   - {fileID: 408527993}
   - {fileID: 8799588693811754048}
-  - {fileID: 631367124}
   m_Father: {fileID: 8060997051562161806}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &7465460269201482119
@@ -91118,6 +91118,7 @@ Transform:
   - {fileID: 371144272105319309}
   - {fileID: 8647752832255739955}
   - {fileID: 8113153729088162684}
+  - {fileID: 631367124}
   m_Father: {fileID: 7463472458744269409}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &8802382126577873949
