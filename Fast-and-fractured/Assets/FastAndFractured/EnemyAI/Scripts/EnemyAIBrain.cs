@@ -1,6 +1,7 @@
 using Enums;
 using StateMachine;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -23,8 +24,11 @@ namespace FastAndFractured
         private Vector3 _positionToDrive;
         //Reference is obtained via LevelController
         private GameObject _player;
+        //Target to shoot
         private GameObject _targetToShoot;
+        //Target to go to item/npc/zones
         private GameObject _targetToGo;
+        private GameObject _currentTarget;
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
         private float _minDistanceUntilNextCorner = 3f;
@@ -82,8 +86,11 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
-            statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
+            if (statsController)
+            {
+                statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
+                statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
+            }
         }
 
 
@@ -137,6 +144,8 @@ namespace FastAndFractured
             startPosition = carMovementController.transform.position;
             startRotation = carMovementController.transform.rotation;
             _startingPercentageHealth = decisionPercentageHealth;
+            statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
+            statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
         }
         public void ReturnToStartPosition()
         {
@@ -177,6 +186,7 @@ namespace FastAndFractured
         public void UpdateTargetPosition()
         {
             _positionToDrive = _targetToShoot.transform.position;
+            _currentTarget = _targetToShoot;
         }
 
         public void RegisterSuddenly(float damageTaken)
@@ -198,7 +208,7 @@ namespace FastAndFractured
 
         public bool HasReachedTargetToGoPosition()
         {
-            return Vector3.Distance(transform.position, _targetToGo.transform.position) < 2;
+            return Vector3.Distance(transform.position, _currentTarget.transform.position) < 2;
         }
         #endregion
 
@@ -216,7 +226,7 @@ namespace FastAndFractured
             int decision = Random.Range(0, _totalDecisionPercentage + 1);
 
             int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
-            int percentageAcceleration = percentageMaxSpeed+ decisionPercentageAcceleration;
+            int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
             int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
             int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
             int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
@@ -224,7 +234,7 @@ namespace FastAndFractured
             if (decision <= decisionPercentageHealth)
             {
                 _statToChoose = Stats.ENDURANCE;
-            } 
+            }
             else if (decision <= percentageMaxSpeed)
             {
                 _statToChoose = Stats.MAX_SPEED;
@@ -240,7 +250,8 @@ namespace FastAndFractured
             else if (decision <= percentagePushShoot)
             {
                 _statToChoose = Stats.PUSH_DAMAGE;
-            } else
+            }
+            else
             {
                 _statToChoose = Stats.COOLDOWN_SPEED;
             }
@@ -258,8 +269,21 @@ namespace FastAndFractured
 
         public void ChooseNearestCharacter()
         {
-            //TODO
-            //Get list of players and choose the nearest one
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
+            var nearestOne = nearestTarget.transform.position.magnitude;
+
+            foreach (var character in inGameCharacters)
+            {
+                float characterDistance = character.transform.position.magnitude - carMovementController.transform.position.magnitude;
+                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
+                {
+                    nearestOne = characterDistance;
+                    nearestTarget = character;
+                }
+            }
+            _targetToShoot = nearestTarget;
+            _currentTarget = _targetToShoot;
         }
 
         public void ChooseNearestDangerZone()
@@ -403,6 +427,12 @@ namespace FastAndFractured
         {
             return statsController.GetEndurancePercentage() > _recoveryThresholdPercentageForSearch;
         }
+
+        public bool HasTargetToShoot()
+        {
+            return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
+        }
+
         #endregion
 
         #region Helpers
@@ -661,7 +691,7 @@ namespace FastAndFractured
         //            //a += total - a - b - c - d - e;
         //        }
         //#endif
-        
+
         #endregion
     }
 }
