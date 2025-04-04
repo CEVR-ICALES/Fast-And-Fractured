@@ -20,8 +20,6 @@ namespace StateMachine
         private void Awake()
         {
             LevelController.Instance.charactersCustomStart.AddListener(CustomStart);
-          //NOT COMMIT THIS
-       //     CustomStart();
         }
         public void CustomStart()
         {
