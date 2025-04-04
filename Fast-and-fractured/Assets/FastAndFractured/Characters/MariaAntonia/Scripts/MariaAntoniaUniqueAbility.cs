@@ -8,10 +8,10 @@ namespace FastAndFractured
     public class MariaAntoniaUniqueAbility : BaseUniqueAbility
     {
         #region Variables
-        [Tooltip("Multiplier to reduce the cooldown timers (example: 1.5 increases the cooldown timer by 50%")]
+        [Tooltip("Multiplier to reduce the cooldown timers (example: 1.5 increases the cooldown timer by 50%)")]
         public float cooldownReductionMultiplier;
 
-        [Tooltip("Multiplier to increase the stats (example: 1.2 increases the stats by 20%")]
+        [Tooltip("Multiplier to increase the stats (example: 1.2 increases the stats by 20%)")]
         public float statBoostMultiplier;
 
         [Tooltip("Unique ability duration in seconds")]
@@ -44,6 +44,15 @@ namespace FastAndFractured
         [Tooltip("Parent object that contains all particle systems for the VFX")]
         [SerializeField] private GameObject _vfxParent;
 
+        [Tooltip("The material which will have its emissive texture modified")]
+        [SerializeField] private Material _hairMaterial;
+
+        // Store the original Exposure Weight value
+        private float _originalExposureWeight;
+
+        // Value to set when the ultimate ability is active
+        public float activeExposureWeight = 1f;
+
         public GameObject croquettePrefab;
 
         public EventReference ssjUltiReference;
@@ -58,13 +67,15 @@ namespace FastAndFractured
 
         /// <summary>
         /// Sets the orbit center to the player's transform if not assigned.
+        /// Also stores the original exposure weight from the hair material.
         /// </summary>
         private void Start()
         {
             if (orbitCenter == null)
-            {
                 orbitCenter = transform;
-            }
+
+            //if (_hairMaterial != null)
+            //    _originalExposureWeight = _hairMaterial.GetFloat("_ExposureWeight");
         }
 
         private void Update()
@@ -95,12 +106,14 @@ namespace FastAndFractured
 
             GenerateCroquettes(numberOfCroquettes);
             StartVFX();
+            //ActivateHairEmission(true); TO ADD IN FUTURE
 
             _timer = TimerSystem.Instance.CreateTimer(
                 duration: uniqueAbilityDuration,
                 onTimerDecreaseComplete: () =>
                 {
                     StopVFX();
+                    //ActivateHairEmission(false);
                 });
         }
 
@@ -127,15 +140,12 @@ namespace FastAndFractured
         /// <summary>
         /// Calculates the position of a croquette based on its angle and time for sinusoidal movement.
         /// </summary>
-        ///<param name="angle"></param> 
-        ///<param name="time"></param> 
         private Vector3 CalculateCroquettePosition(float angle, float time)
         {
             float radians = angle * Mathf.Deg2Rad;
             float x = orbitCenter.position.x + Mathf.Cos(radians) * orbitRadius;
             float z = orbitCenter.position.z + Mathf.Sin(radians) * orbitRadius;
             float y = orbitCenter.position.y + orbitHeight + Mathf.Sin(time * verticalOscillationSpeed) * verticalOscillationAmplitude;
-
             return new Vector3(x, y, z);
         }
 
@@ -191,7 +201,6 @@ namespace FastAndFractured
             Gizmos.color = Color.green;
             Vector3 prevPoint = orbitCenter.position + new Vector3(orbitRadius, orbitHeight, 0);
             int segments = 32;
-
             for (int i = 1; i <= segments; i++)
             {
                 float angle = (i / (float)segments) * 360f;
@@ -204,7 +213,7 @@ namespace FastAndFractured
 
         #region VFX and Particles Methods
         /// <summary>
-        /// Starts the special ability visual effects
+        /// Starts the special ability visual effects.
         /// </summary>
         public void StartVFX()
         {
@@ -215,7 +224,7 @@ namespace FastAndFractured
         }
 
         /// <summary>
-        /// Stops the visual effects of the special ability when it ends
+        /// Stops the visual effects of the special ability when it ends.
         /// </summary>
         public void StopVFX()
         {
@@ -225,6 +234,26 @@ namespace FastAndFractured
             }
         }
 
+        /// <summary>
+        /// Activates or deactivates the hair emissive effect by modifying the Exposure Weight.
+        /// When activated, sets Exposure Weight to activeExposureWeight (should be 1), and when deactivated, restores the original value.
+        /// </summary>
+        private void ActivateHairEmission(bool isActive)
+        {
+            if (_hairMaterial != null)
+            {
+                if (isActive)
+                {
+                    _hairMaterial.SetFloat("_ExposureWeight", activeExposureWeight);
+                    DynamicGI.UpdateEnvironment();
+                }
+                else
+                {
+                    _hairMaterial.SetFloat("_ExposureWeight", _originalExposureWeight);
+                    DynamicGI.UpdateEnvironment();
+                }
+            }
+        }
         #endregion
     }
 }
