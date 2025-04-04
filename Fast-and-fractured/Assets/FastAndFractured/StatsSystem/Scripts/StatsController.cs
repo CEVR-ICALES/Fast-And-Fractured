@@ -96,6 +96,7 @@ namespace FastAndFractured
 
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float> onEnduranceDamageTaken;
+        public UnityEvent<float> onEnduranceDamageHealed;
 
         #region START EVENTS
         public void CustomStart()
@@ -174,7 +175,10 @@ namespace FastAndFractured
         {
             if (sum > 0)
             {
-                if (!ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                {
+                    onEnduranceDamageHealed?.Invoke(sum);
+                } else
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
@@ -277,7 +281,7 @@ namespace FastAndFractured
         private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
         {
             charStat = isProduct ? charStat * mod : charStat + mod;
-            //charStat = Mathf.Clamp(charStat, minVal, maxVal);
+            charStat = Mathf.Clamp(charStat, minVal, maxVal);
             return charStat;
         }
         #endregion
