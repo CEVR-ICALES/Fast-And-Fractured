@@ -249,36 +249,41 @@ namespace FastAndFractured
             switch (stat)
             {
                 case Stats.MAX_SPEED:
-                    currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
-                    currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
+                    currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     return true;
                 case Stats.MAX_SPEED_MULTIPLIER:
-                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);
                     return true;
                 case Stats.ACCELERATION:
-                    currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
+                    currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct, false);
                     return true;
                 case Stats.ENDURANCE:
-                    currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
+                    currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct, true);
                     if (gameObject.TryGetComponent<CarMovementController>(out CarMovementController testCarMController) && !testCarMController.IsAi) //Provisional Refactoring
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
                     return true;
                 case Stats.PUSH_DAMAGE:
-                    currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
+                    currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct, true);
                     return true;
                 case Stats.NORMAL_DAMAGE:
-                    currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
+                    currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct, true);
                     return true;
             }
             return false;
         }
 
-        private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
+        private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct, bool applyClamp)
         {
             charStat = isProduct ? charStat * mod : charStat + mod;
-            charStat = Mathf.Clamp(charStat, minVal, maxVal);
+
+            if (applyClamp)
+            {
+                charStat = Mathf.Clamp(charStat, minVal, maxVal);
+
+            }
             return charStat;
         }
         #endregion
@@ -318,10 +323,10 @@ namespace FastAndFractured
 
             if (iscurrentBigger)
             {
-                if (currentValue / previousValue > 1) 
+                if (currentValue / previousValue > 1)
                     mod = 1 / (currentValue / previousValue);
                 else
-                    mod = -(currentValue - previousValue); 
+                    mod = -(currentValue - previousValue);
             }
             else
             {
