@@ -8,8 +8,14 @@ namespace FastAndFractured
     public class CharacterData : ScriptableObject
     {
         [Header("Identificators")]
-        public int Id;
-        public string Name;
+        public string CharacterName;
+        public bool AI;
+
+        [Header("Prefabs")]
+        public GameObject DefaulPlayer;
+        public List<GameObject> PlayerSkins;
+        public GameObject DefaulAI;
+        public List<GameObject> AISkins;
 
 
         [Header("Health")]

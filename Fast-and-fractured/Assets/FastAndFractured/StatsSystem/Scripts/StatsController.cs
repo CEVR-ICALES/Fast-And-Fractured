@@ -26,10 +26,12 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
+        private float _currentMaxSpeedMultiplier;
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
+        public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
         public float Acceleration { get => currentAcceleration; }
@@ -91,7 +93,8 @@ namespace FastAndFractured
         public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
 
         #endregion
-        private float _errorGetStatFloat = -1;
+
+        private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float> onEnduranceDamageTaken;
 
         #region START EVENTS
@@ -116,7 +119,6 @@ namespace FastAndFractured
             if (copyOfCharData != null)
             {
                 charDataSO = copyOfCharData;
-                //OnDied += Dead;
                 InitCurrentStats();
             }
         }
@@ -249,6 +251,9 @@ namespace FastAndFractured
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
                     return true;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                    return true;
                 case Stats.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
                     return true;
@@ -296,7 +301,7 @@ namespace FastAndFractured
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod, isProduct);
             float currentValue = GetCurrentStat(type);
-            if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
+            if (previousValue == ERROR_GET_STAT_FLOAT || currentValue == ERROR_GET_STAT_FLOAT)
             {
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
@@ -313,7 +318,7 @@ namespace FastAndFractured
             if (iscurrentBigger)
             {
                 if (currentValue / previousValue > 1) // Si fue un producto
-                    mod = 1 / (currentValue / previousValue); // Se revierte con una división
+                    mod = 1 / (currentValue / previousValue); // Se revierte con una divisiÃ³n
                 else
                     mod = -(currentValue - previousValue); // Si fue una suma/resta, se revierte con resta
             }
@@ -327,7 +332,7 @@ namespace FastAndFractured
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicación
+                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicaciÃ³n
             });
         }
         #endregion  
@@ -348,8 +353,10 @@ namespace FastAndFractured
                     return currentPushShootDMG;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    return _currentMaxSpeedMultiplier;
             }
-            return _errorGetStatFloat;
+            return ERROR_GET_STAT_FLOAT;
         }
 
         private bool IsStatAndModificatorCorrect(Stats type, float mod)

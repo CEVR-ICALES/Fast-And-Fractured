@@ -40,7 +40,7 @@ namespace FastAndFractured
         private CarMovementController _carMovementController;
 
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
-        private void Start()
+        private void OnEnable()
         {
             if (!_rb)
             {
@@ -50,7 +50,6 @@ namespace FastAndFractured
             _carMovementController = GetComponent<CarMovementController>();
             _rb.mass = StatsController.Weight;
         }
-
         private void OnTriggerEnter(Collider other)
         {
             // add on trigger enter logic
