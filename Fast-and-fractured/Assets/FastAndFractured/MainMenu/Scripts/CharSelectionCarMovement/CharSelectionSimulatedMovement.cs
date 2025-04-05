@@ -1,7 +1,7 @@
 using UnityEngine;
 using Utilities;
 
-public class FakeCarMovement : MonoBehaviour
+public class CharSelectionSimulatedMovement : MonoBehaviour
 {
     private Rigidbody _rb;
     [SerializeField] private float forceToApply;

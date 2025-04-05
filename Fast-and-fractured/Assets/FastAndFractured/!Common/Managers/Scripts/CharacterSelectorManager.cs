@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 
-public class CharacterSelectorManager : MonoBehaviour
+public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManager>
 {
     public CharacterMenuData[] allCharacters;
 
@@ -38,6 +38,11 @@ public class CharacterSelectorManager : MonoBehaviour
 
     private void OnEnable()
     {
+        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+
         UpdateCharacterDisplay();
         _currentCharacterIndex = 0;
         _currentSkinIndex = 0;
@@ -128,7 +133,7 @@ public class CharacterSelectorManager : MonoBehaviour
         {
             GameObject lastModelInstance = _currentModelInstance.gameObject;
             carStopCollider.enabled = false;
-            _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+            _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
             _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
             {
                 carStopCollider.enabled = true;
@@ -137,19 +142,18 @@ public class CharacterSelectorManager : MonoBehaviour
             });
         }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
-        _currentModelInstance.GetComponent<FakeCarMovement>().MoveCarForward();
+        _currentModelInstance.name = character.Models[_currentSkinIndex].name;
+        _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
     }
-    private void CheckIfSkinUnlocked()
+    public bool CheckIfSkinUnlocked()
     {
         int skinUnlockedValue = PlayerPrefs.GetInt(_currentModelInstance.name);
+        
+        bool isEnabled;
+        isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
 
-        if(skinUnlockedValue == FULLY_UNLOCKED_VALUE)
-        {
-            selectAndStartButton.enabled = true;
-        } else
-        {
-            selectAndStartButton.enabled = false;
-        }
+        selectAndStartButton.enabled = isEnabled;
+        return isEnabled;
     }
 
     public void SaveCurrentSelected()

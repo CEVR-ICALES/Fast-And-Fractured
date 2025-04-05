@@ -62,7 +62,8 @@ namespace Enums
         GAMEMODE_SELECTION,
         CHARACTER_SELECTION,
         LOADING,
-        SPLASH_SCREEN
+        SPLASH_SCREEN,
+        EXIT_POPUP
     }
 
     public enum Pooltype

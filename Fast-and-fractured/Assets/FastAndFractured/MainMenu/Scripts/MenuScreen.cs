@@ -1,5 +1,6 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace FastAndFractured
 {
@@ -7,10 +8,9 @@ namespace FastAndFractured
     {
         public ScreensType screenType;
         [SerializeField] private CanvasGroup canvasGroup;
-        // MORE FUTURE VARIABLES
-        // [SerializeField] protected bool isLocked = false;
-        // [SerializeField] protected bool hasFade;
-        // [SerializeField] protected float fadeDuration;
+        public Button backButton;
+        public Button defaultButton;
+
 
         public void SetAlpha(float alpha)
         {
