@@ -10,8 +10,8 @@ namespace FastAndFractured
         [SerializeField] private ParticleSystem[] trailParticleSystems;
         [SerializeField] private float movementThreshold;
         [SerializeField] private float speedToEmitAllParticles;
-        private bool _carTrailParticlesActive = false;
-        private float _movementTrailInitialEmmisionRate = 200f; // shopuld always match the emissio nrate if its going to be modified
+        private bool _carTrailParticlesActive = true;
+        private float _movementTrailInitialEmmisionRate = 300f; // shopuld always match the emissio nrate if its going to be modified
         private ParticleSystem.EmissionModule[] _trailEmissionModules; // necessary to modify rateOverTime
 
 
@@ -29,7 +29,6 @@ namespace FastAndFractured
             for (int i = 0; i < trailParticleSystems.Length; i++)
             {
                 _trailEmissionModules[i] = trailParticleSystems[i].emission;
-                
             }
         }
 
@@ -62,6 +61,7 @@ namespace FastAndFractured
 
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {
+            if (!boolToChange) return;
             foreach(ParticleSystem particle in particleSystems)
             {
                 particle.Stop();
@@ -71,6 +71,7 @@ namespace FastAndFractured
 
         private void EnableParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {
+            if (boolToChange) return;
             foreach(ParticleSystem particle in particleSystems)
             {
                 particle.Play();
@@ -82,7 +83,6 @@ namespace FastAndFractured
         private void UpdateCarTrailMovementEmission()
         {
             float normalizedSpeed = Mathf.Clamp01(Mathf.InverseLerp(movementThreshold, speedToEmitAllParticles / 3.6f, _currentSpeed));
-            Debug.Log(normalizedSpeed);
             for(int i = 0; i < _trailEmissionModules.Length; i++) // cant do foreach
             {
                 _trailEmissionModules[i].rateOverTime = _movementTrailInitialEmmisionRate * normalizedSpeed;
