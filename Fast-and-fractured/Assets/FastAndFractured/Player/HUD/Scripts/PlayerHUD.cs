@@ -11,7 +11,6 @@ namespace FastAndFractured
         [SerializeField] CarMovementController carMovementController;
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(GetComponentsNeededInChildren);
             LevelController.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
         }
         private void GetComponentsNeededInChildren()
@@ -31,6 +30,7 @@ namespace FastAndFractured
         }
         private void InitUpdateHUDEvents()
         {
+            GetComponentsNeededInChildren();
             normalShootHandle.onOverheatUpdate?.AddListener(UpdateOverheatHUD);
             pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
             carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);

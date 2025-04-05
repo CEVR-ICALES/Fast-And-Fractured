@@ -2259,20 +2259,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   usingController: 0
-  characters:
-  - {fileID: 1761786913}
-  - {fileID: 772235751}
-  ai: {fileID: 1710668407}
-  killCharacterHandles:
-  - {fileID: 1568527882}
-  - {fileID: 983899451}
-  - {fileID: 1802787261}
-  - {fileID: 349168396}
-  - {fileID: 1958660888}
-  - {fileID: 1087084954}
-  - {fileID: 691964146}
-  - {fileID: 1959523196}
-  testing: 1
   charactersCustomStart:
     m_PersistentCalls:
       m_Calls: []
@@ -2292,8 +2278,22 @@ MonoBehaviour:
   - {fileID: 1582165441}
   - {fileID: 1104124905}
   - {fileID: 878038414}
+  _timeToCallTheStorm: 190
+  _playerDeadReductionTime: 40
   PlayerPrefab: {fileID: 2405317262010205209, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   AIPrefab: {fileID: -3036050522178857462, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+  killCharacterHandles:
+  - {fileID: 1568527882}
+  - {fileID: 983899451}
+  - {fileID: 1802787261}
+  - {fileID: 349168396}
+  - {fileID: 1958660888}
+  - {fileID: 1087084954}
+  - {fileID: 691964146}
+  - {fileID: 1959523196}
+  debugMode: 1
+  useMyModels: 1
+  repeatCharacters: 1
 --- !u!1 &1202429351
 GameObject:
   m_ObjectHideFlags: 0
@@ -2812,17 +2812,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1694644746442364181, guid: 7a6fdf1322c44374c8f520691a9a7db8, type: 3}
   m_PrefabInstance: {fileID: 1710668401}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1710668407 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8561768894680828726, guid: 7a6fdf1322c44374c8f520691a9a7db8, type: 3}
-  m_PrefabInstance: {fileID: 1710668401}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e482beda192a4e43951227d293c1fcc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1717982482
 GameObject:
   m_ObjectHideFlags: 0
