@@ -11,6 +11,12 @@ namespace Utilities
         [Range(0f, 1f)]
         public float masterVolume = 1f;
 
+        [Range(0f, 1f)]
+        public float sfxVolume = 1f;
+
+        [Range(0f, 1f)]
+        public float musicVolume = 1f;
+
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
 
