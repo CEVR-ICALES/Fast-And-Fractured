@@ -1,0 +1,1 @@
+Please visit our wiki https://github.com/hippogamesunity/SimpleLocalization/wiki
