@@ -16,7 +16,6 @@ namespace FastAndFractured
         [SerializeField] private List<StatsController> characters;
         [SerializeField] private EnemyAIBrain ai;
         [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
-        [SerializeField] private List<Controller> controllers;
         [Tooltip("Setting to false, will mean that the characters will be spawned, setting to true, you can use characters you place in the scene.")]
         [SerializeField] private bool testing = false;
         [Header("Character Spawn")]
@@ -57,6 +56,7 @@ namespace FastAndFractured
         // Start is called before the first frame update
         protected override void Awake()
         {
+            Debug.Log(gameObject.name);
             base.Awake();
             if (!ai)
             {
@@ -70,6 +70,7 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!testing)
             {
+                DisableCurrentSceneCharacters();
                 PlayerPrefs.SetString("Selected_Player",playerCharacter);
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
@@ -101,8 +102,14 @@ namespace FastAndFractured
         }
         // will be moved to gameManager
 
-    
-        public void StartLevel()
+        private void DisableCurrentSceneCharacters()
+        {
+          foreach(var character in characters)
+          {
+                character.gameObject.SetActive(false);
+          }
+        }
+        private void StartLevel()
         {
 
             foreach (var character in characters)
@@ -110,6 +117,7 @@ namespace FastAndFractured
                 Controller controller = character.GetComponentInParent<Controller>();
                if (controller && controller.CompareTag("Player"))
                 {
+                    playerCamera.SetCameraParameters(character.transform, character.transform.Find("CameraLookAtPoint"));
                     _playerBindingInputs = character.GetComponentInChildren<CarMovementController>();
                     ai.Player = character.transform.gameObject;
                 }

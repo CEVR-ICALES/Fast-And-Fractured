@@ -31,15 +31,18 @@ namespace FastAndFractured
         }
         private void InitUpdateHUDEvents()
         {
-            normalShootHandle.onOverheatUpdate.AddListener(UpdateOverheatHUD);
-            pushShootHandle.onCooldownUpdate.AddListener(UpdatePushCooldownHUD);
-            carMovementController.onDashCooldownUpdate.AddListener(UpdateDashCooldownHUD);
+            normalShootHandle.onOverheatUpdate?.AddListener(UpdateOverheatHUD);
+            pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
+            carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
         }
         private void OnDisable()
         {
-            normalShootHandle.onOverheatUpdate.RemoveListener(UpdateOverheatHUD);
-            pushShootHandle.onCooldownUpdate.AddListener(UpdatePushCooldownHUD);
-            carMovementController.onDashCooldownUpdate.AddListener(UpdateDashCooldownHUD);
+            if (normalShootHandle.onOverheatUpdate != null)
+            {
+                normalShootHandle.onOverheatUpdate?.RemoveListener(UpdateOverheatHUD);
+                pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
+                carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
+            }
 
         }
 
