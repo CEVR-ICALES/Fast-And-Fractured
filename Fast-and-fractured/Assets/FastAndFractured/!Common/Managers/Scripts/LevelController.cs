@@ -117,7 +117,6 @@ namespace FastAndFractured
                 Controller controller = character.GetComponentInParent<Controller>();
                if (controller && controller.CompareTag("Player"))
                 {
-                    playerCamera.SetCameraParameters(character.transform, character.transform.Find("CameraLookAtPoint"));
                     _playerBindingInputs = character.GetComponentInChildren<CarMovementController>();
                     ai.Player = character.transform.gameObject;
                 }

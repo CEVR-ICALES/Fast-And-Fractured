@@ -259,9 +259,9 @@ namespace FastAndFractured
                 case Stats.MAX_SPEED_MULTIPLIER:
                     _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);
                     return true;
-                case Stats.MAX_SPEED_MULTIPLIER:
-                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
-                    return true;
+                //case Stats.MAX_SPEED_MULTIPLIER:
+                //    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                //    return true;
                 case Stats.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct, false);
                     return true;

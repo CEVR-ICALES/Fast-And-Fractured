@@ -178,6 +178,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1517100025}
     m_Modifications:
+    - target: {fileID: 819897087564494098, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
+      propertyPath: m_Sources.Array.data[0].sourceTransform
+      value: 
+      objectReference: {fileID: 1761786922}
     - target: {fileID: 1224184673448985452, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.9741594
@@ -234,6 +238,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3271309006009941253, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
+      propertyPath: m_Sources.Array.data[0].sourceTransform
+      value: 
+      objectReference: {fileID: 1761786922}
     - target: {fileID: 5499074369102328267, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.99440074
@@ -2264,7 +2272,7 @@ MonoBehaviour:
   - {fileID: 1087084954}
   - {fileID: 691964146}
   - {fileID: 1959523196}
-  testing: 0
+  testing: 1
   charactersCustomStart:
     m_PersistentCalls:
       m_Calls: []
@@ -2913,6 +2921,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb199b8e3d92e748aff50c11154d785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &1761786922 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 867328030611729649, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
+  m_PrefabInstance: {fileID: 184129545}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1765637194 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 58217278607910577, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
