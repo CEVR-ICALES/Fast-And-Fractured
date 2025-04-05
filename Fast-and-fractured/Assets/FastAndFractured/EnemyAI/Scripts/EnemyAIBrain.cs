@@ -48,7 +48,8 @@ namespace FastAndFractured
 
         PathMode pathMode = PathMode.ADVANCED;
 
-        const float MAX_ANGLE_DIRECTION = 90f;
+        const float ANGLE_90 = 90f;
+        const float ANGLE_30 = 30f;
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
@@ -169,13 +170,13 @@ namespace FastAndFractured
             //Left/Right
             //If it's negative, go left
             //If it's positive, go right
-            float inputX = -Mathf.Min(angle / MAX_ANGLE_DIRECTION, MAX_INPUT_VALUE);
+            float inputX = -Mathf.Min(angle / ANGLE_90, MAX_INPUT_VALUE);
 
             //Forward/Backward
             //If angle between 90 and -90 go forward
             //If angle more than 90 or less than -90 go backwards
             float inputY = MAX_INPUT_VALUE;
-            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION)
+            if (angle > ANGLE_90 || angle < -ANGLE_90)
             {
                 inputY = -MAX_INPUT_VALUE;
             }
@@ -266,6 +267,28 @@ namespace FastAndFractured
         public void ChooseNearestItem()
         {
             GetClosestItemByList(InteractableHandler.Instance.GetStatBoostItems());
+        }
+
+        public void ChooseNearestItemAwayFromTarget()
+        {
+            float angle = GetAngleDirection(Vector3.up);
+            float nearestOne = float.MaxValue;
+            List<StatsBoostInteractable> items = InteractableHandler.Instance.GetStatBoostItems();
+            GameObject nearestTarget = items[0].gameObject;
+            foreach (StatsBoostInteractable statItem in items)
+            {
+                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (itemDistance < nearestOne && (angle < -FRONT_ANGLE || angle > FRONT_ANGLE))
+                {
+                    nearestOne = itemDistance;
+                    nearestTarget = statItem.gameObject;
+                }
+                nearestTarget = statItem.gameObject;
+            }
+
+            _targetToGo = nearestTarget;
+            _currentTarget = _targetToGo;
+
         }
 
         public void ChooseNearestCharacter()
