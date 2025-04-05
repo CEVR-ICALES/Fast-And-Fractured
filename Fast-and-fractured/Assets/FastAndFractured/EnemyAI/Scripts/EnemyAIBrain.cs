@@ -271,11 +271,11 @@ namespace FastAndFractured
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
-            var nearestOne = nearestTarget.transform.position.magnitude;
-
+            var nearestOne = float.MaxValue;
+    
             foreach (var character in inGameCharacters)
             {
-                float characterDistance = character.transform.position.magnitude - carMovementController.transform.position.magnitude;
+                float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
                 if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
                 {
                     nearestOne = characterDistance;
