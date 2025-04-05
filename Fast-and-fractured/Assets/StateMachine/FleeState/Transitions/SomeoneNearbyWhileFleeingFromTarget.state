@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: TrainingState
+  m_Name: SomeoneNearbyWhileFleeingFromTarget
   m_EditorClassIdentifier: 
-  enterActions:
-  - {fileID: 11400000, guid: b1024442641fc7f4098d43038447d6c8, type: 2}
-  actions:
-  - {fileID: 11400000, guid: 35fe1bd95cdd5e64382961c9b9d86e3e, type: 2}
+  enterActions: []
+  actions: []
   exitActions: []
-  transitions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
+    trueState: {fileID: 11400000, guid: bf08277c988e3704c949ed0946345b3b, type: 2}
+    falseState: {fileID: 11400000, guid: 929379af3bd382341a01c2a4f96e3419, type: 2}
+    hasExitTime: 0

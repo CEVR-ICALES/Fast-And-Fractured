@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
   m_Name: FleeToItem
   m_EditorClassIdentifier: 
-  enterActions: []
+  enterActions:
+  - {fileID: 11400000, guid: 6fcc2c72338df98498dcf4493d62eaf2, type: 2}
   actions:
   - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
   exitActions: []
@@ -29,3 +30,7 @@ MonoBehaviour:
     trueState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
     falseState: {fileID: 11400000, guid: eb73c52ae863e5948a392e02b83c4faa, type: 2}
     hasExitTime: 0
+  - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
+    trueState: {fileID: 11400000, guid: 023d1fc9b8864364687b4797ce5d9ad2, type: 2}
+    falseState: {fileID: 11400000, guid: a48647f68bc89e442b0bd1ded05d288f, type: 2}
+    hasExitTime: 1
