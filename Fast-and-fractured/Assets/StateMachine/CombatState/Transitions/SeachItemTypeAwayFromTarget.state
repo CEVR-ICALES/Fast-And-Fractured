@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: ChangeShootingTarget
+  m_Name: SeachItemTypeAwayFromTarget
   m_EditorClassIdentifier: 
   enterActions:
-  - {fileID: 11400000, guid: cd2d2d5e1228c964da4f7cdb02eca612, type: 2}
-  actions: []
+  - {fileID: 11400000, guid: 29b7b1454728fda40bb02aed208da994, type: 2}
+  actions:
+  - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
   exitActions: []
   transitions:
-  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
-    trueState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
+  - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
+    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 1
