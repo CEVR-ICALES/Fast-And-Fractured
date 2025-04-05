@@ -68,6 +68,7 @@ namespace FastAndFractured
         public float RecoveryThresholdPercentageForSearch => _recoveryThresholdPercentageForSearch;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
         [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
+        [Range(10, 100)][SerializeField] private int decision = 60;
 
 
         [Header("Item Type Priority")]
@@ -356,12 +357,23 @@ namespace FastAndFractured
             //TODO
             //Use unique ability
         }
+         
+        public void ChangeShootingTargetToTheOneThatMadeMoreDamage()
+        {
+            var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
+                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
+                .ToList();
+            if (listOfCarsThatMadeLotsOfDamage.Count>1)
+            {
+                AssignTarget(listOfCarsThatMadeLotsOfDamage[0].Key);
+            }
+        
+        }
         #endregion
 
         #region DashState
         public void Dash()
         {
-            //TODO
             carMovementController.HandleDashWithPhysics();
         }
 
@@ -457,11 +469,49 @@ namespace FastAndFractured
             return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
         }
 
+        public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
+        {
+          
+               var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
+                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
+                .ToList();
+              return listOfCarsThatMadeLotsOfDamage!=null && listOfCarsThatMadeLotsOfDamage.Count > 0;
+        }
+        //State shootToWhoMadeMoreDamageState
+
         #endregion
 
         #region Helpers
-        private void OnTakeEnduranceDamage(float damageTaken)
+
+        private Dictionary<GameObject, CarDamagedMe> _carsThatDamagedAI = new();
+        
+        [SerializeField] private float forgetDuration = 5f;
+        private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
+            if (whoIsMakingDamage!= _targetToShoot)
+            {
+                if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage,new CarDamagedMe(){ 
+                        damageMade = damageTaken ,
+                        timeThatHasPassed = Time.time,
+                        timerUntilRemove = TimerSystem.Instance.CreateTimer(forgetDuration,TimerDirection.INCREASE,onTimerIncreaseComplete:
+                            () =>
+                            {
+                                _carsThatDamagedAI.Remove(whoIsMakingDamage);
+                            })
+                    } ))
+                {
+                    _carsThatDamagedAI[whoIsMakingDamage].timeThatHasPassed = Time.time;
+                    TimerSystem.Instance.ModifyTimer(_carsThatDamagedAI[whoIsMakingDamage].timerUntilRemove, newCurrentTime: 0);
+                }
+                else
+                {
+                    Debug.Log("Added new car that damaged me");
+                }
+                _carsThatDamagedAI[whoIsMakingDamage].damageMade += damageTaken;
+
+                
+                
+            }
             RegisterSuddenly(damageTaken);
             RecalculateDecisionsPercentage();
         }
@@ -474,6 +524,7 @@ namespace FastAndFractured
         private void AssignTarget(GameObject target)
         {
             _targetToShoot = target;
+            _currentTarget = target;
             _positionToDrive = _targetToShoot.transform.position;
         }
 
@@ -624,7 +675,6 @@ namespace FastAndFractured
             _targetToGo = nearestTarget;
             _currentTarget = _targetToGo;
         }
-
         //Is obsolete but can be used in the future
         //#if UNITY_EDITOR
         //        // Save their previous values so we can identify which one changed.
@@ -738,5 +788,12 @@ namespace FastAndFractured
 
         #endregion
     }
+}
+
+public class CarDamagedMe
+{
+    public float damageMade;
+    public float timeThatHasPassed;
+    public ITimer timerUntilRemove;
 }
 

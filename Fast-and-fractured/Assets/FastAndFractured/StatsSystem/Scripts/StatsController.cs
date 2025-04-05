@@ -95,7 +95,7 @@ namespace FastAndFractured
         #endregion
 
         private const float ERROR_GET_STAT_FLOAT = -1;
-        public UnityEvent<float> onEnduranceDamageTaken;
+        public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
 
         #region START EVENTS
@@ -153,7 +153,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
-                        onEnduranceDamageTaken?.Invoke(substract);
+                        onEnduranceDamageTaken?.Invoke(substract,this.gameObject);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
