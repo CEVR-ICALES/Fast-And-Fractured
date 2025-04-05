@@ -54,7 +54,7 @@ namespace FastAndFractured
         [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
-        [SerializeField] private bool useMyModels = false;
+        [SerializeField] private bool useMyCharacters = false;
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
 
@@ -75,7 +75,7 @@ namespace FastAndFractured
             if (debugMode)
             {
                 _charactersStats = FindObjectsOfType<StatsController>();
-                if (!useMyModels)
+                if (!useMyCharacters)
                 {
                     foreach (var character in _charactersStats)
                     {
@@ -91,14 +91,14 @@ namespace FastAndFractured
                 }
             }
             else
-                useMyModels = false;
+                useMyCharacters = false;
         }
 
         //Maybe in Onenable?
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            if (!useMyModels)
+            if (!useMyCharacters)
             {
                 DisableCurrentSceneCharacters();
                 PlayerPrefs.SetString("Selected_Player",playerCharacter);
