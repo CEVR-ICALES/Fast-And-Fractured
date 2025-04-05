@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.TextCore.Text;
 using Utilities;
 
 namespace FastAndFractured
@@ -84,6 +85,7 @@ namespace FastAndFractured
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
+
 
         private void OnEnable()
         {
@@ -222,50 +224,48 @@ namespace FastAndFractured
 
         public void ChooseItemFromType()
         {
-            CalculateTotalDecisionPercentage();
-            //+1 because it's max is exclusive
-            int decision = Random.Range(0, _totalDecisionPercentage + 1);
+            do
+            {
+                CalculateTotalDecisionPercentage();
+                //+1 because it's max is exclusive
+                int decision = Random.Range(0, _totalDecisionPercentage + 1);
 
-            int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
-            int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
-            int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
-            int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
-            int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
+                int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
+                int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
+                int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
+                int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
+                int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
 
-            if (decision <= decisionPercentageHealth)
-            {
-                _statToChoose = Stats.ENDURANCE;
-            }
-            else if (decision <= percentageMaxSpeed)
-            {
-                _statToChoose = Stats.MAX_SPEED;
-            }
-            else if (decision <= percentageAcceleration)
-            {
-                _statToChoose = Stats.ACCELERATION;
-            }
-            else if (decision <= percentageNormalShoot)
-            {
-                _statToChoose = Stats.NORMAL_DAMAGE;
-            }
-            else if (decision <= percentagePushShoot)
-            {
-                _statToChoose = Stats.PUSH_DAMAGE;
-            }
-            else
-            {
-                _statToChoose = Stats.COOLDOWN_SPEED;
-            }
+                switch (decision)
+                {
+                    default:
+                    case int n when (n <= decisionPercentageHealth):
+                        _statToChoose = Stats.ENDURANCE;
+                        break;
+                    case int n when (n <= percentageMaxSpeed):
+                        _statToChoose = Stats.MAX_SPEED;
+                        break;
+                    case int n when (n <= percentageAcceleration):
+                        _statToChoose = Stats.ACCELERATION;
+                        break;
+                    case int n when (n <= percentageNormalShoot):
+                        _statToChoose = Stats.NORMAL_DAMAGE;
+                        break;
+                    case int n when (n <= percentagePushShoot):
+                        _statToChoose = Stats.PUSH_DAMAGE;
+                        break;
+                    case int n when (n <= percentageCooldown):
+                        _statToChoose = Stats.COOLDOWN_SPEED;
+                        break;
+                }
+            } while (!InteractableHandler.Instance.CheckIfStatItemExists(_statToChoose));
 
-            //TODO
-            //Get items from level manager, filter the list to only get that type of stat item,
-            //and choose the nearest from that type of boost
+            GetClosestItemByList(InteractableHandler.Instance.GetOnlyStatBoostItemsStat(_statToChoose));
         }
 
         public void ChooseNearestItem()
         {
-            //TODO
-            //Get items from level manager and choose the closest one
+            GetClosestItemByList(InteractableHandler.Instance.GetStatBoostItems());
         }
 
         public void ChooseNearestCharacter()
@@ -580,6 +580,26 @@ namespace FastAndFractured
         private void RecalculateDecisionsPercentage()
         {
             decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * HEALTH_WEIGHT_PERCENTAGE);
+        }
+
+        private void GetClosestItemByList(List<StatsBoostInteractable> list)
+        {
+            float nearestOne = float.MaxValue;
+            List<StatsBoostInteractable> items = list;
+            GameObject nearestTarget = items[0].gameObject;
+            foreach (StatsBoostInteractable statItem in items)
+            {
+                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (itemDistance < nearestOne)
+                {
+                    nearestOne = itemDistance;
+                    nearestTarget = statItem.gameObject;
+                }
+                nearestTarget = statItem.gameObject;
+            }
+
+            _targetToGo = nearestTarget;
+            _currentTarget = _targetToGo;
         }
 
         //Is obsolete but can be used in the future
