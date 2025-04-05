@@ -24,6 +24,7 @@ namespace FastAndFractured
         [Header("Brake Settings")]
         public BrakeMode brakeMode = BrakeMode.ALL_WHEELS;
         public bool usesCustomBraking = false;
+        public bool IsBraking => _isBraking;
         private bool _isBraking = false;
         private bool _isDrifting = false;
         private float _driftDirection = 1f;

@@ -14,6 +14,9 @@ namespace FastAndFractured
         private float _movementTrailInitialEmmisionRate = 300f; // shopuld always match the emissio nrate if its going to be modified
         private ParticleSystem.EmissionModule[] _trailEmissionModules; // necessary to modify rateOverTime
 
+        [Header("Drift Trail")]
+        [SerializeField] private TrailRenderer[] tyreDriftMarks;
+
 
         PhysicsBehaviour _physicsBehaviour;
         CarMovementController _carMovementController;
@@ -36,7 +39,40 @@ namespace FastAndFractured
         {
             _currentSpeed = _physicsBehaviour.Rb.velocity.magnitude;
             HandleTrailParticleSystem();
+            HandleBrakeMarks();
         }
+
+        #region BrakeMarks
+        private void HandleBrakeMarks()
+        {
+            if(_carMovementController.IsBraking)
+            {
+                StartBrakeMark();
+            } else
+            {
+                StopBrakeMark();
+            }
+        }
+
+        private void StartBrakeMark()
+        {
+            foreach(TrailRenderer trail in tyreDriftMarks)
+            {
+                trail.emitting = true;
+            }
+        }
+
+        private void StopBrakeMark()
+        {
+            foreach (TrailRenderer trail in tyreDriftMarks)
+            {
+                trail.emitting = false;
+            }
+        }
+
+        #endregion
+
+        #region CarTrail
 
         private void HandleTrailParticleSystem()
         {
@@ -57,6 +93,18 @@ namespace FastAndFractured
                     StopParticles(trailParticleSystems, ref _carTrailParticlesActive);
             }
         }
+
+        private void UpdateCarTrailMovementEmission()
+        {
+            float normalizedSpeed = Mathf.Clamp01(Mathf.InverseLerp(movementThreshold, speedToEmitAllParticles / 3.6f, _currentSpeed));
+            for (int i = 0; i < _trailEmissionModules.Length; i++) // cant do foreach
+            {
+                _trailEmissionModules[i].rateOverTime = _movementTrailInitialEmmisionRate * normalizedSpeed;
+            }
+
+        }
+
+        #endregion
 
 
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
@@ -80,15 +128,7 @@ namespace FastAndFractured
             boolToChange = true;
         }
 
-        private void UpdateCarTrailMovementEmission()
-        {
-            float normalizedSpeed = Mathf.Clamp01(Mathf.InverseLerp(movementThreshold, speedToEmitAllParticles / 3.6f, _currentSpeed));
-            for(int i = 0; i < _trailEmissionModules.Length; i++) // cant do foreach
-            {
-                _trailEmissionModules[i].rateOverTime = _movementTrailInitialEmmisionRate * normalizedSpeed;
-            }
-            
-        }
+        
     }
 }
 
