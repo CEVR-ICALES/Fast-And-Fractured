@@ -52,10 +52,14 @@ namespace FastAndFractured
         const float ANGLE_30 = 30f;
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
+        const float SWEEP_FREQUENCY = 0.5f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
         private Quaternion startRotation;
+
+        private Collider[] _sweepColliders = {};
+        private ITimer _sweepTimer = null;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -391,9 +395,17 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            Collider[] colliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
+            if (_sweepTimer == null)
+            {
+                _sweepColliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
+                _sweepTimer = TimerSystem.Instance.CreateTimer(SWEEP_FREQUENCY, onTimerDecreaseComplete: () =>
+                {
+                    _sweepTimer = null;
+                    _sweepColliders = new Collider[0];
+                });
+            }
 
-            return colliders.Length > 0;
+            return _sweepColliders.Length > 0;
         }
 
         public bool IsPushShootReady()
