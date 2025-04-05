@@ -97,10 +97,12 @@ namespace FastAndFractured
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
+        public UnityEvent<float,GameObject> onDead;
 
         #region START EVENTS
         public void CustomStart()
         {
+            onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
@@ -187,11 +189,11 @@ namespace FastAndFractured
             }
         }
 
-        public float Dead()
+        public void Dead()
         {
             Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Invulnerable = true;
-            return charDataSO.DeadDelay;
+            onDead?.Invoke(charDataSO.DeadDelay,gameObject);
         }
 
         public float GetEndurancePercentage()
@@ -259,9 +261,9 @@ namespace FastAndFractured
                 case Stats.MAX_SPEED_MULTIPLIER:
                     _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);
                     return true;
-                case Stats.MAX_SPEED_MULTIPLIER:
-                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
-                    return true;
+                //case Stats.MAX_SPEED_MULTIPLIER:
+                //    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                //    return true;
                 case Stats.ACCELERATION:
                     currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct, false);
                     return true;

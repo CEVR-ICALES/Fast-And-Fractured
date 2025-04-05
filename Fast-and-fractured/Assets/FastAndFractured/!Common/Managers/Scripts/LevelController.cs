@@ -12,13 +12,6 @@ namespace FastAndFractured
     public class LevelController : AbstractSingleton<LevelController>
     {
         public bool usingController;
-        [Header("Testing Values")]
-        [SerializeField] private List<StatsController> characters;
-        [SerializeField] private EnemyAIBrain ai;
-        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
-        [SerializeField] private List<Controller> controllers;
-        [Tooltip("Setting to false, will mean that the characters will be spawned, setting to true, you can use characters you place in the scene.")]
-        [SerializeField] private bool testing = false;
         [Header("Character Spawn")]
         public UnityEvent charactersCustomStart;
         [SerializeField] private List<CharacterData> charactersData;
@@ -42,6 +35,30 @@ namespace FastAndFractured
         [SerializeField]
         private GameObject[] spawnPoints;
 
+        [Header("Game Loop")]
+        [SerializeField]
+        private float _timeToCallTheStorm = 190f;
+        [SerializeField]
+        private float _playerDeadReductionTime = 40f;
+        private ITimer _callStormTimer;
+
+       
+        [Header("Injector prefabs")]
+        [SerializeField] CarInjector PlayerPrefab;
+        [SerializeField] CarInjector AIPrefab;
+
+        [Header("Testing Values (Old Level Controller)")]
+        private StatsController[] _charactersStats;
+        private EnemyAIBrain[] _ais;
+        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
+        [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
+        [SerializeField] private bool debugMode = true;
+        [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
+        [SerializeField] private bool useMyCharacters = false;
+        [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
+        [SerializeField] private bool repeatCharacters = true;
+
+
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
         private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
         private const int DEFAULT_SKIN = 0;
@@ -49,32 +66,47 @@ namespace FastAndFractured
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
-       
-        [Header("Injector prefabs")]
-        [SerializeField] CarInjector PlayerPrefab;
-        [SerializeField] CarInjector AIPrefab;
-
         // Start is called before the first frame update
         protected override void Awake()
         {
+            Debug.Log(gameObject.name);
             base.Awake();
-            if (!ai)
+            //Provisional For Debug
+            if (debugMode)
             {
-                ai = FindObjectOfType<EnemyAIBrain>();
+                _charactersStats = FindObjectsOfType<StatsController>();
+                if (!useMyCharacters)
+                {
+                    foreach (var character in _charactersStats)
+                    {
+                        character.gameObject.transform.parent.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    if (_ais == null)
+                    {
+                        _ais = FindObjectsOfType<EnemyAIBrain>();
+                    }
+                }
             }
+            else
+                useMyCharacters = false;
         }
 
         //Maybe in Onenable?
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            if (!testing)
+            if (!useMyCharacters)
             {
+                DisableCurrentSceneCharacters();
                 PlayerPrefs.SetString("Selected_Player",playerCharacter);
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
                     Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
+                TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, () => { CallStorm(); _callStormTimer = null; });
             }
             else
             {
@@ -101,17 +133,26 @@ namespace FastAndFractured
         }
         // will be moved to gameManager
 
-    
-        public void StartLevel()
+        private void DisableCurrentSceneCharacters()
+        {
+          foreach(var character in _charactersStats)
+          {
+                Destroy(character.transform.parent.gameObject);
+          }
+        }
+        private void StartLevel()
         {
 
-            foreach (var character in characters)
+            foreach (var character in _charactersStats)
             {
                 Controller controller = character.GetComponentInParent<Controller>();
                if (controller && controller.CompareTag("Player"))
                 {
                     _playerBindingInputs = character.GetComponentInChildren<CarMovementController>();
-                    ai.Player = character.transform.gameObject;
+                    foreach (var ai in _ais)
+                    {
+                        ai.Player = character.transform.gameObject;
+                    }
                 }
             }
             foreach (var killCharacterHandle in killCharacterHandles)
@@ -121,29 +162,36 @@ namespace FastAndFractured
              charactersCustomStart?.Invoke();
         }
 
+
+        #region SpawnCharacters
         private void SpawnInGameCharacters(out bool succeded)
         {
             _inGameCharactersNameCodes = new List<string>();
-           succeded = CreateAllCharactersNameCodesList();
-           string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+            succeded = CreateAllCharactersNameCodesList();
+            bool ignoreRepeatedCharacters;
+            if (ignoreRepeatedCharacters = _inGameCharactersNameCodes.Count < maxCharactersInGame)
+            {
+                Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
+            }
+            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
             if (!succeded)
                 return;
-            if (succeded = CheckIfCharacterExistInList(selectedPlayer))
+            if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
             {
                 _inGameCharactersNameCodes.Add(selectedPlayer);
             }
             else
                 return;
             int totalAICharacters = maxCharactersInGame - _currentPlayers;
-            for(int aiCharacterCount = 0; aiCharacterCount < totalAICharacters&&succeded; aiCharacterCount++)
+            for (int aiCharacterCount = 0; aiCharacterCount < totalAICharacters && succeded; aiCharacterCount++)
             {
                 string aiName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
-                if (aiName==ERROR_STRING_MESSAGE)
+                if (aiName == ERROR_STRING_MESSAGE)
                 {
                     Debug.LogWarning("Error, all characters form list _allCharactersNameCode where deleted. " +
                         "Make sure that you are adding more variety of characters or give LIMIT_OF_SAME_CHARACTER_SPAWNED and maxCharactersInGame the same value.");
                 }
-                if (succeded = CheckIfCharacterExistInList(aiName))
+                if (succeded = CheckIfCharacterExistInList(aiName, ignoreRepeatedCharacters))
                 {
                     _inGameCharactersNameCodes.Add(aiName);
                 }
@@ -154,9 +202,6 @@ namespace FastAndFractured
                 SpawnCharactersInScene();
             }
         }
-
-        #region SpawnCharacters
-
         private void SpawnCharactersInScene()
         {
             if (spawnPoints.Length >= maxCharactersInGame)
@@ -249,18 +294,42 @@ namespace FastAndFractured
             }
         }
 
-        private bool CheckIfCharacterExistInList(string nameCode)
+        private bool CheckIfCharacterExistInList(string nameCode, bool ignoreRepeated)
         {
             if (_allCharactersNameCode.Contains(nameCode))
             {
                 DivideNameCode(nameCode,out string name);
-                RemoveSelectedCharacterFromAllCharactersNameCodes(nameCode, name);
+                if (!ignoreRepeated)
+                {
+                    RemoveSelectedCharacterFromAllCharactersNameCodes(nameCode, name);
+                }
                 return true;
             }
             Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
             return false;
         }
         #endregion
+
+        public void OnPlayerDead(float delayTime,GameObject character)
+        {
+            _inGameCharacters.Remove(character);
+            if (_callStormTimer != null) {
+                if (TimerSystem.Instance.HasTimer(_callStormTimer))
+                {
+                  TimerData stormTimer = _callStormTimer.GetData();
+                    float newTime = stormTimer.CurrentTime - _playerDeadReductionTime;
+                    Mathf.Clamp(newTime, 0, _timeToCallTheStorm);
+                    TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
+                }
+            }
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> { Destroy(character); });
+        }
+
+        private void CallStorm()
+        {
+
+        }
+
         #region Resources
         private T GetRandomValueFromShuffleList<T>(List<T> list, T defaultValue)
         {
@@ -322,15 +391,15 @@ namespace FastAndFractured
         public void EliminatePlayer(StatsController characterstats)
         {
             string currentSceneName = SceneManager.GetActiveScene().name;
-            float delay = characterstats.Dead();
-            TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
-                if (IsThePlayer(characterstats.gameObject))
-                {
-                    SceneManager.LoadScene(currentSceneName);
-                }
-                else
-                    characterstats.gameObject.SetActive(false);
-            });
+            //float delay = characterstats.Dead();
+            //TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
+            //    if (IsThePlayer(characterstats.gameObject))
+            //    {
+            //        SceneManager.LoadScene(currentSceneName);
+            //    }
+            //    else
+            //        characterstats.gameObject.SetActive(false);
+            //});
         }
 
         private bool IsThePlayer(GameObject character)

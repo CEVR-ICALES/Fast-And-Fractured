@@ -11,7 +11,6 @@ namespace FastAndFractured
         [SerializeField] CarMovementController carMovementController;
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(GetComponentsNeededInChildren);
             LevelController.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
         }
         private void GetComponentsNeededInChildren()
@@ -31,15 +30,19 @@ namespace FastAndFractured
         }
         private void InitUpdateHUDEvents()
         {
-            normalShootHandle.onOverheatUpdate.AddListener(UpdateOverheatHUD);
-            pushShootHandle.onCooldownUpdate.AddListener(UpdatePushCooldownHUD);
-            carMovementController.onDashCooldownUpdate.AddListener(UpdateDashCooldownHUD);
+            GetComponentsNeededInChildren();
+            normalShootHandle.onOverheatUpdate?.AddListener(UpdateOverheatHUD);
+            pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
+            carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
         }
         private void OnDisable()
         {
-            normalShootHandle.onOverheatUpdate.RemoveListener(UpdateOverheatHUD);
-            pushShootHandle.onCooldownUpdate.AddListener(UpdatePushCooldownHUD);
-            carMovementController.onDashCooldownUpdate.AddListener(UpdateDashCooldownHUD);
+            if (normalShootHandle.onOverheatUpdate != null)
+            {
+                normalShootHandle.onOverheatUpdate?.RemoveListener(UpdateOverheatHUD);
+                pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
+                carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
+            }
 
         }
 
