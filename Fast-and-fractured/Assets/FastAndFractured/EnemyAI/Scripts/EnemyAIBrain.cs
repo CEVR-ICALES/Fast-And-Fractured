@@ -63,6 +63,7 @@ namespace FastAndFractured
         private float _currentAccumulatedDamageTime;
         [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
         [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
+        public float RecoveryThresholdPercentageForSearch => _recoveryThresholdPercentageForSearch;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
         [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
 
