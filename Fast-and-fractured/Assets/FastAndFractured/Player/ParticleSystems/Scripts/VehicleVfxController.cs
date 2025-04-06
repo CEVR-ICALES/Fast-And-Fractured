@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace FastAndFractured
@@ -7,7 +5,7 @@ namespace FastAndFractured
     public class VehicleVfxController : MonoBehaviour
     {
         [Header("Car Movement Trail")]
-        [SerializeField] private ParticleSystem[] trailParticleSystems;
+        [SerializeField] private ParticleSystem[] trailVfxs;
         [SerializeField] private float movementThreshold;
         [SerializeField] private float speedToEmitAllParticles;
         private bool _carTrailParticlesActive = true;
@@ -15,7 +13,11 @@ namespace FastAndFractured
         private ParticleSystem.EmissionModule[] _trailEmissionModules; // necessary to modify rateOverTime
 
         [Header("Drift Trail")]
-        [SerializeField] private TrailRenderer[] tyreDriftMarks;
+        [SerializeField] private TrailRenderer[] tyreDriftMarksVfx;
+
+        [Header("Impact")]
+        [SerializeField] private ParticleSystem collisionVfx;
+        [SerializeField] private LayerMask collisionLayers;
 
 
         PhysicsBehaviour _physicsBehaviour;
@@ -27,11 +29,11 @@ namespace FastAndFractured
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             _carMovementController = GetComponent<CarMovementController>();
 
-            _trailEmissionModules = new ParticleSystem.EmissionModule[trailParticleSystems.Length];
+            _trailEmissionModules = new ParticleSystem.EmissionModule[trailVfxs.Length];
 
-            for (int i = 0; i < trailParticleSystems.Length; i++)
+            for (int i = 0; i < trailVfxs.Length; i++)
             {
-                _trailEmissionModules[i] = trailParticleSystems[i].emission;
+                _trailEmissionModules[i] = trailVfxs[i].emission;
             }
         }
 
@@ -40,6 +42,24 @@ namespace FastAndFractured
             _currentSpeed = _physicsBehaviour.Rb.velocity.magnitude;
             HandleTrailParticleSystem();
             HandleBrakeMarks();
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if(collisionLayers == (collisionLayers | (1 << collision.gameObject.layer))) 
+            {
+                HandleCollisionVfx(collision);
+            }
+        }
+
+        private void HandleCollisionVfx(Collision collision) // if we pool this type of particle since its likely that a lot of impacts are going to happen this will be changed
+        {
+            ContactPoint contact = collision.GetContact(0);
+            collisionVfx.transform.position = contact.point;
+            collisionVfx.transform.rotation = Quaternion.LookRotation(contact.normal);
+
+            if(!collisionVfx.isPlaying)
+                collisionVfx.Play();
         }
 
         #region BrakeMarks
@@ -56,7 +76,7 @@ namespace FastAndFractured
 
         private void StartBrakeMark()
         {
-            foreach(TrailRenderer trail in tyreDriftMarks)
+            foreach(TrailRenderer trail in tyreDriftMarksVfx)
             {
                 trail.emitting = true;
             }
@@ -64,7 +84,7 @@ namespace FastAndFractured
 
         private void StopBrakeMark()
         {
-            foreach (TrailRenderer trail in tyreDriftMarks)
+            foreach (TrailRenderer trail in tyreDriftMarksVfx)
             {
                 trail.emitting = false;
             }
@@ -78,19 +98,19 @@ namespace FastAndFractured
         {
             if(!_carMovementController.IsGrounded())
             {
-                StopParticles(trailParticleSystems, ref _carTrailParticlesActive);
+                StopParticles(trailVfxs, ref _carTrailParticlesActive);
                 return;
             }
 
             if(_currentSpeed > movementThreshold)
             {
                 if(!_carTrailParticlesActive)
-                    EnableParticles(trailParticleSystems, ref _carTrailParticlesActive);
+                    EnableParticles(trailVfxs, ref _carTrailParticlesActive);
                 UpdateCarTrailMovementEmission();
             } else
             {
                 if(_carTrailParticlesActive)
-                    StopParticles(trailParticleSystems, ref _carTrailParticlesActive);
+                    StopParticles(trailVfxs, ref _carTrailParticlesActive);
             }
         }
 

@@ -418,6 +418,16 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9d46fc9f3f1a0c1469e9dee78d68ff20, type: 3}
+--- !u!198 &665400688 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 3746037703931879419, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
+  m_PrefabInstance: {fileID: 2031998251573369517}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &665400689 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
+  m_PrefabInstance: {fileID: 2031998251573369517}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &691964140
 GameObject:
   m_ObjectHideFlags: 0
@@ -646,11 +656,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3724204961557024040, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
   m_PrefabInstance: {fileID: 729840933}
   m_PrefabAsset: {fileID: 0}
---- !u!198 &729840935 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8571953197463317793, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
-  m_PrefabInstance: {fileID: 729840933}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &796177320
 GameObject:
   m_ObjectHideFlags: 0
@@ -819,11 +824,44 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hospital_Cevr_Icales
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 983e980f211049048a7df206b6d96aef, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 983e980f211049048a7df206b6d96aef, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 933047191}
   m_SourcePrefab: {fileID: 100100000, guid: 983e980f211049048a7df206b6d96aef, type: 3}
+--- !u!1 &933047190 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 983e980f211049048a7df206b6d96aef, type: 3}
+  m_PrefabInstance: {fileID: 933047189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &933047191
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933047190}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 115.4908, y: 58.412025, z: 37.0584}
+  m_Center: {x: -14.444017, y: 29.18504, z: 1.3067733}
 --- !u!1 &938797676
 GameObject:
   m_ObjectHideFlags: 0
@@ -2144,6 +2182,7 @@ Transform:
   - {fileID: 1224163457}
   - {fileID: 1791356582}
   - {fileID: 729840934}
+  - {fileID: 665400689}
   m_Father: {fileID: 1944101517}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1568527877
@@ -2285,11 +2324,6 @@ MonoBehaviour:
 --- !u!4 &1577266633 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1669416573918800525, guid: e458c3614a66e6747b88e10eb5d2d203, type: 3}
-  m_PrefabInstance: {fileID: 4145661989153595941}
-  m_PrefabAsset: {fileID: 0}
---- !u!96 &1577266634 stripped
-TrailRenderer:
-  m_CorrespondingSourceObject: {fileID: 1751180718579731296, guid: e458c3614a66e6747b88e10eb5d2d203, type: 3}
   m_PrefabInstance: {fileID: 4145661989153595941}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1636176051
@@ -2876,34 +2910,33 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
---- !u!198 &1301266118530419051 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8571953197463317793, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
-  m_PrefabInstance: {fileID: 1301266118530419050}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2031998251573369517
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1543868357}
     m_Modifications:
     - target: {fileID: 2489603042514872764, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_Name
       value: ImpactSpark
       objectReference: {fileID: 0}
+    - target: {fileID: 3746037703931879419, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 404.49182
+      value: 1.8918152
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 505.5812
+      value: 2.5411987
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -144.78706
+      value: 2.87294
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2915,11 +2948,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5818200715368215985, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4091,14 +4124,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe773b3fe8c6fa645a564995d1e6f30a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trailParticleSystems:
-  - {fileID: 1301266118530419051}
-  - {fileID: 729840935}
+  trailVfxs: []
   movementThreshold: 10
   speedToEmitAllParticles: 70
-  tyreDriftMarks:
-  - {fileID: 1577266634}
-  - {fileID: 1224163458}
+  tyreDriftMarksVfx: []
+  collisionVfx: {fileID: 665400688}
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 1088
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4112,4 +4145,3 @@ SceneRoots:
   - {fileID: 1636176051}
   - {fileID: 933047189}
   - {fileID: 452656826}
-  - {fileID: 2031998251573369517}
