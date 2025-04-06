@@ -23,6 +23,7 @@ namespace FastAndFractured
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
+        [SerializeField] private PhysicsBehaviour physicsBehaviour;
         protected virtual void CustomStart()
         {
             //Provisional, this will be replace
@@ -50,7 +51,7 @@ namespace FastAndFractured
 
         protected virtual void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
-            bulletBehaivour.Velocity = _velocity;
+            bulletBehaivour.Velocity = _velocity + physicsBehaviour.Rb.velocity;
             bulletBehaivour.Range = _range;
             bulletBehaivour.Damage = _damage;
         }

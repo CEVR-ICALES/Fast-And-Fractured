@@ -51,7 +51,6 @@ namespace FastAndFractured {
                 Vector3 currentShootDirectionWithoutY = new Vector3(currentShootDirection.x, 0, currentShootDirection.z);
                 float directionAngle = Vector3.SignedAngle(transform.forward, currentShootDirectionWithoutY, Vector3.up);
                 Quaternion rotation = Quaternion.AngleAxis(directionAngle, Vector3.up);
-
                 Vector3 velocityVectorX = transform.forward * Vx;
                 
                 //Finalmente, se calcula el vector rotado en X y se suma el vector Y.
