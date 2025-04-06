@@ -389,6 +389,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &577749521 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4492021448032354420, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
+  m_PrefabInstance: {fileID: 1196808737}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17a6e8a72042fa459a09a1e42e317c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &621557118 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 867328030611729649, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
@@ -1726,7 +1737,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b3db279bba37e2f4c8ccf9030f214c50, type: 2}
   playerCharacter: Pepe_0
   maxCharactersInGame: 8
-  playerCamera: {fileID: 0}
+  playerCamera: {fileID: 577749521}
   spawnPoints:
   - {fileID: 451664265}
   - {fileID: 1202429351}
@@ -1742,7 +1753,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 2405317262010205209, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   AIPrefab: {fileID: -3036050522178857462, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
   debugMode: 1
-  useMyCharacters: 0
+  useMyCharacters: 1
   repeatCharacters: 1
 --- !u!1001 &1196808737
 PrefabInstance:
@@ -2074,10 +2085,10 @@ MonoBehaviour:
     positiveFade: {x: 0, y: 0, z: 0}
     negativeFade: {x: 0, y: 0, z: 0}
     m_EditorUniformFade: 0
-    m_EditorPositiveFade: {x: 0.000116197996, y: 0, z: 0.00056465267}
-    m_EditorNegativeFade: {x: 0.000116197996, y: 0, z: 0.00056465267}
+    m_EditorPositiveFade: {x: 0.004159733, y: 0, z: 0.0048348065}
+    m_EditorNegativeFade: {x: 0.004159733, y: 0, z: 0.0048348065}
     m_EditorAdvancedFade: 0
-    size: {x: 860.6, y: 196.6, z: 177.1}
+    size: {x: 24.04, y: 2.269244, z: 20.68335}
     invertFade: 0
     distanceFadeStart: 10000
     distanceFadeEnd: 10000
@@ -2593,11 +2604,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 362617908678673583, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 567
+      value: 502.86
       objectReference: {fileID: 0}
     - target: {fileID: 362617908678673583, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -207
+      value: -276.1
       objectReference: {fileID: 0}
     - target: {fileID: 362617908678673583, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2633,15 +2644,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.size.x
-      value: 860.6
+      value: 27.8
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.size.y
-      value: 196.6
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.size.z
-      value: 177.1
+      value: 20.68335
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.meanFreePath
@@ -2661,19 +2672,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.m_EditorNegativeFade.x
-      value: 0.000116197996
+      value: 0.0035971222
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.m_EditorNegativeFade.z
-      value: 0.00056465267
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.m_EditorPositiveFade.x
-      value: 0.000116197996
+      value: 0.0035971222
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.m_EditorPositiveFade.z
-      value: 0.00056465267
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.textureScrollingSpeed.x

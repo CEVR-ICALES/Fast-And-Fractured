@@ -23,7 +23,6 @@ namespace FastAndFractured
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
-
         protected virtual void CustomStart()
         {
             //Provisional, this will be replace

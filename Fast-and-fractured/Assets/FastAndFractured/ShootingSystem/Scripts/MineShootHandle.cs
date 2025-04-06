@@ -5,12 +5,5 @@ using UnityEngine;
 
 public class MineShootHandle : ShootingHandle
 {
-    public void MineShoot()
-    {
-        if (canShoot) 
-        {
-            float range = 0;
 
-        }
-    }
 }

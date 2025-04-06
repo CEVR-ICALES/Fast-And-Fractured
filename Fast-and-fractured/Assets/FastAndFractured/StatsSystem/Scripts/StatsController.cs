@@ -72,11 +72,11 @@ namespace FastAndFractured
         public float PushShootGravityMultiplier { get => charDataSO.PushShootGravityMultiplier; }
         public int PushShootBounceNum { get => charDataSO.PushShootBounceNum; }
         public float PushShootBounceForce { get => charDataSO.PushShootBounceForce; }
+        public float MineShootAngle { get => charDataSO.MineShootAngle; }
+        public float MineShootRange { get => charDataSO.MineShootRange; }
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
-        public float Traction { get => charDataSO.Traction; }
-        public float Damping { get => charDataSO.Damping; }
         public float BaseForce { get => charDataSO.BaseForce; }
         public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
         public float EnduranceImportanceWhenColliding { get => charDataSO.EnduranceImportanceWhenColliding; }
@@ -88,10 +88,9 @@ namespace FastAndFractured
         public float CooldownSpeed { get => currentCooldownSpeed; }
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
+        public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
-        public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
-
         #endregion
 
         private bool _isPlayer = false;
@@ -112,11 +111,6 @@ namespace FastAndFractured
         }
 
         #endregion
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
 
         public void SetCharacter(CharacterData charData)
         {
@@ -137,7 +131,6 @@ namespace FastAndFractured
             currentAcceleration = charDataSO.Acceleration;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
-            currentPushShootDMG = charDataSO.PushShootDMG;
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
@@ -275,9 +268,6 @@ namespace FastAndFractured
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
-                    return true;
-                case Stats.PUSH_DAMAGE:
-                    currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct, true);
                     return true;
                 case Stats.NORMAL_DAMAGE:
                     currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct, true);

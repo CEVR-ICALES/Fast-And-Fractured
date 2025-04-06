@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured {
     public class PushBulletBehaviour : BulletBehaviour
@@ -23,10 +24,10 @@ namespace FastAndFractured {
         //Movement Values
 
         public int BouncingNum { set => _bouncingNum = value; }
-        private int _bouncingNum;
+        private int _bouncingNum = 0;
         private int _currentBouncingNum;
         public float BouncingStrenght { set => _bounceStrenght = value; }
-        private float _bounceStrenght;
+        private float _bounceStrenght = 0;
         private float _currentBounceStrenght;
         private Vector3 initialPosition;
         private bool _firstTime = true;
@@ -96,11 +97,19 @@ namespace FastAndFractured {
             if (_currentBouncingNum >= _bouncingNum)
             {
                 rb.velocity = Vector3.zero;
-            if(_timeToExplode > 0)
+                rb.constraints = RigidbodyConstraints.FreezePosition;
+                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                if (_timeToExplode > 0)
                 {
-                    TimerSystem.Instance.CreateTimer();
+                    TimerSystem.Instance.CreateTimer(_timeToExplode, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                    {
+                        Explosion();
+                    });
                 }
-                Explosion();
+                else
+                {
+                    Explosion();
+                }
             }
         }
 
