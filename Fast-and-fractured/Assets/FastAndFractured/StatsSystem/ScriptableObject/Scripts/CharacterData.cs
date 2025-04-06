@@ -91,6 +91,7 @@ namespace FastAndFractured
 
         public float DashCooldown;
         public float PushShootCooldown;
+        public float MineExplosionTime;
         public float UniqueAbilityCooldown;
         public float NormalShootOverHeat;
         [Tooltip("When in flipped state, how much time is needed to return to normal state")] public float RecoveryCooldown;

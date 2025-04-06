@@ -13,7 +13,7 @@ namespace StateMachine
         PlayerInputController _playerInputController;
         public override void Act(Controller controller)
         {
-            Debug.Log(_isAirRotationToggled);
+           // Debug.Log(_isAirRotationToggled);
             _playerInputController = controller.GetBehaviour<PlayerInputController>();
             HandleIsBrakingInput(_playerInputController.IsBraking);
             

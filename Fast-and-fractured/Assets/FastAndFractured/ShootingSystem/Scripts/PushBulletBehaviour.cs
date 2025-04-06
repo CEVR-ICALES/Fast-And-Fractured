@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured {
     public class PushBulletBehaviour : BulletBehaviour
@@ -15,6 +17,8 @@ namespace FastAndFractured {
         public Vector3 ExplosionCenterOffset { set => _explosionCenterOffset = value; }
         private Vector3 _explosionCenterOffset;
         [SerializeField] private ExplosionForce _explosionHitbox;
+        public float TimeToExplode {set => _timeToExplode = value; }
+        private float _timeToExplode = 0;
 
         //Movement Values
 
@@ -71,7 +75,7 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
-            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius,_pushForce,_explosionCenterOffset);
+            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset);
             OnBulletEndTrayectory();
         }
 
@@ -92,6 +96,10 @@ namespace FastAndFractured {
             if (_currentBouncingNum >= _bouncingNum)
             {
                 rb.velocity = Vector3.zero;
+            if(_timeToExplode > 0)
+                {
+                    TimerSystem.Instance.CreateTimer();
+                }
                 Explosion();
             }
         }

@@ -9,8 +9,8 @@ public class SandstormController : MonoBehaviour
 
     public float growthSpeed = 1.0f;
 
-    [SerializeField] private Vector3 _spawnPoint;
-    [SerializeField] private Vector3 mirrorPoint;
+     private Vector3 _spawnPoint;
+     private Vector3 mirrorPoint;
     private Vector3 _direction;
 
     private float _currentGrowth = 0f;
@@ -20,12 +20,24 @@ public class SandstormController : MonoBehaviour
 
     private Vector3 _initialPositionMain;
     private Vector3 _initialPositionSecondary;
-
-
+    public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
+    private bool _moveSandStorm = false;
+    private void Start()
+    {
+        primaryFog.gameObject.SetActive(false);
+        secondaryFog.gameObject.SetActive(false);
+    }
+    private void Update()
+    {
+        if (_moveSandStorm)
+        {
+            ExpandFogs();
+        }
+    }
     /// <summary>
     /// Spawns the Fogs at a random point (hardcoded values for now)
     /// </summary>
-    private void SpawnFogs()
+    public void SpawnFogs()
     {
         float randomX = Random.Range(-15f, 15f); //Hardcoded values
         float randomZ = Random.Range(-15f, 15f); //Hardcoded values

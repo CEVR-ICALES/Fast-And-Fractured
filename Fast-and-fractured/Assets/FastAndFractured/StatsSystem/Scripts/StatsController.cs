@@ -94,10 +94,11 @@ namespace FastAndFractured
 
         #endregion
 
+        private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
-        public UnityEvent<float,GameObject> onDead;
+        public UnityEvent<float,GameObject,bool> onDead;
 
         #region START EVENTS
         public void CustomStart()
@@ -105,6 +106,7 @@ namespace FastAndFractured
             onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
+            _isPlayer = !GetComponent<CarMovementController>().IsAi;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
@@ -193,7 +195,7 @@ namespace FastAndFractured
         {
             Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Invulnerable = true;
-            onDead?.Invoke(charDataSO.DeadDelay,gameObject);
+            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
         }
 
         public float GetEndurancePercentage()
@@ -269,7 +271,7 @@ namespace FastAndFractured
                     return true;
                 case Stats.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct, true);
-                    if (gameObject.TryGetComponent<CarMovementController>(out CarMovementController testCarMController) && !testCarMController.IsAi) //Provisional Refactoring
+                    if (_isPlayer)
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
