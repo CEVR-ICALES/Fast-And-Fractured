@@ -12,10 +12,6 @@ namespace FastAndFractured {
     {
         public UnityEvent<float, float> onCooldownUpdate;
         private bool _shootingMine = false;
-        protected override void CustomStart()
-        {
-            base.CustomStart();
-        }
         protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);

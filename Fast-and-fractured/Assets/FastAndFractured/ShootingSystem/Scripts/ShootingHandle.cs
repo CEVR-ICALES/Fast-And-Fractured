@@ -23,12 +23,15 @@ namespace FastAndFractured
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
-        [SerializeField] private PhysicsBehaviour physicsBehaviour;
-        protected virtual void CustomStart()
+        [SerializeField]
+        private PhysicsBehaviour physicsBehaviour;
+
+        protected virtual void Start()
         {
-            //Provisional, this will be replace
             if (characterStatsController == null)
                 Debug.LogError("Character " + gameObject.name + " needs a StatsController for  " + name + " Script");
+            if(physicsBehaviour == null)
+                Debug.LogError("Character " + gameObject.name + " needs a PhysicsBehaivour for  " + name + " Script");
         }
 
         protected void ShootBullet(Vector3 velocity, float range)

@@ -44,9 +44,6 @@ namespace FastAndFractured
 
         public bool IsPushShooting => _isPushShooting;
         private bool _isPushShooting;
-        public bool IsMineShoot => _isMineShooting;
-        private bool _isMineShooting;
-
         public bool IsUsingAbility => _isUsingAbility;
         private bool _isUsingAbility;
 
