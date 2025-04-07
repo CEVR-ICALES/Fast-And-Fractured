@@ -380,26 +380,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Path
-      value: event:/ShootingSFX
-      objectReference: {fileID: 0}
-    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data1
-      value: -1426590782
-      objectReference: {fileID: 0}
-    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data2
-      value: 1159805714
-      objectReference: {fileID: 0}
-    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data3
-      value: 2001885093
-      objectReference: {fileID: 0}
-    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data4
-      value: -2108599820
-      objectReference: {fileID: 0}
     - target: {fileID: 1066801283435694975, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.98
@@ -423,6 +403,10 @@ PrefabInstance:
     - target: {fileID: 2285115458274817858, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.61
       objectReference: {fileID: 0}
     - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
@@ -520,25 +504,29 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1.9
       objectReference: {fileID: 0}
-    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Path
-      value: event:/ShootingSFX
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Size.x
+      value: 4.362481
       objectReference: {fileID: 0}
-    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data1
-      value: -1426590782
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Size.y
+      value: 4.112225
       objectReference: {fileID: 0}
-    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data2
-      value: 1159805714
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Size.z
+      value: 7.2453556
       objectReference: {fileID: 0}
-    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data3
-      value: 2001885093
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Center.x
+      value: 0.0087919235
       objectReference: {fileID: 0}
-    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: bulletSound.Guid.Data4
-      value: -2108599820
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Center.y
+      value: 3.3849833
+      objectReference: {fileID: 0}
+    - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_Center.z
+      value: 0.26119852
       objectReference: {fileID: 0}
     - target: {fileID: 9017862046783433866, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -576,8 +564,8 @@ PrefabInstance:
       addedObject: {fileID: 5190605913777753818}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5824066123831529910}
+      insertIndex: 10
+      addedObject: {fileID: 7663214881706065365}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
 --- !u!4 &852454455369511199 stripped
 Transform:
@@ -594,7 +582,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 7936382738066159813}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5824066123831529910
+--- !u!114 &7663214881706065365
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -603,10 +591,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2552904999676308011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
+  m_Script: {fileID: 11500000, guid: 22fd2d33a7ea7474ba08d8c926e71a2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbodyToPause: {fileID: 0}
+  abilityData: {fileID: 11400000, guid: a69eccabc14010a4ea4cb7144b25495e, type: 2}
+  onAbilityActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  enduranceRecoveryAmount: 0
 --- !u!4 &3720275510104103767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

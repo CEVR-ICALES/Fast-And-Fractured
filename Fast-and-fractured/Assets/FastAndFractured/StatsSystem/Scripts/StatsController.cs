@@ -1,5 +1,6 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -17,7 +18,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value;}
+        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value; }
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -25,10 +26,12 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedAscend;
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
+        private float _currentMaxSpeedMultiplier;
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
         public float MaxSpeedDescend { get => currentMaxSpeedDescend; }
+        public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
         public float Acceleration { get => currentAcceleration; }
@@ -69,11 +72,11 @@ namespace FastAndFractured
         public float PushShootGravityMultiplier { get => charDataSO.PushShootGravityMultiplier; }
         public int PushShootBounceNum { get => charDataSO.PushShootBounceNum; }
         public float PushShootBounceForce { get => charDataSO.PushShootBounceForce; }
+        public float MineShootAngle { get => charDataSO.MineShootAngle; }
+        public float MineShootRange { get => charDataSO.MineShootRange; }
 
         //Physics
         public float Weight { get => charDataSO.Weight; }
-        public float Traction { get => charDataSO.Traction; }
-        public float Damping { get => charDataSO.Damping; }
         public float BaseForce { get => charDataSO.BaseForce; }
         public float FrontalHitAnlgeThreshold { get => charDataSO.FrontalHitAnlgeThreshold; }
         public float EnduranceImportanceWhenColliding { get => charDataSO.EnduranceImportanceWhenColliding; }
@@ -85,29 +88,29 @@ namespace FastAndFractured
         public float CooldownSpeed { get => currentCooldownSpeed; }
         public float DashCooldown { get => charDataSO.DashCooldown; }
         public float PushCooldown { get => charDataSO.PushShootCooldown; }
+        public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
-        public float RecoveryCooldown { get => charDataSO.RecoveryCooldown; }
-
         #endregion
 
-        private float _errorGetStatFloat = -1;
+        private bool _isPlayer = false;
+        private const float ERROR_GET_STAT_FLOAT = -1;
+        public UnityEvent<float,GameObject> onEnduranceDamageTaken;
+        public UnityEvent<float> onEnduranceDamageHealed;
+        public UnityEvent<float,GameObject,bool> onDead;
 
         #region START EVENTS
         public void CustomStart()
         {
+            onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
+            _isPlayer = !GetComponent<CarMovementController>().IsAi;
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
 
         #endregion
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
 
         public void SetCharacter(CharacterData charData)
         {
@@ -115,7 +118,6 @@ namespace FastAndFractured
             if (copyOfCharData != null)
             {
                 charDataSO = copyOfCharData;
-                //OnDied += Dead;
                 InitCurrentStats();
             }
         }
@@ -129,10 +131,15 @@ namespace FastAndFractured
             currentAcceleration = charDataSO.Acceleration;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
-            currentPushShootDMG = charDataSO.PushShootDMG;
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
+        [ContextMenu(nameof(DebugTake100Endurance))]
+        public void DebugTake100Endurance()
+        {
+            TakeEndurance(100, false);
+        }
+
 
         #region Health
         public void TakeEndurance(float substract, bool isProduct)
@@ -143,6 +150,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        onEnduranceDamageTaken?.Invoke(substract,this.gameObject);
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
@@ -152,9 +160,10 @@ namespace FastAndFractured
                     else
                         Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
-                }else
+                }
+                else
                 {
-                    IsInvulnerable=false;
+                    IsInvulnerable = false;
                 }
             }
             else Debug.LogError("Value can't be negative or 0.");
@@ -164,7 +173,10 @@ namespace FastAndFractured
         {
             if (sum > 0)
             {
-                if (!ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                {
+                    onEnduranceDamageHealed?.Invoke(sum);
+                } else
                 {
                     Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
@@ -172,11 +184,16 @@ namespace FastAndFractured
             }
         }
 
-        public float Dead()
+        public void Dead()
         {
             Debug.Log("He muerto soy " + charDataSO.name);
             charDataSO.Invulnerable = true;
-            return charDataSO.DeadDelay;
+            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
+        }
+
+        public float GetEndurancePercentage()
+        {
+            return Endurance / MaxEndurance * 100;
         }
         #endregion
 
@@ -233,33 +250,41 @@ namespace FastAndFractured
             switch (stat)
             {
                 case Stats.MAX_SPEED:
-                    currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct);
-                    currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct);
+                    currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     return true;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);
+                    return true;
+                //case Stats.MAX_SPEED_MULTIPLIER:
+                //    _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct);
+                //    return true;
                 case Stats.ACCELERATION:
-                    currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct);
+                    currentAcceleration = ModCharStat(currentAcceleration, mod, charDataSO.MinAcceleration, charDataSO.MaxAcceleration, isProduct, false);
                     return true;
                 case Stats.ENDURANCE:
-                    currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct);
-                    if (gameObject.TryGetComponent<CarMovementController>(out CarMovementController testCarMController) && !testCarMController.IsAi) //Provisional Refactoring
+                    currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct, true);
+                    if (_isPlayer)
                     {
                         HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
                     return true;
-                case Stats.PUSH_DAMAGE:
-                    currentPushShootDMG = ModCharStat(currentPushShootDMG, mod, charDataSO.MinPushShootDMG, charDataSO.MaxPushShootDMG, isProduct);
-                    return true;
                 case Stats.NORMAL_DAMAGE:
-                    currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct);
+                    currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct, true);
                     return true;
             }
             return false;
         }
 
-        private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct)
+        private float ModCharStat(float charStat, float mod, float minVal, float maxVal, bool isProduct, bool applyClamp)
         {
             charStat = isProduct ? charStat * mod : charStat + mod;
-            //charStat = Mathf.Clamp(charStat, minVal, maxVal);
+
+            if (applyClamp)
+            {
+                charStat = Mathf.Clamp(charStat, minVal, maxVal);
+
+            }
             return charStat;
         }
         #endregion
@@ -283,7 +308,7 @@ namespace FastAndFractured
             float previousValue = GetCurrentStat(type);
             ChoseCharToMod(type, mod, isProduct);
             float currentValue = GetCurrentStat(type);
-            if (previousValue == _errorGetStatFloat || currentValue == _errorGetStatFloat)
+            if (previousValue == ERROR_GET_STAT_FLOAT || currentValue == ERROR_GET_STAT_FLOAT)
             {
                 Debug.LogError("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
@@ -299,10 +324,10 @@ namespace FastAndFractured
 
             if (iscurrentBigger)
             {
-                if (currentValue / previousValue > 1) // Si fue un producto
-                    mod = 1 / (currentValue / previousValue); // Se revierte con una división
+                if (currentValue / previousValue > 1)
+                    mod = 1 / (currentValue / previousValue);
                 else
-                    mod = -(currentValue - previousValue); // Si fue una suma/resta, se revierte con resta
+                    mod = -(currentValue - previousValue);
             }
             else
             {
@@ -314,7 +339,7 @@ namespace FastAndFractured
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                ChoseCharToMod(stat, mod, true); // Se usa como producto si fue una multiplicación
+                ChoseCharToMod(stat, mod, true);
             });
         }
         #endregion  
@@ -335,8 +360,10 @@ namespace FastAndFractured
                     return currentPushShootDMG;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
+                case Stats.MAX_SPEED_MULTIPLIER:
+                    return _currentMaxSpeedMultiplier;
             }
-            return _errorGetStatFloat;
+            return ERROR_GET_STAT_FLOAT;
         }
 
         private bool IsStatAndModificatorCorrect(Stats type, float mod)

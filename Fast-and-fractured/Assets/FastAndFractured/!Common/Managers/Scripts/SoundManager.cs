@@ -1,15 +1,22 @@
-using Utilities;
 using FMODUnity;
-using FMOD.Studio;
 using UnityEngine;
+using FMOD.Studio;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        [Range(0f, 1f)]
-        public float masterVolume = 1f;
+        private float _masterVolume = 1f;
+
+        private float _sfxVolume = 1f;
+
+        private float _musicVolume = 1f;
+
+        [SerializeField] private Slider sfxVolumeSlider;
+        [SerializeField] private Slider musicVolumeSlider;
+        [SerializeField] private Slider generalVolumeSlider;
 
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
@@ -17,16 +24,6 @@ namespace Utilities
         protected override void Awake()
         {
             base.Awake();
-        }
-
-        private void Start()
-        {
-            SetSFXVolume(masterVolume);
-        }
-
-        private void Update()
-        {
-            SetSFXVolume(masterVolume);
         }
 
         #region Event Pooling Methods
@@ -176,6 +173,26 @@ namespace Utilities
             VCA sfxVCA = RuntimeManager.GetVCA(vcaPath);
             sfxVCA.setVolume(value);
         }
+
+        #region Slider Volume Methods
+        public void UpdateSFXVolume(Slider sfxSlider)
+        {
+            _sfxVolume = sfxSlider.value;
+            SetSFXVolume(sfxSlider.value);
+        }
+
+        public void UpdateMusicVolume(Slider musicSlider)
+        {
+            _musicVolume = musicSlider.value;
+            SetMusicVolume(musicSlider.value);
+        }
+
+        public void UpdateGeneralVolume(Slider generalVolumeSlider)
+        {
+            _masterVolume = generalVolumeSlider.value;
+            SetGeneralVolume(generalVolumeSlider.value);
+        }
+        #endregion
         #endregion
     }
 }
