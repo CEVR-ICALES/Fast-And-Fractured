@@ -177,21 +177,25 @@ namespace Utilities
             sfxVCA.setVolume(value);
         }
 
-        public void UpdateSFXVolume(float sliderValue)
+        #region Slider Volume Methods
+        public void UpdateSFXVolume(Slider sfxSlider)
         {
-            sfxVolume = sliderValue;
-            //Set
+            sfxVolume = sfxSlider.value;
+            SetSFXVolume(sfxSlider.value);
         }
 
-        public void UpdateMusicVolume(float sliderValue)
+        public void UpdateMusicVolume(Slider musicSlider)
         {
-
+            musicVolume = musicSlider.value;
+            SetMusicVolume(musicSlider.value);
         }
 
-        public void UpdateGeneralVolume(float sliderValue)
+        public void UpdateGeneralVolume(Slider generalVolumeSlider)
         {
-
+            masterVolume = generalVolumeSlider.value;
+            SetGeneralVolume(generalVolumeSlider.value);
         }
+        #endregion
         #endregion
     }
 }
