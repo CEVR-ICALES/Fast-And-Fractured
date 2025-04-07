@@ -50,6 +50,7 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
+        const float DISTANCE_MARGIN_ERROR = 2f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
@@ -189,8 +190,7 @@ namespace FastAndFractured
 
         public void UpdateTargetPosition()
         {
-            _positionToDrive = _targetToShoot.transform.position;
-            _currentTarget = _targetToShoot;
+            _positionToDrive = _currentTarget.transform.position;
         }
 
         public void RegisterSuddenly(float damageTaken)
@@ -212,7 +212,7 @@ namespace FastAndFractured
 
         public bool HasReachedTargetToGoPosition()
         {
-            return Vector3.Distance(transform.position, _currentTarget.transform.position) < 2;
+            return Vector3.Distance(transform.position, _currentTarget.transform.position) < DISTANCE_MARGIN_ERROR;
         }
         #endregion
 
@@ -239,7 +239,6 @@ namespace FastAndFractured
 
                 switch (decision)
                 {
-                    default:
                     case int n when (n <= decisionPercentageHealth):
                         _statToChoose = Stats.ENDURANCE;
                         break;
@@ -257,6 +256,9 @@ namespace FastAndFractured
                         break;
                     case int n when (n <= percentageCooldown):
                         _statToChoose = Stats.COOLDOWN_SPEED;
+                        break;
+                    default:
+                        ChooseNearestItem();
                         break;
                 }
             } while (!InteractableHandler.Instance.CheckIfStatItemExists(_statToChoose));
@@ -299,6 +301,7 @@ namespace FastAndFractured
     
             foreach (var character in inGameCharacters)
             {
+                if (!character) continue;
                 float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
                 if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
                 {

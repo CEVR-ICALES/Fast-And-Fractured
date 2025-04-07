@@ -102,7 +102,7 @@ namespace FastAndFractured
             if (!useMyCharacters)
             {
                 DisableCurrentSceneCharacters();
-                PlayerPrefs.SetString("Selected_Player",playerCharacter);
+               // PlayerPrefs.SetString("Selected_Player",playerCharacter);
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
@@ -120,11 +120,7 @@ namespace FastAndFractured
             }
         }
 
-        private void Update()
-        {
-            if(_callStormTimer!=null)
-            Debug.Log("callStormTimer : " + _callStormTimer.GetData().CurrentTime);
-        }
+     
         // this will be moved to gameManaager once its created
 
         private void OnEnable()
@@ -147,6 +143,10 @@ namespace FastAndFractured
 
         private void DisableCurrentSceneCharacters()
         {
+            if (_charactersStats == null)
+            {
+                return;
+            }
           foreach(var character in _charactersStats)
           {
                 Destroy(character.transform.parent.gameObject);
