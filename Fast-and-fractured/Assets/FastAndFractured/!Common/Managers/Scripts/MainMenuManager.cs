@@ -44,7 +44,8 @@ namespace FastAndFractured
         {
             // Register all Screens in scene
             RegisterScreens();
-            _currentScreen = _menuScreens[ScreensType.MAIN_MENU];
+            if(_menuScreens.TryGetValue(ScreensType.MAIN_MENU, out MenuScreen menuScreen))
+                _currentScreen = menuScreen;
 
             foreach (var screen in _menuScreens.Values)
             {
@@ -52,13 +53,16 @@ namespace FastAndFractured
                 screen.SetInteractable(false);
             }
 
-            _currentScreen = _menuScreens[ScreensType.MAIN_MENU];
-            _currentScreen.gameObject.SetActive(true);
-            _currentScreen.SetAlpha(1); 
-            _currentScreen.SetInteractable(true);
-            isCurrentScreenInteractable = true;
-
-            LockFocusOnButton();
+            
+            if(_currentScreen != null)
+            {
+                _currentScreen.gameObject.SetActive(true);
+                _currentScreen.SetAlpha(1);
+                _currentScreen.SetInteractable(true);
+                isCurrentScreenInteractable = true;
+                LockFocusOnButton();
+            }
+            
         }
 
         #endregion
@@ -89,9 +93,19 @@ namespace FastAndFractured
 
         public void TransitionBetweenScreens(ScreensType nextScreen, float fadeDuration)
         {
+            if (fadeDuration == -1)
+            {
+                if(_currentScreen!=null)
+                    _currentScreen.gameObject.SetActive(false);
+                _currentScreen = _menuScreens[nextScreen];
+                _currentScreen.SetInteractable(true);
+                isCurrentScreenInteractable = true;
+                _currentScreen.gameObject.SetActive(true);
+                return;
+
+            }
             _currentScreen.SetInteractable(false);
             isCurrentScreenInteractable = false;
-
             _fadeOutTimer = TimerSystem.Instance.CreateTimer(fadeDuration,
              onTimerDecreaseComplete: () =>
              {
@@ -99,7 +113,7 @@ namespace FastAndFractured
                  _currentScreen.gameObject.SetActive(false);
                  _currentScreen = _menuScreens[nextScreen];
                  _currentScreen.gameObject.SetActive(true);
-                 _currentScreen.SetAlpha(0); 
+                 _currentScreen.SetAlpha(0);
                  _currentScreen.SetInteractable(false);
                  isCurrentScreenInteractable = false;
 
@@ -107,22 +121,28 @@ namespace FastAndFractured
                  _fadeInTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
                      onTimerIncreaseComplete: () =>
                      {
-                     
+
                          _currentScreen.SetInteractable(true);
                          LockFocusOnButton();
                          isCurrentScreenInteractable = true;
                      },
                      onTimerIncreaseUpdate: (progress) =>
                      {
-                     
+
                          _currentScreen.SetAlpha(progress / fadeDuration);
                      });
              },
              onTimerDecreaseUpdate: (progress) =>
              {
-             
+
                  _currentScreen.SetAlpha(progress / fadeDuration);
              });
+        }
+
+        public void CloseScreen()
+        {
+            _currentScreen?.gameObject.SetActive(false);
+            _currentScreen = null;
         }
 
         #endregion
@@ -144,7 +164,7 @@ namespace FastAndFractured
 
         public void UseBackButton()
         {
-            if(_currentScreen.backButton != null && isCurrentScreenInteractable)
+            if (_currentScreen.backButton != null && isCurrentScreenInteractable)
             {
                 _currentScreen.backButton.onClick.Invoke();
             }
@@ -165,8 +185,8 @@ namespace FastAndFractured
         public void ExitButton()
         {
 #if UNITY_EDITOR
-        // Exit play mode in the Unity Editor
-        EditorApplication.isPlaying = false;
+            // Exit play mode in the Unity Editor
+            EditorApplication.isPlaying = false;
 #else
         // Quit the application when running as a build
         Application.Quit();

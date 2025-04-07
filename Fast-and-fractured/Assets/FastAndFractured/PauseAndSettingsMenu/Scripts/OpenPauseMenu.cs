@@ -11,12 +11,14 @@ namespace FastAndFractured
         [SerializeField] private float fadeDuration = 0.8f;
         public void ResumeGame()
         {
+            MainMenuManager.Instance.CloseScreen();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;    
         }
         public void PauseGame()
         {
-            MainMenuManager.Instance.TransitionBetweenScreens(pauseMenu, fadeDuration);
+            MainMenuManager.Instance.TransitionBetweenScreens(pauseMenu, -1);
+
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }

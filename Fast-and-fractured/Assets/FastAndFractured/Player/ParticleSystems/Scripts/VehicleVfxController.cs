@@ -9,7 +9,7 @@ namespace FastAndFractured
         [SerializeField] private float movementThreshold;
         [SerializeField] private float speedToEmitAllParticles;
         private bool _carTrailParticlesActive = true;
-        private float _movementTrailInitialEmmisionRate = 300f; // shopuld always match the emissio nrate if its going to be modified
+        [SerializeField] private float _movementTrailInitialEmmisionRate = 300f; // shopuld always match the emissio nrate if its going to be modified
         private ParticleSystem.EmissionModule[] _trailEmissionModules; // necessary to modify rateOverTime
 
         [Header("Drift Trail")]
@@ -46,7 +46,7 @@ namespace FastAndFractured
 
         private void OnCollisionEnter(Collision collision)
         {
-            if(collisionLayers == (collisionLayers | (1 << collision.gameObject.layer))) 
+            if (collisionLayers == (collisionLayers | (1 << collision.gameObject.layer)))
             {
                 HandleCollisionVfx(collision);
             }
@@ -58,17 +58,18 @@ namespace FastAndFractured
             collisionVfx.transform.position = contact.point;
             collisionVfx.transform.rotation = Quaternion.LookRotation(contact.normal);
 
-            if(!collisionVfx.isPlaying)
+            if (!collisionVfx.isPlaying)
                 collisionVfx.Play();
         }
 
         #region BrakeMarks
         private void HandleBrakeMarks()
         {
-            if(_carMovementController.IsBraking)
+            if (_carMovementController.IsBraking)
             {
                 StartBrakeMark();
-            } else
+            }
+            else
             {
                 StopBrakeMark();
             }
@@ -76,7 +77,7 @@ namespace FastAndFractured
 
         private void StartBrakeMark()
         {
-            foreach(TrailRenderer trail in tyreDriftMarksVfx)
+            foreach (TrailRenderer trail in tyreDriftMarksVfx)
             {
                 trail.emitting = true;
             }
@@ -96,20 +97,21 @@ namespace FastAndFractured
 
         private void HandleTrailParticleSystem()
         {
-            if(!_carMovementController.IsGrounded())
+            if (!_carMovementController.IsGrounded())
             {
                 StopParticles(trailVfxs, ref _carTrailParticlesActive);
                 return;
             }
 
-            if(_currentSpeed > movementThreshold)
+            if (_currentSpeed > movementThreshold)
             {
-                if(!_carTrailParticlesActive)
+                if (!_carTrailParticlesActive)
                     EnableParticles(trailVfxs, ref _carTrailParticlesActive);
                 UpdateCarTrailMovementEmission();
-            } else
+            }
+            else
             {
-                if(_carTrailParticlesActive)
+                if (_carTrailParticlesActive)
                     StopParticles(trailVfxs, ref _carTrailParticlesActive);
             }
         }
@@ -130,7 +132,7 @@ namespace FastAndFractured
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {
             if (!boolToChange) return;
-            foreach(ParticleSystem particle in particleSystems)
+            foreach (ParticleSystem particle in particleSystems)
             {
                 particle.Stop();
             }
@@ -140,7 +142,7 @@ namespace FastAndFractured
         private void EnableParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {
             if (boolToChange) return;
-            foreach(ParticleSystem particle in particleSystems)
+            foreach (ParticleSystem particle in particleSystems)
             {
                 particle.Play();
             }
@@ -148,7 +150,7 @@ namespace FastAndFractured
             boolToChange = true;
         }
 
-        
+
     }
 }
 

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 using UnityEngine.Animations;
+using FastAndFractured;
+using UnityEngine.UI;
+using TMPro;
 
 public class CarInjector : MonoBehaviour
 {
@@ -29,7 +32,7 @@ public class CarInjector : MonoBehaviour
         var injectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
         var controllers = GetComponentsInChildren<Controller>();
         var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
-    //    var parentConstraints = transform.GetComponentsInChildren<ParentConstraint>();
+        //    var parentConstraints = transform.GetComponentsInChildren<ParentConstraint>();
         foreach (var constraint in positionConstraints)
         {
             var constraintSource = new ConstraintSource();
@@ -38,7 +41,7 @@ public class CarInjector : MonoBehaviour
             constraint.SetSources(new List<ConstraintSource>() { constraintSource });
         }
 
-     
+
         foreach (var controller in controllers)
         {
 
@@ -47,7 +50,11 @@ public class CarInjector : MonoBehaviour
                 controller.AddBehaviour(mono);
             }
         }
-          
+        if (GetComponent<EnemyAIBrain>() == null)
+        {
+            Debug.Log("sd");
+            injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
+        }
 
         return injectedCar;
     }

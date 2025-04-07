@@ -10,8 +10,9 @@ public class MultiLanguage : MonoBehaviour
     private string languageIndexKey = "LanguageIndex";
     private void Awake()
     {
-        language.Add("Català");
-        language.Add("Español");
+        
+        language.Add("Catalï¿½");
+        language.Add("Espaï¿½ol");
         language.Add("English");
 
         if (PlayerPrefs.HasKey(languageIndexKey))
@@ -31,10 +32,10 @@ public class MultiLanguage : MonoBehaviour
                 LocalizationManager.Language = "English";
                 break;
             case 1:
-                LocalizationManager.Language = "Español";
+                LocalizationManager.Language = "Espaï¿½ol";
                 break;
             case 2:
-                LocalizationManager.Language = "Català";
+                LocalizationManager.Language = "Catalï¿½";
                 break;
         }
     }
