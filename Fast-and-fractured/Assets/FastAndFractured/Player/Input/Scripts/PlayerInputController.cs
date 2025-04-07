@@ -118,7 +118,7 @@ namespace FastAndFractured
             _inputActions.PlayerInputActions.ThrowMine.performed += ctx => ThrowMine();
             _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => UnsetShootType();
 
-            _inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
+            _inputActions.PlayerInputActions.Pause.started += ctx => _isPausing = true;
             _inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
             _inputActions.PlayerInputActions.ResetCamera.started += ctx => CameraBehaviours.Instance.ResetCameraPosition();

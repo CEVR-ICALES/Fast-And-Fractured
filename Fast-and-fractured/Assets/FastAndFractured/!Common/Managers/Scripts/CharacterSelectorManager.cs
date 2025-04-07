@@ -159,7 +159,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public void SaveCurrentSelected()
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
-        PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.name + "_" + _currentSkinIndex);
+        PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
     }
 
 

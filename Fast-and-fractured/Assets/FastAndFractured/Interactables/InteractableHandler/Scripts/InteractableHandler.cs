@@ -64,8 +64,9 @@ namespace FastAndFractured
         public List<StatsBoostInteractable> GetOnlyStatBoostItemsStat(Stats stat)
         {
             List<StatsBoostInteractable> statsBoostInteractables = GetStatBoostItems();
-            foreach (StatsBoostInteractable item in statsBoostInteractables)
+            for (int i = 0; i < statsBoostInteractables.Count; i++)
             {
+                StatsBoostInteractable item = statsBoostInteractables[i];
                 foreach (StatsBoost boost in item.BoostList)
                 {
                     if (boost.StatToBoost != stat)
