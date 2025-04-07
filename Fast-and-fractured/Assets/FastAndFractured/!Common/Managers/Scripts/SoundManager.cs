@@ -8,18 +8,15 @@ namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        [Range(0f, 1f)]
         private float _masterVolume = 1f;
 
-        [Range(0f, 1f)]
         private float _sfxVolume = 1f;
 
-        [Range(0f, 1f)]
         private float _musicVolume = 1f;
 
-        public Slider sfxVolumeSlider;
-        public Slider musicVolumeSlider;
-        public Slider generalVolumeSlider;
+        [SerializeField] private Slider sfxVolumeSlider;
+        [SerializeField] private Slider musicVolumeSlider;
+        [SerializeField] private Slider generalVolumeSlider;
 
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
