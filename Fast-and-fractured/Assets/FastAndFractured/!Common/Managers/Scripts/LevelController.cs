@@ -41,6 +41,8 @@ namespace FastAndFractured
         [SerializeField]
         private float _playerDeadReductionTime = 40f;
         private ITimer _callStormTimer;
+        [SerializeField]
+        private SandstormController _sandStormController;
 
        
         [Header("Injector prefabs")]
@@ -50,7 +52,6 @@ namespace FastAndFractured
         [Header("Testing Values (Old Level Controller)")]
         private StatsController[] _charactersStats;
         private EnemyAIBrain[] _ais;
-        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
         [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
@@ -105,13 +106,24 @@ namespace FastAndFractured
                 PlayerPrefs.SetInt("Player_Num", 1);
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
+                {
                     Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
-                TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, () => { CallStorm(); _callStormTimer = null; });
+                }
+                else
+                {
+                    _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
+                }
             }
             else
             {
                 StartLevel();
             }
+        }
+
+        private void Update()
+        {
+            if(_callStormTimer!=null)
+            Debug.Log("callStormTimer : " + _callStormTimer.GetData().CurrentTime);
         }
         // this will be moved to gameManaager once its created
 
@@ -154,11 +166,7 @@ namespace FastAndFractured
                         ai.Player = character.transform.gameObject;
                     }
                 }
-            }
-            foreach (var killCharacterHandle in killCharacterHandles)
-            {
-                killCharacterHandle.onTouchCharacter += EliminatePlayer;
-            }
+            }  
              charactersCustomStart?.Invoke();
         }
 
@@ -232,7 +240,6 @@ namespace FastAndFractured
                     carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
                 }
                 charactersCustomStart?.Invoke();
-              //  playerCamera.SetCameraParameters(player.transform, player.transform.Find("CameraLookAtPoint"));
             }
         }
 
@@ -310,7 +317,7 @@ namespace FastAndFractured
         }
         #endregion
 
-        public void OnPlayerDead(float delayTime,GameObject character)
+        public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
         {
             _inGameCharacters.Remove(character);
             if (_callStormTimer != null) {
@@ -322,12 +329,23 @@ namespace FastAndFractured
                     TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
                 }
             }
-            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> { Destroy(character); });
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> {
+                if (!isPlayer)
+                {
+                    Destroy(character);
+                }
+                else
+                {
+                    //Game over screen
+                }
+            });
         }
 
         private void CallStorm()
         {
-
+            Debug.Log("Storm Called");
+            _sandStormController.SpawnFogs();
+            _sandStormController.MoveSandStorm = true;
         }
 
         #region Resources
@@ -388,19 +406,6 @@ namespace FastAndFractured
         }
         #endregion
 
-        public void EliminatePlayer(StatsController characterstats)
-        {
-            string currentSceneName = SceneManager.GetActiveScene().name;
-            //float delay = characterstats.Dead();
-            //TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
-            //    if (IsThePlayer(characterstats.gameObject))
-            //    {
-            //        SceneManager.LoadScene(currentSceneName);
-            //    }
-            //    else
-            //        characterstats.gameObject.SetActive(false);
-            //});
-        }
 
         private bool IsThePlayer(GameObject character)
         {

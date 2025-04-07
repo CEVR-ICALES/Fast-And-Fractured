@@ -38,20 +38,15 @@ namespace FastAndFractured
 
         #region UNITY_EVENTS
 
-        private void Start()
+        protected override void Start()
         {
-            CustomStart();
+            base.Start();
+            _countOverHeat = 0;
         }
 
         #endregion
 
         #region OVERRIDE_METHODS
-
-        protected override void CustomStart()
-        {
-            base.CustomStart();
-            _countOverHeat = 0;
-        }
 
         protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
