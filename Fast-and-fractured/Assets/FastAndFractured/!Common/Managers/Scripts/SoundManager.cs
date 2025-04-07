@@ -1,7 +1,7 @@
-using Utilities;
 using FMODUnity;
-using FMOD.Studio;
 using UnityEngine;
+using FMOD.Studio;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 namespace Utilities
@@ -17,22 +17,16 @@ namespace Utilities
         [Range(0f, 1f)]
         public float musicVolume = 1f;
 
+        public Slider sfxVolumeSlider;
+        public Slider musicVolumeSlider;
+        public Slider generalVolumeSlider;
+
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
 
         protected override void Awake()
         {
             base.Awake();
-        }
-
-        private void Start()
-        {
-            SetSFXVolume(masterVolume);
-        }
-
-        private void Update()
-        {
-            SetSFXVolume(masterVolume);
         }
 
         #region Event Pooling Methods
@@ -181,6 +175,22 @@ namespace Utilities
         {
             VCA sfxVCA = RuntimeManager.GetVCA(vcaPath);
             sfxVCA.setVolume(value);
+        }
+
+        public void UpdateSFXVolume(float sliderValue)
+        {
+            sfxVolume = sliderValue;
+            //Set
+        }
+
+        public void UpdateMusicVolume(float sliderValue)
+        {
+
+        }
+
+        public void UpdateGeneralVolume(float sliderValue)
+        {
+
         }
         #endregion
     }
