@@ -1,8 +1,6 @@
 using Enums;
-using StateMachine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 using Utilities;
@@ -47,13 +45,18 @@ namespace FastAndFractured
 
         PathMode pathMode = PathMode.ADVANCED;
 
-        const float MAX_ANGLE_DIRECTION = 90f;
+        const float ANGLE_90 = 90f;
+        const float ANGLE_30 = 30f;
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
+        const float SWEEP_FREQUENCY = 0.5f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private Vector3 startPosition;
         private Quaternion startRotation;
+
+        private Collider[] _sweepColliders = {};
+        private ITimer _sweepTimer = null;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -63,8 +66,10 @@ namespace FastAndFractured
         private float _currentAccumulatedDamageTime;
         [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
         [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
+        public float RecoveryThresholdPercentageForSearch => _recoveryThresholdPercentageForSearch;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
         [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
+        [Range(10, 100)][SerializeField] private int decision = 60;
 
 
         [Header("Item Type Priority")]
@@ -83,6 +88,7 @@ namespace FastAndFractured
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
+
 
         private void OnEnable()
         {
@@ -106,8 +112,6 @@ namespace FastAndFractured
 
         private void InitializeAIValues()
         {
-            //Testing 
-            _targetToShoot = _player;
             if (!agent)
             {
                 agent = GetComponentInChildren<NavMeshAgent>();
@@ -138,7 +142,7 @@ namespace FastAndFractured
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
             }
-            //physicsBehaviour.Rb = GetComponent<Rigidbody>();
+
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;
@@ -166,13 +170,13 @@ namespace FastAndFractured
             //Left/Right
             //If it's negative, go left
             //If it's positive, go right
-            float inputX = -Mathf.Min(angle / MAX_ANGLE_DIRECTION, MAX_INPUT_VALUE);
+            float inputX = -Mathf.Min(angle / ANGLE_90, MAX_INPUT_VALUE);
 
             //Forward/Backward
             //If angle between 90 and -90 go forward
             //If angle more than 90 or less than -90 go backwards
             float inputY = MAX_INPUT_VALUE;
-            if (angle > MAX_ANGLE_DIRECTION || angle < -MAX_ANGLE_DIRECTION)
+            if (angle > ANGLE_90 || angle < -ANGLE_90)
             {
                 inputY = -MAX_INPUT_VALUE;
             }
@@ -221,61 +225,81 @@ namespace FastAndFractured
 
         public void ChooseItemFromType()
         {
-            CalculateTotalDecisionPercentage();
-            //+1 because it's max is exclusive
-            int decision = Random.Range(0, _totalDecisionPercentage + 1);
+            do
+            {
+                CalculateTotalDecisionPercentage();
+                //+1 because it's max is exclusive
+                int decision = Random.Range(0, _totalDecisionPercentage + 1);
 
-            int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
-            int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
-            int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
-            int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
-            int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
+                int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
+                int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
+                int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
+                int percentagePushShoot = percentageNormalShoot + decisionPercentagePushShoot;
+                int percentageCooldown = percentagePushShoot + decisionPercentageCooldown;
 
-            if (decision <= decisionPercentageHealth)
-            {
-                _statToChoose = Stats.ENDURANCE;
-            }
-            else if (decision <= percentageMaxSpeed)
-            {
-                _statToChoose = Stats.MAX_SPEED;
-            }
-            else if (decision <= percentageAcceleration)
-            {
-                _statToChoose = Stats.ACCELERATION;
-            }
-            else if (decision <= percentageNormalShoot)
-            {
-                _statToChoose = Stats.NORMAL_DAMAGE;
-            }
-            else if (decision <= percentagePushShoot)
-            {
-                _statToChoose = Stats.PUSH_DAMAGE;
-            }
-            else
-            {
-                _statToChoose = Stats.COOLDOWN_SPEED;
-            }
+                switch (decision)
+                {
+                    default:
+                    case int n when (n <= decisionPercentageHealth):
+                        _statToChoose = Stats.ENDURANCE;
+                        break;
+                    case int n when (n <= percentageMaxSpeed):
+                        _statToChoose = Stats.MAX_SPEED;
+                        break;
+                    case int n when (n <= percentageAcceleration):
+                        _statToChoose = Stats.ACCELERATION;
+                        break;
+                    case int n when (n <= percentageNormalShoot):
+                        _statToChoose = Stats.NORMAL_DAMAGE;
+                        break;
+                    case int n when (n <= percentagePushShoot):
+                        _statToChoose = Stats.PUSH_DAMAGE;
+                        break;
+                    case int n when (n <= percentageCooldown):
+                        _statToChoose = Stats.COOLDOWN_SPEED;
+                        break;
+                }
+            } while (!InteractableHandler.Instance.CheckIfStatItemExists(_statToChoose));
 
-            //TODO
-            //Get items from level manager, filter the list to only get that type of stat item,
-            //and choose the nearest from that type of boost
+            GetClosestItemByList(InteractableHandler.Instance.GetOnlyStatBoostItemsStat(_statToChoose));
         }
 
         public void ChooseNearestItem()
         {
-            //TODO
-            //Get items from level manager and choose the closest one
+            GetClosestItemByList(InteractableHandler.Instance.GetStatBoostItems());
+        }
+
+        public void ChooseNearestItemAwayFromTarget()
+        {
+            float angle = GetAngleDirection(Vector3.up);
+            float nearestOne = float.MaxValue;
+            List<StatsBoostInteractable> items = InteractableHandler.Instance.GetStatBoostItems();
+            GameObject nearestTarget = items[0].gameObject;
+            foreach (StatsBoostInteractable statItem in items)
+            {
+                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                {
+                    nearestOne = itemDistance;
+                    nearestTarget = statItem.gameObject;
+                }
+                nearestTarget = statItem.gameObject;
+            }
+
+            _targetToGo = nearestTarget;
+            _currentTarget = _targetToGo;
+
         }
 
         public void ChooseNearestCharacter()
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
-            var nearestOne = nearestTarget.transform.position.magnitude;
-
+            var nearestOne = float.MaxValue;
+    
             foreach (var character in inGameCharacters)
             {
-                float characterDistance = character.transform.position.magnitude - carMovementController.transform.position.magnitude;
+                float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
                 if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
                 {
                     nearestOne = characterDistance;
@@ -332,12 +356,23 @@ namespace FastAndFractured
             //TODO
             //Use unique ability
         }
+         
+        public void ChangeShootingTargetToTheOneThatMadeMoreDamage()
+        {
+            var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
+                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
+                .ToList();
+            if (listOfCarsThatMadeLotsOfDamage.Count>1)
+            {
+                AssignTarget(listOfCarsThatMadeLotsOfDamage[0].Key);
+            }
+        
+        }
         #endregion
 
         #region DashState
         public void Dash()
         {
-            //TODO
             carMovementController.HandleDashWithPhysics();
         }
 
@@ -355,9 +390,17 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            Collider[] colliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
+            if (_sweepTimer == null)
+            {
+                _sweepColliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
+                _sweepTimer = TimerSystem.Instance.CreateTimer(SWEEP_FREQUENCY, onTimerDecreaseComplete: () =>
+                {
+                    _sweepTimer = null;
+                    _sweepColliders = new Collider[0];
+                });
+            }
 
-            return colliders.Length > 0;
+            return _sweepColliders.Length > 0;
         }
 
         public bool IsPushShootReady()
@@ -433,11 +476,49 @@ namespace FastAndFractured
             return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
         }
 
+        public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
+        {
+          
+               var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
+                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
+                .ToList();
+              return listOfCarsThatMadeLotsOfDamage!=null && listOfCarsThatMadeLotsOfDamage.Count > 0;
+        }
+        //State shootToWhoMadeMoreDamageState
+
         #endregion
 
         #region Helpers
-        private void OnTakeEnduranceDamage(float damageTaken)
+
+        private Dictionary<GameObject, CarDamagedMe> _carsThatDamagedAI = new();
+        
+        [SerializeField] private float forgetDuration = 5f;
+        private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
+            if (whoIsMakingDamage!= _targetToShoot)
+            {
+                if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage,new CarDamagedMe(){ 
+                        damageMade = damageTaken ,
+                        timeThatHasPassed = Time.time,
+                        timerUntilRemove = TimerSystem.Instance.CreateTimer(forgetDuration,TimerDirection.INCREASE,onTimerIncreaseComplete:
+                            () =>
+                            {
+                                _carsThatDamagedAI.Remove(whoIsMakingDamage);
+                            })
+                    } ))
+                {
+                    _carsThatDamagedAI[whoIsMakingDamage].timeThatHasPassed = Time.time;
+                    TimerSystem.Instance.ModifyTimer(_carsThatDamagedAI[whoIsMakingDamage].timerUntilRemove, newCurrentTime: 0);
+                }
+                else
+                {
+                    Debug.Log("Added new car that damaged me");
+                }
+                _carsThatDamagedAI[whoIsMakingDamage].damageMade += damageTaken;
+
+                
+                
+            }
             RegisterSuddenly(damageTaken);
             RecalculateDecisionsPercentage();
         }
@@ -450,6 +531,7 @@ namespace FastAndFractured
         private void AssignTarget(GameObject target)
         {
             _targetToShoot = target;
+            _currentTarget = target;
             _positionToDrive = _targetToShoot.transform.position;
         }
 
@@ -581,6 +663,25 @@ namespace FastAndFractured
             decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * HEALTH_WEIGHT_PERCENTAGE);
         }
 
+        private void GetClosestItemByList(List<StatsBoostInteractable> list)
+        {
+            float nearestOne = float.MaxValue;
+            List<StatsBoostInteractable> items = list;
+            GameObject nearestTarget = items[0].gameObject;
+            foreach (StatsBoostInteractable statItem in items)
+            {
+                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (itemDistance < nearestOne)
+                {
+                    nearestOne = itemDistance;
+                    nearestTarget = statItem.gameObject;
+                }
+                nearestTarget = statItem.gameObject;
+            }
+
+            _targetToGo = nearestTarget;
+            _currentTarget = _targetToGo;
+        }
         //Is obsolete but can be used in the future
         //#if UNITY_EDITOR
         //        // Save their previous values so we can identify which one changed.
@@ -694,5 +795,12 @@ namespace FastAndFractured
 
         #endregion
     }
+}
+
+public class CarDamagedMe
+{
+    public float damageMade;
+    public float timeThatHasPassed;
+    public ITimer timerUntilRemove;
 }
 

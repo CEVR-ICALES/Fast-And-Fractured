@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: RandomDecisionBetweenSearchCharacterAndSearchItemTypeState
+  m_Name: FleeFromCharacterSelect
   m_EditorClassIdentifier: 
-  enterActions: []
+  enterActions:
+  - {fileID: 11400000, guid: b1024442641fc7f4098d43038447d6c8, type: 2}
   actions: []
   exitActions: []
   transitions:
-  - decision: {fileID: 11400000, guid: 2cb3e45480fd15246a41738ed72afdcc, type: 2}
-    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
-    falseState: {fileID: 11400000, guid: f4e318c6bf2f8ea4daa67ce39e6d8dd0, type: 2}
+  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
+    trueState: {fileID: 11400000, guid: 7746619ff74ab41469f51cfbe6199829, type: 2}
+    falseState: {fileID: 0}
     hasExitTime: 0

@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: TrainingState
+  m_Name: SkewedRandomBetweenCombatAndItemState
   m_EditorClassIdentifier: 
-  enterActions:
-  - {fileID: 11400000, guid: b1024442641fc7f4098d43038447d6c8, type: 2}
-  actions:
-  - {fileID: 11400000, guid: 35fe1bd95cdd5e64382961c9b9d86e3e, type: 2}
+  enterActions: []
+  actions: []
   exitActions: []
-  transitions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 63ab15b4d0437c04394114646737891e, type: 2}
+    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
+    falseState: {fileID: 11400000, guid: f4e318c6bf2f8ea4daa67ce39e6d8dd0, type: 2}
+    hasExitTime: 0

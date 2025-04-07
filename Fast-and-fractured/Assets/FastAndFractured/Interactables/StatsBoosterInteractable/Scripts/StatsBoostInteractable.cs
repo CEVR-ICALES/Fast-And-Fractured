@@ -10,6 +10,7 @@ namespace FastAndFractured
     public class StatsBoostInteractable : GenericInteractable
     {
         [SerializeField] private StatsBoost[] boostList;
+        public StatsBoost[] BoostList => boostList;
         private const float PERMANENT_BOOST_VALUE = -1;
 
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)

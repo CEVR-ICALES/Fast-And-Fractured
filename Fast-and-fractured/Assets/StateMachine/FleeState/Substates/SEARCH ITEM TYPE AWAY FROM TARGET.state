@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: SearcDangerZoneState
+  m_Name: SEARCH ITEM TYPE AWAY FROM TARGET
   m_EditorClassIdentifier: 
   enterActions:
-  - {fileID: 11400000, guid: 7a6b4643cf3818c4aa54a951562c8851, type: 2}
+  - {fileID: 11400000, guid: 29b7b1454728fda40bb02aed208da994, type: 2}
   actions:
   - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
   exitActions: []
   transitions:
   - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
-    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
-    falseState: {fileID: 11400000, guid: f4e318c6bf2f8ea4daa67ce39e6d8dd0, type: 2}
+    trueState: {fileID: 11400000, guid: 2ea9c10178c2d4346b3fc47e168a6c24, type: 2}
+    falseState: {fileID: 11400000, guid: a48647f68bc89e442b0bd1ded05d288f, type: 2}
     hasExitTime: 1
   - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
-    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
+    trueState: {fileID: 11400000, guid: 2ea9c10178c2d4346b3fc47e168a6c24, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0
