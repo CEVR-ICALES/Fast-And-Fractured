@@ -429,7 +429,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 9d46fc9f3f1a0c1469e9dee78d68ff20, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 323.1
+      value: 326.39
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9d46fc9f3f1a0c1469e9dee78d68ff20, type: 3}
       propertyPath: m_LocalPosition.y
@@ -437,7 +437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9d46fc9f3f1a0c1469e9dee78d68ff20, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18
+      value: -20.96
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9d46fc9f3f1a0c1469e9dee78d68ff20, type: 3}
       propertyPath: m_LocalRotation.w
@@ -718,6 +718,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3724204961557024040, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
   m_PrefabInstance: {fileID: 729840933}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &729840936 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8571953197463317793, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
+  m_PrefabInstance: {fileID: 729840933}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &796177320
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,15 +845,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 983e980f211049048a7df206b6d96aef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 431.8
+      value: 432
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 983e980f211049048a7df206b6d96aef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 499.3
+      value: 502.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 983e980f211049048a7df206b6d96aef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -48.2
+      value: -48.3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 983e980f211049048a7df206b6d96aef, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2519,6 +2524,11 @@ MonoBehaviour:
 --- !u!4 &1791356582 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3724204961557024040, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
+  m_PrefabInstance: {fileID: 1301266118530419050}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &1791356584 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8571953197463317793, guid: 4d28c3627cf3a2746beda6433dda3986, type: 3}
   m_PrefabInstance: {fileID: 1301266118530419050}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1802787255
@@ -4200,7 +4210,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe773b3fe8c6fa645a564995d1e6f30a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trailVfxs: []
+  trailVfxs:
+  - {fileID: 1791356584}
+  - {fileID: 729840936}
   movementThreshold: 10
   speedToEmitAllParticles: 70
   tyreDriftMarksVfx:
