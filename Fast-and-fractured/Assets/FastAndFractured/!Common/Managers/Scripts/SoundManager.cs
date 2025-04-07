@@ -9,13 +9,13 @@ namespace Utilities
     public class SoundManager : AbstractSingleton<SoundManager>
     {
         [Range(0f, 1f)]
-        public float masterVolume = 1f;
+        private float _masterVolume = 1f;
 
         [Range(0f, 1f)]
-        public float sfxVolume = 1f;
+        private float _sfxVolume = 1f;
 
         [Range(0f, 1f)]
-        public float musicVolume = 1f;
+        private float _musicVolume = 1f;
 
         public Slider sfxVolumeSlider;
         public Slider musicVolumeSlider;
@@ -180,19 +180,19 @@ namespace Utilities
         #region Slider Volume Methods
         public void UpdateSFXVolume(Slider sfxSlider)
         {
-            sfxVolume = sfxSlider.value;
+            _sfxVolume = sfxSlider.value;
             SetSFXVolume(sfxSlider.value);
         }
 
         public void UpdateMusicVolume(Slider musicSlider)
         {
-            musicVolume = musicSlider.value;
+            _musicVolume = musicSlider.value;
             SetMusicVolume(musicSlider.value);
         }
 
         public void UpdateGeneralVolume(Slider generalVolumeSlider)
         {
-            masterVolume = generalVolumeSlider.value;
+            _masterVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
         }
         #endregion
