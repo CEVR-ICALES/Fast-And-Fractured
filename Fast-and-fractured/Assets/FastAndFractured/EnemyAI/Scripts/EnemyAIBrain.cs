@@ -112,8 +112,6 @@ namespace FastAndFractured
 
         private void InitializeAIValues()
         {
-            //Testing 
-            _targetToShoot = _player;
             if (!agent)
             {
                 agent = GetComponentInChildren<NavMeshAgent>();
@@ -144,7 +142,7 @@ namespace FastAndFractured
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
             }
-            //physicsBehaviour.Rb = GetComponent<Rigidbody>();
+
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;
@@ -280,7 +278,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -FRONT_ANGLE || angle > FRONT_ANGLE))
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
