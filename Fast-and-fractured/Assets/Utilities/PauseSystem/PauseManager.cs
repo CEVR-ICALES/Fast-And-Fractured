@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
-using Utilities;  
+using Utilities;
+using FastAndFractured;
+using Enums;  
 
 namespace Utilities.Managers.PauseSystem
 {
@@ -56,7 +58,10 @@ namespace Utilities.Managers.PauseSystem
         {
             if (_isGamePaused)
             {
-                ResumeGame();
+                if(MainMenuManager.Instance.IsInPauseMenu())
+                {
+                    ResumeGame();
+                }
             }
             else
             {

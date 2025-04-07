@@ -172,7 +172,10 @@ namespace FastAndFractured
         Application.Quit();
 #endif
         }
-
+        public bool IsInPauseMenu()
+        {
+            return _currentScreen.screenType == ScreensType.PAUSE;
+        }
         #endregion
     }
 }
