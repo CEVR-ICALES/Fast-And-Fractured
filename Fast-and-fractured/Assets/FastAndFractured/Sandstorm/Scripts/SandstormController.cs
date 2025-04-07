@@ -1,92 +1,106 @@
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
-public class SandstormController : MonoBehaviour
+namespace FastAndFractured
 {
-    public GameObject fogParent;
-    public LocalVolumetricFog primaryFog;
-    public LocalVolumetricFog secondaryFog;
-
-    public float growthSpeed = 1.0f;
-
-     private Vector3 _spawnPoint;
-     private Vector3 mirrorPoint;
-    private Vector3 _direction;
-
-    private float _currentGrowth = 0f;
-
-    private Vector3 _initialVolumeSizeMain;
-    private Vector3 _initialVolumeSizeSecondary;
-
-    private Vector3 _initialPositionMain;
-    private Vector3 _initialPositionSecondary;
-    public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
-    private bool _moveSandStorm = false;
-    private void Start()
+    public class SandstormController : MonoBehaviour
     {
-        primaryFog.gameObject.SetActive(false);
-        secondaryFog.gameObject.SetActive(false);
-    }
-    private void Update()
-    {
-        if (_moveSandStorm)
+        public GameObject fogParent;
+        public LocalVolumetricFog primaryFog;
+        public LocalVolumetricFog secondaryFog;
+
+        public float growthSpeed = 1.0f;
+        [SerializeField]
+        private GameObject spawnPoint;
+        [SerializeField]
+        private GameObject mirroPoint;
+
+        private Vector3 _spawnPoint;
+        private Vector3 _mirrorPoint;
+        private Vector3 _direction;
+
+        private float _currentGrowth = 0f;
+
+        private Vector3 _initialVolumeSizeMain;
+        private Vector3 _initialVolumeSizeSecondary;
+
+        private Vector3 _initialPositionMain;
+        private Vector3 _initialPositionSecondary;
+
+        [SerializeField]
+        private Transform sphereCenter;
+        [SerializeField]
+        private float sphereRadius = 374.6f;
+        public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
+        private bool _moveSandStorm = false;
+        private void Start()
         {
-            ExpandFogs();
+            primaryFog.gameObject.SetActive(false);
+            secondaryFog.gameObject.SetActive(false);
         }
-    }
-    /// <summary>
-    /// Spawns the Fogs at a random point (hardcoded values for now)
-    /// </summary>
-    public void SpawnFogs()
-    {
-        float randomX = Random.Range(-15f, 15f); //Hardcoded values
-        float randomZ = Random.Range(-15f, 15f); //Hardcoded values
-
-        _spawnPoint = new Vector3(randomX, fogParent.transform.position.x, randomZ);
-
-        fogParent.transform.position = _spawnPoint;
-
-        mirrorPoint = -_spawnPoint;
-
-        _direction = (mirrorPoint - _spawnPoint).normalized;
-
-        primaryFog.gameObject.SetActive(true);  
-        secondaryFog.gameObject.SetActive(true);
-
-        Quaternion targetRotation = Quaternion.LookRotation(_direction);
-        fogParent.transform.rotation = targetRotation;
-
-        _initialVolumeSizeMain = primaryFog.parameters.size;
-        _initialVolumeSizeSecondary = secondaryFog.parameters.size;
-
-        _initialPositionMain = primaryFog.transform.position;
-        _initialPositionSecondary = secondaryFog.transform.position;
-    }
-
-    /// <summary>
-    /// Expands the scale and movement of the fog to cover up all the map
-    /// </summary>
-    private void ExpandFogs()
-    {
-        float maxGrowth = 2f * _spawnPoint.magnitude;
-
-        if (_currentGrowth < maxGrowth)
+        private void Update()
         {
-            _currentGrowth += growthSpeed * Time.deltaTime;
+            if (_moveSandStorm)
+            {
+                ExpandFogs();
+            }
+        }
+        /// <summary>
+        /// Spawns the Fogs at a random point (hardcoded values for now)
+        /// </summary>
+        public void SpawnFogs()
+        {
+            Vector3 spawnVector = sphereCenter.position + sphereCenter.forward;
+            float angle = Random.Range(0, 360);
+            Quaternion vectorRotation = Quaternion.AngleAxis(angle, Vector3.up);
+            Vector3 rotatedSpawnVector = vectorRotation * spawnVector;
+            _spawnPoint = new Vector3(rotatedSpawnVector.normalized.x * sphereRadius, fogParent.transform.position.y, rotatedSpawnVector.normalized.z * sphereRadius);
 
-            if(_currentGrowth > maxGrowth)
-                _currentGrowth = maxGrowth;
+            fogParent.transform.position = _spawnPoint;
+            Vector3 mirrorVector = (sphereCenter.position - _spawnPoint) * 2;
+            _mirrorPoint = new Vector3(mirrorVector.x, fogParent.transform.position.y, mirrorVector.z);
+            spawnPoint.transform.position = _spawnPoint;
+            mirroPoint.transform.position = _mirrorPoint;
+            _direction = (_mirrorPoint - _spawnPoint).normalized;
+
+            primaryFog.gameObject.SetActive(true);
+            secondaryFog.gameObject.SetActive(true);
+
+            Quaternion targetRotation = Quaternion.LookRotation(_direction);
+            fogParent.transform.rotation = targetRotation;
+
+            _initialVolumeSizeMain = primaryFog.parameters.size;
+            _initialVolumeSizeSecondary = secondaryFog.parameters.size;
+
+            _initialPositionMain = primaryFog.transform.position;
+            _initialPositionSecondary = secondaryFog.transform.position;
         }
 
-        float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
-        float newZSizeSecondary = _initialVolumeSizeSecondary.z + _currentGrowth;
+        /// <summary>
+        /// Expands the scale and movement of the fog to cover up all the map
+        /// </summary>
+        private void ExpandFogs()
+        {
+            float maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
 
-        primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
-        secondaryFog.parameters.size = new Vector3(_initialPositionSecondary.x, _initialPositionSecondary.y, newZSizeSecondary);
+            if (_currentGrowth < maxGrowth)
+            {
+                _currentGrowth += growthSpeed * Time.deltaTime;
 
-        Vector3 offset = _direction * (_currentGrowth / 2f);    
+                if (_currentGrowth > maxGrowth)
+                    _currentGrowth = maxGrowth;
+            }
 
-        primaryFog.transform.position = _spawnPoint + offset;
-        secondaryFog.transform.position = _spawnPoint + offset;
+            float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
+            float newZSizeSecondary = _initialVolumeSizeSecondary.z + _currentGrowth;
+
+            primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
+            secondaryFog.parameters.size = new Vector3(_initialPositionSecondary.x, _initialPositionSecondary.y, newZSizeSecondary);
+
+            Vector3 offset = _direction * (_currentGrowth / 2f);
+
+            primaryFog.transform.position = _spawnPoint + offset;
+            secondaryFog.transform.position = _spawnPoint + offset;
+        }
     }
 }

@@ -111,13 +111,13 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
                 }
             }
             else
             {
                 StartLevel();
             }
+            _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
         }
 
         private void Update()
