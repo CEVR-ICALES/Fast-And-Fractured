@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8738505900098012919}
   - component: {fileID: 1563959946862937871}
   - component: {fileID: 4748384214353549437}
+  - component: {fileID: 7229632251388505320}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -121,9 +122,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7041867566332906232}
-        m_TargetAssemblyTypeName: FastAndFractured.PauseButtonsBehaviour, Assembly-CSharp
-        m_MethodName: ReturnToMenu
+      - m_Target: {fileID: 7229632251388505320}
+        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
+        m_MethodName: OpenScreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -133,6 +134,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &7229632251388505320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2511411905085348006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenToOpen: 7
+  fadeDuration: 0.8
 --- !u!1 &2960457811120056207
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,14 +559,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7827201620173868544}
-  - component: {fileID: 7041867566332906232}
+  - component: {fileID: 761109788809576135}
+  - component: {fileID: 8804402145373938839}
+  - component: {fileID: 6006653223233342158}
   m_Layer: 5
   m_Name: PauseMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7827201620173868544
 RectTransform:
   m_ObjectHideFlags: 0
@@ -572,7 +589,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7041867566332906232
+--- !u!114 &761109788809576135
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -581,11 +598,46 @@ MonoBehaviour:
   m_GameObject: {fileID: 6363687441494416225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3373b06806fa268499d46c7a6acc3f30, type: 3}
+  m_Script: {fileID: 11500000, guid: bd534419699c40a4a8c3d751bf8dddf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseMenuUI: {fileID: 7845287845871939432}
-  settingsMenuUI: {fileID: 0}
+  screenType: 8
+  canvasGroup: {fileID: 8804402145373938839}
+  backButton: {fileID: 2098279075632884128}
+  defaultButton: {fileID: 2098279075632884128}
+--- !u!225 &8804402145373938839
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6363687441494416225}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!95 &6006653223233342158
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6363687441494416225}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6413250684883865674
 GameObject:
   m_ObjectHideFlags: 0
@@ -668,7 +720,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7034327660794342589
 RectTransform:
   m_ObjectHideFlags: 0
@@ -740,6 +792,7 @@ GameObject:
   - component: {fileID: 7650979473144045849}
   - component: {fileID: 9043270656138847302}
   - component: {fileID: 2098279075632884128}
+  - component: {fileID: 8391548999310163081}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -849,9 +902,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7041867566332906232}
-        m_TargetAssemblyTypeName: FastAndFractured.PauseButtonsBehaviour, Assembly-CSharp
-        m_MethodName: ResumeGame
+      - m_Target: {fileID: 8391548999310163081}
+        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
+        m_MethodName: OpenScreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -861,6 +914,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8391548999310163081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851739351030149215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenToOpen: 0
+  fadeDuration: 0.8
 --- !u!1 &7993217053051446485
 GameObject:
   m_ObjectHideFlags: 0
@@ -873,6 +940,7 @@ GameObject:
   - component: {fileID: 1764544782723398839}
   - component: {fileID: 5907125051781488118}
   - component: {fileID: 927172338892072444}
+  - component: {fileID: 8030631687604218387}
   m_Layer: 5
   m_Name: SettingsButton
   m_TagString: Untagged
@@ -982,9 +1050,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7041867566332906232}
-        m_TargetAssemblyTypeName: FastAndFractured.PauseButtonsBehaviour, Assembly-CSharp
-        m_MethodName: OpenSettings
+      - m_Target: {fileID: 8030631687604218387}
+        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
+        m_MethodName: OpenScreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -994,6 +1062,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8030631687604218387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7993217053051446485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenToOpen: 1
+  fadeDuration: 0.8
 --- !u!1 &8274427664414002975
 GameObject:
   m_ObjectHideFlags: 0
