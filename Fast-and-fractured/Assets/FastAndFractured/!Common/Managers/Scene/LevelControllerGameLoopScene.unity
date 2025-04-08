@@ -1819,52 +1819,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &1163163812 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 386939956398309544, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
-  m_PrefabInstance: {fileID: 6400545731412433952}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1163163814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1163163812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 433404f91474ae541ac2204a23562d62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  usingController: 0
-  charactersCustomStart:
-    m_PersistentCalls:
-      m_Calls: []
-  charactersData:
-  - {fileID: 11400000, guid: 9e1d142e444b1b94dafdd1b92d03cabf, type: 2}
-  - {fileID: 11400000, guid: 34a0f944a0f8ef84ca39b7fea389cc98, type: 2}
-  - {fileID: 11400000, guid: b3db279bba37e2f4c8ccf9030f214c50, type: 2}
-  playerCharacter: Pepe_0
-  maxCharactersInGame: 8
-  playerCamera: {fileID: 577749521}
-  spawnPoints:
-  - {fileID: 451664265}
-  - {fileID: 1202429351}
-  - {fileID: 1843978950}
-  - {fileID: 815211688}
-  - {fileID: 1806075420}
-  - {fileID: 1582165441}
-  - {fileID: 1104124905}
-  - {fileID: 878038414}
-  _timeToCallTheStorm: 2
-  _playerDeadReductionTime: 40
-  _sandStormController: {fileID: 1867144755}
-  PlayerPrefab: {fileID: 2405317262010205209, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-  AIPrefab: {fileID: -3036050522178857462, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
-  debugMode: 1
-  useMyCharacters: 1
-  repeatCharacters: 1
-  stormInDebugMode: 1
 --- !u!1001 &1196808737
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2920,7 +2874,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2641953838915287682, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 65
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.size.x
+      value: 1235
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.size.y
+      value: 254.2
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.textureOffset.x
@@ -2934,10 +2896,22 @@ PrefabInstance:
       propertyPath: parameters.textureOffset.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.m_EditorNegativeFade.x
+      value: 0.000080971644
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.m_EditorPositiveFade.x
+      value: 0.000080971644
+      objectReference: {fileID: 0}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: sphereCenter
       value: 
       objectReference: {fileID: 1692899111}
+    - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: maxGrowthTime
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: gameObjectMirroPoint
       value: 
@@ -3220,7 +3194,7 @@ PrefabInstance:
       objectReference: {fileID: 1795638668}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: debugMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: playerCamera
@@ -3228,12 +3202,16 @@ PrefabInstance:
       objectReference: {fileID: 577749521}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: useMyCharacters
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: stormInDebugMode
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: _sandStormController
       value: 
-      objectReference: {fileID: 1891153362}
+      objectReference: {fileID: 1867144755}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: spawnPoints.Array.data[0]
       value: 
@@ -3702,7 +3680,7 @@ PrefabInstance:
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1500815814}
+      objectReference: {fileID: 0}
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: ResumeGame
@@ -4667,3 +4645,4 @@ SceneRoots:
   - {fileID: 1202039180}
   - {fileID: 381926342}
   - {fileID: 1649717789}
+  - {fileID: 1795638667}

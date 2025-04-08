@@ -31,7 +31,7 @@ namespace FastAndFractured
         private Vector3 _initialVolumeSizeMain;
         private Vector3 _initialVolumeSizeSecondary;
 
-        private Vector3 _initialPositionSecondary;
+        private Vector3 _parentInitialPosition;
 
         [SerializeField]
         private Transform sphereCenter;
@@ -109,11 +109,11 @@ namespace FastAndFractured
             _initialVolumeSizeMain = primaryFog.parameters.size;
             _initialVolumeSizeSecondary = secondaryFog.parameters.size;
 
-            _initialPositionSecondary = secondaryFog.transform.position;
             _maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
-            _growthSpeed = _maxGrowth/maxGrowthTime;
+            _growthSpeed = (_maxGrowth)/maxGrowthTime;
             _stormCollider.enabled = true;
             _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
+            _parentInitialPosition = fogParent.transform.position;
         }
 
         /// <summary>
@@ -128,19 +128,25 @@ namespace FastAndFractured
 
                 if (_currentGrowth > _maxGrowth)
                     _currentGrowth = _maxGrowth;
+
+                float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
+                float newZSizeSecondary = _initialVolumeSizeSecondary.z + _currentGrowth;
+
+                primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
+                secondaryFog.parameters.size = new Vector3(_initialVolumeSizeSecondary.x, _initialVolumeSizeSecondary.y, newZSizeSecondary);
+                _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
+                Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
+
+                //primaryFog.transform.position = _spawnPoint + offset;
+                //secondaryFog.transform.position = _spawnPoint + offset;
+                //_stormCollider.center = _spawnPoint + offset;
+                if ((fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
+                {
+                    fogParent.transform.position += offset;
+                }
             }
 
-            float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
-            float newZSizeSecondary = _initialVolumeSizeSecondary.z + _currentGrowth;
-
-            primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
-            secondaryFog.parameters.size = new Vector3(_initialPositionSecondary.x, _initialPositionSecondary.y, newZSizeSecondary);
-            _stormCollider.size = new Vector3(_initialVolumeSizeMain.x,_initialVolumeSizeMain.y,newZSizeMain);
-            //Vector3 offset = _direction * (_currentGrowth / 2f);
-
-            //primaryFog.transform.position = _spawnPoint + offset;
-            //secondaryFog.transform.position = _spawnPoint + offset;
-            //_stormCollider.center = _spawnPoint + offset;
+           
         }
     }
 }
