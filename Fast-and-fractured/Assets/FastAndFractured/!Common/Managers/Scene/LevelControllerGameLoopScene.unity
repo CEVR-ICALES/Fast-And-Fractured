@@ -2910,7 +2910,7 @@ PrefabInstance:
       objectReference: {fileID: 1692899111}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: maxGrowthTime
-      value: 60
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: gameObjectMirroPoint
@@ -2920,9 +2920,21 @@ PrefabInstance:
       propertyPath: gameObjectSpawnPoint
       value: 
       objectReference: {fileID: 1984509315}
+    - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: maxCharacterKillTime
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: minCharacterKillTime
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8837894182934861129, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_Name
       value: SandstormParent
+      objectReference: {fileID: 0}
+    - target: {fileID: 8837894182934861129, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

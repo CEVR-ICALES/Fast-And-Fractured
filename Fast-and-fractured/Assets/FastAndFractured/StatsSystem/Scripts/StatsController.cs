@@ -105,7 +105,7 @@ namespace FastAndFractured
             onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
-            _isPlayer = !GetComponent<CarMovementController>().IsAi;
+            _isPlayer = transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }

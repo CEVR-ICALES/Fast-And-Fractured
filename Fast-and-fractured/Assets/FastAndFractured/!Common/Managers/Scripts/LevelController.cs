@@ -351,7 +351,7 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    //Game over screen
+                    Debug.Log("Player Dead.");
                 }
             });
         }

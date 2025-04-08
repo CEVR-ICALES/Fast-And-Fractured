@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
-using static UnityEngine.EventSystems.EventTrigger;
-
+using System.Collections.Generic;
+using Utilities;
 namespace FastAndFractured
 {
     public class SandstormController : MonoBehaviour
@@ -31,8 +31,6 @@ namespace FastAndFractured
         private Vector3 _initialVolumeSizeMain;
         private Vector3 _initialVolumeSizeSecondary;
 
-        private Vector3 _parentInitialPosition;
-
         [SerializeField]
         private Transform sphereCenter;
         [SerializeField]
@@ -46,19 +44,29 @@ namespace FastAndFractured
 
         public bool StormSpawnPointsSetted { get => _spawnPointsSet; }
         private bool _spawnPointsSet = false;
-        private void Start()
-        {
-        }
+        [SerializeField]
+        private float maxCharacterKillTime = 10;
+        [SerializeField]
+        private float minCharacterKillTime = 3;
+        private float _currentCharacterKillTime;
+        private float _reductionKillTime;
+        [SerializeField]
+        private int reduceQuantityPoints = 4;
+        private float _timeToReduceKillCharacterTime;
+        private ITimer _reduceKillTimeTimer;
+        private Dictionary<StatsController,ITimer> _killPLayerTimers;
+
         private void Update()
         {
             if (_moveSandStorm)
             {
                 ExpandFogs();
-            }
+            } 
         }
 
         public void SetSpawnPoints(bool debug)
         {
+            _killPLayerTimers = new Dictionary<StatsController, ITimer>();
            _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
             primaryFog.gameObject.SetActive(false);
@@ -85,6 +93,11 @@ namespace FastAndFractured
             _mirrorPoint = sphereCenter.position - rotatedSpawnVector * sphereRadius;
             _spawnPointsSet = true;
 
+            _maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
+
+            _timeToReduceKillCharacterTime = maxGrowthTime / reduceQuantityPoints;
+            _reductionKillTime = (maxCharacterKillTime - minCharacterKillTime) / reduceQuantityPoints;
+
             if (debug)
             {
                 gameObjectSpawnPoint.transform.position = _spawnPoint;
@@ -94,11 +107,17 @@ namespace FastAndFractured
                 Debug.DrawLine(_spawnPoint, _mirrorPoint, Color.red, 100);
             }
         }
+
+        public void SetKillPlayerTimeValue()
+        {
+
+        }
         /// <summary>
         /// Spawns the Fogs at a random point (hardcoded values for now)
         /// </summary>
         public void SpawnFogs()
         {
+            _currentCharacterKillTime = maxCharacterKillTime;
             fogParent.transform.position = _spawnPoint;
             primaryFog.gameObject.SetActive(true);
             secondaryFog.gameObject.SetActive(true);
@@ -109,11 +128,9 @@ namespace FastAndFractured
             _initialVolumeSizeMain = primaryFog.parameters.size;
             _initialVolumeSizeSecondary = secondaryFog.parameters.size;
 
-            _maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
             _growthSpeed = (_maxGrowth)/maxGrowthTime;
             _stormCollider.enabled = true;
             _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
-            _parentInitialPosition = fogParent.transform.position;
         }
 
         /// <summary>
@@ -137,16 +154,51 @@ namespace FastAndFractured
                 _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
 
-                //primaryFog.transform.position = _spawnPoint + offset;
-                //secondaryFog.transform.position = _spawnPoint + offset;
-                //_stormCollider.center = _spawnPoint + offset;
                 if ((fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
                 {
                     fogParent.transform.position += offset;
                 }
-            }
+                if (_reduceKillTimeTimer==null)
+                {
+                 _reduceKillTimeTimer = TimerSystem.Instance.CreateTimer(_timeToReduceKillCharacterTime, Enums.TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                   {
+                       _currentCharacterKillTime -= _reductionKillTime;
 
-           
+                       _reduceKillTimeTimer = null;
+                   });
+                }
+            }
+        }
+
+        private void ReduceTimeOfCurrentTimer()
+        {
+            
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if(other.TryGetComponent(out StatsController statsController))
+            {
+                ITimer deathCountdown = TimerSystem.Instance.CreateTimer(_currentCharacterKillTime, onTimerIncreaseComplete: () =>
+                 {
+                     statsController.Dead();
+                     _killPLayerTimers.Remove(statsController);
+                 });
+                _killPLayerTimers.Add(statsController, deathCountdown);
+            }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if(other.TryGetComponent(out StatsController statsController))
+            {
+                ITimer deathCountdown = _killPLayerTimers[statsController];
+                if(deathCountdown.GetData().CurrentTime > 0)
+                {
+                    deathCountdown.StopTimer();
+                    _killPLayerTimers.Remove(statsController);
+                }
+            }
         }
     }
 }
