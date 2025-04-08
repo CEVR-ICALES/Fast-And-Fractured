@@ -1,16 +1,27 @@
 using Enums;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace FastAndFractured
 {
     public class MenuScreen : MonoBehaviour
     {
         public ScreensType screenType;
+        [SerializeField] private CanvasGroup canvasGroup;
+        public Button backButton;
+        public Button defaultButton;
 
-        // MORE FUTURE VARIABLES
-        // [SerializeField] protected bool isLocked = false;
-        // [SerializeField] protected bool hasFade;
-        // [SerializeField] protected float fadeDuration;
+
+        public void SetAlpha(float alpha)
+        {
+            canvasGroup.alpha = alpha;
+        }
+
+        public void SetInteractable(bool interactable)
+        {
+            canvasGroup.interactable = interactable;
+            canvasGroup.blocksRaycasts = interactable;
+        }
     }
 }
 

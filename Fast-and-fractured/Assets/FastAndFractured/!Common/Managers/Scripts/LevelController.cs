@@ -5,32 +5,122 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
 using Enums;
+using UnityEngine.Events;
 
 namespace FastAndFractured
 {
     public class LevelController : AbstractSingleton<LevelController>
     {
         public bool usingController;
-        [SerializeField] private List<ObjectPoolSO> poolSOList;
-        [SerializeField] private List<StatsController> characters;
-        [SerializeField] private EnemyAIBrain ai;
-        [SerializeField] private List<KillCharacterNotify> killCharacterHandles;
-        [SerializeField] private List<Controller> controllers;
+        [Header("Character Spawn")]
+        public UnityEvent charactersCustomStart;
+        [SerializeField] private List<CharacterData> charactersData;
+        [SerializeField] private string playerCharacter = "Pepe_0";
+        private int _currentPlayers = 1;
+
+        public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
+        [SerializeField]
+        private int maxCharactersInGame = 8;
+        private List<string> _allCharactersNameCode;
+        private Dictionary<string, int> _characterSelectedLimit;
+
+        private List<string> _inGameCharactersNameCodes;
+        public List<GameObject> InGameCharacters { get => _inGameCharacters; }
+        private List<GameObject> _inGameCharacters;
+
+        private CarMovementController _playerBindingInputs;
+        [SerializeField]
+        private CameraBehaviours playerCamera;
+
+        [SerializeField]
+        private GameObject[] spawnPoints;
+
+        [Header("Game Loop")]
+        [SerializeField]
+        private float _timeToCallTheStorm = 190f;
+        [SerializeField]
+        private float _playerDeadReductionTime = 40f;
+        private ITimer _callStormTimer;
+        [SerializeField]
+        private SandstormController _sandStormController;
+
+       
+        [Header("Injector prefabs")]
+        [SerializeField] CarInjector PlayerPrefab;
+        [SerializeField] CarInjector AIPrefab;
+
+        [Header("Testing Values (Old Level Controller)")]
+        private StatsController[] _charactersStats;
+        private EnemyAIBrain[] _ais;
+        [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
+        [SerializeField] private bool debugMode = true;
+        [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
+        [SerializeField] private bool useMyCharacters = false;
+        [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
+        [SerializeField] private bool repeatCharacters = true;
+
+
+        private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
+        private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
+        private const int DEFAULT_SKIN = 0;
+        private const string ERROR_STRING_MESSAGE = "empty list";
+        // Default values is 2. If you want to add more of two types of the same character,
+        // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
+        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
         // Start is called before the first frame update
         protected override void Awake()
         {
+            Debug.Log(gameObject.name);
             base.Awake();
-            if (!ai)
+            //Provisional For Debug
+            if (debugMode)
             {
-                ai = FindObjectOfType<EnemyAIBrain>();
+                _charactersStats = FindObjectsOfType<StatsController>();
+                if (!useMyCharacters)
+                {
+                    foreach (var character in _charactersStats)
+                    {
+                        character.gameObject.transform.parent.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    if (_ais == null)
+                    {
+                        _ais = FindObjectsOfType<EnemyAIBrain>();
+                    }
+                }
             }
-            StartLevel();
+            else
+                useMyCharacters = false;
         }
 
+        //Maybe in Onenable?
         void Start()
         {
-
+            Cursor.lockState = CursorLockMode.Locked;
+            if (!useMyCharacters)
+            {
+                DisableCurrentSceneCharacters();
+               // PlayerPrefs.SetString("Selected_Player",playerCharacter);
+                PlayerPrefs.SetInt("Player_Num", 1);
+                SpawnInGameCharacters(out bool succeded);
+                if (!succeded)
+                {
+                    Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
+                }
+                else
+                {
+                    _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
+                }
+            }
+            else
+            {
+                StartLevel();
+            }
         }
+
+     
         // this will be moved to gameManaager once its created
 
         private void OnEnable()
@@ -45,77 +135,281 @@ namespace FastAndFractured
 
         public void HandleInputChange(InputDeviceType inputType)
         {
-            if (inputType == InputDeviceType.KEYBOARD_MOUSE)
-            {
-                usingController = false;
-            }
-            else if (inputType == InputDeviceType.XBOX_CONTROLLER || inputType == InputDeviceType.PS_CONTROLLER)
-            {
-                usingController = true;
-            }
 
-            foreach (StatsController character in characters) // for now when inoput changed its detected it will only notify the carMovementController of the player
-            {
-                if (character.CompareTag("Player"))
-                {
-                    character.gameObject.GetComponent<CarMovementController>().HandleInputChange(usingController);
-                }
-            }
-
+            usingController = inputType != InputDeviceType.KEYBOARD_MOUSE;
+            _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
 
-        // Update is called once per frame
-        void Update()
+        private void DisableCurrentSceneCharacters()
+        {
+            if (_charactersStats == null)
+            {
+                return;
+            }
+          foreach(var character in _charactersStats)
+          {
+                Destroy(character.transform.parent.gameObject);
+          }
+        }
+        private void StartLevel()
         {
 
-        }
-        public void StartLevel()
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            ObjectPoolManager.Instance.CustomStart();
-            foreach (var poolSO in poolSOList)
+            foreach (var character in _charactersStats)
             {
-                ObjectPoolManager.Instance.CreateObjectPool(poolSO);
-            }
-            foreach (var character in characters)
-            {
-                character.CustomStart();
                 Controller controller = character.GetComponentInParent<Controller>();
-                if (controller && controller.CompareTag("Player"))
+               if (controller && controller.CompareTag("Player"))
                 {
-                    ai.Player = character.transform.gameObject;
+                    _playerBindingInputs = character.GetComponentInChildren<CarMovementController>();
+                    foreach (var ai in _ais)
+                    {
+                        ai.Player = character.transform.gameObject;
+                    }
+                }
+            }  
+             charactersCustomStart?.Invoke();
+        }
+
+
+        #region SpawnCharacters
+        private void SpawnInGameCharacters(out bool succeded)
+        {
+            _inGameCharactersNameCodes = new List<string>();
+            succeded = CreateAllCharactersNameCodesList();
+            bool ignoreRepeatedCharacters;
+            if (ignoreRepeatedCharacters = _inGameCharactersNameCodes.Count < maxCharactersInGame)
+            {
+                Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
+            }
+            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+            if (!succeded)
+                return;
+            if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
+            {
+                _inGameCharactersNameCodes.Add(selectedPlayer);
+            }
+            else
+                return;
+            int totalAICharacters = maxCharactersInGame - _currentPlayers;
+            for (int aiCharacterCount = 0; aiCharacterCount < totalAICharacters && succeded; aiCharacterCount++)
+            {
+                string aiName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
+                if (aiName == ERROR_STRING_MESSAGE)
+                {
+                    Debug.LogWarning("Error, all characters form list _allCharactersNameCode where deleted. " +
+                        "Make sure that you are adding more variety of characters or give LIMIT_OF_SAME_CHARACTER_SPAWNED and maxCharactersInGame the same value.");
+                }
+                if (succeded = CheckIfCharacterExistInList(aiName, ignoreRepeatedCharacters))
+                {
+                    _inGameCharactersNameCodes.Add(aiName);
                 }
             }
-            foreach (var killCharacterHandle in killCharacterHandles)
+            if (succeded)
             {
-                killCharacterHandle.onTouchCharacter += EliminatePlayer;
+                _currentPlayers = PlayerPrefs.GetInt("Player_Num");
+                SpawnCharactersInScene();
             }
-            foreach (var controller in controllers)
+        }
+        private void SpawnCharactersInScene()
+        {
+            if (spawnPoints.Length >= maxCharactersInGame)
             {
-                controller.CustomStart();
+                _inGameCharacters = new List<GameObject>();
+                int allCharacters = _inGameCharactersNameCodes.Count;
+                int charactersCount = 0;
+                GameObject playerCar = null;
+                GameObject player = null;
+                ShuffleList(spawnPoints);
+                for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
+                {
+                    CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
+                   playerCar= carInjector.Install(player);
+
+                    _inGameCharacters.Add(playerCar);
+                    _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
+                }
+                for(;charactersCount < allCharacters; charactersCount++)
+                {
+                    var aiCharacter = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
+
+                    CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    GameObject injectedCar= carInjector.Install(aiCharacter);
+                    _inGameCharacters.Add(injectedCar);
+                    //Provisional
+                    carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
+                }
+                charactersCustomStart?.Invoke();
             }
         }
 
-        public void EliminatePlayer(StatsController characterstats)
+        private GameObject SearchCharacterInList(string nameCode)
         {
-            string currentSceneName = SceneManager.GetActiveScene().name;
-            float delay = characterstats.Dead();
-            TimerSystem.Instance.CreateTimer(delay,TimerDirection.DECREASE, onTimerDecreaseComplete:  () => {
-                if (IsThePlayer(characterstats.gameObject))
+            DivideNameCode(nameCode, out string name, out int skinNum);
+            foreach (var character in charactersData)
+            {
+                if (character.CharacterName == name)
                 {
-                    SceneManager.LoadScene(currentSceneName);
+                    if (skinNum == DEFAULT_SKIN)
+                    {
+                        return character.CarDefaultPrefab;
+                    }
+                    if (skinNum - 1 < character.CarWithSkinsPrefabs.Count)
+                    {
+                        return character.CarWithSkinsPrefabs[skinNum - 1];
+                    }
+                }
+            }
+            return null;
+        }
+
+        private bool CreateAllCharactersNameCodesList()
+        {
+            _allCharactersNameCode = new List<string>();
+            _characterSelectedLimit = new Dictionary<string, int>();
+            int characterSkinCount;
+
+            foreach (var character in charactersData)
+            {
+                characterSkinCount = DEFAULT_SKIN + 1;
+                _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
+                _characterSelectedLimit.Add(character.CharacterName, 0);
+                foreach (var characterSkin in character.CarWithSkinsPrefabs)
+                {
+                    _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
+                    characterSkinCount++;
+                }
+            }
+            return true;
+        }
+
+        private void RemoveSelectedCharacterFromAllCharactersNameCodes(string nameCode, string nameWithoutCode)
+        {
+            _characterSelectedLimit[nameWithoutCode]++;
+            _allCharactersNameCode.Remove(nameCode);
+            if (_characterSelectedLimit[nameWithoutCode] >= LIMIT_OF_SAME_CHARACTER_SPAWNED)
+            {
+                List<string> copyOfAllCharactersNameCode = new List<string>(_allCharactersNameCode);
+                for (int notCurrentInstanceCharacterCount = 0; notCurrentInstanceCharacterCount < copyOfAllCharactersNameCode.Count; notCurrentInstanceCharacterCount++)
+                {
+                    if (copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount].Contains(nameWithoutCode)&&
+                        _allCharactersNameCode.Contains(copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount]))
+                    {
+                        _allCharactersNameCode.Remove(copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount]);
+                    }
+                }
+            }
+        }
+
+        private bool CheckIfCharacterExistInList(string nameCode, bool ignoreRepeated)
+        {
+            if (_allCharactersNameCode.Contains(nameCode))
+            {
+                DivideNameCode(nameCode,out string name);
+                if (!ignoreRepeated)
+                {
+                    RemoveSelectedCharacterFromAllCharactersNameCodes(nameCode, name);
+                }
+                return true;
+            }
+            Debug.LogWarning("Name code " + nameCode + " given for the character don't exist or was not saved. Make sure the format 'Josefino_0' is correct or the character is in the charactersData list.");
+            return false;
+        }
+        #endregion
+
+        public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
+        {
+            _inGameCharacters.Remove(character);
+            if (_callStormTimer != null) {
+                if (TimerSystem.Instance.HasTimer(_callStormTimer))
+                {
+                  TimerData stormTimer = _callStormTimer.GetData();
+                    float newTime = stormTimer.CurrentTime - _playerDeadReductionTime;
+                    Mathf.Clamp(newTime, 0, _timeToCallTheStorm);
+                    TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
+                }
+            }
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> {
+                if (!isPlayer)
+                {
+                    Destroy(character);
                 }
                 else
-                    characterstats.gameObject.SetActive(false);
+                {
+                    //Game over screen
+                }
             });
-    }
+        }
+
+        private void CallStorm()
+        {
+            Debug.Log("Storm Called");
+            _sandStormController.SpawnFogs();
+            _sandStormController.MoveSandStorm = true;
+        }
+
+        #region Resources
+        private T GetRandomValueFromShuffleList<T>(List<T> list, T defaultValue)
+        {
+            if (list.Count > 0)
+            {
+                //Shuffle the list
+                ShuffleList(list);
+                return list[Random.Range(0, _allCharactersNameCode.Count)];
+            }
+            return defaultValue;
+        }
+
+        private void ShuffleList<T>(IList<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        private void DivideNameCode(string nameCode, out string name, out int skinNum)
+        {
+            name = " ";
+            skinNum = -1;
+            string[] dividedNameCode = nameCode.Split(DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE);
+            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
+            {
+                name = dividedNameCode[0];
+                if (_characterSelectedLimit.ContainsKey(name))
+                {
+                    if (!int.TryParse(dividedNameCode[1], out skinNum))
+                    {
+                        skinNum = -1;
+                    }
+                }
+                else
+                {
+                    name = " ";
+                }
+            }
+        }
+
+        private void DivideNameCode(string nameCode, out string name)
+        {
+            name = " ";
+            string[] dividedNameCode = nameCode.Split(DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE);
+            if (dividedNameCode.Length == LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME)
+            {
+                name = dividedNameCode[0];
+                if (!_characterSelectedLimit.ContainsKey(name))
+                {
+                    name = " ";
+                }
+            }
+        }
+        #endregion
+
 
         private bool IsThePlayer(GameObject character)
         {
-            if (character.CompareTag("Player"))
-                return true;
-            return false;
+            return character.CompareTag("Player");
         }
     }
 }

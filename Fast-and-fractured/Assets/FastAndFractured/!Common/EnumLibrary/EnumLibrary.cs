@@ -62,7 +62,9 @@ namespace Enums
         GAMEMODE_SELECTION,
         CHARACTER_SELECTION,
         LOADING,
-        SPLASH_SCREEN
+        SPLASH_SCREEN,
+        EXIT_POPUP,
+        PAUSE
     }
 
     public enum Pooltype
@@ -109,5 +111,38 @@ namespace Enums
     {
         INCREASE,
         DECREASE
+    }
+
+    public enum PlayerIcons
+    {
+        CARME_0,
+        JOSEFINO_0,
+        PEPE_0,
+        MARIAANTONIA_0,
+        CARME_1,
+        JOSEFINO_1,
+        PEPE_1,
+        MARIAANTONIA_1
+    }
+
+    public enum UniqueAbilitiesIcons
+    {
+        CARME_UA,
+        JOSEFINO_UA,
+        PEPE_UA,
+        MARIAANTONIA_UA
+    }
+
+    public enum ScreenEffects
+    {
+        SPEED_EFFECT,
+        TOMATO_EFFECT
+    }
+
+    public enum ErrorTypeInGettingCharacters
+    {
+        DONT_EXIST,
+        INCORRECT_NAME_CODE,
+        NOT_FOUND
     }
 }

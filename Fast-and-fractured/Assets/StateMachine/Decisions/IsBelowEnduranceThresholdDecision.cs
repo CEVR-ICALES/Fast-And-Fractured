@@ -20,13 +20,13 @@ namespace StateMachine
             }
             else
             {
-                if (brain.Target.TryGetComponent(out StatsController targetStats))
+                if (brain.TargetToShoot.TryGetComponent(out StatsController targetStats))
                 {
                     health = targetStats.Endurance;
                 }
                 else
                 {
-                    targetStats = brain.Target.GetComponentInChildren<StatsController>();
+                    targetStats = brain.TargetToShoot.GetComponentInChildren<StatsController>();
                     if (targetStats != null)
                     {
                         health = targetStats.Endurance;

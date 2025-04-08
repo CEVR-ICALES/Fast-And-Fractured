@@ -572,6 +572,13 @@ MonoBehaviour:
   shootPoint: {fileID: 1400430728654701352}
   pooltype: 2
   directionCenterOffSet: {x: 0, y: 0.25, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   onOverheatUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -594,6 +601,13 @@ MonoBehaviour:
   shootPoint: {fileID: 7938072976925763006}
   pooltype: 3
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -770,9 +784,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb236279b7728c4bb52acc08669e3d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseDownardForce: 300
-  _turninDownwardForceMultiplier: 2.5
-  _speedDownwardForceMultiplier: 0.6
   statsController: {fileID: 6490917954964899239}
 --- !u!114 &484851958732381330
 MonoBehaviour:
@@ -805,6 +816,8 @@ MonoBehaviour:
   uphillForwardThreshold: 0.3
   downhillForwardThreshold: -0.3
   slopeSpeedThreshold: 2
+  maxGroundAngleThreshold: 65
+  detectFlipTime: 3.5
   isAi: 0
   statsController: {fileID: 6490917954964899239}
 --- !u!114 &7702316927196663791
@@ -858,6 +871,12 @@ MonoBehaviour:
   carWeightImportance: 0.2
   applyForceYOffset: 0.2
   PushApplyPoint: {fileID: 6588395527950722665}
+  wallCollisionAngleThreshold: 0
+  wallBounceForce: 12000
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _checkGroundTime: 0.5
   statsController: {fileID: 6490917954964899239}
 --- !u!114 &1959976532331524733
 MonoBehaviour:
@@ -930,7 +949,7 @@ MonoBehaviour:
   Params: []
   OverrideAttenuation: 0
   OverrideMinDistance: 1
-  OverrideMaxDistance: 20
+  OverrideMaxDistance: 50
 --- !u!114 &8600442524614870489
 MonoBehaviour:
   m_ObjectHideFlags: 0

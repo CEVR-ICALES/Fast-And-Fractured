@@ -8,20 +8,20 @@ namespace FastAndFractured
     {
         public Collider IgnoreCollider { set => _ignoreCollider = value; }
         private Collider _ignoreCollider;
+        private bool _callForDestroy = true;
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
-                if (!Physics.GetIgnoreCollision(_ignoreCollider, ownCollider))
-                {
-                    Physics.IgnoreCollision(_ignoreCollider, ownCollider,true);
-                }
+            Physics.IgnoreCollision(_ignoreCollider, ownCollider,true);
+            _callForDestroy = true;
         }
 
         protected override void FixedUpdate()
         {
-            if ((transform.position - initPosition).magnitude >= range)
+            if ((transform.position - initPosition).magnitude >= range&&_callForDestroy)
             {
                 OnBulletEndTrayectory();
+                _callForDestroy=false;
             }
         }
 

@@ -44,7 +44,6 @@ namespace FastAndFractured
 
         public bool IsPushShooting => _isPushShooting;
         private bool _isPushShooting;
-
         public bool IsUsingAbility => _isUsingAbility;
         private bool _isUsingAbility;
 
@@ -80,11 +79,14 @@ namespace FastAndFractured
         protected override void Awake()
         {
             base.Awake();
-            _inputActions = new PlayerInputAction();
+            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
+
         }
 
-        private void OnEnable()
+        private void BindActions()
         {
+            _inputActions = new PlayerInputAction();
+
             _inputActions.Enable();
 
             // Movement Input
@@ -113,10 +115,10 @@ namespace FastAndFractured
             _inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
             _inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
 
-            _inputActions.PlayerInputActions.ThrowMine.performed += ctx => _isThrowingMine = true;
-            _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => _isThrowingMine = false;
+            _inputActions.PlayerInputActions.ThrowMine.performed += ctx => ThrowMine();
+            _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => UnsetShootType();
 
-            _inputActions.PlayerInputActions.Pause.performed += ctx => _isPausing = true;
+            _inputActions.PlayerInputActions.Pause.started += ctx => _isPausing = true;
             _inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
 
             _inputActions.PlayerInputActions.ResetCamera.started += ctx => CameraBehaviours.Instance.ResetCameraPosition();
@@ -125,9 +127,24 @@ namespace FastAndFractured
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
         }
 
+        private void OnEnable()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Enable();
+            }
+        }
+
         private void OnDisable()
         {
-            _inputActions.Disable();
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+            }
+        }
+
+        private void Start()
+        {
         }
 
         private void Update()
@@ -262,6 +279,14 @@ namespace FastAndFractured
             }
         }
 
+        private void ThrowMine()
+        {
+            if (_isPushShootMode)
+            {
+                _isThrowingMine = true;
+            }
+        }
+
         private void SetShootType()
         {
             if (_isPushShootMode)
@@ -280,6 +305,7 @@ namespace FastAndFractured
             {
                 _isPushShooting = false;
                 _isPushShootMode = false;
+                _isThrowingMine = false;
             }
             else
             {

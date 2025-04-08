@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: SearcSafeZoneState
+  m_EditorClassIdentifier: 
+  enterActions:
+  - {fileID: 11400000, guid: fdd80088a4d15d148ab730135b29c563, type: 2}
+  actions:
+  - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 0f2b1f9096801b949aa92307655abf67, type: 2}
+    trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 1
+  - decision: {fileID: 11400000, guid: 23285aa3dd2197040b6df91cc3d03706, type: 2}
+    trueState: {fileID: 11400000, guid: 023d1fc9b8864364687b4797ce5d9ad2, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 1
+  - decision: {fileID: 11400000, guid: 04e64bc4069e75042953a63f87ac4c4a, type: 2}
+    trueState: {fileID: 11400000, guid: a48647f68bc89e442b0bd1ded05d288f, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 1
+  - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
+    trueState: {fileID: 11400000, guid: 023d1fc9b8864364687b4797ce5d9ad2, type: 2}
+    falseState: {fileID: 11400000, guid: a48647f68bc89e442b0bd1ded05d288f, type: 2}
+    hasExitTime: 0

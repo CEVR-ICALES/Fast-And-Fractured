@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using Utilities;
+using Enums;
 
 namespace FastAndFractured {
     public class PushBulletBehaviour : BulletBehaviour
@@ -15,14 +18,16 @@ namespace FastAndFractured {
         public Vector3 ExplosionCenterOffset { set => _explosionCenterOffset = value; }
         private Vector3 _explosionCenterOffset;
         [SerializeField] private ExplosionForce _explosionHitbox;
+        public float TimeToExplode {set => _timeToExplode = value; }
+        private float _timeToExplode = 0;
 
         //Movement Values
 
         public int BouncingNum { set => _bouncingNum = value; }
-        private int _bouncingNum;
+        private int _bouncingNum = 0;
         private int _currentBouncingNum;
         public float BouncingStrenght { set => _bounceStrenght = value; }
-        private float _bounceStrenght;
+        private float _bounceStrenght = 0;
         private float _currentBounceStrenght;
         private Vector3 initialPosition;
         private bool _firstTime = true;
@@ -71,7 +76,7 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
-            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius,_pushForce,_explosionCenterOffset);
+            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset);
             OnBulletEndTrayectory();
         }
 
@@ -92,7 +97,19 @@ namespace FastAndFractured {
             if (_currentBouncingNum >= _bouncingNum)
             {
                 rb.velocity = Vector3.zero;
-                Explosion();
+                rb.constraints = RigidbodyConstraints.FreezePosition;
+                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                if (_timeToExplode > 0)
+                {
+                    TimerSystem.Instance.CreateTimer(_timeToExplode, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                    {
+                        Explosion();
+                    });
+                }
+                else
+                {
+                    Explosion();
+                }
             }
         }
 

@@ -22,9 +22,14 @@ namespace Utilities
                     s_Instance = FindObjectOfType<T>();
                     if (s_Instance == null)
                     {
-                        GameObject obj = new GameObject();
-                        obj.name = typeof(T).Name;
-                        s_Instance = obj.AddComponent<T>();
+                        //GameObject obj = new GameObject();
+                        //obj.name = typeof(T).Name;
+                        //s_Instance = obj.AddComponent<T>();
+
+                        //if(s_Instance != null)
+                        //{
+                           
+                        //}
                     }
                 }
 

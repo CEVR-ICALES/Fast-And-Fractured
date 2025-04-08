@@ -13,6 +13,10 @@ namespace StateMachine
             EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
 
             brain.GoToPosition();
+            if (brain.HasReachedTargetToGoPosition())
+            {
+                FinishAction();
+            }
         }
     }
 }
