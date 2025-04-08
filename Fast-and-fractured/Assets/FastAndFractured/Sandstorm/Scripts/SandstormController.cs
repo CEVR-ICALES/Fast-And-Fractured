@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace FastAndFractured
 {
@@ -9,11 +10,17 @@ namespace FastAndFractured
         public LocalVolumetricFog primaryFog;
         public LocalVolumetricFog secondaryFog;
 
-        public float growthSpeed = 1.0f;
+        public float maxGrowthTime = 1.0f;
+
+        private float _maxGrowth;
+        private float _growthSpeed;
+
         [SerializeField]
-        private GameObject spawnPoint;
+        private GameObject gameObjectSpawnPoint;
         [SerializeField]
-        private GameObject mirroPoint;
+        private GameObject gameObjectMirroPoint;
+
+        private BoxCollider _stormCollider;
 
         private Vector3 _spawnPoint;
         private Vector3 _mirrorPoint;
@@ -24,19 +31,23 @@ namespace FastAndFractured
         private Vector3 _initialVolumeSizeMain;
         private Vector3 _initialVolumeSizeSecondary;
 
-        private Vector3 _initialPositionMain;
         private Vector3 _initialPositionSecondary;
 
         [SerializeField]
         private Transform sphereCenter;
         [SerializeField]
         private float sphereRadius = 374.6f;
+        [SerializeField]
+        private float maxAngleExcluded = 360f;
+        [SerializeField]
+        private int numberOfPoints = 18;
         public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
         private bool _moveSandStorm = false;
+
+        public bool StormSpawnPointsSetted { get => _spawnPointsSet; }
+        private bool _spawnPointsSet = false;
         private void Start()
         {
-            primaryFog.gameObject.SetActive(false);
-            secondaryFog.gameObject.SetActive(false);
         }
         private void Update()
         {
@@ -45,35 +56,64 @@ namespace FastAndFractured
                 ExpandFogs();
             }
         }
+
+        public void SetSpawnPoints(bool debug)
+        {
+           _stormCollider = GetComponent<BoxCollider>();
+            _stormCollider.enabled = false;
+            primaryFog.gameObject.SetActive(false);
+            secondaryFog.gameObject.SetActive(false);
+            float[] possibleAngels = new float[numberOfPoints];
+            float nextAngleFactor = maxAngleExcluded / numberOfPoints;
+            float currentAngle = 0;
+            for (int countAngle = 0; countAngle < numberOfPoints; countAngle++)
+            {
+                possibleAngels[countAngle] = currentAngle;
+                currentAngle += nextAngleFactor;
+            }
+            Vector3 spawnVector = sphereCenter.forward;
+            //Probably change for better aplication. Like an utility
+            LevelController.Instance.ShuffleList(possibleAngels);
+
+            float spawnAngle = possibleAngels[0];
+
+            Debug.Log("Spawn Point Angle : " + spawnAngle);
+            Quaternion vectorRotation = Quaternion.AngleAxis(spawnAngle, Vector3.up);
+            Vector3 rotatedSpawnVector = vectorRotation * sphereCenter.forward;
+
+            _spawnPoint = sphereCenter.position + rotatedSpawnVector * sphereRadius;
+            _mirrorPoint = sphereCenter.position - rotatedSpawnVector * sphereRadius;
+            _spawnPointsSet = true;
+
+            if (debug)
+            {
+                gameObjectSpawnPoint.transform.position = _spawnPoint;
+                gameObjectMirroPoint.transform.position = _mirrorPoint;
+                Debug.DrawLine(sphereCenter.position, _spawnPoint, Color.green, 100);
+                Debug.DrawLine(sphereCenter.position, _mirrorPoint, Color.red, 100);
+                Debug.DrawLine(_spawnPoint, _mirrorPoint, Color.red, 100);
+            }
+        }
         /// <summary>
         /// Spawns the Fogs at a random point (hardcoded values for now)
         /// </summary>
         public void SpawnFogs()
         {
-            Vector3 spawnVector = sphereCenter.position + sphereCenter.forward;
-            float angle = Random.Range(0, 360);
-            Quaternion vectorRotation = Quaternion.AngleAxis(angle, Vector3.up);
-            Vector3 rotatedSpawnVector = vectorRotation * spawnVector;
-            _spawnPoint = new Vector3(rotatedSpawnVector.normalized.x * sphereRadius, fogParent.transform.position.y, rotatedSpawnVector.normalized.z * sphereRadius);
-
             fogParent.transform.position = _spawnPoint;
-            Vector3 mirrorVector = (sphereCenter.position - _spawnPoint) * 2;
-            _mirrorPoint = new Vector3(mirrorVector.x, fogParent.transform.position.y, mirrorVector.z);
-            spawnPoint.transform.position = _spawnPoint;
-            mirroPoint.transform.position = _mirrorPoint;
-            _direction = (_mirrorPoint - _spawnPoint).normalized;
-
             primaryFog.gameObject.SetActive(true);
             secondaryFog.gameObject.SetActive(true);
-
+            _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
             fogParent.transform.rotation = targetRotation;
 
             _initialVolumeSizeMain = primaryFog.parameters.size;
             _initialVolumeSizeSecondary = secondaryFog.parameters.size;
 
-            _initialPositionMain = primaryFog.transform.position;
             _initialPositionSecondary = secondaryFog.transform.position;
+            _maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
+            _growthSpeed = _maxGrowth/maxGrowthTime;
+            _stormCollider.enabled = true;
+            _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
         }
 
         /// <summary>
@@ -81,14 +121,13 @@ namespace FastAndFractured
         /// </summary>
         private void ExpandFogs()
         {
-            float maxGrowth = (_mirrorPoint - _spawnPoint).magnitude;
 
-            if (_currentGrowth < maxGrowth)
+            if (_currentGrowth < _maxGrowth)
             {
-                _currentGrowth += growthSpeed * Time.deltaTime;
+                _currentGrowth += _growthSpeed * Time.deltaTime;
 
-                if (_currentGrowth > maxGrowth)
-                    _currentGrowth = maxGrowth;
+                if (_currentGrowth > _maxGrowth)
+                    _currentGrowth = _maxGrowth;
             }
 
             float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
@@ -96,11 +135,12 @@ namespace FastAndFractured
 
             primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
             secondaryFog.parameters.size = new Vector3(_initialPositionSecondary.x, _initialPositionSecondary.y, newZSizeSecondary);
+            _stormCollider.size = new Vector3(_initialVolumeSizeMain.x,_initialVolumeSizeMain.y,newZSizeMain);
+            //Vector3 offset = _direction * (_currentGrowth / 2f);
 
-            Vector3 offset = _direction * (_currentGrowth / 2f);
-
-            primaryFog.transform.position = _spawnPoint + offset;
-            secondaryFog.transform.position = _spawnPoint + offset;
+            //primaryFog.transform.position = _spawnPoint + offset;
+            //secondaryFog.transform.position = _spawnPoint + offset;
+            //_stormCollider.center = _spawnPoint + offset;
         }
     }
 }

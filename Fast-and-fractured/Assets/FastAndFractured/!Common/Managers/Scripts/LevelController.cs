@@ -58,6 +58,7 @@ namespace FastAndFractured
         [SerializeField] private bool useMyCharacters = false;
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
+        [SerializeField] private bool stormInDebugMode = false;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -101,29 +102,17 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-                DisableCurrentSceneCharacters();
-                PlayerPrefs.SetString("Selected_Player",playerCharacter);
-                PlayerPrefs.SetInt("Player_Num", 1);
-                SpawnInGameCharacters(out bool succeded);
-                if (!succeded)
-                {
-                    Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
-                }
-                else
-                {
-                }
+              StartLevelWithSpawnedCharacters();
             }
             else
             {
-                StartLevel();
+                StartLevelWithOwnCharacters();
             }
-            _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
         }
 
         private void Update()
         {
-            if(_callStormTimer!=null)
-            Debug.Log("callStormTimer : " + _callStormTimer.GetData().CurrentTime);
+
         }
         // this will be moved to gameManaager once its created
 
@@ -144,15 +133,7 @@ namespace FastAndFractured
             _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
-
-        private void DisableCurrentSceneCharacters()
-        {
-          foreach(var character in _charactersStats)
-          {
-                Destroy(character.transform.parent.gameObject);
-          }
-        }
-        private void StartLevel()
+        private void StartLevelWithOwnCharacters()
         {
 
             foreach (var character in _charactersStats)
@@ -166,8 +147,45 @@ namespace FastAndFractured
                         ai.Player = character.transform.gameObject;
                     }
                 }
-            }  
-             charactersCustomStart?.Invoke();
+            }
+           SetStormParameters(stormInDebugMode);
+            charactersCustomStart?.Invoke();
+        }
+
+        private void StartLevelWithSpawnedCharacters()
+        {
+            DisableCurrentSceneCharacters();
+            PlayerPrefs.SetString("Selected_Player", playerCharacter);
+            PlayerPrefs.SetInt("Player_Num", 1);
+            SpawnInGameCharacters(out bool succeded);
+            if (!succeded)
+            {
+                Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
+            }
+            else
+            {
+                if (debugMode)
+                    SetStormParameters(stormInDebugMode);
+                else
+                    SetStormParameters(true);
+            }
+        }
+
+        private void SetStormParameters(bool callStorm)
+        {
+            if (callStorm)
+            {
+                _sandStormController.SetSpawnPoints(debugMode);
+                _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
+            }
+        }
+
+        private void DisableCurrentSceneCharacters()
+        {
+            foreach (var character in _charactersStats)
+            {
+                Destroy(character.transform.parent.gameObject);
+            }
         }
 
 
@@ -344,6 +362,8 @@ namespace FastAndFractured
         private void CallStorm()
         {
             Debug.Log("Storm Called");
+            if (!_sandStormController.StormSpawnPointsSetted)
+                _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();
             _sandStormController.MoveSandStorm = true;
         }
@@ -360,7 +380,7 @@ namespace FastAndFractured
             return defaultValue;
         }
 
-        private void ShuffleList<T>(IList<T> list)
+        public void ShuffleList<T>(IList<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
             {
