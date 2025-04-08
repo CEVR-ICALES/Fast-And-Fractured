@@ -1,3 +1,4 @@
+using Enums;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Utilities;
+using static FastAndFractured.StatsBoostInteractable;
 
 namespace FastAndFractured
 {
@@ -29,12 +31,60 @@ namespace FastAndFractured
             MakeInitialPool();
         }
 
+        public List<StatsBoostInteractable> GetStatBoostItems()
+        {
+            List<StatsBoostInteractable> statsBoostInteractables = new List<StatsBoostInteractable>();
+            foreach (GameObject item in _shuffledActivePool)
+            {
+                StatsBoostInteractable statItem = item.GetComponentInParent<StatsBoostInteractable>();
+                if (statItem)
+                {
+                    statsBoostInteractables.Add(statItem);
+                }
+            }
+            return statsBoostInteractables;
+        }
+
+        public bool CheckIfStatItemExists(Stats stat)
+        {
+            List<StatsBoostInteractable> statsBoostInteractables = GetStatBoostItems();
+            foreach (StatsBoostInteractable item in statsBoostInteractables)
+            {
+                foreach (StatsBoost boost in item.BoostList)
+                {
+                    if (boost.StatToBoost == stat)
+                    {
+                        return true;
+                    }
+                }   
+            }
+            return false;
+        }
+
+        public List<StatsBoostInteractable> GetOnlyStatBoostItemsStat(Stats stat)
+        {
+            List<StatsBoostInteractable> statsBoostInteractables = GetStatBoostItems();
+            for (int i = 0; i < statsBoostInteractables.Count; i++)
+            {
+                StatsBoostInteractable item = statsBoostInteractables[i];
+                foreach (StatsBoost boost in item.BoostList)
+                {
+                    if (boost.StatToBoost != stat)
+                    {
+                        statsBoostInteractables.Remove(item);
+                    }
+                }
+            }
+            return statsBoostInteractables;
+        }
 
         void MakeInitialPool()
         {
             _shuffledActivePool = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
             UpdateVisibleInteractableList();
         }
+
+        
         void UpdateVisibleInteractableList(int index = 0)
         {
             for (int i = index; i < _shuffledActivePool.Count && i < numberOfItemsActiveAtSameTime; i++)

@@ -76,6 +76,8 @@ namespace FastAndFractured
             //Provisional For Debug
             if (debugMode)
             {
+                PlayerPrefs.SetString("Selected_Player", playerCharacter);
+                PlayerPrefs.SetInt("Player_Num", 1);
                 _charactersStats = FindObjectsOfType<StatsController>();
                 if (!useMyCharacters)
                 {
@@ -110,10 +112,7 @@ namespace FastAndFractured
             }
         }
 
-        private void Update()
-        {
-
-        }
+     
         // this will be moved to gameManaager once its created
 
         private void OnEnable()
@@ -155,8 +154,6 @@ namespace FastAndFractured
         private void StartLevelWithSpawnedCharacters()
         {
             DisableCurrentSceneCharacters();
-            PlayerPrefs.SetString("Selected_Player", playerCharacter);
-            PlayerPrefs.SetInt("Player_Num", 1);
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {
@@ -244,7 +241,7 @@ namespace FastAndFractured
                     player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
                    playerCar= carInjector.Install(player);
 
-                    _inGameCharacters.Add(player);
+                    _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
                 }
                 for(;charactersCount < allCharacters; charactersCount++)
@@ -252,8 +249,8 @@ namespace FastAndFractured
                     var aiCharacter = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
 
                     CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
-                    carInjector.Install(aiCharacter);
-                    _inGameCharacters.Add(aiCharacter);
+                    GameObject injectedCar= carInjector.Install(aiCharacter);
+                    _inGameCharacters.Add(injectedCar);
                     //Provisional
                     carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
                 }

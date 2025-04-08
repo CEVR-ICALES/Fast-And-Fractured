@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
-using Utilities;  
+using Utilities;
+using FastAndFractured;
+using Enums;  
 
 namespace Utilities.Managers.PauseSystem
 {
@@ -24,7 +26,10 @@ namespace Utilities.Managers.PauseSystem
             if (_isGamePaused) return;  
 
             _isGamePaused = true;
-            //Time.timeScale = 0f;   
+            //Time.timeScale = 0f;
+            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.PAUSE, -1);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
             onGamePaused?.Invoke();
             foreach (var pausable in _pausableComponents)
@@ -41,8 +46,10 @@ namespace Utilities.Managers.PauseSystem
             if (!_isGamePaused) return; 
 
             _isGamePaused = false;
-            Time.timeScale = 1f;  
-
+            Time.timeScale = 1f;
+            MainMenuManager.Instance.CloseScreen();
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             onGameResumed?.Invoke();
             foreach (var pausable in _pausableComponents)
             {
@@ -56,7 +63,13 @@ namespace Utilities.Managers.PauseSystem
         {
             if (_isGamePaused)
             {
-                ResumeGame();
+                if(MainMenuManager.Instance.IsInPauseMenu())
+                {
+                    ResumeGame();
+                } else
+                {
+                    MainMenuManager.Instance.UseBackButton();
+                }
             }
             else
             {
