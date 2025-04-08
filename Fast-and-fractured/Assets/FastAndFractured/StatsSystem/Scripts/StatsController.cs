@@ -195,11 +195,6 @@ namespace FastAndFractured
         {
             return Endurance / MaxEndurance * 100;
         }
-
-        public float GetEndurancePercentage()
-        {
-            return Endurance / MaxEndurance * 100;
-        }
         #endregion
 
         #region OtherStats
