@@ -58,6 +58,7 @@ namespace FastAndFractured
         [SerializeField] private bool useMyCharacters = false;
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
+        [SerializeField] private bool stormInDebugMode = false;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -103,20 +104,11 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-                DisableCurrentSceneCharacters();
-                SpawnInGameCharacters(out bool succeded);
-                if (!succeded)
-                {
-                    Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
-                }
-                else
-                {
-                    _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
-                }
+              StartLevelWithSpawnedCharacters();
             }
             else
             {
-                StartLevel();
+                StartLevelWithOwnCharacters();
             }
         }
 
@@ -140,21 +132,10 @@ namespace FastAndFractured
             _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
-
-        private void DisableCurrentSceneCharacters()
+        
+        private void StartLevelWithOwnCharacters()
         {
-            if (_charactersStats == null)
-            {
-                return;
-            }
-          foreach(var character in _charactersStats)
-          {
-                Destroy(character.transform.parent.gameObject);
-          }
-        }
-        private void StartLevel()
-        {
-
+            _inGameCharacters = new List<GameObject>();
             foreach (var character in _charactersStats)
             {
                 Controller controller = character.GetComponentInParent<Controller>();
@@ -166,8 +147,44 @@ namespace FastAndFractured
                         ai.Player = character.transform.gameObject;
                     }
                 }
-            }  
-             charactersCustomStart?.Invoke();
+                _inGameCharacters.Add(character.gameObject);
+            }
+           SetStormParameters(stormInDebugMode);
+            charactersCustomStart?.Invoke();
+        }
+
+        private void StartLevelWithSpawnedCharacters()
+        {
+            DisableCurrentSceneCharacters();
+            SpawnInGameCharacters(out bool succeded);
+            if (!succeded)
+            {
+                Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
+            }
+            else
+            {
+                if (debugMode)
+                    SetStormParameters(stormInDebugMode);
+                else
+                    SetStormParameters(true);
+            }
+        }
+
+        private void SetStormParameters(bool callStorm)
+        {
+            if (callStorm)
+            {
+                _sandStormController.SetSpawnPoints(debugMode);
+                _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
+            }
+        }
+
+        private void DisableCurrentSceneCharacters()
+        {
+            foreach (var character in _charactersStats)
+            {
+                Destroy(character.transform.parent.gameObject);
+            }
         }
 
 
@@ -329,14 +346,14 @@ namespace FastAndFractured
                     TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
                 }
             }
-            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> {
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
                     Destroy(character);
                 }
                 else
                 {
-                    //Game over screen
+                    Debug.Log("Player Dead.");
                 }
             });
         }
@@ -344,6 +361,8 @@ namespace FastAndFractured
         private void CallStorm()
         {
             Debug.Log("Storm Called");
+            if (!_sandStormController.StormSpawnPointsSetted)
+                _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();
             _sandStormController.MoveSandStorm = true;
         }
@@ -360,7 +379,7 @@ namespace FastAndFractured
             return defaultValue;
         }
 
-        private void ShuffleList<T>(IList<T> list)
+        public void ShuffleList<T>(IList<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
             {
