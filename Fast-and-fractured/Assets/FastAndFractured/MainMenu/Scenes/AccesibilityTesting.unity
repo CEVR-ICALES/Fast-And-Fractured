@@ -10851,6 +10851,8 @@ GameObject:
   - component: {fileID: 1987412338}
   - component: {fileID: 1987412337}
   - component: {fileID: 1987412340}
+  - component: {fileID: 1987412341}
+  - component: {fileID: 1987412342}
   m_Layer: 5
   m_Name: KeyboardInputRemapingContainer
   m_TagString: Untagged
@@ -10961,6 +10963,122 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actions: {fileID: -944628639613478452, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
+--- !u!114 &1987412341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987412334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84cd9b84e0604a9abafb77712f1df90a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xbox:
+    buttonSouth: {fileID: 0}
+    buttonNorth: {fileID: 0}
+    buttonEast: {fileID: 0}
+    buttonWest: {fileID: 0}
+    startButton: {fileID: 0}
+    selectButton: {fileID: 0}
+    leftTrigger: {fileID: 0}
+    rightTrigger: {fileID: 0}
+    leftShoulder: {fileID: 0}
+    rightShoulder: {fileID: 0}
+    dpad: {fileID: 0}
+    dpadUp: {fileID: 0}
+    dpadDown: {fileID: 0}
+    dpadLeft: {fileID: 0}
+    dpadRight: {fileID: 0}
+    leftStick: {fileID: 0}
+    rightStick: {fileID: 0}
+    leftStickPress: {fileID: 0}
+    rightStickPress: {fileID: 0}
+  ps4:
+    buttonSouth: {fileID: 0}
+    buttonNorth: {fileID: 0}
+    buttonEast: {fileID: 0}
+    buttonWest: {fileID: 0}
+    startButton: {fileID: 0}
+    selectButton: {fileID: 0}
+    leftTrigger: {fileID: 0}
+    rightTrigger: {fileID: 0}
+    leftShoulder: {fileID: 0}
+    rightShoulder: {fileID: 0}
+    dpad: {fileID: 0}
+    dpadUp: {fileID: 0}
+    dpadDown: {fileID: 0}
+    dpadLeft: {fileID: 0}
+    dpadRight: {fileID: 0}
+    leftStick: {fileID: 0}
+    rightStick: {fileID: 0}
+    leftStickPress: {fileID: 0}
+    rightStickPress: {fileID: 0}
+  keyboard:
+    KeyA: {fileID: 0}
+    KeyB: {fileID: 0}
+    KeyC: {fileID: 0}
+    KeyD: {fileID: 0}
+    KeyE: {fileID: 0}
+    KeyF: {fileID: 0}
+    KeyG: {fileID: 0}
+    KeyH: {fileID: 0}
+    KeyI: {fileID: 0}
+    KeyJ: {fileID: 0}
+    KeyK: {fileID: 0}
+    KeyL: {fileID: 0}
+    KeyM: {fileID: 0}
+    KeyN: {fileID: 0}
+    KeyO: {fileID: 0}
+    KeyP: {fileID: 0}
+    KeyQ: {fileID: 0}
+    KeyR: {fileID: 0}
+    KeyS: {fileID: 0}
+    KeyT: {fileID: 0}
+    KeyU: {fileID: 0}
+    KeyV: {fileID: 0}
+    KeyW: {fileID: 0}
+    KeyX: {fileID: 0}
+    KeyY: {fileID: 0}
+    KeyZ: {fileID: 0}
+    Key0: {fileID: 0}
+    Key1: {fileID: 0}
+    Key2: {fileID: 0}
+    Key3: {fileID: 0}
+    Key4: {fileID: 0}
+    Key5: {fileID: 0}
+    Key6: {fileID: 0}
+    Key7: {fileID: 0}
+    Key8: {fileID: 0}
+    Key9: {fileID: 0}
+    KeyEnter: {fileID: 0}
+    KeySpace: {fileID: 0}
+    KeyShift: {fileID: 0}
+    KeyCtrl: {fileID: 0}
+    KeyAlt: {fileID: 0}
+    KeyTab: {fileID: 0}
+    KeyBackspace: {fileID: 0}
+    KeyCapsLock: {fileID: 0}
+    KeyDelete: {fileID: 0}
+    KeyArrowUp: {fileID: 0}
+    KeyArrowDown: {fileID: 0}
+    KeyArrowLeft: {fileID: 0}
+    KeyArrowRight: {fileID: 0}
+--- !u!114 &1987412342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987412334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ba8c4235aeaade44a6adbfa56b10a02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputActions: {fileID: -944628639613478452, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
+  targetControlScheme: Keyboard
 --- !u!1 &2009719084
 GameObject:
   m_ObjectHideFlags: 0

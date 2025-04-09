@@ -15,7 +15,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
     {
         public GamepadIcons xbox;
         public GamepadIcons ps4;
-        public GamepadIcons keyboard;
+        public KeyboardIcons keyboard;
 
         protected void OnEnable()
         {
