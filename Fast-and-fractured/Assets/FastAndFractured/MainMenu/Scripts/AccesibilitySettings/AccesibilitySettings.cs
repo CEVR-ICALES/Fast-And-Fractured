@@ -18,6 +18,10 @@ public class AccesibilitySettings : MonoBehaviour
     [SerializeField] ColorBlindModeController colorBlindModeController;
     [SerializeField] private Toggle colorBlindToggle;
     private const string COLORBLIND_KEY = "ColorBlindMode";
+
+    [Header("Subtitles")]
+    [SerializeField] private Toggle subtitlesToggle;
+    private const string SUBTITLES_KEY = "Substitles";
     
 
     private void Awake()
@@ -36,13 +40,16 @@ public class AccesibilitySettings : MonoBehaviour
 
         bool isColorBlindModeOn = PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1;
         colorBlindToggle.isOn = isColorBlindModeOn;
+
+        bool isSubtitlesOn = PlayerPrefs.GetInt(SUBTITLES_KEY, 0) == 1;
+        subtitlesToggle.isOn = isSubtitlesOn;
     }
 
     private void OnEnable()
     {
         nextLenguageButton?.onClick.AddListener(NextLanguage);
         previousLenguageButton?.onClick.AddListener(PreviousLanguage);
-        colorBlindToggle?.onValueChanged.AddListener(OnColorBlindToggleChnanged);
+        colorBlindToggle?.onValueChanged.AddListener(OnColorBlindToggleChanged);
     }
 
     private void OnDisable()
@@ -94,7 +101,7 @@ public class AccesibilitySettings : MonoBehaviour
 
     #region Color Blind
 
-    private void OnColorBlindToggleChnanged(bool isOn)
+    private void OnColorBlindToggleChanged(bool isOn)
     {
         PlayerPrefs.SetInt(COLORBLIND_KEY, isOn ? 1 : 0); // 1 true
         PlayerPrefs.Save();
@@ -102,5 +109,14 @@ public class AccesibilitySettings : MonoBehaviour
  
     }
 
+    #endregion
+
+    #region Substitles
+    
+    private void OnSubtitlesToggleChanged(bool isOn)
+    {
+        PlayerPrefs.SetInt(SUBTITLES_KEY, isOn ? 1 : 0);
+        PlayerPrefs.Save();
+    }
     #endregion
 }
