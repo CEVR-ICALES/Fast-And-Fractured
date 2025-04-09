@@ -132,6 +132,7 @@ namespace FastAndFractured
             _playerBindingInputs.HandleInputChange(usingController);
         }
         // will be moved to gameManager
+        
         private void StartLevelWithOwnCharacters()
         {
             _inGameCharacters = new List<GameObject>();
