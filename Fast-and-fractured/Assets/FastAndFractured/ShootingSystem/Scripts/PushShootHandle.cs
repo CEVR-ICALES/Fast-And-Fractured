@@ -36,7 +36,7 @@ namespace FastAndFractured {
 
         public void PushShooting()
         {
-            if (canShoot&&!_shootingMine)
+            if (canShoot)
             {
                 canShoot = false;
                float range = characterStatsController.PushShootRange;
