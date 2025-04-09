@@ -56,9 +56,9 @@ namespace FastAndFractured
         [Header("Damage")]
 
         [SerializeField] private float currentNormalShootDMG;
-        [SerializeField] private float currentPushShootDMG;
+        [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
-        public float PushShootDamage { get => currentPushShootDMG; }
+        public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
         public Vector3 ExplosionCenterOffset { get => charDataSO.ExplosionCenterOffset; }
@@ -131,6 +131,7 @@ namespace FastAndFractured
             currentAcceleration = charDataSO.Acceleration;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
+            currentPushShootForce = charDataSO.PushShootFORCE;
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
         }
@@ -205,7 +206,7 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, sum, false))
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogError("Stat of "+type+" selected doesn't exist or can't be modified. " +
                      "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
@@ -221,7 +222,7 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, -subtrahend, false))
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogError("Stat of " + type +" selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
@@ -271,6 +272,13 @@ namespace FastAndFractured
                     return true;
                 case Stats.NORMAL_DAMAGE:
                     currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct, true);
+                    return true;
+                case Stats.PUSH_FORCE:
+                    //Needs implementation
+                    currentPushShootForce = ModCharStat(currentPushShootForce, mod, 0, float.MaxValue, isProduct, false);
+                    return true;
+                case Stats.COOLDOWN_SPEED:
+                    currentCooldownSpeed = ModCharStat(currentCooldownSpeed, mod, 0, 10, isProduct, true);
                     return true;
             }
             return false;
@@ -356,8 +364,8 @@ namespace FastAndFractured
                     return currentEndurance;
                 case Stats.NORMAL_DAMAGE:
                     return currentNormalShootDMG;
-                case Stats.PUSH_DAMAGE:
-                    return currentPushShootDMG;
+                case Stats.PUSH_FORCE:
+                    return currentPushShootForce;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
                 case Stats.MAX_SPEED_MULTIPLIER:
