@@ -201,11 +201,12 @@ namespace FastAndFractured
                 {
                     if (killer.KillPriority > _currentKiller.KillPriority)
                     {
-                        _currentKiller = killer;
                         if (_deadTimer != null)
                         {
+                            float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
+                            _currentKiller = killer;
                             _deadTimer.StopTimer();
-                            _deadTimer = TimerSystem.Instance.CreateTimer(killer.KillTime, onTimerDecreaseComplete: () =>
+                            _deadTimer = TimerSystem.Instance.CreateTimer(newTime, onTimerDecreaseComplete: () =>
                             {
                                 Dead();
                                 _deadTimer = null;
