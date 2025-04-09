@@ -175,19 +175,19 @@ namespace Utilities
         }
 
         #region Slider Volume Methods
-        public void UpdateSFXVolume(Slider sfxSlider)
+        public void UpdateSFXVolume()
         {
-            _sfxVolume = sfxSlider.value;
-            SetSFXVolume(sfxSlider.value);
+            _sfxVolume = sfxVolumeSlider.value;
+            SetSFXVolume(sfxVolumeSlider.value);
         }
 
-        public void UpdateMusicVolume(Slider musicSlider)
+        public void UpdateMusicVolume()
         {
-            _musicVolume = musicSlider.value;
-            SetMusicVolume(musicSlider.value);
+            _musicVolume = musicVolumeSlider.value;
+            SetMusicVolume(musicVolumeSlider.value);
         }
 
-        public void UpdateGeneralVolume(Slider generalVolumeSlider)
+        public void UpdateGeneralVolume()
         {
             _masterVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);

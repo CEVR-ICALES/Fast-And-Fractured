@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -12,18 +13,17 @@ namespace FastAndFractured
         [SerializeField] private GameObject accessibilitySettingsUI;
 
         [Header("Settings audio")]
-        [SerializeField] private Slider masterVolumeSlider;
+        [SerializeField] private Slider generalVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
 
         [Header("Settings video")]
+        [SerializeField] private Toggle vsyncDropdown;
+        [SerializeField] private Slider brightnessSlider;
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
-        [SerializeField] private Toggle vsyncDropdown;
         [SerializeField] private TMP_Dropdown antiAliasingDropdown;
         [SerializeField] private TMP_Dropdown sharpeningDropdown;
-        [SerializeField] private TMP_Dropdown rayTracingDropdown;
-        [SerializeField] private Slider brightnessSlider;
 
         [Header("Settings accesibility")]
         [SerializeField] private TMP_Dropdown colorblindDropdown;
@@ -37,54 +37,61 @@ namespace FastAndFractured
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
             antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(antiAliasingDropdown.value); });
             sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(sharpeningDropdown.value); });
-            rayTracingDropdown.onValueChanged.AddListener(delegate { SetRayTracing(rayTracingDropdown.value); });
             brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(brightnessSlider.value); });
             colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(colorblindDropdown.value); });
             languageDropdown.onValueChanged.AddListener(delegate { SetLanguage(languageDropdown.value); });
             subtitlesDropdown.onValueChanged.AddListener(delegate { SetSubtitles(subtitlesDropdown.value); });
-            masterVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(masterVolumeSlider.value); });
+            generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(generalVolumeSlider.value); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
         }
+
         private void SetStartValues()
         {
             //Master volume
             float masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.5f);
-            RefreshValue(masterVolumeSlider, masterVolume);
+            RefreshValue(generalVolumeSlider, masterVolume);
+
             //Music volume 
             float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.5f);
             RefreshValue(musicVolumeSlider, musicVolume);
+
             //SFX volume
             float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
             RefreshValue(sfxVolumeSlider, sfxVolume);
+
             // Max FPS
             int maxFPS = PlayerPrefs.GetInt("MaxFPS", 120);
             string maxFPSString = maxFPS.ToString();
             RefreshValue(fpsDropdown, maxFPSString);
+
             //Resolution
-            string resolution = PlayerPrefs.GetString("Resolution","1920x1080");
+            string resolution = PlayerPrefs.GetString("Resolution", "1920x1080");
             RefreshValue(resolutionDropdown, resolution);
+
             //VSync
             string vsync = PlayerPrefs.GetString("Vsync", "No");
-            //RefreshValue(vsyncDropdown, vsync);
+
             //Anti-Aliasing
             string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
             RefreshValue(antiAliasingDropdown, antiAliasing);
+
             //Sharpening
             string sharpening = PlayerPrefs.GetString("Sharpening", "No");
             RefreshValue(sharpeningDropdown, sharpening);
-            //Ray Tracing
-            string rayTracing = PlayerPrefs.GetString("RayTracing", "No");
-            RefreshValue(rayTracingDropdown, rayTracing);
+
             //Brightness
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
             RefreshValue(brightnessSlider, brightness);
+
             //Colorblind
             string colorblind = PlayerPrefs.GetString("Colorblind", "No");
             RefreshValue(colorblindDropdown, colorblind);
+
             //Language
             string language = PlayerPrefs.GetString("Language", "Español");
             RefreshValue(languageDropdown, language);
+
             //Subtitles
             string subtitles = PlayerPrefs.GetString("Subtitles", "No");
             RefreshValue(subtitlesDropdown, subtitles);
@@ -126,45 +133,58 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(true);
         }
 
-        //Audio settings
+        #region Audio Settings
         private void SetMasterVolume(float value)
         {
             PlayerPrefs.SetFloat("MasterVolume", value);
             PlayerPrefs.Save();
-            //TODO set master volume in game
+            SoundManager.Instance.UpdateGeneralVolume();
         }
         private void SetMusicVolume(float value)
         {
             PlayerPrefs.SetFloat("MusicVolume", value);
             PlayerPrefs.Save();
-            //TODO set music volume in game
+            SoundManager.Instance.UpdateMusicVolume();
         }
         private void SetSFXVolume(float value)
         {
             PlayerPrefs.SetFloat("SFXVolume", value);
             PlayerPrefs.Save();
-            //TODO set sfx volume in game
+            SoundManager.Instance.UpdateSFXVolume();
         }
+        #endregion
 
-        //Video settings
+        #region Video settings
         private void SetBrightness(float value)
         {
-            PlayerPrefs.SetFloat("Brightness",value);
+            PlayerPrefs.SetFloat("Brightness", value);
             PlayerPrefs.Save();
             //TODO set brightness in game
         }
-        private void SetVsync(int option)
+
+        private void UpdateVSync(bool isActive)
         {
-            
+            if (isActive)
+            {
+                QualitySettings.vSyncCount = 1;
+                Application.targetFrameRate = -1;
+            }
+            else
+            {
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = 1; //will be changed to the current option from the fps cap
+            }
         }
+
         private void CapFPS(int option)
         {
             string selectedOption = fpsDropdown.options[option].text;
-            int maxFPS=int.Parse(selectedOption);
+            int maxFPS = int.Parse(selectedOption);
             Application.targetFrameRate = maxFPS;
             PlayerPrefs.SetInt("MaxFPS", maxFPS);
             PlayerPrefs.Save();
         }
+
         private void SetAntiAliasing(int option)
         {
             string selectedOption = antiAliasingDropdown.options[option].text;
@@ -179,13 +199,7 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             //TODO set resolution in game
         }
-        private void SetRayTracing(int option)
-        {
-            string selectedOption = rayTracingDropdown.options[option].text;
-            PlayerPrefs.SetString("RayTracing", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set ray tracing in game
-        }
+
         private void SetSharpening(int option)
         {
             string selectedOption = sharpeningDropdown.options[option].text;
@@ -193,8 +207,9 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             //TODO set sharpening in game
         }
+        #endregion
 
-        //Accesibility settings
+        #region Accesibility settings
         private void SetColorblind(int option)
         {
             string selectedOption = colorblindDropdown.options[option].text;
@@ -224,5 +239,7 @@ namespace FastAndFractured
         {
             //TODO
         }
+
+        #endregion
     }
 }
