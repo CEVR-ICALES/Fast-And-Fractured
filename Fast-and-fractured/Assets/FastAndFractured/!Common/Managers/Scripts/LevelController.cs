@@ -112,8 +112,15 @@ namespace FastAndFractured
             }
         }
 
-     
-        // this will be moved to gameManaager once its created
+        private void Update()
+        {
+            if (_inGameCharacters != null)
+            {
+             bool inside =   IsInsideSandstorm(_inGameCharacters[0].transform);
+                Debug.Log("target : " + _inGameCharacters[0].name + " insideSandstrom : " + inside);
+
+            }
+        }
 
         private void OnEnable()
         {
@@ -365,6 +372,11 @@ namespace FastAndFractured
                 _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();
             _sandStormController.MoveSandStorm = true;
+        }
+
+        public bool IsInsideSandstorm(Transform target)
+        {
+            return _sandStormController.IsInsideStormCollider(target);
         }
 
         #region Resources

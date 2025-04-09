@@ -58,6 +58,8 @@ namespace FastAndFractured
         private int reduceQuantityPoints = 4;
         private float _timeToReduceKillCharacterTime;
         private ITimer _reduceKillTimeTimer;
+
+        const float FRONT_ANGLE = 180;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
@@ -168,6 +170,15 @@ namespace FastAndFractured
                    });
                 }
             }
+        }
+
+        public bool IsInsideStormCollider(Transform target)
+        {
+            Vector3 directionToTarget = target.position - (transform.position + _stormCollider.center + _stormCollider.size);
+            directionToTarget.Normalize();
+            float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
+            float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
+            return !(angleToTarget < (FRONT_ANGLE*0.5f));
         }
 
         private void OnTriggerEnter(Collider other)
