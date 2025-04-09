@@ -134,7 +134,7 @@ namespace FastAndFractured
         // will be moved to gameManager
         private void StartLevelWithOwnCharacters()
         {
-
+            _inGameCharacters = new List<GameObject>();
             foreach (var character in _charactersStats)
             {
                 Controller controller = character.GetComponentInParent<Controller>();
@@ -146,6 +146,7 @@ namespace FastAndFractured
                         ai.Player = character.transform.gameObject;
                     }
                 }
+                _inGameCharacters.Add(character.gameObject);
             }
            SetStormParameters(stormInDebugMode);
             charactersCustomStart?.Invoke();
@@ -344,7 +345,7 @@ namespace FastAndFractured
                     TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
                 }
             }
-            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> {
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
                     Destroy(character);

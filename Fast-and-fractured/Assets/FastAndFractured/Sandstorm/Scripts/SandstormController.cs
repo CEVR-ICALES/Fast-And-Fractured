@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Utilities;
 namespace FastAndFractured
 {
-    public class SandstormController : MonoBehaviour
+    public class SandstormController : MonoBehaviour, IKillCharacters
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
@@ -43,19 +43,29 @@ namespace FastAndFractured
         private bool _moveSandStorm = false;
 
         public bool StormSpawnPointsSetted { get => _spawnPointsSet; }
+
         private bool _spawnPointsSet = false;
         [SerializeField]
         private float maxCharacterKillTime = 10;
         [SerializeField]
         private float minCharacterKillTime = 3;
+        public int killPriority { get => killCharacterPriority;}
+        public float killTime { get => _currentCharacterKillTime;}
         private float _currentCharacterKillTime;
         private float _reductionKillTime;
+        [SerializeField]
+        public int killCharacterPriority = 1;
         [SerializeField]
         private int reduceQuantityPoints = 4;
         private float _timeToReduceKillCharacterTime;
         private ITimer _reduceKillTimeTimer;
-        private Dictionary<StatsController,ITimer> _killPLayerTimers;
-
+        private void Start()
+        {
+            _stormCollider = GetComponent<BoxCollider>();
+            _stormCollider.enabled = false;
+            primaryFog.gameObject.SetActive(false);
+            secondaryFog.gameObject.SetActive(false);
+        }
         private void Update()
         {
             if (_moveSandStorm)
@@ -66,11 +76,6 @@ namespace FastAndFractured
 
         public void SetSpawnPoints(bool debug)
         {
-            _killPLayerTimers = new Dictionary<StatsController, ITimer>();
-           _stormCollider = GetComponent<BoxCollider>();
-            _stormCollider.enabled = false;
-            primaryFog.gameObject.SetActive(false);
-            secondaryFog.gameObject.SetActive(false);
             float[] possibleAngels = new float[numberOfPoints];
             float nextAngleFactor = maxAngleExcluded / numberOfPoints;
             float currentAngle = 0;
@@ -106,11 +111,6 @@ namespace FastAndFractured
                 Debug.DrawLine(sphereCenter.position, _mirrorPoint, Color.red, 100);
                 Debug.DrawLine(_spawnPoint, _mirrorPoint, Color.red, 100);
             }
-        }
-
-        public void SetKillPlayerTimeValue()
-        {
-
         }
         /// <summary>
         /// Spawns the Fogs at a random point (hardcoded values for now)
@@ -170,21 +170,11 @@ namespace FastAndFractured
             }
         }
 
-        private void ReduceTimeOfCurrentTimer()
-        {
-            
-        }
-
         private void OnTriggerEnter(Collider other)
         {
             if(other.TryGetComponent(out StatsController statsController))
             {
-                ITimer deathCountdown = TimerSystem.Instance.CreateTimer(_currentCharacterKillTime, onTimerIncreaseComplete: () =>
-                 {
-                     statsController.Dead();
-                     _killPLayerTimers.Remove(statsController);
-                 });
-                _killPLayerTimers.Add(statsController, deathCountdown);
+               StartKillNotify(statsController);
             }
         }
 
@@ -192,13 +182,18 @@ namespace FastAndFractured
         {
             if(other.TryGetComponent(out StatsController statsController))
             {
-                ITimer deathCountdown = _killPLayerTimers[statsController];
-                if(deathCountdown.GetData().CurrentTime > 0)
-                {
-                    deathCountdown.StopTimer();
-                    _killPLayerTimers.Remove(statsController);
-                }
+               CharacterEscapedDead(statsController);
             }
         }
+
+       public void StartKillNotify(StatsController statsController)
+       {
+         statsController.GetKilledNotify(this,false);
+       }
+
+      public void CharacterEscapedDead(StatsController statsController)
+      {
+            statsController.GetKilledNotify(this, true);  
+      }
     }
 }

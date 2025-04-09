@@ -84,7 +84,7 @@ namespace FastAndFractured {
 
         public void ApplyAirFricction()
         {
-            _rb.AddForce(-_rb.transform.forward * AIR_FRICTION, ForceMode.Acceleration);
+            _rb.AddForce(-_rb.velocity.normalized * AIR_FRICTION, ForceMode.Acceleration);
         }
 
         public void ApplyFlipStateForce()
