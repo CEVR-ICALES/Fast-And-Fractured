@@ -1,3 +1,0 @@
-# F&F Docs
-
-:eyes: This is a test :eyes:...
