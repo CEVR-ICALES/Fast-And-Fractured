@@ -135,7 +135,7 @@ namespace FastAndFractured
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootForce = charDataSO.PushShootFORCE;
             //Cooldowns
-            currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
+            currentCooldownSpeed = charDataSO.CooldownSpeed;
         }
         [ContextMenu(nameof(DebugTake100Endurance))]
         public void DebugTake100Endurance()
