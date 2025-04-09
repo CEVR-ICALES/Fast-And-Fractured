@@ -7,6 +7,7 @@ namespace FastAndFractured
 {
     public class MariaAntoniaUniqueAbility : BaseUniqueAbility
     {
+        private const string materialEmissive = "_EmissiveExposureWeight";
         #region Variables
         [Tooltip("Multiplier to reduce the cooldown timers (example: 1.5 increases the cooldown timer by 50%)")]
         public float cooldownReductionMultiplier;
@@ -51,7 +52,7 @@ namespace FastAndFractured
         private float _originalExposureWeight;
 
         // Value to set when the ultimate ability is active
-        public float activeExposureWeight = 1f;
+        private float _activeExposureWeight = 0f;
 
         public GameObject croquettePrefab;
 
@@ -74,8 +75,8 @@ namespace FastAndFractured
             if (orbitCenter == null)
                 orbitCenter = transform;
 
-            //if (_hairMaterial != null)
-            //    _originalExposureWeight = _hairMaterial.GetFloat("_ExposureWeight");
+            if (_hairMaterial != null)
+                _originalExposureWeight = _hairMaterial.GetFloat(materialEmissive);
         }
 
         private void Update()
@@ -106,14 +107,13 @@ namespace FastAndFractured
 
             GenerateCroquettes(numberOfCroquettes);
             StartVFX();
-            //ActivateHairEmission(true); TO ADD IN FUTURE
-
+            ActivateHairEmission(true); 
             _timer = TimerSystem.Instance.CreateTimer(
                 duration: uniqueAbilityDuration,
                 onTimerDecreaseComplete: () =>
                 {
                     StopVFX();
-                    //ActivateHairEmission(false);
+                    ActivateHairEmission(false);
                 });
         }
 
@@ -244,12 +244,12 @@ namespace FastAndFractured
             {
                 if (isActive)
                 {
-                    _hairMaterial.SetFloat("_ExposureWeight", activeExposureWeight);
+                    _hairMaterial.SetFloat(materialEmissive, _activeExposureWeight);
                     DynamicGI.UpdateEnvironment();
                 }
                 else
                 {
-                    _hairMaterial.SetFloat("_ExposureWeight", _originalExposureWeight);
+                    _hairMaterial.SetFloat(materialEmissive, _originalExposureWeight);
                     DynamicGI.UpdateEnvironment();
                 }
             }
