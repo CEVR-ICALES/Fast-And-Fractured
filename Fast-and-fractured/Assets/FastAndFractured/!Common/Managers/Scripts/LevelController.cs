@@ -75,6 +75,8 @@ namespace FastAndFractured
             //Provisional For Debug
             if (debugMode)
             {
+                PlayerPrefs.SetString("Selected_Player", playerCharacter);
+                PlayerPrefs.SetInt("Player_Num", 1);
                 _charactersStats = FindObjectsOfType<StatsController>();
                 if (!useMyCharacters)
                 {
@@ -102,8 +104,7 @@ namespace FastAndFractured
             if (!useMyCharacters)
             {
                 DisableCurrentSceneCharacters();
-               // PlayerPrefs.SetString("Selected_Player",playerCharacter);
-                PlayerPrefs.SetInt("Player_Num", 1);
+                
                 SpawnInGameCharacters(out bool succeded);
                 if (!succeded)
                 {
@@ -147,10 +148,10 @@ namespace FastAndFractured
             {
                 return;
             }
-          foreach(var character in _charactersStats)
-          {
-                Destroy(character.transform.parent.gameObject);
-          }
+              foreach(var character in _charactersStats)
+              {
+                    Destroy(character.transform.parent.gameObject);
+              }
         }
         private void StartLevel()
         {

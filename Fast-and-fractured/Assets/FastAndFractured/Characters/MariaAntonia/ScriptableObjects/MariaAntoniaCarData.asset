@@ -15,18 +15,17 @@ MonoBehaviour:
   CharacterName: MariaAntonia
   AI: 0
   CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
-  CarWithSkinsPrefabs:
-  - {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
+  CarWithSkinsPrefabs: []
   MaxEndurance: 400
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 100
   MaxSpeedDashing: 140
-  MaxSpeedMultiplier: 0
+  MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 0
-  MinAcceleration: 0
-  Acceleration: 1200
+  MaxAcceleration: 1500
+  MinAcceleration: 1000
+  Acceleration: 3500
   BrakeTorque: 12000
   Handling: 35
   HandlingSmoothnes: 6
@@ -38,33 +37,33 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 900
-  BaseForce: 1000
+  Weight: 1200
+  BaseForce: 300000
   FrontalHitAnlgeThreshold: 35
-  EnduranceImportanceWhenColliding: 0.6
-  BaseDownwardForce: 300
+  EnduranceImportanceWhenColliding: 0.5
+  BaseDownwardForce: 500
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 2
-  MaxNormalShootDMG: 33
-  MinNormalShootDMG: 2
-  PushShootFORCE: 0
-  ExplosionRadius: 33
+  NormalShootDMG: 10
+  MaxNormalShootDMG: 25
+  MinNormalShootDMG: 5
+  PushShootFORCE: 400000
+  ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
-  NormalShootMaxRange: 300
-  PushShootAngle: 3
-  PushShootRange: 2
-  PushShootGravityMultiplier: 21
+  NormalShootMaxRange: 150
+  PushShootAngle: 40
+  PushShootRange: 15
+  PushShootGravityMultiplier: 30
   PushShootBounceNum: 3
-  PushShootBounceForce: 2
+  PushShootBounceForce: 60
   MineShootAngle: 40
   MineShootRange: 5
   DashCooldown: 2
-  PushShootCooldown: 0
+  PushShootCooldown: 3
   MineExplosionTime: 5
-  UniqueAbilityCooldown: 0
-  NormalShootOverHeat: 2
+  UniqueAbilityCooldown: 7
+  NormalShootOverHeat: 5
   FromTopSpeedToMaxSpeed: 0
   DeadDelay: 0
