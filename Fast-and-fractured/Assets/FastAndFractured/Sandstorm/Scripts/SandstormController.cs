@@ -8,7 +8,6 @@ namespace FastAndFractured
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
-        public LocalVolumetricFog secondaryFog;
 
         public float maxGrowthTime = 1.0f;
 
@@ -29,7 +28,7 @@ namespace FastAndFractured
         private float _currentGrowth = 0f;
 
         private Vector3 _initialVolumeSizeMain;
-        private Vector3 _initialVolumeSizeSecondary;
+        private Vector3 _initialColliderSize;
 
         [SerializeField]
         private Transform sphereCenter;
@@ -63,8 +62,7 @@ namespace FastAndFractured
         {
             _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
-            primaryFog.gameObject.SetActive(false);
-            secondaryFog.gameObject.SetActive(false);
+            primaryFog?.gameObject.SetActive(false);
         }
         private void Update()
         {
@@ -119,18 +117,19 @@ namespace FastAndFractured
         {
             _currentCharacterKillTime = maxCharacterKillTime;
             fogParent.transform.position = _spawnPoint;
-            primaryFog.gameObject.SetActive(true);
-            secondaryFog.gameObject.SetActive(true);
+            primaryFog?.gameObject.SetActive(true);
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
             fogParent.transform.rotation = targetRotation;
-
-            _initialVolumeSizeMain = primaryFog.parameters.size;
-            _initialVolumeSizeSecondary = secondaryFog.parameters.size;
-
-            _growthSpeed = (_maxGrowth)/maxGrowthTime;
             _stormCollider.enabled = true;
-            _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
+            if (primaryFog != null)
+            {
+                _initialVolumeSizeMain = primaryFog.parameters.size;
+                _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
+            }
+            _initialColliderSize = _stormCollider.size;
+            _growthSpeed = (_maxGrowth) / maxGrowthTime;
+
         }
 
         /// <summary>
@@ -145,13 +144,14 @@ namespace FastAndFractured
 
                 if (_currentGrowth > _maxGrowth)
                     _currentGrowth = _maxGrowth;
+                if (primaryFog != null)
+                {
+                    float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
 
-                float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
-                float newZSizeSecondary = _initialVolumeSizeSecondary.z + _currentGrowth;
-
-                primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
-                secondaryFog.parameters.size = new Vector3(_initialVolumeSizeSecondary.x, _initialVolumeSizeSecondary.y, newZSizeSecondary);
-                _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
+                    primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
+                }
+                float newZSizeCollider = _initialColliderSize.z + _currentGrowth;
+                _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
 
                 if ((fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
