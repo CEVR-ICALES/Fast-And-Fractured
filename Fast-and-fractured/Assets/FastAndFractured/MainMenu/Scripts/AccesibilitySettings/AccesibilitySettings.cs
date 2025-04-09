@@ -19,7 +19,14 @@ namespace FastAndFractured
         [Header("ColorBlind")]
         [SerializeField] ColorBlindModeController colorBlindModeController;
         [SerializeField] private Toggle colorBlindToggle;
+        [SerializeField] private Button nextColorblindModeButton;
+        [SerializeField] private Button previousColorblindModeButton;
+        [SerializeField] private TextMeshProUGUI colorBlindTypeText;
+        private int _colorblindModeIndex = 0;
+        private const int COLORBLIND_MODES_COUNT = 3;
         private const string COLORBLIND_KEY = "ColorBlindMode";
+        private const string COLORBLIND_INDEX_KEY = "ColorBlindModeIndex";
+        private bool _isColorBlindModeOn = false;
 
         [Header("Subtitles")]
         [SerializeField] private Toggle subtitlesToggle;
@@ -40,8 +47,12 @@ namespace FastAndFractured
             LocalizationManager.Read();
             SelectLanguage();
 
-            bool isColorBlindModeOn = PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1;
-            colorBlindToggle.isOn = isColorBlindModeOn;
+            _isColorBlindModeOn = PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1;
+            Debug.Log(_isColorBlindModeOn + "WHAT");
+            _colorblindModeIndex = PlayerPrefs.GetInt(COLORBLIND_INDEX_KEY);
+            colorBlindToggle.isOn = _isColorBlindModeOn;
+            UpdateColorblindModeText();
+            HandleColorblindButtons();
 
             bool isSubtitlesOn = PlayerPrefs.GetInt(SUBTITLES_KEY, 0) == 1;
             subtitlesToggle.isOn = isSubtitlesOn;
@@ -53,6 +64,8 @@ namespace FastAndFractured
             previousLenguageButton?.onClick.AddListener(PreviousLanguage);
             colorBlindToggle?.onValueChanged.AddListener(OnColorBlindToggleChanged);
             subtitlesToggle?.onValueChanged.AddListener(OnSubtitlesToggleChanged);
+            previousColorblindModeButton?.onClick.AddListener(PreviousColorblindMode);
+            nextColorblindModeButton?.onClick.AddListener(NextColorblindMode);
         }
 
         private void OnDisable()
@@ -61,6 +74,8 @@ namespace FastAndFractured
             previousLenguageButton?.onClick.RemoveAllListeners();
             colorBlindToggle?.onValueChanged.RemoveAllListeners();
             subtitlesToggle?.onValueChanged.RemoveAllListeners();
+            previousColorblindModeButton?.onClick.RemoveAllListeners();
+            nextColorblindModeButton?.onClick.RemoveAllListeners();
             PlayerPrefs.Save();
         }
 
@@ -107,11 +122,76 @@ namespace FastAndFractured
 
         private void OnColorBlindToggleChanged(bool isOn)
         {
+            _isColorBlindModeOn = isOn;
             PlayerPrefs.SetInt(COLORBLIND_KEY, isOn ? 1 : 0); // 1 true
             PlayerPrefs.Save();
-            colorBlindModeController.UpdateColorBlindMode(isOn);
-
+            NotifyColorblindMode();
+            HandleColorblindButtons();
         }
+
+        public void NextColorblindMode()
+        {
+            _colorblindModeIndex++;
+            if (_colorblindModeIndex >= COLORBLIND_MODES_COUNT)
+            {
+                _colorblindModeIndex = 0;
+            }
+            colorBlindModeController.UpdateColorblindModeIndex(_colorblindModeIndex);
+            NotifyColorblindMode();
+            PlayerPrefs.SetInt(COLORBLIND_INDEX_KEY, _colorblindModeIndex);
+        }
+
+        public void PreviousColorblindMode()
+        {
+            _colorblindModeIndex--;
+            if (_languageIndex < 0)
+            {
+                _colorblindModeIndex = COLORBLIND_MODES_COUNT - 1;
+            }
+            colorBlindModeController.UpdateColorblindModeIndex(_colorblindModeIndex);
+            NotifyColorblindMode();
+            PlayerPrefs.SetInt(COLORBLIND_INDEX_KEY, _colorblindModeIndex);
+        }
+
+        private void NotifyColorblindMode()
+        {
+            colorBlindModeController.UpdateColorblindModeIndex(_colorblindModeIndex);
+            colorBlindModeController.UpdateColorBlindMode(_isColorBlindModeOn);
+            UpdateColorblindModeText();
+        }
+
+        private void HandleColorblindButtons()
+        {
+            if (!_isColorBlindModeOn)
+            {
+                nextColorblindModeButton.enabled = false;
+                previousColorblindModeButton.enabled = false;
+            }
+            else
+            {
+                nextColorblindModeButton.enabled = true;
+                previousColorblindModeButton.enabled = true;
+            }
+        }
+
+        public void UpdateColorblindModeText()
+        {
+            switch(_colorblindModeIndex)
+            {
+                case 0:
+                    colorBlindTypeText.text = "Protanopia";
+                    break;
+
+                case 1:
+                    colorBlindTypeText.text = "Deuteranopia";
+                    break;
+
+                case 2:
+                    colorBlindTypeText.text = "Tritanopia";
+                    break;
+            }
+        }
+
 
         #endregion
 
