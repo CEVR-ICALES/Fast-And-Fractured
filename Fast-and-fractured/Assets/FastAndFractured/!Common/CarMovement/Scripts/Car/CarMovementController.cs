@@ -337,6 +337,8 @@ namespace FastAndFractured
              {
                  onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
              });
+            TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: statsController.CooldownSpeed);
+
         }
         public void CancelDash()
         {
