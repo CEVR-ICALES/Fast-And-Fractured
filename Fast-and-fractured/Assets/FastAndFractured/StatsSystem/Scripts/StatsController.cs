@@ -98,6 +98,8 @@ namespace FastAndFractured
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
         public UnityEvent<float,GameObject,bool> onDead;
+        private ITimer _deadTimer;
+        private IKillCharacters _currentKiller;
 
         #region START EVENTS
         public void CustomStart()
@@ -105,7 +107,7 @@ namespace FastAndFractured
             onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
-            _isPlayer = !GetComponent<CarMovementController>().IsAi;
+            _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
         }
@@ -184,9 +186,49 @@ namespace FastAndFractured
             }
         }
 
+        public void GetKilledNotify(IKillCharacters killer,bool escapedDead)
+        {
+            if (killer == _currentKiller)
+            {
+                if(escapedDead)
+                {
+                    _deadTimer.StopTimer();
+                }    
+            }
+            else
+            {
+                if (_currentKiller != null)
+                {
+                    if (killer.KillPriority > _currentKiller.KillPriority)
+                    {
+                        if (_deadTimer != null)
+                        {
+                            float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
+                            _currentKiller = killer;
+                            _deadTimer.StopTimer();
+                            _deadTimer = TimerSystem.Instance.CreateTimer(newTime, onTimerDecreaseComplete: () =>
+                            {
+                                Dead();
+                                _deadTimer = null;
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    _currentKiller = killer;
+                    _deadTimer = TimerSystem.Instance.CreateTimer(killer.KillTime, onTimerDecreaseComplete: () =>
+                    {
+                        Dead();
+                        _deadTimer = null;
+                    });
+                }
+            }
+        }
+
         public void Dead()
         {
-            Debug.Log("He muerto soy " + charDataSO.name);
+            Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
             onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
         }
