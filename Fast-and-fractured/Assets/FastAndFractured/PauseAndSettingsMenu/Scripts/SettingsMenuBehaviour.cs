@@ -19,7 +19,7 @@ namespace FastAndFractured
         [Header("Settings video")]
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
-        [SerializeField] private TMP_Dropdown vsyncDropdown;
+        [SerializeField] private Toggle vsyncDropdown;
         [SerializeField] private TMP_Dropdown antiAliasingDropdown;
         [SerializeField] private TMP_Dropdown sharpeningDropdown;
         [SerializeField] private TMP_Dropdown rayTracingDropdown;
@@ -35,7 +35,6 @@ namespace FastAndFractured
             SetStartValues();
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
-            vsyncDropdown.onValueChanged.AddListener(delegate { SetVsync(vsyncDropdown.value); });
             antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(antiAliasingDropdown.value); });
             sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(sharpeningDropdown.value); });
             rayTracingDropdown.onValueChanged.AddListener(delegate { SetRayTracing(rayTracingDropdown.value); });
@@ -67,7 +66,7 @@ namespace FastAndFractured
             RefreshValue(resolutionDropdown, resolution);
             //VSync
             string vsync = PlayerPrefs.GetString("Vsync", "No");
-            RefreshValue(vsyncDropdown, vsync);
+            //RefreshValue(vsyncDropdown, vsync);
             //Anti-Aliasing
             string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
             RefreshValue(antiAliasingDropdown, antiAliasing);
@@ -156,10 +155,7 @@ namespace FastAndFractured
         }
         private void SetVsync(int option)
         {
-            string selectedOption = vsyncDropdown.options[option].text;
-            PlayerPrefs.SetString("Vsync", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set vsync in game
+            
         }
         private void CapFPS(int option)
         {
