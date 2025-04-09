@@ -11,7 +11,6 @@ namespace FastAndFractured
         public Button backButton;
         public Button defaultButton;
 
-
         public void SetAlpha(float alpha)
         {
             canvasGroup.alpha = alpha;

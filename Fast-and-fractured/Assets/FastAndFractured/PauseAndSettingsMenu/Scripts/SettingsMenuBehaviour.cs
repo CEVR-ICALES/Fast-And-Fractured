@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace FastAndFractured
 {
@@ -12,10 +10,12 @@ namespace FastAndFractured
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
         [SerializeField] private GameObject accessibilitySettingsUI;
+
         [Header("Settings audio")]
         [SerializeField] private Slider masterVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
+
         [Header("Settings video")]
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
@@ -24,10 +24,12 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown sharpeningDropdown;
         [SerializeField] private TMP_Dropdown rayTracingDropdown;
         [SerializeField] private Slider brightnessSlider;
+
         [Header("Settings accesibility")]
         [SerializeField] private TMP_Dropdown colorblindDropdown;
         [SerializeField] private TMP_Dropdown languageDropdown;
         [SerializeField] private TMP_Dropdown subtitlesDropdown;
+
         void Start()
         {
             SetStartValues();
