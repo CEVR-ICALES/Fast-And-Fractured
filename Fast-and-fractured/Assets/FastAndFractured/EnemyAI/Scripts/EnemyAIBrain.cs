@@ -356,8 +356,7 @@ namespace FastAndFractured
 
         public void UseUniqueAbility()
         {
-            //TODO
-            //Use unique ability
+            uniqueAbility.ActivateAbility();
         }
          
         public void ChangeShootingTargetToTheOneThatMadeMoreDamage()
