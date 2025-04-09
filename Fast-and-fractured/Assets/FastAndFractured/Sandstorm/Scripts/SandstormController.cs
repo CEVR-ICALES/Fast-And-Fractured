@@ -34,7 +34,7 @@ namespace FastAndFractured
         [SerializeField]
         private Transform sphereCenter;
         [SerializeField]
-        private float sphereRadius = 374.6f;
+        private float sphereRadius = 500f;
         [SerializeField]
         private float maxAngleExcluded = 360f;
         [SerializeField]
