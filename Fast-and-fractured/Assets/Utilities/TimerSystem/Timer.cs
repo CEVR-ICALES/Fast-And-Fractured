@@ -23,7 +23,7 @@ namespace Utilities
         {
             if (!_data.IsRunning || _data.IsPaused) return;
 
-            var speedMultiplier = GetData().SpeedMultiplier;
+            float speedMultiplier = GetData().SpeedMultiplier;
             _data.CurrentTime += (_data.Direction == TimerDirection.INCREASE) ? deltaTime * speedMultiplier : -deltaTime * speedMultiplier;
 
 
