@@ -48,7 +48,6 @@ namespace FastAndFractured
             SelectLanguage();
 
             _isColorBlindModeOn = PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1;
-            Debug.Log(_isColorBlindModeOn + "WHAT");
             _colorblindModeIndex = PlayerPrefs.GetInt(COLORBLIND_INDEX_KEY);
             colorBlindToggle.isOn = _isColorBlindModeOn;
             UpdateColorblindModeText();

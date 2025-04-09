@@ -10,8 +10,6 @@ namespace FastAndFractured
     {
         public string TextLocalizeCode;
         public float Duration;
-        public Color TextColor;
-        public int FontSize;
         public string SpeakerName;
     }
     public class SubtitlesManager : AbstractSingleton<SubtitlesManager>
@@ -25,7 +23,6 @@ namespace FastAndFractured
         private SubtitleData _currentSubtitle;
         private ITimer _displayTimer;
         private ITimer _fadeTimer;
-        private bool _isShowing = false;
 
         private const string SUBTITLES_KEY = "Substitles";
         protected override void Awake()
@@ -54,7 +51,6 @@ namespace FastAndFractured
 
             CleanupTimers();
             _currentSubtitle = data;
-            _isShowing = true;
             UpdateDisplay();
             _fadeTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
                 onTimerIncreaseComplete: () => StartSubtitleDisplay(),
@@ -77,7 +73,6 @@ namespace FastAndFractured
                 fadeDuration,
                 TimerDirection.DECREASE,
                 onTimerDecreaseComplete: () => {
-                    _isShowing = false;
                     canvasGroup.alpha = 0f;
                 },
                 onTimerDecreaseUpdate: (progress) => canvasGroup.alpha = progress
@@ -88,9 +83,6 @@ namespace FastAndFractured
         {
             subtitleText.gameObject.GetComponent<LocalizedText>().LocalizationKey = _currentSubtitle.TextLocalizeCode;
             subtitleText.gameObject.GetComponent<LocalizedText>().Localize();
-            //subtitleText.fontSize = _currentSubtitle.FontSize;
-            subtitleText.color = _currentSubtitle.TextColor;
-
             if (speakerText != null)
             {
                 speakerText.text = !string.IsNullOrEmpty(_currentSubtitle.SpeakerName)
@@ -103,7 +95,6 @@ namespace FastAndFractured
         {
             CleanupTimers();
             canvasGroup.alpha = 0f;
-            _isShowing = false;
             canvasGroup.gameObject.SetActive(false);
         }
 

@@ -17,7 +17,6 @@ namespace FastAndFractured
             {
                 TextLocalizeCode = textLocalizeCode,
                 Duration = 5f,
-                TextColor = Color.white,
                 SpeakerName = speakerName
             };
             SubtitlesManager.Instance.ShowSubtitle(subtitleData);
