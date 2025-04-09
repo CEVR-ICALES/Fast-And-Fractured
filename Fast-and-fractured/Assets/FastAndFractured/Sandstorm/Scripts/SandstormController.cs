@@ -49,8 +49,8 @@ namespace FastAndFractured
         private float maxCharacterKillTime = 10;
         [SerializeField]
         private float minCharacterKillTime = 3;
-        public int killPriority { get => killCharacterPriority;}
-        public float killTime { get => _currentCharacterKillTime;}
+        public int KillPriority { get => killCharacterPriority;}
+        public float KillTime { get => _currentCharacterKillTime;}
         private float _currentCharacterKillTime;
         private float _reductionKillTime;
         [SerializeField]

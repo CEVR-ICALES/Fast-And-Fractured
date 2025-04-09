@@ -6,8 +6,8 @@ namespace FastAndFractured
 {
     public interface IKillCharacters
     {
-        public int killPriority { get; }
-        public float killTime { get; }
+        public int KillPriority { get; }
+        public float KillTime { get; }
         public void StartKillNotify(StatsController statsController)
         {
 
