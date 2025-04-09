@@ -12,6 +12,7 @@ namespace FastAndFractured
         [SerializeField] private StatsBoost[] boostList;
         public StatsBoost[] BoostList => boostList;
         private const float PERMANENT_BOOST_VALUE = -1;
+        private const float DEFAULT_COOLDOWN_SPEED = 1f;
 
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
@@ -23,41 +24,42 @@ namespace FastAndFractured
 
             foreach (var boost in boostList)
             {
-                if (boost.StatToBoost == Stats.ENDURANCE)
+                switch (boost.StatToBoost)
                 {
-                    if (boost.BoostValue < 0)
-                    {
-                        statsController.RecoverEndurance(boost.BoostValue, false);
-                    }
-                    else
-                    {
-                        statsController.TakeEndurance(boost.BoostValue, false);
-                    }
+                    case Stats.ENDURANCE:
+                        if (boost.BoostValue < 0)
+                        {
+                            statsController.RecoverEndurance(boost.BoostValue, false);
+                        }
+                        else
+                        {
+                            statsController.TakeEndurance(boost.BoostValue, false);
+                        }
+                        break;
+                    default:
+                        statsController.UpgradeCharStat(boost.StatToBoost, boost.BoostValue);
+                        break;
                 }
-                else
-                {
-                    statsController.UpgradeCharStat(boost.StatToBoost, boost.BoostValue);
-                }
-
 
                 boost.OnBoostStartEvent?.Invoke();
                 if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
                 TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
                 {
-                    if (boost.StatToBoost == Stats.ENDURANCE)
+                    switch (boost.StatToBoost)
                     {
-                        if (boost.BoostValue < 0)
-                        {
-                            statsController.TakeEndurance(boost.BoostValue, false);
-                        }
-                        else
-                        {
-                            statsController.RecoverEndurance(boost.BoostValue, false);
-                        }
-                    }
-                    else
-                    {
-                        statsController.ReduceCharStat(boost.StatToBoost, boost.BoostValue);
+                        case Stats.ENDURANCE:
+                            if (boost.BoostValue < 0)
+                            {
+                                statsController.TakeEndurance(boost.BoostValue, false);
+                            }
+                            else
+                            {
+                                statsController.RecoverEndurance(boost.BoostValue, false);
+                            }
+                            break;
+                        default:
+                            statsController.ReduceCharStat(boost.StatToBoost, boost.BoostValue);
+                            break;
                     }
 
                     boost.OnBoostEndEvent?.Invoke();
@@ -67,7 +69,6 @@ namespace FastAndFractured
             onInteractEmpty?.Invoke();
             onInteract?.Invoke(interactionFrom, intearactionTo);
         }
-
 
         [Serializable]
         public class StatsBoost

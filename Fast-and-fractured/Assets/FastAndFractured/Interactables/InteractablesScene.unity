@@ -3639,7 +3639,17 @@ MonoBehaviour:
   fogParent: {fileID: 1867144752}
   primaryFog: {fileID: 79034889}
   secondaryFog: {fileID: 1512332626}
-  growthSpeed: 1
+  maxGrowthTime: 1
+  gameObjectSpawnPoint: {fileID: 0}
+  gameObjectMirroPoint: {fileID: 0}
+  sphereCenter: {fileID: 0}
+  sphereRadius: 500
+  maxAngleExcluded: 360
+  numberOfPoints: 18
+  maxCharacterKillTime: 10
+  minCharacterKillTime: 3
+  killCharacterPriority: 1
+  reduceQuantityPoints: 4
 --- !u!4 &1891153363
 Transform:
   m_ObjectHideFlags: 0
@@ -3985,6 +3995,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1891153362}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: charactersData.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: spawnPoints.Array.data[0]
       value: 
       objectReference: {fileID: 451664265}
@@ -4016,6 +4030,14 @@ PrefabInstance:
       propertyPath: spawnPoints.Array.data[7]
       value: 
       objectReference: {fileID: 878038414}
+    - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: charactersData.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 4bcd8dfa1e06f184497af484462dd6fc, type: 2}
+    - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: charactersData.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: d4a890fa6d77b894080f079f5e77f171, type: 2}
     - target: {fileID: 6692042086972548956, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: m_Name
       value: SceneCommons

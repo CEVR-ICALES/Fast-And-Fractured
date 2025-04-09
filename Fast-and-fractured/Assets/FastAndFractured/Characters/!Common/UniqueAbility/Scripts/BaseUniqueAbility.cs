@@ -11,6 +11,7 @@ namespace FastAndFractured
         #region VARIABLES
 
         [SerializeField] protected AbilityData abilityData;
+        private StatsController statsController;
         private bool _isAbilityActive = false;
         private bool _isAI;
         private GameObject _uniqueUIPrefabInstance;
@@ -35,6 +36,8 @@ namespace FastAndFractured
             _isAbilityActive = false;
             
             _isAI = GetComponentInParent<EnemyAIBrain>();
+            statsController = GetComponent<StatsController>();
+            abilityData.CooldownDuration = statsController.UniqueCooldown;
         }
 
 
@@ -56,6 +59,7 @@ namespace FastAndFractured
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration, onTimerDecreaseComplete:StopCooldown) ;
             _isOnCooldown = true;
+            TimerSystem.Instance.ModifyTimer(_cooldownTimer, speedMultiplier: statsController.CooldownSpeed);
 
         }
 
