@@ -10,6 +10,7 @@ namespace FastAndFractured
         public class CreditsEntry
         {
             public string title;
+            public float sizeMultiplier = 1f;
             public List<string> names = new List<string>();
         }
 
