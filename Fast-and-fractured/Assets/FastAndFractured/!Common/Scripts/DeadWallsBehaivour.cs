@@ -40,7 +40,6 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
         }
     }
 
-    // Verifica si el objeto está dentro del cono de visión y distancia
     public bool IsCharacterInFront(Transform target)
     {
         Vector3 directionToTarget = target.position - (transform.position + transform.lossyScale);
