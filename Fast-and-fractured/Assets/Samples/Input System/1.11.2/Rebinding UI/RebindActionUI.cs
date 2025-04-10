@@ -56,9 +56,12 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             "<Keyboard>/8",
             "<Keyboard>/9",
             "<Keyboard>/enter",
+            "<Keyboard>/Space",
             "<Keyboard>/space",
             "<Keyboard>/leftShift",
             "<Keyboard>/leftCtrl",
+            "<Keyboard>/Ctrl",
+            "<Keyboard>/Control",
             "<Keyboard>/leftAlt",
             "<Keyboard>/tab",
             "<Keyboard>/backspace",
@@ -401,7 +404,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                     var binding = action.bindings[bindingIndex];
                     var keyPath = binding.effectivePath;
 
-                    // Additional validation (e.g., allowed keys)
+                    // here we can potentially add allowed keys...
                     if (m_ControlSchemeRestriction == ControlSchemeRestriction.KeyboardMouse)
                     {
                         if (keyPath.StartsWith("<Keyboard>/") && !inputsList.Contains(keyPath) ||

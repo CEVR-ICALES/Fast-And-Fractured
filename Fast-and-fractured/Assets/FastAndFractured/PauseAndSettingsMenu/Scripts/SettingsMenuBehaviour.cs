@@ -12,6 +12,8 @@ namespace FastAndFractured
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
         [SerializeField] private GameObject accessibilitySettingsUI;
+        [SerializeField] private GameObject gamepadRemappingWindow;
+        [SerializeField] private GameObject keyboardRemappingWindow;
         [Header("Settings audio")]
         [SerializeField] private Slider masterVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
@@ -24,10 +26,6 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown sharpeningDropdown;
         [SerializeField] private TMP_Dropdown rayTracingDropdown;
         [SerializeField] private Slider brightnessSlider;
-        [Header("Settings accesibility")]
-        [SerializeField] private TMP_Dropdown colorblindDropdown;
-        [SerializeField] private TMP_Dropdown languageDropdown;
-        [SerializeField] private TMP_Dropdown subtitlesDropdown;
         void Start()
         {
             SetStartValues();
@@ -38,9 +36,6 @@ namespace FastAndFractured
             sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(sharpeningDropdown.value); });
             rayTracingDropdown.onValueChanged.AddListener(delegate { SetRayTracing(rayTracingDropdown.value); });
             brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(brightnessSlider.value); });
-            colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(colorblindDropdown.value); });
-            languageDropdown.onValueChanged.AddListener(delegate { SetLanguage(languageDropdown.value); });
-            subtitlesDropdown.onValueChanged.AddListener(delegate { SetSubtitles(subtitlesDropdown.value); });
             masterVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(masterVolumeSlider.value); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
@@ -78,15 +73,6 @@ namespace FastAndFractured
             //Brightness
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
             RefreshValue(brightnessSlider, brightness);
-            //Colorblind
-            string colorblind = PlayerPrefs.GetString("Colorblind", "No");
-            RefreshValue(colorblindDropdown, colorblind);
-            //Language
-            string language = PlayerPrefs.GetString("Language", "Español");
-            RefreshValue(languageDropdown, language);
-            //Subtitles
-            string subtitles = PlayerPrefs.GetString("Subtitles", "No");
-            RefreshValue(subtitlesDropdown, subtitles);
         }
         private void RefreshValue(TMP_Dropdown dropdown, string value)
         {
@@ -111,18 +97,41 @@ namespace FastAndFractured
             audioSettingsUI.SetActive(true);
             videoSettingsUI.SetActive(false);
             accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
         }
         public void OpenVideoSettings()
         {
             audioSettingsUI.SetActive(false);
             videoSettingsUI.SetActive(true);
             accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
         }
         public void OpenAccesibilitySettings()
         {
             audioSettingsUI.SetActive(false);
             videoSettingsUI.SetActive(false);
             accessibilitySettingsUI.SetActive(true);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
+        }
+
+        public void OpenKeyboardRemapping()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(true);
+        }
+        public void OpenControllerRemapping()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(true);
+            keyboardRemappingWindow.SetActive(false);
         }
 
         //Audio settings
@@ -195,36 +204,6 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             //TODO set sharpening in game
         }
-
-        //Accesibility settings
-        private void SetColorblind(int option)
-        {
-            string selectedOption = colorblindDropdown.options[option].text;
-            PlayerPrefs.SetString("Colorblind", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set colorblind in game
-        }
-        private void SetLanguage(int option)
-        {
-            string selectedOption = languageDropdown.options[option].text;
-            PlayerPrefs.SetString("Language", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set language in game
-        }
-        private void SetSubtitles(int option)
-        {
-            string selectedOption = subtitlesDropdown.options[option].text;
-            PlayerPrefs.SetString("Subtitles", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set subtitles in game
-        }
-        public void OpenKeyboardRemapping()
-        {
-            //TODO
-        }
-        public void OpenControllerRemapping()
-        {
-            //TODO
-        }
+       
     }
 }
