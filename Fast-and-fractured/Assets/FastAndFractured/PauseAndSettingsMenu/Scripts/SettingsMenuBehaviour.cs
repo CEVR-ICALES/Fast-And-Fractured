@@ -20,7 +20,7 @@ namespace FastAndFractured
         [SerializeField] private Slider sfxVolumeSlider;
 
         [Header("Video Settings")]
-        [SerializeField] private Toggle vsyncDropdown;
+        [SerializeField] private Toggle vsyncToggle;
         [SerializeField] private Slider brightnessSlider;
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
@@ -46,6 +46,8 @@ namespace FastAndFractured
             generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(generalVolumeSlider.value); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
+
+            vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(vsyncToggle.isOn); });
         }
 
         private void SetStartValues()
@@ -73,7 +75,9 @@ namespace FastAndFractured
             LoadAvailableResolutions();
 
             //VSync
-            string vsync = PlayerPrefs.GetString("Vsync", "No");
+            bool vsyncOn = PlayerPrefs.GetInt("Vsync", 0) == 1;
+            vsyncToggle.isOn = vsyncOn; 
+            UpdateVSync(vsyncOn);
 
             //Anti-Aliasing
             string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
@@ -167,16 +171,16 @@ namespace FastAndFractured
 
         private void UpdateVSync(bool isActive)
         {
-            if (isActive)
-            {
-                QualitySettings.vSyncCount = 1;
-                Application.targetFrameRate = -1;
-            }
-            else
-            {
-                QualitySettings.vSyncCount = 0;
-                Application.targetFrameRate = 1; //will be changed to the current option from the fps cap
-            }
+            QualitySettings.vSyncCount = isActive ? 1 : 0;
+            Application.targetFrameRate = isActive ? -1 : 60;
+
+            PlayerPrefs.SetInt("Vsync", isActive ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+
+        private void ToggleVsync(bool value)
+        {
+            UpdateVSync(value);
         }
 
         private void CapFPS(int option)
