@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 742999951481237971}
   - component: {fileID: 8598308109603905528}
   m_Layer: 0
-  m_Name: ShootingDamage
+  m_Name: PushShootForce
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +85,7 @@ MonoBehaviour:
       m_Calls: []
   disableGameObjectOnInteract: 0
   boostList:
-  - _statToBoost: 3
+  - _statToBoost: 4
     _boostValue: 10
     _boostTime: 5
     _onBoostStartEvent:
@@ -156,7 +156,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b56828eeea30e974d857fd5f0f97b399, type: 2}
+  - {fileID: 2100000, guid: e814d3ff7509033418c48bfe0c7a9817, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

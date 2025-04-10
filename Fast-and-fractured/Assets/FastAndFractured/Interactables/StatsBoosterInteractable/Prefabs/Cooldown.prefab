@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 742999951481237971}
   - component: {fileID: 8598308109603905528}
   m_Layer: 0
-  m_Name: ShootingDamage
+  m_Name: Cooldown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,9 +85,9 @@ MonoBehaviour:
       m_Calls: []
   disableGameObjectOnInteract: 0
   boostList:
-  - _statToBoost: 3
-    _boostValue: 10
-    _boostTime: 5
+  - _statToBoost: 5
+    _boostValue: 4
+    _boostTime: 15
     _onBoostStartEvent:
       m_PersistentCalls:
         m_Calls: []
@@ -156,7 +156,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b56828eeea30e974d857fd5f0f97b399, type: 2}
+  - {fileID: 2100000, guid: c59beaccd8e2a564db543c798fef18d6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
