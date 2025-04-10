@@ -48,9 +48,6 @@ namespace FastAndFractured
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
 
-        [Header("Air rotation")]
-        [SerializeField] private float airRotationForce;
-
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
 
@@ -515,19 +512,19 @@ namespace FastAndFractured
 
             if (steeringInput.x > 0)
             {
-                _physicsBehaviour.AddTorque(-transform.forward * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(-transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
             } else if(steeringInput.x < 0)
             {
-                _physicsBehaviour.AddTorque(transform.forward * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
             }
 
             if(steeringInput.y > 0)
             {
-                _physicsBehaviour.AddTorque(transform.right * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
                 
             } else if(steeringInput.y < 0)
             {
-                _physicsBehaviour.AddTorque(-transform.right * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(-transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
             }
 
         }

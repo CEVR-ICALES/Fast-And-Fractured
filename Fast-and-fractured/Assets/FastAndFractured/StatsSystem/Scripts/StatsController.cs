@@ -34,6 +34,7 @@ namespace FastAndFractured
         public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
+        public float AirRotationForce { get => charDataSO.AerialRotationSpeed; }
         public float Acceleration { get => currentAcceleration; }
         public float BrakeTorque { get => charDataSO.BrakeTorque; }
         public float Handling { get => charDataSO.Handling; }
@@ -135,6 +136,8 @@ namespace FastAndFractured
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             //Cooldowns
             currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
+
+            
         }
         [ContextMenu(nameof(DebugTake100Endurance))]
         public void DebugTake100Endurance()
