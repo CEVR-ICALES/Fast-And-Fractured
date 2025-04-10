@@ -192,7 +192,7 @@ namespace FastAndFractured
             {
                 if(escapedDead)
                 {
-                    _deadTimer.StopTimer();
+                    _deadTimer?.StopTimer();
                 }    
             }
             else
