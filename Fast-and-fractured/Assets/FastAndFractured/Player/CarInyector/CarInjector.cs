@@ -54,7 +54,9 @@ public class CarInjector : MonoBehaviour
         if(TryGetComponent<EnemyAIBrain>(out EnemyAIBrain enemyAIBrain))
         {
             enemyAIBrain.InstallAIParameters(injectedCar.GetComponent<StatsController>().CharacterData.AIParameters);
-        }else{
+            injectedCar.GetComponent<CarMovementController>().IsAi = true;
+        }
+        else{
             injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
         } 
 
