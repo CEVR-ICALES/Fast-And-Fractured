@@ -8,18 +8,29 @@ namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        private float _masterVolume = 1f;
-
+        #region Variables
+        #region Volume Variables
+        private float _generalVolume = 1f;
+        private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
 
-        private float _musicVolume = 1f;
+        private float _previousGeneralVolume;
+        private float _previousMusicVolume;
+        private float _previousSFXVolume;
+        #endregion
 
+        #region Slider Variables
         [SerializeField] private Slider sfxVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider generalVolumeSlider;
+        #endregion
 
+        #region Dictionary Variables
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
+        #endregion
+
+        #endregion
 
         protected override void Awake()
         {
@@ -174,37 +185,61 @@ namespace Utilities
             sfxVCA.setVolume(value);
         }
 
-        public void MuteAllSounds()
+        public void ToggleMuteAllSounds(bool isMuted)
         {
-            SetGeneralVolume(0);
-            SetMusicVolume(0);
-            SetSFXVolume(0);
+            _previousGeneralVolume = generalVolumeSlider != null ? generalVolumeSlider.value : _generalVolume;
+            _previousMusicVolume = musicVolumeSlider != null ? musicVolumeSlider.value : _musicVolume;
+            _previousSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : _sfxVolume;
 
-            //If the sliders are assigned, set their values to 0
-            if (sfxVolumeSlider != null && musicVolumeSlider != null && generalVolumeSlider != null)
+            if (isMuted)
             {
-                generalVolumeSlider.value = 0;
-                musicVolumeSlider.value = 0;
-                sfxVolumeSlider.value = 0;
+                Debug.Log("Inside isMuted");
+
+                SetGeneralVolume(0);
+                SetMusicVolume(0);
+                SetSFXVolume(0);
+
+                if (generalVolumeSlider != null) generalVolumeSlider.value = 0;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = 0;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = 0;
+            }
+            else
+            {
+                SetGeneralVolume(0.5f);
+                SetMusicVolume(0.5f);
+                SetSFXVolume(0.5f);
+
+                if (generalVolumeSlider != null) generalVolumeSlider.value = _previousGeneralVolume;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = _previousMusicVolume;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = _previousSFXVolume;
             }
         }
 
         #region Slider Volume Methods
         public void UpdateSFXVolume()
         {
+            if (_sfxVolume != 0)
+                _previousSFXVolume = _sfxVolume;
+
             _sfxVolume = sfxVolumeSlider.value;
             SetSFXVolume(sfxVolumeSlider.value);
         }
 
         public void UpdateMusicVolume()
         {
+            if (_musicVolume != 0)
+                _previousMusicVolume = _musicVolume;
+
             _musicVolume = musicVolumeSlider.value;
             SetMusicVolume(musicVolumeSlider.value);
         }
 
         public void UpdateGeneralVolume()
         {
-            _masterVolume = generalVolumeSlider.value;
+            if (_generalVolume != 0)
+                _previousGeneralVolume = _generalVolume;
+
+            _generalVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
         }
         #endregion
