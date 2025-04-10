@@ -174,6 +174,21 @@ namespace Utilities
             sfxVCA.setVolume(value);
         }
 
+        public void MuteAllSounds()
+        {
+            SetGeneralVolume(0);
+            SetMusicVolume(0);
+            SetSFXVolume(0);
+
+            //If the sliders are assigned, set their values to 0
+            if (sfxVolumeSlider != null && musicVolumeSlider != null && generalVolumeSlider != null)
+            {
+                generalVolumeSlider.value = 0;
+                musicVolumeSlider.value = 0;
+                sfxVolumeSlider.value = 0;
+            }
+        }
+
         #region Slider Volume Methods
         public void UpdateSFXVolume()
         {
