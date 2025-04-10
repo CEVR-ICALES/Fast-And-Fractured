@@ -53,7 +53,7 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
-        const float DISTANCE_MARGIN_ERROR = 4f;
+        const float DISTANCE_MARGIN_ERROR = 5f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private const int PERCENTAGE_VALUE = 100;
@@ -257,7 +257,7 @@ namespace FastAndFractured
                         _statToChoose = Stats.NORMAL_DAMAGE;
                         break;
                     case int n when (n <= percentagePushShoot):
-                        _statToChoose = Stats.PUSH_DAMAGE;
+                        _statToChoose = Stats.PUSH_FORCE;
                         break;
                     case int n when (n <= percentageCooldown):
                         _statToChoose = Stats.COOLDOWN_SPEED;

@@ -94,7 +94,7 @@ namespace FastAndFractured
         public float MineExplosionTime = 5f;
         public float UniqueAbilityCooldown = 7f;
         public float NormalShootOverHeat = 5;
-        [Tooltip("Time to go from top speed to max speed")] public float FromTopSpeedToMaxSpeed;
+        public float CooldownSpeed = 1f;
         public float DeadDelay;
 
         [Header("AI")]
