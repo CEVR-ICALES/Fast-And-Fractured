@@ -1521,6 +1521,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &889784202 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3607463053222498813, guid: 05b9c9827affe234591367846faa86fd, type: 3}
+  m_PrefabInstance: {fileID: 2032603109}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &966538701
 GameObject:
   m_ObjectHideFlags: 3
@@ -1839,6 +1850,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+      propertyPath: muteToggle
+      value: 
+      objectReference: {fileID: 889784202}
     - target: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       propertyPath: sfxVolumeSlider
       value: 
@@ -3081,7 +3096,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3607463053222498813, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3607463053222498813, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
