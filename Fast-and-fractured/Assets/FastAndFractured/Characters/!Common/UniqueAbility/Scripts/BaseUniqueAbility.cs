@@ -6,7 +6,7 @@ using Utilities;
 
 namespace FastAndFractured
 {
-    public abstract class BaseUniqueAbility : MonoBehaviour
+    public abstract class BaseUniqueAbility : MonoBehaviour, ITimeSpeedModifiable
     {
         #region VARIABLES
 
@@ -58,9 +58,8 @@ namespace FastAndFractured
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration, onTimerDecreaseComplete:StopCooldown) ;
+            ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
             _isOnCooldown = true;
-            TimerSystem.Instance.ModifyTimer(_cooldownTimer, speedMultiplier: statsController.CooldownSpeed);
-
         }
 
         protected virtual void PlayActivateAbilitySound()
@@ -121,6 +120,14 @@ namespace FastAndFractured
             _cooldownTimer = null; 
             _isOnCooldown = false;
             _currentCooldownTime = 0f;
+        }
+
+        public void ModifySpeedOfExistingTimer(float newTimerSpeed)
+        {
+            if (_cooldownTimer != null)
+            {
+                TimerSystem.Instance.ModifyTimer(_cooldownTimer, speedMultiplier: newTimerSpeed);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ using UnityEngine.SocialPlatforms;
 using Utilities;
 
 namespace FastAndFractured {
-    public class PushShootHandle : ShootingHandle
+    public class PushShootHandle : ShootingHandle, ITimeSpeedModifiable
     {
         public UnityEvent<float, float> onCooldownUpdate;
         private bool _shootingMine = false;
@@ -57,7 +57,6 @@ namespace FastAndFractured {
                 _pushShootCooldown = TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
                     () => { 
                         canShoot = true;
-                        _pushShootCooldown = null;
                     },
                     onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
@@ -82,12 +81,11 @@ namespace FastAndFractured {
                     () => { 
                         canShoot = true; 
                         _shootingMine = false; 
-                        _pushShootCooldown = null;
                     },
                     onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
 
-                TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: characterStatsController.CooldownSpeed);
+                ModifySpeedOfExistingTimer(characterStatsController.CooldownSpeed);
             }
         }
 
@@ -105,6 +103,14 @@ namespace FastAndFractured {
         private void OnPushShootCooldownDecrease(float currentvalue)
         {
             onCooldownUpdate?.Invoke(currentvalue, characterStatsController.PushCooldown);
+        }
+
+        public void ModifySpeedOfExistingTimer(float newTimerSpeed)
+        {
+            if (_pushShootCooldown != null)
+            {
+                TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: newTimerSpeed);   
+            }
         }
 
     }

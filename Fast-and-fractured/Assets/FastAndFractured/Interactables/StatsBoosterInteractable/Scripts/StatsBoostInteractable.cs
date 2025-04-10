@@ -12,7 +12,6 @@ namespace FastAndFractured
         [SerializeField] private StatsBoost[] boostList;
         public StatsBoost[] BoostList => boostList;
         private const float PERMANENT_BOOST_VALUE = -1;
-        private const float DEFAULT_COOLDOWN_SPEED = 1f;
 
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
@@ -41,6 +40,11 @@ namespace FastAndFractured
                         break;
                 }
 
+                if (boost.StatToBoost == Stats.COOLDOWN_SPEED)
+                {
+                    UpdateExistingCooldowns(interactionFrom, statsController.CooldownSpeed);
+                }
+
                 boost.OnBoostStartEvent?.Invoke();
                 if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
                 TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
@@ -62,12 +66,27 @@ namespace FastAndFractured
                             break;
                     }
 
+                    if (boost.StatToBoost == Stats.COOLDOWN_SPEED)
+                    {
+                        UpdateExistingCooldowns(interactionFrom, statsController.CooldownSpeed);
+                    }
+
                     boost.OnBoostEndEvent?.Invoke();
                 });
+                
             }
 
             onInteractEmpty?.Invoke();
             onInteract?.Invoke(interactionFrom, intearactionTo);
+        }
+
+        private void UpdateExistingCooldowns(GameObject character, float speed)
+        {
+            ITimeSpeedModifiable[] cooldowns = character.GetComponentsInChildren<ITimeSpeedModifiable>();
+            foreach (ITimeSpeedModifiable cd in cooldowns)
+            {
+                cd.ModifySpeedOfExistingTimer(speed);
+            }
         }
 
         [Serializable]
