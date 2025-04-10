@@ -41,7 +41,8 @@ namespace Utilities
 
         private void Start()
         {
-            
+            if (muteToggle != null)
+                ToggleMuteAllSounds();
         }
 
         #region Event Pooling Methods
