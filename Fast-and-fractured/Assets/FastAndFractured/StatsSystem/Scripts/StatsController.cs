@@ -27,6 +27,8 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
         private float _currentMaxSpeedMultiplier;
+
+        public CharacterData CharacterData { get => charDataSO;}   
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
