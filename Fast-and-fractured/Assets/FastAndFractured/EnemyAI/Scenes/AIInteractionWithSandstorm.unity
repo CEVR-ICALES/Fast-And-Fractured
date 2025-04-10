@@ -2397,6 +2397,10 @@ PrefabInstance:
       propertyPath: m_Sources.Array.data[0].sourceTransform
       value: 
       objectReference: {fileID: 621557118}
+    - target: {fileID: 3434230084574221329, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5499074369102328267, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2641,55 +2645,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 703970103}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1494997246
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1494997248}
-  - component: {fileID: 1494997247}
-  m_Layer: 0
-  m_Name: Global Volume
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1494997247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494997246}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IsGlobal: 1
-  priority: 1
-  blendDistance: 0
-  weight: 1
-  sharedProfile: {fileID: 11400000, guid: 2ce4dea495cab03439d8943d3d130447, type: 2}
---- !u!4 &1494997248
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494997246}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 498.85715, y: 542.3703, z: 86.49916}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1517100024
 GameObject:
@@ -3137,7 +3092,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1573327155439233587, guid: 7a6fdf1322c44374c8f520691a9a7db8, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1694644746442364181, guid: 7a6fdf1322c44374c8f520691a9a7db8, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3567,7 +3522,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2641953838915287682, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 65
+      value: 37.9
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.size.x
@@ -3576,6 +3531,22 @@ PrefabInstance:
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.size.y
       value: 254.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.maskMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.blendingMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.materialMask
+      value: 
+      objectReference: {fileID: 2100000, guid: 5af3678d8acc91e488222f63736d501b, type: 2}
+    - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      propertyPath: parameters.meanFreePath
+      value: 144
       objectReference: {fileID: 0}
     - target: {fileID: 5812717557806696838, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: parameters.textureOffset.x
@@ -3603,7 +3574,7 @@ PrefabInstance:
       objectReference: {fileID: 1692899111}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: maxGrowthTime
-      value: 10
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: gameObjectMirroPoint
@@ -3902,7 +3873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: useMyCharacters
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: repeatCharacters
@@ -5347,7 +5318,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1092463884}
-  - {fileID: 1494997248}
   - {fileID: 441166168}
   - {fileID: 6400545731412433952}
   - {fileID: 7708112764650138630}

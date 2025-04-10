@@ -190,7 +190,7 @@ namespace FastAndFractured
 
         public bool IsInsideStormCollider(Transform target)
         {
-            Vector3 directionToTarget = target.position - (transform.position + _stormCollider.center + _stormCollider.size);
+            Vector3 directionToTarget = target.position - (transform.position +  _stormCollider.size.z/2 * transform.forward);
             directionToTarget.Normalize();
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
             float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;

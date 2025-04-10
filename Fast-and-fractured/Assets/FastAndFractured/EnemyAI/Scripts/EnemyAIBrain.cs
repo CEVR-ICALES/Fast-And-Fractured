@@ -30,6 +30,7 @@ namespace FastAndFractured
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
         private float _minDistanceUntilNextCorner = 3f;
+
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
         public GameObject TargetToShoot { get => _targetToShoot; set => _targetToShoot = value; }
@@ -41,6 +42,7 @@ namespace FastAndFractured
         [SerializeField] PhysicsBehaviour physicsBehaviour;
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
+        [SerializeField] ApplyForceByState applyForceByState;
         [SerializeField] LayerMask ignoreLayerMask;
 
         PathMode pathMode = PathMode.ADVANCED;
@@ -90,6 +92,8 @@ namespace FastAndFractured
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
 
+        private IAGroundState groundState = IAGroundState.None;
+
 
         private void OnEnable()
         {
@@ -109,6 +113,40 @@ namespace FastAndFractured
         private void Awake()
         {
             LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+        }
+
+        private void Update()
+        {
+            if (!carMovementController.IsGrounded())
+            {
+                AirForces();
+            }
+            else
+            {
+                GroundForces();
+            }
+        }
+
+        private void GroundForces()
+        {
+            if (groundState == IAGroundState.Air||groundState == IAGroundState.None)
+            {
+                applyForceByState.ToggleAirFriction(false);
+                applyForceByState.ToggleCustomGravity(false);
+                applyForceByState.ToggleRollPrevention(true, 1);//By default, IA is always moving
+                groundState = IAGroundState.Ground;
+            }
+        }
+
+        private void AirForces()
+        {
+            if (groundState == IAGroundState.Ground||groundState == IAGroundState.None)
+            {
+                applyForceByState.ToggleAirFriction(true);
+                applyForceByState.ToggleCustomGravity(true);
+                applyForceByState.ToggleRollPrevention(false, 0);
+                groundState = IAGroundState.Air;
+            }
         }
 
         private void InitializeAIValues()
@@ -142,6 +180,11 @@ namespace FastAndFractured
             if (!uniqueAbility)
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
+            }
+
+            if (!applyForceByState)
+            {
+                applyForceByState = GetComponentInChildren<ApplyForceByState>();
             }
 
             _currentPath = new NavMeshPath();
@@ -280,7 +323,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30)&&LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -303,7 +346,7 @@ namespace FastAndFractured
             {
                 if (!character) continue;
                 float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
+                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject&&LevelController.Instance.IsInsideSandstorm(character.transform))
                 {
                     nearestOne = characterDistance;
                     nearestTarget = character;
@@ -673,7 +716,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne)
+                if (itemDistance < nearestOne&&LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
