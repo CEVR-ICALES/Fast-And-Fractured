@@ -1291,6 +1291,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SettingsMenu (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7885359537952486346, guid: 358874838e5264643968bc8fedd9c4ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7946262022703251991, guid: 358874838e5264643968bc8fedd9c4ec, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -4765,6 +4769,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc11d99b1a6682f4cbc4aba1fcd9ac5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputsList:
+  - <Keyboard>/a
+  - <Keyboard>/b
+  - <Keyboard>/c
+  - <Keyboard>/d
+  - <Keyboard>/e
+  - <Keyboard>/f
+  - <Keyboard>/g
+  - <Keyboard>/h
+  - <Keyboard>/i
+  - <Keyboard>/j
+  - <Keyboard>/k
+  - <Keyboard>/l
+  - <Keyboard>/m
+  - <Keyboard>/n
+  - <Keyboard>/o
+  - <Keyboard>/p
+  - <Keyboard>/q
+  - <Keyboard>/r
+  - <Keyboard>/s
+  - <Keyboard>/t
+  - <Keyboard>/u
+  - <Keyboard>/v
+  - <Keyboard>/w
+  - <Keyboard>/x
+  - <Keyboard>/y
+  - <Keyboard>/z
+  - <Keyboard>/0
+  - <Keyboard>/1
+  - <Keyboard>/2
+  - <Keyboard>/3
+  - <Keyboard>/4
+  - <Keyboard>/5
+  - <Keyboard>/6
+  - <Keyboard>/7
+  - <Keyboard>/8
+  - <Keyboard>/9
+  - <Keyboard>/enter
+  - <Keyboard>/space
+  - <Keyboard>/leftShift
+  - <Keyboard>/leftCtrl
+  - <Keyboard>/leftAlt
+  - <Keyboard>/tab
+  - <Keyboard>/backspace
+  - <Keyboard>/capsLock
+  - <Keyboard>/upArrow
+  - <Keyboard>/downArrow
+  - <Keyboard>/leftArrow
+  - <Keyboard>/rightArrow
   m_Action: {fileID: 5337754477465244148, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
   m_BindingId: 922dbe64-ba9e-4a83-bc7d-7a53b4377f18
   m_DisplayStringOptions: 0
@@ -4772,6 +4825,8 @@ MonoBehaviour:
   m_BindingText: {fileID: 2072502768}
   m_RebindOverlay: {fileID: 643234398}
   m_RebindText: {fileID: 0}
+  m_OverRideActionLabel: 0
+  m_ActionLabelString: 
   m_UpdateBindingUIEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -5677,13 +5732,14 @@ GameObject:
   m_Component:
   - component: {fileID: 684361136}
   - component: {fileID: 684361137}
+  - component: {fileID: 684361138}
   m_Layer: 0
   m_Name: Timeline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &684361136
 Transform:
   m_ObjectHideFlags: 0
@@ -5722,6 +5778,19 @@ PlayableDirector:
     value: {fileID: 496459582}
   m_ExposedReferences:
     m_References: []
+--- !u!114 &684361138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684361135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 389c26c49233f7c4aa4c123b055193a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeLine: {fileID: 684361137}
 --- !u!1 &714480141
 GameObject:
   m_ObjectHideFlags: 0
@@ -11944,6 +12013,10 @@ PrefabInstance:
       value: MainMenuScreens
       objectReference: {fileID: 0}
     - target: {fileID: 8338176869265493634, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8402126191042651360, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
