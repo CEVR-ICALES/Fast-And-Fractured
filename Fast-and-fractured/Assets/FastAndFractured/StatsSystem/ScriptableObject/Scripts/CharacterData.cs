@@ -1,7 +1,10 @@
+using FastAndFractured;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -10,12 +13,11 @@ namespace FastAndFractured
     {
         [Header("Identificators")]
         public string CharacterName;
-        public bool AI;
-
+ 
         [Header("Prefabs")]
         public GameObject CarDefaultPrefab;
         public List<GameObject> CarWithSkinsPrefabs;
-       
+
         [Header("Health")]
         public float MaxEndurance = 500;
         public float MinEndurance = 0;
@@ -94,5 +96,59 @@ namespace FastAndFractured
         public float NormalShootOverHeat = 5;
         public float CooldownSpeed = 1f;
         public float DeadDelay;
+
+        [Header("AI")]
+        [SerializeField] private AIParameters aiParameters;
+        public AIParameters AIParameters => aiParameters;
     }
+
+}
+[Serializable]
+public class AIParameters
+{
+    [Tooltip("Distance to retreat from the current target when executing in flee state.")]
+    [SerializeField] private float fleeDistance = 5f;
+    [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
+    [SerializeField] private float sweepRadius = 20f;
+    [Tooltip("The shooting error that AI has on normal shoot")]
+    [SerializeField] private float shootingMarginErrorAngle = 2f;
+    
+    [Header("Aggressiveness parameters")]
+    [Tooltip("Duration of continuous damage required to reach this value")]
+    [SerializeField] private float damageAccumulationDuration = 5f;
+    [Range(0, 100)][SerializeField] private float fleeTriggerDamageThresholdPercentage = 40;
+    [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
+    [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
+    [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
+    [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
+    [Tooltip("Percentage threshold used to determine if a car has dealt enough damage relative to the endurance value.")]
+    [Range(10, 100)][SerializeField] private int damageThresholdPercentage = 60;
+
+
+    [Header("Item Type Priority")]
+    [Header("Range of weight on how likely it's going to choose that item type.\n" +
+        "--> 10 is base and the minimum.\n" +
+        "--> 25 to 30 if multiple priorities.\n" +
+        "--> 50 if one normal priority is needed.\n" +
+        "--> 150 for hyperfixation in that stat.")]
+    [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 10;
+    [Range(10, 150)][SerializeField] private int decisionPercentageMaxSpeed = 10;
+    [Range(10, 150)][SerializeField] private int decisionPercentageAcceleration = 10;
+    [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
+    [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
+    [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+    public float FleeDistance { get => fleeDistance; set => fleeDistance = value; }
+    public float SweepRadius { get => sweepRadius; set => sweepRadius = value; }
+    public float ShootingMarginErrorAngle { get => shootingMarginErrorAngle; set => shootingMarginErrorAngle = value; }
+    public float DamageAccumulationDuration { get => damageAccumulationDuration; set => damageAccumulationDuration = value; }
+    public float FleeTriggerDamageThresholdPercentage { get => fleeTriggerDamageThresholdPercentage; set => fleeTriggerDamageThresholdPercentage = value; }
+    public float RecoveryThresholdPercentageForSearch { get => _recoveryThresholdPercentageForSearch; set => _recoveryThresholdPercentageForSearch = value; }
+    public float CombatHealthAdvantageThreshold { get => _combatHealthAdvantageThreshold; set => _combatHealthAdvantageThreshold = value; }
+    public int DamageThresholdPercentage { get => damageThresholdPercentage; set => damageThresholdPercentage = value; }
+    public int DecisionPercentageHealth { get => decisionPercentageHealth; set => decisionPercentageHealth = value; }
+    public int DecisionPercentageMaxSpeed { get => decisionPercentageMaxSpeed; set => decisionPercentageMaxSpeed = value; }
+    public int DecisionPercentageAcceleration { get => decisionPercentageAcceleration; set => decisionPercentageAcceleration = value; }
+    public int DecisionPercentageNormalShoot { get => decisionPercentageNormalShoot; set => decisionPercentageNormalShoot = value; }
+    public int DecisionPercentagePushShoot { get => decisionPercentagePushShoot; set => decisionPercentagePushShoot = value; }
+    public int DecisionPercentageCooldown { get => decisionPercentageCooldown; set => decisionPercentageCooldown = value; }
 }

@@ -67,7 +67,10 @@ namespace FastAndFractured
         private float _currentRbMaxVelocity;
         private bool _isUsingController = false;
 
-        public bool IsAi => isAi;
+        public bool IsAi
+        {
+            get => isAi; set =>  isAi = value;
+        }
         [SerializeField] private bool isAi = false;
 
         const float SPEED_TO_METERS_PER_SECOND = 3.6f;
@@ -128,8 +131,8 @@ namespace FastAndFractured
         #region Refactorized Code
 
         public void HandleSteeringInput(Vector2 steeringInput)
-        {
-            if (!PlayerInputController.Instance.IsUsingController && !_isBraking)
+        { 
+            if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
