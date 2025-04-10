@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 ////TODO: localization support
 
@@ -9,11 +10,13 @@ using UnityEngine.UI;
 
 namespace UnityEngine.InputSystem.Samples.RebindUI
 {
+
     /// <summary>
     /// A reusable component with a self-contained UI for rebinding a single action.
     /// </summary>
     public class RebindActionUI : MonoBehaviour
     {
+
         public List<string> inputsList = new List<string>()
         {
             "<Keyboard>/a",
@@ -65,6 +68,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             "<Keyboard>/leftArrow",
             "<Keyboard>/rightArrow"
         };
+
         /// <summary>
         /// Reference to the action that is to be rebound.
         /// </summary>
@@ -269,6 +273,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 return;
 
             ResetBinding(action, bindingIndex);
+
             if (action.bindings[bindingIndex].isComposite)
             {
                 // It's a composite. Remove overrides from part bindings.
@@ -279,9 +284,9 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             {
                 action.RemoveBindingOverride(bindingIndex);
             }
+
             UpdateBindingDisplay();
         }
-
         private void ResetBinding(InputAction action, int bindingIndex)
         {
             InputBinding newBinding = action.bindings[bindingIndex];
@@ -352,12 +357,10 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             {
                 m_RebindOperation?.Dispose();
                 m_RebindOperation = null;
-                action.Enable();
             }
 
-            //Fixes the "InvalidOperationException: Cannot rebind action x while it is enabled" error
+            //disable the action before use to prevent error
             action.Disable();
-
             // Configure the rebind.
             m_RebindOperation = action.PerformInteractiveRebinding(bindingIndex)
                 .WithCancelingThrough("<Keyboard>/escape")
@@ -366,8 +369,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                     {
                         action.Enable();
                         m_RebindStopEvent?.Invoke(this, operation);
-                        if (m_RebindOverlay != null)
-                            m_RebindOverlay.SetActive(false);
+                        m_RebindOverlay?.SetActive(false);
                         UpdateBindingDisplay();
                         CleanUp();
                     })
@@ -435,6 +437,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
 
             m_RebindOperation.Start();
         }
+
         private bool CheckDuplicateBindings(InputAction action, int bindingIndex, bool allCompositeParts = false)
         {
             InputBinding newBinding = action.bindings[bindingIndex];
@@ -484,7 +487,6 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             return false;
         }
 
-
         protected void OnEnable()
         {
             if (s_RebindActionUIs == null)
@@ -492,6 +494,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             s_RebindActionUIs.Add(this);
             if (s_RebindActionUIs.Count == 1)
                 InputSystem.onActionChange += OnActionChange;
+
         }
 
         protected void OnDisable()
@@ -567,6 +570,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         [Tooltip("What text should be displayed for the action label?")]
         [SerializeField] private string m_ActionLabelString;
 
+
         [Tooltip("Event that is triggered when the way the binding is display should be updated. This allows displaying "
             + "bindings in custom ways, e.g. using images instead of text.")]
         [SerializeField]
@@ -588,14 +592,14 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
 
         // We want the label for the action name to update in edit mode, too, so
         // we kick that off from here.
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         protected void OnValidate()
         {
             UpdateActionLabel();
             UpdateBindingDisplay();
         }
 
-        #endif
+#endif
 
         private void UpdateActionLabel()
         {

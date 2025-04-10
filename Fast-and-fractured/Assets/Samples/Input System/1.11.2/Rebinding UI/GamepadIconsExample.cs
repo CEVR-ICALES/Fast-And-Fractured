@@ -215,6 +215,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                     case "space": return KeySpace;
                     case "leftShift": return KeyShift;
                     case "leftCtrl": return KeyCtrl;
+                    case "Ctrl": return KeyCtrl;
                     case "leftAlt": return KeyAlt;
                     case "tab": return KeyTab;
                     case "backspace": return KeyBackspace;
