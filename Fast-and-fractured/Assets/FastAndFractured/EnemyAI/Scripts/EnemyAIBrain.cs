@@ -53,7 +53,7 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
-        const float DISTANCE_MARGIN_ERROR = 2f;
+        const float DISTANCE_MARGIN_ERROR = 4f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private const int PERCENTAGE_VALUE = 100;
@@ -330,12 +330,6 @@ namespace FastAndFractured
             //Get list of safe zones and choose the nearest one
         }
 
-        public void ChooseNearestHelpfulNpc()
-        {
-            //TODO
-            //Get list of NPCs and choose the nearest one
-        }
-
 
         #endregion
 
@@ -367,7 +361,7 @@ namespace FastAndFractured
         public void ChangeShootingTargetToTheOneThatMadeMoreDamage()
         {
             var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
-                .Where(x => (x.Value.damageMade / statsController.Endurance * 100) > damageThresholdPercentage)
+                .Where(x => (x.Value.damageMade / statsController.Endurance * PERCENTAGE_VALUE) > damageThresholdPercentage)
                 .ToList();
             if (listOfCarsThatMadeLotsOfDamage.Count > 1)
             {
