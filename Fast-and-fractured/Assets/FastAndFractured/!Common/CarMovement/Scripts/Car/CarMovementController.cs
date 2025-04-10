@@ -112,24 +112,24 @@ namespace FastAndFractured
         }
 
 
-        public void HandleInputChange(bool usingController)
-        {
-            if (isAi)
-            {
-                _isUsingController = false;
-            }
-            else
-            {
-                _isUsingController = usingController;
-            }
-        }
+        // public void HandleInputChange(bool usingController)
+        // {
+        //     if (isAi)
+        //     {
+        //         _isUsingController = false;
+        //     }
+        //     else
+        //     {
+        //         _isUsingController = usingController;
+        //     }
+        // }
 
 
         #region Refactorized Code
 
         public void HandleSteeringInput(Vector2 steeringInput)
         {
-            if (!_isUsingController && !_isBraking)
+            if (!PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
@@ -140,7 +140,7 @@ namespace FastAndFractured
 
         public void HandleAccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
+            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
@@ -149,7 +149,7 @@ namespace FastAndFractured
 
         public void HandleDeaccelerateInput(float rawAccelerationInput)
         {
-            if (_isUsingController && !_isBraking && rawAccelerationInput > 0)
+            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(-acceleration);

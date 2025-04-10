@@ -124,20 +124,19 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            PlayerInputController.OnInputDeviceChanged += HandleInputChange;
+            // PlayerInputController.OnInputDeviceChanged += HandleInputChange;
         }
 
         private void OnDisable()
         {
-            PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
+            // PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        public void HandleInputChange(InputDeviceType inputType)
-        {
-
-            usingController = inputType != InputDeviceType.KEYBOARD_MOUSE;
-            _playerBindingInputs.HandleInputChange(usingController);
-        }
+        // public void HandleInputChange(InputDeviceType inputType)
+        // {
+        //     usingController = PlayerInputController.Instance.IsUsingController;
+        //     _playerBindingInputs.HandleInputChange(usingController);
+        // }
         // will be moved to gameManager
         
         private void StartLevelWithOwnCharacters()

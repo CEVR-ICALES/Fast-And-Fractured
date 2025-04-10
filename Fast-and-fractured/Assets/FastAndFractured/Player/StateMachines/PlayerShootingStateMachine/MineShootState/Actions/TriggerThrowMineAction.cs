@@ -10,11 +10,8 @@ namespace StateMachine {
     {
         public override void Act(Controller controller)
         {
-            if (controller.GetBehaviour<PlayerInputController>().IsThrowingMine)
-            {
-                PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
-                pushShootHandle.MineShoot();
-            }
+            PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
+            pushShootHandle.MineShoot();
         }
     }
 }
