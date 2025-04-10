@@ -1,25 +1,25 @@
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
+using Utilities;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using Utilities;
+using System.Collections.Generic;
 
 namespace FastAndFractured
 {
     public class SettingsMenuBehaviour : MonoBehaviour
     {
-        [Header("Menus Settings UI")]
+        [Header("Menu Settings UI")]
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
         [SerializeField] private GameObject accessibilitySettingsUI;
 
-        [Header("Settings audio")]
+        [Header("Audio Settings")]
         [SerializeField] private Slider generalVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
 
-        [Header("Settings video")]
+        [Header("Video Settings")]
         [SerializeField] private Toggle vsyncDropdown;
         [SerializeField] private Slider brightnessSlider;
         [SerializeField] private TMP_Dropdown fpsDropdown;
@@ -27,7 +27,7 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown antiAliasingDropdown;
         [SerializeField] private TMP_Dropdown sharpeningDropdown;
 
-        [Header("Settings accesibility")]
+        [Header("Accesibility Settings ")]
         [SerializeField] private TMP_Dropdown colorblindDropdown;
         [SerializeField] private TMP_Dropdown languageDropdown;
         [SerializeField] private TMP_Dropdown subtitlesDropdown;
