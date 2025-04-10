@@ -81,7 +81,6 @@ namespace FastAndFractured
         {
             base.Awake();
             LevelController.Instance.charactersCustomStart.AddListener(BindActions);
-
         }
 
         private void BindActions()
@@ -126,6 +125,8 @@ namespace FastAndFractured
 
             _inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
+
+            LoadInputSettings();
         }
 
         private void OnEnable()
@@ -134,7 +135,6 @@ namespace FastAndFractured
             {
                 _inputActions.Enable();
             }
-            LoadInputSettings();
         }
 
         private void OnDisable()
