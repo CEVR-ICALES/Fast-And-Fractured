@@ -28,11 +28,11 @@ namespace FastAndFractured
                     case Stats.ENDURANCE:
                         if (boost.BoostValue < 0)
                         {
-                            statsController.RecoverEndurance(boost.BoostValue, false);
+                            statsController.TakeEndurance(boost.BoostValue, false);
                         }
                         else
                         {
-                            statsController.TakeEndurance(boost.BoostValue, false);
+                            statsController.RecoverEndurance(boost.BoostValue, false);
                         }
                         break;
                     default:
@@ -54,11 +54,11 @@ namespace FastAndFractured
                         case Stats.ENDURANCE:
                             if (boost.BoostValue < 0)
                             {
-                                statsController.TakeEndurance(boost.BoostValue, false);
+                                statsController.RecoverEndurance(boost.BoostValue, false);
                             }
                             else
                             {
-                                statsController.RecoverEndurance(boost.BoostValue, false);
+                                statsController.TakeEndurance(boost.BoostValue, false);
                             }
                             break;
                         default:
