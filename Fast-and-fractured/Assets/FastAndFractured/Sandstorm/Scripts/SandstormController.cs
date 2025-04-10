@@ -2,9 +2,10 @@ using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 namespace FastAndFractured
 {
-    public class SandstormController : MonoBehaviour, IKillCharacters
+    public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
@@ -59,6 +60,8 @@ namespace FastAndFractured
         private float _timeToReduceKillCharacterTime;
         private ITimer _reduceKillTimeTimer;
 
+        private bool _isPaused = false;
+
         const float FRONT_ANGLE = 180;
         private void Start()
         {
@@ -66,12 +69,25 @@ namespace FastAndFractured
             _stormCollider.enabled = false;
             primaryFog?.gameObject.SetActive(false);
         }
+
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
+        }
         private void Update()
         {
-            if (_moveSandStorm)
+            if (!_isPaused)
             {
-                ExpandFogs();
-            } 
+                if (_moveSandStorm)
+                {
+                    ExpandFogs();
+                }
+            }
         }
 
         public void SetSpawnPoints(bool debug)
@@ -206,5 +222,16 @@ namespace FastAndFractured
       {
             statsController.GetKilledNotify(this, true);  
       }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+            
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
+        }
     }
 }
