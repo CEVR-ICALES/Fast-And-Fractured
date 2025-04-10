@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 namespace FastAndFractured
@@ -31,6 +32,7 @@ namespace FastAndFractured
         [Header("Delete progress")]
         [SerializeField] private GameObject deletePopupUI;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
+        [SerializeField] private GameObject deleteButton;
         void Start()
         {
             SetStartValues();
@@ -47,6 +49,16 @@ namespace FastAndFractured
             masterVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(masterVolumeSlider.value); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
+
+            //quiero comprobar si esta en la escena 0
+            if (SceneManager.GetActiveScene().buildIndex != 0)
+            {
+                deleteButton.SetActive(false);
+            }
+            else
+            {
+                deleteButton.SetActive(true);
+            }
         }
         private void SetStartValues()
         {

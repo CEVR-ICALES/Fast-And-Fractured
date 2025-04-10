@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.SimpleLocalization.Scripts;
 namespace FastAndFractured
 {
     public class CreditsBehaviour : MonoBehaviour
@@ -17,20 +18,20 @@ namespace FastAndFractured
         
         void Start()
         {
-            UpdateCredits();
+            InsertCreditsData();
         }
         void OnDisable()
         {
             _fastMode = false;
             creditsListContainer.transform.position = new Vector3(creditsListContainer.transform.position.x, 0, creditsListContainer.transform.position.z);
         }
-        private void UpdateCredits()
+        private void InsertCreditsData()
         {
             foreach (var entry in creditsListData.creditsEntry)
             {
                 GameObject titleObject = Instantiate(titlePrefab, creditsListContainer.transform);
                 titleObject.transform.localScale = new Vector3(entry.sizeMultiplier, entry.sizeMultiplier, entry.sizeMultiplier);
-                titleObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = entry.title;
+                titleObject.GetComponent<LocalizedText>().LocalizationKey = entry.titleLocalizationKey;
 
                 GameObject nameContainer = Instantiate(nameContainerPrefab, creditsListContainer.transform);
 
@@ -45,10 +46,10 @@ namespace FastAndFractured
         {
             if(creditsCanvasGroup.alpha==1f)
             {
-                moveCredits();
+                MoveCredits();
             }
         }
-        private void moveCredits()
+        private void MoveCredits()
         {
             float scrollAmount;
 

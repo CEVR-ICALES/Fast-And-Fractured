@@ -9,8 +9,8 @@ namespace FastAndFractured
         [System.Serializable]
         public class CreditsEntry
         {
-            public string title;
-            public float sizeMultiplier = 1f;
+            public string titleLocalizationKey;
+            public float sizeMultiplier;
             public List<string> names = new List<string>();
         }
 
