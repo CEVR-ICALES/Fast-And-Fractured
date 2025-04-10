@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +70,7 @@ namespace FastAndFractured
             //Resolution
             string resolution = PlayerPrefs.GetString("Resolution", "1920x1080");
             RefreshValue(resolutionDropdown, resolution);
+            LoadAvailableResolutions();
 
             //VSync
             string vsync = PlayerPrefs.GetString("Vsync", "No");
@@ -192,12 +195,54 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             //TODO set anti-aliasing in game
         }
+
         private void SetResolution(int option)
         {
             string selectedOption = resolutionDropdown.options[option].text;
             PlayerPrefs.SetString("Resolution", selectedOption);
             PlayerPrefs.Save();
-            //TODO set resolution in game
+
+            string[] dimensions = selectedOption.Split('x');
+            int width = int.Parse(dimensions[0]);
+            int height = int.Parse(dimensions[1]);
+            Screen.SetResolution(width, height, Screen.fullScreen);
+        }
+
+        private void LoadAvailableResolutions()
+        {
+            resolutionDropdown.ClearOptions();
+
+            Resolution[] resolutionList = Screen.resolutions
+                .OrderByDescending(r => r.width * r.height)
+                .ToArray();
+
+            List<string> optionsList = new List<string>();
+            int currentResolutionIndex = 0;
+
+            for (int i = 0; i < resolutionList.Length; i++)
+            {
+                string option = $"{resolutionList[i].width}x{resolutionList[i].height}";
+
+                if (!optionsList.Contains(option))
+                    optionsList.Add(option);
+
+                if (resolutionList[i].width == Screen.currentResolution.width &&
+                    resolutionList[i].height == Screen.currentResolution.height)
+                    currentResolutionIndex = optionsList.Count - 1;
+            }
+
+            resolutionDropdown.AddOptions(optionsList);
+
+            string savedResolution = PlayerPrefs.GetString("Resolution", "");
+            if (!string.IsNullOrEmpty(savedResolution))
+            {
+                int index = optionsList.IndexOf(savedResolution);
+                resolutionDropdown.value = index != -1 ? index : currentResolutionIndex;
+            }
+            else
+                resolutionDropdown.value = currentResolutionIndex;
+
+            resolutionDropdown.RefreshShownValue();
         }
 
         private void SetSharpening(int option)
