@@ -224,8 +224,7 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            AssignTarget(_player);
-            _positionToDrive = _player.transform.position;
+            ChangeTargetToShoot(_player);
         }
 
         public void ChooseItemFromType()
@@ -293,9 +292,7 @@ namespace FastAndFractured
                 nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
-
+            ChangeTargetToGo(nearestTarget);
         }
 
         public void ChooseNearestCharacter()
@@ -314,8 +311,7 @@ namespace FastAndFractured
                     nearestTarget = character;
                 }
             }
-            _targetToShoot = nearestTarget;
-            _currentTarget = _targetToShoot;
+            ChangeTargetToShoot(nearestTarget);
         }
 
         public void ChooseNearestDangerZone()
@@ -365,7 +361,7 @@ namespace FastAndFractured
                 .ToList();
             if (listOfCarsThatMadeLotsOfDamage.Count > 1)
             {
-                AssignTarget(listOfCarsThatMadeLotsOfDamage[0].Key);
+                ChangeTargetToShoot(listOfCarsThatMadeLotsOfDamage[0].Key);
             }
 
         }
@@ -530,23 +526,11 @@ namespace FastAndFractured
             RecalculateDecisionsPercentage();
         }
 
-        private void AssignTarget(GameObject target)
-        {
-            _targetToShoot = target;
-            _currentTarget = target;
-            if (_targetToShoot.TryGetComponent<Target>(out var tr))
-            {
-                _positionToDrive = tr.TargetBehind.position;
-            }
-            else
-            {
-                _positionToDrive = _targetToShoot.transform.position;
-            }
-        }
+        
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_targetToShoot.transform.position - carMovementController.transform.position).normalized;
+            return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
         }
 
         private float GetAngleDirection(Vector3 axis)
@@ -688,8 +672,7 @@ namespace FastAndFractured
                 nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
+            ChangeTargetToGo(nearestTarget);
         }
 
 
@@ -710,117 +693,41 @@ namespace FastAndFractured
             decisionPercentagePushShoot = aIParameters.DecisionPercentagePushShoot;
             decisionPercentageCooldown = aIParameters.DecisionPercentageCooldown;
         }
-        //Is obsolete but can be used in the future
-        //#if UNITY_EDITOR
-        //        // Save their previous values so we can identify which one changed.
-        //        int _checkHealth;
-        //        int _checkSpeed;
-        //        int _checkAcceleration;
-        //        int _checkNormal;
-        //        int _checkPush;
-        //        int _checkCooldown;
 
-        //        void OnValidate()
-        //        {
-
-        //            // Skip this if we haven't cached the values yet.
-        //            if (_checkHealth >= 0)
-        //            {
-
-        //                // Find which value the user changed, and update the rest from it.
-        //                if (_checkHealth != decisionPercentageHealth)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageHealth, 
-        //                        ref decisionPercentageMaxSpeed, 
-        //                        ref decisionPercentageAcceleration, 
-        //                        ref decisionPercentageNormalShoot, 
-        //                        ref decisionPercentagePushShoot, 
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkSpeed != decisionPercentageMaxSpeed)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkAcceleration != decisionPercentageAcceleration)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkNormal != decisionPercentageNormalShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkPush != decisionPercentagePushShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkCooldown != decisionPercentageCooldown)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageCooldown,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot);
-        //                }
-
-        //            }
-
-        //            _checkHealth = decisionPercentageHealth;
-        //            _checkSpeed = decisionPercentageMaxSpeed;
-        //            _checkAcceleration = decisionPercentageAcceleration;
-        //            _checkNormal = decisionPercentageNormalShoot;
-        //            _checkPush = decisionPercentagePushShoot;
-        //            _checkCooldown = decisionPercentageCooldown;
-        //        }
-
-
-        //        void DistributeProportionately(ref int changed, ref int a, ref int b, ref int c, ref int d, ref int e)
-        //        {
-        //            changed = (int)Mathf.Clamp(changed, 0f, MAX_PERCENTAGE_100);
-        //            int total = MAX_PERCENTAGE_100 - changed;
-
-        //            int oldTotal = a + b + c + d + e;
-        //            Debug.Log(oldTotal);
-        //            if (oldTotal > 0f)
-        //            {
-        //                float fraction = 1f / oldTotal;
-        //                a = Mathf.RoundToInt(total * a * fraction);
-        //                b = Mathf.RoundToInt(total * b * fraction);
-        //                c = Mathf.RoundToInt(total * c * fraction);
-        //                d = Mathf.RoundToInt(total * d * fraction);
-        //                e = Mathf.RoundToInt(total * e * fraction);
-        //            }
-        //            else
-        //            {
-        //                a = b = c = d = e = total / 5;
-        //            }
-
-        //            // Assign any rounding error to the last one, arbitrarily.
-        //            // (Better rounding rules exist, so take this as an example only)
-        //            //a += total - a - b - c - d - e;
-        //        }
-        //#endif
-
+        /// <summary>
+        /// Makes the IA go to another location that ISN'T A CHARACTER
+        /// such as items, locations etc.
+        /// </summary>
+        private void ChangeTargetToGo(GameObject target)
+        {
+            _targetToGo = target;
+            UpdateCurrentTarget(_targetToGo);
+        }
+        /// <summary>
+        /// Makes the IA go to another CHARACTER
+        /// </summary>
+        private void ChangeTargetToShoot(GameObject target)
+        {
+            _targetToShoot = target;
+            UpdateCurrentTarget(_targetToShoot);
+        }
+        /// <summary>
+        /// Helper to change targets
+        /// DO NOT USE IN OTHER METHODS
+        /// </summary>
+        /// 
+        private void UpdateCurrentTarget(GameObject newTarget)
+        {
+            _currentTarget = newTarget;
+            if (_currentTarget.TryGetComponent(out Target target))
+            {
+                _positionToDrive = target.TargetBehind.position;
+            }
+            else
+            {
+                _positionToDrive = _currentTarget.transform.position;
+            }
+        }
         #endregion
     }
 }
