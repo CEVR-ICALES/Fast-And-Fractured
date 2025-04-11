@@ -7,10 +7,11 @@ namespace Utilities
     public class TimerData
     {
         public string ID { get; private set; }
-        public float Duration { get; set; }  
+        public float Duration { get; set; }
         public float CurrentTime { get; set; }
         public bool IsRunning { get; set; }
         public bool IsPaused { get; set; }
+        public float SpeedMultiplier {  get; set; }
         public TimerDirection Direction { get; set; }
 
         public Action OnTimerComplete { get; set; }
@@ -46,6 +47,7 @@ namespace Utilities
             CurrentTime = (direction == TimerDirection.INCREASE) ? 0 : duration;
             IsRunning = false;
             IsPaused = false;
+            SpeedMultiplier = 1;
         }
 
         public void SetTimerDirection(TimerDirection newDirection)

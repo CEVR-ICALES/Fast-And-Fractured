@@ -161,7 +161,7 @@ namespace Utilities
 
         //Allows changes Using the timer Reference itself
         public bool ModifyTimer(ITimer timer, float? newDuration = null, Action newOnTimerComplete = null,
-            TimerDirection? newDirection = null, float? newCurrentTime = null, bool isRunning = true)
+            TimerDirection? newDirection = null, float? newCurrentTime = null, bool isRunning = true, float? speedMultiplier=null)
         {
             if (!_timers.ContainsKey(timer.GetData().ID))
             {
@@ -195,6 +195,11 @@ namespace Utilities
 
             _timers.TryAdd(timer.GetData().ID, timer);
 
+            if (speedMultiplier != null)
+            {
+                timer.GetData().SpeedMultiplier = speedMultiplier.Value;
+            }
+
             if (!_isPaused) return true;
             
             if (isRunning != timer.GetData().IsRunning)
@@ -208,6 +213,7 @@ namespace Utilities
                     timer.StopTimer();
                 }
             }
+          
 
             return true;
         }
