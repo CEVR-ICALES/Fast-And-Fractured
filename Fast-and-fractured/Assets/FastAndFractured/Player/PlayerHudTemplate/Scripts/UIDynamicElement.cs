@@ -5,7 +5,7 @@ using Enums;
 
 namespace FastAndFractured
 {
-    public class UIElement : MonoBehaviour
+    public class UIDynamicElement : MonoBehaviour
     {
         public UIElementType elementType;
         public Image imageReference;

@@ -49,7 +49,7 @@ namespace Enums
         PLAYER_6,
         PLAYER_7,
         BAD_EFFECTS,
-        EFFECTS,
+        NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR
     }
