@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 namespace FastAndFractured
@@ -28,6 +29,10 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown colorblindDropdown;
         [SerializeField] private TMP_Dropdown languageDropdown;
         [SerializeField] private TMP_Dropdown subtitlesDropdown;
+        [Header("Delete progress")]
+        [SerializeField] private GameObject deletePopupUI;
+        [SerializeField] private List<string> deletedProgressList = new List<string>();
+        [SerializeField] private GameObject deleteButton;
         void Start()
         {
             SetStartValues();
@@ -44,6 +49,16 @@ namespace FastAndFractured
             masterVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(masterVolumeSlider.value); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
+
+            //quiero comprobar si esta en la escena 0
+            if (SceneManager.GetActiveScene().buildIndex != 0)
+            {
+                deleteButton.SetActive(false);
+            }
+            else
+            {
+                deleteButton.SetActive(true);
+            }
         }
         private void SetStartValues()
         {
@@ -225,6 +240,24 @@ namespace FastAndFractured
         public void OpenControllerRemapping()
         {
             //TODO
+        }
+
+        public void DeleteAllProgress()
+        {
+            deletePopupUI.SetActive(false);
+            for (int i = 0; i < deletedProgressList.Count; i++)
+            {
+                PlayerPrefs.DeleteKey(deletedProgressList[i]);
+            }
+            PlayerPrefs.Save();
+        }
+        public void CloseDeletePopup()
+        {
+            deletePopupUI.SetActive(false);
+        }
+        public void OpenDeletePopup()
+        {
+            deletePopupUI.SetActive(true);
         }
     }
 }

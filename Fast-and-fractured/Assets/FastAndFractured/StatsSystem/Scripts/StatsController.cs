@@ -27,6 +27,8 @@ namespace FastAndFractured
         [SerializeField] private float currentMaxSpeedDescend;
         [SerializeField] private float currentAcceleration;
         private float _currentMaxSpeedMultiplier;
+
+        public CharacterData CharacterData { get => charDataSO;}   
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }
@@ -56,9 +58,9 @@ namespace FastAndFractured
         [Header("Damage")]
 
         [SerializeField] private float currentNormalShootDMG;
-        [SerializeField] private float currentPushShootDMG;
+        [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
-        public float PushShootDamage { get => currentPushShootDMG; }
+        public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
         public Vector3 ExplosionCenterOffset { get => charDataSO.ExplosionCenterOffset; }
@@ -134,8 +136,9 @@ namespace FastAndFractured
             currentAcceleration = charDataSO.Acceleration;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
+            currentPushShootForce = charDataSO.PushShootFORCE;
             //Cooldowns
-            currentCooldownSpeed = charDataSO.FromTopSpeedToMaxSpeed;
+            currentCooldownSpeed = charDataSO.CooldownSpeed;
         }
         [ContextMenu(nameof(DebugTake100Endurance))]
         public void DebugTake100Endurance()
@@ -154,6 +157,10 @@ namespace FastAndFractured
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,this.gameObject);
+                        if (_isPlayer)
+                        {
+                            HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        }
                         //This is not the real dead condition, just an example. 
                         /*if (currentEndurance <= charDataSO.MinEndurance)
                         {
@@ -250,7 +257,7 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, sum, false))
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogError("Stat of "+type+" selected doesn't exist or can't be modified. " +
                      "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
@@ -266,7 +273,7 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, -subtrahend, false))
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogError("Stat of " + type +" selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
@@ -309,13 +316,16 @@ namespace FastAndFractured
                     return true;
                 case Stats.ENDURANCE:
                     currentEndurance = ModCharStat(currentEndurance, mod, charDataSO.MinEndurance, charDataSO.MaxEndurance, isProduct, true);
-                    if (_isPlayer)
-                    {
-                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
-                    }
                     return true;
                 case Stats.NORMAL_DAMAGE:
                     currentNormalShootDMG = ModCharStat(currentNormalShootDMG, mod, charDataSO.MinNormalShootDMG, charDataSO.MaxNormalShootDMG, isProduct, true);
+                    return true;
+                case Stats.PUSH_FORCE:
+                    //Needs implementation
+                    currentPushShootForce = ModCharStat(currentPushShootForce, mod, 0, float.MaxValue, isProduct, false);
+                    return true;
+                case Stats.COOLDOWN_SPEED:
+                    currentCooldownSpeed = ModCharStat(currentCooldownSpeed, mod, 0, 10, isProduct, true);
                     return true;
             }
             return false;
@@ -401,8 +411,8 @@ namespace FastAndFractured
                     return currentEndurance;
                 case Stats.NORMAL_DAMAGE:
                     return currentNormalShootDMG;
-                case Stats.PUSH_DAMAGE:
-                    return currentPushShootDMG;
+                case Stats.PUSH_FORCE:
+                    return currentPushShootForce;
                 case Stats.COOLDOWN_SPEED:
                     return currentCooldownSpeed;
                 case Stats.MAX_SPEED_MULTIPLIER:
