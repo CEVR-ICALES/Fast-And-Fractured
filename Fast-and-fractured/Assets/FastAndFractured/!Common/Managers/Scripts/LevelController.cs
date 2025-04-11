@@ -59,6 +59,8 @@ namespace FastAndFractured
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
         [SerializeField] private bool stormInDebugMode = false;
+        private GameObject _playerReference;
+        public GameObject playerReference { get=>_playerReference ;}
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -111,8 +113,10 @@ namespace FastAndFractured
             }
         }
 
-     
-        // this will be moved to gameManaager once its created
+        private void Update()
+        {
+          
+        }
 
         private void OnEnable()
         {
@@ -244,6 +248,7 @@ namespace FastAndFractured
 
                     _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
+                    _playerReference = playerCar;
                 }
                 for(;charactersCount < allCharacters; charactersCount++)
                 {
@@ -364,6 +369,11 @@ namespace FastAndFractured
                 _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();
             _sandStormController.MoveSandStorm = true;
+        }
+
+        public bool IsInsideSandstorm(Transform target)
+        {
+            return _sandStormController.IsInsideStormCollider(target);
         }
 
         #region Resources

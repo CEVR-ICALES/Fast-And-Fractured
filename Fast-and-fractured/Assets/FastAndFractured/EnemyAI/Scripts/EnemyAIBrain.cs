@@ -33,6 +33,7 @@ namespace FastAndFractured
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
         private float _minDistanceUntilNextCorner = 3f;
+
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
         public GameObject TargetToShoot { get => _targetToShoot; set => _targetToShoot = value; }
@@ -44,6 +45,7 @@ namespace FastAndFractured
         [SerializeField] PhysicsBehaviour physicsBehaviour;
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
+        [SerializeField] ApplyForceByState applyForceByState;
         [SerializeField] LayerMask ignoreLayerMask;
 
         PathMode pathMode = PathMode.ADVANCED;
@@ -59,9 +61,6 @@ namespace FastAndFractured
         private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
         private Quaternion startRotation;
-
-        private Collider[] _sweepColliders = { };
-        private ITimer _sweepTimer = null;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -95,6 +94,8 @@ namespace FastAndFractured
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
 
+        private IAGroundState groundState = IAGroundState.None;
+
 
         private void OnEnable()
         {
@@ -114,6 +115,40 @@ namespace FastAndFractured
         private void Awake()
         {
             LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+        }
+
+        private void Update()
+        {
+            if (!carMovementController.IsGrounded())
+            {
+                AirForces();
+            }
+            else
+            {
+                GroundForces();
+            }
+        }
+
+        private void GroundForces()
+        {
+            if (groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)
+            {
+                applyForceByState.ToggleAirFriction(false);
+                applyForceByState.ToggleCustomGravity(false);
+                applyForceByState.ToggleRollPrevention(true, 1);//By default, IA is always moving
+                groundState = IAGroundState.GROUND;
+            }
+        }
+
+        private void AirForces()
+        {
+            if (groundState == IAGroundState.GROUND||groundState == IAGroundState.NONE)
+            {
+                applyForceByState.ToggleAirFriction(true);
+                applyForceByState.ToggleCustomGravity(true);
+                applyForceByState.ToggleRollPrevention(false, 0);
+                groundState = IAGroundState.AIR;
+            }
         }
 
         private void InitializeAIValues()
@@ -147,6 +182,11 @@ namespace FastAndFractured
             if (!uniqueAbility)
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
+            }
+
+            if (!applyForceByState)
+            {
+                applyForceByState = GetComponentInChildren<ApplyForceByState>();
             }
 
             _currentPath = new NavMeshPath();
@@ -284,7 +324,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30)&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -295,7 +335,17 @@ namespace FastAndFractured
             ChangeTargetToGo(nearestTarget);
         }
 
+
+
         public void ChooseNearestCharacter()
+        {
+            GameObject nearestTarget = CalcNearestCharacter();
+            _targetToShoot = nearestTarget;
+            _currentTarget = _targetToShoot;
+        }
+
+
+        public GameObject CalcNearestCharacter()
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
@@ -305,15 +355,14 @@ namespace FastAndFractured
             {
                 if (!character) continue;
                 float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
+                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject&&!LevelController.Instance.IsInsideSandstorm(character.transform))
                 {
                     nearestOne = characterDistance;
                     nearestTarget = character;
                 }
             }
-            ChangeTargetToShoot(nearestTarget);
+            return nearestTarget;
         }
-
         public void ChooseNearestDangerZone()
         {
             //TODO
@@ -387,17 +436,13 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            if (_sweepTimer == null)
-            {
-                _sweepColliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
-                _sweepTimer = TimerSystem.Instance.CreateTimer(SWEEP_FREQUENCY, onTimerDecreaseComplete: () =>
-                {
-                    _sweepTimer = null;
-                    _sweepColliders = new Collider[0];
-                });
-            }
 
-            return _sweepColliders.Length > 0;
+            GameObject nearestCharacter = CalcNearestCharacter();
+            if (nearestCharacter != null)
+            {
+                return Vector3.Distance(carMovementController.transform.position,nearestCharacter.transform.position) < sweepRadius;
+            }
+            return false;
         }
 
         public bool IsPushShootReady()
@@ -664,7 +709,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne)
+                if (itemDistance < nearestOne&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -675,8 +720,7 @@ namespace FastAndFractured
             ChangeTargetToGo(nearestTarget);
         }
 
-
-        public void InstallAIParameters( AIParameters aIParameters)
+        public void InstallAIParameters(AIParameters aIParameters)
         {
             fleeDistance = aIParameters.FleeDistance;
             sweepRadius = aIParameters.SweepRadius;
@@ -728,6 +772,7 @@ namespace FastAndFractured
                 _positionToDrive = _currentTarget.transform.position;
             }
         }
+
         #endregion
     }
 }
