@@ -194,7 +194,7 @@ namespace FastAndFractured
             directionToTarget.Normalize();
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
             float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
-            return !(angleToTarget < (HALF_FRONT_ANGLE));
+            return !(angleToTarget < HALF_FRONT_ANGLE);
         }
 
         private void OnTriggerEnter(Collider other)

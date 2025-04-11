@@ -92,7 +92,7 @@ namespace FastAndFractured
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
 
-        private IAGroundState groundState = IAGroundState.None;
+        private IAGroundState groundState = IAGroundState.NONE;
 
 
         private void OnEnable()
