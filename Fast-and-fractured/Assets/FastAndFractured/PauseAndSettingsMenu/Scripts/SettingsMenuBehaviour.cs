@@ -40,6 +40,9 @@ namespace FastAndFractured
         void Start()
         {
             SetStartValues();
+
+            _globalVolume.profile.TryGet(out _liftGammaGain);
+
             _fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(_fpsDropdown.value); });
             _resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(_resolutionDropdown.value); });
             _antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(_antiAliasingDropdown.value); });
@@ -121,6 +124,7 @@ namespace FastAndFractured
                 }
             }
         }
+
         private void RefreshValue(Slider slider, float value)
         {
             slider.value = value;
@@ -170,9 +174,7 @@ namespace FastAndFractured
         #region Video settings
         private void SetBrightness(float value)
         {
-            PlayerPrefs.SetFloat("Brightness", value);
-            PlayerPrefs.Save();
-            //TODO set brightness in game
+            BrightnessManager.Instance?.SetBrightness(value);
         }
 
         private void UpdateVSync(bool isActive)
