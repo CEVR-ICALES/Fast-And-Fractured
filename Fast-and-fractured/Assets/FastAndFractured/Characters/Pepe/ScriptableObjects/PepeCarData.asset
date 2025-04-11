@@ -17,19 +17,19 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
-  MaxEndurance: 500
+  MaxEndurance: 1100
   MinEndurance: 0
   Invulnerable: 0
-  MaxSpeed: 100
-  MaxSpeedDashing: 140
+  MaxSpeed: 130
+  MaxSpeedDashing: 200
   MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 1500
+  MaxAcceleration: 13000
   MinAcceleration: 0
-  Acceleration: 3500
-  BrakeTorque: 12000
+  Acceleration: 10000
+  BrakeTorque: 70000
   Handling: 35
-  HandlingSmoothnes: 6
+  HandlingSmoothnes: 8
   AerialRotationSpeed: 0
   DriftThreshold: 0.1
   DriftingFactorToSpeed: 80
@@ -38,22 +38,17 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 1200
-  Traction: 0
-  Damping: 0
-  BaseForce: 300000
+  Weight: 1500
+  BaseForce: 400000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
-  BaseDownwardForce: 500
+  BaseDownwardForce: 1600
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 10
-  MaxNormalShootDMG: 25
-  MinNormalShootDMG: 5
-  PushShootDMG: 0
+  NormalShootDMG: 20
+  MaxNormalShootDMG: 30
+  MinNormalShootDMG: 15
   PushShootFORCE: 400000
-  MaxPushShootDMG: 0
-  MinPushShootDMG: 0
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
@@ -64,10 +59,12 @@ MonoBehaviour:
   PushShootGravityMultiplier: 30
   PushShootBounceNum: 3
   PushShootBounceForce: 60
+  MineShootAngle: 40
+  MineShootRange: 5
   DashCooldown: 2
   PushShootCooldown: 3
+  MineExplosionTime: 5
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
-  RecoveryCooldown: 0
   FromTopSpeedToMaxSpeed: 0
   DeadDelay: 0
