@@ -60,9 +60,6 @@ namespace FastAndFractured
         private Vector3 startPosition;
         private Quaternion startRotation;
 
-        private Collider[] _sweepColliders = { };
-        private ITimer _sweepTimer = null;
-
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
         [SerializeField] private float damageAccumulationDuration = 5f;
@@ -298,7 +295,17 @@ namespace FastAndFractured
 
         }
 
+
+
         public void ChooseNearestCharacter()
+        {
+            GameObject nearestTarget = CalcNearestCharacter();
+            _targetToShoot = nearestTarget;
+            _currentTarget = _targetToShoot;
+        }
+
+
+        public GameObject CalcNearestCharacter()
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
@@ -314,10 +321,8 @@ namespace FastAndFractured
                     nearestTarget = character;
                 }
             }
-            _targetToShoot = nearestTarget;
-            _currentTarget = _targetToShoot;
+            return nearestTarget;
         }
-
         public void ChooseNearestDangerZone()
         {
             //TODO
@@ -391,17 +396,13 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            if (_sweepTimer == null)
-            {
-                _sweepColliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
-                _sweepTimer = TimerSystem.Instance.CreateTimer(SWEEP_FREQUENCY, onTimerDecreaseComplete: () =>
-                {
-                    _sweepTimer = null;
-                    _sweepColliders = new Collider[0];
-                });
-            }
 
-            return _sweepColliders.Length > 0;
+            GameObject nearestCharacter = CalcNearestCharacter();
+            if (nearestCharacter != null)
+            {
+                return Vector3.Distance(carMovementController.transform.position,nearestCharacter.transform.position) < sweepRadius;
+            }
+            return false;
         }
 
         public bool IsPushShootReady()
@@ -693,7 +694,7 @@ namespace FastAndFractured
         }
 
 
-        public void InstallAIParameters( AIParameters aIParameters)
+        public void InstallAIParameters(AIParameters aIParameters)
         {
             fleeDistance = aIParameters.FleeDistance;
             sweepRadius = aIParameters.SweepRadius;
