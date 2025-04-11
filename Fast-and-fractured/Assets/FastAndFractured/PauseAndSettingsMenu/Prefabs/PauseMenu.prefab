@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8738505900098012919}
   - component: {fileID: 1563959946862937871}
   - component: {fileID: 4748384214353549437}
-  - component: {fileID: 7229632251388505320}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -122,10 +121,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7229632251388505320}
-        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
-        m_MethodName: OpenScreen
-        m_Mode: 1
+      - m_Target: {fileID: 219468584513301950, guid: bf272fc5bdaf26c4591bdc5afc49aa1a, type: 3}
+        m_TargetAssemblyTypeName: FastAndFractured.MainMenuManager, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -134,20 +133,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &7229632251388505320
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2511411905085348006}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenToOpen: 7
-  fadeDuration: 0.8
 --- !u!1 &2960457811120056207
 GameObject:
   m_ObjectHideFlags: 0

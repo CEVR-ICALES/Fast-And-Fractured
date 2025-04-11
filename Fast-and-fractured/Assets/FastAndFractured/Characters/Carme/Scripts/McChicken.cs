@@ -10,7 +10,6 @@ namespace FastAndFractured
         [Header("Launch Settings")]
         [SerializeField] private float launchTime = 1f;
         [SerializeField] private float jumpHeight = 2f;
-        [SerializeField] private float maxLaunchTime = 3f;
 
         [Header("Scaling")]
         [SerializeField] private float finalScaleDuration = 0.5f;

@@ -39,8 +39,6 @@ MonoBehaviour:
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 1200
-  Traction: 0
-  Damping: 0
   BaseForce: 300000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
@@ -50,10 +48,7 @@ MonoBehaviour:
   NormalShootDMG: 10
   MaxNormalShootDMG: 25
   MinNormalShootDMG: 5
-  PushShootDMG: 0
   PushShootFORCE: 400000
-  MaxPushShootDMG: 0
-  MinPushShootDMG: 0
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
@@ -71,6 +66,5 @@ MonoBehaviour:
   MineExplosionTime: 5
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
-  RecoveryCooldown: 0
-  FromTopSpeedToMaxSpeed: 0
+  CooldownSpeed: 1
   DeadDelay: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
@@ -7,6 +8,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 using Utilities;
+using static UnityEngine.InputSystem.DefaultInputActions;
 
 namespace FastAndFractured
 {
@@ -80,7 +82,6 @@ namespace FastAndFractured
         {
             base.Awake();
             LevelController.Instance.charactersCustomStart.AddListener(BindActions);
-
         }
 
         private void BindActions()
@@ -115,8 +116,8 @@ namespace FastAndFractured
             _inputActions.PlayerInputActions.SpecialAbility.performed += ctx => _isUsingAbility = true;
             _inputActions.PlayerInputActions.SpecialAbility.canceled += ctx => _isUsingAbility = false;
 
-            _inputActions.PlayerInputActions.ThrowMine.performed += ctx => ThrowMine();
-            _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => UnsetShootType();
+            _inputActions.PlayerInputActions.ThrowMine.started += ctx => ToggleBoolForSpecifiedTime(b => _isThrowingMine = b, false, 1f);
+            _inputActions.PlayerInputActions.ThrowMine.canceled += ctx => _isThrowingMine = false;
 
             _inputActions.PlayerInputActions.Pause.started += ctx => _isPausing = true;
             _inputActions.PlayerInputActions.Pause.canceled += ctx => _isPausing = false;
@@ -125,6 +126,8 @@ namespace FastAndFractured
 
             _inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
+
+            LoadInputSettings();
         }
 
         private void OnEnable()
@@ -152,6 +155,12 @@ namespace FastAndFractured
             CheckForInputDeviceChange();
         }
 
+        private void LoadInputSettings()
+        {
+            var rebinds = PlayerPrefs.GetString("rebinds");
+            if (!string.IsNullOrEmpty(rebinds))
+                _inputActions.LoadBindingOverridesFromJson(rebinds);
+        }
 
         private void CheckForInputDeviceChange()
         {
@@ -279,12 +288,13 @@ namespace FastAndFractured
             }
         }
 
-        private void ThrowMine()
+        private void ToggleBoolForSpecifiedTime(Action<bool> setBoolAction, bool boolResult, float timeTillReset)
         {
-            if (_isPushShootMode)
+            setBoolAction(!boolResult);
+            TimerSystem.Instance.CreateTimer(timeTillReset, onTimerDecreaseComplete: () =>
             {
-                _isThrowingMine = true;
-            }
+                setBoolAction(boolResult);
+            });
         }
 
         private void SetShootType()
