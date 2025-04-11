@@ -11,6 +11,7 @@ namespace FastAndFractured
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite[] backgroundSprites;
         [SerializeField] private float imageTimerDuration = 5f;
+        private ITimer timerReference;
         void Start()
         {
             loadingScreenUI.SetActive(true);
@@ -19,6 +20,11 @@ namespace FastAndFractured
         void Update()
         {
             // TODO: call HideLoadingScreen() when game is ready(level controller task)
+        }
+        void OnDisable()
+        {
+            timerReference.StopTimer();
+            timerReference = null;
         }
         public void HideLoadingScreen()
         {
@@ -30,7 +36,7 @@ namespace FastAndFractured
             {
                 int randomIndex = Random.Range(0, backgroundSprites.Length);
                 backgroundImage.sprite = backgroundSprites[randomIndex];
-                TimerSystem.Instance.CreateTimer(imageTimerDuration, onTimerDecreaseComplete: () =>
+                timerReference = TimerSystem.Instance.CreateTimer(imageTimerDuration, onTimerDecreaseComplete: () =>
                 {
                     SetRandomBackgroundImage();
                 });
