@@ -1,37 +1,30 @@
 using Enums;
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Utilities;
+using UnityEngine.UI;
 
 namespace FastAndFractured
 {
-    public class HUDManager : MonoBehaviour
+    public class HUDManager : AbstractSingleton<HUDManager>
     {
-        #region Singleton
+        #region Public Fields
 
-        public static HUDManager Instance { get; private set; }
+        public Dictionary<UIElementType, UIDynamicElement> UIElements => _uiElements;
 
         #endregion
 
         #region Private Fields
 
-        private Dictionary<UIElementType, UIElement> _uiElements = new Dictionary<UIElementType, UIElement>();
+        private Dictionary<UIElementType, UIDynamicElement> _uiElements = new Dictionary<UIElementType, UIDynamicElement>();
+
+        private Image[] _goodEffects;
+        private Image[] _normalEffects;
+        private Image[] _badEffects;
 
         #endregion
 
         #region Unity Methods
-
-        private void Awake()
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
 
         private void Start()
         {
@@ -39,41 +32,23 @@ namespace FastAndFractured
             RegisterUIElements();
         }
 
-        private void OnEnable()
-        {
-            // Subscribe to events if necessary
-            
-            // Example
-            // EventManager.OnHealthUpdate += UpdateHealthBar;
-            // EventManager.OnCooldownUpdate += UpdateCooldown;
-            // EventManager.OnTimerUpdate += UpdateTimer;
-            // EventManager.OnEventTitleUpdate += UpdateEventTitle;
-        }
-
-        private void OnDisable()
-        {
-            // Unsubscribe from events if necessary
-            
-            // Example
-            // EventManager.OnHealthUpdate -= UpdateHealthBar;
-            // EventManager.OnCooldownUpdate -= UpdateCooldown;
-            // EventManager.OnTimerUpdate -= UpdateTimer;
-            // EventManager.OnEventTitleUpdate -= UpdateEventTitle;
-        }
-
         #endregion
 
-        #region Private Methods
+        #region UI Elements Registration
 
         void RegisterUIElements()
         {
-            foreach (UIElement element in FindObjectsOfType<UIElement>(true))
+            foreach (UIDynamicElement element in FindObjectsOfType<UIDynamicElement>(true))
             {
                 _uiElements[element.elementType] = element;
             }
+
+            _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>();
+            _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>();
+            _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>();
         }
 
-        private bool TryGetUIElement(UIElementType type, out UIElement element)
+        private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
         {
             if (!_uiElements.TryGetValue(type, out element))
             {
@@ -85,7 +60,7 @@ namespace FastAndFractured
 
         #endregion
 
-        #region Public Methods
+        #region UI Modifications Methods
 
         /// <summary>
         /// Updates the specified UI element.
@@ -93,7 +68,7 @@ namespace FastAndFractured
         /// </summary>
         public void UpdateUIElement(UIElementType type, string newText)
         {
-            if (TryGetUIElement(type, out UIElement element) && element.textReference != null)
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.textReference != null)
             {
                 element.textReference.text = newText;
             }
@@ -101,7 +76,7 @@ namespace FastAndFractured
 
         public void UpdateUIElement(UIElementType type, Sprite newSprite)
         {
-            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
             {
                 element.imageReference.sprite = newSprite;
             }
@@ -109,7 +84,7 @@ namespace FastAndFractured
 
         public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
         {
-            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
             {
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
                 element.imageReference.fillAmount = fillAmount;
@@ -123,46 +98,20 @@ namespace FastAndFractured
 
         public void UpdateUIElement(UIElementType type, bool isActive)
         {
-            if (TryGetUIElement(type, out UIElement element))
+            if (TryGetUIElement(type, out UIDynamicElement element))
             {
                 element.gameObject.SetActive(isActive);
             }
         }
 
-        public UIElement GetUIElement(UIElementType type)
+        public UIDynamicElement GetUIElement(UIElementType type)
         {
-            if (TryGetUIElement(type, out UIElement element))
+            if (TryGetUIElement(type, out UIDynamicElement element))
             {
                 return element;
             }
             else return null;
         }
-
-        #endregion
-
-        #region Event Handlers
-
-        // Placeholder methods for future event handling
-
-        // private void UpdateHealthBar()
-        // {
-        //     UpdateUIImageFillAmount(UIElementType.HealthBar, Player.currentHealth, Player.maxHealth);
-        // }
-
-        // private void UpdateCooldown(UIElementType type, float currentCooldown, float maxCooldown)
-        // {
-        //     UpdateUIImageFillAmount(type, currentCooldown, maxCooldown);
-        // }
-
-        // private void UpdateTimer(float time)
-        // {
-        //     UpdateUITextString(UIElementType.TimerText, time.ToString("F2"));
-        // }
-
-        // private void UpdateEventTitle(string title)
-        // {
-        //     UpdateUITextString(UIElementType.EventText, title);
-        // }
 
         #endregion
     }
