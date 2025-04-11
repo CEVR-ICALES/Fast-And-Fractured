@@ -3,6 +3,8 @@ using Utilities;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 
 namespace FastAndFractured
@@ -10,98 +12,102 @@ namespace FastAndFractured
     public class SettingsMenuBehaviour : MonoBehaviour
     {
         [Header("Menu Settings UI")]
-        [SerializeField] private GameObject audioSettingsUI;
-        [SerializeField] private GameObject videoSettingsUI;
-        [SerializeField] private GameObject accessibilitySettingsUI;
+        [SerializeField] private GameObject _audioSettingsUI;
+        [SerializeField] private GameObject _videoSettingsUI;
+        [SerializeField] private GameObject _accessibilitySettingsUI;
 
         [Header("Audio Settings")]
-        [SerializeField] private Slider generalVolumeSlider;
-        [SerializeField] private Slider musicVolumeSlider;
-        [SerializeField] private Slider sfxVolumeSlider;
+        [SerializeField] private Slider _generalVolumeSlider;
+        [SerializeField] private Slider _musicVolumeSlider;
+        [SerializeField] private Slider _sfxVolumeSlider;
 
         [Header("Video Settings")]
-        [SerializeField] private Toggle vsyncToggle;
-        [SerializeField] private Slider brightnessSlider;
-        [SerializeField] private TMP_Dropdown fpsDropdown;
-        [SerializeField] private TMP_Dropdown resolutionDropdown;
-        [SerializeField] private TMP_Dropdown antiAliasingDropdown;
-        [SerializeField] private TMP_Dropdown sharpeningDropdown;
+        [SerializeField] private Toggle _vsyncToggle;
+        [SerializeField] private Volume _globalVolume;
+        [SerializeField] private Slider _brightnessSlider;
+        [SerializeField] private TMP_Dropdown _fpsDropdown;
+        [SerializeField] private TMP_Dropdown _resolutionDropdown;
+        [SerializeField] private TMP_Dropdown _antiAliasingDropdown;
+        [SerializeField] private TMP_Dropdown _sharpeningDropdown;
+
+        private LiftGammaGain _liftGammaGain;
 
         [Header("Accesibility Settings ")]
-        [SerializeField] private TMP_Dropdown colorblindDropdown;
-        [SerializeField] private TMP_Dropdown languageDropdown;
-        [SerializeField] private TMP_Dropdown subtitlesDropdown;
+        [SerializeField] private TMP_Dropdown _colorblindDropdown;
+        [SerializeField] private TMP_Dropdown _languageDropdown;
+        [SerializeField] private TMP_Dropdown _subtitlesDropdown;
 
         void Start()
         {
             SetStartValues();
-            fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
-            resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
-            antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(antiAliasingDropdown.value); });
-            sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(sharpeningDropdown.value); });
-            brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(brightnessSlider.value); });
-            colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(colorblindDropdown.value); });
-            languageDropdown.onValueChanged.AddListener(delegate { SetLanguage(languageDropdown.value); });
-            subtitlesDropdown.onValueChanged.AddListener(delegate { SetSubtitles(subtitlesDropdown.value); });
-            generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(generalVolumeSlider.value); });
-            musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
-            sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
+            _fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(_fpsDropdown.value); });
+            _resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(_resolutionDropdown.value); });
+            _antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(_antiAliasingDropdown.value); });
+            _sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(_sharpeningDropdown.value); });
+            _colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(_colorblindDropdown.value); });
+            _languageDropdown.onValueChanged.AddListener(delegate { SetLanguage(_languageDropdown.value); });
+            _subtitlesDropdown.onValueChanged.AddListener(delegate { SetSubtitles(_subtitlesDropdown.value); });
+            _generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(_generalVolumeSlider.value); });
+            _musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(_musicVolumeSlider.value); });
+            _sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(_sfxVolumeSlider.value); });
 
-            vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(vsyncToggle.isOn); });
+            _brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(_brightnessSlider.value); });
+
+            _vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(_vsyncToggle.isOn); });
         }
 
         private void SetStartValues()
         {
             //Master volume
             float masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.5f);
-            RefreshValue(generalVolumeSlider, masterVolume);
+            RefreshValue(_generalVolumeSlider, masterVolume);
 
             //Music volume 
             float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.5f);
-            RefreshValue(musicVolumeSlider, musicVolume);
+            RefreshValue(_musicVolumeSlider, musicVolume);
 
             //SFX volume
             float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
-            RefreshValue(sfxVolumeSlider, sfxVolume);
+            RefreshValue(_sfxVolumeSlider, sfxVolume);
 
             // Max FPS
             int maxFPS = PlayerPrefs.GetInt("MaxFPS", 120);
             string maxFPSString = maxFPS.ToString();
-            RefreshValue(fpsDropdown, maxFPSString);
+            RefreshValue(_fpsDropdown, maxFPSString);
 
             //Resolution
             string resolution = PlayerPrefs.GetString("Resolution", "1920x1080");
-            RefreshValue(resolutionDropdown, resolution);
+            RefreshValue(_resolutionDropdown, resolution);
             LoadAvailableResolutions();
 
             //VSync
             bool vsyncOn = PlayerPrefs.GetInt("Vsync", 0) == 1;
-            vsyncToggle.isOn = vsyncOn; 
+            _vsyncToggle.isOn = vsyncOn; 
             UpdateVSync(vsyncOn);
 
             //Anti-Aliasing
             string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
-            RefreshValue(antiAliasingDropdown, antiAliasing);
+            RefreshValue(_antiAliasingDropdown, antiAliasing);
 
             //Sharpening
             string sharpening = PlayerPrefs.GetString("Sharpening", "No");
-            RefreshValue(sharpeningDropdown, sharpening);
+            RefreshValue(_sharpeningDropdown, sharpening);
 
             //Brightness
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
-            RefreshValue(brightnessSlider, brightness);
+            RefreshValue(_brightnessSlider, brightness);
 
             //Colorblind
             string colorblind = PlayerPrefs.GetString("Colorblind", "No");
-            RefreshValue(colorblindDropdown, colorblind);
+            RefreshValue(_colorblindDropdown, colorblind);
 
             //Language
             string language = PlayerPrefs.GetString("Language", "Español");
-            RefreshValue(languageDropdown, language);
+            RefreshValue(_languageDropdown, language);
 
             //Subtitles
             string subtitles = PlayerPrefs.GetString("Subtitles", "No");
-            RefreshValue(subtitlesDropdown, subtitles);
+            RefreshValue(_subtitlesDropdown, subtitles);
         }
         private void RefreshValue(TMP_Dropdown dropdown, string value)
         {
@@ -123,21 +129,21 @@ namespace FastAndFractured
         //Change between settings ui
         public void OpenAudioSettings()
         {
-            audioSettingsUI.SetActive(true);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(false);
+            _audioSettingsUI.SetActive(true);
+            _videoSettingsUI.SetActive(false);
+            _accessibilitySettingsUI.SetActive(false);
         }
         public void OpenVideoSettings()
         {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(true);
-            accessibilitySettingsUI.SetActive(false);
+            _audioSettingsUI.SetActive(false);
+            _videoSettingsUI.SetActive(true);
+            _accessibilitySettingsUI.SetActive(false);
         }
         public void OpenAccesibilitySettings()
         {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(true);
+            _audioSettingsUI.SetActive(false);
+            _videoSettingsUI.SetActive(false);
+            _accessibilitySettingsUI.SetActive(true);
         }
 
         #region Audio Settings
@@ -185,7 +191,7 @@ namespace FastAndFractured
 
         private void CapFPS(int option)
         {
-            string selectedOption = fpsDropdown.options[option].text;
+            string selectedOption = _fpsDropdown.options[option].text;
             int maxFPS = int.Parse(selectedOption);
             Application.targetFrameRate = maxFPS;
             PlayerPrefs.SetInt("MaxFPS", maxFPS);
@@ -194,7 +200,7 @@ namespace FastAndFractured
 
         private void SetAntiAliasing(int option)
         {
-            string selectedOption = antiAliasingDropdown.options[option].text;
+            string selectedOption = _antiAliasingDropdown.options[option].text;
             PlayerPrefs.SetString("Anti-Aliasing", selectedOption);
             PlayerPrefs.Save();
             //TODO set anti-aliasing in game
@@ -202,7 +208,7 @@ namespace FastAndFractured
 
         private void SetResolution(int option)
         {
-            string selectedOption = resolutionDropdown.options[option].text;
+            string selectedOption = _resolutionDropdown.options[option].text;
             PlayerPrefs.SetString("Resolution", selectedOption);
             PlayerPrefs.Save();
 
@@ -214,7 +220,7 @@ namespace FastAndFractured
 
         private void LoadAvailableResolutions()
         {
-            resolutionDropdown.ClearOptions();
+            _resolutionDropdown.ClearOptions();
 
             Resolution[] resolutionList = Screen.resolutions
                 .OrderByDescending(r => r.width * r.height)
@@ -235,23 +241,23 @@ namespace FastAndFractured
                     currentResolutionIndex = optionsList.Count - 1;
             }
 
-            resolutionDropdown.AddOptions(optionsList);
+            _resolutionDropdown.AddOptions(optionsList);
 
             string savedResolution = PlayerPrefs.GetString("Resolution", "");
             if (!string.IsNullOrEmpty(savedResolution))
             {
                 int index = optionsList.IndexOf(savedResolution);
-                resolutionDropdown.value = index != -1 ? index : currentResolutionIndex;
+                _resolutionDropdown.value = index != -1 ? index : currentResolutionIndex;
             }
             else
-                resolutionDropdown.value = currentResolutionIndex;
+                _resolutionDropdown.value = currentResolutionIndex;
 
-            resolutionDropdown.RefreshShownValue();
+            _resolutionDropdown.RefreshShownValue();
         }
 
         private void SetSharpening(int option)
         {
-            string selectedOption = sharpeningDropdown.options[option].text;
+            string selectedOption = _sharpeningDropdown.options[option].text;
             PlayerPrefs.SetString("Sharpening", selectedOption);
             PlayerPrefs.Save();
             //TODO set sharpening in game
@@ -261,21 +267,21 @@ namespace FastAndFractured
         #region Accesibility settings
         private void SetColorblind(int option)
         {
-            string selectedOption = colorblindDropdown.options[option].text;
+            string selectedOption = _colorblindDropdown.options[option].text;
             PlayerPrefs.SetString("Colorblind", selectedOption);
             PlayerPrefs.Save();
             //TODO set colorblind in game
         }
         private void SetLanguage(int option)
         {
-            string selectedOption = languageDropdown.options[option].text;
+            string selectedOption = _languageDropdown.options[option].text;
             PlayerPrefs.SetString("Language", selectedOption);
             PlayerPrefs.Save();
             //TODO set language in game
         }
         private void SetSubtitles(int option)
         {
-            string selectedOption = subtitlesDropdown.options[option].text;
+            string selectedOption = _subtitlesDropdown.options[option].text;
             PlayerPrefs.SetString("Subtitles", selectedOption);
             PlayerPrefs.Save();
             //TODO set subtitles in game
