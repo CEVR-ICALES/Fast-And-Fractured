@@ -302,7 +302,7 @@ namespace FastAndFractured
         ITimer _dashTimer;
         public void HandleDashWithPhysics()
         {
-            if (!_isDashing && _canDash)
+            if (!_isDashing && _canDash )
             {
                 _isDashing = true;
                 _physicsBehaviour.BlockRigidBodyRotations();
