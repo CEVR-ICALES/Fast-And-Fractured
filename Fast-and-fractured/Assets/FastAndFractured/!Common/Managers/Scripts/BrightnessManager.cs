@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
-using UnityEngine.TextCore.LowLevel;
 using Utilities;
 
 public class BrightnessManager : AbstractSingleton<BrightnessManager>
@@ -52,6 +51,6 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
 
         float gamma = Mathf.Lerp(minGammaValue, maxGammaValue, _brightness);
         liftGammaGain.gamma.overrideState = true;
-        liftGammaGain.gamma.value = new Vector4(gamma, gamma, gamma, 0f);
+        liftGammaGain.gamma.value = new Vector4(gamma, gamma, gamma, 1f);
     }
 }

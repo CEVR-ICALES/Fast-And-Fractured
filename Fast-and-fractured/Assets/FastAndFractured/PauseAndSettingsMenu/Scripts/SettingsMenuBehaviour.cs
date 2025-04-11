@@ -23,14 +23,11 @@ namespace FastAndFractured
 
         [Header("Video Settings")]
         [SerializeField] private Toggle _vsyncToggle;
-        [SerializeField] private Volume _globalVolume;
         [SerializeField] private Slider _brightnessSlider;
         [SerializeField] private TMP_Dropdown _fpsDropdown;
         [SerializeField] private TMP_Dropdown _resolutionDropdown;
         [SerializeField] private TMP_Dropdown _antiAliasingDropdown;
         [SerializeField] private TMP_Dropdown _sharpeningDropdown;
-
-        private LiftGammaGain _liftGammaGain;
 
         [Header("Accesibility Settings ")]
         [SerializeField] private TMP_Dropdown _colorblindDropdown;
@@ -40,8 +37,6 @@ namespace FastAndFractured
         void Start()
         {
             SetStartValues();
-
-            _globalVolume.profile.TryGet(out _liftGammaGain);
 
             _fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(_fpsDropdown.value); });
             _resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(_resolutionDropdown.value); });
@@ -54,7 +49,7 @@ namespace FastAndFractured
             _musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(_musicVolumeSlider.value); });
             _sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(_sfxVolumeSlider.value); });
 
-            _brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(_brightnessSlider.value); });
+            _brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
 
             _vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(_vsyncToggle.isOn); });
         }
@@ -112,6 +107,7 @@ namespace FastAndFractured
             string subtitles = PlayerPrefs.GetString("Subtitles", "No");
             RefreshValue(_subtitlesDropdown, subtitles);
         }
+
         private void RefreshValue(TMP_Dropdown dropdown, string value)
         {
             for (int i = 0; i < dropdown.options.Count; i++)
@@ -137,12 +133,17 @@ namespace FastAndFractured
             _videoSettingsUI.SetActive(false);
             _accessibilitySettingsUI.SetActive(false);
         }
+
         public void OpenVideoSettings()
         {
             _audioSettingsUI.SetActive(false);
             _videoSettingsUI.SetActive(true);
             _accessibilitySettingsUI.SetActive(false);
+
+            float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
+            _brightnessSlider.SetValueWithoutNotify(brightness);
         }
+
         public void OpenAccesibilitySettings()
         {
             _audioSettingsUI.SetActive(false);
@@ -157,12 +158,14 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             SoundManager.Instance.UpdateGeneralVolume();
         }
+
         private void SetMusicVolume(float value)
         {
             PlayerPrefs.SetFloat("MusicVolume", value);
             PlayerPrefs.Save();
             SoundManager.Instance.UpdateMusicVolume();
         }
+
         private void SetSFXVolume(float value)
         {
             PlayerPrefs.SetFloat("SFXVolume", value);
@@ -172,9 +175,9 @@ namespace FastAndFractured
         #endregion
 
         #region Video settings
-        private void SetBrightness(float value)
+        public void SetBrightness()
         {
-            BrightnessManager.Instance?.SetBrightness(value);
+            BrightnessManager.Instance?.SetBrightness(_brightnessSlider.value);
         }
 
         private void UpdateVSync(bool isActive)
