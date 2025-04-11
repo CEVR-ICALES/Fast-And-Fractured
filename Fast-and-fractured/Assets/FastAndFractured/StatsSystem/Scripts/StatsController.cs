@@ -101,6 +101,7 @@ namespace FastAndFractured
         public UnityEvent<float> onEnduranceDamageHealed;
         public UnityEvent<float,GameObject,bool> onDead;
         private ITimer _deadTimer;
+        public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
 
         #region START EVENTS
@@ -199,7 +200,9 @@ namespace FastAndFractured
             {
                 if(escapedDead)
                 {
-                    _deadTimer.StopTimer();
+                    _deadTimer?.StopTimer();
+                    _deadTimer = null;
+                    _currentKiller = null;
                 }    
             }
             else
@@ -211,26 +214,26 @@ namespace FastAndFractured
                         if (_deadTimer != null)
                         {
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
-                            _currentKiller = killer;
                             _deadTimer.StopTimer();
-                            _deadTimer = TimerSystem.Instance.CreateTimer(newTime, onTimerDecreaseComplete: () =>
-                            {
-                                Dead();
-                                _deadTimer = null;
-                            });
+                            SetDeadTimer(killer,newTime);
                         }
                     }
                 }
                 else
                 {
-                    _currentKiller = killer;
-                    _deadTimer = TimerSystem.Instance.CreateTimer(killer.KillTime, onTimerDecreaseComplete: () =>
-                    {
-                        Dead();
-                        _deadTimer = null;
-                    });
+                    SetDeadTimer(killer,killer.KillTime);
                 }
             }
+        }
+
+        private void SetDeadTimer(IKillCharacters killer,float time)
+        {
+            _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
+            {
+                _currentKiller = killer;
+                Dead();
+                _deadTimer = null;
+            });
         }
 
         public void Dead()

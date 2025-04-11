@@ -83,6 +83,13 @@ namespace Enums
         ADVANCED
     }
 
+    public enum IAGroundState
+    {
+        GROUND,
+        AIR,
+        NONE
+    }
+
     public enum CollisionType
     {
         COLLISION,
@@ -139,10 +146,4 @@ namespace Enums
         TOMATO_EFFECT
     }
 
-    public enum ErrorTypeInGettingCharacters
-    {
-        DONT_EXIST,
-        INCORRECT_NAME_CODE,
-        NOT_FOUND
-    }
 }
