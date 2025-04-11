@@ -114,12 +114,7 @@ namespace FastAndFractured
 
         private void Update()
         {
-            if (_inGameCharacters != null)
-            {
-             bool inside =   IsInsideSandstorm(_inGameCharacters[0].transform);
-                Debug.Log("target : " + _inGameCharacters[0].name + " insideSandstrom : " + inside);
-
-            }
+          
         }
 
         private void OnEnable()

@@ -85,9 +85,9 @@ namespace Enums
 
     public enum IAGroundState
     {
-        Ground,
-        Air,
-        None
+        GROUND,
+        AIR,
+        NONE
     }
 
     public enum CollisionType

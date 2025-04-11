@@ -62,7 +62,7 @@ namespace FastAndFractured
 
         private bool _isPaused = false;
 
-        const float FRONT_ANGLE = 180;
+        const float HALF_FRONT_ANGLE = 90;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
@@ -194,7 +194,7 @@ namespace FastAndFractured
             directionToTarget.Normalize();
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
             float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
-            return !(angleToTarget < (FRONT_ANGLE*0.5f));
+            return !(angleToTarget < (HALF_FRONT_ANGLE));
         }
 
         private void OnTriggerEnter(Collider other)

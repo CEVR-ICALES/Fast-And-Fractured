@@ -129,23 +129,23 @@ namespace FastAndFractured
 
         private void GroundForces()
         {
-            if (groundState == IAGroundState.Air||groundState == IAGroundState.None)
+            if (groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)
             {
                 applyForceByState.ToggleAirFriction(false);
                 applyForceByState.ToggleCustomGravity(false);
                 applyForceByState.ToggleRollPrevention(true, 1);//By default, IA is always moving
-                groundState = IAGroundState.Ground;
+                groundState = IAGroundState.GROUND;
             }
         }
 
         private void AirForces()
         {
-            if (groundState == IAGroundState.Ground||groundState == IAGroundState.None)
+            if (groundState == IAGroundState.GROUND||groundState == IAGroundState.NONE)
             {
                 applyForceByState.ToggleAirFriction(true);
                 applyForceByState.ToggleCustomGravity(true);
                 applyForceByState.ToggleRollPrevention(false, 0);
-                groundState = IAGroundState.Air;
+                groundState = IAGroundState.AIR;
             }
         }
 
@@ -323,7 +323,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30)&&LevelController.Instance.IsInsideSandstorm(statItem.transform))
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30)&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -346,7 +346,7 @@ namespace FastAndFractured
             {
                 if (!character) continue;
                 float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject&&LevelController.Instance.IsInsideSandstorm(character.transform))
+                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject&&!LevelController.Instance.IsInsideSandstorm(character.transform))
                 {
                     nearestOne = characterDistance;
                     nearestTarget = character;
@@ -716,7 +716,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne&&LevelController.Instance.IsInsideSandstorm(statItem.transform))
+                if (itemDistance < nearestOne&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -727,116 +727,6 @@ namespace FastAndFractured
             _targetToGo = nearestTarget;
             _currentTarget = _targetToGo;
         }
-        //Is obsolete but can be used in the future
-        //#if UNITY_EDITOR
-        //        // Save their previous values so we can identify which one changed.
-        //        int _checkHealth;
-        //        int _checkSpeed;
-        //        int _checkAcceleration;
-        //        int _checkNormal;
-        //        int _checkPush;
-        //        int _checkCooldown;
-
-        //        void OnValidate()
-        //        {
-
-        //            // Skip this if we haven't cached the values yet.
-        //            if (_checkHealth >= 0)
-        //            {
-
-        //                // Find which value the user changed, and update the rest from it.
-        //                if (_checkHealth != decisionPercentageHealth)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageHealth, 
-        //                        ref decisionPercentageMaxSpeed, 
-        //                        ref decisionPercentageAcceleration, 
-        //                        ref decisionPercentageNormalShoot, 
-        //                        ref decisionPercentagePushShoot, 
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkSpeed != decisionPercentageMaxSpeed)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkAcceleration != decisionPercentageAcceleration)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkNormal != decisionPercentageNormalShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkPush != decisionPercentagePushShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkCooldown != decisionPercentageCooldown)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageCooldown,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot);
-        //                }
-
-        //            }
-
-        //            _checkHealth = decisionPercentageHealth;
-        //            _checkSpeed = decisionPercentageMaxSpeed;
-        //            _checkAcceleration = decisionPercentageAcceleration;
-        //            _checkNormal = decisionPercentageNormalShoot;
-        //            _checkPush = decisionPercentagePushShoot;
-        //            _checkCooldown = decisionPercentageCooldown;
-        //        }
-
-
-        //        void DistributeProportionately(ref int changed, ref int a, ref int b, ref int c, ref int d, ref int e)
-        //        {
-        //            changed = (int)Mathf.Clamp(changed, 0f, MAX_PERCENTAGE_100);
-        //            int total = MAX_PERCENTAGE_100 - changed;
-
-        //            int oldTotal = a + b + c + d + e;
-        //            Debug.Log(oldTotal);
-        //            if (oldTotal > 0f)
-        //            {
-        //                float fraction = 1f / oldTotal;
-        //                a = Mathf.RoundToInt(total * a * fraction);
-        //                b = Mathf.RoundToInt(total * b * fraction);
-        //                c = Mathf.RoundToInt(total * c * fraction);
-        //                d = Mathf.RoundToInt(total * d * fraction);
-        //                e = Mathf.RoundToInt(total * e * fraction);
-        //            }
-        //            else
-        //            {
-        //                a = b = c = d = e = total / 5;
-        //            }
-
-        //            // Assign any rounding error to the last one, arbitrarily.
-        //            // (Better rounding rules exist, so take this as an example only)
-        //            //a += total - a - b - c - d - e;
-        //        }
-        //#endif
 
         #endregion
     }
