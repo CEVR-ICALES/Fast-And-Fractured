@@ -43,9 +43,9 @@ namespace FastAndFractured
                 _uiElements[element.elementType] = element;
             }
 
-            _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>();
-            _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>();
-            _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>();
+            _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
         }
 
         private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
@@ -80,6 +80,21 @@ namespace FastAndFractured
             {
                 element.imageReference.sprite = newSprite;
             }
+            else
+            {
+                switch (type)
+                {
+                    case UIElementType.GOOD_EFFECTS:
+                        foreach (Image image in _goodEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        break;
+                    case UIElementType.NORMAL_EFFECTS:
+                        foreach (Image image in _normalEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        break;
+                    case UIElementType.BAD_EFFECTS:
+                        foreach (Image image in _badEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        break;
+                }
+            }
         }
 
         public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
@@ -104,6 +119,9 @@ namespace FastAndFractured
             }
         }
 
+        /// <summary>
+        /// Returns the UI element of the specified type.
+        /// </summary>
         public UIDynamicElement GetUIElement(UIElementType type)
         {
             if (TryGetUIElement(type, out UIDynamicElement element))
@@ -111,6 +129,17 @@ namespace FastAndFractured
                 return element;
             }
             else return null;
+        }
+
+        public GameObject GetEffectGameObject(Sprite sprite)
+        {
+            GameObject hudImage = null;
+
+            foreach (Image image in _goodEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
+            foreach (Image image in _normalEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
+            foreach (Image image in _badEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
+
+            return hudImage;
         }
 
         #endregion
