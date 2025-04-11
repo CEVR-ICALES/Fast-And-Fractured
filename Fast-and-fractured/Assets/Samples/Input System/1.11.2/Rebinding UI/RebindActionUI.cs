@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 ////TODO: localization support
 
@@ -9,11 +10,78 @@ using UnityEngine.UI;
 
 namespace UnityEngine.InputSystem.Samples.RebindUI
 {
+
     /// <summary>
     /// A reusable component with a self-contained UI for rebinding a single action.
     /// </summary>
     public class RebindActionUI : MonoBehaviour
     {
+
+        public List<string> inputsList = new List<string>()
+        {
+            "<Keyboard>/a",
+            "<Keyboard>/b",
+            "<Keyboard>/c",
+            "<Keyboard>/d",
+            "<Keyboard>/e",
+            "<Keyboard>/f",
+            "<Keyboard>/g",
+            "<Keyboard>/h",
+            "<Keyboard>/i",
+            "<Keyboard>/j",
+            "<Keyboard>/k",
+            "<Keyboard>/l",
+            "<Keyboard>/m",
+            "<Keyboard>/n",
+            "<Keyboard>/o",
+            "<Keyboard>/p",
+            "<Keyboard>/q",
+            "<Keyboard>/r",
+            "<Keyboard>/s",
+            "<Keyboard>/t",
+            "<Keyboard>/u",
+            "<Keyboard>/v",
+            "<Keyboard>/w",
+            "<Keyboard>/x",
+            "<Keyboard>/y",
+            "<Keyboard>/z",
+            "<Keyboard>/0",
+            "<Keyboard>/1",
+            "<Keyboard>/2",
+            "<Keyboard>/3",
+            "<Keyboard>/4",
+            "<Keyboard>/5",
+            "<Keyboard>/6",
+            "<Keyboard>/7",
+            "<Keyboard>/8",
+            "<Keyboard>/9",
+            "<Keyboard>/enter",
+            "<Keyboard>/Space",
+            "<Keyboard>/space",
+            "<Keyboard>/leftShift",
+            "<Keyboard>/leftCtrl",
+            "<Keyboard>/Ctrl",
+            "<Keyboard>/Control",
+            "<Keyboard>/leftAlt",
+            "<Keyboard>/tab",
+            "<Keyboard>/backspace",
+            "<Keyboard>/capsLock",
+            "<Keyboard>/upArrow",
+            "<Keyboard>/downArrow",
+            "<Keyboard>/leftArrow",
+            "<Keyboard>/rightArrow"
+        };
+
+        public enum ControlSchemeRestriction
+        {
+            None,           // Allow any input device
+            KeyboardMouse,  // Only allow Keyboard/Mouse bindings
+            Gamepad,        // Only allow Gamepad bindings
+        }
+
+        [Tooltip("Restrict rebinding to a specific control scheme")]
+        public ControlSchemeRestriction m_ControlSchemeRestriction = ControlSchemeRestriction.None;
+
         /// <summary>
         /// Reference to the action that is to be rebound.
         /// </summary>
@@ -217,6 +285,8 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             if (!ResolveActionAndBinding(out var action, out var bindingIndex))
                 return;
 
+            ResetBinding(action, bindingIndex);
+
             if (action.bindings[bindingIndex].isComposite)
             {
                 // It's a composite. Remove overrides from part bindings.
@@ -227,7 +297,47 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             {
                 action.RemoveBindingOverride(bindingIndex);
             }
+
             UpdateBindingDisplay();
+        }
+        private void ResetBinding(InputAction action, int bindingIndex)
+        {
+            InputBinding newBinding = action.bindings[bindingIndex];
+            string oldOverridePath = newBinding.overridePath;
+
+            action.RemoveBindingOverride(bindingIndex);
+            int currentIndex = -1;
+
+            foreach (InputAction otherAction in action.actionMap.actions)
+            {
+                currentIndex++;
+                InputBinding currentBinding = action.actionMap.bindings[currentIndex];
+
+                if (otherAction == action)
+                {
+                    if (newBinding.isPartOfComposite)
+                    {
+                        if (currentBinding.overridePath == newBinding.path)
+                        {
+                            otherAction.ApplyBindingOverride(currentIndex, oldOverridePath);
+                        }
+                    }
+
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                for (int i = 0; i < otherAction.bindings.Count; i++)
+                {
+                    InputBinding binding = otherAction.bindings[i];
+                    if (binding.overridePath == newBinding.path)
+                    {
+                        otherAction.ApplyBindingOverride(i, oldOverridePath);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -254,72 +364,135 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
 
         private void PerformInteractiveRebind(InputAction action, int bindingIndex, bool allCompositeParts = false)
         {
-            m_RebindOperation?.Cancel(); // Will null out m_RebindOperation.
+            m_RebindOperation?.Cancel();
 
             void CleanUp()
             {
                 m_RebindOperation?.Dispose();
                 m_RebindOperation = null;
-                action.Enable();
             }
 
-            //Fixes the "InvalidOperationException: Cannot rebind action x while it is enabled" error
             action.Disable();
 
-            // Configure the rebind.
-            m_RebindOperation = action.PerformInteractiveRebinding(bindingIndex)
-                .OnCancel(
-                    operation =>
-                    {
-                        m_RebindStopEvent?.Invoke(this, operation);
-                        if (m_RebindOverlay != null)
-                            m_RebindOverlay.SetActive(false);
-                        UpdateBindingDisplay();
-                        CleanUp();
-                    })
-                .OnComplete(
-                    operation =>
-                    {
-                        if (m_RebindOverlay != null)
-                            m_RebindOverlay.SetActive(false);
-                        m_RebindStopEvent?.Invoke(this, operation);
-                        UpdateBindingDisplay();
-                        CleanUp();
+            // Configure rebind operation
+            var rebind = action.PerformInteractiveRebinding(bindingIndex)
+                .WithCancelingThrough("<Keyboard>/escape");
 
-                        // If there's more composite parts we should bind, initiate a rebind
-                        // for the next part.
-                        if (allCompositeParts)
-                        {
-                            var nextBindingIndex = bindingIndex + 1;
-                            if (nextBindingIndex < action.bindings.Count && action.bindings[nextBindingIndex].isPartOfComposite)
-                                PerformInteractiveRebind(action, nextBindingIndex, true);
-                        }
-                    });
-
-            // If it's a part binding, show the name of the part in the UI.
-            var partName = default(string);
-            if (action.bindings[bindingIndex].isPartOfComposite)
-                partName = $"Binding '{action.bindings[bindingIndex].name}'. ";
-
-            // Bring up rebind overlay, if we have one.
-            m_RebindOverlay?.SetActive(true);
-            if (m_RebindText != null)
+            // Apply control scheme restriction if set
+            switch (m_ControlSchemeRestriction)
             {
-                var text = !string.IsNullOrEmpty(m_RebindOperation.expectedControlType)
-                    ? $"{partName}Waiting for {m_RebindOperation.expectedControlType} input..."
-                    : $"{partName}Waiting for input...";
-                m_RebindText.text = text;
+                case ControlSchemeRestriction.KeyboardMouse:
+                    rebind.WithControlsHavingToMatchPath("<Keyboard>")
+                          .WithControlsHavingToMatchPath("<Mouse>");
+                    break;
+                case ControlSchemeRestriction.Gamepad:
+                    rebind.WithControlsHavingToMatchPath("<Gamepad>");
+                    break;
             }
 
-            // If we have no rebind overlay and no callback but we have a binding text label,
-            // temporarily set the binding text label to "<Waiting>".
-            if (m_RebindOverlay == null && m_RebindText == null && m_RebindStartEvent == null && m_BindingText != null)
-                m_BindingText.text = "<Waiting...>";
+            m_RebindOperation = rebind
+                .OnCancel(operation =>
+                {
+                    action.Enable();
+                    m_RebindStopEvent?.Invoke(this, operation);
+                    m_RebindOverlay?.SetActive(false);
+                    UpdateBindingDisplay();
+                    CleanUp();
+                })
+                .OnComplete(operation =>
+                {
+                    var binding = action.bindings[bindingIndex];
+                    var keyPath = binding.effectivePath;
 
-            // Give listeners a chance to act on the rebind starting.
+                    // here we can potentially add allowed keys...
+                    if (m_ControlSchemeRestriction == ControlSchemeRestriction.KeyboardMouse)
+                    {
+                        if (keyPath.StartsWith("<Keyboard>/") && !inputsList.Contains(keyPath) ||
+                            keyPath.StartsWith("<Mouse>/"))
+                        {
+                            Debug.Log("Key not allowed. Please choose another.");
+                            action.RemoveBindingOverride(bindingIndex);
+                            PerformInteractiveRebind(action, bindingIndex, allCompositeParts);
+                            return;
+                        }
+                    }
+
+                    action.Enable();
+                    m_RebindOverlay?.SetActive(false);
+                    m_RebindStopEvent?.Invoke(this, operation);
+
+                    if (CheckDuplicateBindings(action, bindingIndex, allCompositeParts))
+                    {
+                        action.RemoveBindingOverride(bindingIndex);
+                        CleanUp();
+                        PerformInteractiveRebind(action, bindingIndex, allCompositeParts);
+                        return;
+                    }
+
+                    UpdateBindingDisplay();
+                    CleanUp();
+
+                    if (allCompositeParts)
+                    {
+                        var nextBindingIndex = bindingIndex + 1;
+                        if (nextBindingIndex < action.bindings.Count && action.bindings[nextBindingIndex].isPartOfComposite)
+                            PerformInteractiveRebind(action, nextBindingIndex, true);
+                    }
+                });
+
+            m_RebindOverlay?.SetActive(true);
+            m_BindingText.text = "[Waiting for Input]";
             m_RebindStartEvent?.Invoke(this, m_RebindOperation);
-
             m_RebindOperation.Start();
+        }
+
+        private bool CheckDuplicateBindings(InputAction action, int bindingIndex, bool allCompositeParts = false)
+        {
+            InputBinding newBinding = action.bindings[bindingIndex];
+            int currentIndex = -1;
+
+            foreach (InputBinding binding in action.actionMap.bindings)
+            {
+                currentIndex++;
+
+                if (binding.action == newBinding.action)
+                {
+                    if (binding.isPartOfComposite && currentIndex != bindingIndex)
+                    {
+                        if (binding.effectivePath == newBinding.effectivePath)
+                        {
+                            Debug.Log("Duplicate binding found in composite: " + newBinding.effectivePath);
+                            return true;
+                        }
+                    }
+
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                if (binding.effectivePath == newBinding.effectivePath)
+                {
+                    Debug.Log("Duplicate binding found: " + newBinding.effectivePath);
+                    return true;
+                }
+
+            }
+
+            if (allCompositeParts)
+            {
+                for (int i = 1; i < bindingIndex; i++)
+                {
+                    if (action.bindings[i].effectivePath == newBinding.overridePath)
+                    {
+                        //Debug.Log("Duplicate binding found: " + newBinding.effectivePath);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         protected void OnEnable()
@@ -329,6 +502,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             s_RebindActionUIs.Add(this);
             if (s_RebindActionUIs.Count == 1)
                 InputSystem.onActionChange += OnActionChange;
+
         }
 
         protected void OnDisable()
@@ -398,6 +572,13 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         [SerializeField]
         private Text m_RebindText;
 
+        [Tooltip("Optional bool field which allows you to OVERRIDE the action label with your own text")]
+        public bool m_OverRideActionLabel;
+
+        [Tooltip("What text should be displayed for the action label?")]
+        [SerializeField] private string m_ActionLabelString;
+
+
         [Tooltip("Event that is triggered when the way the binding is display should be updated. This allows displaying "
             + "bindings in custom ways, e.g. using images instead of text.")]
         [SerializeField]
@@ -419,21 +600,30 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
 
         // We want the label for the action name to update in edit mode, too, so
         // we kick that off from here.
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         protected void OnValidate()
         {
             UpdateActionLabel();
             UpdateBindingDisplay();
         }
 
-        #endif
+#endif
 
         private void UpdateActionLabel()
         {
             if (m_ActionLabel != null)
             {
                 var action = m_Action?.action;
-                m_ActionLabel.text = action != null ? action.name : string.Empty;
+
+                if (m_OverRideActionLabel)
+                {
+                    m_ActionLabel.text = m_ActionLabelString;
+                }
+                else
+                {
+                    m_ActionLabel.text = action != null ? action.name : string.Empty;
+                    m_ActionLabelString = string.Empty;
+                }
             }
         }
 

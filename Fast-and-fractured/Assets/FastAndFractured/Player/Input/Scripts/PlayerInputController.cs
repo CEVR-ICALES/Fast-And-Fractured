@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 using Utilities;
+using static UnityEngine.InputSystem.DefaultInputActions;
 
 namespace FastAndFractured
 {
@@ -81,7 +82,6 @@ namespace FastAndFractured
         {
             base.Awake();
             LevelController.Instance.charactersCustomStart.AddListener(BindActions);
-
         }
 
         private void BindActions()
@@ -126,6 +126,8 @@ namespace FastAndFractured
 
             _inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
+
+            LoadInputSettings();
         }
 
         private void OnEnable()
@@ -153,6 +155,12 @@ namespace FastAndFractured
             CheckForInputDeviceChange();
         }
 
+        private void LoadInputSettings()
+        {
+            var rebinds = PlayerPrefs.GetString("rebinds");
+            if (!string.IsNullOrEmpty(rebinds))
+                _inputActions.LoadBindingOverridesFromJson(rebinds);
+        }
 
         private void CheckForInputDeviceChange()
         {
