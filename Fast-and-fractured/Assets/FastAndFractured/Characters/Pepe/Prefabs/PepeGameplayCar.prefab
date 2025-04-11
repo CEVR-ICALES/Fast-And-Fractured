@@ -318,6 +318,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: directionCenterOffSet.y
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 732716184055679885, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.13
@@ -376,7 +380,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Name
-      value: PepeCar Variant
+      value: PepeGameplayCar
       objectReference: {fileID: 0}
     - target: {fileID: 6029403678818502445, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -576,7 +580,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2878993216845904401}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1723240950232034530}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
 --- !u!4 &259418342896148673 stripped
 Transform:
@@ -591,6 +598,42 @@ Transform:
 --- !u!4 &3430634758526554405 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4562356898158092377 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1723240950232034530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562356898158092377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42e3d8643af16247b6bfc1843a73a10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityData: {fileID: 11400000, guid: 2c0f93fb0b468614e931a853a422dc45, type: 2}
+  onAbilityActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  spawnPoint: {fileID: 5404290905123533514}
+  tomatoSpeed: 100
+  descendingTomatoSpeed: 100
+  distanceEffect: 50
+  ascendingTime: 2
+  pooltypeAscendingTomato: 4
+  pooltypeDescendingTomato: 5
+--- !u!1 &5404290905123533514 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4098650610201051261, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 8223204524156514999}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &6406879614907160408 stripped

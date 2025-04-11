@@ -109,7 +109,7 @@ namespace Enums
         ACCELERATION,
         ENDURANCE,
         NORMAL_DAMAGE,
-        PUSH_DAMAGE,
+        PUSH_FORCE,
         COOLDOWN_SPEED,
         MAX_SPEED_MULTIPLIER
     }
