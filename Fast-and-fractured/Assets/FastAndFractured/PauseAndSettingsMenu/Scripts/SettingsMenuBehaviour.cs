@@ -17,9 +17,8 @@ namespace FastAndFractured
         [SerializeField] private GameObject _videoSettingsUI;
         [SerializeField] private GameObject _accessibilitySettingsUI;
 
-        [SerializeField] private GameObject gamepadRemappingWindow;
-        [SerializeField] private GameObject keyboardRemappingWindow;
-
+        [SerializeField] private GameObject _gamepadRemappingWindow;
+        [SerializeField] private GameObject _keyboardRemappingWindow;
 
         [Header("Audio Settings")]
         [SerializeField] private Slider _generalVolumeSlider;
@@ -40,9 +39,9 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown _subtitlesDropdown;
 
         [Header("Delete progress")]
-        [SerializeField] private GameObject deletePopupUI;
-        [SerializeField] private List<string> deletedProgressList = new List<string>();
-        [SerializeField] private GameObject deleteButton;
+        [SerializeField] private GameObject _deletePopupUI;
+        [SerializeField] private List<string> _deletedProgressList = new List<string>();
+        [SerializeField] private GameObject _deleteButton;
 
         void Start()
         {
@@ -53,8 +52,6 @@ namespace FastAndFractured
             _antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(_antiAliasingDropdown.value); });
             _sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(_sharpeningDropdown.value); });
             _colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(_colorblindDropdown.value); });
-            _languageDropdown.onValueChanged.AddListener(delegate { SetLanguage(_languageDropdown.value); });
-            _subtitlesDropdown.onValueChanged.AddListener(delegate { SetSubtitles(_subtitlesDropdown.value); });
             _generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(_generalVolumeSlider.value); });
             _musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(_musicVolumeSlider.value); });
             _sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(_sfxVolumeSlider.value); });
@@ -65,11 +62,11 @@ namespace FastAndFractured
 
             if (SceneManager.GetActiveScene().buildIndex != 0)
             {
-                deleteButton.SetActive(false);
+                _deleteButton.SetActive(false);
             }
             else
             {
-                deleteButton.SetActive(true);
+                _deleteButton.SetActive(true);
             }
         }
 
@@ -148,61 +145,48 @@ namespace FastAndFractured
         //Change between settings ui
         public void OpenAudioSettings()
         {
-            audioSettingsUI.SetActive(true);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(false);
-            gamepadRemappingWindow.SetActive(false);
-            keyboardRemappingWindow.SetActive(false);
+            _audioSettingsUI.SetActive(true);
+            _videoSettingsUI.SetActive(false);
+            _accessibilitySettingsUI.SetActive(false);
+            _gamepadRemappingWindow.SetActive(false);
+            _keyboardRemappingWindow.SetActive(false);
         }
-        public void OpenVideoSettings()
-        {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(true);
-            accessibilitySettingsUI.SetActive(false);
-            gamepadRemappingWindow.SetActive(false);
-            keyboardRemappingWindow.SetActive(false);
-        }
-        public void OpenAccesibilitySettings()
-        {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(true);
-            gamepadRemappingWindow.SetActive(false);
-            keyboardRemappingWindow.SetActive(false);
-        }
-
-        public void OpenKeyboardRemapping()
-        {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(false);
-            gamepadRemappingWindow.SetActive(false);
-            keyboardRemappingWindow.SetActive(true);
-        }
-        public void OpenControllerRemapping()
-        {
-            audioSettingsUI.SetActive(false);
-            videoSettingsUI.SetActive(false);
-            accessibilitySettingsUI.SetActive(false);
-            gamepadRemappingWindow.SetActive(true);
-            keyboardRemappingWindow.SetActive(false);
-        }
-
         public void OpenVideoSettings()
         {
             _audioSettingsUI.SetActive(false);
             _videoSettingsUI.SetActive(true);
             _accessibilitySettingsUI.SetActive(false);
+            _gamepadRemappingWindow.SetActive(false);
+            _keyboardRemappingWindow.SetActive(false);
 
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
             _brightnessSlider.SetValueWithoutNotify(brightness);
         }
-
+        
         public void OpenAccesibilitySettings()
         {
             _audioSettingsUI.SetActive(false);
             _videoSettingsUI.SetActive(false);
             _accessibilitySettingsUI.SetActive(true);
+            _gamepadRemappingWindow.SetActive(false);
+            _keyboardRemappingWindow.SetActive(false);
+        }
+
+        public void OpenKeyboardRemapping()
+        {
+            _audioSettingsUI.SetActive(false);
+            _videoSettingsUI.SetActive(false);
+            _accessibilitySettingsUI.SetActive(false);
+            _gamepadRemappingWindow.SetActive(false);
+            _keyboardRemappingWindow.SetActive(true);
+        }
+        public void OpenControllerRemapping()
+        {
+            _audioSettingsUI.SetActive(false);
+            _videoSettingsUI.SetActive(false);
+            _accessibilitySettingsUI.SetActive(false);
+            _gamepadRemappingWindow.SetActive(true);
+            _keyboardRemappingWindow.SetActive(false);
         }
 
         #region Audio Settings
@@ -226,6 +210,17 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             SoundManager.Instance.UpdateSFXVolume();
         }
+        #endregion
+
+        #region Accesibility settings
+        private void SetColorblind(int option)
+        {
+            string selectedOption = _colorblindDropdown.options[option].text;
+            PlayerPrefs.SetString("Colorblind", selectedOption);
+            PlayerPrefs.Save();
+            //TODO set colorblind in game
+        }
+
         #endregion
 
         #region Video settings
@@ -323,24 +318,25 @@ namespace FastAndFractured
         }
         #endregion
 
+        #region Delete Progress Methods
         public void DeleteAllProgress()
         {
-            deletePopupUI.SetActive(false);
-            for (int i = 0; i < deletedProgressList.Count; i++)
+            _deletePopupUI.SetActive(false);
+            for (int i = 0; i < _deletedProgressList.Count; i++)
             {
-                PlayerPrefs.DeleteKey(deletedProgressList[i]);
+                PlayerPrefs.DeleteKey(_deletedProgressList[i]);
             }
             PlayerPrefs.Save();
         }
 
         public void CloseDeletePopup()
         {
-            deletePopupUI.SetActive(false);
+            _deletePopupUI.SetActive(false);
         }
 
         public void OpenDeletePopup()
         {
-            deletePopupUI.SetActive(true);
+            _deletePopupUI.SetActive(true);
         }
 
         #endregion
