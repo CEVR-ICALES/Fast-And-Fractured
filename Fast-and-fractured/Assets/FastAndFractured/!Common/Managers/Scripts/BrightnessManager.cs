@@ -49,8 +49,8 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
         if (!globalVolume.profile.TryGet(out liftGammaGain))
             liftGammaGain = globalVolume.profile.Add<LiftGammaGain>(true);
 
-        float gamma = Mathf.Lerp(minGammaValue, maxGammaValue, _brightness);
-        liftGammaGain.gamma.overrideState = true;
-        liftGammaGain.gamma.value = new Vector4(gamma, gamma, gamma, 1f);
+        float gamma = Mathf.Lerp(-0.7f, 0.7f, _brightness);
+
+        liftGammaGain.gamma.Override(new Vector4(1f, 1f, 1f, gamma));
     }
 }
