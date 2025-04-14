@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{4e71e283-7a57-477e-8f21-fd08fbfab4ab}">
+		<property name="name">
+			<value>CarState</value>
+		</property>
+		<relationship name="folder">
+			<destination>{08c67f7f-0182-4fee-acd6-def6da4d6308}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{1ec67e57-761a-41e9-9ec1-69442bd4fb33}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{1ec67e57-761a-41e9-9ec1-69442bd4fb33}">
+		<property name="parameterType">
+			<value>2</value>
+		</property>
+		<property name="maximum">
+			<value>3</value>
+		</property>
+		<property name="enumerationLabels">
+			<value>Starting</value>
+			<value>Running</value>
+			<value>Stopping</value>
+		</property>
+		<property name="initialValue">
+			<value>1</value>
+		</property>
+	</object>
+</objects>
