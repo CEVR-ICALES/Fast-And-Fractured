@@ -1,5 +1,73 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4427718371182597162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2596766532287913715}
+  - component: {fileID: 1129174231850469920}
+  m_Layer: 0
+  m_Name: SecondSandstorm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2596766532287913715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4427718371182597162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 5.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 362617908678673583}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1129174231850469920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4427718371182597162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1fbb15bf92b84f40a1eb030765b5afe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parameters:
+    albedo: {r: 0.8627451, g: 0.58431375, b: 0.2509804, a: 1}
+    meanFreePath: 0.5
+    blendingMode: 1
+    priority: 0
+    anisotropy: 0
+    volumeMask: {fileID: 11700000, guid: 3af9c20750f577e4396cbd935f26e8b9, type: 3}
+    textureScrollingSpeed: {x: 0, y: 0, z: 0}
+    textureTiling: {x: 1, y: 1, z: 1}
+    positiveFade: {x: 0, y: 0, z: 0}
+    negativeFade: {x: 0, y: 0, z: 0}
+    m_EditorUniformFade: 0
+    m_EditorPositiveFade: {x: 0.00011595542, y: 0, z: 0}
+    m_EditorNegativeFade: {x: 0.00011595542, y: 0, z: 0}
+    m_EditorAdvancedFade: 0
+    size: {x: 862.4, y: 113.25, z: 48.2}
+    invertFade: 0
+    distanceFadeStart: 10000
+    distanceFadeEnd: 10000
+    textureOffset: {x: 0, y: 0, z: 0}
+    falloffMode: 0
+    maskMode: 0
+    materialMask: {fileID: 0}
+  m_Version: 2
 --- !u!1 &6745150645740628129
 GameObject:
   m_ObjectHideFlags: 0
@@ -26,8 +94,8 @@ Transform:
   m_GameObject: {fileID: 6745150645740628129}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 5.5, z: 0}
+  m_LocalScale: {x: -11.3, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 362617908678673583}
@@ -46,20 +114,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parameters:
     albedo: {r: 0.8627451, g: 0.58431375, b: 0.2509804, a: 1}
-    meanFreePath: 4
+    meanFreePath: 0.5
     blendingMode: 1
     priority: 0
     anisotropy: 0
     volumeMask: {fileID: 11700000, guid: 7ffbbd5e8af0e5442aeb311b9ae6e091, type: 3}
-    textureScrollingSpeed: {x: 2, y: 1, z: 1}
+    textureScrollingSpeed: {x: 9.57, y: 1, z: 1}
     textureTiling: {x: 2, y: 1, z: 2}
     positiveFade: {x: 0, y: 0, z: 0}
     negativeFade: {x: 0, y: 0, z: 0}
     m_EditorUniformFade: 0
-    m_EditorPositiveFade: {x: 0.0009999999, y: 0, z: 0.0009999999}
-    m_EditorNegativeFade: {x: 0.0009999999, y: 0, z: 0.0009999999}
+    m_EditorPositiveFade: {x: 0.00011595542, y: 0, z: 0}
+    m_EditorNegativeFade: {x: 0.00011595542, y: 0, z: 0}
     m_EditorAdvancedFade: 0
-    size: {x: 100, y: 12.5, z: 100}
+    size: {x: 862.4, y: 113.25, z: 48.2}
     invertFade: 0
     distanceFadeStart: 10000
     distanceFadeEnd: 10000
@@ -77,6 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 362617908678673583}
+  - component: {fileID: 6586242171806106470}
   m_Layer: 0
   m_Name: SandstormParent
   m_TagString: Untagged
@@ -98,5 +167,28 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2641953838915287682}
+  - {fileID: 2596766532287913715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6586242171806106470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8837894182934861129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2a846d43725d614b9a082538308dbe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fogParent: {fileID: 8837894182934861129}
+  primaryFog: {fileID: 5812717557806696838}
+  secondaryFog: {fileID: 1129174231850469920}
+  maxGrowthTime: 60
+  gameObjectSpawnPoint: {fileID: 0}
+  gameObjectMirroPoint: {fileID: 0}
+  sphereCenter: {fileID: 0}
+  sphereRadius: 500
+  maxAngleExcluded: 360
+  numberOfPoints: 18

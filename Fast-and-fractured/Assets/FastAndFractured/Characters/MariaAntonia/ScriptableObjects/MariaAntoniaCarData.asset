@@ -15,18 +15,17 @@ MonoBehaviour:
   CharacterName: MariaAntonia
   AI: 0
   CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
-  CarWithSkinsPrefabs:
-  - {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
+  CarWithSkinsPrefabs: []
   MaxEndurance: 400
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 100
   MaxSpeedDashing: 140
-  MaxSpeedMultiplier: 0
+  MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 0
-  MinAcceleration: 0
-  Acceleration: 1200
+  MaxAcceleration: 1500
+  MinAcceleration: 1000
+  Acceleration: 3500
   BrakeTorque: 12000
   Handling: 35
   HandlingSmoothnes: 6
@@ -38,36 +37,33 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 900
-  Traction: 0
-  Damping: 0
-  BaseForce: 1000
+  Weight: 1200
+  BaseForce: 300000
   FrontalHitAnlgeThreshold: 35
-  EnduranceImportanceWhenColliding: 0.6
-  BaseDownwardForce: 300
+  EnduranceImportanceWhenColliding: 0.5
+  BaseDownwardForce: 500
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 2
-  MaxNormalShootDMG: 0
-  MinNormalShootDMG: 0
-  PushShootDMG: 0
-  PushShootFORCE: 0
-  MaxPushShootDMG: 0
-  MinPushShootDMG: 0
-  ExplosionRadius: 0
+  NormalShootDMG: 10
+  MaxNormalShootDMG: 25
+  MinNormalShootDMG: 5
+  PushShootFORCE: 400000
+  ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
-  NormalShootMaxRange: 300
-  PushShootAngle: 0
-  PushShootRange: 0
-  PushShootGravityMultiplier: 0
-  PushShootBounceNum: 0
-  PushShootBounceForce: 0
+  NormalShootMaxRange: 150
+  PushShootAngle: 40
+  PushShootRange: 15
+  PushShootGravityMultiplier: 30
+  PushShootBounceNum: 3
+  PushShootBounceForce: 60
+  MineShootAngle: 40
+  MineShootRange: 5
   DashCooldown: 2
-  PushShootCooldown: 0
-  UniqueAbilityCooldown: 0
-  NormalShootOverHeat: 0
-  RecoveryCooldown: 0
-  FromTopSpeedToMaxSpeed: 0
+  PushShootCooldown: 3
+  MineExplosionTime: 5
+  UniqueAbilityCooldown: 7
+  NormalShootOverHeat: 5
+  CooldownSpeed: 1
   DeadDelay: 0

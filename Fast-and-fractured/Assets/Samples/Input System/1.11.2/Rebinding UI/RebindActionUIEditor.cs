@@ -25,6 +25,9 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             m_RebindStartEventProperty = serializedObject.FindProperty("m_RebindStartEvent");
             m_RebindStopEventProperty = serializedObject.FindProperty("m_RebindStopEvent");
             m_DisplayStringOptionsProperty = serializedObject.FindProperty("m_DisplayStringOptions");
+            m_ControlSchemeRestrictionProperty = serializedObject.FindProperty("m_ControlSchemeRestriction");
+            m_OverRideActionLabelProperty = serializedObject.FindProperty("m_OverRideActionLabel");
+            m_ActionLabelStringProperty = serializedObject.FindProperty("m_ActionLabelString");
 
             RefreshBindingOptions();
         }
@@ -51,6 +54,9 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 var optionsNew = (InputBinding.DisplayStringOptions)EditorGUILayout.EnumFlagsField(m_DisplayOptionsLabel, optionsOld);
                 if (optionsOld != optionsNew)
                     m_DisplayStringOptionsProperty.intValue = (int)optionsNew;
+
+                // Add Control Scheme Restriction dropdown
+                EditorGUILayout.PropertyField(m_ControlSchemeRestrictionProperty, m_ControlSchemeRestrictionLabel);
             }
 
             // UI section.
@@ -58,7 +64,15 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             EditorGUILayout.LabelField(m_UILabel, Styles.boldLabel);
             using (new EditorGUI.IndentLevelScope())
             {
-                EditorGUILayout.PropertyField(m_ActionLabelProperty);
+                EditorGUILayout.PropertyField(m_OverRideActionLabelProperty);
+                if (m_OverRideActionLabelProperty.boolValue)
+                {
+                    EditorGUILayout.PropertyField(m_ActionLabelStringProperty);
+                }
+                else
+                {
+                    EditorGUILayout.PropertyField(m_ActionLabelProperty);
+                }
                 EditorGUILayout.PropertyField(m_BindingTextProperty);
                 EditorGUILayout.PropertyField(m_RebindOverlayProperty);
                 EditorGUILayout.PropertyField(m_RebindTextProperty);
@@ -108,26 +122,18 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 var bindingId = binding.id.ToString();
                 var haveBindingGroups = !string.IsNullOrEmpty(binding.groups);
 
-                // If we don't have a binding groups (control schemes), show the device that if there are, for example,
-                // there are two bindings with the display string "A", the user can see that one is for the keyboard
-                // and the other for the gamepad.
                 var displayOptions =
                     InputBinding.DisplayStringOptions.DontUseShortDisplayNames | InputBinding.DisplayStringOptions.IgnoreBindingOverrides;
                 if (!haveBindingGroups)
                     displayOptions |= InputBinding.DisplayStringOptions.DontOmitDevice;
 
-                // Create display string.
                 var displayString = action.GetBindingDisplayString(i, displayOptions);
 
-                // If binding is part of a composite, include the part name.
                 if (binding.isPartOfComposite)
                     displayString = $"{ObjectNames.NicifyVariableName(binding.name)}: {displayString}";
 
-                // Some composites use '/' as a separator. When used in popup, this will lead to to submenus. Prevent
-                // by instead using a backlash.
                 displayString = displayString.Replace('/', '\\');
 
-                // If the binding is part of control schemes, mention them.
                 if (haveBindingGroups)
                 {
                     var asset = action.actionMap?.asset;
@@ -159,9 +165,13 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         private SerializedProperty m_RebindStopEventProperty;
         private SerializedProperty m_UpdateBindingUIEventProperty;
         private SerializedProperty m_DisplayStringOptionsProperty;
+        private SerializedProperty m_ControlSchemeRestrictionProperty;
+        private SerializedProperty m_OverRideActionLabelProperty;
+        private SerializedProperty m_ActionLabelStringProperty;
 
         private GUIContent m_BindingLabel = new GUIContent("Binding");
         private GUIContent m_DisplayOptionsLabel = new GUIContent("Display Options");
+        private GUIContent m_ControlSchemeRestrictionLabel = new GUIContent("Control Scheme Restriction");
         private GUIContent m_UILabel = new GUIContent("UI");
         private GUIContent m_EventsLabel = new GUIContent("Events");
         private GUIContent[] m_BindingOptions;
@@ -174,4 +184,5 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         }
     }
 }
+
 #endif

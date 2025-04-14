@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace FastAndFractured
 {
@@ -15,6 +16,10 @@ namespace FastAndFractured
         [SerializeField] private GameObject _audioSettingsUI;
         [SerializeField] private GameObject _videoSettingsUI;
         [SerializeField] private GameObject _accessibilitySettingsUI;
+
+        [SerializeField] private GameObject gamepadRemappingWindow;
+        [SerializeField] private GameObject keyboardRemappingWindow;
+
 
         [Header("Audio Settings")]
         [SerializeField] private Slider _generalVolumeSlider;
@@ -34,6 +39,11 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown _languageDropdown;
         [SerializeField] private TMP_Dropdown _subtitlesDropdown;
 
+        [Header("Delete progress")]
+        [SerializeField] private GameObject deletePopupUI;
+        [SerializeField] private List<string> deletedProgressList = new List<string>();
+        [SerializeField] private GameObject deleteButton;
+
         void Start()
         {
             SetStartValues();
@@ -52,6 +62,15 @@ namespace FastAndFractured
             _brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
 
             _vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(_vsyncToggle.isOn); });
+
+            if (SceneManager.GetActiveScene().buildIndex != 0)
+            {
+                deleteButton.SetActive(false);
+            }
+            else
+            {
+                deleteButton.SetActive(true);
+            }
         }
 
         private void SetStartValues()
@@ -129,9 +148,44 @@ namespace FastAndFractured
         //Change between settings ui
         public void OpenAudioSettings()
         {
-            _audioSettingsUI.SetActive(true);
-            _videoSettingsUI.SetActive(false);
-            _accessibilitySettingsUI.SetActive(false);
+            audioSettingsUI.SetActive(true);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
+        }
+        public void OpenVideoSettings()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(true);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
+        }
+        public void OpenAccesibilitySettings()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(true);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(false);
+        }
+
+        public void OpenKeyboardRemapping()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(false);
+            keyboardRemappingWindow.SetActive(true);
+        }
+        public void OpenControllerRemapping()
+        {
+            audioSettingsUI.SetActive(false);
+            videoSettingsUI.SetActive(false);
+            accessibilitySettingsUI.SetActive(false);
+            gamepadRemappingWindow.SetActive(true);
+            keyboardRemappingWindow.SetActive(false);
         }
 
         public void OpenVideoSettings()
@@ -269,35 +323,24 @@ namespace FastAndFractured
         }
         #endregion
 
-        #region Accesibility settings
-        private void SetColorblind(int option)
+        public void DeleteAllProgress()
         {
-            string selectedOption = _colorblindDropdown.options[option].text;
-            PlayerPrefs.SetString("Colorblind", selectedOption);
+            deletePopupUI.SetActive(false);
+            for (int i = 0; i < deletedProgressList.Count; i++)
+            {
+                PlayerPrefs.DeleteKey(deletedProgressList[i]);
+            }
             PlayerPrefs.Save();
-            //TODO set colorblind in game
         }
-        private void SetLanguage(int option)
+
+        public void CloseDeletePopup()
         {
-            string selectedOption = _languageDropdown.options[option].text;
-            PlayerPrefs.SetString("Language", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set language in game
+            deletePopupUI.SetActive(false);
         }
-        private void SetSubtitles(int option)
+
+        public void OpenDeletePopup()
         {
-            string selectedOption = _subtitlesDropdown.options[option].text;
-            PlayerPrefs.SetString("Subtitles", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set subtitles in game
-        }
-        public void OpenKeyboardRemapping()
-        {
-            //TODO
-        }
-        public void OpenControllerRemapping()
-        {
-            //TODO
+            deletePopupUI.SetActive(true);
         }
 
         #endregion

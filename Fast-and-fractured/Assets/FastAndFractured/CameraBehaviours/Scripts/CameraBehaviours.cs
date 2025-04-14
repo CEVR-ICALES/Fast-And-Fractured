@@ -10,11 +10,11 @@ namespace FastAndFractured
     {
         [SerializeField] CinemachineFreeLook freeLookCamera;
         private PlayerInputController _inputController;
-    
+
 
         void OnEnable()
         {
-            
+            _inputController = PlayerInputController.Instance;
         }
 
         void Update()
@@ -26,13 +26,6 @@ namespace FastAndFractured
                     UpdateCameraMovement();
                 }
             }
-        }
-
-        public void SetCameraParameters(Transform follow, Transform lookAt)
-        {
-            _inputController = PlayerInputController.Instance;
-            freeLookCamera.Follow = follow;
-            freeLookCamera.LookAt = lookAt;
         }
 
         private void UpdateCameraMovement()

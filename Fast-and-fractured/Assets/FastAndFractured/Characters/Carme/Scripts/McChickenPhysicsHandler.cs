@@ -16,7 +16,6 @@ namespace FastAndFractured
         [SerializeField] private LayerMask charLayerMask;
         [SerializeField] private float bounceForce = 8f;
         [SerializeField] private float bounceCooldown = 0.5f;
-        [SerializeField] private float groundCheckOffset = 0.1f;
         [SerializeField] private float bounceDuration;
         [SerializeField] private float climbingDotThreshold = 0.7f;
         [SerializeField] private float chickenForce;

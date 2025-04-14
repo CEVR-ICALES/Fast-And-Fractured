@@ -8,10 +8,12 @@ using UnityEngine.SocialPlatforms;
 using Utilities;
 
 namespace FastAndFractured {
-    public class PushShootHandle : ShootingHandle
+    public class PushShootHandle : ShootingHandle, ITimeSpeedModifiable
     {
         public UnityEvent<float, float> onCooldownUpdate;
         private bool _shootingMine = false;
+
+        ITimer _pushShootCooldown;
         protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
@@ -36,7 +38,7 @@ namespace FastAndFractured {
 
         public void PushShooting()
         {
-            if (canShoot&&!_shootingMine)
+            if (canShoot)
             {
                 canShoot = false;
                float range = characterStatsController.PushShootRange;
@@ -52,10 +54,14 @@ namespace FastAndFractured {
                 //Finalmente, se calcula el vector rotado en X y se suma el vector Y.
                 Vector3 rotatedVector = (rotation * velocityVectorX) + transform.up * Vy;
                 ShootBullet(rotatedVector, range);
-                TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
-                    () => { canShoot = true; },
+                _pushShootCooldown = TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
+                    () => { 
+                        canShoot = true;
+                    },
                     onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
+                TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: characterStatsController.CooldownSpeed);
+
             }
         }
 
@@ -71,10 +77,15 @@ namespace FastAndFractured {
                 Vector3 velocityVectorX = -transform.forward * Vx;
                 Vector3 velocity = velocityVectorX + transform.up * Vy;
                 ShootBullet(velocity, range);
-                TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
-                    () => { canShoot = true; _shootingMine = false; },
+                _pushShootCooldown = TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
+                    () => { 
+                        canShoot = true; 
+                        _shootingMine = false; 
+                    },
                     onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
+
+                ModifySpeedOfExistingTimer(characterStatsController.CooldownSpeed);
             }
         }
 
@@ -93,5 +104,14 @@ namespace FastAndFractured {
         {
             onCooldownUpdate?.Invoke(currentvalue, characterStatsController.PushCooldown);
         }
+
+        public void ModifySpeedOfExistingTimer(float newTimerSpeed)
+        {
+            if (_pushShootCooldown != null)
+            {
+                TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: newTimerSpeed);   
+            }
+        }
+
     }
 }

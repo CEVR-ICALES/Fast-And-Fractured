@@ -8,7 +8,9 @@ namespace StateMachine
     {
         public override bool Decide(Controller controller)
         {
-            return controller.GetBehaviour<PlayerInputController>().IsDashing;
+            PlayerInputController playerInputController = controller.GetBehaviour<PlayerInputController>();
+            CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
+            return playerInputController.IsDashing && carMovementController.CanDash;
         }
     }
 }

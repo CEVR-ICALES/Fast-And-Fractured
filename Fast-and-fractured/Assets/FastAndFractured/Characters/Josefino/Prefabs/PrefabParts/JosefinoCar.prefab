@@ -821,6 +821,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65fc8bfb1d92dad46ac749e745cfe6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onDashCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   wheels:
   - {fileID: 8358634498599888414}
   - {fileID: 9007676966523974460}
@@ -837,8 +840,12 @@ MonoBehaviour:
   uphillForwardThreshold: 0.3
   downhillForwardThreshold: -0.3
   slopeSpeedThreshold: 3
+  maxGroundAngleThreshold: 65
+  airRotationForce: 0
+  detectFlipTime: 3.5
   isAi: 0
   statsController: {fileID: 6241371975123796762}
+  slowingDownAngularMomentumTime: 0
 --- !u!114 &333432659559934318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -892,6 +899,11 @@ MonoBehaviour:
   PushApplyPoint: {fileID: 7784836884610744019}
   wallCollisionAngleThreshold: 65
   wallBounceForce: 30000
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  _checkGroundTime: 0.5
+  slowDownFactor: 0
   statsController: {fileID: 6241371975123796762}
 --- !u!114 &2458429989511805493
 MonoBehaviour:
@@ -912,6 +924,7 @@ MonoBehaviour:
   - {fileID: 2050233496893708425}
   - {fileID: 2435327966734875818}
   firstState: {fileID: 11400000, guid: 6170d0348e5e72941aedd8b4fd07c0a3, type: 2}
+  _isDebugging: 0
 --- !u!114 &6241371975123796762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -934,6 +947,15 @@ MonoBehaviour:
   currentNormalShootDMG: 0
   currentPushShootDMG: 0
   currentCooldownSpeed: 0
+  onEnduranceDamageTaken:
+    m_PersistentCalls:
+      m_Calls: []
+  onEnduranceDamageHealed:
+    m_PersistentCalls:
+      m_Calls: []
+  onDead:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &2102361280212250019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -964,7 +986,7 @@ MonoBehaviour:
   Params: []
   OverrideAttenuation: 0
   OverrideMinDistance: 1
-  OverrideMaxDistance: 20
+  OverrideMaxDistance: 50
 --- !u!114 &2435327966734875818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1100,6 +1122,7 @@ MonoBehaviour:
   - {fileID: 8763111695371764142}
   - {fileID: 2435327966734875818}
   firstState: {fileID: 11400000, guid: ed599a34f3769df49a78d82fc5b3b206, type: 2}
+  _isDebugging: 0
 --- !u!114 &269260444545454214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1116,9 +1139,20 @@ MonoBehaviour:
   shootPoint: {fileID: 296651857050313622}
   pooltype: 2
   directionCenterOffSet: {x: 0, y: 0.25, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  physicsBehaviour: {fileID: 0}
+  onOverheatUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  isInState: 0
   previousCountOverHeat: 0
   ignoredCollider: {fileID: 8465954929189034660}
-  isInState: 0
 --- !u!114 &8763111695371764142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1135,6 +1169,17 @@ MonoBehaviour:
   shootPoint: {fileID: 4318566299198585024}
   pooltype: 3
   directionCenterOffSet: {x: 0, y: 0, z: 0}
+  bulletSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  physicsBehaviour: {fileID: 0}
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7307183082399257957
 GameObject:
   m_ObjectHideFlags: 0

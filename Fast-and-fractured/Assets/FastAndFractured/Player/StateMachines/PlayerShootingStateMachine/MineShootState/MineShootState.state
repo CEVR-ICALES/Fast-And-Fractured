@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: MineShootState
+  m_EditorClassIdentifier: 
+  enterActions:
+  - {fileID: 11400000, guid: 6440409070800b742938c0fbbcf37fa9, type: 2}
+  actions: []
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 1d88aca0293b37b4f94d981ee59705d0, type: 2}
+    trueState: {fileID: 0}
+    falseState: {fileID: 11400000, guid: ed599a34f3769df49a78d82fc5b3b206, type: 2}
+    hasExitTime: 0
