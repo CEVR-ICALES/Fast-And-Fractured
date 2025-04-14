@@ -8,14 +8,15 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
 {
     #region Variables
     private float _brightness = 1f;
-    private const float minGammaValue = 0.3f;
-    private const float maxGammaValue = 1.7f;
+    private const float MIN_GAMMA_THRESHOLD_VALUE = -0.7f;
+    private const float MAX_GAMMA_THRESHOLD_VALUE = 0.7f;
+    private const string PLAYER_PREF_BRIGHTNESS_STRING = "Brightness";
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
-        _brightness = PlayerPrefs.GetFloat("Brightness", 1f);
+        _brightness = PlayerPrefs.GetFloat(PLAYER_PREF_BRIGHTNESS_STRING, _brightness);
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -32,7 +33,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     public void SetBrightness(float value)
     {
         _brightness = value;
-        PlayerPrefs.SetFloat("Brightness", _brightness);
+        PlayerPrefs.SetFloat(PLAYER_PREF_BRIGHTNESS_STRING, _brightness);
         PlayerPrefs.Save();
 
         ApplyBrightnessToScene();
@@ -49,7 +50,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
         if (!globalVolume.profile.TryGet(out liftGammaGain))
             liftGammaGain = globalVolume.profile.Add<LiftGammaGain>(true);
 
-        float gamma = Mathf.Lerp(-0.7f, 0.7f, _brightness);
+        float gamma = Mathf.Lerp(MIN_GAMMA_THRESHOLD_VALUE, MAX_GAMMA_THRESHOLD_VALUE, _brightness);
 
         liftGammaGain.gamma.Override(new Vector4(1f, 1f, 1f, gamma));
     }
