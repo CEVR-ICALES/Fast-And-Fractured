@@ -3,6 +3,7 @@ using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using Utilities;
 using Utilities.Managers.PauseSystem;
+using System.Net.NetworkInformation;
 namespace FastAndFractured
 {
     public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
@@ -188,9 +189,9 @@ namespace FastAndFractured
             }
         }
 
-        public bool IsInsideStormCollider(Transform target)
+        public bool IsInsideStormCollider(Transform target,float marginError)
         {
-            Vector3 directionToTarget = target.position - (transform.position +  _stormCollider.size.z/2 * transform.forward);
+            Vector3 directionToTarget = target.position - (transform.position +  (_stormCollider.size.z/2 + marginError) * transform.forward);
             directionToTarget.Normalize();
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
             float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
@@ -215,12 +216,13 @@ namespace FastAndFractured
 
        public void StartKillNotify(StatsController statsController)
        {
-         statsController.GetKilledNotify(this,false);
+         float damageXFrame = statsController.MaxEndurance/_currentCharacterKillTime;
+         statsController.GetKilledNotify(this,false,damageXFrame);
        }
 
       public void CharacterEscapedDead(StatsController statsController)
       {
-            statsController.GetKilledNotify(this, true);  
+            statsController.GetKilledNotify(this, true,0);  
       }
 
         public void OnPause()

@@ -13,10 +13,12 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
     [SerializeField]
     private float frontAngle = 180;
     private Dictionary<StatsController,ITimer> _charactersDontExitTheCollider;
-
     public int KillPriority => killPriority;
 
     public float KillTime => timeTillKill;
+
+    const float DAMAGE_TO_CHARACTERS = 0;
+
 
     private void Start()
     {
@@ -52,10 +54,10 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
 
     public void StartKillNotify(StatsController statsController)
     {
-        statsController.GetKilledNotify(this, false);
+        statsController.GetKilledNotify(this, false,DAMAGE_TO_CHARACTERS);
     }
     public void CharacterEscapedDead(StatsController statsController)
     {
-        statsController.GetKilledNotify(this, true);
+        statsController.GetKilledNotify(this, true,DAMAGE_TO_CHARACTERS);
     }
 }

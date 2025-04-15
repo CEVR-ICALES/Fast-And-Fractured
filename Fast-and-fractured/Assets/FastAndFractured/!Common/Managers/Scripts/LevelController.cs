@@ -372,7 +372,12 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(Transform target)
         {
-            return _sandStormController.IsInsideStormCollider(target);
+            return _sandStormController.IsInsideStormCollider(target,0);
+        }
+
+        public bool IsInsideSandstorm(Transform target, float marginError)
+        {
+            return _sandStormController.IsInsideStormCollider(target,marginError);
         }
 
         #region Resources
