@@ -48,16 +48,6 @@ namespace FastAndFractured
             _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
         }
 
-        private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
-        {
-            if (!_uiElements.TryGetValue(type, out element))
-            {
-                Debug.LogWarning($"UI Element not found: {type}");
-                return false;
-            }
-            return true;
-        }
-
         #endregion
 
         #region UI Modifications Methods
@@ -85,13 +75,13 @@ namespace FastAndFractured
                 switch (type)
                 {
                     case UIElementType.GOOD_EFFECTS:
-                        foreach (Image image in _goodEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        UpdateEffectSprites(_goodEffects, newSprite);
                         break;
                     case UIElementType.NORMAL_EFFECTS:
-                        foreach (Image image in _normalEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        UpdateEffectSprites(_normalEffects, newSprite);
                         break;
                     case UIElementType.BAD_EFFECTS:
-                        foreach (Image image in _badEffects) { if (!image.gameObject.activeSelf) image.sprite = newSprite; }
+                        UpdateEffectSprites(_badEffects, newSprite);
                         break;
                 }
             }
@@ -133,13 +123,51 @@ namespace FastAndFractured
 
         public GameObject GetEffectGameObject(Sprite sprite)
         {
-            GameObject hudImage = null;
+            GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
+            if (hudImage != null) return hudImage;
 
-            foreach (Image image in _goodEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
-            foreach (Image image in _normalEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
-            foreach (Image image in _badEffects) { if (sprite == image.sprite) hudImage = image.gameObject; }
+            hudImage = FindEffectGameObject(_normalEffects, sprite);
+            if (hudImage != null) return hudImage;
 
+            hudImage = FindEffectGameObject(_badEffects, sprite);
             return hudImage;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
+        {
+            if (!_uiElements.TryGetValue(type, out element))
+            {
+                Debug.LogWarning($"UI Element not found: {type}");
+                return false;
+            }
+            return true;
+        }
+
+        private void UpdateEffectSprites(Image[] effects, Sprite newSprite)
+        {
+            foreach (Image image in effects)
+            {
+                if (!image.gameObject.activeSelf)
+                {
+                    image.sprite = newSprite;
+                }
+            }
+        }
+
+        private GameObject FindEffectGameObject(Image[] effects, Sprite sprite)
+        {
+            foreach (Image image in effects)
+            {
+                if (sprite == image.sprite)
+                {
+                    return image.gameObject;
+                }
+            }
+            return null;
         }
 
         #endregion
