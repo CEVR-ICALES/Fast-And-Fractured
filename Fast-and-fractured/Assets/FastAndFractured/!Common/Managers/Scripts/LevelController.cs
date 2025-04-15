@@ -59,6 +59,8 @@ namespace FastAndFractured
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
         [SerializeField] private bool stormInDebugMode = false;
+        private GameObject _playerReference;
+        public GameObject playerReference { get=>_playerReference ;}
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -224,7 +226,6 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                _currentPlayers = PlayerPrefs.GetInt("Player_Num");
                 SpawnCharactersInScene();
             }
         }
@@ -246,6 +247,7 @@ namespace FastAndFractured
 
                     _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
+                    _playerReference = playerCar;
                 }
                 for(;charactersCount < allCharacters; charactersCount++)
                 {

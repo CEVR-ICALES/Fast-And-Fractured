@@ -264,8 +264,7 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            AssignTarget(_player);
-            _positionToDrive = _player.transform.position;
+            ChangeTargetToShoot(_player);
         }
 
         public void ChooseItemFromType()
@@ -333,9 +332,7 @@ namespace FastAndFractured
                 nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
-
+            ChangeTargetToGo(nearestTarget);
         }
 
 
@@ -413,7 +410,7 @@ namespace FastAndFractured
                 .ToList();
             if (listOfCarsThatMadeLotsOfDamage.Count > 1)
             {
-                AssignTarget(listOfCarsThatMadeLotsOfDamage[0].Key);
+                ChangeTargetToShoot(listOfCarsThatMadeLotsOfDamage[0].Key);
             }
 
         }
@@ -574,23 +571,11 @@ namespace FastAndFractured
             RecalculateDecisionsPercentage();
         }
 
-        private void AssignTarget(GameObject target)
-        {
-            _targetToShoot = target;
-            _currentTarget = target;
-            if (_targetToShoot.TryGetComponent<Target>(out var tr))
-            {
-                _positionToDrive = tr.TargetBehind.position;
-            }
-            else
-            {
-                _positionToDrive = _targetToShoot.transform.position;
-            }
-        }
+        
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_targetToShoot.transform.position - carMovementController.transform.position).normalized;
+            return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
         }
 
         private float GetAngleDirection(Vector3 axis)
@@ -732,8 +717,7 @@ namespace FastAndFractured
                 nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
+            ChangeTargetToGo(nearestTarget);
         }
 
         public void InstallAIParameters(AIParameters aIParameters)
@@ -753,7 +737,42 @@ namespace FastAndFractured
             decisionPercentagePushShoot = aIParameters.DecisionPercentagePushShoot;
             decisionPercentageCooldown = aIParameters.DecisionPercentageCooldown;
         }
-     
+
+        /// <summary>
+        /// Makes the IA go to another location that ISN'T A CHARACTER
+        /// such as items, locations etc.
+        /// </summary>
+        private void ChangeTargetToGo(GameObject target)
+        {
+            _targetToGo = target;
+            UpdateCurrentTarget(_targetToGo);
+        }
+        /// <summary>
+        /// Makes the IA go to another CHARACTER
+        /// </summary>
+        private void ChangeTargetToShoot(GameObject target)
+        {
+            _targetToShoot = target;
+            UpdateCurrentTarget(_targetToShoot);
+        }
+        /// <summary>
+        /// Helper to change targets
+        /// DO NOT USE IN OTHER METHODS
+        /// </summary>
+        /// 
+        private void UpdateCurrentTarget(GameObject newTarget)
+        {
+            _currentTarget = newTarget;
+            if (_currentTarget.TryGetComponent(out Target target))
+            {
+                _positionToDrive = target.TargetBehind.position;
+            }
+            else
+            {
+                _positionToDrive = _currentTarget.transform.position;
+            }
+        }
+
         #endregion
     }
 }

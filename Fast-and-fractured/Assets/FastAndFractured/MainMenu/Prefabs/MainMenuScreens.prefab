@@ -3530,7 +3530,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 6553035769250286668}
   m_OnClick:
     m_PersistentCalls:
@@ -3817,6 +3817,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 5998136498972114209}
+        m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
+        m_MethodName: SaveCurrentSelected
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 219468584513301950}
         m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
         m_MethodName: LoadScene
@@ -6510,6 +6522,7 @@ GameObject:
   - component: {fileID: 3777563180617398618}
   - component: {fileID: 219468584513301950}
   - component: {fileID: 1996322158215129064}
+  - component: {fileID: 2395059049495385382}
   m_Layer: 5
   m_Name: MainMenuScreens
   m_TagString: Untagged
@@ -6564,6 +6577,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bf534da7ff35f24f9aaf9ec8c0324dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2395059049495385382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8338176869265493634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b6c2da2db9374dada6761b5e35121c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actions: {fileID: -944628639613478452, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
 --- !u!1 &8358582916665822472
 GameObject:
   m_ObjectHideFlags: 0
@@ -6828,6 +6854,7 @@ MonoBehaviour:
   allCharacters:
   - {fileID: 11400000, guid: 0830dc6928f66b84fac9a6f6e41ba949, type: 2}
   - {fileID: 11400000, guid: 5eff2256fb6970847ae3b2fa3d259803, type: 2}
+  - {fileID: 11400000, guid: c48a06f2002129e43bfd3e1b54fbf9aa, type: 2}
   charIcon: {fileID: 2386255632903296735}
   charName: {fileID: 8173808318133460883}
   charDescription: {fileID: 5533726323589159810}
