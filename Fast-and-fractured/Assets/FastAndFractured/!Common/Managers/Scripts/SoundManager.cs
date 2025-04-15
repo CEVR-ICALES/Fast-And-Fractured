@@ -8,22 +8,41 @@ namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        private float _masterVolume = 1f;
-
+        #region Variables
+        #region Volume Variables
+        private float _generalVolume = 1f;
+        private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
 
-        private float _musicVolume = 1f;
+        private float _previousGeneralVolume;
+        private float _previousMusicVolume;
+        private float _previousSFXVolume;
+        #endregion
 
+        #region Slider and Toggle Variables
         [SerializeField] private Slider sfxVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider generalVolumeSlider;
 
+        [SerializeField] private Toggle muteToggle;
+        #endregion
+
+        #region Dictionary Variables
         private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
+        #endregion
+
+        #endregion
 
         protected override void Awake()
         {
             base.Awake();
+        }
+
+        private void Start()
+        {
+            if (muteToggle != null)
+                ToggleMuteAllSounds();
         }
 
         #region Event Pooling Methods
@@ -174,22 +193,63 @@ namespace Utilities
             sfxVCA.setVolume(value);
         }
 
+        public void ToggleMuteAllSounds()
+        {
+            if (muteToggle.isOn)
+            {
+                _previousGeneralVolume = generalVolumeSlider != null ? generalVolumeSlider.value : _generalVolume;
+                _previousMusicVolume = musicVolumeSlider != null ? musicVolumeSlider.value : _musicVolume;
+                _previousSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : _sfxVolume;
+
+                generalVolumeSlider.value = 0;
+                musicVolumeSlider.value = 0;
+                sfxVolumeSlider.value = 0;
+
+                UpdateGeneralVolume();
+                UpdateMusicVolume();
+                UpdateSFXVolume();
+            }
+            else
+            {
+                generalVolumeSlider.value = 0.5f;
+                musicVolumeSlider.value = 0.5f;
+                sfxVolumeSlider.value = 0.5f;
+
+                UpdateGeneralVolume();
+                UpdateMusicVolume();
+                UpdateSFXVolume();
+
+                if (generalVolumeSlider != null) generalVolumeSlider.value = _previousGeneralVolume;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = _previousMusicVolume;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = _previousSFXVolume;
+            }
+        }
+
         #region Slider Volume Methods
-        public void UpdateSFXVolume(Slider sfxSlider)
+        public void UpdateSFXVolume()
         {
-            _sfxVolume = sfxSlider.value;
-            SetSFXVolume(sfxSlider.value);
+            if (_sfxVolume != 0)
+                _previousSFXVolume = _sfxVolume;
+
+            _sfxVolume = sfxVolumeSlider.value;
+            SetSFXVolume(sfxVolumeSlider.value);
         }
 
-        public void UpdateMusicVolume(Slider musicSlider)
+        public void UpdateMusicVolume()
         {
-            _musicVolume = musicSlider.value;
-            SetMusicVolume(musicSlider.value);
+            if (_musicVolume != 0)
+                _previousMusicVolume = _musicVolume;
+
+            _musicVolume = musicVolumeSlider.value;
+            SetMusicVolume(musicVolumeSlider.value);
         }
 
-        public void UpdateGeneralVolume(Slider generalVolumeSlider)
+        public void UpdateGeneralVolume()
         {
-            _masterVolume = generalVolumeSlider.value;
+            if (_generalVolume != 0)
+                _previousGeneralVolume = _generalVolume;
+
+            _generalVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
         }
         #endregion
