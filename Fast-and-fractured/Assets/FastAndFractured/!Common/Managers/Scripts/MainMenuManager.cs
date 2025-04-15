@@ -23,6 +23,7 @@ namespace FastAndFractured
         private bool isCurrentScreenInteractable;
         private ITimer _fadeInTimer;
         private ITimer _fadeOutTimer;
+        EventSystem _eventSystem;
 
         #endregion
 
@@ -42,6 +43,8 @@ namespace FastAndFractured
 
         private void Start()
         {
+            _eventSystem = EventSystem.current;
+
             // Register all Screens in scene
             RegisterScreens();
             if(_menuScreens.TryGetValue(ScreensType.MAIN_MENU, out MenuScreen menuScreen))
@@ -62,7 +65,6 @@ namespace FastAndFractured
                 isCurrentScreenInteractable = true;
                 LockFocusOnButton();
             }
-            
         }
 
         #endregion
@@ -174,7 +176,7 @@ namespace FastAndFractured
         {
             if (_currentScreen.defaultButton != null)
             {
-                EventSystem.current.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
+                _eventSystem.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
             }
             else
             {
