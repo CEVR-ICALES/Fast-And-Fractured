@@ -370,14 +370,39 @@ namespace FastAndFractured
             _sandStormController.MoveSandStorm = true;
         }
 
-        public bool IsInsideSandstorm(Transform target)
+        public bool IsInsideSandstorm(GameObject target)
         {
             return _sandStormController.IsInsideStormCollider(target,0);
         }
 
-        public bool IsInsideSandstorm(Transform target, float marginError)
+        public bool IsInsideSandstorm(GameObject target, float marginError)
         {
             return _sandStormController.IsInsideStormCollider(target,marginError);
+        }
+
+        public bool AreThisGameElementsInsideSandstorm(GameElement gameElement)
+        {
+            List<GameObject> interactablesList = new List<GameObject>();
+            if (gameElement == GameElement.INTERACTABLE)
+            {
+                foreach (var item in InteractableHandler.Instance.GetStatBoostItems())
+                {
+                    interactablesList.Add(item.gameObject);
+                }
+            }
+            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
+                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+        }
+
+        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        {
+            foreach (T item in list1) {
+                if (!list2.Contains(item))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #region Resources
@@ -438,11 +463,6 @@ namespace FastAndFractured
         }
         #endregion
 
-
-        private bool IsThePlayer(GameObject character)
-        {
-            return character.CompareTag("Player");
-        }
     }
 }
 

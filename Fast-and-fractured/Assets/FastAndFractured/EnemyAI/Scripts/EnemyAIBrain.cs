@@ -727,7 +727,7 @@ namespace FastAndFractured
             List<T> gameElementsNotInsideSandstorm = new List<T>();
             foreach(T gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement.transform)){
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject)){
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
             }
@@ -739,7 +739,7 @@ namespace FastAndFractured
             List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
             foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement.transform)){
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement)){
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
             }

@@ -374,11 +374,9 @@ namespace FastAndFractured
                 Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
             }
-            //StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
             RemoveStatModificationByTimer(previousValue, currentValue, type, previousValue < currentValue, time);
         }
 
-        //Coroutine is for try propuses. It will be susbtitute for a Timer. 
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
             float mod;
