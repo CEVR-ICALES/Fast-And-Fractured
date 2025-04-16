@@ -32,26 +32,24 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown _fpsDropdown;
         [SerializeField] private TMP_Dropdown _resolutionDropdown;
         [SerializeField] private TMP_Dropdown _antiAliasingDropdown;
-
         [SerializeField] private GameObject _sharpeningSliderContainer;
 
         [Header("Accesibility Settings ")]
-        [SerializeField] private TMP_Dropdown _colorblindDropdown;
         [SerializeField] private TMP_Dropdown _languageDropdown;
         [SerializeField] private TMP_Dropdown _subtitlesDropdown;
+        [SerializeField] private TMP_Dropdown _colorblindDropdown;
 
-        [Header("Delete progress")]
+        [Header("Delete Progress")]
+        [SerializeField] private GameObject _deleteButton;
         [SerializeField] private GameObject _deletePopupUI;
         [SerializeField] private List<string> _deletedProgressList = new List<string>();
-        [SerializeField] private GameObject _deleteButton;
 
         #region Player Prefs String Constants
-        private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
-        private const string RESOLUTION_STRING = "Resolution";
-        private const string SHARPENING_STRING = "Sharpening";
-        private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
-        private const string BRIGHTNESS_STRING = "Brightness";
         private const string VSYNC_STRING = "Vsync";
+        private const string RESOLUTION_STRING = "Resolution";
+        private const string BRIGHTNESS_STRING = "Brightness";
+        private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
+        private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
         #endregion
 
         void Start()

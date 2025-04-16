@@ -1603,11 +1603,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 195144550}
+  m_Father: {fileID: 257821043}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 567.5, y: -607}
+  m_AnchoredPosition: {x: 567.5, y: -0.99993896}
   m_SizeDelta: {x: 1135, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &234545795
@@ -1668,6 +1668,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 234545793}
   m_CullTransparentMesh: 1
+--- !u!1 &257821042
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 257821043}
+  m_Layer: 5
+  m_Name: SharpeningContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &257821043
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257821042}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 234545794}
+  m_Father: {fileID: 195144550}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &277792167
 GameObject:
   m_ObjectHideFlags: 0
@@ -7674,6 +7710,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 290059530}
     - target: {fileID: 1236804520480299492, guid: 05b9c9827affe234591367846faa86fd, type: 3}
+      propertyPath: _sharpeningSlider
+      value: 
+      objectReference: {fileID: 1440310244}
+    - target: {fileID: 1236804520480299492, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: musicVolumeSlider
       value: 
       objectReference: {fileID: 0}
@@ -7717,6 +7757,10 @@ PrefabInstance:
       propertyPath: _accessibilitySettingsUI
       value: 
       objectReference: {fileID: 1854810867}
+    - target: {fileID: 1236804520480299492, guid: 05b9c9827affe234591367846faa86fd, type: 3}
+      propertyPath: _sharpeningSliderContainer
+      value: 
+      objectReference: {fileID: 2032603112}
     - target: {fileID: 1289467874209453773, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -7979,7 +8023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3854271131167146072, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: m_Name
-      value: SharpeningContainer
+      value: Sharpening
       objectReference: {fileID: 0}
     - target: {fileID: 3854271131167146072, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       propertyPath: m_IsActive
@@ -8391,8 +8435,8 @@ PrefabInstance:
       insertIndex: 5
       addedObject: {fileID: 1833458444}
     - targetCorrespondingSourceObject: {fileID: 9151777570048094246, guid: 05b9c9827affe234591367846faa86fd, type: 3}
-      insertIndex: 7
-      addedObject: {fileID: 234545794}
+      insertIndex: 8
+      addedObject: {fileID: 257821043}
     - targetCorrespondingSourceObject: {fileID: 9151777570048094246, guid: 05b9c9827affe234591367846faa86fd, type: 3}
       insertIndex: 9
       addedObject: {fileID: 226235554}
@@ -8409,6 +8453,11 @@ RectTransform:
 --- !u!224 &2032603111 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5415901985837733108, guid: 05b9c9827affe234591367846faa86fd, type: 3}
+  m_PrefabInstance: {fileID: 2032603109}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2032603112 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3854271131167146072, guid: 05b9c9827affe234591367846faa86fd, type: 3}
   m_PrefabInstance: {fileID: 2032603109}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &2032603114 stripped
@@ -9683,7 +9732,7 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3777563180617398618, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
-      insertIndex: 1
+      insertIndex: -1
       addedObject: {fileID: 2032603110}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
