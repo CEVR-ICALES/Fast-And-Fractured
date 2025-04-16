@@ -1,12 +1,12 @@
 using TMPro;
+using Enums;
 using Utilities;
-using System.Linq;
 using UnityEngine;
+using System.Linq;
 using UnityEngine.UI;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace FastAndFractured
 {
@@ -42,6 +42,14 @@ namespace FastAndFractured
         [SerializeField] private GameObject _deletePopupUI;
         [SerializeField] private List<string> _deletedProgressList = new List<string>();
         [SerializeField] private GameObject _deleteButton;
+
+        #region Player Prefs String Constants
+        private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
+        private const string RESOLUTION_STRING = "Resolution";
+        private const string SHARPENING_STRING = "Sharpening";
+        private const string BRIGHTNESS_STRING = "Brightness";
+        private const string VSYNC_STRING = "Vsync";
+        #endregion
 
         void Start()
         {
@@ -90,25 +98,24 @@ namespace FastAndFractured
             RefreshValue(_fpsDropdown, maxFPSString);
 
             //Resolution
-            string resolution = PlayerPrefs.GetString("Resolution", "1920x1080");
+            string resolution = PlayerPrefs.GetString(RESOLUTION_STRING, "1920x1080");
             RefreshValue(_resolutionDropdown, resolution);
             LoadAvailableResolutions();
 
             //VSync
-            bool vsyncOn = PlayerPrefs.GetInt("Vsync", 0) == 1;
-            _vsyncToggle.isOn = vsyncOn; 
+            bool vsyncOn = PlayerPrefs.GetInt(VSYNC_STRING, 0) == 1;
+            _vsyncToggle.isOn = vsyncOn;
             UpdateVSync(vsyncOn);
 
             //Anti-Aliasing
-            string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
-            RefreshValue(_antiAliasingDropdown, antiAliasing);
+            LoadAntiAliasingOptions();
 
             //Sharpening
-            string sharpening = PlayerPrefs.GetString("Sharpening", "No");
+            string sharpening = PlayerPrefs.GetString(SHARPENING_STRING, "No");
             RefreshValue(_sharpeningDropdown, sharpening);
 
             //Brightness
-            float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
+            float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, 1f);
             RefreshValue(_brightnessSlider, brightness);
 
             //Colorblind
@@ -162,7 +169,7 @@ namespace FastAndFractured
             float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
             _brightnessSlider.SetValueWithoutNotify(brightness);
         }
-        
+
         public void OpenAccesibilitySettings()
         {
             _audioSettingsUI.SetActive(false);
@@ -180,6 +187,7 @@ namespace FastAndFractured
             _gamepadRemappingWindow.SetActive(false);
             _keyboardRemappingWindow.SetActive(true);
         }
+        
         public void OpenControllerRemapping()
         {
             _audioSettingsUI.SetActive(false);
@@ -223,7 +231,7 @@ namespace FastAndFractured
 
         #endregion
 
-        #region Video settings
+        #region Video Settings
         public void SetBrightness()
         {
             BrightnessManager.Instance?.SetBrightness(_brightnessSlider.value);
@@ -252,18 +260,64 @@ namespace FastAndFractured
             PlayerPrefs.Save();
         }
 
-        private void SetAntiAliasing(int option)
+        private void LoadAntiAliasingOptions()
         {
-            string selectedOption = _antiAliasingDropdown.options[option].text;
-            PlayerPrefs.SetString("Anti-Aliasing", selectedOption);
+            List<string> antiAliasingOptions = new List<string> { "None", "FXAA", "TAA" };
+
+            _antiAliasingDropdown.ClearOptions();
+            _antiAliasingDropdown.AddOptions(antiAliasingOptions);
+
+            string savedOption = PlayerPrefs.GetString(ANTI_ALIASING_STRING, "None");
+            int index = antiAliasingOptions.IndexOf(savedOption);
+
+            if (index >= 0)
+                _antiAliasingDropdown.value = index;
+            else
+                _antiAliasingDropdown.value = 0;
+
+            _antiAliasingDropdown.RefreshShownValue();
+        }
+
+        private void SetAntiAliasing(int dropdownIndex)
+        {
+            string selectedOption = _antiAliasingDropdown.options[dropdownIndex].text;
+            PlayerPrefs.SetString(ANTI_ALIASING_STRING, selectedOption);
             PlayerPrefs.Save();
-            //TODO set anti-aliasing in game
+
+            ApplyAntiAliasing(selectedOption);
+        }
+
+        private void ApplyAntiAliasing(string selectedOption)
+        {
+            Camera camera = Camera.main;
+            if (camera == null) return;
+
+            HDAdditionalCameraData hdCameraData = camera.GetComponent<HDAdditionalCameraData>();
+            if (hdCameraData == null) return;
+
+            switch (selectedOption)
+            {
+                case "None":
+                    hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.None;
+                    break;
+                case "FXAA":
+                    hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.FastApproximateAntialiasing;
+                    break;
+                case "TAA":
+                    hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing;
+                    break;
+                default:
+                    hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.None;
+                    break;
+            }
+
+            Debug.Log("Applied AntiAliasing: " + hdCameraData.antialiasing);
         }
 
         private void SetResolution(int option)
         {
             string selectedOption = _resolutionDropdown.options[option].text;
-            PlayerPrefs.SetString("Resolution", selectedOption);
+            PlayerPrefs.SetString(RESOLUTION_STRING, selectedOption);
             PlayerPrefs.Save();
 
             string[] dimensions = selectedOption.Split('x');
@@ -297,7 +351,7 @@ namespace FastAndFractured
 
             _resolutionDropdown.AddOptions(optionsList);
 
-            string savedResolution = PlayerPrefs.GetString("Resolution", "");
+            string savedResolution = PlayerPrefs.GetString(RESOLUTION_STRING, "");
             if (!string.IsNullOrEmpty(savedResolution))
             {
                 int index = optionsList.IndexOf(savedResolution);
@@ -312,7 +366,7 @@ namespace FastAndFractured
         private void SetSharpening(int option)
         {
             string selectedOption = _sharpeningDropdown.options[option].text;
-            PlayerPrefs.SetString("Sharpening", selectedOption);
+            PlayerPrefs.SetString(RESOLUTION_STRING, selectedOption);
             PlayerPrefs.Save();
             //TODO set sharpening in game
         }

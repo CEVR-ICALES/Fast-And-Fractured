@@ -146,4 +146,10 @@ namespace Enums
         TOMATO_EFFECT
     }
 
+    public enum AntiAliasingType
+    {
+        NONE,
+        FXAA,
+        TAA
+    }
 }
