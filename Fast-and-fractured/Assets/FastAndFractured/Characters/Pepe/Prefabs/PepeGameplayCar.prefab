@@ -362,22 +362,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1.99
       objectReference: {fileID: 0}
-    - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: charDataSO
-      value: 
-      objectReference: {fileID: 11400000, guid: b3db279bba37e2f4c8ccf9030f214c50, type: 2}
-    - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: currentMaxSpeedAscend
-      value: 110
-      objectReference: {fileID: 0}
-    - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: currentMaxSpeedDescend
-      value: 140
-      objectReference: {fileID: 0}
-    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: dashForce
-      value: 5000
-      objectReference: {fileID: 0}
     - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Mass
       value: 20
@@ -385,6 +369,14 @@ PrefabInstance:
     - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.damper
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.spring
+      value: 50000
       objectReference: {fileID: 0}
     - target: {fileID: 4737484894664670994, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_CenterOfMass.y
@@ -394,17 +386,29 @@ PrefabInstance:
       propertyPath: m_Radius
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4819824608313735464, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.damper
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819824608313735464, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.spring
+      value: 50000
+      objectReference: {fileID: 0}
     - target: {fileID: 5437146293920699635, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 5437146293920699635, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.damper
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5437146293920699635, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.spring
+      value: 50000
+      objectReference: {fileID: 0}
     - target: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Name
       value: PepeGameplayCar
-      objectReference: {fileID: 0}
-    - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-      propertyPath: slowDownFactor
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6029403678818502445, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -425,6 +429,14 @@ PrefabInstance:
     - target: {fileID: 6679896942987676810, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6679896942987676810, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.damper
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 6679896942987676810, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_SuspensionSpring.spring
+      value: 50000
       objectReference: {fileID: 0}
     - target: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x

@@ -785,13 +785,12 @@ MonoBehaviour:
   brakeMode: 3
   usesCustomBraking: 1
   usingPhysicsDash: 1
-  dashForce: 400
+  dashForce: 5000
   slopeAngleThreshold: 25
   uphillForwardThreshold: 0.3
   downhillForwardThreshold: -0.3
   slopeSpeedThreshold: 3
   maxGroundAngleThreshold: 65
-  airRotationForce: 0
   detectFlipTime: 3.5
   isAi: 0
   statsController: {fileID: 2898550601115800401}
@@ -853,7 +852,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _checkGroundTime: 0.5
-  slowDownFactor: 0
+  slowDownFactor: 2
   statsController: {fileID: 2898550601115800401}
 --- !u!114 &2898550601115800401
 MonoBehaviour:
@@ -867,12 +866,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb199b8e3d92e748aff50c11154d785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  charDataSO: {fileID: 11400000, guid: 9e1d142e444b1b94dafdd1b92d03cabf, type: 2}
+  charDataSO: {fileID: 11400000, guid: b3db279bba37e2f4c8ccf9030f214c50, type: 2}
   currentEndurance: 0
   currentMaxSpeed: 0
   currentMaxSpeedDashing: 0
-  currentMaxSpeedAscend: 90
-  currentMaxSpeedDescend: 120
+  currentMaxSpeedAscend: 110
+  currentMaxSpeedDescend: 140
   currentAcceleration: 0
   currentNormalShootDMG: 0
   currentPushShootDMG: 0
