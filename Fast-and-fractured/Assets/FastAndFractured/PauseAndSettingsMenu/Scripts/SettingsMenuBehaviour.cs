@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.InputSystem.DualShock;
 
 namespace FastAndFractured
 {
@@ -31,6 +32,7 @@ namespace FastAndFractured
         [SerializeField] private Slider _brightnessSlider;
         [SerializeField] private TMP_Dropdown _fpsDropdown;
         [SerializeField] private TMP_Dropdown _resolutionDropdown;
+        [SerializeField] private TMP_Dropdown _displayModeDropdown;
         [SerializeField] private TMP_Dropdown _antiAliasingDropdown;
         [SerializeField] private GameObject _sharpeningSliderContainer;
 
@@ -48,6 +50,7 @@ namespace FastAndFractured
         private const string VSYNC_STRING = "Vsync";
         private const string RESOLUTION_STRING = "Resolution";
         private const string BRIGHTNESS_STRING = "Brightness";
+        private const string DISPLAY_MODE_STRING = "DisplayMode";
         private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
         private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
         #endregion
@@ -64,6 +67,7 @@ namespace FastAndFractured
             _sharpeningSlider.onValueChanged.AddListener(delegate { UpdateTAASharpening(); });
             _musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(_musicVolumeSlider.value); });
             _sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(_sfxVolumeSlider.value); });
+            _displayModeDropdown.onValueChanged.AddListener(delegate { SetDisplayMode(_displayModeDropdown.value); });
 
             _brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
 
@@ -102,6 +106,9 @@ namespace FastAndFractured
             string resolution = PlayerPrefs.GetString(RESOLUTION_STRING, "1920x1080");
             RefreshValue(_resolutionDropdown, resolution);
             LoadAvailableResolutions();
+
+            //Display Mode
+            LoadDisplayModeOptions();
 
             //VSync
             bool vsyncOn = PlayerPrefs.GetInt(VSYNC_STRING, 0) == 1;
@@ -263,6 +270,7 @@ namespace FastAndFractured
             PlayerPrefs.Save();
         }
 
+        #region Anti-Aliasing and Sharpening Methods
         private void LoadAntiAliasingOptions()
         {
             List<string> antiAliasingOptions = new List<string> { "None", "FXAA", "TAA" };
@@ -350,7 +358,9 @@ namespace FastAndFractured
                 PlayerPrefs.Save();
             }
         }
+        #endregion
 
+        #region Resolution Methods
         private void SetResolution(int option)
         {
             string selectedOption = _resolutionDropdown.options[option].text;
@@ -399,6 +409,51 @@ namespace FastAndFractured
 
             _resolutionDropdown.RefreshShownValue();
         }
+        #endregion
+
+        #region Display Mode Methods
+        private void SetDisplayMode(int option)
+        {
+            string selectedOption = _displayModeDropdown.options[option].text;
+            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedOption);
+            PlayerPrefs.Save();
+
+            ApplyDisplayMode(selectedOption);
+        }
+
+        private void ApplyDisplayMode(string selectedOption)
+        {
+            switch (selectedOption)
+            {
+                case "Full Screen":
+                    Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                    break;
+                case "Window":
+                    Screen.fullScreenMode = FullScreenMode.Windowed;
+                    break;
+                case "Window without borders":
+                    Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
+                    break;
+                default:
+                    Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                    break;
+            }
+            Debug.Log($"Display Mode Applicated: {Screen.fullScreenMode}");
+        }
+
+        private void LoadDisplayModeOptions()
+        {
+            List<string> displayModes = new List<string> { "Full Screen", "Window", "Window without borders" };
+
+            _displayModeDropdown.ClearOptions();
+            _displayModeDropdown.AddOptions(displayModes);
+
+            string savedMode = PlayerPrefs.GetString(DISPLAY_MODE_STRING, "Full Screen");
+            int index = displayModes.IndexOf(savedMode);
+            _displayModeDropdown.value = index >= 0 ? index : 0;
+            _displayModeDropdown.RefreshShownValue();
+        }
+        #endregion
 
         #endregion
 
