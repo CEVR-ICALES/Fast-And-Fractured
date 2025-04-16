@@ -38,6 +38,8 @@ namespace FastAndFractured
 
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
+        [SerializeField] private int airUseDashLimit = 1;
+        private int currentNumberOfAirDashes = 0;
 
         [Header("Slope Detecting")]
         [SerializeField] private float slopeAngleThreshold;
@@ -304,13 +306,17 @@ namespace FastAndFractured
         {
             if (!_isDashing && _canDash )
             {
+                if (!IsGrounded() && currentNumberOfAirDashes >= airUseDashLimit)
+                    return;
+
+                currentNumberOfAirDashes++;
                 _isDashing = true;
                 _physicsBehaviour.BlockRigidBodyRotations();
                 Vector3 dashDirection = transform.forward.normalized;
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
                 _physicsBehaviour.IsCurrentlyDashing = true;
                 _canDash = false;
-                _dashTimer=  TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
+                _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
                     FinishDash();
                 }, onTimerDecreaseUpdate: (progress) =>
@@ -318,6 +324,8 @@ namespace FastAndFractured
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
+                
+               
             }
         }
         ITimer _dashCooldown;
@@ -405,7 +413,10 @@ namespace FastAndFractured
             foreach (var wheel in wheels)
             {
                 if(wheel.IsGrounded())
+                {
+                    currentNumberOfAirDashes = 0;
                     return true;
+                }
             }
             return _physicsBehaviour.IsTouchingGround;
         }
