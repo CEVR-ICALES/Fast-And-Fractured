@@ -27,11 +27,13 @@ namespace FastAndFractured
 
         [Header("Video Settings")]
         [SerializeField] private Toggle _vsyncToggle;
+        [SerializeField] private Slider _sharpeningSlider;
         [SerializeField] private Slider _brightnessSlider;
         [SerializeField] private TMP_Dropdown _fpsDropdown;
         [SerializeField] private TMP_Dropdown _resolutionDropdown;
         [SerializeField] private TMP_Dropdown _antiAliasingDropdown;
-        [SerializeField] private TMP_Dropdown _sharpeningDropdown;
+
+        [SerializeField] private GameObject _sharpeningSliderContainer;
 
         [Header("Accesibility Settings ")]
         [SerializeField] private TMP_Dropdown _colorblindDropdown;
@@ -47,6 +49,7 @@ namespace FastAndFractured
         private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
         private const string RESOLUTION_STRING = "Resolution";
         private const string SHARPENING_STRING = "Sharpening";
+        private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
         private const string BRIGHTNESS_STRING = "Brightness";
         private const string VSYNC_STRING = "Vsync";
         #endregion
@@ -58,9 +61,9 @@ namespace FastAndFractured
             _fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(_fpsDropdown.value); });
             _resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(_resolutionDropdown.value); });
             _antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(_antiAliasingDropdown.value); });
-            _sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(_sharpeningDropdown.value); });
             _colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(_colorblindDropdown.value); });
             _generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(_generalVolumeSlider.value); });
+            _sharpeningSlider.onValueChanged.AddListener(delegate { UpdateTAASharpening(); });
             _musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(_musicVolumeSlider.value); });
             _sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(_sfxVolumeSlider.value); });
 
@@ -111,8 +114,11 @@ namespace FastAndFractured
             LoadAntiAliasingOptions();
 
             //Sharpening
-            string sharpening = PlayerPrefs.GetString(SHARPENING_STRING, "No");
-            RefreshValue(_sharpeningDropdown, sharpening);
+            if (PlayerPrefs.HasKey(TAA_SHARPENING_STRING))
+            {
+                float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, 0.5f);
+                _sharpeningSlider.SetValueWithoutNotify(savedSharpening);
+            }
 
             //Brightness
             float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, 1f);
@@ -149,7 +155,6 @@ namespace FastAndFractured
             slider.value = value;
         }
 
-        //Change between settings ui
         public void OpenAudioSettings()
         {
             _audioSettingsUI.SetActive(true);
@@ -187,7 +192,7 @@ namespace FastAndFractured
             _gamepadRemappingWindow.SetActive(false);
             _keyboardRemappingWindow.SetActive(true);
         }
-        
+
         public void OpenControllerRemapping()
         {
             _audioSettingsUI.SetActive(false);
@@ -242,7 +247,7 @@ namespace FastAndFractured
             QualitySettings.vSyncCount = isActive ? 1 : 0;
             Application.targetFrameRate = isActive ? -1 : 60;
 
-            PlayerPrefs.SetInt("Vsync", isActive ? 1 : 0);
+            PlayerPrefs.SetInt(VSYNC_STRING, isActive ? 1 : 0);
             PlayerPrefs.Save();
         }
 
@@ -285,6 +290,22 @@ namespace FastAndFractured
             PlayerPrefs.Save();
 
             ApplyAntiAliasing(selectedOption);
+
+            bool showSharpening = selectedOption == "TAA";
+            _sharpeningSliderContainer.SetActive(showSharpening);
+
+            if (showSharpening)
+            {
+                Camera camera = Camera.main;
+
+                if (camera != null)
+                {
+                    HDAdditionalCameraData hdCameraData = camera.GetComponent<HDAdditionalCameraData>();
+
+                    if (hdCameraData != null)
+                        _sharpeningSlider.SetValueWithoutNotify(hdCameraData.taaSharpenStrength);
+                }
+            }
         }
 
         private void ApplyAntiAliasing(string selectedOption)
@@ -305,6 +326,8 @@ namespace FastAndFractured
                     break;
                 case "TAA":
                     hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing;
+                    float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, 0.5f);
+                    hdCameraData.taaSharpenStrength = savedSharpening;
                     break;
                 default:
                     hdCameraData.antialiasing = HDAdditionalCameraData.AntialiasingMode.None;
@@ -312,6 +335,22 @@ namespace FastAndFractured
             }
 
             Debug.Log("Applied AntiAliasing: " + hdCameraData.antialiasing);
+        }
+
+        private void UpdateTAASharpening()
+        {
+            Camera camera = Camera.main;
+            if (camera == null) return; 
+
+            HDAdditionalCameraData hdCameraData = camera.GetComponent<HDAdditionalCameraData>();
+            if (hdCameraData == null) return;   
+
+            if(hdCameraData.antialiasing == HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing)
+            {
+                hdCameraData.taaSharpenStrength = _sharpeningSlider.value;
+                PlayerPrefs.SetFloat(TAA_SHARPENING_STRING, _sharpeningSlider.value);
+                PlayerPrefs.Save();
+            }
         }
 
         private void SetResolution(int option)
@@ -363,13 +402,6 @@ namespace FastAndFractured
             _resolutionDropdown.RefreshShownValue();
         }
 
-        private void SetSharpening(int option)
-        {
-            string selectedOption = _sharpeningDropdown.options[option].text;
-            PlayerPrefs.SetString(RESOLUTION_STRING, selectedOption);
-            PlayerPrefs.Save();
-            //TODO set sharpening in game
-        }
         #endregion
 
         #region Delete Progress Methods
