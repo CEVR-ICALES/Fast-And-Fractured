@@ -83,7 +83,7 @@ namespace FastAndFractured
             return statsBoostInteractables;
         }
 
-        public List<GameObject> GetCurrentItemsActivePool()
+        public List<GameObject> GetCurrentItemsInActivePool()
         {
             return _shuffledActivePool;
         }
