@@ -342,8 +342,7 @@ namespace FastAndFractured
         public void ChooseNearestCharacter()
         {
             GameObject nearestTarget = CalcNearestCharacter();
-            _targetToShoot = nearestTarget;
-            _currentTarget = _targetToShoot;
+            ChangeTargetToShoot(nearestTarget);
         }
 
 
