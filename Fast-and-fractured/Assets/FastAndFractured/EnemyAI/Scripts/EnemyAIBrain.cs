@@ -89,6 +89,8 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+
+       [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -330,7 +332,6 @@ namespace FastAndFractured
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
                 }
-                nearestTarget = statItem.gameObject;
             }
 
             ChangeTargetToGo(nearestTarget);
@@ -744,6 +745,16 @@ namespace FastAndFractured
                 }
             }
             return gameElementsNotInsideSandstorm.Count > 0 ? gameElementsNotInsideSandstorm : gameElementListIfInsideSandstorm;
+        }
+
+        public bool IsIAInsideSandstorm()
+        {
+            return LevelController.Instance.IsInsideSandstorm(gameObject,marginToFleeFromSandstorm);
+        }
+
+        public bool AreAllInteractablesInsideSandstorm()
+        {
+            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

@@ -72,7 +72,6 @@ namespace FastAndFractured
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
         protected override void Awake()
         {
-            Debug.Log(gameObject.name);
             base.Awake();
             //Provisional For Debug
             if (debugMode)
