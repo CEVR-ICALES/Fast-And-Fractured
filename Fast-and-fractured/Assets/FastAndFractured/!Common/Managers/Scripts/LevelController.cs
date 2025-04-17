@@ -226,7 +226,6 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                _currentPlayers = PlayerPrefs.GetInt("Player_Num");
                 SpawnCharactersInScene();
             }
         }
