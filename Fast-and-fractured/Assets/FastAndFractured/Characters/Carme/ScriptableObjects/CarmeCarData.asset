@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: CarmeCarData
   m_EditorClassIdentifier: 
   CharacterName: Carme
-  AI: 0
   CarDefaultPrefab: {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
@@ -68,3 +67,18 @@ MonoBehaviour:
   NormalShootOverHeat: 5
   CooldownSpeed: 1
   DeadDelay: 0
+  aiParameters:
+    fleeDistance: 5
+    sweepRadius: 20
+    shootingMarginErrorAngle: 0.02
+    damageAccumulationDuration: 5
+    fleeTriggerDamageThresholdPercentage: 40
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 10
+    decisionPercentageAcceleration: 10
+    decisionPercentageNormalShoot: 50
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 10
