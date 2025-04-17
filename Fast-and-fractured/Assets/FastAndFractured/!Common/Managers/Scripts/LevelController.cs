@@ -380,7 +380,7 @@ namespace FastAndFractured
             return _sandStormController.IsInsideStormCollider(target,marginError);
         }
 
-        public bool AreThisGameElementsInsideSandstorm(GameElement gameElement)
+        public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
         {
             List<GameObject> interactablesList = new List<GameObject>();
             if (gameElement == GameElement.INTERACTABLE)
