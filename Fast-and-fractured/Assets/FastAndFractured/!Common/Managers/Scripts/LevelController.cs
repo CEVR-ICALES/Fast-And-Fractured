@@ -338,7 +338,6 @@ namespace FastAndFractured
 
         public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
         {
-            _inGameCharacters.Remove(character);
             if (_callStormTimer != null) {
                 if (TimerSystem.Instance.HasTimer(_callStormTimer))
                 {
@@ -351,6 +350,7 @@ namespace FastAndFractured
             TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
+                    _inGameCharacters.Remove(character);
                     Destroy(character);
                 }
                 else

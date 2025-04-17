@@ -161,11 +161,6 @@ namespace FastAndFractured
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                         }
-                        //This is not the real dead condition, just an example. 
-                        /*if (currentEndurance <= charDataSO.MinEndurance)
-                        {
-                            Dead();
-                        }*/
                     }
                     else
                         Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
