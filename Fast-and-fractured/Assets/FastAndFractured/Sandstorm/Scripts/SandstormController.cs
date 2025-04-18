@@ -25,6 +25,7 @@ namespace FastAndFractured
         private Vector3 _spawnPoint;
         private Vector3 _mirrorPoint;
         private Vector3 _direction;
+        public Vector3 direction { get => _direction; }
 
         private float _currentGrowth = 0f;
 
