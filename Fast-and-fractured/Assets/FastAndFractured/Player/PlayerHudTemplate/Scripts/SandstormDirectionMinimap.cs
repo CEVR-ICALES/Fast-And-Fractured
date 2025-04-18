@@ -6,28 +6,29 @@ namespace FastAndFractured
 {
     public class SandstormDirectionMinimap : MonoBehaviour
     {
-        [SerializeField] private SandstormController sandstormController;
-        [SerializeField] private GameObject player;
-        [SerializeField] private Vector3 sandstormDirection;
-        [SerializeField] private bool isDataReceived = false;
+        private GameObject _player;
+        private Vector3 _sandstormDirection;
+        private bool _isDataReceived = false;
         void Start()
         {
-            
+            transform.GetChild(0).gameObject.SetActive(false);
         }
 
-        // Update is called once per frame
         void Update()
         {
-            sandstormDirection = sandstormController.direction;
-            if(isDataReceived == false)
+            if(_isDataReceived)
             {
-                player = LevelController.Instance.playerReference;
-                isDataReceived = true;
-                
+                Vector3 playerForward = _player.transform.forward;
+                float angle = -Vector3.SignedAngle(playerForward, _sandstormDirection, Vector3.up);
+                transform.rotation = Quaternion.Euler(0, 0, angle);     
             }
-            Vector3 playerForward = player.transform.forward;
-            float angle = -Vector3.SignedAngle(playerForward, sandstormDirection, Vector3.up);
-            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+        public void SetSandstormDirection(Vector3 direction)
+        {
+            _player = LevelController.Instance.playerReference;
+            _sandstormDirection = direction;
+            _isDataReceived = true;
+            transform.GetChild(0).gameObject.SetActive(true);
         }
     }
 }

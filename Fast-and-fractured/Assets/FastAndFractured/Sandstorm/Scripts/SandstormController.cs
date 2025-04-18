@@ -25,7 +25,6 @@ namespace FastAndFractured
         private Vector3 _spawnPoint;
         private Vector3 _mirrorPoint;
         private Vector3 _direction;
-        public Vector3 direction { get => _direction; }
 
         private float _currentGrowth = 0f;
 
@@ -62,6 +61,8 @@ namespace FastAndFractured
         private ITimer _reduceKillTimeTimer;
 
         private bool _isPaused = false;
+
+        [SerializeField] private GameObject minimapSandstormDirection;
 
         const float HALF_FRONT_ANGLE = 90;
         private void Start()
@@ -149,6 +150,7 @@ namespace FastAndFractured
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
 
+            minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
         }
 
         /// <summary>
