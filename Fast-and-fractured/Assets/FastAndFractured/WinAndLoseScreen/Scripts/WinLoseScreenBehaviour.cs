@@ -36,7 +36,6 @@ namespace FastAndFractured
             totalDamageDealtText.GetComponent<TextMeshProUGUI>().text = _player.GetComponent<StatsController>().totalDamageDealt.ToString();
             totalDamageTakenText.GetComponent<TextMeshProUGUI>().text = _player.GetComponent<StatsController>().totalDamageTaken.ToString();
             float distance = _player.GetComponent<StatsController>().totalDistanceDriven;
-            //quiero que si es menor de 1000 se redondee a 0 decimales y en metros y sino que se redondee a 1 decimal y en km
             if (distance < 1000)
             {
                 distance = Mathf.Round(distance);
