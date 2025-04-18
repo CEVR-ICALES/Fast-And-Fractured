@@ -371,7 +371,7 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(GameObject target)
         {
-            return _sandStormController.IsInsideStormCollider(target,0);
+            return _sandStormController.IsInsideStormCollider(target);
         }
 
         public bool IsInsideSandstorm(GameObject target, float marginError)

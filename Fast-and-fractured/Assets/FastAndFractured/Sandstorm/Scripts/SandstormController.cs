@@ -195,7 +195,7 @@ namespace FastAndFractured
             }
         }
 
-        public bool IsInsideStormCollider(GameObject target,float marginError)
+        public bool IsInsideStormCollider(GameObject target,float marginError=0f)
         {
             if (marginError > 0)
             {
