@@ -248,7 +248,12 @@ namespace FastAndFractured
             statsController.GetKilledNotify(this, true,0);  
       }
 
-        public void OnPause()
+      public GameObject GetKillerGameObject()
+      {
+         return this.gameObject;
+      }
+
+      public void OnPause()
         {
             _isPaused = true;
             

@@ -90,7 +90,7 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
 
-       [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
+        [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -539,6 +539,10 @@ namespace FastAndFractured
         [SerializeField] private float forgetDuration = 5f;
         private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
+            if (!whoIsMakingDamage.GetComponentInParent<CarMovementController>())
+            {
+                return;
+            }
             if (whoIsMakingDamage != _targetToShoot)
             {
                 if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage, new CarDamagedMe()

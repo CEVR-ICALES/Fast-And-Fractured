@@ -60,4 +60,9 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
     {
         statsController.GetKilledNotify(this, true,DAMAGE_TO_CHARACTERS);
     }
+
+    public GameObject GetKillerGameObject()
+    {
+        return gameObject;
+    }
 }

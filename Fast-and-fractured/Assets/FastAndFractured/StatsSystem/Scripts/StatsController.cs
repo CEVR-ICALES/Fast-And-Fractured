@@ -143,12 +143,12 @@ namespace FastAndFractured
         [ContextMenu(nameof(DebugTake100Endurance))]
         public void DebugTake100Endurance()
         {
-            TakeEndurance(100, false);
+            TakeEndurance(100, false,gameObject);
         }
 
 
         #region Health
-        public void TakeEndurance(float substract, bool isProduct)
+        public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
             if (substract > 0)
             {
@@ -156,7 +156,7 @@ namespace FastAndFractured
                 {
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
-                        onEnduranceDamageTaken?.Invoke(substract,this.gameObject);
+                        onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
@@ -232,7 +232,7 @@ namespace FastAndFractured
             {
                 if (damageXFrame > 0)
                 {
-                    TakeEndurance(damageXFrame * Time.deltaTime, false);
+                    TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });
         }
