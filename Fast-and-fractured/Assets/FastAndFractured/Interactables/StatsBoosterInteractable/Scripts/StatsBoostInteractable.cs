@@ -28,7 +28,7 @@ namespace FastAndFractured
                     case Stats.ENDURANCE:
                         if (boost.BoostValue < 0)
                         {
-                            statsController.TakeEndurance(boost.BoostValue, false);
+                            statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
                         }
                         else
                         {
@@ -58,7 +58,7 @@ namespace FastAndFractured
                             }
                             else
                             {
-                                statsController.TakeEndurance(boost.BoostValue, false);
+                                statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
                             }
                             break;
                         default:

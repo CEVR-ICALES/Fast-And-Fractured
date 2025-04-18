@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: DashState
+  m_Name: CombatDashState
   m_EditorClassIdentifier: 
   enterActions:
   - {fileID: 11400000, guid: a109a09763a4cbd4ca38adefca7bd612, type: 2}
@@ -18,7 +18,7 @@ MonoBehaviour:
   actions: []
   exitActions: []
   transitions:
-  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
+  - decision: {fileID: 11400000, guid: 4ff19ce2e4647ac41a75a9735c847e76, type: 2}
     trueState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
-    falseState: {fileID: 0}
+    falseState: {fileID: 11400000, guid: a48647f68bc89e442b0bd1ded05d288f, type: 2}
     hasExitTime: 1
