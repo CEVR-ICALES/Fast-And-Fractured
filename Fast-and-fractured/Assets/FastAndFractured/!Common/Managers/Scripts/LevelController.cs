@@ -61,6 +61,9 @@ namespace FastAndFractured
         [SerializeField] private bool stormInDebugMode = false;
         private GameObject _playerReference;
         public GameObject playerReference { get=>_playerReference ;}
+        private bool _hasPlayerWinned = false;
+        public bool hasPlayerWinned { get => _hasPlayerWinned; }
+        private int _aliveCharacterCount;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -103,6 +106,7 @@ namespace FastAndFractured
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
+            _aliveCharacterCount = maxCharactersInGame;
             if (!useMyCharacters)
             {
               StartLevelWithSpawnedCharacters();
@@ -354,10 +358,18 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     Destroy(character);
+                    _aliveCharacterCount--;
+                    if (_aliveCharacterCount == 1)
+                    {
+                        _hasPlayerWinned = true;
+                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
+                    }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
+                    _hasPlayerWinned = false;
+                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
                 }
             });
         }
