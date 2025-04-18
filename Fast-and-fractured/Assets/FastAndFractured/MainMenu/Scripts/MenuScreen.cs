@@ -10,7 +10,7 @@ namespace FastAndFractured
         [SerializeField] private CanvasGroup canvasGroup;
         public Button backButton;
         public Button defaultButton;
-
+        public Button settingsButton;
 
         public void SetAlpha(float alpha)
         {
