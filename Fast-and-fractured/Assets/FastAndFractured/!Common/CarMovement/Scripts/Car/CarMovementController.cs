@@ -114,20 +114,6 @@ namespace FastAndFractured
             _currentRbMaxVelocity = statsController.MaxSpeed;
         }
 
-
-        // public void HandleInputChange(bool usingController)
-        // {
-        //     if (isAi)
-        //     {
-        //         _isUsingController = false;
-        //     }
-        //     else
-        //     {
-        //         _isUsingController = usingController;
-        //     }
-        // }
-
-
         #region Refactorized Code
 
         public void HandleSteeringInput(Vector2 steeringInput)
@@ -137,10 +123,6 @@ namespace FastAndFractured
                 
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-                if(!IsAi){
-                    Debug.Log("Player steering input: " + steeringInput);
-                    Debug.Log("Applying keyboard acceleration: " + acceleration);
-                }
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
@@ -151,7 +133,6 @@ namespace FastAndFractured
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-                Debug.Log("Applying gamepad acceleration: " + acceleration);
             }
         }
 
