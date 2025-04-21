@@ -12,7 +12,6 @@ namespace FastAndFractured
         public bool IsInCeling => _isInCeiling;
 
         [Header("Movement Settings")]
-        [SerializeField] private float maxSpeed = 30f;
         [SerializeField] private float moveForce = 5f;
         [SerializeField] private float rotationSpeed = 10f;
         [SerializeField] private float maxSlopeAngle = 45f;
@@ -20,8 +19,6 @@ namespace FastAndFractured
 
 
         [Header("Climbing")]
-        [SerializeField] private float climbLerpSpeed = 2f;
-        [SerializeField] private float wallClimbSpeed = 3f;
         [SerializeField] private float jumpDuration = 3f;
         [SerializeField] private float jumpHeight = 3f;
 

@@ -2,9 +2,10 @@ using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 namespace FastAndFractured
 {
-    public class SandstormController : MonoBehaviour, IKillCharacters
+    public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
@@ -58,18 +59,35 @@ namespace FastAndFractured
         private int reduceQuantityPoints = 4;
         private float _timeToReduceKillCharacterTime;
         private ITimer _reduceKillTimeTimer;
+
+        private bool _isPaused = false;
+
+        const float HALF_FRONT_ANGLE = 90;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
             primaryFog?.gameObject.SetActive(false);
         }
+
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
+        }
         private void Update()
         {
-            if (_moveSandStorm)
+            if (!_isPaused)
             {
-                ExpandFogs();
-            } 
+                if (_moveSandStorm)
+                {
+                    ExpandFogs();
+                }
+            }
         }
 
         public void SetSpawnPoints(bool debug)
@@ -170,6 +188,15 @@ namespace FastAndFractured
             }
         }
 
+        public bool IsInsideStormCollider(Transform target)
+        {
+            Vector3 directionToTarget = target.position - (transform.position +  _stormCollider.size.z/2 * transform.forward);
+            directionToTarget.Normalize();
+            float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
+            float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
+            return !(angleToTarget < (HALF_FRONT_ANGLE));
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             if(other.TryGetComponent(out StatsController statsController))
@@ -195,5 +222,16 @@ namespace FastAndFractured
       {
             statsController.GetKilledNotify(this, true);  
       }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+            
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
+        }
     }
 }

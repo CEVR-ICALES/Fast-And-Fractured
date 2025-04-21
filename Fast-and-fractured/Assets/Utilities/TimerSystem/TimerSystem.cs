@@ -195,6 +195,11 @@ namespace Utilities
 
             _timers.TryAdd(timer.GetData().ID, timer);
 
+            if (speedMultiplier != null)
+            {
+                timer.GetData().SpeedMultiplier = speedMultiplier.Value;
+            }
+
             if (!_isPaused) return true;
             
             if (isRunning != timer.GetData().IsRunning)
@@ -208,10 +213,7 @@ namespace Utilities
                     timer.StopTimer();
                 }
             }
-            if (speedMultiplier != null)
-            {
-                timer.GetData().SpeedMultiplier =speedMultiplier.Value;
-            }
+          
 
             return true;
         }
