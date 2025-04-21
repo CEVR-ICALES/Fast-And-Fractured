@@ -134,28 +134,24 @@ namespace FastAndFractured
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
+                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-                // Possible set motor torque to 0 if no input (w,s)
+                if(!IsAi){
+                    Debug.Log("Player steering input: " + steeringInput);
+                    Debug.Log("Applying keyboard acceleration: " + acceleration);
+                }
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
         public void HandleAccelerateInput(float rawAccelerationInput)
         {
-            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
+            if (PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-            }
-        }
-
-        public void HandleDeaccelerateInput(float rawAccelerationInput)
-        {
-            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
-            {
-                float acceleration = rawAccelerationInput * statsController.Acceleration;
-                ApplyMotorTorque(-acceleration);
+                Debug.Log("Applying gamepad acceleration: " + acceleration);
             }
         }
 
