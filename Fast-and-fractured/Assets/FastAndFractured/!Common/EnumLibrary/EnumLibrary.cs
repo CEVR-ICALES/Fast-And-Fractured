@@ -96,7 +96,7 @@ namespace Enums
         TRIGGER
     }
 
-    public enum InputBlockTypes 
+    public enum InputBlockTypes
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
@@ -146,10 +146,11 @@ namespace Enums
         TOMATO_EFFECT
     }
 
-    public enum AntiAliasingType
+    
+    public enum ScreenMode
     {
-        NONE,
-        FXAA,
-        TAA
+        FULLSCREEN,
+        WINDOWED,
+        FULLSCREEN_WINDOWED
     }
 }
