@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Utilities;
 using Enums;
 using UnityEngine.Events;
+using UnityEngine.TextCore.Text;
 
 namespace FastAndFractured
 {
@@ -50,14 +51,16 @@ namespace FastAndFractured
         [SerializeField] CarInjector AIPrefab;
 
         [Header("Testing Values (Old Level Controller)")]
-        private StatsController[] _charactersStats;
-        private EnemyAIBrain[] _ais;
+         private EnemyAIBrain[] _ais;
         [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
         [SerializeField] private bool useMyCharacters = false;
         [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
         [SerializeField] private bool repeatCharacters = true;
+        [SerializeField] private bool stormInDebugMode = false;
+        private GameObject _playerReference;
+        public GameObject playerReference { get=>_playerReference ;}
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -67,18 +70,18 @@ namespace FastAndFractured
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
-        // Start is called before the first frame update
         protected override void Awake()
         {
-            Debug.Log(gameObject.name);
             base.Awake();
             //Provisional For Debug
             if (debugMode)
             {
-                _charactersStats = FindObjectsOfType<StatsController>();
+                PlayerPrefs.SetString("Selected_Player", playerCharacter);
+                PlayerPrefs.SetInt("Player_Num", 1);
+                StatsController[] debugControllers = FindObjectsOfType<StatsController>();
                 if (!useMyCharacters)
                 {
-                    foreach (var character in _charactersStats)
+                    foreach (var character in debugControllers)
                     {
                         character.gameObject.transform.parent.gameObject.SetActive(false);
                     }
@@ -101,74 +104,90 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-                DisableCurrentSceneCharacters();
-               // PlayerPrefs.SetString("Selected_Player",playerCharacter);
-                PlayerPrefs.SetInt("Player_Num", 1);
-                SpawnInGameCharacters(out bool succeded);
-                if (!succeded)
-                {
-                    Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
-                }
-                else
-                {
-                    _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
-                }
+              StartLevelWithSpawnedCharacters();
             }
             else
             {
-                StartLevel();
+                StartLevelWithOwnCharacters();
             }
         }
 
-     
-        // this will be moved to gameManaager once its created
+        private void Update()
+        {
+          
+        }
 
         private void OnEnable()
         {
-            PlayerInputController.OnInputDeviceChanged += HandleInputChange;
+            // PlayerInputController.OnInputDeviceChanged += HandleInputChange;
         }
 
         private void OnDisable()
         {
-            PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
+            // PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        public void HandleInputChange(InputDeviceType inputType)
-        {
-
-            usingController = inputType != InputDeviceType.KEYBOARD_MOUSE;
-            _playerBindingInputs.HandleInputChange(usingController);
-        }
+        // public void HandleInputChange(InputDeviceType inputType)
+        // {
+        //     usingController = PlayerInputController.Instance.IsUsingController;
+        //     _playerBindingInputs.HandleInputChange(usingController);
+        // }
         // will be moved to gameManager
-
-        private void DisableCurrentSceneCharacters()
+        
+        private void StartLevelWithOwnCharacters()
         {
-            if (_charactersStats == null)
+            _inGameCharacters = new List<GameObject>();
+
+            EnemyAIBrain[] aIBrains = FindObjectsOfType<EnemyAIBrain>();
+
+
+            PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            foreach (var aiBrain in aIBrains)
             {
-                return;
+                _inGameCharacters.Add(aiBrain.gameObject);
+
             }
-          foreach(var character in _charactersStats)
-          {
-                Destroy(character.transform.parent.gameObject);
-          }
-        }
-        private void StartLevel()
-        {
-
-            foreach (var character in _charactersStats)
+            if (playerCar)
             {
-                Controller controller = character.GetComponentInParent<Controller>();
-               if (controller && controller.CompareTag("Player"))
+                foreach (var aiBrain in aIBrains)
                 {
-                    _playerBindingInputs = character.GetComponentInChildren<CarMovementController>();
-                    foreach (var ai in _ais)
-                    {
-                        ai.Player = character.transform.gameObject;
-                    }
+                    aiBrain.Player = playerCar.gameObject;
+
                 }
-            }  
-             charactersCustomStart?.Invoke();
+                _inGameCharacters.Add(playerCar.gameObject);
+
+
+            }
+            SetStormParameters(stormInDebugMode);
+            charactersCustomStart?.Invoke();
         }
+
+        private void StartLevelWithSpawnedCharacters()
+        {
+            SpawnInGameCharacters(out bool succeded);
+            if (!succeded)
+            {
+                Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
+            }
+            else
+            {
+                if (debugMode)
+                    SetStormParameters(stormInDebugMode);
+                else
+                    SetStormParameters(true);
+            }
+        }
+
+        private void SetStormParameters(bool callStorm)
+        {
+            if (callStorm)
+            {
+                _sandStormController.SetSpawnPoints(debugMode);
+                _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
+            }
+        }
+
+        
 
 
         #region SpawnCharacters
@@ -206,7 +225,6 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                _currentPlayers = PlayerPrefs.GetInt("Player_Num");
                 SpawnCharactersInScene();
             }
         }
@@ -228,6 +246,7 @@ namespace FastAndFractured
 
                     _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
+                    _playerReference = playerCar;
                 }
                 for(;charactersCount < allCharacters; charactersCount++)
                 {
@@ -319,7 +338,6 @@ namespace FastAndFractured
 
         public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
         {
-            _inGameCharacters.Remove(character);
             if (_callStormTimer != null) {
                 if (TimerSystem.Instance.HasTimer(_callStormTimer))
                 {
@@ -329,14 +347,15 @@ namespace FastAndFractured
                     TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
                 }
             }
-            TimerSystem.Instance.CreateTimer(delayTime, onTimerIncreaseComplete : ()=> {
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
+                    _inGameCharacters.Remove(character);
                     Destroy(character);
                 }
                 else
                 {
-                    //Game over screen
+                    Debug.Log("Player Dead.");
                 }
             });
         }
@@ -344,8 +363,45 @@ namespace FastAndFractured
         private void CallStorm()
         {
             Debug.Log("Storm Called");
+            if (!_sandStormController.StormSpawnPointsSetted)
+                _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();
             _sandStormController.MoveSandStorm = true;
+        }
+
+        public bool IsInsideSandstorm(GameObject target)
+        {
+            return _sandStormController.IsInsideStormCollider(target);
+        }
+
+        public bool IsInsideSandstorm(GameObject target, float marginError)
+        {
+            return _sandStormController.IsInsideStormCollider(target,marginError);
+        }
+
+        public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
+        {
+            List<GameObject> interactablesList = new List<GameObject>();
+            if (gameElement == GameElement.INTERACTABLE)
+            {
+                foreach (var item in InteractableHandler.Instance.GetStatBoostItems())
+                {
+                    interactablesList.Add(item.gameObject);
+                }
+            }
+            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
+                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+        }
+
+        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        {
+            foreach (T item in list1) {
+                if (!list2.Contains(item))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #region Resources
@@ -360,7 +416,7 @@ namespace FastAndFractured
             return defaultValue;
         }
 
-        private void ShuffleList<T>(IList<T> list)
+        public void ShuffleList<T>(IList<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
             {
@@ -406,11 +462,6 @@ namespace FastAndFractured
         }
         #endregion
 
-
-        private bool IsThePlayer(GameObject character)
-        {
-            return character.CompareTag("Player");
-        }
     }
 }
 

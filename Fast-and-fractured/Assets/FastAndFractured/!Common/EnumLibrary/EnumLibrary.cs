@@ -49,7 +49,7 @@ namespace Enums
         PLAYER_6,
         PLAYER_7,
         BAD_EFFECTS,
-        EFFECTS,
+        NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR
     }
@@ -83,6 +83,13 @@ namespace Enums
         ADVANCED
     }
 
+    public enum IAGroundState
+    {
+        GROUND,
+        AIR,
+        NONE
+    }
+
     public enum CollisionType
     {
         COLLISION,
@@ -102,7 +109,7 @@ namespace Enums
         ACCELERATION,
         ENDURANCE,
         NORMAL_DAMAGE,
-        PUSH_DAMAGE,
+        PUSH_FORCE,
         COOLDOWN_SPEED,
         MAX_SPEED_MULTIPLIER
     }
@@ -139,10 +146,10 @@ namespace Enums
         TOMATO_EFFECT
     }
 
-    public enum ErrorTypeInGettingCharacters
+    public enum GameElement
     {
-        DONT_EXIST,
-        INCORRECT_NAME_CODE,
-        NOT_FOUND
+        CHARACTER,
+        INTERACTABLE
     }
+
 }

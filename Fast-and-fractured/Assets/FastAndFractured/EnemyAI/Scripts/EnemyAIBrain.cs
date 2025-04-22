@@ -13,8 +13,11 @@ namespace FastAndFractured
         [SerializeField] NavMeshAgent agent;
         NavMeshPath _currentPath;
         Vector3[] _previousPath;
-        [SerializeField] float fleeMagnitude = 5f;
+        [Tooltip("Distance to retreat from the current target when executing in flee state.")]
+        [SerializeField] float fleeDistance = 5f;
+        [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
         [SerializeField] float sweepRadius = 20f;
+        [Tooltip("The shooting error that AI has on normal shoot")]
         [SerializeField] float shootingMarginErrorAngle = 2f;
         [SerializeField] LayerMask sweepLayerMask;
 
@@ -30,6 +33,7 @@ namespace FastAndFractured
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
         private float _minDistanceUntilNextCorner = 3f;
+
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
         public GameObject TargetToShoot { get => _targetToShoot; set => _targetToShoot = value; }
@@ -41,6 +45,7 @@ namespace FastAndFractured
         [SerializeField] PhysicsBehaviour physicsBehaviour;
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
+        [SerializeField] ApplyForceByState applyForceByState;
         [SerializeField] LayerMask ignoreLayerMask;
 
         PathMode pathMode = PathMode.ADVANCED;
@@ -50,14 +55,12 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
-        const float DISTANCE_MARGIN_ERROR = 2f;
+        const float DISTANCE_MARGIN_ERROR = 5f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
+        private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
         private Quaternion startRotation;
-
-        private Collider[] _sweepColliders = {};
-        private ITimer _sweepTimer = null;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -66,11 +69,12 @@ namespace FastAndFractured
         private ITimer damageAccumulationTimer;
         private float _currentAccumulatedDamageTime;
         [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
-        [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
-        public float RecoveryThresholdPercentageForSearch => _recoveryThresholdPercentageForSearch;
+        [Range(0, 100)][SerializeField] private float recoveryThresholdPercentageForSearch = 50;
+        public float RecoveryThresholdPercentageForSearch => recoveryThresholdPercentageForSearch;
         [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
-        [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
-        [Range(10, 100)][SerializeField] private int decision = 60;
+        [Range(0, 100)][SerializeField] private float combatHealthAdvantageThreshold = 60f;
+        [Tooltip("Percentage threshold used to determine if a car has dealt enough damage relative to the endurance value.")]
+        [Range(10, 100)][SerializeField] private int damageThresholdPercentage = 60;
 
 
         [Header("Item Type Priority")]
@@ -85,10 +89,14 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+
+        [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
         private Stats _statToChoose;
+
+        private IAGroundState groundState = IAGroundState.NONE;
 
 
         private void OnEnable()
@@ -109,6 +117,40 @@ namespace FastAndFractured
         private void Awake()
         {
             LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+        }
+
+        private void Update()
+        {
+            if (!carMovementController.IsGrounded())
+            {
+                AirForces();
+            }
+            else
+            {
+                GroundForces();
+            }
+        }
+
+        private void GroundForces()
+        {
+            if (groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)
+            {
+                applyForceByState.ToggleAirFriction(false);
+                applyForceByState.ToggleCustomGravity(false);
+                applyForceByState.ToggleRollPrevention(true, 1);//By default, IA is always moving
+                groundState = IAGroundState.GROUND;
+            }
+        }
+
+        private void AirForces()
+        {
+            if (groundState == IAGroundState.GROUND||groundState == IAGroundState.NONE)
+            {
+                applyForceByState.ToggleAirFriction(true);
+                applyForceByState.ToggleCustomGravity(true);
+                applyForceByState.ToggleRollPrevention(false, 0);
+                groundState = IAGroundState.AIR;
+            }
         }
 
         private void InitializeAIValues()
@@ -142,6 +184,11 @@ namespace FastAndFractured
             if (!uniqueAbility)
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
+            }
+
+            if (!applyForceByState)
+            {
+                applyForceByState = GetComponentInChildren<ApplyForceByState>();
             }
 
             _currentPath = new NavMeshPath();
@@ -219,8 +266,7 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            AssignTarget(_player);
-            _positionToDrive = _player.transform.position;
+            ChangeTargetToShoot(_player);
         }
 
         public void ChooseItemFromType()
@@ -252,7 +298,7 @@ namespace FastAndFractured
                         _statToChoose = Stats.NORMAL_DAMAGE;
                         break;
                     case int n when (n <= percentagePushShoot):
-                        _statToChoose = Stats.PUSH_DAMAGE;
+                        _statToChoose = Stats.PUSH_FORCE;
                         break;
                     case int n when (n <= percentageCooldown):
                         _statToChoose = Stats.COOLDOWN_SPEED;
@@ -276,6 +322,7 @@ namespace FastAndFractured
             float angle = GetAngleDirection(Vector3.up);
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = InteractableHandler.Instance.GetStatBoostItems();
+            items = ListWithGameElementNotInsideSandstorm(items);
             GameObject nearestTarget = items[0].gameObject;
             foreach (StatsBoostInteractable statItem in items)
             {
@@ -285,20 +332,27 @@ namespace FastAndFractured
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
                 }
-                nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
-
+            ChangeTargetToGo(nearestTarget);
         }
+
+
 
         public void ChooseNearestCharacter()
         {
+            GameObject nearestTarget = CalcNearestCharacter();
+            ChangeTargetToShoot(nearestTarget);
+        }
+
+
+        public GameObject CalcNearestCharacter()
+        {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
             var nearestOne = float.MaxValue;
-    
+
             foreach (var character in inGameCharacters)
             {
                 if (!character) continue;
@@ -309,10 +363,8 @@ namespace FastAndFractured
                     nearestTarget = character;
                 }
             }
-            _targetToShoot = nearestTarget;
-            _currentTarget = _targetToShoot;
+            return nearestTarget;
         }
-
         public void ChooseNearestDangerZone()
         {
             //TODO
@@ -323,12 +375,6 @@ namespace FastAndFractured
         {
             //TODO
             //Get list of safe zones and choose the nearest one
-        }
-
-        public void ChooseNearestHelpfulNpc()
-        {
-            //TODO
-            //Get list of NPCs and choose the nearest one
         }
 
 
@@ -358,17 +404,17 @@ namespace FastAndFractured
         {
             uniqueAbility.ActivateAbility();
         }
-         
+
         public void ChangeShootingTargetToTheOneThatMadeMoreDamage()
         {
             var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
-                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
+                .Where(x => (x.Value.damageMade / statsController.Endurance * PERCENTAGE_VALUE) > damageThresholdPercentage)
                 .ToList();
-            if (listOfCarsThatMadeLotsOfDamage.Count>1)
+            if (listOfCarsThatMadeLotsOfDamage.Count > 1)
             {
-                AssignTarget(listOfCarsThatMadeLotsOfDamage[0].Key);
+                ChangeTargetToShoot(listOfCarsThatMadeLotsOfDamage[0].Key);
             }
-        
+
         }
         #endregion
 
@@ -383,7 +429,7 @@ namespace FastAndFractured
         #region FleeState
         public void RunAwayFromCurrentTarget()
         {
-            _positionToDrive = -CalcNormalizedTargetDirection() * fleeMagnitude;
+            _positionToDrive = -CalcNormalizedTargetDirection() * fleeDistance;
         }
 
         #endregion
@@ -392,17 +438,13 @@ namespace FastAndFractured
         #region Decisions
         public bool EnemySweep()
         {
-            if (_sweepTimer == null)
-            {
-                _sweepColliders = Physics.OverlapSphere(carMovementController.transform.position, sweepRadius, sweepLayerMask);
-                _sweepTimer = TimerSystem.Instance.CreateTimer(SWEEP_FREQUENCY, onTimerDecreaseComplete: () =>
-                {
-                    _sweepTimer = null;
-                    _sweepColliders = new Collider[0];
-                });
-            }
 
-            return _sweepColliders.Length > 0;
+            GameObject nearestCharacter = CalcNearestCharacter();
+            if (nearestCharacter != null)
+            {
+                return Vector3.Distance(carMovementController.transform.position,nearestCharacter.transform.position) < sweepRadius;
+            }
+            return false;
         }
 
         public bool IsPushShootReady()
@@ -455,7 +497,7 @@ namespace FastAndFractured
 
 
             float healthDifference = statsController.GetEndurancePercentage() - enemyStatsController.GetEndurancePercentage();
-            return healthDifference < _combatHealthAdvantageThreshold;
+            return healthDifference < combatHealthAdvantageThreshold;
         }
         public bool WantsToChangeToFleeState()
         {
@@ -470,7 +512,7 @@ namespace FastAndFractured
 
         public bool WantsToChangeFromFleeToSearchState()
         {
-            return statsController.GetEndurancePercentage() > _recoveryThresholdPercentageForSearch;
+            return statsController.GetEndurancePercentage() > recoveryThresholdPercentageForSearch;
         }
 
         public bool HasTargetToShoot()
@@ -480,11 +522,11 @@ namespace FastAndFractured
 
         public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
         {
-          
-               var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
-                .Where(x => (x.Value.damageMade/statsController.Endurance* 100) > decision)
-                .ToList();
-              return listOfCarsThatMadeLotsOfDamage!=null && listOfCarsThatMadeLotsOfDamage.Count > 0;
+
+            var listOfCarsThatMadeLotsOfDamage = _carsThatDamagedAI
+             .Where(x => (x.Value.damageMade / statsController.Endurance * PERCENTAGE_VALUE) > damageThresholdPercentage)
+             .ToList();
+            return listOfCarsThatMadeLotsOfDamage != null && listOfCarsThatMadeLotsOfDamage.Count > 0;
         }
         //State shootToWhoMadeMoreDamageState
 
@@ -493,21 +535,26 @@ namespace FastAndFractured
         #region Helpers
 
         private Dictionary<GameObject, CarDamagedMe> _carsThatDamagedAI = new();
-        
+
         [SerializeField] private float forgetDuration = 5f;
         private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
-            if (whoIsMakingDamage!= _targetToShoot)
+            if (!whoIsMakingDamage.GetComponentInParent<CarMovementController>())
             {
-                if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage,new CarDamagedMe(){ 
-                        damageMade = damageTaken ,
-                        timeThatHasPassed = Time.time,
-                        timerUntilRemove = TimerSystem.Instance.CreateTimer(forgetDuration,TimerDirection.INCREASE,onTimerIncreaseComplete:
+                return;
+            }
+            if (whoIsMakingDamage != _targetToShoot)
+            {
+                if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage, new CarDamagedMe()
+                {
+                    damageMade = damageTaken,
+                    timeThatHasPassed = Time.time,
+                    timerUntilRemove = TimerSystem.Instance.CreateTimer(forgetDuration, TimerDirection.INCREASE, onTimerIncreaseComplete:
                             () =>
                             {
                                 _carsThatDamagedAI.Remove(whoIsMakingDamage);
                             })
-                    } ))
+                }))
                 {
                     _carsThatDamagedAI[whoIsMakingDamage].timeThatHasPassed = Time.time;
                     TimerSystem.Instance.ModifyTimer(_carsThatDamagedAI[whoIsMakingDamage].timerUntilRemove, newCurrentTime: 0);
@@ -518,8 +565,8 @@ namespace FastAndFractured
                 }
                 _carsThatDamagedAI[whoIsMakingDamage].damageMade += damageTaken;
 
-                
-                
+
+
             }
             RegisterSuddenly(damageTaken);
             RecalculateDecisionsPercentage();
@@ -530,16 +577,11 @@ namespace FastAndFractured
             RecalculateDecisionsPercentage();
         }
 
-        private void AssignTarget(GameObject target)
-        {
-            _targetToShoot = target;
-            _currentTarget = target;
-            _positionToDrive = _targetToShoot.transform.position;
-        }
+        
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_targetToShoot.transform.position - carMovementController.transform.position).normalized;
+            return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
         }
 
         private float GetAngleDirection(Vector3 axis)
@@ -670,6 +712,7 @@ namespace FastAndFractured
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = list;
             GameObject nearestTarget = items[0].gameObject;
+            items = ListWithGameElementNotInsideSandstorm(items);
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
@@ -678,122 +721,97 @@ namespace FastAndFractured
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
                 }
-                nearestTarget = statItem.gameObject;
             }
 
-            _targetToGo = nearestTarget;
-            _currentTarget = _targetToGo;
+            ChangeTargetToGo(nearestTarget);
         }
-        //Is obsolete but can be used in the future
-        //#if UNITY_EDITOR
-        //        // Save their previous values so we can identify which one changed.
-        //        int _checkHealth;
-        //        int _checkSpeed;
-        //        int _checkAcceleration;
-        //        int _checkNormal;
-        //        int _checkPush;
-        //        int _checkCooldown;
 
-        //        void OnValidate()
-        //        {
+        private List<T> ListWithGameElementNotInsideSandstorm<T>(List<T> gameElementListIfInsideSandstorm)  where T : MonoBehaviour
+        {
+            List<T> gameElementsNotInsideSandstorm = new List<T>();
+            foreach(T gameElement in gameElementListIfInsideSandstorm)
+            {
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject)){
+                    gameElementsNotInsideSandstorm.Add(gameElement);
+                }
+            }
+            return gameElementsNotInsideSandstorm.Count > 0 ? gameElementsNotInsideSandstorm : gameElementListIfInsideSandstorm;
+        }
 
-        //            // Skip this if we haven't cached the values yet.
-        //            if (_checkHealth >= 0)
-        //            {
+        private List<GameObject> ListWithGameElementNotInsideSandstorm(List<GameObject> gameElementListIfInsideSandstorm)
+        {
+            List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
+            foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
+            {
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement)){
+                    gameElementsNotInsideSandstorm.Add(gameElement);
+                }
+            }
+            return gameElementsNotInsideSandstorm.Count > 0 ? gameElementsNotInsideSandstorm : gameElementListIfInsideSandstorm;
+        }
 
-        //                // Find which value the user changed, and update the rest from it.
-        //                if (_checkHealth != decisionPercentageHealth)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageHealth, 
-        //                        ref decisionPercentageMaxSpeed, 
-        //                        ref decisionPercentageAcceleration, 
-        //                        ref decisionPercentageNormalShoot, 
-        //                        ref decisionPercentagePushShoot, 
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkSpeed != decisionPercentageMaxSpeed)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkAcceleration != decisionPercentageAcceleration)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkNormal != decisionPercentageNormalShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkPush != decisionPercentagePushShoot)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentagePushShoot,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentageCooldown);
-        //                }
-        //                else if (_checkCooldown != decisionPercentageCooldown)
-        //                {
-        //                    DistributeProportionately(ref decisionPercentageCooldown,
-        //                        ref decisionPercentageHealth,
-        //                        ref decisionPercentageMaxSpeed,
-        //                        ref decisionPercentageAcceleration,
-        //                        ref decisionPercentageNormalShoot,
-        //                        ref decisionPercentagePushShoot);
-        //                }
+        public bool IsIAInsideSandstorm()
+        {
+            return LevelController.Instance.IsInsideSandstorm(gameObject,marginToFleeFromSandstorm);
+        }
 
-        //            }
+        public bool AreAllInteractablesInsideSandstorm()
+        {
+            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+        }
 
-        //            _checkHealth = decisionPercentageHealth;
-        //            _checkSpeed = decisionPercentageMaxSpeed;
-        //            _checkAcceleration = decisionPercentageAcceleration;
-        //            _checkNormal = decisionPercentageNormalShoot;
-        //            _checkPush = decisionPercentagePushShoot;
-        //            _checkCooldown = decisionPercentageCooldown;
-        //        }
+        public void InstallAIParameters(AIParameters aIParameters)
+        {
+            fleeDistance = aIParameters.FleeDistance;
+            sweepRadius = aIParameters.SweepRadius;
+            shootingMarginErrorAngle = aIParameters.ShootingMarginErrorAngle;
+            damageAccumulationDuration = aIParameters.DamageAccumulationDuration;
+            fleeTriggerDamageThresholdPercentage = aIParameters.FleeTriggerDamageThresholdPercentage;
+            recoveryThresholdPercentageForSearch = aIParameters.RecoveryThresholdPercentageForSearch;
+            combatHealthAdvantageThreshold = aIParameters.CombatHealthAdvantageThreshold;
+            damageThresholdPercentage = aIParameters.DamageThresholdPercentage;
+            decisionPercentageHealth = aIParameters.DecisionPercentageHealth;
+            decisionPercentageMaxSpeed = aIParameters.DecisionPercentageMaxSpeed;
+            decisionPercentageAcceleration = aIParameters.DecisionPercentageAcceleration;
+            decisionPercentageNormalShoot = aIParameters.DecisionPercentageNormalShoot;
+            decisionPercentagePushShoot = aIParameters.DecisionPercentagePushShoot;
+            decisionPercentageCooldown = aIParameters.DecisionPercentageCooldown;
+        }
 
-
-        //        void DistributeProportionately(ref int changed, ref int a, ref int b, ref int c, ref int d, ref int e)
-        //        {
-        //            changed = (int)Mathf.Clamp(changed, 0f, MAX_PERCENTAGE_100);
-        //            int total = MAX_PERCENTAGE_100 - changed;
-
-        //            int oldTotal = a + b + c + d + e;
-        //            Debug.Log(oldTotal);
-        //            if (oldTotal > 0f)
-        //            {
-        //                float fraction = 1f / oldTotal;
-        //                a = Mathf.RoundToInt(total * a * fraction);
-        //                b = Mathf.RoundToInt(total * b * fraction);
-        //                c = Mathf.RoundToInt(total * c * fraction);
-        //                d = Mathf.RoundToInt(total * d * fraction);
-        //                e = Mathf.RoundToInt(total * e * fraction);
-        //            }
-        //            else
-        //            {
-        //                a = b = c = d = e = total / 5;
-        //            }
-
-        //            // Assign any rounding error to the last one, arbitrarily.
-        //            // (Better rounding rules exist, so take this as an example only)
-        //            //a += total - a - b - c - d - e;
-        //        }
-        //#endif
+        /// <summary>
+        /// Makes the IA go to another location that ISN'T A CHARACTER
+        /// such as items, locations etc.
+        /// </summary>
+        private void ChangeTargetToGo(GameObject target)
+        {
+            _targetToGo = target;
+            UpdateCurrentTarget(_targetToGo);
+        }
+        /// <summary>
+        /// Makes the IA go to another CHARACTER
+        /// </summary>
+        private void ChangeTargetToShoot(GameObject target)
+        {
+            _targetToShoot = target;
+            UpdateCurrentTarget(_targetToShoot);
+        }
+        /// <summary>
+        /// Helper to change targets
+        /// DO NOT USE IN OTHER METHODS
+        /// </summary>
+        /// 
+        private void UpdateCurrentTarget(GameObject newTarget)
+        {
+            _currentTarget = newTarget;
+            if (_currentTarget.TryGetComponent(out Target target))
+            {
+                _positionToDrive = target.TargetBehind.position;
+            }
+            else
+            {
+                _positionToDrive = _currentTarget.transform.position;
+            }
+        }
 
         #endregion
     }
