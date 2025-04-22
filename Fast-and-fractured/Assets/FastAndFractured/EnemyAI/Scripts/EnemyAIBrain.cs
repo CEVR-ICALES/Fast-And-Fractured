@@ -89,6 +89,8 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+
+        [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -320,16 +322,16 @@ namespace FastAndFractured
             float angle = GetAngleDirection(Vector3.up);
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = InteractableHandler.Instance.GetStatBoostItems();
+            items = ListWithGameElementNotInsideSandstorm(items);
             GameObject nearestTarget = items[0].gameObject;
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30)&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
+                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
                 }
-                nearestTarget = statItem.gameObject;
             }
 
             ChangeTargetToGo(nearestTarget);
@@ -340,14 +342,14 @@ namespace FastAndFractured
         public void ChooseNearestCharacter()
         {
             GameObject nearestTarget = CalcNearestCharacter();
-            _targetToShoot = nearestTarget;
-            _currentTarget = _targetToShoot;
+            ChangeTargetToShoot(nearestTarget);
         }
 
 
         public GameObject CalcNearestCharacter()
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
             GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
             var nearestOne = float.MaxValue;
 
@@ -355,7 +357,7 @@ namespace FastAndFractured
             {
                 if (!character) continue;
                 float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject&&!LevelController.Instance.IsInsideSandstorm(character.transform))
+                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
                 {
                     nearestOne = characterDistance;
                     nearestTarget = character;
@@ -537,6 +539,10 @@ namespace FastAndFractured
         [SerializeField] private float forgetDuration = 5f;
         private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
+            if (!whoIsMakingDamage.GetComponentInParent<CarMovementController>())
+            {
+                return;
+            }
             if (whoIsMakingDamage != _targetToShoot)
             {
                 if (!_carsThatDamagedAI.TryAdd(whoIsMakingDamage, new CarDamagedMe()
@@ -706,18 +712,52 @@ namespace FastAndFractured
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = list;
             GameObject nearestTarget = items[0].gameObject;
+            items = ListWithGameElementNotInsideSandstorm(items);
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
-                if (itemDistance < nearestOne&&!LevelController.Instance.IsInsideSandstorm(statItem.transform))
+                if (itemDistance < nearestOne)
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
                 }
-                nearestTarget = statItem.gameObject;
             }
 
             ChangeTargetToGo(nearestTarget);
+        }
+
+        private List<T> ListWithGameElementNotInsideSandstorm<T>(List<T> gameElementListIfInsideSandstorm)  where T : MonoBehaviour
+        {
+            List<T> gameElementsNotInsideSandstorm = new List<T>();
+            foreach(T gameElement in gameElementListIfInsideSandstorm)
+            {
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject)){
+                    gameElementsNotInsideSandstorm.Add(gameElement);
+                }
+            }
+            return gameElementsNotInsideSandstorm.Count > 0 ? gameElementsNotInsideSandstorm : gameElementListIfInsideSandstorm;
+        }
+
+        private List<GameObject> ListWithGameElementNotInsideSandstorm(List<GameObject> gameElementListIfInsideSandstorm)
+        {
+            List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
+            foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
+            {
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement)){
+                    gameElementsNotInsideSandstorm.Add(gameElement);
+                }
+            }
+            return gameElementsNotInsideSandstorm.Count > 0 ? gameElementsNotInsideSandstorm : gameElementListIfInsideSandstorm;
+        }
+
+        public bool IsIAInsideSandstorm()
+        {
+            return LevelController.Instance.IsInsideSandstorm(gameObject,marginToFleeFromSandstorm);
+        }
+
+        public bool AreAllInteractablesInsideSandstorm()
+        {
+            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

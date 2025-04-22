@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: JosefinoCarData
   m_EditorClassIdentifier: 
   CharacterName: Josefino
-  AI: 0
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
-  MaxEndurance: 500
+  MaxEndurance: 800
   MinEndurance: 0
   Invulnerable: 0
-  MaxSpeed: 100
-  MaxSpeedDashing: 140
+  MaxSpeed: 155
+  MaxSpeedDashing: 230
   MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 1500
-  MinAcceleration: 0
-  Acceleration: 3500
-  BrakeTorque: 12000
+  MaxAcceleration: 7000
+  MinAcceleration: 120
+  Acceleration: 4500
+  BrakeTorque: 50000
   Handling: 35
-  HandlingSmoothnes: 6
-  AerialRotationSpeed: 0
+  HandlingSmoothnes: 9
+  AerialRotationSpeed: 2.5
   DriftThreshold: 0.1
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
@@ -42,7 +41,7 @@ MonoBehaviour:
   BaseForce: 300000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
-  BaseDownwardForce: 500
+  BaseDownwardForce: 800
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
   NormalShootDMG: 10
@@ -68,3 +67,18 @@ MonoBehaviour:
   NormalShootOverHeat: 5
   CooldownSpeed: 1
   DeadDelay: 0
+  aiParameters:
+    fleeDistance: 5
+    sweepRadius: 20
+    shootingMarginErrorAngle: 0.02
+    damageAccumulationDuration: 5
+    fleeTriggerDamageThresholdPercentage: 40
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 10
+    decisionPercentageAcceleration: 10
+    decisionPercentageNormalShoot: 50
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 10

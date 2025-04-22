@@ -79,7 +79,13 @@ namespace FastAndFractured
                     statsBoostInteractables.Add(statItem);
                 }
             }
+
             return statsBoostInteractables;
+        }
+
+        public List<GameObject> GetCurrentItemsInActivePool()
+        {
+            return _shuffledActivePool;
         }
 
         public bool CheckIfStatItemExists(Stats stat)

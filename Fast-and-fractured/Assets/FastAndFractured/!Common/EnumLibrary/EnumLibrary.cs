@@ -49,7 +49,7 @@ namespace Enums
         PLAYER_6,
         PLAYER_7,
         BAD_EFFECTS,
-        EFFECTS,
+        NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR
     }
@@ -145,12 +145,10 @@ namespace Enums
         SPEED_EFFECT,
         TOMATO_EFFECT
     }
-
-    
-    public enum ScreenMode
+ 
+    public enum GameElement
     {
-        FULLSCREEN,
-        WINDOWED,
-        FULLSCREEN_WINDOWED
+        CHARACTER,
+        INTERACTABLE
     }
 }
