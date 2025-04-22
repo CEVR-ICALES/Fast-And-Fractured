@@ -143,6 +143,7 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            _playerReference = playerCar.gameObject;
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);

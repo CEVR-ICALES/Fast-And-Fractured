@@ -9,7 +9,10 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            // To do
+            if (controller.GetBehaviour<PhysicsBehaviour>().Rb.velocity != Vector3.zero)
+            {
+                controller.GetBehaviour<AimPushShootTrace>().DrawTrajectory();
+            }
         }
     }
 }

@@ -89,6 +89,40 @@ namespace Utilities
             return null;
         }
 
+        public T GivePooledObjectOfType<T>(Pooltype pooltype) where T : IPooledObject
+        {
+            var objectPool = FindObjectPoolInList(pooltype);
+            if (objectPool != null)
+            {
+                if (!objectPool.IsNextObjectActive())
+                {
+                    objectPool.NextIndex();
+                    GameObject objectPooled = objectPool.GetCurrentObject(out var IpooledObject);
+                    if (IpooledObject != null)
+                    {
+                        if (!objectPooled.activeSelf)
+                        {
+                            objectPooled.SetActive(true);
+                            return (T)IpooledObject;
+                        }
+                        return default;
+                    }
+                    return default;
+                }
+                return default;
+            }
+            return default;
+        }
+
+        public List<GameObject> GiveAllMyPooledObjects(Pooltype pooltype)
+        {
+            ObjectPool objectPool = FindObjectPoolInList(pooltype);
+            if (objectPool != null) {
+                return objectPool.GetAllObjectsInPool();
+            }
+            return null;
+        }
+
         public void DesactivatePooledObject(IPooledObject pooledObject,GameObject instance)
         {
             ObjectPool objectPool = FindObjectPoolInList(pooledObject.Pooltype);

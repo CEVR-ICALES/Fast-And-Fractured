@@ -25,6 +25,11 @@ namespace Utilities
             _index = indexInitValue;
         }
 
+        public List<GameObject> GetAllObjectsInPool()
+        {
+            return _objPoolList;
+        }
+
         public GameObject GetCurrentObject(out IPooledObject IpooledObject)
         {
             IpooledObject = null;

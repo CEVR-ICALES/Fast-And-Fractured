@@ -74,7 +74,8 @@ namespace Enums
         NORMAL_BULLET,
         PUSH_BULLET,
         ASCENDING_TOMATO,
-        DESCENDING_TOMATO
+        DESCENDING_TOMATO,
+        TRACE_COLISION
     }
 
     public enum PathMode
