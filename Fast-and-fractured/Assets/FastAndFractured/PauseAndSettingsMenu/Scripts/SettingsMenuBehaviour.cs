@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.HighDefinition;
-using UnityEngine.InputSystem.DualShock;
 using System;
 
 namespace FastAndFractured
@@ -36,11 +35,6 @@ namespace FastAndFractured
         [SerializeField] private TMP_Dropdown displayModeDropdown;
         [SerializeField] private TMP_Dropdown antiAliasingDropdown;
         [SerializeField] private GameObject sharpeningSliderContainer;
-
-        [Header("Accesibility Settings ")]
-        [SerializeField] private TMP_Dropdown languageDropdown;
-        [SerializeField] private TMP_Dropdown subtitlesDropdown;
-        [SerializeField] private TMP_Dropdown colorblindDropdown;
 
         [Header("Delete Progress")]
         [SerializeField] private GameObject deleteButton;
@@ -71,7 +65,6 @@ namespace FastAndFractured
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
             antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(antiAliasingDropdown.value); });
-            colorblindDropdown.onValueChanged.AddListener(delegate { SetColorblind(colorblindDropdown.value); });
             generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(generalVolumeSlider.value); });
             sharpeningSlider.onValueChanged.AddListener(delegate { UpdateTAASharpening(); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
@@ -138,18 +131,6 @@ namespace FastAndFractured
             //Brightness
             float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, BRIGHTNESS_DEFAULT);
             RefreshValue(brightnessSlider, brightness);
-
-            //Colorblind
-            string colorblind = PlayerPrefs.GetString("Colorblind", "No");
-            RefreshValue(colorblindDropdown, colorblind);
-
-            //Language
-            string language = PlayerPrefs.GetString("Language", "Español");
-            RefreshValue(languageDropdown, language);
-
-            //Subtitles
-            string subtitles = PlayerPrefs.GetString("Subtitles", "No");
-            RefreshValue(subtitlesDropdown, subtitles);
         }
 
         private void RefreshValue(TMP_Dropdown dropdown, string value)
@@ -238,17 +219,6 @@ namespace FastAndFractured
             PlayerPrefs.Save();
             SoundManager.Instance.UpdateSFXVolume();
         }
-        #endregion
-
-        #region Accesibility settings
-        private void SetColorblind(int option)
-        {
-            string selectedOption = colorblindDropdown.options[option].text;
-            PlayerPrefs.SetString("Colorblind", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set colorblind in game
-        }
-
         #endregion
 
         #region Video Settings
@@ -427,7 +397,7 @@ namespace FastAndFractured
         private void ApplyDisplayMode(FullScreenMode selectedOption)
         {
             Screen.fullScreenMode = selectedOption;
-            Debug.Log($"Display Mode Applicated: {Screen.fullScreenMode}");
+            Debug.Log($"Display Mode Applicated: {selectedOption}");
         }
 
         private void LoadDisplayModeOptions()
