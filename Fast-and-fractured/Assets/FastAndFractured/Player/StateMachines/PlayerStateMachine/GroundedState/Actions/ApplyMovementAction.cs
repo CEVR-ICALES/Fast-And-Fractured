@@ -14,9 +14,18 @@ namespace StateMachine
             Vector2 moveInput = playerInputController.MoveInput;
 
             carMovementController.HandleSteeringInput(moveInput); // maybe we will need to send the current input device when calling these functions
+            
+            if(playerInputController.IsAccelerating != 0){
+                carMovementController.HandleAccelerateInput(playerInputController.IsAccelerating);
+            }
 
-            carMovementController.HandleAccelerateInput(playerInputController.IsAccelerating);
-            carMovementController.HandleDeaccelerateInput(playerInputController.IsReversing);
+            if(playerInputController.IsReversing != 0){
+                carMovementController.HandleAccelerateInput(-playerInputController.IsReversing);
+            }
+
+            if(playerInputController.IsReversing == 0 && playerInputController.IsAccelerating == 0){
+                carMovementController.HandleAccelerateInput(0f);
+            }
         }
     }
 }

@@ -114,48 +114,25 @@ namespace FastAndFractured
             _currentRbMaxVelocity = statsController.MaxSpeed;
         }
 
-
-        // public void HandleInputChange(bool usingController)
-        // {
-        //     if (isAi)
-        //     {
-        //         _isUsingController = false;
-        //     }
-        //     else
-        //     {
-        //         _isUsingController = usingController;
-        //     }
-        // }
-
-
         #region Refactorized Code
 
         public void HandleSteeringInput(Vector2 steeringInput)
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
+                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-                // Possible set motor torque to 0 if no input (w,s)
             }
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
         public void HandleAccelerateInput(float rawAccelerationInput)
         {
-            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
+            if (PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
-            }
-        }
-
-        public void HandleDeaccelerateInput(float rawAccelerationInput)
-        {
-            if (PlayerInputController.Instance.IsUsingController && !_isBraking && rawAccelerationInput > 0)
-            {
-                float acceleration = rawAccelerationInput * statsController.Acceleration;
-                ApplyMotorTorque(-acceleration);
             }
         }
 
