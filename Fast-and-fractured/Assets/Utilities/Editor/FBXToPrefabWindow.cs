@@ -338,16 +338,12 @@ namespace Utilities
             }
 
             Material sharedBatchMaterial = null;
-
-            //todo extract this to a method someday
-            if (_overrideMaterial == null && // << DON'T create if overriding with existing
-                _useManualTextureOverrides && _useSharedMaterial && _selectedFBXAssets.Count > 0)
+            if (_overrideMaterial == null && _useManualTextureOverrides && _useSharedMaterial && _selectedFBXAssets.Count > 0)
             {
                 sharedBatchMaterial = CreateAndPrepareSharedMaterial("Shared_BaseVariant_Mat");
-                if (sharedBatchMaterial == null)
+                if (sharedBatchMaterial == null)  
                 {
-                    Debug.LogError("Shared material creation failed (not cancelled by user). Aborting batch process.");
-                    return;
+                    Debug.LogWarning("Shared material creation cancelled or failed. Proceeding with unique materials if possible.");
                 }
             }
 
@@ -420,7 +416,7 @@ namespace Utilities
                 if (!AssetDatabase.Contains(_overrideMaterial))
                 {
                     Debug.LogError(
-                        $"Override Material '{_overrideMaterial.name}' is not a valid project asset. Skipping {modelNameForPaths}.");
+                        $"Override Material '{_overrideMaterial.name}' is not a valid project asset. Skipping {modelName}.");
                     return false;
                 }
 
