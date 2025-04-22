@@ -19,6 +19,10 @@ namespace FastAndFractured
         [SerializeField] private ParticleSystem collisionVfx;
         [SerializeField] private LayerMask collisionLayers;
 
+        [Header("Dashing")]
+        [SerializeField] private ParticleSystem dashSpeedVfx;
+        [SerializeField] private ParticleSystem dashTurboVfx;
+
 
         PhysicsBehaviour _physicsBehaviour;
         CarMovementController _carMovementController;
@@ -65,7 +69,7 @@ namespace FastAndFractured
         #region BrakeMarks
         private void HandleBrakeMarks()
         {
-            if (_carMovementController.IsBraking)
+            if (_carMovementController.IsBraking && _carMovementController.IsGrounded())
             {
                 StartBrakeMark();
             }
@@ -128,6 +132,21 @@ namespace FastAndFractured
 
         #endregion
 
+        #region Dash
+
+        public void StartDashVfx()
+        {
+            dashSpeedVfx.Play();
+            dashTurboVfx.Play();
+        }
+
+        public void StopDashVfx()
+        {
+            dashSpeedVfx.Stop();
+            dashTurboVfx.Stop();
+        }
+
+        #endregion
 
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {

@@ -73,6 +73,7 @@ namespace FastAndFractured
 
         [Header("References")]
         [SerializeField] private StatsController statsController;
+        [SerializeField] private VehicleVfxController vehicleVfxController;
         [SerializeField] private float slowingDownAngularMomentumTime;
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
@@ -311,6 +312,7 @@ namespace FastAndFractured
 
                 currentNumberOfAirDashes++;
                 _isDashing = true;
+                vehicleVfxController.StartDashVfx();
                 _physicsBehaviour.BlockRigidBodyRotations();
                 Vector3 dashDirection = transform.forward.normalized;
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
@@ -335,6 +337,7 @@ namespace FastAndFractured
             _physicsBehaviour.UnblockRigidBodyRotations();
             _currentRbMaxVelocity = statsController.MaxSpeed;
             _physicsBehaviour.IsCurrentlyDashing = false;
+            vehicleVfxController.StopDashVfx();
             _dashCooldown = TimerSystem.Instance.CreateTimer(statsController.DashCooldown, onTimerDecreaseComplete: () =>
              {
                  _canDash = true;
