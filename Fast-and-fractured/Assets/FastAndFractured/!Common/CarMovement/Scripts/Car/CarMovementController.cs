@@ -39,7 +39,7 @@ namespace FastAndFractured
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
         [SerializeField] private int airUseDashLimit = 1;
-        private int currentNumberOfAirDashes = 0;
+        private int _currentNumberOfAirDashes = 0;
 
         [Header("Slope Detecting")]
         [SerializeField] private float slopeAngleThreshold;
@@ -310,10 +310,10 @@ namespace FastAndFractured
         {
             if (!_isDashing && _canDash )
             {
-                if (!IsGrounded() && currentNumberOfAirDashes >= airUseDashLimit)
+                if (!IsGrounded() && _currentNumberOfAirDashes >= airUseDashLimit)
                     return;
 
-                currentNumberOfAirDashes++;
+                _currentNumberOfAirDashes++;
                 _isDashing = true;
                 vehicleVfxController.StartDashVfx();
                 _physicsBehaviour.BlockRigidBodyRotations();
@@ -421,7 +421,7 @@ namespace FastAndFractured
             {
                 if(wheel.IsGrounded())
                 {
-                    currentNumberOfAirDashes = 0;
+                    _currentNumberOfAirDashes = 0;
                     return true;
                 }
             }
