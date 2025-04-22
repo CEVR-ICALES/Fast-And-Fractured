@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using System.Collections.Generic; 
- 
+using System.Collections.Generic;
+
 
 namespace Utilities
 {
@@ -42,6 +42,9 @@ namespace Utilities
         private Texture2D _manualNormalMap = null;
         private Texture2D _manualMaskMap = null;
         private Texture2D _manualEmissiveMap = null;
+        private bool _useSharedMaterial = false;
+
+        private Material _overrideMaterial = null;
 
         [MenuItem("Tools/Utilities/FBX To Prefab Tool (HDRP)", false, 50)]
         public static void ShowWindow()
@@ -78,25 +81,52 @@ namespace Utilities
                 typeof(GameObject), false);
             DrawBasePrefabHelp();
             EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField("Existing Material Override (Optional)", EditorStyles.boldLabel);
+            _overrideMaterial = (Material)EditorGUILayout.ObjectField(
+                new GUIContent("Override Material",
+                    "If set, this existing material will be used for ALL processed models, ignoring texture settings and material creation."),
+                _overrideMaterial,
+                typeof(Material),
+                false
+            );
+            using (new EditorGUI.DisabledScope(_overrideMaterial != null))
+            {
+                EditorGUILayout.LabelField("Manual Texture Overrides (for entire batch)", EditorStyles.boldLabel);
+                _useManualTextureOverrides =
+                    EditorGUILayout.BeginToggleGroup("Enable Manual Overrides", _useManualTextureOverrides);
+                EditorGUI.indentLevel++;
+                _manualBaseMap =
+                    (Texture2D)EditorGUILayout.ObjectField("Base Map", _manualBaseMap, typeof(Texture2D), false);
+                _manualNormalMap =
+                    (Texture2D)EditorGUILayout.ObjectField("Normal Map", _manualNormalMap, typeof(Texture2D), false);
+                _manualMaskMap =
+                    (Texture2D)EditorGUILayout.ObjectField("Mask Map", _manualMaskMap, typeof(Texture2D), false);
+                _manualEmissiveMap =
+                    (Texture2D)EditorGUILayout.ObjectField("Emissive Map", _manualEmissiveMap, typeof(Texture2D),
+                        false);
+            }
 
-            EditorGUILayout.LabelField("Manual Texture Overrides (for entire batch)", EditorStyles.boldLabel);
-            _useManualTextureOverrides =
-                EditorGUILayout.BeginToggleGroup("Enable Manual Overrides", _useManualTextureOverrides);
-            EditorGUI.indentLevel++;
-            _manualBaseMap =
-                (Texture2D)EditorGUILayout.ObjectField("Base Map", _manualBaseMap, typeof(Texture2D), false);
-            _manualNormalMap =
-                (Texture2D)EditorGUILayout.ObjectField("Normal Map", _manualNormalMap, typeof(Texture2D), false);
-            _manualMaskMap =
-                (Texture2D)EditorGUILayout.ObjectField("Mask Map", _manualMaskMap, typeof(Texture2D), false);
-            _manualEmissiveMap =
-                (Texture2D)EditorGUILayout.ObjectField("Emissive Map", _manualEmissiveMap, typeof(Texture2D), false);
+            using (new EditorGUI.DisabledScope(!_useManualTextureOverrides))
+            {
+                _useSharedMaterial = EditorGUILayout.Toggle(
+                    new GUIContent("Use One Shared Material",
+                        "If enabled, creates ONE material for the entire batch using the manual textures above, instead of one material per FBX."),
+                    _useSharedMaterial);
+            }
+
+
             if (_useManualTextureOverrides &&
                 (_manualBaseMap || _manualNormalMap || _manualMaskMap || _manualEmissiveMap))
             {
                 EditorGUILayout.HelpBox(
                     "Manually assigned textures WILL OVERRIDE automatic detection for those slots for ALL processed models.",
                     MessageType.Warning);
+                if (_useSharedMaterial)
+                {
+                    EditorGUILayout.HelpBox(
+                        "A single material asset will be created and shared by all prefabs in this batch.",
+                        MessageType.Info);
+                }
             }
             else if (_useManualTextureOverrides)
             {
@@ -111,7 +141,7 @@ namespace Utilities
 
 
             bool canProcess = _selectedFBXAssets.Count > 0;
-            using (new EditorGUI.DisabledScope(!canProcess)) 
+            using (new EditorGUI.DisabledScope(!canProcess))
             {
                 DrawProcessSelectedButton();
                 EditorGUILayout.Space(5);
@@ -244,8 +274,23 @@ namespace Utilities
                 return;
             }
 
+            Material sharedBatchMaterial = null;
             int successCount = 0;
             int failCount = 0;
+
+            if (_overrideMaterial == null &&
+                _useManualTextureOverrides && _useSharedMaterial && _selectedFBXAssets.Count > 0)
+            {
+                sharedBatchMaterial = CreateAndPrepareSharedMaterial("Shared_Batch_Mat");
+                if (sharedBatchMaterial == null)
+                {
+                    Debug.LogError(
+                        "Shared material creation failed (not cancelled by user). Aborting batch process.");
+                    return;
+                }
+            }
+
+
             AssetDatabase.StartAssetEditing();
             try
             {
@@ -263,8 +308,8 @@ namespace Utilities
                         break;
                     }
 
-                    if (ProcessSingleFBX(fbxAsset, _basePrefab)) successCount++;
-                    else failCount++;  
+                    if (ProcessSingleFBX(fbxAsset, _basePrefab, sharedBatchMaterial)) successCount++;
+                    else failCount++;
                 }
             }
             finally
@@ -290,6 +335,20 @@ namespace Utilities
             {
                 Debug.LogError("FBX Processor (HDRP): Aborting variant creation, failed to create common base.");
                 return;
+            }
+
+            Material sharedBatchMaterial = null;
+
+            //todo extract this to a method someday
+            if (_overrideMaterial == null && // << DON'T create if overriding with existing
+                _useManualTextureOverrides && _useSharedMaterial && _selectedFBXAssets.Count > 0)
+            {
+                sharedBatchMaterial = CreateAndPrepareSharedMaterial("Shared_BaseVariant_Mat");
+                if (sharedBatchMaterial == null)
+                {
+                    Debug.LogError("Shared material creation failed (not cancelled by user). Aborting batch process.");
+                    return;
+                }
             }
 
             int successCount = 0;
@@ -328,12 +387,12 @@ namespace Utilities
 
         /// <summary> Processes a single FBX asset: Creates Material, Finds/Assigns Textures (respecting manual override), Creates Prefab/Variant. </summary>
         /// <returns>True if successful, False otherwise.</returns>
-        private bool ProcessSingleFBX(GameObject fbxAsset, GameObject optionalBasePrefab)
+        private bool ProcessSingleFBX(GameObject fbxAsset, GameObject optionalBasePrefab,
+            Material sharedMaterial = null)
         {
             if (fbxAsset == null || !IsValidModelAsset(fbxAsset)) return false;
 
             string assetPath = AssetDatabase.GetAssetPath(fbxAsset);
-            string modelName = Path.GetFileNameWithoutExtension(assetPath);
             string assetFolder = Path.GetDirectoryName(assetPath);
             string parentFolder = Directory.GetParent(assetFolder)?.FullName;
             if (string.IsNullOrEmpty(parentFolder) || !parentFolder.StartsWith(Application.dataPath.Replace('/', '\\')))
@@ -352,33 +411,64 @@ namespace Utilities
             EnsureFolderExists(relativeParentFolder, TEXTURES_FOLDER_NAME);
             EnsureFolderExists(relativeParentFolder, PREFABS_FOLDER_NAME);
 
+            string modelName = Path.GetFileNameWithoutExtension(assetPath);
 
-            string materialPath = Path.Combine(materialsFolderPath, $"{modelName}_Mat.mat").Replace('\\', '/');
-            Material material = CreateHDRPMaterial(materialPath);
-            if (material == null)
+            Material materialToUse = null;
+            bool createdUniqueMaterial = false;
+            if (_overrideMaterial != null)
             {
-                Debug.LogError($"Material creation failed: {modelName}");
-                return false;
-            }
-
-            this.FindAndAssignTexturesHDRP(material, texturesFolderPath,
-                modelName);
-
-            string prefabPath = Path.Combine(prefabsFolderPath, $"{modelName}.prefab").Replace('\\', '/');
-            bool success;
-            if (optionalBasePrefab == null)
-            {
-                success = this.CreateStandardPrefab(fbxAsset, material, prefabPath, modelName);
-            }
-            else
-            {
-                if (!PrefabUtility.IsPartOfPrefabAsset(optionalBasePrefab))
+                if (!AssetDatabase.Contains(_overrideMaterial))
                 {
-                    Debug.LogError($"Base '{optionalBasePrefab.name}' invalid for '{modelName}'.");
+                    Debug.LogError(
+                        $"Override Material '{_overrideMaterial.name}' is not a valid project asset. Skipping {modelNameForPaths}.");
                     return false;
                 }
 
-                success = this.CreateVariantPrefab(fbxAsset, material, optionalBasePrefab, prefabPath, modelName);
+                materialToUse = _overrideMaterial;
+            }
+            else 
+            if (sharedMaterial != null)
+            {
+                materialToUse = sharedMaterial;
+            }
+            else
+            {
+                string materialPath = Path.Combine(materialsFolderPath, $"{modelName}_Mat.mat").Replace('\\', '/');
+                materialToUse = CreateHDRPMaterial(materialPath);
+                if (materialToUse == null)
+                {
+                    Debug.LogError($"Unique material creation failed: {modelName}");
+                    return false;
+                }
+
+                materialToUse.enableInstancing = true;
+
+                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);
+                EditorUtility.SetDirty(materialToUse);
+                if (materialToUse == null)
+                {
+                    Debug.LogError($"Material creation failed: {modelName}");
+                    return false;
+                }
+
+                createdUniqueMaterial = materialToUse != null;
+            }
+            if (createdUniqueMaterial && materialToUse != null)
+            { 
+                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);
+                EditorUtility.SetDirty(materialToUse);
+            }
+            string finalPrefabName = Path.GetFileNameWithoutExtension(assetPath);
+            string prefabPath = Path.Combine(prefabsFolderPath, $"{finalPrefabName}.prefab").Replace('\\', '/');
+            bool success;
+            if (optionalBasePrefab == null)
+            {
+                success = this.CreateStandardPrefab(fbxAsset, materialToUse, prefabPath, finalPrefabName);
+            }
+            else
+            {
+                success = this.CreateVariantPrefab(fbxAsset, materialToUse, optionalBasePrefab, prefabPath,
+                    finalPrefabName);
             }
 
             return success;
@@ -549,6 +639,7 @@ namespace Utilities
             }
 
             Material material = new Material(hdrpLitShader);
+            material.enableInstancing = true;
             AssetDatabase.CreateAsset(material, materialPath);
             return material;
         }
@@ -651,10 +742,9 @@ namespace Utilities
         }
 
 
-        
         private bool TryAssignAutoDetectedTexture(Material material, string searchFolder, string modelNameBase,
             string textureSuffix, string propertyName, TextureImporterType expectedType, bool expectedSRGB)
-        { 
+        {
             string modelNamePrefix = modelNameBase;
             int firstUnderscoreIndex = modelNameBase.IndexOf('_');
             if (firstUnderscoreIndex > 0)
@@ -681,13 +771,14 @@ namespace Utilities
                 }
             }
 
-            if (bestMatchPath == null) return false;  
+            if (bestMatchPath == null) return false;
 
             if (potentialMatches.Count > 1)
             {
                 Debug.LogWarning(
                     $"Multiple textures matched pattern '{modelNamePrefix}_...{textureSuffix}' in '{searchFolder}'. Using first: '{Path.GetFileName(bestMatchPath)}'");
             }
+
             Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(bestMatchPath);
             if (texture == null)
             {
@@ -706,7 +797,7 @@ namespace Utilities
             TextureImporterType expectedType, bool expectedSRGB)
         {
             TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
-            if (importer == null) return;  
+            if (importer == null) return;
 
             bool needsReimport = false;
             string logReason = "";
@@ -731,6 +822,64 @@ namespace Utilities
                     $"Texture '{Path.GetFileName(texturePath)}' ({propertyName}): Fixing importer settings. {logReason}");
                 importer.SaveAndReimport();
             }
+        }
+
+        private Material CreateAndPrepareSharedMaterial(string defaultFileNameBase)
+        {
+            if (!_useManualTextureOverrides || !_useSharedMaterial || _selectedFBXAssets.Count == 0)
+            {
+                Debug.LogError("Internal Error: CreateAndPrepareSharedMaterial called under wrong conditions.");
+                return null;
+            }
+
+            Debug.Log($"Attempting to create a shared material ({defaultFileNameBase})...");
+            string firstAssetPath = AssetDatabase.GetAssetPath(_selectedFBXAssets[0]);
+            string firstAssetFolder = Path.GetDirectoryName(firstAssetPath);
+            string parentFolder = Directory.GetParent(firstAssetFolder)?.FullName;
+            string sharedMaterialPath = null;
+
+            if (!string.IsNullOrEmpty(parentFolder) && parentFolder.StartsWith(Application.dataPath.Replace('/', '\\')))
+            {
+                string relativeParentFolder = "Assets" + parentFolder.Substring(Application.dataPath.Length);
+                relativeParentFolder = relativeParentFolder.Replace('\\', '/');
+                string materialsFolderPath =
+                    Path.Combine(relativeParentFolder, MATERIALS_FOLDER_NAME).Replace('\\', '/');
+                EnsureFolderExists(relativeParentFolder, MATERIALS_FOLDER_NAME);
+
+
+                sharedMaterialPath = EditorUtility.SaveFilePanelInProject(
+                    "Save Shared Batch Material",
+                    defaultFileNameBase + ".mat",
+                    "mat",
+                    "Please enter a file name for the shared material.",
+                    materialsFolderPath);
+
+                if (string.IsNullOrEmpty(sharedMaterialPath))
+                {
+                    Debug.LogWarning("Shared material creation cancelled by user.");
+                    return null;
+                }
+            }
+            else
+            {
+                Debug.LogError(
+                    "Could not determine a valid parent folder for the shared material based on the first selected asset. Cannot create shared material.");
+                return null;
+            }
+
+            Material sharedMaterial = CreateHDRPMaterial(sharedMaterialPath);
+            if (sharedMaterial == null)
+            {
+                Debug.LogError($"Failed to create the shared material asset at {sharedMaterialPath}.");
+                return null;
+            }
+
+            sharedMaterial.enableInstancing = true;
+            this.FindAndAssignTexturesHDRP(sharedMaterial, "", "");
+            EditorUtility.SetDirty(sharedMaterial);
+            Debug.Log($"Created and prepared shared material: {sharedMaterialPath}");
+
+            return sharedMaterial;
         }
 
         #endregion
@@ -766,7 +915,7 @@ namespace Utilities
                 EditorUtility.SetDirty(renderer);
             }
         }
- 
+
         private bool SavePrefab(GameObject rootObject, string path, string logDescription)
         {
             try
@@ -785,7 +934,7 @@ namespace Utilities
                 return false;
             }
         }
- 
+
         private bool SavePrefabVariant(GameObject instanceRoot, string path, string logDescription)
         {
             bool success = false;
@@ -808,5 +957,5 @@ namespace Utilities
         }
 
         #endregion
-    }  
-}  
+    }
+}
