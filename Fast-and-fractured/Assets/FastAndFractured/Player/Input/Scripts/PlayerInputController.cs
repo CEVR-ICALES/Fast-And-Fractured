@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cinemachine;
 using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.XInput;
 using Utilities;
@@ -23,7 +25,7 @@ namespace FastAndFractured
 
         // Movement & Camera Inputs with private backing fields
         public Vector2 MoveInput => _moveInput;
-        private Vector2 _moveInput;
+        private Vector2 _moveInput = Vector2.zero;
 
         public Vector2 CameraInput => _cameraInput;
         private Vector2 _cameraInput = Vector2.zero;
@@ -169,9 +171,11 @@ namespace FastAndFractured
                 _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
+                Debug.Log("KEYBOARD DETECTED");
             }
 
-            if (Gamepad.current != null)
+            bool gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
+            if (Gamepad.current != null && gamepadButtonPressed)
             {
                 if (Gamepad.current is DualShockGamepad)
                 {
@@ -183,6 +187,7 @@ namespace FastAndFractured
                     _currentInputDevice = InputDeviceType.XBOX_CONTROLLER;
                     OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 }
+                Debug.Log("CONTROLLER DETECTED");
 
                 _isUsingController = true;
             }

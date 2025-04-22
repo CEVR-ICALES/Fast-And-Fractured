@@ -22,7 +22,7 @@ namespace FastAndFractured
             // HUDManager.Instance.UpdateUIElement(UIElementType.Player0, sprite);
             // HUDManager.Instance.UpdateUIElement(UIElementType.EventText, "¡TOMA TOMATE VIEJO TRAIDOR!");
 
-            playerStatsController.TakeEndurance(60, false);
+            playerStatsController.TakeEndurance(60, false,this.gameObject);
         }
     }
 }

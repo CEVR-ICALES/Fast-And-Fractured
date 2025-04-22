@@ -10,6 +10,6 @@ public class ApplyDamageTest : MonoBehaviour
     [ContextMenu("Apply Damage")]
     private void ApplyDamage()
     {
-        gameObject.GetComponent<StatsController>().TakeEndurance(damageAmount, false);
+        gameObject.GetComponent<StatsController>().TakeEndurance(damageAmount, false,this.gameObject);
     }
 }

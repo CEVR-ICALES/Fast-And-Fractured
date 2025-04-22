@@ -147,4 +147,10 @@ namespace Enums
         TOMATO_EFFECT
     }
 
+    public enum GameElement
+    {
+        CHARACTER,
+        INTERACTABLE
+    }
+
 }

@@ -17,7 +17,7 @@ namespace FastAndFractured
         [SerializeField] private AnimationCurve enduranceFactorEvaluate;
         [SerializeField] private float averageCarWeight = 1150f;
         [SerializeField] private float carWeightImportance = 0.2f;
-        [Tooltip("Small offset that will be applied to the vector of the direction so that the car doesnt stop fast by dragging through the floor")] 
+        [Tooltip("Small offset that will be applied to the vector of the direction so that the car doesnt stop fast by dragging through the floor")]
         [SerializeField] private float applyForceYOffset = 0.2f;
         public Transform PushApplyPoint; // if we decide to not use the collision point as the starting point to generate the force this variable will be used
 
@@ -38,7 +38,7 @@ namespace FastAndFractured
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public StatsController StatsController { get => statsController; }
-        public Rigidbody Rb { get => _rb; set => _rb = value;}
+        public Rigidbody Rb { get => _rb; set => _rb = value; }
         private Rigidbody _rb;
         private CarMovementController _carMovementController;
 
@@ -70,7 +70,7 @@ namespace FastAndFractured
 
         private void OnCollisionExit(Collision collision)
         {
-           ExitGroundCheck(collision);
+            ExitGroundCheck(collision);
         }
 
         private void VehicleCollision(Collision collision)
@@ -114,30 +114,30 @@ namespace FastAndFractured
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    
-                     if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
-                        {
-                            otherComponentPhysicsBehaviours.StatsController.IsInvulnerable=false;
-                        }
-                        else
-                        {
-                            otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                            otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
-                        }
+
+                    if (otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
+                    {
+                        otherComponentPhysicsBehaviours.StatsController.IsInvulnerable = false;
+                    }
+                    else
+                    {
+                        otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                        otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
+                    }
                 }
             }
         }
 
         private void GroundCheck(Collision collision)
         {
-            if((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer){
-              _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { _isTouchingGround = true; });
+            if ((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer) {
+                _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { _isTouchingGround = true; });
             }
         }
 
         private void ExitGroundCheck(Collision collision)
         {
-            if((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+            if ((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
             {
                 if (_isTouchingGround)
                     _isTouchingGround = false;
@@ -166,7 +166,7 @@ namespace FastAndFractured
             ContactPoint contact = collision.contacts[0];
             float angle = Vector3.Angle(contact.normal, transform.forward); // angle btween collision normal and .forward
 
-            if(angle > wallCollisionAngleThreshold)
+            if (angle > wallCollisionAngleThreshold)
             {
                 _carMovementController.CancelDash();
                 Vector3 bounceDirection = Vector3.Reflect(transform.forward, contact.normal);
@@ -196,7 +196,7 @@ namespace FastAndFractured
         public void SlowDownAngularMomentum()
         {
             Vector3 initialAngularVelocity = _rb.angularVelocity;
-            if(initialAngularVelocity.magnitude < 0.01f)
+            if (initialAngularVelocity.magnitude < 0.01f)
             {
                 _rb.angularVelocity = Vector3.zero;
                 return;
@@ -218,7 +218,7 @@ namespace FastAndFractured
         private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
         {
             float weightFactor = 1 + ((oCarWeight - averageCarWeight) / averageCarWeight) * carWeightImportance; // is for example the car importance is 0.2 (20 %) and the car weights 1200 the final force will be multiplied by 1.05 or something close to that value since the car is heavier (number will be big so a 0.05 is enough for now)
-                                                                                                                 
+
             float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
             float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
 
@@ -230,7 +230,7 @@ namespace FastAndFractured
 
         private bool DecideIfWinsFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float oCurrentRbSpeed)
         {
-            if(CalculateCurrentSimulationWeight((statsController.MaxEndurance / statsController.Endurance), statsController.Weight, statsController.EnduranceImportanceWhenColliding, _rb.velocity.magnitude) > CalculateCurrentSimulationWeight(oCarEnduranceFactor, oCarWeight, oEnduranceImportance, oCurrentRbSpeed))
+            if (CalculateCurrentSimulationWeight((statsController.MaxEndurance / statsController.Endurance), statsController.Weight, statsController.EnduranceImportanceWhenColliding, _rb.velocity.magnitude) > CalculateCurrentSimulationWeight(oCarEnduranceFactor, oCarWeight, oEnduranceImportance, oCurrentRbSpeed))
             {
                 return true;
             } else
@@ -266,14 +266,14 @@ namespace FastAndFractured
             if (clampedVelocity.magnitude > (maxSpeed / SPEED_TO_METER_PER_SECOND))
             {
                 clampedVelocity = clampedVelocity.normalized * (maxSpeed / SPEED_TO_METER_PER_SECOND);
-                _rb.velocity = clampedVelocity;
+                _rb.velocity = clampedVelocity;                
             }
         }
 
         public void LimitRigidBodyRotation(float maxAngularVelocity)
-        {
+        { 
             if (_rb.angularVelocity.magnitude > maxAngularVelocity)
-            {
+            {  
                 _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularVelocity;
             }
         }
