@@ -38,6 +38,8 @@ namespace FastAndFractured
 
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
+        [SerializeField] private int airUseDashLimit = 1;
+        private int _currentNumberOfAirDashes = 0;
 
         [Header("Slope Detecting")]
         [SerializeField] private float slopeAngleThreshold;
@@ -47,9 +49,6 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundAngleThreshold = 65;
-
-        [Header("Air rotation")]
-        [SerializeField] private float airRotationForce;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
@@ -77,6 +76,7 @@ namespace FastAndFractured
 
         [Header("References")]
         [SerializeField] private StatsController statsController;
+        [SerializeField] private VehicleVfxController vehicleVfxController;
         [SerializeField] private float slowingDownAngularMomentumTime;
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
@@ -285,9 +285,14 @@ namespace FastAndFractured
         ITimer _dashTimer;
         public void HandleDashWithPhysics()
         {
-            if (!_isDashing && _canDash)
+            if (!_isDashing && _canDash )
             {
+                if (!IsGrounded() && _currentNumberOfAirDashes >= airUseDashLimit)
+                    return;
+
+                _currentNumberOfAirDashes++;
                 _isDashing = true;
+                vehicleVfxController.StartDashVfx();
                 _physicsBehaviour.BlockRigidBodyRotations();
                 Vector3 dashDirection = transform.forward.normalized;
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
@@ -301,6 +306,8 @@ namespace FastAndFractured
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
+                
+               
             }
         }
         ITimer _dashCooldown;
@@ -310,6 +317,7 @@ namespace FastAndFractured
             _physicsBehaviour.UnblockRigidBodyRotations();
             _currentRbMaxVelocity = statsController.MaxSpeed;
             _physicsBehaviour.IsCurrentlyDashing = false;
+            vehicleVfxController.StopDashVfx();
             _dashCooldown = TimerSystem.Instance.CreateTimer(statsController.DashCooldown, onTimerDecreaseComplete: () =>
             {
                 _canDash = true;
@@ -388,8 +396,11 @@ namespace FastAndFractured
         {
             foreach (var wheel in wheels)
             {
-                if (wheel.IsGrounded())
+                if(wheel.IsGrounded())
+                {
+                    _currentNumberOfAirDashes = 0;
                     return true;
+                }
             }
             return _physicsBehaviour.IsTouchingGround;
         }
@@ -497,21 +508,19 @@ namespace FastAndFractured
 
             if (steeringInput.x > 0)
             {
-                _physicsBehaviour.AddTorque(-transform.forward * airRotationForce, ForceMode.Acceleration);
-            }
-            else if (steeringInput.x < 0)
+                _physicsBehaviour.AddTorque(-transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
+            } else if(steeringInput.x < 0)
             {
-                _physicsBehaviour.AddTorque(transform.forward * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
             }
 
             if (steeringInput.y > 0)
             {
-                _physicsBehaviour.AddTorque(transform.right * airRotationForce, ForceMode.Acceleration);
-
-            }
-            else if (steeringInput.y < 0)
+                _physicsBehaviour.AddTorque(transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
+                
+            } else if(steeringInput.y < 0)
             {
-                _physicsBehaviour.AddTorque(-transform.right * airRotationForce, ForceMode.Acceleration);
+                _physicsBehaviour.AddTorque(-transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
             }
 
         }
