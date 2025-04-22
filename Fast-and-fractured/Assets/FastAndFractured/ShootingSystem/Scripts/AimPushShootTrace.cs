@@ -37,7 +37,7 @@ public class AimPushShootTrace : MonoBehaviour
     private int _pointsPerFrame;
     private bool _currentFinished = true;
     public UnityEvent currentFinishedEvent;
-    private bool _higherPointWasAchivied =false;
+    private int _raycastCount = 0;
     private Vector3 _initialSpeed;
 
     [Header("Resources")]
@@ -60,7 +60,7 @@ public class AimPushShootTrace : MonoBehaviour
         combinedMask = (1 << _groundMask) | (1 << _staticMask);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!_currentFinished)
         {
@@ -78,17 +78,13 @@ public class AimPushShootTrace : MonoBehaviour
                     _currentPosition = GetNextPosition(_currentPosition, _currentVelocity);
                     points.Add(_currentPosition);
                     _currentVelocity += Physics.gravity * _currentCustomGravity * timeStep;
-                    if (!_higherPointWasAchivied && _currentPosition.y >= higherPoint.y)
-                    {
-                        _higherPointWasAchivied = true;
-                    }
-                    else if(currentPoints%2==0)
+                    if(currentPoints%2==0)
                     {
                         _raycastPoints.Add(_currentPosition);
                         if (_raycastPoints.Count >= 2)
                         {
                             RaycastHit hit = new RaycastHit();
-                            Vector3 vectorForRaycast = _raycastPoints[1] - _raycastPoints[0];
+                            Vector3 vectorForRaycast = _raycastPoints[_raycastCount+1] - _raycastPoints[_raycastCount];
                             Vector3 direction = vectorForRaycast.normalized;
                             float magnitude = vectorForRaycast.magnitude;
                             Ray ray = new Ray(_raycastPoints[0], direction);
@@ -97,29 +93,14 @@ public class AimPushShootTrace : MonoBehaviour
                                 SetHitMark(hit.point, hit.normal);
                             }
                             Debug.DrawRay(higherPoint, direction * magnitude, Color.green);
-                          _raycastPoints.Clear();
+                            _raycastCount++;
                         }
                     }
                 }
             }
+            _raycastPoints.Clear();
+            _raycastCount = 0;
         }
-    }
-
-    private Vector3 CalculateHigherPoint(Vector3 initialPos, Vector3 initialVelocity, float customGravity)
-    {
-        float timeToPeak = -initialVelocity.y / (Physics.gravity.y * customGravity);
-
-        Vector3 horizontalVelocity = new Vector3(initialVelocity.x, 0f, initialVelocity.z);
-        Vector3 horizontalMovement = horizontalVelocity * timeToPeak;
-
-        float maxHeight = initialPos.y + initialVelocity.y * timeToPeak +
-                        0.5f * Physics.gravity.y * customGravity * timeToPeak * timeToPeak;
-
-        return new Vector3(
-            initialPos.x + horizontalMovement.x,
-            maxHeight,
-            initialPos.z + horizontalMovement.z
-        );
     }
     public void DrawTrajectory()
     {
@@ -129,14 +110,14 @@ public class AimPushShootTrace : MonoBehaviour
             _currentVelocity = _initialSpeed;
             _currentPosition = pushShootPoint.position;
             _currentFinished = false;
-            higherPoint = CalculateHigherPoint(_currentPosition, _currentVelocity, _currentCustomGravity);
             _previousVelocity = _currentVelocity;
             points.Clear();
             points.Add(_currentPosition);
             _pointsPerFrame = maxCalculationSteps / frames;
             _collision = true;
             _raycastPoints = new List<Vector3>();
-            _higherPointWasAchivied = false;
+            _raycastPoints.Clear();
+            _raycastCount = 0;
         }
     }
 
@@ -150,7 +131,6 @@ public class AimPushShootTrace : MonoBehaviour
        hitMark.SetActive(true);
        hitMark.transform.SetPositionAndRotation(point, Quaternion.LookRotation(normal));
        hitMark.transform.Rotate(90, 0, 0);
-       //currentFinishedEvent?.Invoke();
        points = RemovePointsInLowerPos(point.y);
        lineRenderer.positionCount = points.Count;
        lineRenderer.SetPositions(points.ToArray());
