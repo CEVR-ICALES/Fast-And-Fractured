@@ -23,51 +23,71 @@ namespace FastAndFractured
 
             foreach (var boost in boostList)
             {
-                if (boost.StatToBoost == Stats.ENDURANCE)
+                switch (boost.StatToBoost)
                 {
-                    if (boost.BoostValue < 0)
-                    {
-                        statsController.RecoverEndurance(boost.BoostValue, false);
-                    }
-                    else
-                    {
-                        statsController.TakeEndurance(boost.BoostValue, false);
-                    }
-                }
-                else
-                {
-                    statsController.UpgradeCharStat(boost.StatToBoost, boost.BoostValue);
-                }
-
-
-                boost.OnBoostStartEvent?.Invoke();
-                if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
-                TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
-                {
-                    if (boost.StatToBoost == Stats.ENDURANCE)
-                    {
+                    case Stats.ENDURANCE:
                         if (boost.BoostValue < 0)
                         {
-                            statsController.TakeEndurance(boost.BoostValue, false);
+                            statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
                         }
                         else
                         {
                             statsController.RecoverEndurance(boost.BoostValue, false);
                         }
-                    }
-                    else
+                        break;
+                    default:
+                        statsController.UpgradeCharStat(boost.StatToBoost, boost.BoostValue);
+                        break;
+                }
+
+                if (boost.StatToBoost == Stats.COOLDOWN_SPEED)
+                {
+                    UpdateExistingCooldowns(interactionFrom, statsController.CooldownSpeed);
+                }
+
+                boost.OnBoostStartEvent?.Invoke();
+                if (boost.BoostTime == PERMANENT_BOOST_VALUE) return;
+                TimerSystem.Instance.CreateTimer(boost.BoostTime, onTimerDecreaseComplete: () =>
+                {
+                    switch (boost.StatToBoost)
                     {
-                        statsController.ReduceCharStat(boost.StatToBoost, boost.BoostValue);
+                        case Stats.ENDURANCE:
+                            if (boost.BoostValue < 0)
+                            {
+                                statsController.RecoverEndurance(boost.BoostValue, false);
+                            }
+                            else
+                            {
+                                statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
+                            }
+                            break;
+                        default:
+                            statsController.ReduceCharStat(boost.StatToBoost, boost.BoostValue);
+                            break;
+                    }
+
+                    if (boost.StatToBoost == Stats.COOLDOWN_SPEED)
+                    {
+                        UpdateExistingCooldowns(interactionFrom, statsController.CooldownSpeed);
                     }
 
                     boost.OnBoostEndEvent?.Invoke();
                 });
+                
             }
 
             onInteractEmpty?.Invoke();
             onInteract?.Invoke(interactionFrom, intearactionTo);
         }
 
+        private void UpdateExistingCooldowns(GameObject character, float speed)
+        {
+            ITimeSpeedModifiable[] cooldowns = character.GetComponentsInChildren<ITimeSpeedModifiable>();
+            foreach (ITimeSpeedModifiable cd in cooldowns)
+            {
+                cd.ModifySpeedOfExistingTimer(speed);
+            }
+        }
 
         [Serializable]
         public class StatsBoost

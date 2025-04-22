@@ -103,7 +103,7 @@ namespace FastAndFractured
             _statsController.TemporalProductStat(Enums.Stats.MAX_SPEED, statBoostMultiplier, uniqueAbilityDuration);
             _statsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
             _statsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
-            _statsController.TemporalProductStat(Enums.Stats.PUSH_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
+            _statsController.TemporalProductStat(Enums.Stats.PUSH_FORCE, statBoostMultiplier, uniqueAbilityDuration);
 
             GenerateCroquettes(numberOfCroquettes);
             StartVFX();

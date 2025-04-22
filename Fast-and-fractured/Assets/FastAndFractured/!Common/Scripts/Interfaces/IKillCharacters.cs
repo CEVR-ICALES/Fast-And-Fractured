@@ -16,5 +16,7 @@ namespace FastAndFractured
         {
 
         }
+
+        public GameObject GetKillerGameObject();
     }
 }

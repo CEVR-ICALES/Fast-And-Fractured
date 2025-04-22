@@ -9,8 +9,8 @@ public class AboveRecoveryHealthPercentageDecision : Decision
 {
     public override bool Decide(Controller controller)
     {
-        EnemyAIBrain brain = controller.GetComponent<EnemyAIBrain>();
-        StatsController statsController = controller.GetComponent<StatsController>();
+        EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
+        StatsController statsController = controller.GetBehaviour<StatsController>();
 
         return statsController.Endurance >= brain.RecoveryThresholdPercentageForSearch;
     }

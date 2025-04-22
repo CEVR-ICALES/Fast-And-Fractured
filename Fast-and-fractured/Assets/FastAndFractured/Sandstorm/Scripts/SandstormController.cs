@@ -2,9 +2,11 @@ using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using Utilities;
+using Utilities.Managers.PauseSystem;
+using System.Net.NetworkInformation;
 namespace FastAndFractured
 {
-    public class SandstormController : MonoBehaviour, IKillCharacters
+    public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
@@ -58,18 +60,41 @@ namespace FastAndFractured
         private int reduceQuantityPoints = 4;
         private float _timeToReduceKillCharacterTime;
         private ITimer _reduceKillTimeTimer;
+
+        private bool _isPaused = false;
+        public List<GameObject> ItemsInsideSandstorm =>_itemsInsideSandstorm;
+        private List<GameObject> _itemsInsideSandstorm;
+        public List<GameObject>  CharactersInsideSandstorm => _charactersInsideSandstorm;
+        private List<GameObject> _charactersInsideSandstorm;
+
+        const float HALF_FRONT_ANGLE = 90;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
             primaryFog?.gameObject.SetActive(false);
+            _itemsInsideSandstorm = new List<GameObject>();
+            _charactersInsideSandstorm = new List<GameObject>();
+        }
+
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
         }
         private void Update()
         {
-            if (_moveSandStorm)
+            if (!_isPaused)
             {
-                ExpandFogs();
-            } 
+                if (_moveSandStorm)
+                {
+                    ExpandFogs();
+                }
+            }
         }
 
         public void SetSpawnPoints(bool debug)
@@ -170,30 +195,73 @@ namespace FastAndFractured
             }
         }
 
+        public bool IsInsideStormCollider(GameObject target,float marginError=0f)
+        {
+            if (marginError > 0)
+            {
+                Vector3 directionToTarget = target.transform.position - (transform.position + (_stormCollider.size.z / 2 + marginError) * transform.forward);
+                directionToTarget.Normalize();
+                float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
+                float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
+                return !(angleToTarget < HALF_FRONT_ANGLE);
+            }
+            else
+            {
+                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target);
+            }
+        }
+
         private void OnTriggerEnter(Collider other)
         {
-            if(other.TryGetComponent(out StatsController statsController))
+            if (other.TryGetComponent(out StatsController statsController))
             {
-               StartKillNotify(statsController);
+                StartKillNotify(statsController);
+                _charactersInsideSandstorm.Add(other.gameObject);
+            }
+            else
+            {
+                _itemsInsideSandstorm.Add(other.gameObject);
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if(other.TryGetComponent(out StatsController statsController))
+            if (other.TryGetComponent(out StatsController statsController))
             {
-               CharacterEscapedDead(statsController);
+                CharacterEscapedDead(statsController);
+                _charactersInsideSandstorm.Remove(other.gameObject);
+            }
+            else
+            {
+                _itemsInsideSandstorm.Remove(other.gameObject);
             }
         }
 
-       public void StartKillNotify(StatsController statsController)
+        public void StartKillNotify(StatsController statsController)
        {
-         statsController.GetKilledNotify(this,false);
+         float damageXFrame = statsController.MaxEndurance/_currentCharacterKillTime;
+         statsController.GetKilledNotify(this,false,damageXFrame);
        }
 
       public void CharacterEscapedDead(StatsController statsController)
       {
-            statsController.GetKilledNotify(this, true);  
+            statsController.GetKilledNotify(this, true,0);  
       }
+
+      public GameObject GetKillerGameObject()
+      {
+         return this.gameObject;
+      }
+
+      public void OnPause()
+        {
+            _isPaused = true;
+            
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
+        }
     }
 }
