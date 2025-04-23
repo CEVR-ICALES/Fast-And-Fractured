@@ -432,7 +432,7 @@ namespace Utilities
             }
             
             
-            if (materialToUse == null) // If we haven't assigned a material yet...
+            if (materialToUse == null)  
             {
                 string materialPath = Path.Combine(materialsFolderPath, $"{modelName}_Mat.mat").Replace('\\', '/');
                 materialToUse = CreateHDRPMaterial(materialPath);
