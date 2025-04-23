@@ -26,9 +26,11 @@ namespace FastAndFractured
 
         [Header("Car Endurance")]
         [SerializeField] private ParticleSystem[] smokeVfx;
+        [SerializeField] private ParticleSystem lowEnduranceExclusiveSmokeVfx;
         private ParticleSystem.EmissionModule[] _smokeEmmisionModules; // necessary to modify rateOverTime
         private ParticleSystem.MainModule[] _smokeMainModules;
         private bool _carEnduracenParticlesActive = false;
+        private bool _canPlayExlusiveSmokeVfx = false;
         private const float START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD = 0.8f;
         private const float HIGH_ENDURANCE_MIN_START_SPEED = 0.8f;
         private const float HIGH_ENDURANCE_MAX_START_SPEED = 1.2f;
@@ -182,23 +184,38 @@ namespace FastAndFractured
             if(enduranceFactor > START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD)
             {
                 if(_carEnduracenParticlesActive)
+                {
                     StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
+                    lowEnduranceExclusiveSmokeVfx.Stop();
+                }
             } else
             {
                 if (enduranceFactor <= ENDURANCE_SUPERLOW)
                 {
                     UpdateEnduranceVfxValues(LOW_ENDURANCE_MIN_START_SPEED, LOW_ENDURANCE_MAX_START_SPEED, LOW_ENDURANCE_EMISSION_RATE);
+                    _canPlayExlusiveSmokeVfx = true;
                 }
                 else if (enduranceFactor <= ALMOST_HALF_ENDURANCE)
                 {
                     UpdateEnduranceVfxValues(HALF_ENDURANCE_MIN_START_SPEED, HALF_ENDURANCE_MAX_START_SPEED, HALF_ENDURANCE_EMISSION_RATE);
+                    _canPlayExlusiveSmokeVfx = false;
                 }
                 else if (enduranceFactor <= START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD)
                 {
                     UpdateEnduranceVfxValues(HIGH_ENDURANCE_MIN_START_SPEED, HIGH_ENDURANCE_MAX_START_SPEED, HIGH_ENDURANCE_EMISSION_RATE);
+                    _canPlayExlusiveSmokeVfx = false;
                 }
                 if(!_carEnduracenParticlesActive)
                     EnableParticles(smokeVfx, ref _carEnduracenParticlesActive);
+                if(_canPlayExlusiveSmokeVfx)
+                {
+                    if (!lowEnduranceExclusiveSmokeVfx.isPlaying)
+                        lowEnduranceExclusiveSmokeVfx.Play();
+                }   else
+                {
+                    if(lowEnduranceExclusiveSmokeVfx.isPlaying)
+                        lowEnduranceExclusiveSmokeVfx.Stop();
+                }
             } 
         }
 
