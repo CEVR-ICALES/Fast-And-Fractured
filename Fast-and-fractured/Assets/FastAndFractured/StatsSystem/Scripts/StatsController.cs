@@ -10,6 +10,9 @@ namespace FastAndFractured
         [SerializeField]
         private CharacterData charDataSO;
 
+        [SerializeField]
+        private VehicleVfxController vehicleVfxController;
+
         [Header("CURRENT STATS")]
 
         [Header("Health")]
@@ -158,6 +161,7 @@ namespace FastAndFractured
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
+                        vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
@@ -182,6 +186,11 @@ namespace FastAndFractured
                 if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
+                    vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
+                    if(_isPlayer)
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                    }
                 } else
                 {
                     Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
