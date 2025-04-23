@@ -5,54 +5,61 @@ using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
 
-public class AimPushShootHitMarkCollision : MonoBehaviour, IPooledObject
+public class AimPushShootHitMarkCollision : MonoBehaviour
 {
-    public UnityEvent<Vector3, Vector3> onCollide;
-    [SerializeField]
-    private float _speed = 100f;
+    private bool _colliding = false;
 
-    public Pooltype Pooltype { get => Pooltype.TRACE_COLISION; set => _pooltype = value; }
-    private Pooltype _pooltype = Pooltype.TRACE_COLISION;
-    public bool InitValues => _initValues;
-    private bool _initValues = true;
-
+    private LayerMask _groundMask = 3;
+    private LayerMask _staticMask = 10;
+    private LayerMask combinedMask;
+    public UnityEvent<Vector3> moveMyPosition;
+    public UnityEvent<Vector3,Vector3,bool> onCollision;
+    public Vector3 PositionReference {set=>_positionReferenece=value; }
+    private Vector3 _positionReferenece;
     private void Start()
     {
+        combinedMask = (1 << _groundMask) | (1 << _staticMask);
     }
-    public void SubscribeToParent(AimPushShootTrace aimPushShootTrace)
+    private void Update()
     {
-        aimPushShootTrace.currentFinishedEvent.AddListener(OnEndDetection);
+        if (!_colliding)
+        {
+            Ray downRay = new Ray(transform.position, Vector3.down);
+            RaycastHit hit;
+            if (Physics.Raycast(downRay, out hit, Mathf.Infinity, combinedMask))
+            {
+                moveMyPosition?.Invoke(hit.point);
+            }
+            else
+            {
+                Ray upRay = new Ray(transform.position, Vector3.up);
+                if (Physics.Raycast(upRay, out hit, Mathf.Infinity, combinedMask))
+                {
+                    moveMyPosition?.Invoke(hit.point);
+                }
+            }
+        }
+        transform.position = _positionReferenece;
     }
-    public void MoveToOtherPosition(Vector3 otherPosition,float frames)
-    {
-        transform.position = otherPosition;
-    }
-
     public void ToogleCollider(bool enable)
     {
         GetComponent<Collider>().enabled = enable;
-    }
-    public void OnEndDetection()
-    {
-        ToogleCollider(false);
-        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
     }
     private void OnCollisionEnter(Collision collision)
     {
         ContactPoint contactPoint = collision.contacts[0];
         if (gameObject.activeSelf)
         {
-            onCollide?.Invoke(contactPoint.point, contactPoint.normal);
+            _colliding = true;
+            onCollision?.Invoke(contactPoint.point, contactPoint.normal, true);
         }
     }
-
-    private void OnEnable()
+    private void OnCollisionExit(Collision collision)
     {
-      
-    }
-
-    public void InitializeValues()
-    {
-        ToogleCollider(false);
+        if (gameObject.activeSelf)
+        {
+            _colliding = false;
+            onCollision?.Invoke(Vector3.zero, Vector3.zero, true);
+        }
     }
 }
