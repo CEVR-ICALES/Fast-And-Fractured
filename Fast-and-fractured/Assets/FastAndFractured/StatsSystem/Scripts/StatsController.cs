@@ -105,6 +105,13 @@ namespace FastAndFractured
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
 
+        [Header("GAME STATS")]
+
+        public float totalDamageTaken = 0f;
+        public float totalDamageDealt = 0f;
+        public float totalDistanceDriven = 0f;
+        private Vector3 _lastPosition;
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -114,10 +121,15 @@ namespace FastAndFractured
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
+            _lastPosition = transform.position;
         }
 
         #endregion
-
+        void Update()
+        {
+            totalDistanceDriven += Vector3.Distance(transform.position, _lastPosition);
+            _lastPosition = transform.position;
+        }
         public void SetCharacter(CharacterData charData)
         {
             var copyOfCharData = Instantiate(charData);
@@ -155,6 +167,7 @@ namespace FastAndFractured
             {
                 if (!charDataSO.Invulnerable)
                 {
+                    totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
@@ -343,6 +356,10 @@ namespace FastAndFractured
 
             }
             return charStat;
+        }
+        public void AddDealtDamage(float damage)
+        {
+            totalDamageDealt += damage;
         }
         #endregion
         #region TemporalModificators

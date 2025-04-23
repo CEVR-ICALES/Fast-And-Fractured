@@ -14,6 +14,7 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         public GameObject objective;
         public float speed;
+        public Vector3 randomRotation;
         public virtual void InitializeValues()
         {
             
@@ -25,6 +26,7 @@ namespace FastAndFractured
             {
                 Vector3 direction = (objective.transform.position - transform.position).normalized;
                 transform.position += direction * speed * Time.deltaTime;
+                transform.Rotate(randomRotation * Time.deltaTime);
             }
             else
             {
