@@ -154,7 +154,7 @@ namespace FastAndFractured
             }
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
-
+            IngameEventsManager.Instance.CreateEvent("La tormenta de arena ha comenzado");
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace FastAndFractured
         private int maxCharactersInGame = 8;
         private List<string> _allCharactersNameCode;
         private Dictionary<string, int> _characterSelectedLimit;
-
+        public List<string> InGameCharactersNameCodes { get => _inGameCharactersNameCodes; }
         private List<string> _inGameCharactersNameCodes;
         public List<GameObject> InGameCharacters { get => _inGameCharacters; }
         private List<GameObject> _inGameCharacters;
