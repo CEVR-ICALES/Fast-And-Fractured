@@ -24,7 +24,7 @@ namespace StateMachine
             }
 
             if(playerInputController.IsReversing == 0 && playerInputController.IsAccelerating == 0){
-                carMovementController.HandleAccelerateInput(0f);
+                carMovementController.HandleAccelerateInput(-1f);
             }
         }
     }

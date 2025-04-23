@@ -120,7 +120,6 @@ namespace FastAndFractured
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
-                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
@@ -132,7 +131,15 @@ namespace FastAndFractured
             if (PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
-                ApplyMotorTorque(acceleration);
+                if(_physicsBehaviour.Rb.velocity.magnitude != _currentRbMaxVelocity)
+                {
+                    ApplyMotorTorque(acceleration);
+                }
+                else if(acceleration == 0f)
+                {
+                    ApplyMotorTorque(acceleration);
+                }
+                // maybe need to reduce rb velocity progressively when not accelerating
             }
         }
 
