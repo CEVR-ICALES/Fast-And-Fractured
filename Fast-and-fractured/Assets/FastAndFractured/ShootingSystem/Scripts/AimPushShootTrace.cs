@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using FastAndFractured;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,6 +13,7 @@ public class AimPushShootTrace : MonoBehaviour
     [Header("Settings")]
     [Range(1f, 15f)]
     [SerializeField] private int frames = 5;
+    private ITimer _showTraceTimer;
     [Range(0.01f, 0.1f)]
     public float timeStep = 0.02f;
     [SerializeField] private int maxCalculationSteps = 128;
@@ -28,17 +30,15 @@ public class AimPushShootTrace : MonoBehaviour
     private bool _collision = false;
 
     private List<Vector3> points;
+    private List<Vector3> previousPoints;
     private Vector3 _currentVelocity;
     private float _currentCustomGravity;
     private Vector3 _currentPosition;
     private Vector3 _previousVelocity = Vector3.zero;
-    private List<Vector3> _raycastPoints;
-    private Vector3 higherPoint;
-    private int _pointsPerFrame;
     private bool _currentFinished = true;
     public UnityEvent currentFinishedEvent;
-    private int _raycastCount = 0;
     private Vector3 _initialSpeed;
+    private Vector3 _rangePoint;
 
     [Header("Resources")]
     [SerializeField] private Transform pushShootPoint;
@@ -58,66 +58,45 @@ public class AimPushShootTrace : MonoBehaviour
         _initialSpeed = Vector3.zero;
 
         combinedMask = (1 << _groundMask) | (1 << _staticMask);
+        _showTraceTimer = null;
+        CalculateTrayectory();
+
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        if (!_currentFinished)
-        {
-            for (int currentPoints = 0; currentPoints < _pointsPerFrame&&!_currentFinished; currentPoints++)
-            {
-                if (points.Count >= maxCalculationSteps)
-                {
-                    _currentFinished = true;
-                    lineRenderer.positionCount = points.Count;
-                    lineRenderer.SetPositions(points.ToArray());
-                    lineRenderer.Simplify(tolerance);
-                }
-                else
-                {
-                    _currentPosition = GetNextPosition(_currentPosition, _currentVelocity);
-                    points.Add(_currentPosition);
-                    _currentVelocity += Physics.gravity * _currentCustomGravity * timeStep;
-                    if(currentPoints%2==0)
-                    {
-                        _raycastPoints.Add(_currentPosition);
-                        if (_raycastPoints.Count >= 2)
-                        {
-                            RaycastHit hit = new RaycastHit();
-                            Vector3 vectorForRaycast = _raycastPoints[_raycastCount+1] - _raycastPoints[_raycastCount];
-                            Vector3 direction = vectorForRaycast.normalized;
-                            float magnitude = vectorForRaycast.magnitude;
-                            Ray ray = new Ray(_raycastPoints[0], direction);
-                            if (Physics.Raycast(ray, out hit, magnitude, combinedMask))
-                            {
-                                SetHitMark(hit.point, hit.normal);
-                            }
-                            Debug.DrawRay(higherPoint, direction * magnitude, Color.green);
-                            _raycastCount++;
-                        }
-                    }
-                }
-            }
-            _raycastPoints.Clear();
-            _raycastCount = 0;
-        }
+       CalculateTrayectory();
     }
-    public void DrawTrajectory()
+    public void CalculateTrayectory()
     {
         _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
-        if (_previousVelocity.ToString() != _initialSpeed.ToString()&&_currentFinished)
+        if (_previousVelocity.ToString() != _initialSpeed.ToString())
         {
+            previousPoints = points;
             _currentVelocity = _initialSpeed;
             _currentPosition = pushShootPoint.position;
             _currentFinished = false;
             _previousVelocity = _currentVelocity;
             points.Clear();
             points.Add(_currentPosition);
-            _pointsPerFrame = maxCalculationSteps / frames;
-            _collision = true;
-            _raycastPoints = new List<Vector3>();
-            _raycastPoints.Clear();
-            _raycastCount = 0;
+
+            for (int currentPoints = 0; currentPoints < maxCalculationSteps; currentPoints++)
+            {
+                _currentPosition = GetNextPosition(_currentPosition, _currentVelocity);
+                points.Add(_currentPosition);
+                _currentVelocity += Physics.gravity * _currentCustomGravity * timeStep;
+            }
+        }
+    }
+
+    public void DrawTrayectory(bool draw)
+    {
+        if (draw) {
+            SetHitMark();
+        }
+        else
+        {
+
         }
     }
 
@@ -126,28 +105,64 @@ public class AimPushShootTrace : MonoBehaviour
         return currentPoint + velocity * timeStep;
     }
 
-    private void SetHitMark(Vector3 point, Vector3 normal)
+    private void SetHitMark()
     {
-       hitMark.SetActive(true);
-       hitMark.transform.SetPositionAndRotation(point, Quaternion.LookRotation(normal));
-       hitMark.transform.Rotate(90, 0, 0);
-       points = RemovePointsInLowerPos(point.y);
-       lineRenderer.positionCount = points.Count;
-       lineRenderer.SetPositions(points.ToArray());
-       lineRenderer.Simplify(tolerance);
-       _currentFinished = true;
-       _collision = false;
+        if (_showTraceTimer == null)
+        {
+            List<Vector3> preivousPoints = new List<Vector3>(previousPoints);
+            List<Vector3> interpolationPoints = new List<Vector3>(previousPoints);
+            List<Vector3> currentPoints = new List<Vector3>(points);
+            int cicles = 20;
+            int currentCicles = 0;
+            float timePerInterpolationChange = 1f / (frames * cicles);
+            float timeStep = 0;
+            _showTraceTimer = TimerSystem.Instance.CreateTimer(Time.deltaTime * frames, onTimerDecreaseComplete: () =>
+            {
+                Vector3 point; Vector3 normal;
+                 hitMark.SetActive(true);
+                //hitMark.transform.SetPositionAndRotation(point, Quaternion.LookRotation(normal));
+                //hitMark.transform.Rotate(90, 0, 0);
+                //currentPoints = RemovePointsInLowerPos(currentPoints, point.y);
+                lineRenderer.enabled = true;
+                lineRenderer.positionCount = currentPoints.Count;
+                //lineRenderer.SetPositions(currentPoints.ToArray());
+                _showTraceTimer = null;
+            }, onTimerDecreaseUpdate: (float timer) =>
+            {
+                currentCicles = 0;
+                while (currentCicles < cicles)
+                {
+                    timeStep += timePerInterpolationChange;
+                    for (int i = 0; i < preivousPoints.Count; i++)
+                    {
+                        interpolationPoints[i] = Vector3.Lerp(preivousPoints[i], currentPoints[i], timePerInterpolationChange);
+                    }
+                    lineRenderer.positionCount = interpolationPoints.Count;
+                    lineRenderer.SetPositions(interpolationPoints.ToArray());
+                    lineRenderer.Simplify(tolerance);
+                    currentCicles++;
+                }
+            });
+        }
     }
 
-    private List<Vector3> RemovePointsInLowerPos(float yPosition)
+    private void UnsetHitMark()
     {
-        List<Vector3> listWithRemovedPoints = new List<Vector3>(points);
+        if(_showTraceTimer !=null)
+            _showTraceTimer.StopTimer();
+        hitMark.SetActive(false);
+        lineRenderer.enabled = false;
+    }
+
+    private List<Vector3> RemovePointsInLowerPos(List<Vector3> currentPoints,float yPosition)
+    {
+        List<Vector3> listWithRemovedPoints = new List<Vector3>(currentPoints);
         bool breakFor = false;
-        for (int i = points.Count -1; i >=0&&!breakFor; i--)
+        for (int i = currentPoints.Count -1; i >=0&&!breakFor; i--)
         {
-            if (yPosition > points[i].y)
+            if (yPosition > currentPoints[i].y)
             {
-                listWithRemovedPoints.Remove(points[i]);
+                listWithRemovedPoints.Remove(currentPoints[i]);
             }
             else
             {
