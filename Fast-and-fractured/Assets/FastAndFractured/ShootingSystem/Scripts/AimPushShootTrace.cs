@@ -215,23 +215,7 @@ using Utilities;
 //        lineRenderer.enabled = false;
 //    }
 
-//    private List<Vector3> RemovePointsInLowerPos(List<Vector3> currentPoints,float yPosition)
-//    {
-//        List<Vector3> listWithRemovedPoints = new List<Vector3>(currentPoints);
-//        bool breakFor = false;
-//        for (int i = currentPoints.Count -1; i >=0&&!breakFor; i--)
-//        {
-//            if (yPosition > currentPoints[i].y)
-//            {
-//                listWithRemovedPoints.Remove(currentPoints[i]);
-//            }
-//            else
-//            {
-//                breakFor = true;
-//            }
-//        }
-//        return listWithRemovedPoints;
-//    }
+//   
 //    private void OnDisable()
 //    {
 
@@ -322,26 +306,31 @@ public class AimPushShootTrace : MonoBehaviour
         return closestIndex;
     }
 
-    private List<Vector3> RemovePointsInLowerPos(List<Vector3> pointList, float yThreshold)
+    private List<Vector3> RemovePointsInLowerPos(List<Vector3> currentPoints, float yPosition)
     {
-        int firstValidIndex = 0;
-        while (firstValidIndex < pointList.Count && pointList[firstValidIndex].y < yThreshold)
+        List<Vector3> listWithRemovedPoints = new List<Vector3>(currentPoints);
+        bool breakFor = false;
+        for (int i = currentPoints.Count -1; i >=0&&!breakFor; i--)
         {
-            firstValidIndex++;
+            if (yPosition > currentPoints[i].y)
+            {
+                listWithRemovedPoints.Remove(currentPoints[i]);
+            }
+            else
+            {
+                breakFor = true;
+            }
         }
-        return pointList.GetRange(firstValidIndex, pointList.Count - firstValidIndex);
+        return listWithRemovedPoints;
     }
 
     private void SetHitMark()
     {
+        _currentIndex = FindClosestPointAbove(_currentPoint);
+        hitMark.transform.SetPositionAndRotation(points[_currentIndex], Quaternion.LookRotation(_currentNormal));
         if (_showTraceTimer == null)
         {
             ThrowSimulatedProyectile();
-            if (Mathf.Abs(_previousCurrentPoint.y - _currentPoint.y) > magnitudeDiferenceFactorBetweenColisionPoints)
-            {
-                _currentIndex = FindClosestPointAbove(_currentNormal);
-            }
-
             List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(points), points[_currentIndex].y);
             List<Vector3> filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
            
@@ -350,7 +339,6 @@ public class AimPushShootTrace : MonoBehaviour
                 onTimerDecreaseComplete: () =>
                 {
                     hitMark.SetActive(true);
-                    hitMark.transform.SetPositionAndRotation(filteredCurrentPoints[_currentIndex], Quaternion.LookRotation(_currentNormal));
                     _previousCurrentPoint = _currentPoint;
                     lineRenderer.enabled = true;
                     _showTraceTimer = null;
