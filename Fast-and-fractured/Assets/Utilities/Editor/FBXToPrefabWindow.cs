@@ -366,7 +366,7 @@ namespace Utilities
                         break;
                     }
 
-                    if (ProcessSingleFBX(fbxAsset, newlyCreatedBasePrefab)) successCount++;
+                    if (ProcessSingleFBX(fbxAsset, newlyCreatedBasePrefab,sharedBatchMaterial)) successCount++;
                     else failCount++;
                 }
             }
@@ -411,23 +411,28 @@ namespace Utilities
 
             Material materialToUse = null;
             bool createdUniqueMaterial = false;
+            bool setupTexturesForThisMaterial = false;
+           
             if (_overrideMaterial != null)
             {
-                if (!AssetDatabase.Contains(_overrideMaterial))
-                {
-                    Debug.LogError(
-                        $"Override Material '{_overrideMaterial.name}' is not a valid project asset. Skipping {modelName}.");
-                    return false;
-                }
-
+                if (!AssetDatabase.Contains(_overrideMaterial)) { Debug.LogError($"Override Mat '{_overrideMaterial.name}' invalid. Skip {modelName}."); return false; }
                 materialToUse = _overrideMaterial;
+                Debug.Log($"Decision for {modelName}: USING EXPLICIT OVERRIDE MATERIAL '{materialToUse.name}'.");
+                setupTexturesForThisMaterial = false; 
             }
             else 
             if (sharedMaterial != null)
             {
-                materialToUse = sharedMaterial;
+                if (!AssetDatabase.Contains(sharedMaterial)) { Debug.LogError($"Passed shared Mat '{sharedMaterial.name}' is invalid/deleted. Creating unique for {modelName}."); }
+                else {
+                    materialToUse = sharedMaterial;
+                    Debug.Log($"Decision for {modelName}: USING BATCH SHARED MATERIAL '{materialToUse.name}'.");
+                    setupTexturesForThisMaterial = false; 
+                }
             }
-            else
+            
+            
+            if (materialToUse == null) // If we haven't assigned a material yet...
             {
                 string materialPath = Path.Combine(materialsFolderPath, $"{modelName}_Mat.mat").Replace('\\', '/');
                 materialToUse = CreateHDRPMaterial(materialPath);
@@ -446,27 +451,30 @@ namespace Utilities
                     Debug.LogError($"Material creation failed: {modelName}");
                     return false;
                 }
+                Debug.Log($"Decision for {modelName}: CREATING UNIQUE MATERIAL '{materialToUse.name}'.");
+                setupTexturesForThisMaterial = true;
+             }
+            if (setupTexturesForThisMaterial)
+            {
+                Debug.Log($"   -> Setting up textures for unique material '{materialToUse.name}'...");
+                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);  
+                EditorUtility.SetDirty(materialToUse);  
+            }
 
-                createdUniqueMaterial = materialToUse != null;
-            }
-            if (createdUniqueMaterial && materialToUse != null)
-            { 
-                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);
-                EditorUtility.SetDirty(materialToUse);
-            }
-            string finalPrefabName = Path.GetFileNameWithoutExtension(assetPath);
-            string prefabPath = Path.Combine(prefabsFolderPath, $"{finalPrefabName}.prefab").Replace('\\', '/');
+             string prefabPath = Path.Combine(prefabsFolderPath, $"{modelName}.prefab").Replace('\\', '/');
             bool success;
+            Debug.Log($"   -> Creating Prefab/Variant '{prefabPath}' using material '{materialToUse.name}'...");
             if (optionalBasePrefab == null)
             {
-                success = this.CreateStandardPrefab(fbxAsset, materialToUse, prefabPath, finalPrefabName);
+                success = this.CreateStandardPrefab(fbxAsset, materialToUse, prefabPath, modelName);
             }
             else
             {
-                success = this.CreateVariantPrefab(fbxAsset, materialToUse, optionalBasePrefab, prefabPath,
-                    finalPrefabName);
+                if (!PrefabUtility.IsPartOfPrefabAsset(optionalBasePrefab)) {  return false; }
+                success = this.CreateVariantPrefab(fbxAsset, materialToUse, optionalBasePrefab, prefabPath, modelName);
             }
 
+            Debug.Log($"--- Finished Processing: {modelName} - Success: {success} ---");
             return success;
         }
 
