@@ -94,6 +94,9 @@ namespace FastAndFractured
         public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
+
+        //SKINS
+        public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
         #endregion
 
         private bool _isPlayer = false;
