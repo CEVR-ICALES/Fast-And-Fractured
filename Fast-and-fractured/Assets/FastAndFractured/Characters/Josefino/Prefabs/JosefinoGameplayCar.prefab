@@ -412,6 +412,22 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.61
       objectReference: {fileID: 0}
+    - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: currentMaxSpeedAscend
+      value: 135
+      objectReference: {fileID: 0}
+    - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: currentMaxSpeedDescend
+      value: 165
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: dashForce
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: vehicleVfxController
+      value: 
+      objectReference: {fileID: 7333974813881313245}
     - target: {fileID: 4138751993412433310, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 1
@@ -625,6 +641,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 7936382738066159813}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7333974813881313245 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 7936382738066159813}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2552904999676308011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe773b3fe8c6fa645a564995d1e6f30a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8184710044747616135 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2285115458274817858, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

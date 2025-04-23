@@ -32,11 +32,12 @@ namespace FastAndFractured
         {
             if (other.TryGetComponent<StatsController>(out var statsController))
             {
-                statsController.TakeEndurance(damage, false);
+                statsController.TakeEndurance(damage, false, ownCollider.gameObject);
                 if (_ignoreCollider != null && _ignoreCollider.TryGetComponent<StatsController>(out var ownerStatsController))
                 {
                     ownerStatsController.AddDealtDamage(damage);
                 }
+
                 OnBulletEndTrayectory();
             }
             else

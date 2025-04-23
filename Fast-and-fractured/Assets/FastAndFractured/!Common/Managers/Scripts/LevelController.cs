@@ -75,7 +75,6 @@ namespace FastAndFractured
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
         protected override void Awake()
         {
-            Debug.Log(gameObject.name);
             base.Awake();
             //Provisional For Debug
             if (debugMode)
@@ -230,7 +229,6 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                _currentPlayers = PlayerPrefs.GetInt("Player_Num");
                 SpawnCharactersInScene();
             }
         }
@@ -344,7 +342,6 @@ namespace FastAndFractured
 
         public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
         {
-            _inGameCharacters.Remove(character);
             if (_callStormTimer != null) {
                 if (TimerSystem.Instance.HasTimer(_callStormTimer))
                 {
@@ -357,6 +354,7 @@ namespace FastAndFractured
             TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
+                    _inGameCharacters.Remove(character);
                     Destroy(character);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
@@ -383,9 +381,39 @@ namespace FastAndFractured
             _sandStormController.MoveSandStorm = true;
         }
 
-        public bool IsInsideSandstorm(Transform target)
+        public bool IsInsideSandstorm(GameObject target)
         {
             return _sandStormController.IsInsideStormCollider(target);
+        }
+
+        public bool IsInsideSandstorm(GameObject target, float marginError)
+        {
+            return _sandStormController.IsInsideStormCollider(target,marginError);
+        }
+
+        public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
+        {
+            List<GameObject> interactablesList = new List<GameObject>();
+            if (gameElement == GameElement.INTERACTABLE)
+            {
+                foreach (var item in InteractableHandler.Instance.GetStatBoostItems())
+                {
+                    interactablesList.Add(item.gameObject);
+                }
+            }
+            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
+                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+        }
+
+        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        {
+            foreach (T item in list1) {
+                if (!list2.Contains(item))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #region Resources
@@ -446,11 +474,6 @@ namespace FastAndFractured
         }
         #endregion
 
-
-        private bool IsThePlayer(GameObject character)
-        {
-            return character.CompareTag("Player");
-        }
     }
 }
 
