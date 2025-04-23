@@ -149,6 +149,11 @@ namespace FastAndFractured
         {
             TakeEndurance(100, false,gameObject);
         }
+        [ContextMenu(nameof(DebugRecover100Endurance))]
+        public void DebugRecover100Endurance()
+        {
+            RecoverEndurance(100, false);
+        }
 
 
         #region Health

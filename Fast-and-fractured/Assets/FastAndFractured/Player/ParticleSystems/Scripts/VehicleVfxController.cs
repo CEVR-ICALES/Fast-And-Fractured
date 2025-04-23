@@ -32,17 +32,17 @@ namespace FastAndFractured
         private bool _carEnduracenParticlesActive = false;
         private bool _canPlayExlusiveSmokeVfx = false;
         private const float START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD = 0.8f;
-        private const float HIGH_ENDURANCE_MIN_START_SPEED = 0.8f;
-        private const float HIGH_ENDURANCE_MAX_START_SPEED = 1.2f;
-        private const float HIGH_ENDURANCE_EMISSION_RATE = 15f;
+        [SerializeField] private float hightEnduranceMinStartSpeed = 0.8f;
+        [SerializeField] private float highEnduranceMaxStartSpeed = 1.2f;
+        [SerializeField] private float highEnduranceEmmissionRate = 15f;
         private const float ALMOST_HALF_ENDURANCE = 0.55f;
-        private const float HALF_ENDURANCE_MIN_START_SPEED = 1.4f;
-        private const float HALF_ENDURANCE_MAX_START_SPEED = 1.7f;
-        private const float HALF_ENDURANCE_EMISSION_RATE = 40f;
+        [SerializeField] private float halfEnduranceMinStartSpeed = 1.8f;
+        [SerializeField] private float haldEnduranceMaxStartSpeed = 2.4f;
+        [SerializeField] private float haldEnduranceEmmissionRate = 55f;
         private const float ENDURANCE_SUPERLOW = 0.3f;
-        private const float LOW_ENDURANCE_MIN_START_SPEED = 1.8f;
-        private const float LOW_ENDURANCE_MAX_START_SPEED = 2.2f;
-        private const float LOW_ENDURANCE_EMISSION_RATE = 80f;
+        [SerializeField] private float lowEnduranceMinStartSpeed = 2.5f;
+        [SerializeField] private float lowEnduranceMaxStartSpeed = 3.3f;
+        [SerializeField] private float lowEnduranceEmmissionRate = 80f;
 
 
         PhysicsBehaviour _physicsBehaviour;
@@ -188,21 +188,21 @@ namespace FastAndFractured
                     StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
                     lowEnduranceExclusiveSmokeVfx.Stop();
                 }
-            } else
+            } else 
             {
                 if (enduranceFactor <= ENDURANCE_SUPERLOW)
                 {
-                    UpdateEnduranceVfxValues(LOW_ENDURANCE_MIN_START_SPEED, LOW_ENDURANCE_MAX_START_SPEED, LOW_ENDURANCE_EMISSION_RATE);
+                    UpdateEnduranceVfxValues(lowEnduranceMinStartSpeed, lowEnduranceMaxStartSpeed, lowEnduranceEmmissionRate);
                     _canPlayExlusiveSmokeVfx = true;
                 }
                 else if (enduranceFactor <= ALMOST_HALF_ENDURANCE)
                 {
-                    UpdateEnduranceVfxValues(HALF_ENDURANCE_MIN_START_SPEED, HALF_ENDURANCE_MAX_START_SPEED, HALF_ENDURANCE_EMISSION_RATE);
+                    UpdateEnduranceVfxValues(halfEnduranceMinStartSpeed, haldEnduranceMaxStartSpeed, haldEnduranceEmmissionRate);
                     _canPlayExlusiveSmokeVfx = false;
                 }
                 else if (enduranceFactor <= START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD)
                 {
-                    UpdateEnduranceVfxValues(HIGH_ENDURANCE_MIN_START_SPEED, HIGH_ENDURANCE_MAX_START_SPEED, HIGH_ENDURANCE_EMISSION_RATE);
+                    UpdateEnduranceVfxValues(hightEnduranceMinStartSpeed, highEnduranceMaxStartSpeed, highEnduranceEmmissionRate);
                     _canPlayExlusiveSmokeVfx = false;
                 }
                 if(!_carEnduracenParticlesActive)
