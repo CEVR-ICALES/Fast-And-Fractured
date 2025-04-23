@@ -61,8 +61,8 @@ namespace FastAndFractured
         [SerializeField] private bool stormInDebugMode = false;
         private GameObject _playerReference;
         public GameObject playerReference { get=>_playerReference ;}
-        private bool _hasPlayerWinned = false;
-        public bool hasPlayerWinned { get => _hasPlayerWinned; }
+        public bool HasPlayerWon { get => _hasPlayerWon; }
+        private bool _hasPlayerWon = false;
         private int _aliveCharacterCount;
 
 
@@ -359,14 +359,14 @@ namespace FastAndFractured
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
                     {
-                        _hasPlayerWinned = true;
+                        _hasPlayerWon = true;
                         MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
                     }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
-                    _hasPlayerWinned = false;
+                    _hasPlayerWon = false;
                     MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
                 }
             });

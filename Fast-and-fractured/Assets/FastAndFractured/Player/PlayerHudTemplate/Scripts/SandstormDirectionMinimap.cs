@@ -9,9 +9,10 @@ namespace FastAndFractured
         private GameObject _player;
         private Vector3 _sandstormDirection;
         private bool _isDataReceived = false;
+        [SerializeField] private GameObject arrowIcon;
         void Start()
         {
-            transform.GetChild(0).gameObject.SetActive(false);
+            arrowIcon.SetActive(false);
         }
 
         void Update()
@@ -28,7 +29,7 @@ namespace FastAndFractured
             _player = LevelController.Instance.playerReference;
             _sandstormDirection = direction;
             _isDataReceived = true;
-            transform.GetChild(0).gameObject.SetActive(true);
+            arrowIcon.SetActive(true);
         }
     }
 }

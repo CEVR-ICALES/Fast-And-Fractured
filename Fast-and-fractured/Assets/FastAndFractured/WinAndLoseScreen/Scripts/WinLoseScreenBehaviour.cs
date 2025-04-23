@@ -20,7 +20,7 @@ namespace FastAndFractured
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            if(LevelController.Instance.hasPlayerWinned)
+            if(LevelController.Instance.HasPlayerWon)
             {
                 resultText.GetComponent<LocalizedText>().LocalizationKey = "Menu.Win";
             }
