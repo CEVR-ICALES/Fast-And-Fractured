@@ -348,7 +348,7 @@ public class AimPushShootTrace : MonoBehaviour
                     float progress = 1f - (timer / (Time.deltaTime * frames));
                     lineRenderer.positionCount = filteredCurrentPoints.Count;
 
-                    for (int i = 0; i < filteredCurrentPoints.Count; i++)
+                    for (int i = 0; i < filteredCurrentPoints.Count&& i < filteredPreviousPoints.Count; i++)
                     {
                         Vector3 interpolatedPos = Vector3.Slerp(
                             filteredPreviousPoints[i],

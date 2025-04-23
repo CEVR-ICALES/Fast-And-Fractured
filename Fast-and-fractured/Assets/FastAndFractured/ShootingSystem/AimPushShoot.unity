@@ -3355,9 +3355,9 @@ Transform:
   m_GameObject: {fileID: 1226048012}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.37772, y: 0.37772, z: 0.37772}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 2.18}
+  m_LocalScale: {x: 4.2, y: 2.025, z: 4.2}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1406489864}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
@@ -3410,7 +3410,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1226048012}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1260433532 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1568179513852714539, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
@@ -3541,15 +3541,15 @@ MonoBehaviour:
   timeStep: 0.0223
   maxCalculationSteps: 128
   tolerance: 0.25
+  magnitudeDiferenceFactorBetweenColisionPoints: 0.05
   hitMark: {fileID: 1406489863}
   _hitMarkCollision: {fileID: 104584559}
-  currentFinishedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  magnitudeDiferenceFactorBetweenColisionPoints: 0.05
   pushShootPoint: {fileID: 236894177}
   pushShootHandle: {fileID: 1762147998}
   lineRenderer: {fileID: 1260433535}
+  currentFinishedEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1325766521 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1262311764758205136, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
