@@ -10,6 +10,17 @@ namespace FastAndFractured
     {
         private GameObject _character;
         private bool _isCharacterReceived = false;
+
+        void Update()
+        {
+            if(_isCharacterReceived)
+            {
+                if(_character==null)
+                {
+                    gameObject.SetActive(false);
+                }
+            }
+        }
         public void SetCharacterIcon(GameObject characterReceived, string characterIconName)
         {
             _character = characterReceived;
@@ -17,15 +28,6 @@ namespace FastAndFractured
             {
                 GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(characterIconName);
                 _isCharacterReceived = true;
-            }
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            if(_isCharacterReceived)
-            {
-                
             }
         }
     }

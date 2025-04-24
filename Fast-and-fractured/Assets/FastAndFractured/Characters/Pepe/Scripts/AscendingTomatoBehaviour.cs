@@ -19,6 +19,8 @@ namespace FastAndFractured
         public float effectDistance;
         public float descendingTomatoSpeed = 100f;
         public float ascendingTime = 3f;
+        public float effectTime = 5f;
+        private List<GameObject> charactersList;
         public virtual void InitializeValues()
         {
             
@@ -27,25 +29,25 @@ namespace FastAndFractured
         
         public void StartTimer()
         {
+            charactersList = LevelController.Instance.InGameCharacters;
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
-                //TODO cambiar el FindObjectsOfType cuando el level manager este terminado
-                foreach (GameObject obj in FindObjectsOfType<GameObject>())
+                foreach (GameObject obj in charactersList)
                 {
-                    if (obj.GetComponent<StatsController>() != null)
+                    if(obj!=null)
                     {
                         float distance = Vector3.Distance(OriginPosition, obj.transform.position);
                         if(distance<=effectDistance)
                         {
-                            if (!obj.transform.IsChildOf(Caster.transform))
-                            {
+                            // if (!obj.transform.IsChildOf(Caster.transform))
+                            // {
                                 GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeDescendingTomato);
                                 if(tomato!=null)
                                 {
                                     SetTomatoVariables(tomato, obj);
                                 }
-                            }
-                        }
+                            // }
+                        }  
                     }
                 }
                 ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
@@ -55,8 +57,24 @@ namespace FastAndFractured
         void Update()
         {
             transform.position += transform.up * speed * Time.deltaTime;
-            // Add a way to alert players in range that a tomato is coming, if the player manages to get out of the
-            // range in time the alert disappears
+            if(LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
+            {
+                float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
+                if (distance<=effectDistance)
+                {
+                    if(!IngameEventsManager.Instance.IsTomatoAlertActive)
+                    {
+                        IngameEventsManager.Instance.SetTomatoAlert();
+                    }
+                }
+                else
+                {
+                    if(IngameEventsManager.Instance.IsTomatoAlertActive)
+                    {
+                        IngameEventsManager.Instance.RemoveTomatoAlert();
+                    }
+                }
+            }
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
@@ -66,6 +84,7 @@ namespace FastAndFractured
             descendingTomatoBehaviour.speed = descendingTomatoSpeed;
             descendingTomatoBehaviour.objective = obj;
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
+            descendingTomatoBehaviour.effectTime = effectTime;
         }
     }
 }
