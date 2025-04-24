@@ -64,7 +64,8 @@ namespace Enums
         LOADING,
         SPLASH_SCREEN,
         EXIT_POPUP,
-        PAUSE
+        PAUSE,
+        WIN_LOSE
     }
 
     public enum Pooltype
@@ -97,7 +98,7 @@ namespace Enums
         TRIGGER
     }
 
-    public enum InputBlockTypes 
+    public enum InputBlockTypes
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
@@ -146,11 +147,10 @@ namespace Enums
         SPEED_EFFECT,
         TOMATO_EFFECT
     }
-
+ 
     public enum GameElement
     {
         CHARACTER,
         INTERACTABLE
     }
-
 }

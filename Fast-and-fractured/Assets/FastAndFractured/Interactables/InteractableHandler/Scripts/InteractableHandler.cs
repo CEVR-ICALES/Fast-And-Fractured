@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.Events;
 using Utilities;
 using static FastAndFractured.StatsBoostInteractable;
 
@@ -17,7 +17,10 @@ namespace FastAndFractured
         [SerializeField] float itemCooldownAfterPick = 2f;
 
         List<GameObject> _shuffledActivePool = new();
+        public List<GameObject> ShuffledActivePool => _shuffledActivePool;
         List<GameObject> _interactablesOnCooldown = new();
+        public UnityEvent onPoolInitialize;
+
         protected override void Awake()
         {
             base.Awake();
@@ -28,12 +31,17 @@ namespace FastAndFractured
                 interactable.disableGameObjectOnInteract = true;
                 interactable.onInteract.AddListener(RemoveInteractableFromPool);
             }
+        }
+
+        void Start()
+        {
             MakeInitialPool();
         }
 
         void MakeInitialPool()
         {
             _shuffledActivePool = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
+            onPoolInitialize?.Invoke();
             UpdateVisibleInteractableList();
         }
 
@@ -87,7 +95,8 @@ namespace FastAndFractured
         {
             return _shuffledActivePool;
         }
-
+        #region Helpers
+        #region AI
         public bool CheckIfStatItemExists(Stats stat)
         {
             List<StatsBoostInteractable> statsBoostInteractables = GetStatBoostItems();
@@ -120,6 +129,15 @@ namespace FastAndFractured
             }
             return statsBoostInteractables;
         }
+        #endregion
+        #region Skins
+        public void DestroySkinInteractable(GameObject skinInteractable)
+        {
+            _shuffledActivePool.Remove(skinInteractable);
+            skinInteractable.SetActive(false);
+        }
+        #endregion
+        #endregion
     }
 }
 

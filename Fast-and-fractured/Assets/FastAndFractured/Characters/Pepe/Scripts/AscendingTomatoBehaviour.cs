@@ -19,6 +19,7 @@ namespace FastAndFractured
         public float effectDistance;
         public float descendingTomatoSpeed = 100f;
         public float ascendingTime = 3f;
+        private Vector3 _randomRotation;
         public virtual void InitializeValues()
         {
             
@@ -27,6 +28,7 @@ namespace FastAndFractured
         
         public void StartTimer()
         {
+            _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
                 //TODO cambiar el FindObjectsOfType cuando el level manager este terminado
@@ -54,7 +56,8 @@ namespace FastAndFractured
 
         void Update()
         {
-            transform.position += transform.up * speed * Time.deltaTime;
+            transform.position += Vector3.up * speed * Time.deltaTime;
+            transform.Rotate(_randomRotation * Time.deltaTime);
             // Add a way to alert players in range that a tomato is coming, if the player manages to get out of the
             // range in time the alert disappears
         }
@@ -66,6 +69,7 @@ namespace FastAndFractured
             descendingTomatoBehaviour.speed = descendingTomatoSpeed;
             descendingTomatoBehaviour.objective = obj;
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
+            descendingTomatoBehaviour.randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         }
     }
 }
