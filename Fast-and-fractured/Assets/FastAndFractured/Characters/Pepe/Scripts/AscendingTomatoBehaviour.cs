@@ -39,14 +39,14 @@ namespace FastAndFractured
                         float distance = Vector3.Distance(OriginPosition, obj.transform.position);
                         if(distance<=effectDistance)
                         {
-                            // if (!obj.transform.IsChildOf(Caster.transform))
-                            // {
+                            if (!obj.transform.IsChildOf(Caster.transform))
+                            {
                                 GameObject tomato = ObjectPoolManager.Instance.GivePooledObject(pooltypeDescendingTomato);
                                 if(tomato!=null)
                                 {
                                     SetTomatoVariables(tomato, obj);
                                 }
-                            // }
+                            }
                         }  
                     }
                 }
@@ -57,7 +57,7 @@ namespace FastAndFractured
         void Update()
         {
             transform.position += transform.up * speed * Time.deltaTime;
-            if(LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
+            if(!LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
             {
                 float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
                 if (distance<=effectDistance)
