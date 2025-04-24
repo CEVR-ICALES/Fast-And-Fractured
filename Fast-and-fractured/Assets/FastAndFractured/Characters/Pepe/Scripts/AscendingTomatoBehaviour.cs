@@ -19,8 +19,12 @@ namespace FastAndFractured
         public float effectDistance;
         public float descendingTomatoSpeed = 100f;
         public float ascendingTime = 3f;
+
         public float effectTime = 5f;
         private List<GameObject> charactersList;
+
+        private Vector3 _randomRotation;
+
         public virtual void InitializeValues()
         {
             
@@ -30,6 +34,7 @@ namespace FastAndFractured
         public void StartTimer()
         {
             charactersList = LevelController.Instance.InGameCharacters;
+            _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
                 foreach (GameObject obj in charactersList)
@@ -56,7 +61,6 @@ namespace FastAndFractured
 
         void Update()
         {
-            transform.position += transform.up * speed * Time.deltaTime;
             if(!LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
             {
                 float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
@@ -75,6 +79,8 @@ namespace FastAndFractured
                     }
                 }
             }
+            transform.position += Vector3.up * speed * Time.deltaTime;
+            transform.Rotate(_randomRotation * Time.deltaTime);
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
@@ -85,6 +91,7 @@ namespace FastAndFractured
             descendingTomatoBehaviour.objective = obj;
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
             descendingTomatoBehaviour.effectTime = effectTime;
+            descendingTomatoBehaviour.randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         }
     }
 }

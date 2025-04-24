@@ -67,6 +67,8 @@ namespace FastAndFractured
         public List<GameObject>  CharactersInsideSandstorm => _charactersInsideSandstorm;
         private List<GameObject> _charactersInsideSandstorm;
 
+        [SerializeField] private GameObject minimapSandstormDirection;
+
         const float HALF_FRONT_ANGLE = 90;
         private void Start()
         {
@@ -155,6 +157,8 @@ namespace FastAndFractured
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
             IngameEventsManager.Instance.CreateEvent("La tormenta de arena ha comenzado", 5f);
+
+            minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
         }
 
         /// <summary>
