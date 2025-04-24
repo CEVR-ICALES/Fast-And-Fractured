@@ -98,7 +98,7 @@ namespace FastAndFractured
         //SKINS
         public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
         #endregion
-
+        public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;

@@ -43,6 +43,13 @@ namespace FastAndFractured
         public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
         private bool _moveSandStorm = false;
 
+        [SerializeField]
+        private float fogDistancePlayerInsideSandstorm = 30f;
+        [SerializeField]
+        private float fogDistancePlayerOutsideSandstorm = 10f;
+        [SerializeField]
+        private float atenuationTime = 1f;
+
         public bool StormSpawnPointsSetted { get => _spawnPointsSet; }
 
         private bool _spawnPointsSet = false;
@@ -77,6 +84,7 @@ namespace FastAndFractured
             primaryFog?.gameObject.SetActive(false);
             _itemsInsideSandstorm = new List<GameObject>();
             _charactersInsideSandstorm = new List<GameObject>();
+            primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
         }
 
         private void OnEnable()
@@ -214,12 +222,33 @@ namespace FastAndFractured
             }
         }
 
+        private void ChangeSandstormVisuals(bool playerInside)
+        {
+            if (playerInside)
+            {
+                float progress = 1/(atenuationTime / Time.deltaTime);
+                float actualFogDistance = primaryFog.parameters.meanFreePath;
+                TimerSystem.Instance.CreateTimer(atenuationTime,onTimerDecreaseUpdate : (float time) => {
+                    primaryFog.parameters.meanFreePath = Mathf.Lerp(actualFogDistance, fogDistancePlayerInsideSandstorm,progress);
+                    progress += progress;
+                });
+            }
+            else
+            {
+                primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
+            }
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             if (other.TryGetComponent(out StatsController statsController))
             {
                 StartKillNotify(statsController);
                 _charactersInsideSandstorm.Add(other.gameObject);
+                if (statsController.IsPlayer)
+                {
+                    ChangeSandstormVisuals(true);
+                }
             }
             else
             {
