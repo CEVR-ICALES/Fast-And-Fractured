@@ -174,8 +174,12 @@ namespace FastAndFractured
                 Debug.Log("KEYBOARD DETECTED");
             }
 
-            bool gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
-            if (Gamepad.current != null && gamepadButtonPressed)
+            bool gamepadButtonPressed = false;
+            if(Gamepad.current != null){
+                gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
+            }
+            
+            if (gamepadButtonPressed)
             {
                 if (Gamepad.current is DualShockGamepad)
                 {
