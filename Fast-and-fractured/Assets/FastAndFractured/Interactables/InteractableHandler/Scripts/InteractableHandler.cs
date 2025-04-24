@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 using static FastAndFractured.StatsBoostInteractable;
 
@@ -18,8 +19,7 @@ namespace FastAndFractured
         List<GameObject> _shuffledActivePool = new();
         public List<GameObject> ShuffledActivePool => _shuffledActivePool;
         List<GameObject> _interactablesOnCooldown = new();
-        SkinUnlockHandler skinUnlockHandler;
-
+        public UnityEvent onPoolInitialize;
 
         protected override void Awake()
         {
@@ -31,27 +31,17 @@ namespace FastAndFractured
                 interactable.disableGameObjectOnInteract = true;
                 interactable.onInteract.AddListener(RemoveInteractableFromPool);
             }
-
-            skinUnlockHandler = GetComponent<SkinUnlockHandler>();
         }
 
         void Start()
         {
-            if (!skinUnlockHandler)
-            {
-                Debug.LogWarning("InteractableHandler doesn't have SkinUnlockHandler.\n" +
-                    "GET THAT INTERACTABLEHANDLER A SKINUNLOCKHANDLER NOW!!!!");
-            } else
-            {
-                skinUnlockHandler.Init();
-            }
             MakeInitialPool();
         }
 
         void MakeInitialPool()
         {
             _shuffledActivePool = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
-            skinUnlockHandler.CheckDespawnSkinInteractables();
+            onPoolInitialize?.Invoke();
             UpdateVisibleInteractableList();
         }
 
