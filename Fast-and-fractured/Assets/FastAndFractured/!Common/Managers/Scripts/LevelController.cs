@@ -63,7 +63,8 @@ namespace FastAndFractured
         public GameObject playerReference { get=>_playerReference ;}
         public bool HasPlayerWon { get => _hasPlayerWon; }
         private bool _hasPlayerWon = false;
-        private int _aliveCharacterCount;
+        [SerializeField]
+        private float endGameDelayTime = 0.5f;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -105,7 +106,6 @@ namespace FastAndFractured
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            _aliveCharacterCount = maxCharactersInGame;
             if (!useMyCharacters)
             {
               StartLevelWithSpawnedCharacters();
@@ -123,20 +123,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            // PlayerInputController.OnInputDeviceChanged += HandleInputChange;
         }
 
         private void OnDisable()
         {
-            // PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        // public void HandleInputChange(InputDeviceType inputType)
-        // {
-        //     usingController = PlayerInputController.Instance.IsUsingController;
-        //     _playerBindingInputs.HandleInputChange(usingController);
-        // }
-        // will be moved to gameManager
         
         private void StartLevelWithOwnCharacters()
         {
@@ -146,6 +138,7 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            _playerReference = playerCar.gameObject;
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);
@@ -356,18 +349,17 @@ namespace FastAndFractured
                 {
                     _inGameCharacters.Remove(character);
                     Destroy(character);
-                    _aliveCharacterCount--;
-                    if (_aliveCharacterCount == 1)
+                    if (_inGameCharacters.Count == 1)
                     {
                         _hasPlayerWon = true;
-                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
+                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
                     }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
                     _hasPlayerWon = false;
-                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
+                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
                 }
             });
         }

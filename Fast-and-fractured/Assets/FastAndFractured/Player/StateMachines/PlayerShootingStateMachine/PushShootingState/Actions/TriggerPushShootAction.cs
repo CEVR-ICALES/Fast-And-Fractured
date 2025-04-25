@@ -10,10 +10,10 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
+            PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
+            pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
             if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
             {
-                PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
-                pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
                 pushShootHandle.PushShooting();
             }
         }
