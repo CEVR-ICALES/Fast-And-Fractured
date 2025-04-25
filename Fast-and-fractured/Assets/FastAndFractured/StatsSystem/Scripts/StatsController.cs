@@ -61,6 +61,7 @@ namespace FastAndFractured
         [SerializeField] private float currentNormalShootDMG;
         [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
+        public float NormalShootAngle { get => charDataSO.NormalShootAngle; }
         public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
@@ -98,7 +99,7 @@ namespace FastAndFractured
         //SKINS
         public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
         #endregion
-
+        public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;

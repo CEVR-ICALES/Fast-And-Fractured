@@ -171,7 +171,7 @@ namespace FastAndFractured
                 _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
-                Debug.Log("KEYBOARD DETECTED");
+                //Debug.Log("KEYBOARD DETECTED");
             }
 
             bool gamepadButtonPressed = false;
@@ -181,10 +181,7 @@ namespace FastAndFractured
             
             if (gamepadButtonPressed)
             {
-                bool gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
-                if (gamepadButtonPressed)
-                {
-                    if (Gamepad.current is DualShockGamepad)
+                if (Gamepad.current is DualShockGamepad)
                     {
                         _currentInputDevice = InputDeviceType.PS_CONTROLLER;
                         OnInputDeviceChanged?.Invoke(_currentInputDevice);
@@ -197,7 +194,6 @@ namespace FastAndFractured
                     Debug.Log("CONTROLLER DETECTED");
 
                     _isUsingController = true;
-                }
             }
         }
 
