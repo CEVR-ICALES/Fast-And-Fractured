@@ -5,7 +5,7 @@
 			<value>QuadBikeEngine</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{546fec08-fd3e-4814-9312-8512edee9f6b}</destination>
@@ -185,6 +185,7 @@
 	<object class="MixerBusEffectChain" id="{5c21f018-8f55-4a18-a2b8-49d6c7c06f3b}">
 		<relationship name="effects">
 			<destination>{fd59a078-5eee-4bf4-a2a8-3a4192116232}</destination>
+			<destination>{fce3e24f-fff1-40db-9802-704d261152ec}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{3ce43a47-fbdb-43b0-b8fc-1594bc4d8eec}" />
@@ -210,6 +211,7 @@
 	</object>
 	<object class="MixerBusPanner" id="{7a6bfa14-9c79-4c1d-a025-8cf01ea4fe8f}" />
 	<object class="MixerBusFader" id="{fd59a078-5eee-4bf4-a2a8-3a4192116232}" />
+	<object class="SpatialiserEffect" id="{fce3e24f-fff1-40db-9802-704d261152ec}" />
 	<object class="AutomationPoint" id="{1dcb7070-6721-4361-8468-a209f714c59e}">
 		<property name="position">
 			<value>49</value>

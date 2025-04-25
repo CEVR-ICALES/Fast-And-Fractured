@@ -5,7 +5,7 @@
 			<value>TractorEngineSound</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{546fec08-fd3e-4814-9312-8512edee9f6b}</destination>
@@ -157,6 +157,7 @@
 	<object class="MixerBusEffectChain" id="{b024c096-0f3a-4dfb-8473-1d59c791850a}">
 		<relationship name="effects">
 			<destination>{3ea5af30-a3b2-4249-88e2-ac672b5e54c5}</destination>
+			<destination>{2c2a7a54-75d7-4b05-afb1-1d42f330465d}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{f484162e-8685-4d70-94b3-eff141407a88}" />
@@ -168,5 +169,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{494482b1-93fd-4c5d-9974-6a4333b169d5}" />
 	<object class="MixerBusFader" id="{3ea5af30-a3b2-4249-88e2-ac672b5e54c5}" />
+	<object class="SpatialiserEffect" id="{2c2a7a54-75d7-4b05-afb1-1d42f330465d}" />
 	<object class="MixerBusFader" id="{6dfb7d47-bc3a-48c8-bba9-7a1cfc0fe5b0}" />
 </objects>
