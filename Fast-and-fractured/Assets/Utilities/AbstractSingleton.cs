@@ -22,14 +22,9 @@ namespace Utilities
                     s_Instance = FindObjectOfType<T>();
                     if (s_Instance == null)
                     {
-                        //GameObject obj = new GameObject();
-                        //obj.name = typeof(T).Name;
-                        //s_Instance = obj.AddComponent<T>();
-
-                        //if(s_Instance != null)
-                        //{
-                           
-                        //}
+                        GameObject obj = new GameObject();
+                        obj.name = typeof(T).Name;
+                        s_Instance = obj.AddComponent<T>();
                     }
                 }
 
@@ -43,7 +38,7 @@ namespace Utilities
             {
                 s_Instance = this as T;
             }
-            else
+            else if (s_Instance != this)
             {
                 Destroy(gameObject);
             }

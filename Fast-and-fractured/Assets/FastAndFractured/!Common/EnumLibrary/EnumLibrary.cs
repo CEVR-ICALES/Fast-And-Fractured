@@ -88,6 +88,7 @@ namespace Enums
     {
         GROUND,
         AIR,
+        FLIP_SATE,
         NONE
     }
 
