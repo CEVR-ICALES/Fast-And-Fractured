@@ -92,12 +92,14 @@ namespace FastAndFractured
             if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
             {
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
-                element.imageReference.fillAmount = fillAmount;
 
                 if (type == UIElementType.HEALTH_BAR)
                 {
-                    element.imageReference.color = Color.Lerp(Color.red, Color.green, fillAmount);
+                    fillAmount = 1f - Mathf.Clamp01(currentValue / maxValue);
+                    element.imageReference.color = Color.Lerp(Color.yellow, Color.red, fillAmount);
                 }
+                
+                element.imageReference.fillAmount = fillAmount;
             }
         }
 

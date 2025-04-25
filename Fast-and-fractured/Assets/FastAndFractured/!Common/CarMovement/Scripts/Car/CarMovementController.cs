@@ -120,10 +120,10 @@ namespace FastAndFractured
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
-                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
+            
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
