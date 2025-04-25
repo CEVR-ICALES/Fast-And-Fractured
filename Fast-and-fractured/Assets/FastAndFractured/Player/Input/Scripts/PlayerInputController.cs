@@ -171,7 +171,7 @@ namespace FastAndFractured
                 _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
-                Debug.Log("KEYBOARD DETECTED");
+                //Debug.Log("KEYBOARD DETECTED");
             }
             if (Gamepad.current != null)
             {
