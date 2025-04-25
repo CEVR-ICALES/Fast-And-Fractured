@@ -32,7 +32,7 @@ namespace FastAndFractured
         {
             rb = GetComponent<Rigidbody>();
             ownCollider = GetComponent<Collider>();
-            _meshRenderer = GetComponent<MeshRenderer>();
+            _meshRenderer = GetComponentInChildren<MeshRenderer>();
         }
         public virtual void InitBulletTrayectory()
         {
