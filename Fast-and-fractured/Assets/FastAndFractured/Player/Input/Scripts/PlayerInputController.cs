@@ -173,7 +173,13 @@ namespace FastAndFractured
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
                 Debug.Log("KEYBOARD DETECTED");
             }
-            if (Gamepad.current != null)
+
+            bool gamepadButtonPressed = false;
+            if(Gamepad.current != null){
+                gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
+            }
+            
+            if (gamepadButtonPressed)
             {
                 bool gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
                 if (gamepadButtonPressed)
