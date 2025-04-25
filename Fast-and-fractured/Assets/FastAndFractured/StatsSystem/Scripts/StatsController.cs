@@ -12,6 +12,9 @@ namespace FastAndFractured
         [SerializeField]
         private CharacterData charDataSO;
 
+        [SerializeField]
+        private VehicleVfxController vehicleVfxController;
+
         [Header("CURRENT STATS")]
 
         [Header("Health")]
@@ -167,6 +170,16 @@ namespace FastAndFractured
         {
             TakeEndurance(100, false,gameObject);
         }
+        [ContextMenu(nameof(DebugRecover100Endurance))]
+        public void DebugRecover100Endurance()
+        {
+            RecoverEndurance(100, false);
+        }
+        [ContextMenu(nameof(DebugDie))]
+        public void DebugDie()
+        {
+            Dead();
+        }
 
 
         #region Health
@@ -180,6 +193,7 @@ namespace FastAndFractured
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
+                        vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
@@ -204,6 +218,11 @@ namespace FastAndFractured
                 if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
+                    vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
+                    if(_isPlayer)
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                    }
                 } else
                 {
                     Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
@@ -286,6 +305,7 @@ namespace FastAndFractured
         {
             Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
+            vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
         }
 
