@@ -8,26 +8,30 @@ namespace FastAndFractured
     public class IngameEventsManager : AbstractSingleton<IngameEventsManager>
     {
         [SerializeField] private GameObject eventTextContainer;
-        [SerializeField] private GameObject[] inGameCharactersTopIcons;
+        public GameObject[] inGameCharactersTopIcons;
         [SerializeField] private GameObject tomatoAlertUI;
         [SerializeField] private GameObject tomatoScreenEfect;
         public bool IsTomatoAlertActive {get => _isTomatoAlertActive;}
         private bool _isTomatoAlertActive = false;
         private ITimer _timerReference;
-
+        private LocalizedText _localizedTextReference;
+        private void Start()
+        {
+            _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
+        }
         public void CreateEvent(string eventText, float timeInScreen)
         {
-            if(eventTextContainer.GetComponent<LocalizedText>().LocalizationKey != string.Empty)
+            if(_localizedTextReference.LocalizationKey != string.Empty)
             {
                 _timerReference.StopTimer();
                 _timerReference = null;
             }
-            eventTextContainer.GetComponent<LocalizedText>().LocalizationKey = eventText;
-            eventTextContainer.GetComponent<LocalizedText>().Localize();
+            _localizedTextReference.LocalizationKey = eventText;
+            _localizedTextReference.Localize();
             _timerReference = TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
             {
-                eventTextContainer.GetComponent<LocalizedText>().LocalizationKey = string.Empty;
-                eventTextContainer.GetComponent<LocalizedText>().Localize();
+                _localizedTextReference.LocalizationKey = string.Empty;
+                _localizedTextReference.Localize();
             });
         }
         public void SetCharactersTopElements()
@@ -39,6 +43,7 @@ namespace FastAndFractured
                 inGameCharactersTopIcons[i].SetActive(true);
                 i++;
             }
+            LevelController.Instance.characterIcons = inGameCharactersTopIcons;
         }
         public void SetTomatoAlert()
         {

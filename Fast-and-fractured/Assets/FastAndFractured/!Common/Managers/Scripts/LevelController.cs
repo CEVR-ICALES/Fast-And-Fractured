@@ -64,6 +64,7 @@ namespace FastAndFractured
         public bool HasPlayerWon { get => _hasPlayerWon; }
         private bool _hasPlayerWon = false;
         private int _aliveCharacterCount;
+        public GameObject[] characterIcons;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -355,6 +356,16 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
+                    foreach (Transform child in character.transform)
+                    {
+                        foreach (GameObject icon in characterIcons)
+                        { 
+                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            {
+                                icon.SetActive(false);
+                            }
+                        }
+                    }
                     Destroy(character);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
