@@ -388,6 +388,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingEvents/ShootingSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: directionCenterOffSet.y
       value: 0.1
       objectReference: {fileID: 0}
@@ -442,6 +446,10 @@ PrefabInstance:
     - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: dashForce
       value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: EventReference.Path
+      value: event:/VehicleMovementEvents/GolfCartEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: OverrideMaxDistance
@@ -727,6 +735,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1.593
       objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingEvents/ShootingSFX
+      objectReference: {fileID: 0}
     - target: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.866
@@ -854,11 +866,11 @@ MonoBehaviour:
   croquettePrefab: {fileID: 3196287454565126686, guid: 0a442841012210a47841e0e2a6ff06bf, type: 3}
   ssjUltiReference:
     Guid:
-      Data1: -524896162
-      Data2: 1157054263
-      Data3: 1836290983
-      Data4: -610731094
-    Path: event:/GolfCartEngine
+      Data1: 526829551
+      Data2: 1239381257
+      Data3: -1023862356
+      Data4: -154867332
+    Path: event:/SpecialAbilityEvents/SuperSaiyanMariaAntonia
   _statsController: {fileID: 9213536243823301278}
 --- !u!4 &2766236455326356409 stripped
 Transform:
