@@ -7,9 +7,8 @@ using Utilities;
 
 public class AimPushShootHitMarkCollision : MonoBehaviour
 {
-    public UnityEvent<Vector3,Vector3,bool> onCollision;
+    public UnityEvent<Vector3> onCollision;
     private Rigidbody rb;
-    private bool _useCustomGravity = true;
     private Vector3 _customGravity = new Vector3(0,-30,0);
     private bool simulating = false;
     private void Start()
@@ -18,11 +17,10 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
         {
             rb = GetComponent<Rigidbody>();
         }
-        _useCustomGravity = false;
     }
     private void FixedUpdate()
     {
-        if (_useCustomGravity)
+        if (simulating)
         {
             rb.velocity += _customGravity * Time.fixedDeltaTime;
         }
@@ -35,7 +33,6 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
             if (rb == null)
                 rb = GetComponent<Rigidbody>();
             rb.velocity = velocity;
-            _useCustomGravity = true;
             _customGravity = customGravity;
             simulating = true;
         }
@@ -49,9 +46,8 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
         ContactPoint contactPoint = collision.contacts[0];
         if (gameObject.activeSelf)
         {
-            onCollision?.Invoke(contactPoint.point, contactPoint.normal, true);
+            onCollision?.Invoke(contactPoint.point);
             rb.velocity = Vector3.zero;
-            _useCustomGravity = false;
             simulating = false;
         }
     }

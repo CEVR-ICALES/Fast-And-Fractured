@@ -38,32 +38,41 @@ public class AimPushShootTrace : MonoBehaviour
     private Vector3 _initialSpeed;
     private Vector3 _currentContactPoint;
     private int _previousContactIndex;
-    private Vector3 _currentNormal;
+    [SerializeField]
+    private float toleranceToVelocityMarginError = 0.001f;
     private int _currentIndex = 0;
     private ITimer _showTraceTimer;
+    private bool _calculateTracePoints;
 
+    private void OnEnable()
+    {
+        hitMarkCollision.onCollision.AddListener(SetPointForHitMark);
+        hitMarkCollision2.onCollision.AddListener(SetPointForHitMark);
+    }
     void Start()
     {
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
-        hitMarkCollision.onCollision.AddListener(SetPointAndNormalForHitMark);
-        hitMarkCollision2.onCollision.AddListener(SetPointAndNormalForHitMark);
         CalculateTrayectory();
         hitMark.SetActive(false);
         _previousContactIndex = 0;
         _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
+        _calculateTracePoints = false;
         ThrowSimulatedProyectile();
     }
 
     void Update()
     {
-        CalculateTrayectory();
+        if (_calculateTracePoints)
+        {
+            CalculateTrayectory();
+        }
     }
 
     private void CalculateTrayectory()
     {
         _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
 
-        if (Vector3.SqrMagnitude(_previousVelocity - _initialSpeed) > 0.001f)
+        if (Vector3.SqrMagnitude(_previousVelocity - _initialSpeed) > toleranceToVelocityMarginError)
         {
             previousPoints = new List<Vector3>(_points);
             _currentVelocity = _initialSpeed;
@@ -145,44 +154,58 @@ public class AimPushShootTrace : MonoBehaviour
         {
             ThrowSimulatedProyectile();
             List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
-            List<Vector3> filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
+            List<Vector3> filteredPreviousPoints = new List<Vector3>();
+            bool noPreviousPoint = previousPoints.Count == 0;
+            if (!noPreviousPoint)
+            {
+               filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
+            }
            
             _showTraceTimer = TimerSystem.Instance.CreateTimer(
                 Time.deltaTime * frames,
                 onTimerDecreaseComplete: () =>
                 {
                     _showTraceTimer = null;
+                    if (noPreviousPoint)
+                    {
+                        lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
+                        lineRenderer.Simplify(tolerance);
+                    }
                 },
                 onTimerDecreaseUpdate: (float timer) =>
                 {
-                    float progress = 1f - (timer / (Time.deltaTime * frames));
-                    lineRenderer.positionCount = filteredCurrentPoints.Count;
-                    Vector3 hitMarkInitialPos = hitMark.transform.position;
-                    Vector3 newPositionForHitMark = hitMark.transform.position;
-                    for (int i = 0; i < filteredCurrentPoints.Count&& i < filteredPreviousPoints.Count; i++)
+                    if (!noPreviousPoint)
                     {
-                        Vector3 interpolatedPos = Vector3.Slerp(
-                            filteredPreviousPoints[i],
-                            filteredCurrentPoints[i],
-                            progress
-                        );
-                        if (indexToFollow == i)
+                        float progress = 1f - (timer / (Time.deltaTime * frames));
+                        lineRenderer.positionCount = filteredCurrentPoints.Count;
+                        Vector3 hitMarkInitialPos = hitMark.transform.position;
+                        Vector3 newPositionForHitMark = hitMark.transform.position;
+                        for (int i = 0; i < filteredCurrentPoints.Count && i < filteredPreviousPoints.Count; i++)
                         {
-                            newPositionForHitMark = interpolatedPos;
+                            Vector3 interpolatedPos = Vector3.Slerp(
+                                filteredPreviousPoints[i],
+                                filteredCurrentPoints[i],
+                                progress
+                            );
+                            if (indexToFollow == i)
+                            {
+                                newPositionForHitMark = interpolatedPos;
+                                Vector3 interpolationHitMarkPoint = Vector3.Slerp(hitMarkInitialPos, newPositionForHitMark, progress);
+                                hitMark.transform.position = interpolationHitMarkPoint;
+                            }
+                            lineRenderer.SetPosition(i, interpolatedPos);
                         }
-                        lineRenderer.SetPosition(i, interpolatedPos);
+                       
+                        lineRenderer.Simplify(tolerance);
                     }
-                    Vector3 interpolationHitMarkPoint = Vector3.Slerp(hitMarkInitialPos,newPositionForHitMark,progress);
-                    hitMark.transform.position = interpolationHitMarkPoint;
-                    lineRenderer.Simplify(tolerance);
                 }
             );
         }
     }
 
-    private void SetPointAndNormalForHitMark(Vector3 point, Vector3 normal, bool colliding)
+    private void SetPointForHitMark(Vector3 point)
     {
-        (_currentContactPoint, _currentNormal) = (point, normal);
+       _currentContactPoint = point;
     }
 
 
@@ -196,6 +219,7 @@ public class AimPushShootTrace : MonoBehaviour
     {
         if (draw) SetHitMark();
         else UnsetHitMark();
+        _calculateTracePoints = draw;
     }
 
     private void UnsetHitMark()
@@ -204,5 +228,10 @@ public class AimPushShootTrace : MonoBehaviour
         lineRenderer.enabled = false;
     }
 
-    private void OnDisable() { UnsetHitMark(); }
+    private void OnDisable() 
+    { 
+        UnsetHitMark(); 
+        hitMarkCollision.onCollision?.RemoveAllListeners();
+        hitMarkCollision2?.onCollision?.RemoveAllListeners();
+    }
 }
