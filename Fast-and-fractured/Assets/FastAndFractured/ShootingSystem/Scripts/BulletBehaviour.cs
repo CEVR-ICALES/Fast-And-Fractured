@@ -22,7 +22,8 @@ namespace FastAndFractured
         //References
         protected Rigidbody rb;
         protected Collider ownCollider;
-        private MeshRenderer _meshRenderer;
+        [SerializeField]
+        private GameObject visuals;
         [SerializeField] protected GameObject particles;
         [Tooltip("Time delay to allow particles to show up")][SerializeField] private float delayProyectileEnd = 1.5f;
 
@@ -32,7 +33,7 @@ namespace FastAndFractured
         {
             rb = GetComponent<Rigidbody>();
             ownCollider = GetComponent<Collider>();
-            _meshRenderer = GetComponentInChildren<MeshRenderer>();
+           
         }
         public virtual void InitBulletTrayectory()
         {
@@ -50,7 +51,7 @@ namespace FastAndFractured
             {
                 rb.velocity = Vector3.zero;
                 ownCollider.enabled = false;
-                _meshRenderer.enabled = false;
+                visuals.SetActive(false);
                 rb.constraints = RigidbodyConstraints.FreezePosition;
                 rb.constraints = RigidbodyConstraints.FreezeRotation;
                 transform.rotation = new Quaternion(0, 0, 0, 0);
@@ -59,7 +60,6 @@ namespace FastAndFractured
                 {
                     ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                     ownCollider.enabled = true;
-                    _meshRenderer.enabled = true;
                     rb.constraints = RigidbodyConstraints.None;
                 });
             }
