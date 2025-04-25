@@ -1,7 +1,11 @@
 using Enums;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.InputSystem.XInput;
 using UnityEngine.UI;
 
 
@@ -32,6 +36,15 @@ namespace FastAndFractured
             _actions = new PlayerInputAction();
             HasRebinds();
             DetectCurrentDevice();
+        }
+        private void Update()
+        {
+            DetectCurrentDevice();
+            if (_currentDevice != _lastDevice)
+            {
+                HandleIconChange();
+            }
+            _lastDevice = _currentDevice;
         }
 
         void HasRebinds()
@@ -89,15 +102,156 @@ namespace FastAndFractured
 
         void DetectCurrentDevice()
         {
+            if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
+            {
+                _currentDevice = InputDeviceType.KEYBOARD_MOUSE;
+            }
+
             if (Gamepad.current != null)
             {
-                
+                if (Gamepad.current is DualShockGamepad)
+                {
+                    _currentDevice = InputDeviceType.PS_CONTROLLER;
+                }
+                else if (Gamepad.current is XInputController)
+                {
+                    _currentDevice = InputDeviceType.XBOX_CONTROLLER;
+                }
             }
         }
 
         void HandleIconChange()
         {
+            List<string> keys = ShowBoundKeys(_selectedAction, _currentDevice);
+            if (keys.Count != 1 && _currentDevice == InputDeviceType.KEYBOARD_MOUSE)
+            {
+                for (int i = 0; i <= keys.Count - 1; i++)
+                {
+                    icons[i].enabled = true;
+                    ChangeDecal(keys[i], icons[i]);
+                }
+            }
+            else
+            {
+                ChangeDecal(keys[0], icons[0]);
+                if (icons.Length > 1)
+                {
+                    for (int i = 1; i < icons.Length; i++)
+                    {
+                        icons[i].enabled = false;
+                    }
+                }
+            }
+        }
+        private void ChangeDecal(string key, Image decal)
+        {
+            Sprite sprite = null;
+            switch (_currentDevice)
+            {
+                case InputDeviceType.KEYBOARD_MOUSE:
+                    sprite = keyboard.GetSprite(key);
+                    break;
+                case InputDeviceType.XBOX_CONTROLLER:
+                    sprite = xbox.GetSprite(key);
+                    break;
+                case InputDeviceType.PS_CONTROLLER:
+                    sprite = ps4.GetSprite(key);
+                    break;
+            }
+            Texture texture = sprite.texture;
+            Material mat = new Material(decal.material);
+            mat.SetTexture("_BaseColorMap", texture);
+            decal.material = mat;
+        }
+        private List<string> ShowBoundKeys(InputAction action, InputDeviceType currentDevice)
+        {
+            List<string> returnVal = new List<string>();
+            bool isProcessingComposite = false;
 
+            foreach (var binding in action.bindings)
+            {
+                if (isProcessingComposite)
+                {
+                    if (binding.isComposite)
+                    {
+                        isProcessingComposite = true;
+                        continue;
+                    }
+                    else
+                    {
+                        ProcessNonCompositeBinding(currentDevice, ref returnVal, binding);
+                    }
+                }
+                else
+                {
+                    if (binding.isPartOfComposite)
+                    {
+                        if (PathContainsDeviceKey(binding.effectivePath, currentDevice))
+                        {
+                            returnVal.Add(GetKeyFromBinding(binding));
+                        }
+                    }
+                    else
+                    {
+                        if (binding.isComposite)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            isProcessingComposite = false;
+                            ProcessNonCompositeBinding(currentDevice, ref returnVal, binding);
+                        }
+                    }
+                }
+            }
+
+
+            return returnVal;
+        }
+
+        private string GetKeyFromBinding(InputBinding binding)
+        {
+
+            if (_currentDevice == InputDeviceType.KEYBOARD_MOUSE)
+            {
+                return binding.effectivePath.Split('/').Last();
+            }
+            else
+            {
+                string key = binding.effectivePath.Split('/')[1];
+                Debug.Log(key);
+                return key;
+            }
+        }
+
+        private void ProcessNonCompositeBinding(InputDeviceType currentDevice, ref List<string> returnVal, InputBinding binding)
+        {
+            if (PathContainsDeviceKey(binding.effectivePath, currentDevice))
+            {
+                if (!string.IsNullOrEmpty(binding.effectivePath))
+                {
+                    returnVal.Add(GetKeyFromBinding(binding));
+                }
+            }
+        }
+
+        private bool PathContainsDeviceKey(string path, InputDeviceType deviceType)
+        {
+            string toCheck = "";
+            switch (deviceType)
+            {
+                case InputDeviceType.KEYBOARD_MOUSE:
+                    toCheck = "Keyboard";
+                    break;
+                case InputDeviceType.PS_CONTROLLER:
+                    toCheck = "Gamepad";
+                    break;
+                case InputDeviceType.XBOX_CONTROLLER:
+                    toCheck = "Gamepad";
+                    break;
+            }
+            return path.Contains(toCheck);
         }
     }
     [Serializable]
