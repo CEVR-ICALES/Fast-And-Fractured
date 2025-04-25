@@ -4,6 +4,7 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
@@ -355,14 +356,14 @@ namespace FastAndFractured
                     if (_aliveCharacterCount == 1)
                     {
                         _hasPlayerWon = true;
-                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
+                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
                     }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
                     _hasPlayerWon = false;
-                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
+                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
                 }
             });
         }
@@ -469,6 +470,16 @@ namespace FastAndFractured
         }
         #endregion
 
+        public void FinishGame()
+        {
+            foreach (var character in _inGameCharacters)
+            {
+                Destroy(character);
+            }
+            PauseManager.Instance.DisablePause();
+            _sandStormController.DisableSandstorm();
+            HUDManager.Instance.HideHUD();
+        }
     }
 }
 

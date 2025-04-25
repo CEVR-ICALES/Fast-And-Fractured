@@ -295,5 +295,10 @@ namespace FastAndFractured
         {
             _isPaused = false;
         }
+        public void DisableSandstorm()
+        {
+            fogParent.SetActive(false);
+            primaryFog?.gameObject.SetActive(false);
+        }
     }
 }

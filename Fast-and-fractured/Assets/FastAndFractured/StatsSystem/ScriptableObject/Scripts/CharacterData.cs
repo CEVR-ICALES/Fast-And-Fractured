@@ -103,8 +103,8 @@ namespace FastAndFractured
         public AIParameters AIParameters => aiParameters;
 
         [Header("FinalAnimations")]
-        public Dictionary<GameObject,String> WinObject;
-        public Dictionary<GameObject,String> LoseObject;
+        public List<GameObjectStringPair> WinObjects;
+        public List<GameObjectStringPair> LoseObjects;
     }
 
 }
@@ -156,4 +156,10 @@ public class AIParameters
     public int DecisionPercentageNormalShoot { get => decisionPercentageNormalShoot; set => decisionPercentageNormalShoot = value; }
     public int DecisionPercentagePushShoot { get => decisionPercentagePushShoot; set => decisionPercentagePushShoot = value; }
     public int DecisionPercentageCooldown { get => decisionPercentageCooldown; set => decisionPercentageCooldown = value; }
+}
+[Serializable]
+public class GameObjectStringPair
+{
+    public GameObject GameObject;
+    public string StringValue;
 }

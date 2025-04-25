@@ -173,5 +173,10 @@ namespace FastAndFractured
         }
 
         #endregion
+
+        public void HideHUD()
+        {
+            transform.gameObject.SetActive(false);
+        }
     }
 }

@@ -121,8 +121,8 @@ namespace FastAndFractured
         public float totalDistanceDriven = 0f;
         private Vector3 _lastPosition;
 
-        public Dictionary<GameObject,String> WinObject { get => charDataSO.WinObject; }
-        public Dictionary<GameObject,String> LoseObject { get => charDataSO.LoseObject; }
+        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
+        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
 
         #region START EVENTS
         public void CustomStart()
@@ -232,22 +232,23 @@ namespace FastAndFractured
         }
         public GameObject GetWinObjectByString(string key)
         {
-            foreach (var pair in WinObject)
+            foreach (var pair in WinObjects)
             {
-                if (pair.Value == key)
+                if (pair.StringValue == key)
                 {
-                    return pair.Key;
+                    return pair.GameObject;
                 }
             }
             return null;
         }
+
         public GameObject GetLoseObjectByString(string key)
         {
-            foreach (var pair in LoseObject)
+            foreach (var pair in LoseObjects)
             {
-                if (pair.Value == key)
+                if (pair.StringValue == key)
                 {
-                    return pair.Key;
+                    return pair.GameObject;
                 }
             }
             return null;

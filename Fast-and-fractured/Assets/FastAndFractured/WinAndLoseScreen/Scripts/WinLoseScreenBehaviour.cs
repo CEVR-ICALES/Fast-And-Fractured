@@ -5,6 +5,7 @@ using Assets.SimpleLocalization.Scripts;
 using TMPro;
 using UnityEngine.UI;
 using Utilities;
+using UnityEngine.Playables;
 namespace FastAndFractured
 {
     public class WinLoseScreenBehaviour : MonoBehaviour
@@ -18,10 +19,12 @@ namespace FastAndFractured
         private string _playerName;
         private GameObject objectToSpawn;
         public GameObject spawnPoint;
+        private PlayableDirector _playableDirector;
 
         void OnEnable()
         {
             _player = LevelController.Instance.playerReference;
+            SetFinalStats();
             _playerName = LevelController.Instance.InGameCharactersNameCodes[0];
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -38,13 +41,23 @@ namespace FastAndFractured
             if (objectToSpawn != null)
             {
                 GameObject spawnedObject = Instantiate(objectToSpawn, spawnPoint.transform.position, spawnPoint.transform.rotation);
+                _playableDirector = spawnedObject.GetComponentInChildren<PlayableDirector>();
+                _playableDirector.stopped += OnPlayableDirectorStopped;
+            }else
+            {
+                ShowMenu();
             }
-            SetFinalStats();
-            _player.SetActive(false);
+            LevelController.Instance.FinishGame();
+            
         }
         public void ShowMenu()
         {
             container.SetActive(true);
+        }
+        private void OnPlayableDirectorStopped(PlayableDirector obj)
+        {
+            _playableDirector.stopped -= OnPlayableDirectorStopped;
+            ShowMenu();
         }
         private void SetFinalStats()
         {
