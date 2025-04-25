@@ -44,6 +44,9 @@ namespace FastAndFractured
         [SerializeField] private float lowEnduranceMaxStartSpeed = 3.3f;
         [SerializeField] private float lowEnduranceEmmissionRate = 80f;
 
+        [Header("Die Vfx")]
+        [SerializeField] private ParticleSystem dieVfx;
+
 
         PhysicsBehaviour _physicsBehaviour;
         CarMovementController _carMovementController;
@@ -233,6 +236,12 @@ namespace FastAndFractured
         }
 
         #endregion
+
+        public void OnDead()
+        {
+            dieVfx.Play();
+        }
+
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {
             if (!boolToChange) return;
