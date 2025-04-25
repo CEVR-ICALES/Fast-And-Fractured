@@ -101,6 +101,10 @@ namespace FastAndFractured
         [Header("AI")]
         [SerializeField] private AIParameters aiParameters;
         public AIParameters AIParameters => aiParameters;
+
+        [Header("FinalAnimations")]
+        public Dictionary<GameObject,String> WinObject;
+        public Dictionary<GameObject,String> LoseObject;
     }
 
 }

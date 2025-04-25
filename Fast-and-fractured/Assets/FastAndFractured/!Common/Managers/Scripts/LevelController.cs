@@ -24,7 +24,7 @@ namespace FastAndFractured
         private int maxCharactersInGame = 8;
         private List<string> _allCharactersNameCode;
         private Dictionary<string, int> _characterSelectedLimit;
-
+        public List<string> InGameCharactersNameCodes { get => _inGameCharactersNameCodes; }
         private List<string> _inGameCharactersNameCodes;
         public List<GameObject> InGameCharacters { get => _inGameCharacters; }
         private List<GameObject> _inGameCharacters;
@@ -65,6 +65,7 @@ namespace FastAndFractured
         private bool _hasPlayerWon = false;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
+        private int _aliveCharacterCount;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -114,6 +115,7 @@ namespace FastAndFractured
             {
                 StartLevelWithOwnCharacters();
             }
+            _aliveCharacterCount = maxCharactersInGame;
         }
 
         private void Update()
@@ -349,7 +351,8 @@ namespace FastAndFractured
                 {
                     _inGameCharacters.Remove(character);
                     Destroy(character);
-                    if (_inGameCharacters.Count == 1)
+                    _aliveCharacterCount--;
+                    if (_aliveCharacterCount == 1)
                     {
                         _hasPlayerWon = true;
                         MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
