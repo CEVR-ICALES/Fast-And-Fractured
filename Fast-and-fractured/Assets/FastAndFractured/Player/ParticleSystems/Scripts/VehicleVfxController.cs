@@ -46,6 +46,7 @@ namespace FastAndFractured
 
         [Header("Die Vfx")]
         [SerializeField] private ParticleSystem dieVfx;
+        [SerializeField] private GameObject[] carModel;   
 
 
         PhysicsBehaviour _physicsBehaviour;
@@ -66,7 +67,7 @@ namespace FastAndFractured
                 _trailEmissionModules[i] = trailVfxs[i].emission;
             }
 
-            for (int i = 0; i <= smokeVfx.Length; i++)
+            for (int i = 0; i < smokeVfx.Length; i++)
             {
                 _smokeEmmisionModules[i] = smokeVfx[i].emission;
                 _smokeMainModules[i] = smokeVfx[i].main;
@@ -239,6 +240,10 @@ namespace FastAndFractured
 
         public void OnDead()
         {
+            foreach(GameObject model in carModel)
+            {
+                model.SetActive(false);
+            }
             dieVfx.Play();
         }
 

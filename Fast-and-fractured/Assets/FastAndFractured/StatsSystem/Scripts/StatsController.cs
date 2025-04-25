@@ -154,6 +154,11 @@ namespace FastAndFractured
         {
             RecoverEndurance(100, false);
         }
+        [ContextMenu(nameof(DebugDie))]
+        public void DebugDie()
+        {
+            Dead();
+        }
 
 
         #region Health
@@ -256,6 +261,7 @@ namespace FastAndFractured
         {
             Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
+            vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
         }
 
