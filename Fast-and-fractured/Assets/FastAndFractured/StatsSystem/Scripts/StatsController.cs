@@ -61,6 +61,7 @@ namespace FastAndFractured
         [SerializeField] private float currentNormalShootDMG;
         [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
+        public float NormalShootAngle { get => charDataSO.NormalShootAngle; }
         public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
