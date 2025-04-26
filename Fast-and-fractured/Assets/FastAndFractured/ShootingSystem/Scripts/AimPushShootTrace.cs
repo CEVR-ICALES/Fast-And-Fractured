@@ -52,6 +52,7 @@ public class AimPushShootTrace : MonoBehaviour
     void Start()
     {
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
+        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
         CalculateTrayectory();
         hitMark.SetActive(false);
         _previousContactIndex = 0;
