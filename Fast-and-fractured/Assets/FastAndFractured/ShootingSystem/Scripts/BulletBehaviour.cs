@@ -58,6 +58,7 @@ namespace FastAndFractured
                 particles.SetActive(true);
                 TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
                 {
+                    visuals.SetActive(true);
                     ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                     ownCollider.enabled = true;
                     rb.constraints = RigidbodyConstraints.None;
