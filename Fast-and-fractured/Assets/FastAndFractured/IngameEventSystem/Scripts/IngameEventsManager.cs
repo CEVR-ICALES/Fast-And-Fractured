@@ -21,18 +21,21 @@ namespace FastAndFractured
         }
         public void CreateEvent(string eventText, float timeInScreen)
         {
-            if(_localizedTextReference.LocalizationKey != string.Empty)
+            if (_localizedTextReference != null)
             {
-                _timerReference.StopTimer();
-                _timerReference = null;
-            }
-            _localizedTextReference.LocalizationKey = eventText;
-            _localizedTextReference.Localize();
-            _timerReference = TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
-            {
-                _localizedTextReference.LocalizationKey = string.Empty;
+                if (_localizedTextReference.LocalizationKey != string.Empty)
+                {
+                    _timerReference.StopTimer();
+                    _timerReference = null;
+                }
+                _localizedTextReference.LocalizationKey = eventText;
                 _localizedTextReference.Localize();
-            });
+                _timerReference = TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
+                {
+                    _localizedTextReference.LocalizationKey = string.Empty;
+                    _localizedTextReference.Localize();
+                });
+            }
         }
         public void SetCharactersTopElements()
         {

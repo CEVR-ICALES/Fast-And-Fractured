@@ -2,10 +2,11 @@ using Enums;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class StatsController : MonoBehaviour
+    public class StatsController : MonoBehaviour, IPausable
     {
         [SerializeField]
         private CharacterData charDataSO;
@@ -130,6 +131,15 @@ namespace FastAndFractured
             InitCurrentStats();
             _lastPosition = transform.position;
         }
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
+        }
 
         #endregion
         void Update()
@@ -245,6 +255,7 @@ namespace FastAndFractured
                     {
                         if (_deadTimer != null)
                         {
+                            _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
                             SetDeadTimer(killer, newTime,damageXFrame);
@@ -253,6 +264,7 @@ namespace FastAndFractured
                 }
                 else
                 {
+                    _currentKiller = killer;
                     SetDeadTimer(killer, killer.KillTime,damageXFrame);
                 }
             }
@@ -262,16 +274,32 @@ namespace FastAndFractured
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                _currentKiller = killer;
                 Dead();
                 _deadTimer = null;
             }, onTimerDecreaseUpdate : (float time) =>
             {
                 if (damageXFrame > 0)
                 {
+                    Debug.Log("DamagePlayer");
                     TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });
+        }
+
+        public void OnPause()
+        {
+            if(_deadTimer != null)
+            {
+                _deadTimer.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            if (_deadTimer != null)
+            {
+                _deadTimer.ResumeTimer();
+            }
         }
 
         public void Dead()
