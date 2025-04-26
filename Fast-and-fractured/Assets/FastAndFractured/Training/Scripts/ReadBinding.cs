@@ -14,12 +14,6 @@ using static UnityEngine.InputSystem.InputBinding;
 
 namespace FastAndFractured
 {
-    public enum DeviceType
-    {
-        Keyboard,
-        XboxGamepad,
-        PSGamepad
-    }
     [System.Serializable]
     public class InputController : MonoBehaviour
     {
@@ -119,6 +113,7 @@ namespace FastAndFractured
                     case "space": return KeySpace;
                     case "leftShift": return KeyShift;
                     case "leftCtrl": return KeyCtrl;
+                    case "ctrl": return KeyCtrl;
                     case "leftAlt": return KeyAlt;
                     case "tab": return KeyTab;
                     case "backspace": return KeyBackspace;
@@ -187,14 +182,17 @@ namespace FastAndFractured
         public KeyboardIcons keyboard;
 
         private PlayerInputAction _playerActions;
-        public string action;
+        public string actionName;
 
-        public List<Image> image;
+        public Image[] icons;
 
-        private DeviceType currentDevice;
-        private DeviceType lastDevice;
+        private InputDeviceType _currentDevice;
+        private InputDeviceType _lastDevice;
 
         private InputAction _selectedAction;
+        private InputBinding[] _bindings;
+
+        private bool changesNumberOfPhotosOnDeviceChange = false;
 
         private void Awake()
         {
@@ -205,229 +203,119 @@ namespace FastAndFractured
         }
         private void Start()
         {
-            currentDevice = DeviceType.Keyboard;
-            _selectedAction = _playerActions.PlayerInputActions.Accelerate;
-            InputBinding[] bindings = _selectedAction.bindings.ToArray();
-            foreach (var binding in bindings)
+            _currentDevice = InputDeviceType.KEYBOARD_MOUSE;
+            var actionPropery = _playerActions.PlayerInputActions.GetType().GetProperty(actionName);
+            if(actionPropery != null && actionPropery.GetValue(_playerActions.PlayerInputActions) is InputAction action)
             {
-                Debug.Log(binding);
-
+                _selectedAction = action;
+                _bindings = _selectedAction.bindings.ToArray();
+            } else
+            {
+                Debug.LogError($"Action '{actionName}' not found in player actions");
             }
-            //switch (action)
-            //{
-            //    case "Movement":
-            //        _selectedAction = _playerActions.PlayerInputActions.Movement;
-            //        break;
-            //    case "Accelerate":
-            //        _selectedAction = _playerActions.PlayerInputActions.Accelerate;
-            //        break;
-            //    case "Camera Move":  
-            //        _selectedAction = _playerActions.PlayerInputActions.CameraMove;
-            //        break;
-            //    case "Reverse":
-            //        _selectedAction = _playerActions.PlayerInputActions.Reverse;
-            //        break;
-            //    case "Brake":
-            //        _selectedAction = _playerActions.PlayerInputActions.Brake;
-            //        break;
-            //    case "Shooting Mode":  
-            //        _selectedAction = _playerActions.PlayerInputActions.ShootingMode;
-            //        break;
-            //    case "Shoot":
-            //        _selectedAction = _playerActions.PlayerInputActions.Shoot;
-            //        break;
-            //    case "Special Ability":  
-            //        _selectedAction = _playerActions.PlayerInputActions.SpecialAbility;
-            //        break;
-            //    case "Throw Mine":  
-            //        _selectedAction = _playerActions.PlayerInputActions.ThrowMine;
-            //        break;
-            //    case "Pause":
-            //        _selectedAction = _playerActions.PlayerInputActions.Pause;
-            //        break;
-            //    case "Reset Camera":  
-            //        _selectedAction = _playerActions.PlayerInputActions.ResetCamera;
-            //        break;
-            //    case "Dash":
-            //        _selectedAction = _playerActions.PlayerInputActions.Dash;
-            //        break;
-            //    default:
-            //        Debug.LogWarning($"Action not recognized: {action}");
-            //        break;
-            //}
-            HandleDecalChange();
+            
+            HandleIconChange();
         }
 
         void Update()
         {
             CheckCurrentController();
-            if (currentDevice != lastDevice)
+            if (_currentDevice != _lastDevice)
             {
-                HandleDecalChange();
+                HandleIconChange();
             }
-            lastDevice = currentDevice;
+            _lastDevice = _currentDevice;
         }
 
-        private void HandleDecalChange()
+        private void HandleIconChange()
         {
-            List<string> keys = ShowBoundKeys(_selectedAction, currentDevice);
-            foreach(string key in keys)
+            int currentIconIndex = 0;
+            foreach (var binding in _bindings)
             {
-                Debug.Log(key);
-            }
-            if (keys.Count != 1 && currentDevice == DeviceType.Keyboard)
-            {
-                for (int i = 0; i <= keys.Count - 1; i++)
+                string bindingPath = binding.effectivePath;
+                if(!string.IsNullOrEmpty(bindingPath))
                 {
-                    image[i].enabled = true;
-                    ChangeDecal(keys[i], image[i]);
-                }
-            }
-            else
-            {
-                ChangeDecal(keys[0], image[0]);
-                if (image.Count > 1)
-                {
-                    for (int i = 1; i < image.Count; i++)
+                    string[] parts = bindingPath.Split('/');
+                    if(parts.Length > 1) // avoid false null when dealing with composites inputs since they first return a effectivePath with only the name that contains the inputs
                     {
-                        image[i].enabled = false;
+                        string deviceType = parts[0].Trim('<', '>');
+                        string key = parts[1];
+
+                        Debug.Log($"Device: {deviceType}, Key: {key}");
+                        Sprite icon = GetIconSprite(deviceType, key);
+
+                        UpdateIcons(currentIconIndex, deviceType, icon);
+                        currentIconIndex++;
                     }
+                    
                 }
             }
         }
 
         private void LateUpdate()
         {
-            lastDevice = currentDevice;
+            _lastDevice = _currentDevice;
         }
         private void CheckCurrentController()
         {
             if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
             {
-                currentDevice = DeviceType.Keyboard;
+                _currentDevice = InputDeviceType.KEYBOARD_MOUSE;
             }
 
             if (Gamepad.current != null)
             {
                 if (Gamepad.current is DualShockGamepad)
                 {
-                    currentDevice = DeviceType.PSGamepad;
+                    _currentDevice = InputDeviceType.PS_CONTROLLER;
                 }
                 else if (Gamepad.current is XInputController)
                 {
-                    currentDevice = DeviceType.XboxGamepad;
+                    _currentDevice = InputDeviceType.XBOX_CONTROLLER;
                 }
             }
         }
 
-        private void ChangeDecal(string key, Image imagae)
+        private Sprite GetIconSprite(string device, string key)
         {
-            Sprite sprite = null;
-            switch (currentDevice)
+            if(device == "Keyboard")
             {
-                case DeviceType.Keyboard:
-                    sprite = keyboard.GetSprite(key);
-                    break;
-                case DeviceType.XboxGamepad:
-                    sprite = xbox.GetSprite(key);
-                    break;
-                case DeviceType.PSGamepad:
-                    sprite = play.GetSprite(key);
-                    break;
+                return keyboard.GetSprite(key);
+            } else
+            {
+                if(_currentDevice == InputDeviceType.PS_CONTROLLER)
+                {
+                    return play.GetSprite(key);
+                }
+
+                if(_currentDevice == InputDeviceType.XBOX_CONTROLLER)
+                {
+                    return xbox.GetSprite(key);
+                }
             }
 
-            imagae.sprite = sprite;
+            return null;
             
         }
-        private List<string> ShowBoundKeys(InputAction action, DeviceType currentDevice)
+
+        private void UpdateIcons(int iconIndex, string device, Sprite icon)
         {
-            List<string> returnVal = new List<string>();
-            bool isProcessingComposite = false;
-
-            foreach (var binding in action.bindings)
+            if (device == "Keyboard")
             {
-                if (isProcessingComposite)
-                {
-                    if (binding.isComposite)
-                    {
-                        isProcessingComposite = true;
-                        continue;
-                    }
-                    else
-                    {
-                        ProcessNonCompositeBinding(currentDevice, ref returnVal, binding);
-                    }
-                }
-                else
-                {
-                    if (binding.isPartOfComposite)
-                    {
-                        if (PathContainsDeviceKey(binding.effectivePath, currentDevice))
-                        {
-                            returnVal.Add(GetKeyFromBinding(binding));
-                        }
-                    }
-                    else
-                    {
-                        if (binding.isComposite)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            isProcessingComposite = false;
-                            ProcessNonCompositeBinding(currentDevice, ref returnVal, binding);
-                        }
-                    }
-                }
-            }
-
-
-            return returnVal;
-        }
-
-        private string GetKeyFromBinding(InputBinding binding)
-        {
-
-            if (currentDevice == DeviceType.Keyboard)
-            {
-                return binding.effectivePath.Split('/').Last();
+                icons[iconIndex].sprite = icon;
             }
             else
             {
-                string key = binding.effectivePath.Split('/')[1];
-                Debug.Log(key);
-                return key;
-            }
-        }
-
-        private void ProcessNonCompositeBinding(DeviceType currentDevice, ref List<string> returnVal, InputBinding binding)
-        {
-            if (PathContainsDeviceKey(binding.effectivePath, currentDevice))
-            {
-                if (!string.IsNullOrEmpty(binding.effectivePath))
+                if (_currentDevice == InputDeviceType.PS_CONTROLLER)
                 {
-                    returnVal.Add(GetKeyFromBinding(binding));
+                    icons[iconIndex].sprite = icon; 
+                }
+
+                if (_currentDevice == InputDeviceType.XBOX_CONTROLLER)
+                {
+                    icons[iconIndex].sprite = icon;
                 }
             }
-        }
-
-        private bool PathContainsDeviceKey(string path, DeviceType deviceType)
-        {
-            string toCheck = "";
-            switch (deviceType)
-            {
-                case DeviceType.Keyboard:
-                    toCheck = "Keyboard";
-                    break;
-                case DeviceType.XboxGamepad:
-                    toCheck = "Gamepad";
-                    break;
-                case DeviceType.PSGamepad:
-                    toCheck = "Gamepad";
-                    break;
-            }
-            return path.Contains(toCheck);
         }
 
     }
