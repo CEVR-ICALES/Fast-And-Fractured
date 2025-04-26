@@ -127,6 +127,7 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     {
         foreach(Sprite sprite in _playerIconsDictionary.Values)
         {
+            Debug.Log($"Sprite name: {sprite.name} | spriteKey: {spriteKey}");
             if(sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
         }
 
