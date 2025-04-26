@@ -46,6 +46,7 @@ namespace FastAndFractured
                 inGameCharactersTopIcons[i].SetActive(true);
                 i++;
             }
+            Debug.Log("Ingame Characters Top Icon: " + inGameCharactersTopIcons[4]);
             LevelController.Instance.characterIcons = inGameCharactersTopIcons;
         }
         public void SetTomatoAlert()

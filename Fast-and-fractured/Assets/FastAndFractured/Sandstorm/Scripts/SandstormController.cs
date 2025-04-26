@@ -118,7 +118,6 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            Vector3 spawnVector = sphereCenter.forward;
             //Probably change for better aplication. Like an utility
             LevelController.Instance.ShuffleList(possibleAngels);
 
@@ -152,7 +151,7 @@ namespace FastAndFractured
         public void SpawnFogs()
         {
             _currentCharacterKillTime = maxCharacterKillTime;
-            fogParent.transform.position = _spawnPoint;
+            fogParent.transform.position = new Vector3(_spawnPoint.x, fogParent.transform.position.y, _spawnPoint.z);;
             primaryFog?.gameObject.SetActive(true);
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);

@@ -164,7 +164,6 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
-            IngameEventsManager.Instance.SetCharactersTopElements();
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {
@@ -177,6 +176,7 @@ namespace FastAndFractured
                 else
                     SetStormParameters(true);
             }
+            IngameEventsManager.Instance.SetCharactersTopElements();
         }
 
         private void SetStormParameters(bool callStorm)
