@@ -743,7 +743,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 468.4584, y: -367.79028}
+  m_AnchoredPosition: {x: 468.4584, y: -367.79}
   m_SizeDelta: {x: 263.0832, y: 107.68}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &110517898
@@ -1375,6 +1375,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Movement
   icons:
   - {fileID: 2088718814}
@@ -1481,6 +1482,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Brake
   icons:
   - {fileID: 175639432}
@@ -2378,6 +2380,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Brake
   icons:
   - {fileID: 499050714}
@@ -2522,6 +2525,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Dash
   icons:
   - {fileID: 889895171}
@@ -3116,6 +3120,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: ResetCamera
   icons:
   - {fileID: 1565034571}
@@ -3702,10 +3707,10 @@ RectTransform:
   - {fileID: 366187965}
   m_Father: {fileID: 1688782977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 70}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 300, y: -195}
+  m_SizeDelta: {x: 600, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &644007682
 MonoBehaviour:
@@ -3810,6 +3815,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: ThrowMine
   icons:
   - {fileID: 1421487578}
@@ -3954,6 +3960,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: CameraMove
   icons:
   - {fileID: 862232802}
@@ -4765,6 +4772,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 813635298}
+  - component: {fileID: 813635299}
   m_Layer: 5
   m_Name: Pause
   m_TagString: Untagged
@@ -4793,6 +4801,113 @@ RectTransform:
   m_AnchoredPosition: {x: 141.1925, y: -367.99423}
   m_SizeDelta: {x: 282.385, y: 108.0915}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &813635299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 813635297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7f0e0910ab33bd4dafd81e24b277fd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xbox:
+    buttonSouth: {fileID: 0}
+    buttonNorth: {fileID: 0}
+    buttonEast: {fileID: 0}
+    buttonWest: {fileID: 0}
+    startButton: {fileID: 21300000, guid: 71bfa2f3050512846869fc4e74037385, type: 3}
+    selectButton: {fileID: 0}
+    leftTrigger: {fileID: 21300000, guid: 71bfa2f3050512846869fc4e74037385, type: 3}
+    rightTrigger: {fileID: 0}
+    leftShoulder: {fileID: 0}
+    rightShoulder: {fileID: 0}
+    dpad: {fileID: 0}
+    dpadUp: {fileID: 0}
+    dpadDown: {fileID: 0}
+    dpadLeft: {fileID: 0}
+    dpadRight: {fileID: 0}
+    leftStick: {fileID: 0}
+    rightStick: {fileID: 0}
+    leftStickPress: {fileID: 0}
+    rightStickPress: {fileID: 0}
+  play:
+    buttonSouth: {fileID: 0}
+    buttonNorth: {fileID: 0}
+    buttonEast: {fileID: 0}
+    buttonWest: {fileID: 0}
+    startButton: {fileID: 21300000, guid: 55772ee67e86398478a5ac30c7c25ab9, type: 3}
+    selectButton: {fileID: 0}
+    leftTrigger: {fileID: 0}
+    rightTrigger: {fileID: 0}
+    leftShoulder: {fileID: 0}
+    rightShoulder: {fileID: 0}
+    dpad: {fileID: 0}
+    dpadUp: {fileID: 0}
+    dpadDown: {fileID: 0}
+    dpadLeft: {fileID: 0}
+    dpadRight: {fileID: 0}
+    leftStick: {fileID: 0}
+    rightStick: {fileID: 0}
+    leftStickPress: {fileID: 0}
+    rightStickPress: {fileID: 0}
+  keyboard:
+    KeyA: {fileID: 0}
+    KeyB: {fileID: 0}
+    KeyC: {fileID: 0}
+    KeyD: {fileID: 0}
+    KeyE: {fileID: 0}
+    KeyF: {fileID: 0}
+    KeyG: {fileID: 0}
+    KeyH: {fileID: 0}
+    KeyI: {fileID: 0}
+    KeyJ: {fileID: 0}
+    KeyK: {fileID: 0}
+    KeyL: {fileID: 0}
+    KeyM: {fileID: 0}
+    KeyN: {fileID: 0}
+    KeyO: {fileID: 0}
+    KeyP: {fileID: 0}
+    KeyQ: {fileID: 0}
+    KeyR: {fileID: 0}
+    KeyS: {fileID: 0}
+    KeyT: {fileID: 0}
+    KeyU: {fileID: 0}
+    KeyV: {fileID: 0}
+    KeyW: {fileID: 0}
+    KeyX: {fileID: 0}
+    KeyY: {fileID: 0}
+    KeyZ: {fileID: 0}
+    Key0: {fileID: 0}
+    Key1: {fileID: 0}
+    Key2: {fileID: 0}
+    Key3: {fileID: 0}
+    Key4: {fileID: 0}
+    Key5: {fileID: 0}
+    Key6: {fileID: 0}
+    Key7: {fileID: 0}
+    Key8: {fileID: 0}
+    Key9: {fileID: 0}
+    KeyEnter: {fileID: 0}
+    KeySpace: {fileID: 0}
+    KeyShift: {fileID: 0}
+    KeyCtrl: {fileID: 0}
+    KeyAlt: {fileID: 0}
+    KeyTab: {fileID: 0}
+    KeyBackspace: {fileID: 0}
+    KeyCapsLock: {fileID: 0}
+    KeyArrowUp: {fileID: 0}
+    KeyArrowDown: {fileID: 0}
+    KeyArrowLeft: {fileID: 0}
+    KeyArrowRight: {fileID: 0}
+    KeyRightButton: {fileID: 0}
+    KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 21300000, guid: 9af98a4db327fac4ba427caa6c9b4425, type: 3}
+  actionName: Pause
+  icons:
+  - {fileID: 278490598}
 --- !u!1 &814034605
 GameObject:
   m_ObjectHideFlags: 0
@@ -5448,6 +5563,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Movement
   icons:
   - {fileID: 846477939}
@@ -6161,6 +6277,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Movement
   icons:
   - {fileID: 74980634}
@@ -7901,6 +8018,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1233776148}
   m_CullTransparentMesh: 1
+--- !u!1 &1238281409 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2975145955692240855, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+  m_PrefabInstance: {fileID: 7708112764650138630}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1260701529
 GameObject:
   m_ObjectHideFlags: 0
@@ -8861,6 +8983,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Brake
   icons:
   - {fileID: 1571209317}
@@ -10165,6 +10288,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Reverse
   icons:
   - {fileID: 1567201130}
@@ -10313,10 +10437,10 @@ RectTransform:
   - {fileID: 820338805}
   m_Father: {fileID: 1688782977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 70}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 300, y: -275}
+  m_SizeDelta: {x: 600, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1657154573
 MonoBehaviour:
@@ -10421,6 +10545,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: SpecialAbility
   icons:
   - {fileID: 1439115366}
@@ -10457,10 +10582,10 @@ RectTransform:
   - {fileID: 709162195}
   m_Father: {fileID: 1688782977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 70}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 300, y: -115}
+  m_SizeDelta: {x: 600, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1667554546
 MonoBehaviour:
@@ -10565,6 +10690,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 21300000, guid: 2dccdc8303a043d42a0425407cc49027, type: 3}
     KeyLeftButton: {fileID: 21300000, guid: 47e8224a437fe6846a86f67061c27867, type: 3}
+    KeyEscape: {fileID: 0}
   actionName: ShootingMode
   icons:
   - {fileID: 1390080737}
@@ -10775,6 +10901,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Dash
   icons:
   - {fileID: 270958045}
@@ -11039,6 +11166,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: ResetCamera
   icons:
   - {fileID: 445364870}
@@ -11489,6 +11617,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Accelerate
   icons:
   - {fileID: 412073548}
@@ -12023,7 +12152,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1977945268
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12151,10 +12280,10 @@ RectTransform:
   - {fileID: 2052926819}
   m_Father: {fileID: 1688782977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 70}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 300, y: -35}
+  m_SizeDelta: {x: 600, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1997393216
 MonoBehaviour:
@@ -12259,6 +12388,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 21300000, guid: 2dccdc8303a043d42a0425407cc49027, type: 3}
     KeyLeftButton: {fileID: 21300000, guid: 47e8224a437fe6846a86f67061c27867, type: 3}
+    KeyEscape: {fileID: 0}
   actionName: Shoot
   icons:
   - {fileID: 2113770532}
@@ -12772,6 +12902,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Brake
   icons:
   - {fileID: 1233776150}
@@ -12878,6 +13009,7 @@ MonoBehaviour:
     KeyArrowRight: {fileID: 21300000, guid: d0133b2bdb643da429b2ffd8f5d33670, type: 3}
     KeyRightButton: {fileID: 0}
     KeyLeftButton: {fileID: 0}
+    KeyEscape: {fileID: 0}
   actionName: Movement
   icons:
   - {fileID: 1111671855}
@@ -14759,13 +14891,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2286793300866081007, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 813635298}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2975145955692240855, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7708112764650138632}
   m_SourcePrefab: {fileID: 100100000, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
 --- !u!224 &7708112764650138631 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2286793300866081007, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
   m_PrefabInstance: {fileID: 7708112764650138630}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7708112764650138632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238281409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81af39a8f7f078942adb19a3e644ce16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyboardScreens:
+  - {fileID: 95424888}
+  - {fileID: 1959660639}
+  - {fileID: 1977945267}
+  gamepadScreens:
+  - {fileID: 1654740854}
+  - {fileID: 1849894164}
+  - {fileID: 1977945267}
+  gamepadNextSprite: {fileID: 21300000, guid: 624d7f0ce8cefad4b9a99227919d048c, type: 3}
+  keyboardNextSprite: {fileID: 21300000, guid: 1f839f4a61d053a45b43008fae380873, type: 3}
+  nextScreenImagee: {fileID: 1736288948}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

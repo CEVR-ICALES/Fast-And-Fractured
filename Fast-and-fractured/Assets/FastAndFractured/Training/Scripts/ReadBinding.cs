@@ -1,15 +1,9 @@
 using Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.DualShock;
-using UnityEngine.InputSystem.XInput;
-using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-using static UnityEngine.InputSystem.InputBinding;
 
 
 namespace FastAndFractured
@@ -70,6 +64,7 @@ namespace FastAndFractured
             public Sprite KeyArrowRight;
             public Sprite KeyRightButton;
             public Sprite KeyLeftButton;
+            public Sprite KeyEscape;
 
             public Sprite GetSprite(string controlPath)
             {
@@ -126,6 +121,7 @@ namespace FastAndFractured
                     case "rightArrow": return KeyArrowRight;
                     case "rightButton": return KeyRightButton;
                     case "leftButton": return KeyLeftButton;
+                    case "escape": return KeyEscape;
                 }
                 return null;
             }
@@ -236,6 +232,7 @@ namespace FastAndFractured
             int currentIconIndex = 0;
             foreach (var binding in _bindings)
             {
+                
                 string bindingPath = binding.effectivePath;
                 if(!string.IsNullOrEmpty(bindingPath))
                 {
@@ -285,10 +282,12 @@ namespace FastAndFractured
 
         private void UpdateIcons(int iconIndex, string device, Sprite icon, ref int currentIndex)
         {
-            if (device == "Keyboard")
+            if (currentIndex > icons.Length - 1) return;
+            if (device == "Keyboard" || device == "Mouse")
             {
                 if(_currentDevice == InputDeviceType.KEYBOARD_MOUSE)
                 {
+                    
                     icons[iconIndex].sprite = icon;
                     currentIndex++;
                 }

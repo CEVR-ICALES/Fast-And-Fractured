@@ -2,13 +2,20 @@ using FastAndFractured;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Enums;
+using UnityEngine.InputSystem;
 
 public class TrainingScreensHandler : MonoBehaviour
 {
     // this will need refactoring, due to timings had to be done this way
     public GameObject[] keyboardScreens;
     public GameObject[] gamepadScreens;
+    public Sprite gamepadNextSprite;
+    public Sprite keyboardNextSprite;
+    public Image nextScreenImagee;
+    public InputAction nextScreenController;
+
     private int _currentScreenIndex = 0;
     private GameObject _currentScreen;
 
@@ -26,9 +33,21 @@ public class TrainingScreensHandler : MonoBehaviour
         PlayerInputController.OnInputDeviceChanged -= HandleInputDeviceChanged;
     }
 
+    private void Update()
+    {
+        CheckIfNextScreenHasBeeenClicked();
+    }
+
     private void HandleInputDeviceChanged(InputDeviceType currentDecive)
     {
         _currentInputDeviceType = currentDecive;
+        if(_currentInputDeviceType == InputDeviceType.KEYBOARD_MOUSE)
+        {
+            nextScreenImagee.sprite = keyboardNextSprite;
+        } else
+        {
+            nextScreenImagee.sprite = gamepadNextSprite;
+        }
         SelectDeviceScreen();
     }
 
@@ -45,6 +64,8 @@ public class TrainingScreensHandler : MonoBehaviour
 
     private void SelectDeviceScreen()
     {
+        if(_currentScreen != null)
+            _currentScreen.SetActive(false);
         if(_currentInputDeviceType == InputDeviceType.KEYBOARD_MOUSE)
         {
             _currentScreen = keyboardScreens[_currentScreenIndex];
@@ -54,6 +75,23 @@ public class TrainingScreensHandler : MonoBehaviour
         }
 
         _currentScreen.SetActive(true);
+    }
+
+    private void CheckIfNextScreenHasBeeenClicked()
+    {
+        if(Input.GetKeyDown(KeyCode.Tab))
+        {
+            OpenNextScreen();
+        }
+
+        if(Gamepad.current != null)
+        {
+            if (Gamepad.current.dpad.right.isPressed)
+                OpenNextScreen();
+        }
+
+        
+
     }
 
     
