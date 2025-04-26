@@ -171,7 +171,6 @@ namespace FastAndFractured
                 _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
-                //Debug.Log("KEYBOARD DETECTED");
             }
 
             bool gamepadButtonPressed = false;
@@ -191,7 +190,6 @@ namespace FastAndFractured
                         _currentInputDevice = InputDeviceType.XBOX_CONTROLLER;
                         OnInputDeviceChanged?.Invoke(_currentInputDevice);
                     }
-                    Debug.Log("CONTROLLER DETECTED");
 
                     _isUsingController = true;
             }
