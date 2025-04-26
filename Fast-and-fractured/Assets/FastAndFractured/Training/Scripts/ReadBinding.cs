@@ -234,6 +234,7 @@ namespace FastAndFractured
             {
                 
                 string bindingPath = binding.effectivePath;
+                Debug.Log(bindingPath);
                 if(!string.IsNullOrEmpty(bindingPath))
                 {
                     string[] parts = bindingPath.Split('/');
@@ -241,6 +242,10 @@ namespace FastAndFractured
                     {
                         string deviceType = parts[0].Trim('<', '>');
                         string key = parts[1];
+                        if (parts.Length > 2)
+                        {
+                            key = key + "/" + parts[2];
+                        }
 
                         Debug.Log($"Device: {deviceType}, Key: {key}");
                         Sprite icon = GetIconSprite(deviceType, key);
@@ -254,6 +259,7 @@ namespace FastAndFractured
 
         private void OnDeviceChangedNotifyed(InputDeviceType newInputDevice) 
         {
+            if (_currentDevice == newInputDevice) return;
             _currentDevice = newInputDevice;
             HandleIconChange();
         }

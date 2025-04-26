@@ -1,6 +1,4 @@
 using FastAndFractured;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Enums;
@@ -18,6 +16,7 @@ public class TrainingScreensHandler : MonoBehaviour
 
     private int _currentScreenIndex = 0;
     private GameObject _currentScreen;
+    private bool _hasDpadBeenReleased = false;
 
     private InputDeviceType _currentInputDeviceType;
 
@@ -40,6 +39,7 @@ public class TrainingScreensHandler : MonoBehaviour
 
     private void HandleInputDeviceChanged(InputDeviceType currentDecive)
     {
+        if (_currentInputDeviceType == currentDecive) return;
         _currentInputDeviceType = currentDecive;
         if(_currentInputDeviceType == InputDeviceType.KEYBOARD_MOUSE)
         {
@@ -86,8 +86,14 @@ public class TrainingScreensHandler : MonoBehaviour
 
         if(Gamepad.current != null)
         {
-            if (Gamepad.current.dpad.right.isPressed)
+            if (Gamepad.current.dpad.right.isPressed && _hasDpadBeenReleased)
+            {
+                _hasDpadBeenReleased = false;
                 OpenNextScreen();
+            } else if(!Gamepad.current.dpad.right.isPressed)
+            {
+                _hasDpadBeenReleased = true;
+            }
         }
 
         
