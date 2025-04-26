@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 [RequireComponent(typeof(ResourcesLoader))]
 public class ResourcesManager : AbstractSingleton<ResourcesManager>
@@ -36,6 +37,7 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         InitPlayerIconsDictionary(_playerIcons);
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
         InitScreenEffectsDictionary(_screenEffectsSprites);
+        IngameEventsManager.Instance.SetCharactersTopElements();
     }
 
     void InitPlayerIconsDictionary(List<Sprite> playerIconsSprites)
