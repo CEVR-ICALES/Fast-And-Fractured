@@ -209,7 +209,7 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            PlayerInputController.OnInputDeviceChanged += OnDeviceChangedNotifyed;
+            PlayerInputController.OnInputDeviceChanged -= OnDeviceChangedNotifyed;
         }
 
         private void Start()

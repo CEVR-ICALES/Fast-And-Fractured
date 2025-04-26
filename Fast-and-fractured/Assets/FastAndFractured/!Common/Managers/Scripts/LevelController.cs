@@ -99,7 +99,6 @@ namespace FastAndFractured
                     {
                         _ais = FindObjectsOfType<EnemyAIBrain>();
                     }
-
                 }
             }
             else
@@ -112,7 +111,7 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-              StartLevelWithSpawnedCharacters();
+                StartLevelWithSpawnedCharacters();
             }
             else
             {
@@ -165,6 +164,7 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
+            IngameEventsManager.Instance.SetCharactersTopElements();
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {

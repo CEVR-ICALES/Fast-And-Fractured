@@ -104,7 +104,6 @@ namespace FastAndFractured
         #endregion
         public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
-        public bool IsPlayer => _isPlayer;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
