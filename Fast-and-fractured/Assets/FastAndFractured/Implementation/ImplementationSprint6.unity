@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 4
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -6011,6 +6011,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 362617908678673583, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
   m_PrefabInstance: {fileID: 1867144751}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1914529947 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2335148309138898220, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+  m_PrefabInstance: {fileID: 6400545731412433952}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2971857b8254c81b49865d1989562af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1920657850
 GameObject:
   m_ObjectHideFlags: 0
@@ -6842,6 +6853,10 @@ PrefabInstance:
       propertyPath: orthographic size
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 2517803797502007672, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 2147497983
+      objectReference: {fileID: 0}
     - target: {fileID: 3771727662970398601, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -6992,7 +7007,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: playerCharacter
-      value: MariaAntonia_0
+      value: Josefino_0
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: useMyCharacters
@@ -7057,6 +7072,14 @@ PrefabInstance:
     - target: {fileID: 6692042086972548956, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: m_Name
       value: SceneCommons
+      objectReference: {fileID: 0}
+    - target: {fileID: 7985864442918617635, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_TargetTexture
+      value: 
+      objectReference: {fileID: 8400000, guid: 02e2c511b076ab84db7528c3bae02aba, type: 2}
+    - target: {fileID: 7985864442918617635, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 3080
       objectReference: {fileID: 0}
     - target: {fileID: 9080696093257076180, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: testing
@@ -7158,6 +7181,14 @@ PrefabInstance:
       propertyPath: playersCharactersData.Array.data[0]
       value: 
       objectReference: {fileID: 11400000, guid: 9e1d142e444b1b94dafdd1b92d03cabf, type: 2}
+    - target: {fileID: 9172932133489541210, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 381.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9172932133489541210, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -147.7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -7507,7 +7538,7 @@ PrefabInstance:
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1914529947}
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: ResumeGame
