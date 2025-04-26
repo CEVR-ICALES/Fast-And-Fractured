@@ -15,7 +15,7 @@ using static UnityEngine.InputSystem.InputBinding;
 namespace FastAndFractured
 {
     [System.Serializable]
-    public class InputController : MonoBehaviour
+    public class ReadBinding : MonoBehaviour
     {
         [Serializable]
         public struct KeyboardIcons
@@ -68,6 +68,8 @@ namespace FastAndFractured
             public Sprite KeyArrowDown;
             public Sprite KeyArrowLeft;
             public Sprite KeyArrowRight;
+            public Sprite KeyRightButton;
+            public Sprite KeyLeftButton;
 
             public Sprite GetSprite(string controlPath)
             {
@@ -122,6 +124,8 @@ namespace FastAndFractured
                     case "downArrow": return KeyArrowDown;
                     case "leftArrow": return KeyArrowLeft;
                     case "rightArrow": return KeyArrowRight;
+                    case "rightButton": return KeyRightButton;
+                    case "leftButton": return KeyLeftButton;
                 }
                 return null;
             }
@@ -177,6 +181,7 @@ namespace FastAndFractured
             }
         }
 
+
         public GamepadIcons xbox;
         [FormerlySerializedAs("ps4")] public GamepadIcons play;
         public KeyboardIcons keyboard;
@@ -187,12 +192,10 @@ namespace FastAndFractured
         public Image[] icons;
 
         private InputDeviceType _currentDevice;
-        private InputDeviceType _lastDevice;
 
         private InputAction _selectedAction;
         private InputBinding[] _bindings;
 
-        private bool changesNumberOfPhotosOnDeviceChange = false;
 
         private void Awake()
         {
@@ -201,30 +204,31 @@ namespace FastAndFractured
             if (!string.IsNullOrEmpty(rebinds))
                 _playerActions.LoadBindingOverridesFromJson(rebinds);
         }
+
+        private void OnEnable()
+        {
+            PlayerInputController.OnInputDeviceChanged += OnDeviceChangedNotifyed;
+        }
+
+        private void OnDisable()
+        {
+            PlayerInputController.OnInputDeviceChanged += OnDeviceChangedNotifyed;
+        }
+
         private void Start()
         {
             _currentDevice = InputDeviceType.KEYBOARD_MOUSE;
             var actionPropery = _playerActions.PlayerInputActions.GetType().GetProperty(actionName);
-            if(actionPropery != null && actionPropery.GetValue(_playerActions.PlayerInputActions) is InputAction action)
+            if (actionPropery != null && actionPropery.GetValue(_playerActions.PlayerInputActions) is InputAction action)
             {
                 _selectedAction = action;
                 _bindings = _selectedAction.bindings.ToArray();
-            } else
+            }
+            else
             {
                 Debug.LogError($"Action '{actionName}' not found in player actions");
             }
-            
             HandleIconChange();
-        }
-
-        void Update()
-        {
-            CheckCurrentController();
-            if (_currentDevice != _lastDevice)
-            {
-                HandleIconChange();
-            }
-            _lastDevice = _currentDevice;
         }
 
         private void HandleIconChange()
@@ -251,33 +255,15 @@ namespace FastAndFractured
             }
         }
 
-        private void LateUpdate()
+        private void OnDeviceChangedNotifyed(InputDeviceType newInputDevice) 
         {
-            _lastDevice = _currentDevice;
-        }
-        private void CheckCurrentController()
-        {
-            if (Keyboard.current != null && Keyboard.current.anyKey.isPressed)
-            {
-                _currentDevice = InputDeviceType.KEYBOARD_MOUSE;
-            }
-
-            if (Gamepad.current != null)
-            {
-                if (Gamepad.current is DualShockGamepad)
-                {
-                    _currentDevice = InputDeviceType.PS_CONTROLLER;
-                }
-                else if (Gamepad.current is XInputController)
-                {
-                    _currentDevice = InputDeviceType.XBOX_CONTROLLER;
-                }
-            }
+            _currentDevice = newInputDevice;
+            HandleIconChange();
         }
 
         private Sprite GetIconSprite(string device, string key)
         {
-            if(device == "Keyboard")
+            if(device == "Keyboard" || device == "Mouse")
             {
                 return keyboard.GetSprite(key);
             } else
