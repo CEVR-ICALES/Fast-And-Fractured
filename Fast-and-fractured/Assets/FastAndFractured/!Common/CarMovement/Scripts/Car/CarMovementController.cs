@@ -414,7 +414,6 @@ namespace FastAndFractured
             {
                 return false;
             }
-            Debug.Log("IsWall");
             float absoluteXRotationOfCar = Mathf.Abs(transform.rotation.x);
             return currentWheelsAngle >= maxGroundWheelsAngleThreshold&&absoluteXRotationOfCar>=maxGroundCarAngleThreshold;
         }

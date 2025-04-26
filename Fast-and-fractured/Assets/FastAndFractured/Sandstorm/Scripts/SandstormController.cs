@@ -241,14 +241,18 @@ namespace FastAndFractured
         }
 
         private void OnTriggerEnter(Collider other)
-        {
+        {   
             if (other.TryGetComponent(out StatsController statsController))
             {
-                StartKillNotify(statsController);
-                _charactersInsideSandstorm.Add(other.gameObject);
-                if (statsController.IsPlayer)
+                if (!other.GetComponent<Rigidbody>().isKinematic)
                 {
-                    ChangeSandstormVisuals(true);
+
+                    StartKillNotify(statsController);
+                    _charactersInsideSandstorm.Add(other.gameObject);
+                    if (statsController.IsPlayer)
+                    {
+                        ChangeSandstormVisuals(true);
+                    }
                 }
             }
             else
@@ -261,8 +265,14 @@ namespace FastAndFractured
         {
             if (other.TryGetComponent(out StatsController statsController))
             {
-                CharacterEscapedDead(statsController);
-                _charactersInsideSandstorm.Remove(other.gameObject);
+                if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
+                {
+                    if (!IsInsideStormCollider(other.gameObject,0.00000001f))
+                    {
+                        CharacterEscapedDead(statsController);
+                        _charactersInsideSandstorm.Remove(other.gameObject);
+                    }
+                }
             }
             else
             {
@@ -272,13 +282,13 @@ namespace FastAndFractured
 
         public void StartKillNotify(StatsController statsController)
        {
-         float damageXFrame = statsController.MaxEndurance/_currentCharacterKillTime;
+         float damageXFrame = statsController.Endurance/_currentCharacterKillTime;
          statsController.GetKilledNotify(this,false,damageXFrame);
        }
 
       public void CharacterEscapedDead(StatsController statsController)
-      {
-            statsController.GetKilledNotify(this, true,0);  
+      { 
+        statsController.GetKilledNotify(this, true,0);  
       }
 
       public GameObject GetKillerGameObject()
