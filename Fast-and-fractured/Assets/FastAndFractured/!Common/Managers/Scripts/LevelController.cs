@@ -113,7 +113,7 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-              StartLevelWithSpawnedCharacters();
+                StartLevelWithSpawnedCharacters();
             }
             else
             {
@@ -144,7 +144,7 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
-            _playerReference = playerCar.gameObject;
+            _playerReference = FindObjectOfType<PlayerInputController>().GetComponentInChildren<StatsController>().gameObject;
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);
@@ -167,6 +167,7 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
+            IngameEventsManager.Instance.SetCharactersTopElements();
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {

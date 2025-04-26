@@ -13,7 +13,10 @@ namespace StateMachine
         {
             if (controller.GetBehaviour<PhysicsBehaviour>().Rb.velocity != Vector3.zero)
             {
-                controller.GetBehaviour<AimPushShootTrace>().DrawTrayectory(activateAim);
+                if (controller.GetBehaviour<AimPushShootTrace>() != null)
+                {
+                    controller.GetBehaviour<AimPushShootTrace>().DrawTrayectory(activateAim);
+                }
             }
         }
     }

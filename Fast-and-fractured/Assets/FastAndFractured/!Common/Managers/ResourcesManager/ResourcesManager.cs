@@ -37,7 +37,6 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         InitPlayerIconsDictionary(_playerIcons);
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
         InitScreenEffectsDictionary(_screenEffectsSprites);
-        IngameEventsManager.Instance.SetCharactersTopElements();
     }
 
     void InitPlayerIconsDictionary(List<Sprite> playerIconsSprites)

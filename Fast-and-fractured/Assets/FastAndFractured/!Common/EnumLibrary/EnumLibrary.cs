@@ -75,7 +75,15 @@ namespace Enums
         NORMAL_BULLET,
         PUSH_BULLET,
         ASCENDING_TOMATO,
-        DESCENDING_TOMATO
+        DESCENDING_TOMATO,
+        NORMAL_BULLET_EGG,
+        PUSH_BULLET_CHICKEN,
+        NORMAL_BULLET_GOLF,
+        PUSH_BULLET_GOLF,
+        NORMAL_BULLET_TOMATO,
+        PUSH_BULLET_MELON,
+        NORMAL_BULLET_CROQUETA,
+        PUSH_BULLET_SARTENAZO
     }
 
     public enum PathMode
