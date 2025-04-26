@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using UnityEngine.Windows;
 
 
 namespace FastAndFractured
@@ -244,7 +245,12 @@ namespace FastAndFractured
                         string key = parts[1];
                         if (parts.Length > 2)
                         {
-                            key = key + "/" + parts[2];
+                            int slashIndex = bindingPath.IndexOf('/');
+
+                            if (slashIndex != -1)
+                            {
+                                key = bindingPath.Substring(slashIndex + 1);
+                            }
                         }
 
                         Debug.Log($"Device: {deviceType}, Key: {key}");
