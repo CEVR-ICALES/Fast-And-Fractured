@@ -128,12 +128,30 @@ namespace FastAndFractured
             else
             {
                 GroundForces();
+                if (carMovementController.IsInWall()||physicsBehaviour.IsTouchingGround)
+                {
+                    carMovementController.StartIsFlippedTimer();
+                }
+                else
+                {
+                    carMovementController.StopFlippedTimer();
+                }
+                if (carMovementController.IsFlipped)
+                {
+                    FlipStateForce();
+                    groundState = IAGroundState.FLIP_SATE;
+                    if (!carMovementController.IsInWall())
+                    {
+                        carMovementController.IsFlipped = false;
+                        groundState = IAGroundState.GROUND;
+                    }
+                }
             }
         }
 
         private void GroundForces()
         {
-            if (groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)
+            if ((groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)&&groundState!=IAGroundState.FLIP_SATE)
             {
                 applyForceByState.ToggleAirFriction(false);
                 applyForceByState.ToggleCustomGravity(false);
@@ -151,6 +169,12 @@ namespace FastAndFractured
                 applyForceByState.ToggleRollPrevention(false, 0);
                 groundState = IAGroundState.AIR;
             }
+        }
+
+        private void FlipStateForce()
+        {
+            applyForceByState.ApplyFlipStateForce();
+            applyForceByState.ToggleRollPrevention(false, 1);
         }
 
         private void InitializeAIValues()

@@ -48,7 +48,8 @@ namespace FastAndFractured
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
-        [SerializeField] private float maxGroundAngleThreshold = 65;
+        [SerializeField] private float maxGroundWheelsAngleThreshold = 65;
+        [SerializeField] private float maxGroundCarAngleThreshold = 50f;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
@@ -120,10 +121,10 @@ namespace FastAndFractured
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
-                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
+            
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
@@ -409,12 +410,13 @@ namespace FastAndFractured
         {
             float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
 
-            if (groundWheels < WHEELS_IN_SLOPE || currentWheelsAngle < maxGroundAngleThreshold)
+            if (groundWheels < WHEELS_IN_SLOPE || currentWheelsAngle < maxGroundWheelsAngleThreshold)
             {
                 return false;
             }
             Debug.Log("IsWall");
-            return currentWheelsAngle >= maxGroundAngleThreshold;
+            float absoluteXRotationOfCar = Mathf.Abs(transform.rotation.x);
+            return currentWheelsAngle >= maxGroundWheelsAngleThreshold&&absoluteXRotationOfCar>=maxGroundCarAngleThreshold;
         }
 
         public void StartIsFlippedTimer()

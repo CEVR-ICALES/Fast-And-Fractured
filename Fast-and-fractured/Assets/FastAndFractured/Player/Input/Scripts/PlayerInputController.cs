@@ -172,12 +172,15 @@ namespace FastAndFractured
                 _isUsingController = false;
                 OnInputDeviceChanged?.Invoke(_currentInputDevice);
             }
-            if (Gamepad.current != null)
+
+            bool gamepadButtonPressed = false;
+            if(Gamepad.current != null){
+                gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
+            }
+            
+            if (gamepadButtonPressed)
             {
-                bool gamepadButtonPressed = Gamepad.current.allControls.Any(x => x is ButtonControl button && x.IsPressed() && !x.synthetic);
-                if (gamepadButtonPressed)
-                {
-                    if (Gamepad.current is DualShockGamepad)
+                if (Gamepad.current is DualShockGamepad)
                     {
                         _currentInputDevice = InputDeviceType.PS_CONTROLLER;
                         OnInputDeviceChanged?.Invoke(_currentInputDevice);
@@ -189,7 +192,6 @@ namespace FastAndFractured
                     }
 
                     _isUsingController = true;
-                }
             }
         }
 
