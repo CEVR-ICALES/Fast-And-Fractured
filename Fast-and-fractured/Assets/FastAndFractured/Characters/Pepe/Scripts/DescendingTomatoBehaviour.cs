@@ -14,6 +14,7 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         public GameObject objective;
         public float speed;
+        public float effectTime = 5f;
         public Vector3 randomRotation;
         public virtual void InitializeValues()
         {
@@ -42,16 +43,16 @@ namespace FastAndFractured
         }
         private void EffectOnCharacter(Collider other)
         {
-            Controller controller = other.GetComponent<Controller>();
-            EnemyAIBrain enemyAI = other.GetComponent<EnemyAIBrain>();
-            if(enemyAI != null)
+            if (other.gameObject == LevelController.Instance.playerReference)
             {
-                // Apply effect on the player that got hit by the tomato
+                IngameEventsManager.Instance.RemoveTomatoAlert();
+                IngameEventsManager.Instance.SetTomatoScreenEffect(effectTime);
             }
-            else if (controller != null)
+            else
             {
-                // Apply effect on the character AI that got hit by the tomato
+                //todo efect on IA
             }
+            
             ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
         }
     }

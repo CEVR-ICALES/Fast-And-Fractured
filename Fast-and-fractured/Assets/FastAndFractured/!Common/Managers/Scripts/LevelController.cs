@@ -64,6 +64,9 @@ namespace FastAndFractured
         public GameObject playerReference { get=>_playerReference ;}
         public bool HasPlayerWon { get => _hasPlayerWon; }
         private bool _hasPlayerWon = false;
+
+        private int _aliveCharacterCount;
+        public GameObject[] characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
         private int _aliveCharacterCount;
@@ -351,6 +354,16 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
+                    foreach (Transform child in character.transform)
+                    {
+                        foreach (GameObject icon in characterIcons)
+                        { 
+                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            {
+                                icon.SetActive(false);
+                            }
+                        }
+                    }
                     Destroy(character);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
