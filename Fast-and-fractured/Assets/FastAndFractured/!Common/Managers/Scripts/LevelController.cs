@@ -95,6 +95,7 @@ namespace FastAndFractured
                     {
                         _ais = FindObjectsOfType<EnemyAIBrain>();
                     }
+
                 }
             }
             else
@@ -146,6 +147,8 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            _playerReference = FindObjectOfType<PlayerInputController>().GetComponentInChildren<StatsController>().gameObject;
+
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);
