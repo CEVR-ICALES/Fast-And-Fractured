@@ -244,8 +244,7 @@ namespace FastAndFractured
                         Debug.Log($"Device: {deviceType}, Key: {key}");
                         Sprite icon = GetIconSprite(deviceType, key);
 
-                        UpdateIcons(currentIconIndex, deviceType, icon);
-                        currentIconIndex++;
+                        UpdateIcons(currentIconIndex, deviceType, icon, ref currentIconIndex);
                     }
                     
                 }
@@ -298,22 +297,28 @@ namespace FastAndFractured
             
         }
 
-        private void UpdateIcons(int iconIndex, string device, Sprite icon)
+        private void UpdateIcons(int iconIndex, string device, Sprite icon, ref int currentIndex)
         {
             if (device == "Keyboard")
             {
-                icons[iconIndex].sprite = icon;
+                if(_currentDevice == InputDeviceType.KEYBOARD_MOUSE)
+                {
+                    icons[iconIndex].sprite = icon;
+                    currentIndex++;
+                }
             }
             else
             {
                 if (_currentDevice == InputDeviceType.PS_CONTROLLER)
                 {
                     icons[iconIndex].sprite = icon; 
+                    currentIndex++;
                 }
 
                 if (_currentDevice == InputDeviceType.XBOX_CONTROLLER)
                 {
                     icons[iconIndex].sprite = icon;
+                    currentIndex++;
                 }
             }
         }
