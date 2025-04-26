@@ -10,6 +10,9 @@ namespace FastAndFractured
         [SerializeField]
         private CharacterData charDataSO;
 
+        [SerializeField]
+        private VehicleVfxController vehicleVfxController;
+
         [Header("CURRENT STATS")]
 
         [Header("Health")]
@@ -61,6 +64,7 @@ namespace FastAndFractured
         [SerializeField] private float currentNormalShootDMG;
         [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
+        public float NormalShootAngle { get => charDataSO.NormalShootAngle; }
         public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
@@ -94,8 +98,11 @@ namespace FastAndFractured
         public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
-        #endregion
 
+        //SKINS
+        public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
+        #endregion
+        public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
@@ -104,6 +111,13 @@ namespace FastAndFractured
         private ITimer _deadTimer;
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
+
+        [Header("GAME STATS")]
+
+        public float totalDamageTaken = 0f;
+        public float totalDamageDealt = 0f;
+        public float totalDistanceDriven = 0f;
+        private Vector3 _lastPosition;
 
         #region START EVENTS
         public void CustomStart()
@@ -114,10 +128,15 @@ namespace FastAndFractured
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
+            _lastPosition = transform.position;
         }
 
         #endregion
-
+        void Update()
+        {
+            totalDistanceDriven += Vector3.Distance(transform.position, _lastPosition);
+            _lastPosition = transform.position;
+        }
         public void SetCharacter(CharacterData charData)
         {
             var copyOfCharData = Instantiate(charData);
@@ -146,6 +165,16 @@ namespace FastAndFractured
         {
             TakeEndurance(100, false,gameObject);
         }
+        [ContextMenu(nameof(DebugRecover100Endurance))]
+        public void DebugRecover100Endurance()
+        {
+            RecoverEndurance(100, false);
+        }
+        [ContextMenu(nameof(DebugDie))]
+        public void DebugDie()
+        {
+            Dead();
+        }
 
 
         #region Health
@@ -155,9 +184,11 @@ namespace FastAndFractured
             {
                 if (!charDataSO.Invulnerable)
                 {
+                    totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
+                        vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
@@ -182,6 +213,11 @@ namespace FastAndFractured
                 if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
+                    vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
+                    if(_isPlayer)
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                    }
                 } else
                 {
                     Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
@@ -242,6 +278,7 @@ namespace FastAndFractured
         {
             Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
+            vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
         }
 
@@ -343,6 +380,10 @@ namespace FastAndFractured
 
             }
             return charStat;
+        }
+        public void AddDealtDamage(float damage)
+        {
+            totalDamageDealt += damage;
         }
         #endregion
         #region TemporalModificators

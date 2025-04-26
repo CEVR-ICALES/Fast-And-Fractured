@@ -34,7 +34,7 @@ namespace Utilities
             if (objectPoolSO.prefab != null)
             {
                 ObjectPool newObjectPool = new ObjectPool(objectPoolSO.pooltype, objectPoolSO.poolNum, objectPoolSO.poolNum);
-                var pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.prefab, objectPoolSO.poolNum, poolGameObject.transform);
+                var pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.prefab,objectPoolSO.prefabVariants, objectPoolSO.poolNum, poolGameObject.transform);
                 foreach (GameObject pooledGameObject in pooledGameObjectList)
                 {
                     newObjectPool.AddObject(pooledGameObject);
@@ -46,11 +46,21 @@ namespace Utilities
         }
         
         //Create and prepare the GameObjects of a pool in scene
-        private GameObject[] InstanceObjectPoolGameObjects(GameObject gameobjectToPool, int num, Transform parent)
+        private GameObject[] InstanceObjectPoolGameObjects(GameObject gameobjectToPool, GameObject[] prefabVariants, int num, Transform parent)
         {
             GameObject[] gameObjectsPooled = new GameObject[num];
+            int variantCount = 0;
+            int variantMaxCount = prefabVariants.Length;
             for (int i = 0; i < num; i++) {
-                var gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                GameObject gameObjectPooled = null;
+                if (variantCount == 0)
+                {
+                   gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                }
+                else
+                {
+                    gameObjectPooled = Instantiate(prefabVariants[i],parent);
+                }
                 if (gameObjectPooled.TryGetComponent<IPooledObject>(out var pooledObject))
                 {
                     if (pooledObject.InitValues)
@@ -60,6 +70,9 @@ namespace Utilities
                 }
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
+                variantCount++;
+                if(variantCount>=variantMaxCount)
+                    variantCount = 0;
             }
             return gameObjectsPooled;
         }
@@ -85,6 +98,40 @@ namespace Utilities
                     return null;
                 }
                 return null;
+            }
+            return null;
+        }
+
+        public T GivePooledObjectOfType<T>(Pooltype pooltype) where T : IPooledObject
+        {
+            var objectPool = FindObjectPoolInList(pooltype);
+            if (objectPool != null)
+            {
+                if (!objectPool.IsNextObjectActive())
+                {
+                    objectPool.NextIndex();
+                    GameObject objectPooled = objectPool.GetCurrentObject(out var IpooledObject);
+                    if (IpooledObject != null)
+                    {
+                        if (!objectPooled.activeSelf)
+                        {
+                            objectPooled.SetActive(true);
+                            return (T)IpooledObject;
+                        }
+                        return default;
+                    }
+                    return default;
+                }
+                return default;
+            }
+            return default;
+        }
+
+        public List<GameObject> GiveAllMyPooledObjects(Pooltype pooltype)
+        {
+            ObjectPool objectPool = FindObjectPoolInList(pooltype);
+            if (objectPool != null) {
+                return objectPool.GetAllObjectsInPool();
             }
             return null;
         }

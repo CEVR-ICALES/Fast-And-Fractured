@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 [RequireComponent(typeof(ResourcesLoader))]
 public class ResourcesManager : AbstractSingleton<ResourcesManager>

@@ -24,7 +24,7 @@ namespace FastAndFractured
         private int maxCharactersInGame = 8;
         private List<string> _allCharactersNameCode;
         private Dictionary<string, int> _characterSelectedLimit;
-
+        public List<string> InGameCharactersNameCodes { get => _inGameCharactersNameCodes; }
         private List<string> _inGameCharactersNameCodes;
         public List<GameObject> InGameCharacters { get => _inGameCharacters; }
         private List<GameObject> _inGameCharacters;
@@ -61,6 +61,13 @@ namespace FastAndFractured
         [SerializeField] private bool stormInDebugMode = false;
         private GameObject _playerReference;
         public GameObject playerReference { get=>_playerReference ;}
+        public bool HasPlayerWon { get => _hasPlayerWon; }
+        private bool _hasPlayerWon = false;
+
+        private int _aliveCharacterCount;
+        public GameObject[] characterIcons;
+        [SerializeField]
+        private float endGameDelayTime = 0.5f;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -104,7 +111,7 @@ namespace FastAndFractured
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-              StartLevelWithSpawnedCharacters();
+                StartLevelWithSpawnedCharacters();
             }
             else
             {
@@ -119,20 +126,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            // PlayerInputController.OnInputDeviceChanged += HandleInputChange;
         }
 
         private void OnDisable()
         {
-            // PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        // public void HandleInputChange(InputDeviceType inputType)
-        // {
-        //     usingController = PlayerInputController.Instance.IsUsingController;
-        //     _playerBindingInputs.HandleInputChange(usingController);
-        // }
-        // will be moved to gameManager
         
         private void StartLevelWithOwnCharacters()
         {
@@ -142,6 +141,7 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            _playerReference = FindObjectOfType<PlayerInputController>().GetComponentInChildren<StatsController>().gameObject;
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);
@@ -164,6 +164,7 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
+            IngameEventsManager.Instance.SetCharactersTopElements();
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {
@@ -351,11 +352,28 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
+                    foreach (Transform child in character.transform)
+                    {
+                        foreach (GameObject icon in characterIcons)
+                        { 
+                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            {
+                                icon.SetActive(false);
+                            }
+                        }
+                    }
                     Destroy(character);
+                    if (_inGameCharacters.Count == 1)
+                    {
+                        _hasPlayerWon = true;
+                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
+                    }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
+                    _hasPlayerWon = false;
+                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
                 }
             });
         }

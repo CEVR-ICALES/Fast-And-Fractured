@@ -64,7 +64,8 @@ namespace Enums
         LOADING,
         SPLASH_SCREEN,
         EXIT_POPUP,
-        PAUSE
+        PAUSE,
+        WIN_LOSE
     }
 
     public enum Pooltype
@@ -87,6 +88,7 @@ namespace Enums
     {
         GROUND,
         AIR,
+        FLIP_SATE,
         NONE
     }
 

@@ -12,10 +12,17 @@ namespace FastAndFractured
         [SerializeField] private StatsBoost[] boostList;
         public StatsBoost[] BoostList => boostList;
         private const float PERMANENT_BOOST_VALUE = -1;
+        public string ingameEventText;
+        public float ingameEventTimeOnScreen = 2f;
 
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
+            GameObject player = LevelController.Instance.playerReference;
+            if (interactionFrom == player)
+            {
+                IngameEventsManager.Instance.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+            }
             if (!statsController) return;
 
             base.OnInteract(interactionFrom, intearactionTo);
