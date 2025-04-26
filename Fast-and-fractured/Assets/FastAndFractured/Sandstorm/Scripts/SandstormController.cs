@@ -77,6 +77,7 @@ namespace FastAndFractured
         [SerializeField] private GameObject minimapSandstormDirection;
 
         const float HALF_FRONT_ANGLE = 90;
+        private const float MIN_VALUE_PER_SANDSTORM_DETECTION = 0.00000000001f;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
@@ -267,7 +268,7 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
                 {
-                    if (!IsInsideStormCollider(other.gameObject,float.MinValue))
+                    if (!IsInsideStormCollider(other.gameObject,MIN_VALUE_PER_SANDSTORM_DETECTION))
                     {
                         CharacterEscapedDead(statsController);
                         _charactersInsideSandstorm.Remove(other.gameObject);
