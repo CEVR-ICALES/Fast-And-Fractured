@@ -267,7 +267,7 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
                 {
-                    if (!IsInsideStormCollider(other.gameObject,0.00000001f))
+                    if (!IsInsideStormCollider(other.gameObject,float.MinValue))
                     {
                         CharacterEscapedDead(statsController);
                         _charactersInsideSandstorm.Remove(other.gameObject);
@@ -298,8 +298,7 @@ namespace FastAndFractured
 
       public void OnPause()
         {
-            _isPaused = true;
-            
+            _isPaused = true; 
         }
 
         public void OnResume()
