@@ -128,7 +128,7 @@ namespace FastAndFractured
             else
             {
                 GroundForces();
-                if (carMovementController.IsInWall()||physicsBehaviour.IsTouchingGround)
+                if (carMovementController.IsInFlipCase()||physicsBehaviour.IsTouchingGround)
                 {
                     carMovementController.StartIsFlippedTimer();
                 }
@@ -140,7 +140,7 @@ namespace FastAndFractured
                 {
                     FlipStateForce();
                     groundState = IAGroundState.FLIP_SATE;
-                    if (!carMovementController.IsInWall())
+                    if (!carMovementController.IsInFlipCase())
                     {
                         carMovementController.IsFlipped = false;
                         groundState = IAGroundState.GROUND;
@@ -173,7 +173,7 @@ namespace FastAndFractured
 
         private void FlipStateForce()
         {
-            applyForceByState.ApplyFlipStateForce();
+            applyForceByState.ApplyFlipStateForce(physicsBehaviour.TouchingGroundNormal,physicsBehaviour.TouchingGroundPoint);
             applyForceByState.ToggleRollPrevention(false, 1);
         }
 

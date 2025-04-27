@@ -27,10 +27,15 @@ namespace FastAndFractured
 
         [Header("Ground Detection")]
         [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private LayerMask staticLayer;
         [SerializeField] private float _checkGroundTime = 0.5f;
         private ITimer _groundTimer;
         public bool IsTouchingGround { get => _isTouchingGround; }
         private bool _isTouchingGround = false;
+        public Vector3 TouchingGroundPoint { get => _touchingGroundPoint; set => _touchingGroundPoint = value; }
+        public Vector3 TouchingGroundNormal { get => _touchingGroundNormal; set => _touchingGroundNormal = value; }
+        private Vector3 _touchingGroundPoint;
+        private Vector3 _touchingGroundNormal;
 
         [Header("Air rotation")]
         [SerializeField] private float slowDownFactor;
@@ -52,6 +57,12 @@ namespace FastAndFractured
 
             _carMovementController = GetComponent<CarMovementController>();
             _rb.mass = StatsController.Weight;
+        }
+
+        private void Start()
+        {
+            _touchingGroundNormal = transform.up;
+            _touchingGroundPoint = transform.position;
         }
         private void OnTriggerEnter(Collider other)
         {
@@ -130,14 +141,22 @@ namespace FastAndFractured
 
         private void GroundCheck(Collision collision)
         {
-            if ((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer) {
-                _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { _isTouchingGround = true; });
+            if ((((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)||
+                ((staticLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer))
+                &&!_carMovementController.IsGrounded()) {
+                _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { 
+                    _isTouchingGround = true;
+                    _touchingGroundNormal = collision.contacts[0].normal;
+                    _touchingGroundPoint = collision.contacts[0].point;
+                });
+
             }
         }
 
         private void ExitGroundCheck(Collision collision)
         {
-            if ((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+            if (((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer) ||
+                ((staticLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer))
             {
                 if (_isTouchingGround)
                     _isTouchingGround = false;
@@ -148,6 +167,8 @@ namespace FastAndFractured
                         _groundTimer.StopTimer();
                     }
                 }
+                _touchingGroundNormal = transform.up;
+                _touchingGroundPoint = transform.position;
             }
         }
 

@@ -9,7 +9,7 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            if (!controller.GetBehaviour<CarMovementController>().IsInWall())
+            if (!controller.GetBehaviour<CarMovementController>().IsInFlipCase())
             {
                 if (!controller.GetBehaviour<PhysicsBehaviour>().HasBeenPushed)
                 {
