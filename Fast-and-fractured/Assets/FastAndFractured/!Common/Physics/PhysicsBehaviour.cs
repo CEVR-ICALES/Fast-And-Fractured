@@ -146,6 +146,11 @@ namespace FastAndFractured
                 &&!_carMovementController.IsGrounded()) {
                 _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { 
                     _isTouchingGround = true;
+                    if (collision.contacts.Length == 0)
+                    {
+                        return;
+                    }
+
                     _touchingGroundNormal = collision.contacts[0].normal;
                     _touchingGroundPoint = collision.contacts[0].point;
                 });

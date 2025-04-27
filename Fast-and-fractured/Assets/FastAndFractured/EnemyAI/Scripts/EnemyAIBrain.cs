@@ -261,6 +261,10 @@ namespace FastAndFractured
 
         public void UpdateTargetPosition()
         {
+            if (_currentTarget==null)
+            {
+                return;
+            }
             _positionToDrive = _currentTarget.transform.position;
         }
 
@@ -283,6 +287,10 @@ namespace FastAndFractured
 
         public bool HasReachedTargetToGoPosition()
         {
+            if (_currentTarget == null)
+            {
+                return true;
+            }
             return Vector3.Distance(transform.position, _currentTarget.transform.position) < DISTANCE_MARGIN_ERROR;
         }
         #endregion
@@ -646,8 +654,26 @@ namespace FastAndFractured
             return Vector3.SignedAngle(direction, carMovementController.transform.forward, axis);
         }
 
+        private float _emergencyRepositioningValue = 100f;
         bool TryToCalculatePath()
         {
+            if (!carMovementController.IsGrounded())
+            {
+                return false;
+            }
+
+            if (!agent.isOnNavMesh)
+            {
+                _positionToDrive = _positionToDrive;
+                Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
+                return true;
+                if (NavMesh.SamplePosition(transform.position, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
+                {
+                     _positionToDrive = hit.position;
+                     Debug.LogWarning("Emergency repositioning", this.gameObject);
+                     return true;
+                }
+            }
             if (agent.CalculatePath(_positionToDrive, _currentPath))
             {
                 if (_previousPath.Length != _currentPath.corners.Length)
@@ -675,7 +701,7 @@ namespace FastAndFractured
             switch (_currentPath.corners.Length)
             {
                 case 1:
-                    Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground");
+                    Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground",this.gameObject);
 
                     return _currentPath.corners[0];
                 case > 0:
