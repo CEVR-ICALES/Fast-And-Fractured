@@ -1,11 +1,14 @@
+using System;
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class StatsController : MonoBehaviour
+    public class StatsController : MonoBehaviour, IPausable
     {
         [SerializeField]
         private CharacterData charDataSO;
@@ -119,6 +122,9 @@ namespace FastAndFractured
         public float totalDistanceDriven = 0f;
         private Vector3 _lastPosition;
 
+        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
+        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -129,6 +135,15 @@ namespace FastAndFractured
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
+        }
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
         }
 
         #endregion
@@ -225,6 +240,29 @@ namespace FastAndFractured
                 }
             }
         }
+        public GameObject GetWinObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in WinObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
+
+        public GameObject GetLoseObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in LoseObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
         {
@@ -245,6 +283,7 @@ namespace FastAndFractured
                     {
                         if (_deadTimer != null)
                         {
+                            _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
                             SetDeadTimer(killer, newTime,damageXFrame);
@@ -253,6 +292,7 @@ namespace FastAndFractured
                 }
                 else
                 {
+                    _currentKiller = killer;
                     SetDeadTimer(killer, killer.KillTime,damageXFrame);
                 }
             }
@@ -262,16 +302,32 @@ namespace FastAndFractured
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                _currentKiller = killer;
                 Dead();
                 _deadTimer = null;
             }, onTimerDecreaseUpdate : (float time) =>
             {
                 if (damageXFrame > 0)
                 {
+                    Debug.Log("DamagePlayer");
                     TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });
+        }
+
+        public void OnPause()
+        {
+            if(_deadTimer != null)
+            {
+                _deadTimer.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            if (_deadTimer != null)
+            {
+                _deadTimer.ResumeTimer();
+            }
         }
 
         public void Dead()
@@ -279,7 +335,7 @@ namespace FastAndFractured
             Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
-            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
+            onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
         }
 
         public float GetEndurancePercentage()

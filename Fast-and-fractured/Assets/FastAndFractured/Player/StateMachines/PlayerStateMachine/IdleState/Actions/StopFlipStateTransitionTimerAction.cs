@@ -9,7 +9,11 @@ namespace StateMachine {
     {
         public override void Act(Controller controller)
         {
-            controller.GetBehaviour<CarMovementController>().StopFlippedTimer();
+            CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
+            if (!carMovementController.IsFlipped)
+            {
+                controller.GetBehaviour<CarMovementController>().StopFlippedTimer();
+            }
         }
     }
 }

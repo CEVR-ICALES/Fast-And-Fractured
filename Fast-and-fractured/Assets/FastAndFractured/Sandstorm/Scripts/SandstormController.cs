@@ -77,6 +77,7 @@ namespace FastAndFractured
         [SerializeField] private GameObject minimapSandstormDirection;
 
         const float HALF_FRONT_ANGLE = 90;
+        private const float MIN_VALUE_PER_SANDSTORM_DETECTION = 0.00000000001f;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
@@ -117,7 +118,6 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            Vector3 spawnVector = sphereCenter.forward;
             //Probably change for better aplication. Like an utility
             LevelController.Instance.ShuffleList(possibleAngels);
 
@@ -151,7 +151,7 @@ namespace FastAndFractured
         public void SpawnFogs()
         {
             _currentCharacterKillTime = maxCharacterKillTime;
-            fogParent.transform.position = _spawnPoint;
+            fogParent.transform.position = new Vector3(_spawnPoint.x, fogParent.transform.position.y, _spawnPoint.z);;
             primaryFog?.gameObject.SetActive(true);
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
@@ -241,14 +241,18 @@ namespace FastAndFractured
         }
 
         private void OnTriggerEnter(Collider other)
-        {
+        {   
             if (other.TryGetComponent(out StatsController statsController))
             {
-                StartKillNotify(statsController);
-                _charactersInsideSandstorm.Add(other.gameObject);
-                if (statsController.IsPlayer)
+                if (!other.GetComponent<Rigidbody>().isKinematic)
                 {
-                    ChangeSandstormVisuals(true);
+
+                    StartKillNotify(statsController);
+                    _charactersInsideSandstorm.Add(other.gameObject);
+                    if (statsController.IsPlayer)
+                    {
+                        ChangeSandstormVisuals(true);
+                    }
                 }
             }
             else
@@ -261,8 +265,14 @@ namespace FastAndFractured
         {
             if (other.TryGetComponent(out StatsController statsController))
             {
-                CharacterEscapedDead(statsController);
-                _charactersInsideSandstorm.Remove(other.gameObject);
+                if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
+                {
+                    if (!IsInsideStormCollider(other.gameObject,MIN_VALUE_PER_SANDSTORM_DETECTION))
+                    {
+                        CharacterEscapedDead(statsController);
+                        _charactersInsideSandstorm.Remove(other.gameObject);
+                    }
+                }
             }
             else
             {
@@ -272,13 +282,13 @@ namespace FastAndFractured
 
         public void StartKillNotify(StatsController statsController)
        {
-         float damageXFrame = statsController.MaxEndurance/_currentCharacterKillTime;
+         float damageXFrame = statsController.Endurance/_currentCharacterKillTime;
          statsController.GetKilledNotify(this,false,damageXFrame);
        }
 
       public void CharacterEscapedDead(StatsController statsController)
-      {
-            statsController.GetKilledNotify(this, true,0);  
+      { 
+        statsController.GetKilledNotify(this, true,0);  
       }
 
       public GameObject GetKillerGameObject()
@@ -288,8 +298,7 @@ namespace FastAndFractured
 
       public void OnPause()
         {
-            _isPaused = true;
-            
+            _isPaused = true; 
         }
 
         public void OnResume()

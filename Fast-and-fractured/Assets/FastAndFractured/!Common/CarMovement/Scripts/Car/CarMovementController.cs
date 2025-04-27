@@ -49,7 +49,7 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundWheelsAngleThreshold = 65;
-        [SerializeField] private float maxGroundCarAngleThreshold = 50f;
+        [SerializeField] private float maxGroundCarAngleThreshold = 12f;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
@@ -57,6 +57,11 @@ namespace FastAndFractured
         [SerializeField]
         private float detectFlipTime = 3.5f;
         private ITimer _flipTimer;
+        private LayerMask _combinedMask;
+        [SerializeField]
+        private LayerMask groundLayer;
+        [SerializeField]
+        private LayerMask staticLayer;
 
         private const float WHEELS_IN_SLOPE = 2;
 
@@ -88,6 +93,7 @@ namespace FastAndFractured
             statsController.CustomStart();
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             SetMaxRbSpeedDelayed();
+            _combinedMask = groundLayer | staticLayer;
         }
 
         private void FixedUpdate()
@@ -406,17 +412,16 @@ namespace FastAndFractured
             return _physicsBehaviour.IsTouchingGround;
         }
 
+        public bool IsInFlipCase()
+        {
+            return IsInWall()||_physicsBehaviour.IsTouchingGround;
+        }
+
         public bool IsInWall()
         {
             float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
-
-            if (groundWheels < WHEELS_IN_SLOPE || currentWheelsAngle < maxGroundWheelsAngleThreshold)
-            {
-                return false;
-            }
-            Debug.Log("IsWall");
-            float absoluteXRotationOfCar = Mathf.Abs(transform.rotation.x);
-            return currentWheelsAngle >= maxGroundWheelsAngleThreshold&&absoluteXRotationOfCar>=maxGroundCarAngleThreshold;
+            float absoluteXRotationOfCar = Mathf.Abs(transform.localRotation.x) * Mathf.Rad2Deg;
+            return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
         public void StartIsFlippedTimer()
@@ -424,7 +429,19 @@ namespace FastAndFractured
             if (_flipTimer == null)
             {
                 Debug.Log("StartTimer");
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE, () => { _isFlipped = true; });
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
+                    _isFlipped = true;
+                    //if (!_physicsBehaviour.IsTouchingGround)
+                    //{
+                    //    Ray ray = new Ray(transform.position,-transform.up);
+                    //    RaycastHit hit = new RaycastHit();
+                    //    if(Physics.Raycast(ray,out hit, Mathf.Infinity, _combinedMask)){
+                    //        _physicsBehaviour.TouchingGroundNormal = hit.normal;
+                    //        _physicsBehaviour.TouchingGroundPoint = transform.position;
+                    //    }
+                    //}
+                    _flipTimer=null;
+                });
             }
         }
 

@@ -1,10 +1,12 @@
 using Enums;
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Utilities;
 using UnityEngine.EventSystems;
 using UnityEditor;
+using UnityEngine.Events;
 
 namespace FastAndFractured
 {
@@ -25,6 +27,7 @@ namespace FastAndFractured
         private ITimer _fadeOutTimer;
 
         #endregion
+        public UnityEvent OnInitialized;
 
         #region Unity Methods
 
@@ -62,7 +65,7 @@ namespace FastAndFractured
                 isCurrentScreenInteractable = true;
                 LockFocusOnButton();
             }
-            
+            OnInitialized?.Invoke();
         }
 
         #endregion
