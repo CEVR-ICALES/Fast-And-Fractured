@@ -16,22 +16,24 @@ namespace FastAndFractured
         [SerializeField] private GameObject totalDamageTakenText;
         [SerializeField] private GameObject totalDistanceText;
         [SerializeField] private GameObject container;
-        private GameObject objectToSpawn;
+        private GameObject _objectToSpawn;
         public GameObject spawnPoint;
         private PlayableDirector _playableDirector;
         [SerializeField] private GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
         [SerializeField] private GameObject mainMenuTimeline;
+        private const string WIN_TEXT = "Menu.Win";
+        private const string LOSE_TEXT = "Menu.Lose";
 
 
         void OnEnable()
         {
             SetFinalStats();
-            objectToSpawn = gameEndData.finalAnimation;
-            if (objectToSpawn != null)
+            _objectToSpawn = gameEndData.finalAnimation;
+            if (_objectToSpawn != null)
             {
-                _spawnedObject = Instantiate(objectToSpawn, spawnPoint.transform.position, spawnPoint.transform.rotation);
+                _spawnedObject = Instantiate(_objectToSpawn, spawnPoint.transform.position, spawnPoint.transform.rotation);
                 _playableDirector = _spawnedObject.GetComponentInChildren<PlayableDirector>();
                 _playableDirector.stopped += OnPlayableDirectorStopped;
             }else
@@ -53,11 +55,11 @@ namespace FastAndFractured
         {
             if (gameEndData.isWin)
             {
-                resultText.GetComponent<LocalizedText>().LocalizationKey = "Menu.Win";
+                resultText.GetComponent<LocalizedText>().LocalizationKey = WIN_TEXT;
             }
             else
             {
-                resultText.GetComponent<LocalizedText>().LocalizationKey = "Menu.Lose";
+                resultText.GetComponent<LocalizedText>().LocalizationKey = LOSE_TEXT;
             }
             
             totalDamageDealtText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDamageDealt;

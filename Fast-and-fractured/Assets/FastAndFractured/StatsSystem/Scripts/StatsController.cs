@@ -232,7 +232,7 @@ namespace FastAndFractured
         }
         public GameObject GetWinObjectByString(string key)
         {
-            foreach (var pair in WinObjects)
+            foreach (GameObjectStringPair pair in WinObjects)
             {
                 if (pair.StringValue == key)
                 {
@@ -244,7 +244,7 @@ namespace FastAndFractured
 
         public GameObject GetLoseObjectByString(string key)
         {
-            foreach (var pair in LoseObjects)
+            foreach (GameObjectStringPair pair in LoseObjects)
             {
                 if (pair.StringValue == key)
                 {

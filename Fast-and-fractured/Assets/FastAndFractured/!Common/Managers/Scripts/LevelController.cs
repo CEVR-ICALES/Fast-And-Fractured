@@ -71,7 +71,9 @@ namespace FastAndFractured
         private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
 
-
+        private const float DISTANCE_TO_CHANGE_TO_KM = 1000f;
+        private const string METERS_TEXT = " m";
+        private const string KILOMETERS_TEXT = " km";
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
         private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
         private const int DEFAULT_SKIN = 0;
@@ -487,15 +489,15 @@ namespace FastAndFractured
         {
             float distance = _playerReference.GetComponent<StatsController>().totalDistanceDriven;
             string totalDistanceText;
-            if (distance < 1000)
+            if (distance < DISTANCE_TO_CHANGE_TO_KM)
             {
                 distance = Mathf.Round(distance);
-                totalDistanceText = distance.ToString() + " m";
+                totalDistanceText = distance.ToString() + METERS_TEXT;
             }
             else
             {
-                distance = Mathf.Round(distance / 1000f * 10) / 10;
-                totalDistanceText = distance.ToString() + " km";
+                distance = Mathf.Round(distance / DISTANCE_TO_CHANGE_TO_KM * 10) / 10;
+                totalDistanceText = distance.ToString() + KILOMETERS_TEXT;
             }
             GameObject finalAnimation;
             if(_hasPlayerWon)
