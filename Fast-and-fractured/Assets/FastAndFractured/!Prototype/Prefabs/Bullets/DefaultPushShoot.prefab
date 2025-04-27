@@ -192,8 +192,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 1
+  m_Center: {x: 0, y: 0.7, z: 0}
 --- !u!114 &-1545520480643349451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,6 +208,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pooltype: 3
   initValues: 1
+  visuals: {fileID: 0}
   particles: {fileID: 7271843766761087530}
   delayProyectileEnd: 1
   _explosionHitbox: {fileID: 7493075962908273155}

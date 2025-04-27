@@ -367,7 +367,7 @@ namespace FastAndFractured
                             }
                         }
                     }
-                    Destroy(character);
+                    Destroy(character.transform.parent.gameObject);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
                     {
