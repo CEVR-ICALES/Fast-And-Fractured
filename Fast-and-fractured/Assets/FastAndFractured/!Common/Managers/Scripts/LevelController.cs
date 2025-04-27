@@ -4,6 +4,7 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
@@ -68,8 +69,11 @@ namespace FastAndFractured
         public GameObject[] characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
+        [SerializeField] private GameEndData gameEndDataScriptableObject;
 
-
+        private const float DISTANCE_TO_CHANGE_TO_KM = 1000f;
+        private const string METERS_TEXT = " m";
+        private const string KILOMETERS_TEXT = " km";
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
         private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
         private const int DEFAULT_SKIN = 0;
@@ -108,6 +112,7 @@ namespace FastAndFractured
         //Maybe in Onenable?
         void Start()
         {
+            _aliveCharacterCount = maxCharactersInGame;
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
@@ -363,17 +368,18 @@ namespace FastAndFractured
                         }
                     }
                     Destroy(character);
-                    if (_inGameCharacters.Count == 1)
+                    _aliveCharacterCount--;
+                    if (_aliveCharacterCount == 1)
                     {
                         _hasPlayerWon = true;
-                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
+                        GetPlayerFinalStatsAndChangeScene();
                     }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
                     _hasPlayerWon = false;
-                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, endGameDelayTime);
+                    GetPlayerFinalStatsAndChangeScene();
                 }
             });
         }
@@ -479,7 +485,36 @@ namespace FastAndFractured
             }
         }
         #endregion
-
+        private void GetPlayerFinalStatsAndChangeScene()
+        {
+            float distance = _playerReference.GetComponent<StatsController>().totalDistanceDriven;
+            string totalDistanceText;
+            if (distance < DISTANCE_TO_CHANGE_TO_KM)
+            {
+                distance = Mathf.Round(distance);
+                totalDistanceText = distance.ToString() + METERS_TEXT;
+            }
+            else
+            {
+                distance = Mathf.Round(distance / DISTANCE_TO_CHANGE_TO_KM * 10) / 10;
+                totalDistanceText = distance.ToString() + KILOMETERS_TEXT;
+            }
+            GameObject finalAnimation;
+            if(_hasPlayerWon)
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetWinObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            else
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetLoseObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            gameEndDataScriptableObject.isWin = _hasPlayerWon;
+            gameEndDataScriptableObject.totalDamageDealt = _playerReference.GetComponent<StatsController>().totalDamageDealt.ToString();;
+            gameEndDataScriptableObject.totalDamageTaken = _playerReference.GetComponent<StatsController>().totalDamageTaken.ToString();
+            gameEndDataScriptableObject.totalDistanceTraveled = totalDistanceText;
+            gameEndDataScriptableObject.finalAnimation = finalAnimation;
+            MainMenuManager.Instance.LoadScene(0);
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
@@ -120,6 +122,9 @@ namespace FastAndFractured
         public float totalDistanceDriven = 0f;
         private Vector3 _lastPosition;
 
+        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
+        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -234,6 +239,29 @@ namespace FastAndFractured
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
+        }
+        public GameObject GetWinObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in WinObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
+
+        public GameObject GetLoseObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in LoseObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
         }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
