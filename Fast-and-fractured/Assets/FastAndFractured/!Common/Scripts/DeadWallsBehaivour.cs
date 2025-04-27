@@ -45,7 +45,7 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
 
     public bool IsCharacterInFront(Transform target)
     {
-        Vector3 directionToTarget = target.position - (transform.position + transform.lossyScale);
+        Vector3 directionToTarget = target.position - (transform.position);
 
         directionToTarget.Normalize();
         float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
