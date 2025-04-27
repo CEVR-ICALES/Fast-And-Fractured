@@ -18,9 +18,8 @@ namespace FastAndFractured {
 
         private const float AIR_FRICTION = 9.8f;
 
-        private const float FLIP_FORCE = 50f;
+        private const float FLIP_FORCE = 0.5f;
 
-        private const float FLIP_FORCE_OFFSET = 0.4f;
 
         private void Start()
         {
@@ -89,7 +88,7 @@ namespace FastAndFractured {
 
         public void ApplyFlipStateForce(Vector3 forceDirection, Vector3 forcePoint)
         {
-            _rb.AddForceAtPosition((forceDirection + FLIP_FORCE_OFFSET * Vector3.up * FLIP_FORCE) * statsController.Weight,forcePoint,ForceMode.Impulse);
+            _rb.AddForceAtPosition(Vector3.up * FLIP_FORCE * statsController.Weight,forcePoint,ForceMode.Impulse);
         }
     }
 }

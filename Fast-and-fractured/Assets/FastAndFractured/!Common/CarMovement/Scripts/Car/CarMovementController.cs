@@ -414,9 +414,14 @@ namespace FastAndFractured
 
         public bool IsInFlipCase()
         {
+            return IsInWall()||_physicsBehaviour.IsTouchingGround;
+        }
+
+        public bool IsInWall()
+        {
             float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
-            float absoluteXRotationOfCar = Mathf.Abs(transform.localRotation.x)*Mathf.Rad2Deg;
-            return currentWheelsAngle >= maxGroundWheelsAngleThreshold||absoluteXRotationOfCar>=maxGroundCarAngleThreshold||_physicsBehaviour.IsTouchingGround;
+            float absoluteXRotationOfCar = Mathf.Abs(transform.localRotation.x) * Mathf.Rad2Deg;
+            return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
         public void StartIsFlippedTimer()
@@ -426,15 +431,16 @@ namespace FastAndFractured
                 Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
-                    if (!_physicsBehaviour.IsTouchingGround)
-                    {
-                        Ray ray = new Ray(transform.position,-transform.up);
-                        RaycastHit hit = new RaycastHit();
-                        if(Physics.Raycast(ray,out hit, Mathf.Infinity, _combinedMask)){
-                            _physicsBehaviour.TouchingGroundNormal = hit.normal;
-                            _physicsBehaviour.TouchingGroundPoint = transform.position;
-                        }
-                    }
+                    //if (!_physicsBehaviour.IsTouchingGround)
+                    //{
+                    //    Ray ray = new Ray(transform.position,-transform.up);
+                    //    RaycastHit hit = new RaycastHit();
+                    //    if(Physics.Raycast(ray,out hit, Mathf.Infinity, _combinedMask)){
+                    //        _physicsBehaviour.TouchingGroundNormal = hit.normal;
+                    //        _physicsBehaviour.TouchingGroundPoint = transform.position;
+                    //    }
+                    //}
+                    _flipTimer=null;
                 });
             }
         }

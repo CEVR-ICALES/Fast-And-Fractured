@@ -61,7 +61,7 @@ namespace FastAndFractured
 
         private void Start()
         {
-            _touchingGroundNormal = transform.up;
+            _touchingGroundNormal = transform.up.normalized;
             _touchingGroundPoint = transform.position;
         }
         private void OnTriggerEnter(Collider other)
@@ -146,8 +146,8 @@ namespace FastAndFractured
                 &&!_carMovementController.IsGrounded()) {
                 _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { 
                     _isTouchingGround = true;
-                    _touchingGroundNormal = collision.contacts[0].normal;
-                    _touchingGroundPoint = collision.contacts[0].point;
+                    //_touchingGroundNormal = collision.contacts[0].normal;
+                    //_touchingGroundPoint = collision.contacts[0].point;
                 });
 
             }
@@ -167,8 +167,8 @@ namespace FastAndFractured
                         _groundTimer.StopTimer();
                     }
                 }
-                _touchingGroundNormal = transform.up;
-                _touchingGroundPoint = transform.position;
+                //_touchingGroundNormal = transform.up.normalized;
+                //_touchingGroundPoint = transform.position;
             }
         }
 
