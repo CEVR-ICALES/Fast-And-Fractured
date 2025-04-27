@@ -77,8 +77,8 @@ namespace FastAndFractured
         public void GoToMainMenu()
         {
             _spawnedObject.SetActive(false);
-            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
             mainMenuTimeline.SetActive(true);
+            // MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
         }
     }
 }
