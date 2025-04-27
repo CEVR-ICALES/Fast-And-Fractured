@@ -49,7 +49,7 @@ namespace FastAndFractured
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
         [SerializeField] private float maxGroundWheelsAngleThreshold = 65;
-        [SerializeField] private float maxGroundCarAngleThreshold = 50f;
+        [SerializeField] private float maxGroundCarAngleThreshold = 12f;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
@@ -415,8 +415,8 @@ namespace FastAndFractured
         public bool IsInFlipCase()
         {
             float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
-            float absoluteXRotationOfCar = Mathf.Abs(transform.rotation.x);
-            return (currentWheelsAngle >= maxGroundWheelsAngleThreshold&&absoluteXRotationOfCar>=maxGroundCarAngleThreshold)||_physicsBehaviour.IsTouchingGround; ;
+            float absoluteXRotationOfCar = Mathf.Abs(transform.localRotation.x)*Mathf.Rad2Deg;
+            return currentWheelsAngle >= maxGroundWheelsAngleThreshold||absoluteXRotationOfCar>=maxGroundCarAngleThreshold||_physicsBehaviour.IsTouchingGround;
         }
 
         public void StartIsFlippedTimer()
