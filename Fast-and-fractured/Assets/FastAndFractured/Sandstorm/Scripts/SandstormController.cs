@@ -211,7 +211,7 @@ namespace FastAndFractured
         {
             if (marginError > 0)
             {
-                Vector3 directionToTarget = target.transform.position - (transform.position + (_stormCollider.size.z / 2 + marginError) * transform.forward);
+                Vector3 directionToTarget = target.transform.position - (transform.position  + (_stormCollider.size.z / 2 + marginError + _stormCollider.center.z) * transform.forward);
                 directionToTarget.Normalize();
                 float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
                 float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
