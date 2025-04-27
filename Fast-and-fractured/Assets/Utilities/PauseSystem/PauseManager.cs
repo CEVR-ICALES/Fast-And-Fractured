@@ -115,9 +115,5 @@ namespace Utilities.Managers.PauseSystem
         }
 
         #endregion
-        public void DisablePause()
-        {
-            transform.gameObject.SetActive(false);
-        }
     }
 }

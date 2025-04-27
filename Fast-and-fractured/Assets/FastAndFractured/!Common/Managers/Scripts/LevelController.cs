@@ -69,7 +69,7 @@ namespace FastAndFractured
         public GameObject[] characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
-        private int _aliveCharacterCount;
+        [SerializeField] private GameEndData gameEndDataScriptableObject;
 
 
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
@@ -110,6 +110,7 @@ namespace FastAndFractured
         //Maybe in Onenable?
         void Start()
         {
+            _aliveCharacterCount = maxCharactersInGame;
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
@@ -119,7 +120,6 @@ namespace FastAndFractured
             {
                 StartLevelWithOwnCharacters();
             }
-            _aliveCharacterCount = maxCharactersInGame;
         }
 
         private void Update()
@@ -370,14 +370,14 @@ namespace FastAndFractured
                     if (_aliveCharacterCount == 1)
                     {
                         _hasPlayerWon = true;
-                        MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
+                        GetPlayerFinalStatsAndChangeScene();
                     }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
                     _hasPlayerWon = false;
-                    MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, -1);
+                    GetPlayerFinalStatsAndChangeScene();
                 }
             });
         }
@@ -483,16 +483,35 @@ namespace FastAndFractured
             }
         }
         #endregion
-
-        public void FinishGame()
+        private void GetPlayerFinalStatsAndChangeScene()
         {
-            foreach (var character in _inGameCharacters)
+            float distance = _playerReference.GetComponent<StatsController>().totalDistanceDriven;
+            string totalDistanceText;
+            if (distance < 1000)
             {
-                Destroy(character);
+                distance = Mathf.Round(distance);
+                totalDistanceText = distance.ToString() + " m";
             }
-            PauseManager.Instance.DisablePause();
-            _sandStormController.DisableSandstorm();
-            HUDManager.Instance.HideHUD();
+            else
+            {
+                distance = Mathf.Round(distance / 1000f * 10) / 10;
+                totalDistanceText = distance.ToString() + " km";
+            }
+            GameObject finalAnimation;
+            if(_hasPlayerWon)
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetWinObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            else
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetLoseObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            gameEndDataScriptableObject.isWin = _hasPlayerWon;
+            gameEndDataScriptableObject.totalDamageDealt = _playerReference.GetComponent<StatsController>().totalDamageDealt.ToString();;
+            gameEndDataScriptableObject.totalDamageTaken = _playerReference.GetComponent<StatsController>().totalDamageTaken.ToString();
+            gameEndDataScriptableObject.totalDistanceTraveled = totalDistanceText;
+            gameEndDataScriptableObject.finalAnimation = finalAnimation;
+            MainMenuManager.Instance.LoadScene(0);
         }
     }
 }
