@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using StateMachine;
@@ -8,6 +9,7 @@ using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
+using Random = UnityEngine.Random;
 
 namespace FastAndFractured
 {
@@ -137,7 +139,12 @@ namespace FastAndFractured
         {
         }
 
-        
+        private void OnDestroy()
+        {
+            Cursor.lockState = CursorLockMode.None;
+
+        }
+
         private void StartLevelWithOwnCharacters()
         {
             _inGameCharacters = new List<GameObject>();
