@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8686500854922035951, guid: 44ee10dc01db0f54b8236c6d14783d52, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7817da970f4570b4cbb98110d0dc195a, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -70,6 +74,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2280124765157583539}
     m_Modifications:
+    - target: {fileID: 2273420842889063861, guid: 0e7465bb4a04a2142b5e8f96e455d359, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7817da970f4570b4cbb98110d0dc195a, type: 2}
     - target: {fileID: 4549337908063535024, guid: 0e7465bb4a04a2142b5e8f96e455d359, type: 3}
       propertyPath: m_Name
       value: Wheel0 (1)
@@ -176,6 +184,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8686500854922035951, guid: 44ee10dc01db0f54b8236c6d14783d52, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7817da970f4570b4cbb98110d0dc195a, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -318,6 +330,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3720275510104103767}
     m_Modifications:
+    - target: {fileID: 2273420842889063861, guid: 0e7465bb4a04a2142b5e8f96e455d359, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7817da970f4570b4cbb98110d0dc195a, type: 2}
     - target: {fileID: 4549337908063535024, guid: 0e7465bb4a04a2142b5e8f96e455d359, type: 3}
       propertyPath: m_Name
       value: Wheel0
@@ -505,6 +521,30 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: pooltype
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingEvents/GolfBallThrow
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data1
+      value: 599806390
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data2
+      value: 1187424729
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data3
+      value: -1902186851
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data4
+      value: 704942478
+      objectReference: {fileID: 0}
+    - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: directionCenterOffSet.y
       value: 0.1
       objectReference: {fileID: 0}
@@ -590,7 +630,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.61
+      value: 3.43
+      objectReference: {fileID: 0}
+    - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.58
       objectReference: {fileID: 0}
     - target: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: charDataSO
@@ -612,6 +656,10 @@ PrefabInstance:
       propertyPath: vehicleVfxController
       value: 
       objectReference: {fileID: 7333974813881313245}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: maxGroundCarAngleThreshold
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 3172721178746115966, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.01
@@ -655,6 +703,10 @@ PrefabInstance:
     - target: {fileID: 3335559782921742567, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: 4.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: EventReference.Path
+      value: event:/VehicleMovementEvents/GolfCartEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3800277089519839925, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -748,6 +800,18 @@ PrefabInstance:
       propertyPath: m_Radius
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.59
+      objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.79
+      objectReference: {fileID: 0}
     - target: {fileID: 4819824608313735464, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 1
@@ -772,6 +836,10 @@ PrefabInstance:
       propertyPath: groundLayer.m_Bits
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: staticLayer.m_Bits
+      value: 1024
+      objectReference: {fileID: 0}
     - target: {fileID: 6679896942987676810, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 1
@@ -795,7 +863,7 @@ PrefabInstance:
     - target: {fileID: 7200528592949526990, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 665f849362f3ba14fa9541e433b742ab, type: 2}
+      objectReference: {fileID: 2100000, guid: 7817da970f4570b4cbb98110d0dc195a, type: 2}
     - target: {fileID: 7656301979064582024, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.233
@@ -859,6 +927,30 @@ PrefabInstance:
     - target: {fileID: 7872838902971275789, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: pooltype
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Path
+      value: event:/ShootingEvents/GolfBallThrow
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data1
+      value: 599806390
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data2
+      value: 1187424729
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data3
+      value: -1902186851
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923571590346614690, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: bulletSound.Guid.Data4
+      value: 704942478
       objectReference: {fileID: 0}
     - target: {fileID: 8001744072022429593, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: playOnAwake

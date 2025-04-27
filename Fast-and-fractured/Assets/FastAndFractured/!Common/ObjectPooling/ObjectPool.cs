@@ -81,6 +81,7 @@ namespace Utilities
                     _objPoolList.Add(obj);
                     if (obj.TryGetComponent<IPooledObject>(out var IpooledObject))
                     {
+                        IpooledObject.Pooltype = _type;
                         _IpooledObjectsList.Add(IpooledObject);
                     }
                 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using FastAndFractured;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Events;
 using UnityEngine.Timeline;
 using UnityEngine.UIElements;
@@ -25,7 +26,7 @@ public class AimPushShootTrace : MonoBehaviour
     [SerializeField] private float delayTimeForSecondThrow = 0.2f;
 
     [Header("Resources")]
-    [SerializeField] private Transform pushShootPoint;
+     private Transform _pushShootPoint;
     [SerializeField] private PushShootHandle pushShootHandle;
     [SerializeField] private LineRenderer lineRenderer;
 
@@ -52,6 +53,8 @@ public class AimPushShootTrace : MonoBehaviour
     void Start()
     {
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
+        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
+        _pushShootPoint = pushShootHandle.PushShootPoint;
         CalculateTrayectory();
         hitMark.SetActive(false);
         _previousContactIndex = 0;
@@ -76,7 +79,7 @@ public class AimPushShootTrace : MonoBehaviour
         {
             previousPoints = new List<Vector3>(_points);
             _currentVelocity = _initialSpeed;
-            _currentPosition = pushShootPoint.position;
+            _currentPosition = _pushShootPoint.position;
             _points.Clear();
             _points.Add(_currentPosition);
 
@@ -211,8 +214,8 @@ public class AimPushShootTrace : MonoBehaviour
 
     private void ThrowSimulatedProyectile()
     {
-        hitMarkCollision.SimulateThrow(_initialSpeed, pushShootPoint.position, Physics.gravity * _currentCustomGravity);
-        TimerSystem.Instance.CreateTimer(delayTimeForSecondThrow, onTimerDecreaseComplete: () => { hitMarkCollision2.SimulateThrow(_initialSpeed, pushShootPoint.position, Physics.gravity * _currentCustomGravity); });
+        hitMarkCollision.SimulateThrow(_initialSpeed, _pushShootPoint.position, Physics.gravity * _currentCustomGravity);
+        TimerSystem.Instance.CreateTimer(delayTimeForSecondThrow, onTimerDecreaseComplete: () => { hitMarkCollision2.SimulateThrow(_initialSpeed, _pushShootPoint.position, Physics.gravity * _currentCustomGravity); });
     }
 
     public void DrawTrayectory(bool draw)
