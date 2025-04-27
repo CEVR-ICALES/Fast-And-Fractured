@@ -115,6 +115,7 @@ namespace FastAndFractured
                 {
                     StopVFX();
                     ActivateHairEmission(false);
+                    SoundManager.Instance.StopSound(ssjUltiReference);
                 });
         }
 
