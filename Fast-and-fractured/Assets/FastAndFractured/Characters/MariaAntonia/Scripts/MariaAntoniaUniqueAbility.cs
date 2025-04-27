@@ -1,3 +1,4 @@
+using System;
 using FMODUnity;
 using UnityEngine;
 using System.Collections.Generic;
@@ -115,6 +116,11 @@ namespace FastAndFractured
                     StopVFX();
                     ActivateHairEmission(false);
                 });
+        }
+
+        private void OnDestroy()
+        {
+            SoundManager.Instance.StopSound(ssjUltiReference);
         }
 
         #region Croquette Methods
