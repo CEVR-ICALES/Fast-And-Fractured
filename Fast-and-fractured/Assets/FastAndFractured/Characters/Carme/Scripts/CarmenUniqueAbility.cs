@@ -30,12 +30,11 @@ namespace FastAndFractured
 
         public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
-            base.ActivateAbility();
-            _aimDirection = shootingHandle.CurrentShootDirection;
-            // remove vertical component while maintaining direction relative to car
-            _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
-            CalculateLandingPoint();
-
+                base.ActivateAbility();
+                _aimDirection = shootingHandle.CurrentShootDirection;
+                // remove vertical component while maintaining direction relative to car
+                _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
+                CalculateLandingPoint();
         }
 
         private void InitializeAbility(Vector3 landPoint)

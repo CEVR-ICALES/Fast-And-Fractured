@@ -215,7 +215,10 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    IsInvulnerable = false;
+                    if (IsInvulnerable)
+                    {
+                        IsInvulnerable = false;
+                    }
                 }
             }
             else Debug.LogWarning("Value can't be negative or 0.");
