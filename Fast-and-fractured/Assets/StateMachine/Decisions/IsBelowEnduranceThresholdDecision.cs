@@ -20,6 +20,10 @@ namespace StateMachine
             }
             else
             {
+                if (brain.TargetToShoot==null)
+                {
+                    return false;
+                }
                 if (brain.TargetToShoot.TryGetComponent(out StatsController targetStats))
                 {
                     health = targetStats.Endurance;

@@ -9,6 +9,7 @@ namespace Utilities
         public Pooltype pooltype;
         public string poolName;
         public GameObject prefab;
+        public GameObject[] prefabVariants;
         public int poolNum;
     }
 }

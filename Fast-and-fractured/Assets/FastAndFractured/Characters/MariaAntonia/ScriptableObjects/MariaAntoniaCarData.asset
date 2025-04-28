@@ -13,23 +13,23 @@ MonoBehaviour:
   m_Name: MariaAntoniaCarData
   m_EditorClassIdentifier: 
   CharacterName: MariaAntonia
-  AI: 0
   CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
-  CarWithSkinsPrefabs: []
-  MaxEndurance: 400
+  CarWithSkinsPrefabs:
+  - {fileID: 2299859702755162595, guid: c06f8ab003558b849b900acc4b42dd01, type: 3}
+  MaxEndurance: 500
   MinEndurance: 0
-  Invulnerable: 0
-  MaxSpeed: 100
-  MaxSpeedDashing: 140
+  Invulnerable: 1
+  MaxSpeed: 200
+  MaxSpeedDashing: 260
   MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 1500
+  MaxAcceleration: 10000
   MinAcceleration: 1000
-  Acceleration: 3500
-  BrakeTorque: 12000
+  Acceleration: 6000
+  BrakeTorque: 60000
   Handling: 35
-  HandlingSmoothnes: 6
-  AerialRotationSpeed: 0
+  HandlingSmoothnes: 9
+  AerialRotationSpeed: 2.5
   DriftThreshold: 0.1
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
@@ -37,22 +37,23 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 1200
-  BaseForce: 300000
+  Weight: 950
+  BaseForce: 250000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
-  BaseDownwardForce: 500
+  BaseDownwardForce: 1400
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 10
-  MaxNormalShootDMG: 25
-  MinNormalShootDMG: 5
+  NormalShootDMG: 15
+  MaxNormalShootDMG: 30
+  MinNormalShootDMG: 10
   PushShootFORCE: 400000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
-  NormalShootSpeed: 100
+  NormalShootSpeed: 120
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 150
+  NormalShootAngle: 180
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
@@ -66,4 +67,23 @@ MonoBehaviour:
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
   CooldownSpeed: 1
-  DeadDelay: 0
+  DeadDelay: 2.5
+  aiParameters:
+    fleeDistance: 5
+    sweepRadius: 20
+    shootingMarginErrorAngle: 0.02
+    damageAccumulationDuration: 5
+    fleeTriggerDamageThresholdPercentage: 40
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 10
+    decisionPercentageAcceleration: 10
+    decisionPercentageNormalShoot: 50
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 10
+  WinObjects:
+  - GameObject: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
+    StringValue: MariaAntonia_0
+  LoseObjects: []

@@ -71,20 +71,32 @@ namespace FastAndFractured
 
             if (canShoot)
             {
-                Vector3 velocity = (currentShootDirection + directionCenterOffSet) *
-                                   characterStatsController.NormalShootSpeed;
+                Vector3 shootingDirection = currentShootDirection + directionCenterOffSet;
+
+                float angle = Vector3.Angle(shootingDirection, transform.forward);
+                if (angle > characterStatsController.NormalShootAngle / 2)
+                {
+                    Vector3 clampedDirection = Vector3.RotateTowards(
+                        transform.forward,
+                        shootingDirection,
+                        Mathf.Deg2Rad * (characterStatsController.NormalShootAngle / 2),
+                        0f
+                    );
+                    clampedDirection.y = shootingDirection.y;
+                    shootingDirection = clampedDirection.normalized;
+                }
+
+                Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
 
                 canShoot = false;
 
-                //Normal Cadence TImer 
                 TimerSystem.Instance.CreateTimer(characterStatsController.NormalShootCadenceTime,
                     TimerDirection.INCREASE,
                     () => { canShoot = true; }
                 );
             }
-
 
         }
 

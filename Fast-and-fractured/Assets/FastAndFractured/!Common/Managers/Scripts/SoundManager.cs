@@ -8,53 +8,41 @@ namespace Utilities
 {
     public class SoundManager : AbstractSingleton<SoundManager>
     {
-        private float _masterVolume = 1f;
-
+        #region Variables
+        #region Volume Variables
+        private float _generalVolume = 1f;
+        private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
 
-        private float _musicVolume = 1f;
+        private float _previousGeneralVolume;
+        private float _previousMusicVolume;
+        private float _previousSFXVolume;
+        #endregion
 
+        #region Slider and Toggle Variables
         [SerializeField] private Slider sfxVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider generalVolumeSlider;
 
-        private Dictionary<EventReference, Queue<EventInstance>> _eventPool = new Dictionary<EventReference, Queue<EventInstance>>();
+        [SerializeField] private Toggle muteToggle;
+        #endregion
+
+        #region Dictionary Variables
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
+        #endregion
+
+        #endregion
 
         protected override void Awake()
         {
             base.Awake();
         }
 
-        #region Event Pooling Methods
-        /// <summary>
-        /// Retrieves an EventInstance from the pool if available; otherwise, create a new one
-        /// </summary>
-        /// <param name="eventReference">FMOD event reference</param>
-        /// <returns>EventInstance to be used</returns>
-        private EventInstance GetPooledEventInstance(EventReference eventReference)
+        private void Start()
         {
-            if (_eventPool.TryGetValue(eventReference, out Queue<EventInstance> eventQueue) && eventQueue.Count > 0)
-                return eventQueue.Dequeue();
-
-            return RuntimeManager.CreateInstance(eventReference);
+            if (muteToggle != null)
+                ToggleMuteAllSounds();
         }
-
-        /// <summary>
-        /// Stops an EventInstance and returns it to the pool for future reuse
-        /// </summary>
-        /// <param name="eventReference">FMOD event reference</param>
-        /// <param name="instance">EventInstance to be returned to the pool</param>
-        private void ReturnEventInstanceToPool(EventReference eventReference, EventInstance instance)
-        {
-            if (!_eventPool.ContainsKey(eventReference))
-                _eventPool[eventReference] = new Queue<EventInstance>();
-
-            instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            instance.setParameterByName("Volume", 0f);
-            _eventPool[eventReference].Enqueue(instance);
-        }
-        #endregion
 
         #region Play Sounds Methods
         /// <summary>
@@ -68,28 +56,18 @@ namespace Utilities
         }
 
         /// <summary>
-        /// Plays a looping sound event and keeps track of it
-        /// </summary>
-        /// <param name="eventReference">Path of the FMOD event</param>
-        /// <param name="soundInstance">Created FMOD EventInstance reference</param>
-        public void PlaySound(EventReference eventReference, out EventInstance soundInstance)
-        {
-            soundInstance = RuntimeManager.CreateInstance(eventReference);
-            _activeEvents[eventReference] = soundInstance;
-            soundInstance.start();
-        }
-
-        /// <summary>
         /// Plays a 3D sound event at a specific world position
         /// </summary>
         /// <param name="eventReference">Path of the FMOD event</param>
         /// <param name="position">Position in the world space</param>
-        public void PlaySound3D(EventReference eventReference, Vector3 position)
+        public EventInstance PlaySound3D(EventReference eventReference, Vector3 position)
         {
             EventInstance soundInstance = RuntimeManager.CreateInstance(eventReference);
-            _activeEvents[eventReference] = soundInstance;
             soundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
             soundInstance.start();
+            _activeEvents[eventReference] = soundInstance;
+
+            return soundInstance;
         }
         #endregion
 
@@ -102,7 +80,8 @@ namespace Utilities
         {
             if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
             {
-                ReturnEventInstanceToPool(eventReference, instance);
+                instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                instance.release();
                 _activeEvents.Remove(eventReference);
             }
         }
@@ -112,9 +91,10 @@ namespace Utilities
         /// </summary>
         public void StopAllSounds()
         {
-            foreach (var pair in _activeEvents)
+            foreach (var instance in _activeEvents.Values)
             {
-                ReturnEventInstanceToPool(pair.Key, pair.Value);
+                instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                instance.release();
             }
             _activeEvents.Clear();
         }
@@ -153,43 +133,73 @@ namespace Utilities
             RuntimeManager.StudioSystem.setParameterByName(parameterName, value);
         }
 
-        public void SetSFXVolume(float value)
-        {
-            SetVCAVolume("vca:/SFX", value);
-        }
-
-        public void SetMusicVolume(float value)
-        {
-            SetVCAVolume("vca:/Music", value);
-        }
-
-        public void SetGeneralVolume(float value)
-        {
-            SetVCAVolume("vca:/General", value);
-        }
+        public void SetSFXVolume(float value) => SetVCAVolume("vca:/SFX", value);
+        public void SetMusicVolume(float value) => SetVCAVolume("vca:/Music", value);
+        public void SetGeneralVolume(float value) => SetVCAVolume("vca:/General", value);
 
         public void SetVCAVolume(string vcaPath, float value)
         {
-            VCA sfxVCA = RuntimeManager.GetVCA(vcaPath);
-            sfxVCA.setVolume(value);
+            VCA vca= RuntimeManager.GetVCA(vcaPath);
+            vca.setVolume(value);
+        }
+
+        public void ToggleMuteAllSounds()
+        {
+            if (muteToggle.isOn)
+            {
+                _previousGeneralVolume = generalVolumeSlider != null ? generalVolumeSlider.value : _generalVolume;
+                _previousMusicVolume = musicVolumeSlider != null ? musicVolumeSlider.value : _musicVolume;
+                _previousSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : _sfxVolume;
+
+                generalVolumeSlider.value = 0;
+                musicVolumeSlider.value = 0;
+                sfxVolumeSlider.value = 0;
+
+                UpdateGeneralVolume();
+                UpdateMusicVolume();
+                UpdateSFXVolume();
+            }
+            else
+            {
+                generalVolumeSlider.value = 0.5f;
+                musicVolumeSlider.value = 0.5f;
+                sfxVolumeSlider.value = 0.5f;
+
+                UpdateGeneralVolume();
+                UpdateMusicVolume();
+                UpdateSFXVolume();
+
+                if (generalVolumeSlider != null) generalVolumeSlider.value = _previousGeneralVolume;
+                if (musicVolumeSlider != null) musicVolumeSlider.value = _previousMusicVolume;
+                if (sfxVolumeSlider != null) sfxVolumeSlider.value = _previousSFXVolume;
+            }
         }
 
         #region Slider Volume Methods
-        public void UpdateSFXVolume(Slider sfxSlider)
+        public void UpdateSFXVolume()
         {
-            _sfxVolume = sfxSlider.value;
-            SetSFXVolume(sfxSlider.value);
+            if (_sfxVolume != 0)
+                _previousSFXVolume = _sfxVolume;
+
+            _sfxVolume = sfxVolumeSlider.value;
+            SetSFXVolume(sfxVolumeSlider.value);
         }
 
-        public void UpdateMusicVolume(Slider musicSlider)
+        public void UpdateMusicVolume()
         {
-            _musicVolume = musicSlider.value;
-            SetMusicVolume(musicSlider.value);
+            if (_musicVolume != 0)
+                _previousMusicVolume = _musicVolume;
+
+            _musicVolume = musicVolumeSlider.value;
+            SetMusicVolume(musicVolumeSlider.value);
         }
 
-        public void UpdateGeneralVolume(Slider generalVolumeSlider)
+        public void UpdateGeneralVolume()
         {
-            _masterVolume = generalVolumeSlider.value;
+            if (_generalVolume != 0)
+                _previousGeneralVolume = _generalVolume;
+
+            _generalVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
         }
         #endregion

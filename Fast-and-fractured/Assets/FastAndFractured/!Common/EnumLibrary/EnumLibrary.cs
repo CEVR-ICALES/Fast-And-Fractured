@@ -49,7 +49,7 @@ namespace Enums
         PLAYER_6,
         PLAYER_7,
         BAD_EFFECTS,
-        EFFECTS,
+        NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR
     }
@@ -64,7 +64,8 @@ namespace Enums
         LOADING,
         SPLASH_SCREEN,
         EXIT_POPUP,
-        PAUSE
+        PAUSE,
+        WIN_LOSE
     }
 
     public enum Pooltype
@@ -74,7 +75,15 @@ namespace Enums
         NORMAL_BULLET,
         PUSH_BULLET,
         ASCENDING_TOMATO,
-        DESCENDING_TOMATO
+        DESCENDING_TOMATO,
+        NORMAL_BULLET_EGG,
+        PUSH_BULLET_CHICKEN,
+        NORMAL_BULLET_GOLF,
+        PUSH_BULLET_GOLF,
+        NORMAL_BULLET_TOMATO,
+        PUSH_BULLET_MELON,
+        NORMAL_BULLET_CROQUETA,
+        PUSH_BULLET_SARTENAZO
     }
 
     public enum PathMode
@@ -87,6 +96,7 @@ namespace Enums
     {
         GROUND,
         AIR,
+        FLIP_SATE,
         NONE
     }
 
@@ -96,7 +106,7 @@ namespace Enums
         TRIGGER
     }
 
-    public enum InputBlockTypes 
+    public enum InputBlockTypes
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
@@ -145,5 +155,10 @@ namespace Enums
         SPEED_EFFECT,
         TOMATO_EFFECT
     }
-
+ 
+    public enum GameElement
+    {
+        CHARACTER,
+        INTERACTABLE
+    }
 }

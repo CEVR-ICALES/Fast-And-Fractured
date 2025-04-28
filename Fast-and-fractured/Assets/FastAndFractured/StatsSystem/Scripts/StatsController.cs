@@ -1,14 +1,20 @@
+using System;
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class StatsController : MonoBehaviour
+    public class StatsController : MonoBehaviour, IPausable
     {
         [SerializeField]
         private CharacterData charDataSO;
+
+        [SerializeField]
+        private VehicleVfxController vehicleVfxController;
 
         [Header("CURRENT STATS")]
 
@@ -36,6 +42,7 @@ namespace FastAndFractured
         public float MaxSpeedMultiplier { get => MaxSpeedMultiplier; }
         public float MinSpeed { get => charDataSO.MinSpeed; }
 
+        public float AirRotationForce { get => charDataSO.AerialRotationSpeed; }
         public float Acceleration { get => currentAcceleration; }
         public float BrakeTorque { get => charDataSO.BrakeTorque; }
         public float Handling { get => charDataSO.Handling; }
@@ -60,6 +67,7 @@ namespace FastAndFractured
         [SerializeField] private float currentNormalShootDMG;
         [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
+        public float NormalShootAngle { get => charDataSO.NormalShootAngle; }
         public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
@@ -93,8 +101,11 @@ namespace FastAndFractured
         public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
-        #endregion
 
+        //SKINS
+        public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
+        #endregion
+        public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
@@ -103,6 +114,16 @@ namespace FastAndFractured
         private ITimer _deadTimer;
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
+
+        [Header("GAME STATS")]
+
+        public float totalDamageTaken = 0f;
+        public float totalDamageDealt = 0f;
+        public float totalDistanceDriven = 0f;
+        private Vector3 _lastPosition;
+
+        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
+        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
 
         #region START EVENTS
         public void CustomStart()
@@ -113,10 +134,24 @@ namespace FastAndFractured
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
+            _lastPosition = transform.position;
+        }
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         #endregion
-
+        void Update()
+        {
+            totalDistanceDriven += Vector3.Distance(transform.position, _lastPosition);
+            _lastPosition = transform.position;
+        }
         public void SetCharacter(CharacterData charData)
         {
             var copyOfCharData = Instantiate(charData);
@@ -143,40 +178,50 @@ namespace FastAndFractured
         [ContextMenu(nameof(DebugTake100Endurance))]
         public void DebugTake100Endurance()
         {
-            TakeEndurance(100, false);
+            TakeEndurance(100, false,gameObject);
+        }
+        [ContextMenu(nameof(DebugRecover100Endurance))]
+        public void DebugRecover100Endurance()
+        {
+            RecoverEndurance(100, false);
+        }
+        [ContextMenu(nameof(DebugDie))]
+        public void DebugDie()
+        {
+            Dead();
         }
 
 
         #region Health
-        public void TakeEndurance(float substract, bool isProduct)
+        public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
             if (substract > 0)
             {
                 if (!charDataSO.Invulnerable)
                 {
+                    totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
-                        onEnduranceDamageTaken?.Invoke(substract,this.gameObject);
+                        onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
+                        vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                         }
-                        //This is not the real dead condition, just an example. 
-                        /*if (currentEndurance <= charDataSO.MinEndurance)
-                        {
-                            Dead();
-                        }*/
                     }
                     else
-                        Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                        Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
                 else
                 {
-                    IsInvulnerable = false;
+                    if (IsInvulnerable)
+                    {
+                        IsInvulnerable = false;
+                    }
                 }
             }
-            else Debug.LogError("Value can't be negative or 0.");
+            else Debug.LogWarning("Value can't be negative or 0.");
         }
 
         public void RecoverEndurance(float sum, bool isProduct)
@@ -186,24 +231,52 @@ namespace FastAndFractured
                 if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
+                    vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
+                    if(_isPlayer)
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                    }
                 } else
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
         }
+        public GameObject GetWinObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in WinObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
 
-        public void GetKilledNotify(IKillCharacters killer,bool escapedDead)
+        public GameObject GetLoseObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in LoseObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
+
+        public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
         {
             if (killer == _currentKiller)
             {
-                if(escapedDead)
+                if (escapedDead)
                 {
                     _deadTimer?.StopTimer();
                     _deadTimer = null;
                     _currentKiller = null;
-                }    
+                }
             }
             else
             {
@@ -213,34 +286,59 @@ namespace FastAndFractured
                     {
                         if (_deadTimer != null)
                         {
+                            _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
-                            SetDeadTimer(killer,newTime);
+                            SetDeadTimer(killer, newTime,damageXFrame);
                         }
                     }
                 }
                 else
                 {
-                    SetDeadTimer(killer,killer.KillTime);
+                    _currentKiller = killer;
+                    SetDeadTimer(killer, killer.KillTime,damageXFrame);
                 }
             }
         }
 
-        private void SetDeadTimer(IKillCharacters killer,float time)
+        private void SetDeadTimer(IKillCharacters killer,float time,float damageXFrame)
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                _currentKiller = killer;
                 Dead();
                 _deadTimer = null;
+            }, onTimerDecreaseUpdate : (float time) =>
+            {
+                if (damageXFrame > 0)
+                {
+                    Debug.Log("DamagePlayer");
+                    TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
+                }
             });
+        }
+
+        public void OnPause()
+        {
+            if(_deadTimer != null)
+            {
+                _deadTimer.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            if (_deadTimer != null)
+            {
+                _deadTimer.ResumeTimer();
+            }
         }
 
         public void Dead()
         {
             Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
-            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
+            vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
+            onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
         }
 
         public float GetEndurancePercentage()
@@ -257,12 +355,12 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, sum, false))
                 {
-                    Debug.LogError("Stat of "+type+" selected doesn't exist or can't be modified. " +
+                    Debug.LogWarning("Stat of "+type+" selected doesn't exist or can't be modified. " +
                      "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
             else
-                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                Debug.LogWarning("Value can't be positive or you are trying to change the endurance." +
                     " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
 
         }
@@ -273,12 +371,12 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, -subtrahend, false))
                 {
-                    Debug.LogError("Stat of " + type +" selected doesn't exist or can't be modified. " +
+                    Debug.LogWarning("Stat of " + type +" selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
             else
-                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                Debug.LogWarning("Value can't be positive or you are trying to change the endurance." +
                   " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
@@ -288,12 +386,12 @@ namespace FastAndFractured
             {
                 if (!ChoseCharToMod(type, multiplier, true))
                 {
-                    Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                    Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                     "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
             else
-                Debug.LogError("Value can't be positive or you are trying to change the endurance." +
+                Debug.LogWarning("Value can't be positive or you are trying to change the endurance." +
                  " If that's the case, use the TakeEndurance or RecoverEndurance methods.");
         }
 
@@ -342,6 +440,10 @@ namespace FastAndFractured
             }
             return charStat;
         }
+        public void AddDealtDamage(float damage)
+        {
+            totalDamageDealt += damage;
+        }
         #endregion
         #region TemporalModificators
         public void TemporalStatUp(Stats type, float sum, float time)
@@ -365,14 +467,12 @@ namespace FastAndFractured
             float currentValue = GetCurrentStat(type);
             if (previousValue == ERROR_GET_STAT_FLOAT || currentValue == ERROR_GET_STAT_FLOAT)
             {
-                Debug.LogError("Stat selected doesn't exist or can't be modified. " +
+                Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                    "Comprove if GetCurrentStat method of class Stats Controller contains this states");
             }
-            //StartCoroutine(WaitTimeToModStat(previousValue, currentValue, type, previousValue < currentValue, time));
             RemoveStatModificationByTimer(previousValue, currentValue, type, previousValue < currentValue, time);
         }
 
-        //Coroutine is for try propuses. It will be susbtitute for a Timer. 
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
             float mod;

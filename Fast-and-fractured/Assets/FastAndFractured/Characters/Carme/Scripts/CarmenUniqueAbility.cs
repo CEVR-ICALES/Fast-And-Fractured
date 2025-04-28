@@ -28,14 +28,18 @@ namespace FastAndFractured
         [SerializeField] private ShootingHandle shootingHandle;
 
 
-        public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
+        public override bool ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
-            base.ActivateAbility();
-            _aimDirection = shootingHandle.CurrentShootDirection;
-            // remove vertical component while maintaining direction relative to car
-            _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
-            CalculateLandingPoint();
+            if (base.ActivateAbility())
+            {
+                _aimDirection = shootingHandle.CurrentShootDirection;
+                // remove vertical component while maintaining direction relative to car
+                _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
+                CalculateLandingPoint();
+                return true;
+            }
 
+            return false;
         }
 
         private void InitializeAbility(Vector3 landPoint)
@@ -47,11 +51,12 @@ namespace FastAndFractured
             {
                 DestroyUniqueAbility(uniqueAbility);
             });
+            EndAbilityEffects();
+
         }
 
         private void DestroyUniqueAbility(GameObject uniqueAbility)
         {
-            EndAbilityEffects();
             StopCooldown(); 
             Destroy(uniqueAbility);
         }
