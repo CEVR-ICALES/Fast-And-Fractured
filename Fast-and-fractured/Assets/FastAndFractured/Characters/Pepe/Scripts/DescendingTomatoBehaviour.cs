@@ -36,16 +36,31 @@ namespace FastAndFractured
         }
         void OnTriggerEnter(Collider other)
         {
+            //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
+            if(objective == LevelController.Instance.playerReference)
+            {
+                IngameEventsManager.Instance.RemoveTomatoAlert();
+            }
+
+            
             if (other.gameObject.layer == LayerMask.NameToLayer("Characters"))
             {
-                EffectOnCharacter(other);
+                StatsController statsController = other.GetComponent<StatsController>();
+                if(statsController.IsInvulnerable)
+                {
+                    statsController.IsInvulnerable = false;
+                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                }
+                else
+                {
+                    EffectOnCharacter(other);
+                }
             }
         }
         private void EffectOnCharacter(Collider other)
         {
             if (other.gameObject == LevelController.Instance.playerReference)
             {
-                IngameEventsManager.Instance.RemoveTomatoAlert();
                 IngameEventsManager.Instance.SetTomatoScreenEffect(effectTime);
             }
             else
