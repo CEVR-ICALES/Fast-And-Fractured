@@ -41,11 +41,11 @@ namespace FastAndFractured
         }
 
 
-        public virtual void ActivateAbility()
+        public virtual bool ActivateAbility()
         {
             if (_isAbilityActive || _isOnCooldown)
             {
-                return;
+                return false;
             }
 
             _isAbilityActive = true;
@@ -53,6 +53,7 @@ namespace FastAndFractured
             StartAbilityEffects();
             onAbilityActivated?.Invoke();
             StartCooldown();
+            return true;
         }  
         private void StartCooldown()
         {

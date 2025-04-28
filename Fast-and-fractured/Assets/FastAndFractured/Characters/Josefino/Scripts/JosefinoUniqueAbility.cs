@@ -11,10 +11,15 @@ namespace FastAndFractured
         [SerializeField] private float enduranceRecoveryAmount = 0f;
         private StatsController statsController;
 
-        public override void ActivateAbility()
+        public override bool ActivateAbility()
         {
-            base.ActivateAbility();
-            AbilityEffect();
+            if (base.ActivateAbility())
+            {
+                AbilityEffect();
+                return true;
+            }
+
+            return false;
         }
         private void Start()
         {
@@ -23,15 +28,13 @@ namespace FastAndFractured
         }
         private void Update()
         {
-            if (!statsController.IsInvulnerable&&IsAbilityActive)
-            {
-                EndAbilityEffects();
-            }
+            
         }
         private void AbilityEffect()
         {
            statsController.RecoverEndurance(enduranceRecoveryAmount, false);
            statsController.IsInvulnerable = true;
+           EndAbilityEffects();
         }
     }
 
