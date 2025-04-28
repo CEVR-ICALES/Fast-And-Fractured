@@ -123,7 +123,7 @@ namespace FastAndFractured
 
         private void OnDestroy()
         {
-            SoundManager.Instance.StopSound(ssjUltiReference);
+            SoundManager.Instance?.StopSound(ssjUltiReference);
         }
 
         #region Croquette Methods

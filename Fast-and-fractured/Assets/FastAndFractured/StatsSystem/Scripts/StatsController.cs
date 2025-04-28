@@ -143,7 +143,7 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         #endregion
