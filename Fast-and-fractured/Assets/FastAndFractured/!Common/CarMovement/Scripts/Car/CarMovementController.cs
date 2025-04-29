@@ -305,6 +305,13 @@ namespace FastAndFractured
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
                 _physicsBehaviour.IsCurrentlyDashing = true;
                 _canDash = false;
+
+                // Apply a small initial velocity to overcome static friction
+                if (_physicsBehaviour.Rb.velocity.magnitude < 1f)
+                {
+                    _physicsBehaviour.Rb.velocity += dashDirection * 0.5f;
+                }
+
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
                     FinishDash();
