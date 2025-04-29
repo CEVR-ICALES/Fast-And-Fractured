@@ -209,7 +209,7 @@ namespace FastAndFractured
             _inGameCharactersNameCodes = new List<string>();
             succeded = CreateAllCharactersNameCodesList();
             bool ignoreRepeatedCharacters;
-            if (ignoreRepeatedCharacters = _inGameCharactersNameCodes.Count < maxCharactersInGame)
+            if (ignoreRepeatedCharacters = _allCharactersNameCode.Count < maxCharactersInGame)
             {
                 Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
             }
