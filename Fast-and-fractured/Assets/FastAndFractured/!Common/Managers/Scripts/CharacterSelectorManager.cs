@@ -47,9 +47,25 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
 
+
+        if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
+            foreach (CharacterMenuData character in allCharacters)
+            {
+                if (PlayerPrefs.GetString(SELECTED_PLAYER_KEY).Contains(character.CharacterName))
+                {
+                    _currentCharacterIndex = System.Array.IndexOf(allCharacters, character);
+                    _currentSkinIndex = int.Parse(PlayerPrefs.GetString(SELECTED_PLAYER_KEY).Split('_')[1]);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            _currentCharacterIndex = 0;
+            _currentSkinIndex = 0;
+        }
+
         UpdateCharacterDisplay();
-        _currentCharacterIndex = 0;
-        _currentSkinIndex = 0;
     }
 
     public void SelectNextCharacter()
