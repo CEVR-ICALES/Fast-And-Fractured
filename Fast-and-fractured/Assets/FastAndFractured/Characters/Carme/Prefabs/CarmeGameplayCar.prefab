@@ -5894,6 +5894,22 @@ PrefabInstance:
       propertyPath: currentMaxSpeedDescend
       value: 195
       objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: detectFlipTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: staticLayer.m_Bits
+      value: 1024
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: maxGroundCarAngleThreshold
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 3172721178746115966, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.04
@@ -5948,7 +5964,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: OverrideMaxDistance
-      value: 20
+      value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: EventReference.Guid.Data1
@@ -6094,6 +6110,18 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -2.7529893
       objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.073
+      objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.66
+      objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 4737484894664670994, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_CenterOfMass.y
       value: -0.2
@@ -6213,6 +6241,10 @@ PrefabInstance:
     - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: groundLayer.m_Bits
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: staticLayer.m_Bits
+      value: 1024
       objectReference: {fileID: 0}
     - target: {fileID: 6029403678818502445, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6546,6 +6578,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6626373658847031856, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 4591979289224938860}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8142885279693097499 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 4591979289224938860}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8284357542529456002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db449586d91ae8349a505d9a5a990687, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8284357542529456002 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -6570,8 +6613,12 @@ MonoBehaviour:
   onAbilityEnded:
     m_PersistentCalls:
       m_Calls: []
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   chickenPrefab: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
   uniqueAbilityShootPoint: {fileID: 1988297944522183032}
+  physicsBehaviour: {fileID: 8142885279693097499}
   rayCastDistance: 10
   obstacleLayerMask:
     serializedVersion: 2

@@ -51,7 +51,7 @@ namespace FastAndFractured
         private const float MASTER_VOLUME_DEFAULT = 0.5f;
         private const int VSYNC_DEFAULT_STATE = 0;
         private const float SHARPENING_DEFAULT = 0.5f;
-        private const float BRIGHTNESS_DEFAULT = 1f;
+        private const float BRIGHTNESS_DEFAULT = 0.5f;
         private const int FPS_DEFAULT = 60;
         private const string RESOLUTION_DEFAULT = "1920x1080";
         #endregion

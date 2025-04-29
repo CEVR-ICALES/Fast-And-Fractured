@@ -116,7 +116,7 @@ public class AIParameters
     [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
     [SerializeField] private float sweepRadius = 20f;
     [Tooltip("The shooting error that AI has on normal shoot")]
-    [SerializeField] private float shootingMarginErrorAngle = 2f;
+    [SerializeField] private float shootingMarginErrorAngle = 0.02f;
     
     [Header("Aggressiveness parameters")]
     [Tooltip("Duration of continuous damage required to reach this value")]

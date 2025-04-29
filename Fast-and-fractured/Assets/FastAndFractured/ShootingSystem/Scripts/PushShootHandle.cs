@@ -12,6 +12,7 @@ namespace FastAndFractured {
     {
         public UnityEvent<float, float> onCooldownUpdate;
         private bool _shootingMine = false;
+        public Transform PushShootPoint=>shootPoint;
 
         ITimer _pushShootCooldown;
         protected override void SetBulletStats(BulletBehaviour bulletBehaivour)

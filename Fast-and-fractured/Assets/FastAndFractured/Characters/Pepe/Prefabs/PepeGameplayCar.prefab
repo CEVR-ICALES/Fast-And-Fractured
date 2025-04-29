@@ -466,10 +466,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 14.125
       objectReference: {fileID: 0}
+    - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: detectFlipTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: staticLayer.m_Bits
+      value: 1024
+      objectReference: {fileID: 0}
     - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: vehicleVfxController
       value: 
       objectReference: {fileID: 8789480297743576495}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: maxGroundCarAngleThreshold
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 3172721178746115966, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.37
@@ -528,7 +552,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: OverrideMaxDistance
-      value: 20
+      value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3352713489937622652, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: EventReference.Guid.Data1
@@ -678,6 +702,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -3.75
       objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.51
+      objectReference: {fileID: 0}
     - target: {fileID: 4737484894664670994, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_CenterOfMass.y
       value: -0.1
@@ -729,6 +761,10 @@ PrefabInstance:
     - target: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Name
       value: PepeGameplayCar
+      objectReference: {fileID: 0}
+    - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: staticLayer.m_Bits
+      value: 1024
       objectReference: {fileID: 0}
     - target: {fileID: 6029403678818502445, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1040,10 +1076,13 @@ MonoBehaviour:
   onAbilityEnded:
     m_PersistentCalls:
       m_Calls: []
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   spawnPoint: {fileID: 5404290905123533514}
   tomatoSpeed: 100
   descendingTomatoSpeed: 100
-  distanceEffect: 50
+  distanceEffect: 150
   ascendingTime: 2
   pooltypeAscendingTomato: 4
   pooltypeDescendingTomato: 5

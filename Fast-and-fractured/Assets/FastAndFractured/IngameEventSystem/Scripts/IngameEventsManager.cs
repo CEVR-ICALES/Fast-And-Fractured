@@ -18,6 +18,7 @@ namespace FastAndFractured
         private void Start()
         {
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
+            IngameEventsManager.Instance.CreateEvent("¡¡¡¡Empuja a todos fuera del mapa antes de que llegue la tormenta!!!!", 5f);
         }
         public void CreateEvent(string eventText, float timeInScreen)
         {
@@ -46,6 +47,7 @@ namespace FastAndFractured
                 inGameCharactersTopIcons[i].SetActive(true);
                 i++;
             }
+            Debug.Log("Ingame Characters Top Icon: " + inGameCharactersTopIcons[4]);
             LevelController.Instance.characterIcons = inGameCharactersTopIcons;
         }
         public void SetTomatoAlert()

@@ -12,7 +12,9 @@ namespace FastAndFractured
         public LocalVolumetricFog primaryFog;
 
         public float maxGrowthTime = 1.0f;
-
+        [SerializeField]
+        [Range(0.05f,0.9f)]
+        private float colliderLessGrowMultiplicator = 0.7f;
         private float _maxGrowth;
         private float _growthSpeed;
 
@@ -95,7 +97,7 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
         private void Update()
         {
@@ -118,7 +120,6 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            Vector3 spawnVector = sphereCenter.forward;
             //Probably change for better aplication. Like an utility
             LevelController.Instance.ShuffleList(possibleAngels);
 
@@ -152,7 +153,7 @@ namespace FastAndFractured
         public void SpawnFogs()
         {
             _currentCharacterKillTime = maxCharacterKillTime;
-            fogParent.transform.position = _spawnPoint;
+            fogParent.transform.position = new Vector3(_spawnPoint.x, fogParent.transform.position.y, _spawnPoint.z);;
             primaryFog?.gameObject.SetActive(true);
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
@@ -188,7 +189,7 @@ namespace FastAndFractured
 
                     primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
                 }
-                float newZSizeCollider = _initialColliderSize.z + _currentGrowth;
+                float newZSizeCollider = _initialColliderSize.z + _currentGrowth * colliderLessGrowMultiplicator;
                 _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
 
@@ -212,7 +213,7 @@ namespace FastAndFractured
         {
             if (marginError > 0)
             {
-                Vector3 directionToTarget = target.transform.position - (transform.position + (_stormCollider.size.z / 2 + marginError) * transform.forward);
+                Vector3 directionToTarget = target.transform.position - (transform.position  + (_stormCollider.size.z / 2 + marginError + _stormCollider.center.z) * transform.forward);
                 directionToTarget.Normalize();
                 float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
                 float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;

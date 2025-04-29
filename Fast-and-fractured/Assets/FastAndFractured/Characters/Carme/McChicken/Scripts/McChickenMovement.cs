@@ -1,15 +1,18 @@
 using DG.Tweening;
 using UnityEngine;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class McChickenMovement : MonoBehaviour
+    public class McChickenMovement : MonoBehaviour, IPausable
     {
         public Vector3 MoveDirection => _currentMoveDirection;
         public bool IsClimbing => _isClimbing;
 
         public bool IsInCeling => _isInCeiling;
+
+        bool _isPaused = false;
 
         [Header("Movement Settings")]
         [SerializeField] private float moveForce = 5f;
@@ -34,6 +37,15 @@ namespace FastAndFractured
         private McChickenPhysicsHandler _physicsHandler;
         private const int NUMBER_OF_JUMPS = 1;
 
+        void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
         public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
         {
             _rb = rb;
@@ -48,6 +60,9 @@ namespace FastAndFractured
 
         private void FixedUpdate()
         {
+            if (_isPaused)
+                return;
+
             _physicsHandler.UpdateGroundState();
 
             if (_isClimbing)
@@ -56,6 +71,7 @@ namespace FastAndFractured
             }
             else
             {
+
                 KinematicMovement();
                 ApplyCustomGravity();
                 _physicsHandler.ApplyRotation(rotationSpeed);
@@ -66,7 +82,6 @@ namespace FastAndFractured
         {
             if(!_physicsHandler.IsGrounded)
             {
-                Debug.Log("gravity");
                 _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
             }
         }
@@ -116,6 +131,16 @@ namespace FastAndFractured
             _isClimbing = false;
             _rb.useGravity = true;
             _rb.isKinematic = false;
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }
