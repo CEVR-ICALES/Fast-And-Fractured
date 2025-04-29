@@ -162,7 +162,4 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
     }
-
-
-
 }
