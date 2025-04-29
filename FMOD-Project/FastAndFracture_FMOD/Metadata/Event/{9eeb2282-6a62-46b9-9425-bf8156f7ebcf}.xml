@@ -5,7 +5,7 @@
 			<value>EggShootSFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{07e1d877-4165-4e6c-965b-1779a21d1a0a}</destination>
@@ -116,6 +116,7 @@
 	<object class="MixerBusEffectChain" id="{ada58ddb-e8c7-4310-a9d7-c09a17bb695c}">
 		<relationship name="effects">
 			<destination>{59e17599-9657-40c9-8d2a-7317c26a6c55}</destination>
+			<destination>{85a82a8f-dd3d-46f1-bab4-979c16e3a7a5}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{a3b94581-d290-495a-b79a-9287cd633e4a}" />
@@ -127,5 +128,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{afb1a427-3df1-42d0-be59-dd432a6b229d}" />
 	<object class="MixerBusFader" id="{59e17599-9657-40c9-8d2a-7317c26a6c55}" />
+	<object class="SpatialiserEffect" id="{85a82a8f-dd3d-46f1-bab4-979c16e3a7a5}" />
 	<object class="MixerBusFader" id="{39aaaa54-985e-40af-8751-e3e99bf44602}" />
 </objects>

@@ -5,7 +5,7 @@
 			<value>TomatoShoot</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{07e1d877-4165-4e6c-965b-1779a21d1a0a}</destination>
@@ -116,6 +116,7 @@
 	<object class="MixerBusEffectChain" id="{b758a0e5-af53-4a18-97de-d68957b7f139}">
 		<relationship name="effects">
 			<destination>{925a2079-3c0e-43d5-ae71-8cdde5744259}</destination>
+			<destination>{0086cb28-31a3-4364-a15f-18c343caa298}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{d96733f3-9dd6-4c86-8131-650eccb07a66}" />
@@ -127,5 +128,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{33b4dfe2-b088-43c9-b16b-19f8ce1eb4ff}" />
 	<object class="MixerBusFader" id="{925a2079-3c0e-43d5-ae71-8cdde5744259}" />
+	<object class="SpatialiserEffect" id="{0086cb28-31a3-4364-a15f-18c343caa298}" />
 	<object class="MixerBusFader" id="{369409a1-c34a-4bae-8f42-7a222800497f}" />
 </objects>
