@@ -18,7 +18,7 @@ namespace FastAndFractured
         [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
         [SerializeField] float sweepRadius = 20f;
         [Tooltip("The shooting error that AI has on normal shoot")]
-        [SerializeField] float shootingMarginErrorAngle = 2f;
+        [SerializeField] float shootingMarginErrorAngle = 0.02f;
         [SerializeField] LayerMask sweepLayerMask;
 
 
@@ -616,6 +616,11 @@ namespace FastAndFractured
             return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
         }
 
+        private Vector3 CalcNormalizedShootingDirection()
+        {
+            return (_currentTarget.transform.position - normalShootHandle.ShootPoint.position).normalized;
+        }
+
         private float GetAngleDirection(Vector3 axis)
         {
             Vector3 direction;
@@ -726,9 +731,9 @@ namespace FastAndFractured
             _previousPath = _currentPath.corners;
         }
 
-        private Vector3 GetShootingDirectionWithError()
+        private Vector3 GetShootingDirectionWithError() 
         {
-            Vector3 shootingDirection = CalcNormalizedTargetDirection();
+            Vector3 shootingDirection = CalcNormalizedShootingDirection();
 
             //Add shooting error 
             return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),

@@ -128,7 +128,7 @@ namespace FastAndFractured
 
                     if (otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
                     {
-                        otherComponentPhysicsBehaviours.StatsController.IsInvulnerable = false;
+                        otherComponentPhysicsBehaviours.StatsController.LoseInvulnerability();
                     }
                     else
                     {

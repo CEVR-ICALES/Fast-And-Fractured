@@ -64,7 +64,7 @@ namespace FastAndFractured
                 StatsController statsController = other.GetComponent<StatsController>();
                 if(statsController.IsInvulnerable)
                 {
-                    statsController.IsInvulnerable = false;
+                    statsController.LoseInvulnerability();
                     ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                 }
                 else

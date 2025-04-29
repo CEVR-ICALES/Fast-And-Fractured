@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Playables;
+using Utilities;
 
-public class MenuSkipInitialCutscene : MonoBehaviour
+public class MenuSkipInitialCutscene : AbstractSingleton<MenuSkipInitialCutscene>
 {
     public PlayableDirector timeLine;
-    [SerializeField] private GameObject skipText;
+    public GameObject skipText;
 
-    private bool alreadySkipped = false;
+    private bool alreadySkipped;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        alreadySkipped = false;
+    }
 
     private void Update()
     {

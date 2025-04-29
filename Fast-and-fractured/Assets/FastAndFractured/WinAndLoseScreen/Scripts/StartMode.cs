@@ -10,7 +10,6 @@ namespace FastAndFractured
     {
         [SerializeField] private GameEndData gameEndData;
         [SerializeField] private GameObject mainMenuTimeline;
-        [SerializeField] private MenuSkipInitialCutscene menuSkipInitialCutscene;
         [SerializeField] private GameObject skipText;
 
 
@@ -20,8 +19,8 @@ namespace FastAndFractured
             {
                 MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE,-1);
                 mainMenuTimeline.SetActive(false);
-                menuSkipInitialCutscene.timeLine = gameEndData.finalAnimation.GetComponentInChildren<PlayableDirector>();
-                skipText.SetActive(true);
+                MenuSkipInitialCutscene.Instance.timeLine = gameEndData.finalAnimation.GetComponentInChildren<PlayableDirector>();
+                MenuSkipInitialCutscene.Instance.skipText.SetActive(true);
             }
             else
             {
