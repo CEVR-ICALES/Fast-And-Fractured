@@ -42,7 +42,7 @@ namespace FastAndFractured
             abilityData.CooldownDuration = statsController.UniqueCooldown;
         }
 
-
+        [ContextMenu(nameof(ActivateAbility))]
         public virtual bool ActivateAbility()
         {
             if (_isAbilityActive || _isOnCooldown)

@@ -33,6 +33,7 @@ namespace FastAndFractured
 
         private ITimer _bounceTimer;
         private ITimer _charCollisionTimer;
+        private const float ENDURANCE_DAMAGE_ON_COLLISION = 1f;
         public void Initialize(Rigidbody rb, McChickenMovement movement)
         {
             _rb = rb;
@@ -98,6 +99,10 @@ namespace FastAndFractured
                 Vector3 collisionNormal = -collision.contacts[0].normal;
                 Vector3 finalForce = collisionNormal * chickenForce;
                 physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
+            }
+            if(collision.gameObject.TryGetComponent(out StatsController statsController))
+            {
+                statsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION,false,gameObject);
             }
 
         }

@@ -195,6 +195,7 @@ namespace FastAndFractured
             if (!carMovementController)
             {
                 carMovementController = GetComponentInChildren<CarMovementController>();
+                gameObject.name = gameObject.name.Replace("(Clone)", "") + " - " + carMovementController.gameObject.name;
             }
             if (!physicsBehaviour)
             {
