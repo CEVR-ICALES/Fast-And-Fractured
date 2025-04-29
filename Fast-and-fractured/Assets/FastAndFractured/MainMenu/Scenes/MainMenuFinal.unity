@@ -3451,7 +3451,7 @@ PrefabInstance:
       objectReference: {fileID: 370708242}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
@@ -3476,7 +3476,7 @@ PrefabInstance:
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
-      objectReference: {fileID: 443351275}
+      objectReference: {fileID: 836826430}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Target
       value: 
@@ -3531,7 +3531,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_BoolArgument
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_BoolArgument
@@ -3595,7 +3595,7 @@ PrefabInstance:
       objectReference: {fileID: 643767772}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -3628,7 +3628,7 @@ PrefabInstance:
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Target
       value: 
-      objectReference: {fileID: 836826430}
+      objectReference: {fileID: 540025684}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -3659,7 +3659,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_MethodName
-      value: 
+      value: SetActive
       objectReference: {fileID: 0}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -3679,7 +3679,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_BoolArgument
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_BoolArgument
@@ -6806,6 +6806,8 @@ PlayableDirector:
     value: {fileID: 836826433}
   - key: {fileID: 7037825394461377694, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
     value: {fileID: 1201907928}
+  - key: {fileID: 853960859622585905, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
+    value: {fileID: 836826430}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &688193634
@@ -10906,7 +10908,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1201907929
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17957,7 +17959,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameEndData: {fileID: 11400000, guid: d6586914b10116444a99eddca7cff681, type: 2}
   mainMenuTimeline: {fileID: 684361135}
-  menuSkipInitialCutscene: {fileID: 0}
+  menuSkipInitialCutscene: {fileID: 120212383993182388}
+  skipText: {fileID: 1201907928}
 --- !u!4 &2086437005
 Transform:
   m_ObjectHideFlags: 0
