@@ -55,7 +55,7 @@ namespace FastAndFractured
         private bool _isFlipped = false;
 
         [SerializeField]
-        private float detectFlipTime = 3.5f;
+        private float detectFlipTime = 2f;
         private ITimer _flipTimer;
         private LayerMask _combinedMask;
         [SerializeField]
@@ -438,15 +438,6 @@ namespace FastAndFractured
                 Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
-                    //if (!_physicsBehaviour.IsTouchingGround)
-                    //{
-                    //    Ray ray = new Ray(transform.position,-transform.up);
-                    //    RaycastHit hit = new RaycastHit();
-                    //    if(Physics.Raycast(ray,out hit, Mathf.Infinity, _combinedMask)){
-                    //        _physicsBehaviour.TouchingGroundNormal = hit.normal;
-                    //        _physicsBehaviour.TouchingGroundPoint = transform.position;
-                    //    }
-                    //}
                     _flipTimer=null;
                 });
             }

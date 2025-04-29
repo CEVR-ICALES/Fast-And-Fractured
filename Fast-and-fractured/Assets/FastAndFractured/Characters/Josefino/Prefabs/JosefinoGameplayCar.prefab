@@ -736,6 +736,10 @@ PrefabInstance:
       value: 1500
       objectReference: {fileID: 0}
     - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: detectFlipTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: vehicleVfxController
       value: 
       objectReference: {fileID: 7333974813881313245}
@@ -1178,6 +1182,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   enduranceRecoveryAmount: 200
 --- !u!4 &3720275510104103767 stripped
 Transform:

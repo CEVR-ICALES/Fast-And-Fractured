@@ -5895,6 +5895,10 @@ PrefabInstance:
       value: 195
       objectReference: {fileID: 0}
     - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: detectFlipTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3106855550054847348, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: groundLayer.m_Bits
       value: 8
       objectReference: {fileID: 0}
@@ -6596,6 +6600,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onAbilityEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
   chickenPrefab: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
