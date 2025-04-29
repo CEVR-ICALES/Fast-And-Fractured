@@ -18,6 +18,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     private const float POSITIVE_GAMMA_OFFESET = 0.07f;
     private const string PLAYER_PREF_BRIGHTNESS_STRING = "Brightness";
     private readonly Vector3 _defaultGammaRGB = new Vector3(0.84f, 0.77f, 0.71f);
+    private const float BRIGHTNESS_OFFSET = -0.3f;
     #endregion
 
     protected override void Awake()
@@ -38,7 +39,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //ApplyBrightnessToScene();
+        ApplyBrightnessToScene();
     }
 
     public void SetBrightness(float value)
@@ -52,14 +53,21 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     private void ApplyBrightnessToScene()
     {
         Debug.Log(_brightness);
-        float value = Mathf.Clamp(_brightness, MIN_GAMMA_MODIFIER, MAX_MAX_MODIFIER);
-        Debug.Log(value);
+        //float value = Mathf.Clamp(_brightness, MIN_GAMMA_MODIFIER, MAX_MAX_MODIFIER);
+        //float value = _brightness + MIN_GAMMA_MODIFIER;
+        //Debug.Log(value);
         _liftGammaGain.gamma.overrideState = true;
+        //_liftGammaGain.gamma.Override(new Vector4(
+        //    value - POSITIVE_GAMMA_OFFESET,  // R (0.84)
+        //    value,  // G (0.77)
+        //    value + POSITIVE_GAMMA_OFFESET,  // B (0.71)
+        //    1f         // Alpha (gamma ajustable)
+        //));
         _liftGammaGain.gamma.Override(new Vector4(
-            value - POSITIVE_GAMMA_OFFESET,  // R (0.84)
-            value,  // G (0.77)
-            value + POSITIVE_GAMMA_OFFESET,  // B (0.71)
-            1f         // Alpha (gamma ajustable)
+            0.84f,  // R (0.84)
+            0.77f,  // G (0.77)
+            0.71f,  // B (0.71)
+            BRIGHTNESS_OFFSET + (_brightness)         // Alpha (gamma ajustable)
         ));
     }
 }
