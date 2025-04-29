@@ -241,6 +241,7 @@ namespace FastAndFractured
         {
             foreach(GameObject model in carModel)
             {
+                if(model != null)
                 model.SetActive(false);
             }
             dieVfx.Play();

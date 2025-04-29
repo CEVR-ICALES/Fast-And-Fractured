@@ -26,7 +26,7 @@ namespace FastAndFractured
         public bool IsOnCooldown => _isOnCooldown;
 
         public UnityEvent<float, float> onCooldownUpdate;
-
+        public bool isAbilityActive;
         private void Awake()
         {
             if (abilityData == null)
@@ -36,7 +36,7 @@ namespace FastAndFractured
             }
 
             _isAbilityActive = false;
-            
+            isAbilityActive = _isAbilityActive;
             _isAI = GetComponentInParent<EnemyAIBrain>();
             statsController = GetComponent<StatsController>();
             abilityData.CooldownDuration = statsController.UniqueCooldown;
@@ -51,6 +51,8 @@ namespace FastAndFractured
             }
 
             _isAbilityActive = true;
+            isAbilityActive = _isAbilityActive;
+
             PlayActivateAbilitySound();
             StartAbilityEffects();
             onAbilityActivated?.Invoke();
@@ -103,6 +105,8 @@ namespace FastAndFractured
         {
             DestroySpawnedGameObjectsInstances();
             _isAbilityActive = false;
+            isAbilityActive = _isAbilityActive;
+
             onAbilityEnded?.Invoke();
         } 
         
