@@ -5,7 +5,7 @@
 			<value>GolfBallThrow</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{07e1d877-4165-4e6c-965b-1779a21d1a0a}</destination>
@@ -116,6 +116,7 @@
 	<object class="MixerBusEffectChain" id="{19bf47c2-a785-418a-b853-72c03c7918ed}">
 		<relationship name="effects">
 			<destination>{13b6f6a9-d532-4974-99ed-7c87b1222f41}</destination>
+			<destination>{40b99ee8-84e7-49da-94dc-41fce49fbc33}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{09eeec9c-036d-4e2c-a156-6cd95269364f}" />
@@ -127,5 +128,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{86c8e409-18ec-47f0-b686-379fbc98a315}" />
 	<object class="MixerBusFader" id="{13b6f6a9-d532-4974-99ed-7c87b1222f41}" />
+	<object class="SpatialiserEffect" id="{40b99ee8-84e7-49da-94dc-41fce49fbc33}" />
 	<object class="MixerBusFader" id="{9fd32441-077c-4bba-b0d5-72f51f7c9be6}" />
 </objects>
