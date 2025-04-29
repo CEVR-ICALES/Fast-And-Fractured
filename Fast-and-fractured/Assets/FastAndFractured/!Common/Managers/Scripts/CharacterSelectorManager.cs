@@ -42,6 +42,10 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
 
         UpdateCharacterDisplay();
         _currentCharacterIndex = 0;
@@ -100,9 +104,6 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         ChangePlayerIcon();
 
         UpdateInformationTexts(character);
-
-        CheckIfSkinUnlocked();
-
     }
 
     private void UpdateInformationTexts(CharacterMenuData character) // PROVISIONAL
@@ -144,6 +145,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
+        selectAndStartButton.enabled = CheckIfSkinUnlocked();
     }
     public bool CheckIfSkinUnlocked()
     {
@@ -152,7 +154,6 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         bool isEnabled;
         isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
 
-        selectAndStartButton.enabled = isEnabled;
         return isEnabled;
     }
 

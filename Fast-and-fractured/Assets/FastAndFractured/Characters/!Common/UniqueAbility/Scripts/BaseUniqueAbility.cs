@@ -25,6 +25,8 @@ namespace FastAndFractured
         public bool IsAbilityActive => _isAbilityActive;
         public bool IsOnCooldown => _isOnCooldown;
 
+        public UnityEvent<float, float> onCooldownUpdate;
+
         private void Awake()
         {
             if (abilityData == null)
@@ -58,9 +60,16 @@ namespace FastAndFractured
         private void StartCooldown()
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
-            _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration, onTimerDecreaseComplete:StopCooldown) ;
+            _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration,
+                onTimerDecreaseUpdate:OnUniqueAbilityCooldownDecrease, 
+                onTimerDecreaseComplete:StopCooldown) ;
             ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
             _isOnCooldown = true;
+        }
+
+        private void OnUniqueAbilityCooldownDecrease(float currentvalue)
+        {
+            onCooldownUpdate?.Invoke(currentvalue, statsController.UniqueCooldown);
         }
 
         protected virtual void PlayActivateAbilitySound()

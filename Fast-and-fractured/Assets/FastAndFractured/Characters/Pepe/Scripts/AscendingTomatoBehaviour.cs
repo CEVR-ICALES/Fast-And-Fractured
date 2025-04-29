@@ -4,9 +4,10 @@ using UnityEngine;
 using Utilities;
 using StateMachine;
 using Enums;
+using Utilities.Managers.PauseSystem;
 namespace FastAndFractured
 {
-    public class AscendingTomatoBehaviour : MonoBehaviour, IPooledObject
+    public class AscendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
     {
         private bool initValues = true;
         public Pooltype pooltype;
@@ -24,13 +25,23 @@ namespace FastAndFractured
         private List<GameObject> charactersList;
 
         private Vector3 _randomRotation;
+        private bool _isPaused = false;
 
         public virtual void InitializeValues()
         {
             
         }
-        
-        
+
+        void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
+        }
+
         public void StartTimer()
         {
             charactersList = LevelController.Instance.InGameCharacters;
@@ -61,7 +72,10 @@ namespace FastAndFractured
 
         void Update()
         {
-            if(!LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
+            if (_isPaused)
+                return;
+
+            if (!LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
             {
                 float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
                 if (distance<=effectDistance)
@@ -92,6 +106,16 @@ namespace FastAndFractured
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
             descendingTomatoBehaviour.effectTime = effectTime;
             descendingTomatoBehaviour.randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }

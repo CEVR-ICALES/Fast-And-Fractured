@@ -116,7 +116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fogParent: {fileID: 8837894182934861129}
   primaryFog: {fileID: 5812717557806696838}
-  maxGrowthTime: 120
+  maxGrowthTime: 300
   gameObjectSpawnPoint: {fileID: 0}
   gameObjectMirroPoint: {fileID: 0}
   sphereCenter: {fileID: 0}
@@ -126,8 +126,8 @@ MonoBehaviour:
   fogDistancePlayerInsideSandstorm: 30
   fogDistancePlayerOutsideSandstorm: 15
   atenuationTime: 1
-  maxCharacterKillTime: 10
-  minCharacterKillTime: 4
+  maxCharacterKillTime: 60
+  minCharacterKillTime: 25
   killCharacterPriority: 1
   reduceQuantityPoints: 4
   minimapSandstormDirection: {fileID: 0}
@@ -150,5 +150,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 862.4, y: 113.25, z: 48.2}
+  m_Size: {x: 862.4, y: 113.25, z: 26.6}
   m_Center: {x: 0, y: 0, z: -17}
