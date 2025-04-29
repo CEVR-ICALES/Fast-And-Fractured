@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using FastAndFractured;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Playables;
@@ -34,7 +35,8 @@ public class MenuSkipInitialCutscene : AbstractSingleton<MenuSkipInitialCutscene
         {
             timeLine.time = timeLine.duration;
             timeLine.Evaluate();
-            timeLine.Stop();
+            if(timeLine.gameObject.name == "PlayableDirector") WinLoseScreenBehaviour.Instance.ShowMenu();
+            
             skipText.SetActive(false);
         }
     }
