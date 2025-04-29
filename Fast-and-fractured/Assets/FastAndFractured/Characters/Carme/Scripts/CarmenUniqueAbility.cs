@@ -44,6 +44,7 @@ namespace FastAndFractured
 
         private void InitializeAbility(Vector3 landPoint)
         {
+            EndAbilityEffects();
             landPoint.y = landPoint.y + landPointYOffset;
             GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
             uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
@@ -51,8 +52,13 @@ namespace FastAndFractured
             {
                 DestroyUniqueAbility(uniqueAbility);
             });
-            EndAbilityEffects();
 
+        }
+
+        private void OnAbilityCantBeInitialized()
+        {
+            EndAbilityEffects();
+            StopCooldown();
         }
 
         private void DestroyUniqueAbility(GameObject uniqueAbility)
@@ -95,6 +101,9 @@ namespace FastAndFractured
             if (hitPoint)
             {
                 InitializeAbility(_groundHit.point);
+            } else
+            {
+                OnAbilityCantBeInitialized();
             }
         }
 
