@@ -48,6 +48,10 @@ namespace FastAndFractured
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
+                if (!Caster)
+                {
+                    return;
+                }
                 foreach (GameObject obj in charactersList)
                 {
                     if(obj!=null)
