@@ -40,7 +40,6 @@ namespace FastAndFractured
             {
                 ShowMenu();
             }
-            ResetGameEndData();
         }
         public void ShowMenu()
         {
@@ -49,6 +48,7 @@ namespace FastAndFractured
         private void OnPlayableDirectorStopped(PlayableDirector obj)
         {
             _playableDirector.stopped -= OnPlayableDirectorStopped;
+            ResetGameEndData();
             ShowMenu();
         }
         private void SetFinalStats()
@@ -77,8 +77,8 @@ namespace FastAndFractured
         public void GoToMainMenu()
         {
             _spawnedObject.SetActive(false);
-            mainMenuTimeline.SetActive(true);
-            // MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
+            // mainMenuTimeline.SetActive(true);
+            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
         }
     }
 }
