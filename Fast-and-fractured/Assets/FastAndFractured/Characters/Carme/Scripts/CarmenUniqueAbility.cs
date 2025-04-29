@@ -8,6 +8,8 @@ namespace FastAndFractured
     {
         public GameObject chickenPrefab;
         public Transform uniqueAbilityShootPoint;
+        [SerializeField]
+        private PhysicsBehaviour physicsBehaviour;
 
         [Header("Land Point")]
         [SerializeField] private float rayCastDistance;
@@ -32,7 +34,7 @@ namespace FastAndFractured
         {
             if (base.ActivateAbility())
             {
-                _aimDirection = shootingHandle.CurrentShootDirection;
+                _aimDirection = shootingHandle.CurrentShootDirection + physicsBehaviour.Rb.velocity ;
                 // remove vertical component while maintaining direction relative to car
                 _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
                 CalculateLandingPoint();
