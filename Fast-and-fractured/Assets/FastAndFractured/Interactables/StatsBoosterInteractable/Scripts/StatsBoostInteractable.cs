@@ -21,7 +21,8 @@ namespace FastAndFractured
             GameObject player = LevelController.Instance.playerReference;
             if (interactionFrom == player)
             {
-                IngameEventsManager.Instance.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+                IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
+                if(ingameEventsManager != null) ingameEventsManager.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
             }
             if (!statsController) return;
 
