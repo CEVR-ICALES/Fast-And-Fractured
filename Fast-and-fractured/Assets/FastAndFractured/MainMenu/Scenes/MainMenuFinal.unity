@@ -1875,7 +1875,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 120212383993182385}
         m_TargetAssemblyTypeName: FastAndFractured.MainMenuManager, Assembly-CSharp
         m_MethodName: LoadScene
         m_Mode: 3
@@ -3429,6 +3429,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 120212383993182382}
     m_Modifications:
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnUp
+      value: 
+      objectReference: {fileID: 643767772}
+    - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnDown
+      value: 
+      objectReference: {fileID: 370708242}
+    - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -3532,6 +3544,18 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 2098279075632884128, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2098279075632884128, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnUp
+      value: 
+      objectReference: {fileID: 370708242}
+    - target: {fileID: 2098279075632884128, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnDown
+      value: 
+      objectReference: {fileID: 370708246}
     - target: {fileID: 4606516725019989426, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: spawnPoint
       value: 
@@ -3548,6 +3572,18 @@ PrefabInstance:
       propertyPath: gameEndDataDefault
       value: 
       objectReference: {fileID: 11400000, guid: 2376eb04ddcd51c47a73406696d15002, type: 2}
+    - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnUp
+      value: 
+      objectReference: {fileID: 370708246}
+    - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: m_Navigation.m_SelectOnDown
+      value: 
+      objectReference: {fileID: 643767772}
     - target: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 3
@@ -3809,6 +3845,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   screenToOpen: 4
   fadeDuration: 0.8
+--- !u!114 &370708242 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4748384214353549437, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+  m_PrefabInstance: {fileID: 370708234}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370708236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &370708246 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+  m_PrefabInstance: {fileID: 370708234}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370708238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &374102190
 GameObject:
   m_ObjectHideFlags: 0
@@ -6218,6 +6276,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 625314365}
   m_CullTransparentMesh: 1
+--- !u!114 &643767772 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2098279075632884128, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+  m_PrefabInstance: {fileID: 370708234}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &652638672
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8893,9 +8962,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6788780915703739489}
         m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
-        m_MethodName: SelectPreviousSkin
+        m_MethodName: SelectNextSkin
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9408,7 +9477,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6788780915703739489}
         m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
         m_MethodName: SaveCurrentSelected
         m_Mode: 1
@@ -9420,8 +9489,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
+      - m_Target: {fileID: 120212383993182385}
+        m_TargetAssemblyTypeName: FastAndFractured.MainMenuManager, Assembly-CSharp
         m_MethodName: LoadScene
         m_Mode: 3
         m_Arguments:
@@ -9860,7 +9929,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6788780915703739489}
         m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
         m_MethodName: SelectPreviousCharacter
         m_Mode: 1
@@ -14481,9 +14550,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6788780915703739489}
         m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
-        m_MethodName: SelectNextSkin
+        m_MethodName: SelectPreviousSkin
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -17974,7 +18043,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6788780915703739489}
         m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
         m_MethodName: SelectNextCharacter
         m_Mode: 1
@@ -18604,19 +18673,19 @@ PrefabInstance:
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charIcon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1475511459}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charName
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 556182803}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarWeight
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 457547294}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarManuver
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1299146681}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: carStopCollider
       value: 
@@ -18624,15 +18693,15 @@ PrefabInstance:
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarMaxSpeed
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1273929913}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charDescription
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1018992794}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarBaseForce
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1011352213}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: modelSpawnPosition
       value: 
@@ -18640,15 +18709,15 @@ PrefabInstance:
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarAcceleration
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2106204784}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: charCarMaxEndurance
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 874273804}
     - target: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: selectAndStartButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1006999695}
     - target: {fileID: 6295589118761128890, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -18773,6 +18842,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4805756054962430758, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
   m_PrefabInstance: {fileID: 6788780915703739481}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6788780915703739489 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5998136498972114209, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+  m_PrefabInstance: {fileID: 6788780915703739481}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511347328197fdb43988ebdc95d70c10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7784774396820387947
 PrefabInstance:
   m_ObjectHideFlags: 0

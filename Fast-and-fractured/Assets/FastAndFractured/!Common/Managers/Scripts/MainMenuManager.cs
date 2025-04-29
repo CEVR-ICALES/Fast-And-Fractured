@@ -10,13 +10,22 @@ using UnityEngine.Events;
 
 namespace FastAndFractured
 {
-    public class MainMenuManager : MonoBehaviour
+    public class MainMenuManager : AbstractSingleton<MainMenuManager>
     {
-        #region Singleton
+        #region Public Fields
 
-        public static MainMenuManager Instance { get; private set; }
+        public MenuScreen currentScreen => _currentScreen;
+        public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
 
         #endregion
+
+        #region Serialized Fields
+
+        [SerializeField] private GameObject mainMenuTimeline;
+        [SerializeField] private GameObject pauseMenuTimeline;
+
+        #endregion
+
 
         #region Private Fields
 
@@ -32,22 +41,17 @@ namespace FastAndFractured
 
         #region Unity Methods
 
-        private void Awake()
+        protected override void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            base.Awake();
+            _eventSystem = EventSystem.current;
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         private void Start()
         {
-            _eventSystem = EventSystem.current;
-
             // Register all Screens in scene
             RegisterScreens();
             if(_menuScreens.TryGetValue(ScreensType.MAIN_MENU, out MenuScreen menuScreen))
