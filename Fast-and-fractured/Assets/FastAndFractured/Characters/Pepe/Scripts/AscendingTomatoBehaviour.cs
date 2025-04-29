@@ -74,8 +74,8 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-
-            if (!LevelController.Instance.playerReference.transform.IsChildOf(Caster.transform))
+            GameObject player= LevelController.Instance.playerReference;
+            if (player&&!player.transform.IsChildOf(Caster.transform))
             {
                 float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
                 if (distance<=effectDistance)

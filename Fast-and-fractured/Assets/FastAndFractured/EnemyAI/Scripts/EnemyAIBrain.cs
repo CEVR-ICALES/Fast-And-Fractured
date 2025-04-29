@@ -416,6 +416,8 @@ namespace FastAndFractured
         #region CombatState
         public void NormalShoot()
         {
+            if (!TargetToShoot) return;
+
             normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             normalShootHandle.NormalShooting();
         }
