@@ -246,6 +246,7 @@ namespace FastAndFractured
             }
         }
 
+
         /// <summary>
         /// Activates or deactivates the hair emissive effect by modifying the Exposure Weight.
         /// When activated, sets Exposure Weight to activeExposureWeight (should be 1), and when deactivated, restores the original value.
