@@ -82,7 +82,7 @@ namespace FastAndFractured
         private const string ERROR_STRING_MESSAGE = "empty list";
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
-        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
+        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 3;
         protected override void Awake()
         {
             base.Awake();
