@@ -26,12 +26,12 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.Instance?.RegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         void Update()
@@ -64,7 +64,7 @@ namespace FastAndFractured
                 StatsController statsController = other.GetComponent<StatsController>();
                 if(statsController.IsInvulnerable)
                 {
-                    statsController.IsInvulnerable = false;
+                    statsController.LoseInvulnerability();
                     ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                 }
                 else

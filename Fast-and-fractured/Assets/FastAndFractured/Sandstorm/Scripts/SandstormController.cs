@@ -12,7 +12,9 @@ namespace FastAndFractured
         public LocalVolumetricFog primaryFog;
 
         public float maxGrowthTime = 1.0f;
-
+        [SerializeField]
+        [Range(0.05f,0.9f)]
+        private float colliderLessGrowMultiplicator = 0.7f;
         private float _maxGrowth;
         private float _growthSpeed;
 
@@ -187,7 +189,7 @@ namespace FastAndFractured
 
                     primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
                 }
-                float newZSizeCollider = _initialColliderSize.z + _currentGrowth;
+                float newZSizeCollider = _initialColliderSize.z + _currentGrowth * colliderLessGrowMultiplicator;
                 _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
 
