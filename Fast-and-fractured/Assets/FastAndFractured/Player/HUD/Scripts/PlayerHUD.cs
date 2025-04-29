@@ -9,6 +9,7 @@ namespace FastAndFractured
         [SerializeField] NormalShootHandle normalShootHandle;
         [SerializeField] PushShootHandle pushShootHandle;
         [SerializeField] CarMovementController carMovementController;
+        [SerializeField] BaseUniqueAbility uniqueAbility;
         private void Awake()
         {
             LevelController.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
@@ -27,6 +28,10 @@ namespace FastAndFractured
             {
                 carMovementController = GetComponentInChildren<CarMovementController>();
             }
+            if (!uniqueAbility)
+            {
+                uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
+            }
         }
         private void InitUpdateHUDEvents()
         {
@@ -34,16 +39,17 @@ namespace FastAndFractured
             normalShootHandle.onOverheatUpdate?.AddListener(UpdateOverheatHUD);
             pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
             carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
+            uniqueAbility.onCooldownUpdate?.AddListener(UpdateUniqueAbilityCooldownHUD);
         }
         private void OnDisable()
         {
             if (normalShootHandle.onOverheatUpdate != null)
             {
                 normalShootHandle.onOverheatUpdate?.RemoveListener(UpdateOverheatHUD);
-                pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
-                carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
+                pushShootHandle.onCooldownUpdate?.RemoveListener(UpdatePushCooldownHUD);
+                carMovementController.onDashCooldownUpdate?.RemoveListener(UpdateDashCooldownHUD);
+                uniqueAbility.onCooldownUpdate?.RemoveListener(UpdateUniqueAbilityCooldownHUD);
             }
-
         }
 
         private void UpdateOverheatHUD(float currentValue, float maxValue)
@@ -59,6 +65,11 @@ namespace FastAndFractured
         private void UpdateDashCooldownHUD(float currentValue, float maxValue)
         {
             HUDManager.Instance.UpdateUIElement(UIElementType.DASH_COOLDOWN, currentValue, maxValue);
+        }
+
+        private void UpdateUniqueAbilityCooldownHUD(float currentValue, float maxValue)
+        {
+            HUDManager.Instance.UpdateUIElement(UIElementType.ULT_COOLDOWN, currentValue, maxValue);
         }
 
     }
