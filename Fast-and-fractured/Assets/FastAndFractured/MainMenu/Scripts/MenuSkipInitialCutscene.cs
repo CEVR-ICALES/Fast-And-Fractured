@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Playables;
 
 public class MenuSkipInitialCutscene : MonoBehaviour
 {
     public PlayableDirector timeLine;
+    [SerializeField] private GameObject skipText;
+
     private bool alreadySkipped = false;
 
     private void Update()
@@ -19,7 +22,11 @@ public class MenuSkipInitialCutscene : MonoBehaviour
 
     private void SkipTimeline()
     {
-        if (timeLine != null)
+        Debug.Log(timeLine.name);
+        if (timeLine != null) 
+        {
             timeLine.time = timeLine.duration;
+            skipText.SetActive(false);
+        }
     }
 }

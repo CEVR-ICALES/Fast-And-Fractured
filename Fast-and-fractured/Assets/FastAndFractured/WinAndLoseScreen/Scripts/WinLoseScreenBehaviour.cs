@@ -41,15 +41,15 @@ namespace FastAndFractured
                 ShowMenu();
             }
         }
-        public void ShowMenu()
+        private void ShowMenu()
         {
             container.SetActive(true);
         }
         private void OnPlayableDirectorStopped(PlayableDirector obj)
         {
             _playableDirector.stopped -= OnPlayableDirectorStopped;
-            ResetGameEndData();
             ShowMenu();
+            ResetGameEndData();
         }
         private void SetFinalStats()
         {

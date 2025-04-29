@@ -215,6 +215,11 @@ Transform:
   - {fileID: 1517515931}
   m_Father: {fileID: 362200843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &43412845 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8338176869265493634, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+  m_PrefabInstance: {fileID: 6788780915703739481}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &44180564
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,8 +371,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 46549926}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15304494, y: 0.7562745, z: -0.19136655, w: 0.6066342}
-  m_LocalPosition: {x: -65.3, y: 41.4, z: 43.9}
+  m_LocalRotation: {x: -0.13692011, y: -0.10848427, z: 0.019909993, w: -0.9844225}
+  m_LocalPosition: {x: -17.908192, y: 8.727978, z: -9.695976}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6760,7 +6765,6 @@ GameObject:
   m_Component:
   - component: {fileID: 684361136}
   - component: {fileID: 684361137}
-  - component: {fileID: 684361138}
   m_Layer: 0
   m_Name: MainMenuTimeline
   m_TagString: Untagged
@@ -6800,27 +6804,10 @@ PlayableDirector:
   m_SceneBindings:
   - key: {fileID: 8262497580793062690, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
     value: {fileID: 836826433}
-  - key: {fileID: -4134968446473600062, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: -3683993081220796026, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
-    value: {fileID: 0}
   - key: {fileID: 7037825394461377694, guid: a02c9ce218081234dbaf42bf0c133175, type: 2}
     value: {fileID: 1201907928}
   m_ExposedReferences:
     m_References: []
---- !u!114 &684361138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684361135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 389c26c49233f7c4aa4c123b055193a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timeLine: {fileID: 684361137}
 --- !u!1 &688193634
 GameObject:
   m_ObjectHideFlags: 0
@@ -17969,7 +17956,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameEndData: {fileID: 11400000, guid: d6586914b10116444a99eddca7cff681, type: 2}
   mainMenuTimeline: {fileID: 684361135}
-  menuSkipInitialCutscene: {fileID: 684361138}
+  menuSkipInitialCutscene: {fileID: 0}
 --- !u!4 &2086437005
 Transform:
   m_ObjectHideFlags: 0
@@ -18469,12 +18456,26 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 219468584513301950, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
   m_PrefabInstance: {fileID: 6788780915703739481}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 43412845}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e5e41968f73ae747b1b24da0600b304, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &120212383993182388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43412845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 389c26c49233f7c4aa4c123b055193a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeLine: {fileID: 684361137}
+  skipText: {fileID: 1201907928}
 --- !u!1001 &6788780915703739481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18830,7 +18831,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7643273883353786011, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1706326757}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8338176869265493634, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 120212383993182388}
   m_SourcePrefab: {fileID: 100100000, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
 --- !u!224 &6788780915703739482 stripped
 RectTransform:
