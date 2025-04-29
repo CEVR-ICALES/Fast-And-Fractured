@@ -22,7 +22,6 @@ public class MenuSkipInitialCutscene : MonoBehaviour
 
     private void SkipTimeline()
     {
-        Debug.Log(timeLine.name);
         if (timeLine != null) 
         {
             timeLine.time = timeLine.duration;
