@@ -431,6 +431,7 @@ namespace FastAndFractured
         }
         public void PushShoot()
         {
+            if (!_targetToShoot) return;
             pushShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             pushShootHandle.PushShooting();
         }
