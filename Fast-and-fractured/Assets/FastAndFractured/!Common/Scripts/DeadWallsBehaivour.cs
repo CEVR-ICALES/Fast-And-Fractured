@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using FastAndFractured;
 using UnityEngine;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
-public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
+public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
 {
     [SerializeField]
     private float timeTillKill = 1.5f;
@@ -12,36 +13,52 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
     private int killPriority = 2;
     [SerializeField]
     private float frontAngle = 180;
-    private Dictionary<StatsController,ITimer> _charactersDontExitTheCollider;
+
+    private bool _isPaused = false;
     public int KillPriority => killPriority;
 
     public float KillTime => timeTillKill;
 
     const float DAMAGE_TO_CHARACTERS = 0;
 
+    private void OnEnable()
+    {
+        PauseManager.Instance.RegisterPausable(this);
+    }
+
+    private void OnDisable()
+    {
+        PauseManager.Instance?.UnregisterPausable(this);
+    }
 
     private void Start()
     {
-        _charactersDontExitTheCollider = new Dictionary<StatsController,ITimer>();
     }
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent(out StatsController controller))
+        if (other.TryGetComponent(out StatsController statsController))
         {
-            StartKillNotify(controller);
-            if(LevelController.Instance.playerReference == controller.gameObject)
+            if (!other.GetComponent<Rigidbody>().isKinematic)
             {
-                IngameEventsManager.Instance.CreateEvent("Vuelve a la zona de juego r�pido!!!!!",2f);
+                StartKillNotify(statsController);
+                if (LevelController.Instance.playerReference == statsController.gameObject)
+                {
+                    IngameEventsManager.Instance.CreateEvent("Vuelve a la zona de juego rapido!!!!!", 2f);
+                }
             }
         }
     }
 
-    private void OnTriggerExit(Collider other) {
-        if (other.TryGetComponent(out StatsController controller))
+    private void OnTriggerExit(Collider other) 
+    {
+        if (other.TryGetComponent(out StatsController statsController))
         {
-            if (IsCharacterInFront(other.transform))
+            if (!other.GetComponent<Rigidbody>().isKinematic && !_isPaused)
             {
-                CharacterEscapedDead(controller);
+                if (IsCharacterInFront(other.transform))
+                {
+                    CharacterEscapedDead(statsController);
+                }
             }
         }
     }
@@ -68,5 +85,15 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
     public GameObject GetKillerGameObject()
     {
         return gameObject;
+    }
+
+    public void OnPause()
+    {
+        _isPaused = true;
+    }
+
+    public void OnResume()
+    {
+        _isPaused = false;
     }
 }
