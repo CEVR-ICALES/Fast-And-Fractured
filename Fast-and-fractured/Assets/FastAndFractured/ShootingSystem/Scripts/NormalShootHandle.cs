@@ -21,6 +21,7 @@ namespace FastAndFractured
         public float previousCountOverHeat;
         [SerializeField] private Collider ignoredCollider;
 
+        public Transform ShootPoint => shootPoint;
         public bool IsOverHeat
         {
             get => _isOverHeat;
