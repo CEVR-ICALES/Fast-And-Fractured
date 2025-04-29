@@ -237,10 +237,12 @@ namespace FastAndFractured
         /// </summary>
         public void StopVFX()
         {
-            
-            foreach (ParticleSystem ps in _vfxParent?.GetComponentsInChildren<ParticleSystem>())
+            if (_vfxParent != null)
             {
-                ps.Stop();
+                foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+                {
+                    ps.Stop();
+                }
             }
         }
 
