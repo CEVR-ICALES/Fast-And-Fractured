@@ -364,16 +364,15 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
-                    foreach (Transform child in character.transform)
-                    {
+                    
                         foreach (GameObject icon in characterIcons)
                         { 
-                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            if (icon.GetComponent<CharacterIcon>().Character == character)
                             {
                                 icon.SetActive(false);
                             }
                         }
-                    }
+                    
                     Destroy(character.transform.parent.gameObject);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)

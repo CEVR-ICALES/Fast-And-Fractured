@@ -29,7 +29,10 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters
         if(other.TryGetComponent(out StatsController controller))
         {
             StartKillNotify(controller);
-            IngameEventsManager.Instance.CreateEvent("¡¡¡¡¡¡¡Vuelve a la zona de juego rápido!!!!!",2f);
+            if(LevelController.Instance.playerReference == controller.gameObject)
+            {
+                IngameEventsManager.Instance.CreateEvent("Vuelve a la zona de juego rï¿½pido!!!!!",2f);
+            }
         }
     }
 
