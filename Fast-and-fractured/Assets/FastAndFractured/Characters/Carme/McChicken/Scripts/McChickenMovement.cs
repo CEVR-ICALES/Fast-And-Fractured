@@ -12,7 +12,7 @@ namespace FastAndFractured
 
         public bool IsInCeling => _isInCeiling;
 
-        bool isPaused = false;
+        bool _isPaused = false;
 
         [Header("Movement Settings")]
         [SerializeField] private float moveForce = 5f;
@@ -60,7 +60,7 @@ namespace FastAndFractured
 
         private void FixedUpdate()
         {
-            if (isPaused)
+            if (_isPaused)
                 return;
 
             _physicsHandler.UpdateGroundState();
@@ -136,12 +136,12 @@ namespace FastAndFractured
 
         public void OnPause()
         {
-            isPaused = true;
+            _isPaused = true;
         }
 
         public void OnResume()
         {
-            isPaused = false;
+            _isPaused = false;
         }
     }
 }
