@@ -138,6 +138,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
             {
                 carStopCollider.enabled = true;
                 Destroy(lastModelInstance);
+                selectAndStartButton.enabled = CheckIfSkinUnlocked();
                 _modelChangeTimer = null;
             });
         }
@@ -152,7 +153,6 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         bool isEnabled;
         isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
 
-        selectAndStartButton.enabled = isEnabled;
         return isEnabled;
     }
 

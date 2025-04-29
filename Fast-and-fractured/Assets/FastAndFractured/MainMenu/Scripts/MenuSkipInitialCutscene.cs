@@ -25,6 +25,8 @@ public class MenuSkipInitialCutscene : MonoBehaviour
         if (timeLine != null) 
         {
             timeLine.time = timeLine.duration;
+            timeLine.Evaluate();
+            timeLine.Stop();
             skipText.SetActive(false);
         }
     }
