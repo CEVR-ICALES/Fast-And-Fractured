@@ -174,7 +174,7 @@ namespace FastAndFractured
 
         public void UseBackButton()
         {
-            if (_currentScreen.backButton != null && isCurrentScreenInteractable)
+            if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
             {
                 _currentScreen.backButton.onClick.Invoke();
             }
