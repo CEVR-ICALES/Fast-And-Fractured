@@ -82,7 +82,6 @@ namespace FastAndFractured
         {
             if(!_physicsHandler.IsGrounded)
             {
-                Debug.Log("gravity");
                 _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
             }
         }
