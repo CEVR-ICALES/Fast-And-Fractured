@@ -28,7 +28,7 @@ public class MenuInputsController : MonoBehaviour
 
         private void OnDisable()
         {
-            _inputActions.Disable();
+            _inputActions?.Disable();
         }
 
         private bool CompareCurrentScreenType(ScreensType screenType)

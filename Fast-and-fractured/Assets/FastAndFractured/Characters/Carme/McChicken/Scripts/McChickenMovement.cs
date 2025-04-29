@@ -39,12 +39,12 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.Instance?.RegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
         public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
         {
