@@ -3428,6 +3428,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 120212383993182382}
     m_Modifications:
+    - target: {fileID: 761109788809576135, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
+      propertyPath: backButton
+      value: 
+      objectReference: {fileID: 370708242}
     - target: {fileID: 927172338892072444, guid: 0580e7502c1bf4743b370c40f3d8a678, type: 3}
       propertyPath: m_Navigation.m_Mode
       value: 4
@@ -4638,7 +4642,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 468697666}
   backButton: {fileID: 1991573945}
   defaultButton: {fileID: 1975989971}
-  settingsButton: {fileID: 0}
+  settingsButton: {fileID: 913166042}
 --- !u!1001 &482033385
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17965,6 +17969,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameEndData: {fileID: 11400000, guid: d6586914b10116444a99eddca7cff681, type: 2}
   mainMenuTimeline: {fileID: 684361135}
+  menuSkipInitialCutscene: {fileID: 684361138}
 --- !u!4 &2086437005
 Transform:
   m_ObjectHideFlags: 0

@@ -14,17 +14,17 @@ namespace FastAndFractured
     {
         #region Public Fields
 
-        public MenuScreen currentScreen => _currentScreen;
+        public MenuScreen CurrentScreen => _currentScreen;
         public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
 
         #endregion
 
-        #region Serialized Fields
+        // #region Serialized Fields
 
-        [SerializeField] private GameObject mainMenuTimeline;
-        [SerializeField] private GameObject pauseMenuTimeline;
+        // [SerializeField] private GameObject mainMenuTimeline;
+        // [SerializeField] private GameObject pauseMenuTimeline;
 
-        #endregion
+        // #endregion
 
 
         #region Private Fields
