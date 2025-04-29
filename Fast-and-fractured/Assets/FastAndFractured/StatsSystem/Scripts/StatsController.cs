@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Utilities;
 using Utilities.Managers.PauseSystem;
 
@@ -24,7 +25,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value; }
+        public bool IsInvulnerable { get => charDataSO.Invulnerable;  private set => charDataSO.Invulnerable = value; }
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -111,6 +112,8 @@ namespace FastAndFractured
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
         public UnityEvent<float,GameObject,bool> onDead;
+        public UnityEvent onInvulnerabilityAdded;
+        public UnityEvent onInvulnerabilityLost;
         private ITimer _deadTimer;
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
@@ -197,7 +200,7 @@ namespace FastAndFractured
         {
             if (substract > 0)
             {
-                if (!charDataSO.Invulnerable)
+                if (!IsInvulnerable)
                 {
                     totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
@@ -215,13 +218,20 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    if (IsInvulnerable)
-                    {
-                        IsInvulnerable = false;
-                    }
+                    LoseInvulnerability();
                 }
             }
             else Debug.LogWarning("Value can't be negative or 0.");
+        }
+        public void ActivateInvulnerability()
+        {
+            IsInvulnerable = true;
+            onInvulnerabilityAdded?.Invoke();
+        }
+        public void LoseInvulnerability()
+        {
+            IsInvulnerable = false;
+            onInvulnerabilityLost?.Invoke();
         }
 
         public void RecoverEndurance(float sum, bool isProduct)
