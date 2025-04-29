@@ -551,6 +551,11 @@ namespace FastAndFractured
             }
         }
 
+        public void OnDie()
+        {
+            _physicsBehaviour.Rb.isKinematic = true;
+        }
+
         private void UpdateWheelVisuals()
         {
             foreach (var wheel in wheels)

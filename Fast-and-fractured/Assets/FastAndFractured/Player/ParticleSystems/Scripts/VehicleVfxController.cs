@@ -243,6 +243,9 @@ namespace FastAndFractured
             {
                 model.SetActive(false);
             }
+            StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
+            lowEnduranceExclusiveSmokeVfx.Stop();
+            _carMovementController.OnDie();
             dieVfx.Play();
         }
 
