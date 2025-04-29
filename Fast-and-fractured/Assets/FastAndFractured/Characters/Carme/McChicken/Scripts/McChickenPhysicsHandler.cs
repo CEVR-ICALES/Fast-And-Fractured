@@ -95,7 +95,6 @@ namespace FastAndFractured
                 {
                     _rb.isKinematic = false;
                 });
-                Debug.Log("Collision");
                 Vector3 collisionNormal = -collision.contacts[0].normal;
                 Vector3 finalForce = collisionNormal * chickenForce;
                 physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
