@@ -410,6 +410,24 @@ namespace FastAndFractured
             ChangeTargetToGo(nearestTarget);
         }
 
+        public void ChooseNearestSafeZoneAwayFromTarget()
+        {
+            float angle = GetAngleDirection(Vector3.up);
+            float nearestOne = float.MaxValue;
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
+            GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
+            foreach (GameObject safeZone in safeZonesOutsideSandstorm)
+            {
+                float safeZoneDistance = (safeZone.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (safeZoneDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                {
+                    nearestOne = safeZoneDistance;
+                    nearestSafeZone = safeZone.gameObject;
+                }
+            }
+            ChangeTargetToGo(nearestSafeZone);
+        }
+
         public GameObject CalcNearestSafeZone()
         {
             List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
@@ -428,6 +446,7 @@ namespace FastAndFractured
             }
             return nearestSafeZone;
         }
+
 
 
         #endregion
