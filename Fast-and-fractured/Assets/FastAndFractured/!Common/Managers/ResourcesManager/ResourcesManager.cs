@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 [RequireComponent(typeof(ResourcesLoader))]
 public class ResourcesManager : AbstractSingleton<ResourcesManager>
@@ -121,6 +122,7 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         return null;
     }
 
+    // Overload
     public Sprite GetResourcesSprite(string spriteKey) // provisional
     {
         foreach(Sprite sprite in _playerIconsDictionary.Values)

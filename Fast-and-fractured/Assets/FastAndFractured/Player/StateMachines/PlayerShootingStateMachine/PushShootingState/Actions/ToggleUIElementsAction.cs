@@ -15,7 +15,7 @@ namespace StateMachine
         {
             foreach (UIElementType uiElementType in uiElementsType)
             {
-                UIElement uiElement = HUDManager.Instance.GetUIElement(uiElementType);
+                UIDynamicElement uiElement = HUDManager.Instance.GetUIElement(uiElementType);
                 uiElement.gameObject.SetActive(!uiElement.gameObject.activeSelf);
             }
         }

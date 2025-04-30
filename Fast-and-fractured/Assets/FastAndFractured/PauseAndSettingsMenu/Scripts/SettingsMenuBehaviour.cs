@@ -1,53 +1,80 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using TMPro;
+using Enums;
+using Utilities;
+using UnityEngine;
+using System.Linq;
+using UnityEngine.UI;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEngine.Rendering.HighDefinition;
+using System;
 
 namespace FastAndFractured
 {
     public class SettingsMenuBehaviour : MonoBehaviour
     {
-        [Header("Menus Settings UI")]
+        [Header("Menu Settings UI")]
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
         [SerializeField] private GameObject accessibilitySettingsUI;
+
         [SerializeField] private GameObject gamepadRemappingWindow;
         [SerializeField] private GameObject keyboardRemappingWindow;
-        [Header("Settings audio")]
-        [SerializeField] private Slider masterVolumeSlider;
+
+        [Header("Audio Settings")]
+        [SerializeField] private Slider generalVolumeSlider;
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
-        [Header("Settings video")]
+
+        [Header("Video Settings")]
+        [SerializeField] private Toggle vsyncToggle;
+        [SerializeField] private Slider sharpeningSlider;
+        [SerializeField] private Slider brightnessSlider;
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
-        [SerializeField] private TMP_Dropdown vsyncDropdown;
+        [SerializeField] private TMP_Dropdown displayModeDropdown;
         [SerializeField] private TMP_Dropdown antiAliasingDropdown;
-        [SerializeField] private TMP_Dropdown sharpeningDropdown;
-        [SerializeField] private TMP_Dropdown rayTracingDropdown;
-        [SerializeField] private Slider brightnessSlider;
+        [SerializeField] private GameObject sharpeningSliderContainer;
 
-        [Header("Delete progress")]
+        [Header("Delete Progress")]
+        [SerializeField] private GameObject deleteButton;
         [SerializeField] private GameObject deletePopupUI;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
-        [SerializeField] private GameObject deleteButton;
-        
+
+        #region Player Prefs String Constants
+        private const string VSYNC_STRING = "Vsync";
+        private const string RESOLUTION_STRING = "Resolution";
+        private const string BRIGHTNESS_STRING = "Brightness";
+        private const string DISPLAY_MODE_STRING = "DisplayMode";
+        private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
+        private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
+        private const float MASTER_VOLUME_DEFAULT = 0.5f;
+        private const int VSYNC_DEFAULT_STATE = 0;
+        private const float SHARPENING_DEFAULT = 0.5f;
+        private const float BRIGHTNESS_DEFAULT = 1f;
+        private const int FPS_DEFAULT = 60;
+        private const string RESOLUTION_DEFAULT = "1920x1080";
+        #endregion
+
+        Camera _camera;
+
         void Start()
         {
             SetStartValues();
+
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
-            vsyncDropdown.onValueChanged.AddListener(delegate { SetVsync(vsyncDropdown.value); });
             antiAliasingDropdown.onValueChanged.AddListener(delegate { SetAntiAliasing(antiAliasingDropdown.value); });
-            sharpeningDropdown.onValueChanged.AddListener(delegate { SetSharpening(sharpeningDropdown.value); });
-            rayTracingDropdown.onValueChanged.AddListener(delegate { SetRayTracing(rayTracingDropdown.value); });
-            brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(brightnessSlider.value); });
-            masterVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(masterVolumeSlider.value); });
+            generalVolumeSlider.onValueChanged.AddListener(delegate { SetMasterVolume(generalVolumeSlider.value); });
+            sharpeningSlider.onValueChanged.AddListener(delegate { UpdateTAASharpening(); });
             musicVolumeSlider.onValueChanged.AddListener(delegate { SetMusicVolume(musicVolumeSlider.value); });
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
+            displayModeDropdown.onValueChanged.AddListener(delegate { SetDisplayMode(displayModeDropdown.value); });
 
-            //quiero comprobar si esta en la escena 0
+            brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
+
+            vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(vsyncToggle.isOn); });
+
             if (SceneManager.GetActiveScene().buildIndex != 0)
             {
                 deleteButton.SetActive(false);
@@ -56,41 +83,56 @@ namespace FastAndFractured
             {
                 deleteButton.SetActive(true);
             }
+            _camera = Camera.main;
         }
+
         private void SetStartValues()
         {
             //Master volume
-            float masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.5f);
-            RefreshValue(masterVolumeSlider, masterVolume);
+            float masterVolume = PlayerPrefs.GetFloat("MasterVolume", MASTER_VOLUME_DEFAULT);
+            RefreshValue(generalVolumeSlider, masterVolume);
+
             //Music volume 
             float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.5f);
             RefreshValue(musicVolumeSlider, musicVolume);
+
             //SFX volume
             float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
             RefreshValue(sfxVolumeSlider, sfxVolume);
+
             // Max FPS
-            int maxFPS = PlayerPrefs.GetInt("MaxFPS", 120);
+            int maxFPS = PlayerPrefs.GetInt("MaxFPS", FPS_DEFAULT);
             string maxFPSString = maxFPS.ToString();
             RefreshValue(fpsDropdown, maxFPSString);
+
             //Resolution
-            string resolution = PlayerPrefs.GetString("Resolution","1920x1080");
+            string resolution = PlayerPrefs.GetString(RESOLUTION_STRING, "1920x1080");
             RefreshValue(resolutionDropdown, resolution);
+            LoadAvailableResolutions();
+
+            //Display Mode
+            LoadDisplayModeOptions();
+
             //VSync
-            string vsync = PlayerPrefs.GetString("Vsync", "No");
-            RefreshValue(vsyncDropdown, vsync);
+            bool vsyncOn = PlayerPrefs.GetInt(VSYNC_STRING, VSYNC_DEFAULT_STATE) == 1;
+            vsyncToggle.isOn = vsyncOn;
+            UpdateVSync(vsyncOn);
+
             //Anti-Aliasing
-            string antiAliasing = PlayerPrefs.GetString("Anti-Aliasing", "No");
-            RefreshValue(antiAliasingDropdown, antiAliasing);
+            LoadAntiAliasingOptions();
+
             //Sharpening
-            string sharpening = PlayerPrefs.GetString("Sharpening", "No");
-            RefreshValue(sharpeningDropdown, sharpening);
-            //Ray Tracing
-            string rayTracing = PlayerPrefs.GetString("RayTracing", "No");
-            RefreshValue(rayTracingDropdown, rayTracing);
+            if (PlayerPrefs.HasKey(TAA_SHARPENING_STRING))
+            {
+                float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, SHARPENING_DEFAULT);
+                sharpeningSlider.SetValueWithoutNotify(savedSharpening);
+            }
+
             //Brightness
-            float brightness = PlayerPrefs.GetFloat("Brightness", 1f);
+            float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, BRIGHTNESS_DEFAULT);
             RefreshValue(brightnessSlider, brightness);
         }
+
         private void RefreshValue(TMP_Dropdown dropdown, string value)
         {
             for (int i = 0; i < dropdown.options.Count; i++)
@@ -103,12 +145,12 @@ namespace FastAndFractured
                 }
             }
         }
+
         private void RefreshValue(Slider slider, float value)
         {
             slider.value = value;
         }
 
-        //Change between settings ui
         public void OpenAudioSettings()
         {
             audioSettingsUI.SetActive(true);
@@ -124,7 +166,11 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(false);
             gamepadRemappingWindow.SetActive(false);
             keyboardRemappingWindow.SetActive(false);
+
+            float brightness = PlayerPrefs.GetFloat("Brightness", BRIGHTNESS_DEFAULT);
+            brightnessSlider.SetValueWithoutNotify(brightness);
         }
+
         public void OpenAccesibilitySettings()
         {
             audioSettingsUI.SetActive(false);
@@ -142,6 +188,7 @@ namespace FastAndFractured
             gamepadRemappingWindow.SetActive(false);
             keyboardRemappingWindow.SetActive(true);
         }
+
         public void OpenControllerRemapping()
         {
             audioSettingsUI.SetActive(false);
@@ -151,77 +198,230 @@ namespace FastAndFractured
             keyboardRemappingWindow.SetActive(false);
         }
 
-        //Audio settings
+        #region Audio Settings
         private void SetMasterVolume(float value)
         {
             PlayerPrefs.SetFloat("MasterVolume", value);
             PlayerPrefs.Save();
-            //TODO set master volume in game
+            SoundManager.Instance.UpdateGeneralVolume();
         }
+
         private void SetMusicVolume(float value)
         {
             PlayerPrefs.SetFloat("MusicVolume", value);
             PlayerPrefs.Save();
-            //TODO set music volume in game
+            SoundManager.Instance.UpdateMusicVolume();
         }
+
         private void SetSFXVolume(float value)
         {
             PlayerPrefs.SetFloat("SFXVolume", value);
             PlayerPrefs.Save();
-            //TODO set sfx volume in game
+            SoundManager.Instance.UpdateSFXVolume();
+        }
+        #endregion
+
+        #region Video Settings
+        public void SetBrightness()
+        {
+            BrightnessManager.Instance?.SetBrightness(brightnessSlider.value);
         }
 
-        //Video settings
-        private void SetBrightness(float value)
+        private void UpdateVSync(bool isActive)
         {
-            PlayerPrefs.SetFloat("Brightness",value);
+            QualitySettings.vSyncCount = isActive ? 1 : VSYNC_DEFAULT_STATE;
+            Application.targetFrameRate = isActive ? -1 : FPS_DEFAULT;
+
+            PlayerPrefs.SetInt(VSYNC_STRING, QualitySettings.vSyncCount);
             PlayerPrefs.Save();
-            //TODO set brightness in game
         }
-        private void SetVsync(int option)
+
+        private void ToggleVsync(bool value)
         {
-            string selectedOption = vsyncDropdown.options[option].text;
-            PlayerPrefs.SetString("Vsync", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set vsync in game
+            UpdateVSync(value);
         }
+
         private void CapFPS(int option)
         {
             string selectedOption = fpsDropdown.options[option].text;
-            int maxFPS=int.Parse(selectedOption);
+            int maxFPS = int.Parse(selectedOption);
             Application.targetFrameRate = maxFPS;
             PlayerPrefs.SetInt("MaxFPS", maxFPS);
             PlayerPrefs.Save();
         }
-        private void SetAntiAliasing(int option)
+
+        #region Anti-Aliasing and Sharpening Methods
+        private void LoadAntiAliasingOptions()
         {
-            string selectedOption = antiAliasingDropdown.options[option].text;
-            PlayerPrefs.SetString("Anti-Aliasing", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set anti-aliasing in game
+            List<string> antiAliasingOptions = new List<string> {
+                Enum.GetName(typeof(HDAdditionalCameraData.AntialiasingMode),HDAdditionalCameraData.AntialiasingMode.None),
+                Enum.GetName(typeof(HDAdditionalCameraData.AntialiasingMode),HDAdditionalCameraData.AntialiasingMode.FastApproximateAntialiasing),
+                Enum.GetName(typeof(HDAdditionalCameraData.AntialiasingMode),HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing),
+                Enum.GetName(typeof(HDAdditionalCameraData.AntialiasingMode),HDAdditionalCameraData.AntialiasingMode.SubpixelMorphologicalAntiAliasing) };
+            antiAliasingDropdown.ClearOptions();
+            antiAliasingDropdown.AddOptions(antiAliasingOptions);
+
+            string savedOption = PlayerPrefs.GetString(ANTI_ALIASING_STRING, Enum.GetName(typeof(HDAdditionalCameraData.AntialiasingMode), HDAdditionalCameraData.AntialiasingMode.None));
+            int index = antiAliasingOptions.IndexOf(savedOption);
+
+            if (index >= 0)
+                antiAliasingDropdown.value = index;
+            else
+                antiAliasingDropdown.value = 0;
+
+            antiAliasingDropdown.RefreshShownValue();
         }
+
+        private void SetAntiAliasing(int dropdownIndex)
+        {
+            string selectedOption = antiAliasingDropdown.options[dropdownIndex].text;
+            PlayerPrefs.SetString(ANTI_ALIASING_STRING, selectedOption);
+            PlayerPrefs.Save();
+            HDAdditionalCameraData.AntialiasingMode antialiasingMode = (HDAdditionalCameraData.AntialiasingMode)Enum.Parse(typeof(HDAdditionalCameraData.AntialiasingMode), selectedOption);
+            ApplyAntiAliasing(antialiasingMode);
+
+            bool showSharpening = antialiasingMode == HDAdditionalCameraData.AntialiasingMode.None;
+            sharpeningSliderContainer.SetActive(showSharpening);
+
+            if (showSharpening)
+            {
+
+                if (_camera != null)
+                {
+                    HDAdditionalCameraData hdCameraData = _camera.GetComponent<HDAdditionalCameraData>();
+
+                    if (hdCameraData != null)
+                        sharpeningSlider.SetValueWithoutNotify(hdCameraData.taaSharpenStrength);
+                }
+            }
+
+        }
+
+        private void ApplyAntiAliasing(HDAdditionalCameraData.AntialiasingMode selectedOption)
+        {
+            if (_camera == null) return;
+
+            HDAdditionalCameraData hdCameraData = _camera.GetComponent<HDAdditionalCameraData>();
+            if (hdCameraData == null) return;
+
+            hdCameraData.antialiasing = selectedOption;
+
+            if (selectedOption == HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing)
+            {
+                float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, SHARPENING_DEFAULT);
+                hdCameraData.taaSharpenStrength = savedSharpening;
+            }
+
+
+
+            Debug.Log("Applied AntiAliasing: " + hdCameraData.antialiasing);
+        }
+
+        private void UpdateTAASharpening()
+        {
+            if (_camera == null) return;
+
+            HDAdditionalCameraData hdCameraData = _camera.GetComponent<HDAdditionalCameraData>();
+            if (hdCameraData == null) return;
+
+            if (hdCameraData.antialiasing == HDAdditionalCameraData.AntialiasingMode.TemporalAntialiasing)
+            {
+                hdCameraData.taaSharpenStrength = sharpeningSlider.value;
+                PlayerPrefs.SetFloat(TAA_SHARPENING_STRING, sharpeningSlider.value);
+                PlayerPrefs.Save();
+            }
+        }
+        #endregion
+
+        #region Resolution Methods
         private void SetResolution(int option)
         {
             string selectedOption = resolutionDropdown.options[option].text;
-            PlayerPrefs.SetString("Resolution", selectedOption);
+            PlayerPrefs.SetString(RESOLUTION_STRING, selectedOption);
             PlayerPrefs.Save();
-            //TODO set resolution in game
-        }
-        private void SetRayTracing(int option)
-        {
-            string selectedOption = rayTracingDropdown.options[option].text;
-            PlayerPrefs.SetString("RayTracing", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set ray tracing in game
-        }
-        private void SetSharpening(int option)
-        {
-            string selectedOption = sharpeningDropdown.options[option].text;
-            PlayerPrefs.SetString("Sharpening", selectedOption);
-            PlayerPrefs.Save();
-            //TODO set sharpening in game
+
+            string[] dimensions = selectedOption.Split('x');
+            int width = int.Parse(dimensions[0]);
+            int height = int.Parse(dimensions[1]);
+            Screen.SetResolution(width, height, Screen.fullScreen);
         }
 
+        private void LoadAvailableResolutions()
+        {
+            resolutionDropdown.ClearOptions();
+
+            Resolution[] resolutionList = Screen.resolutions
+                .OrderByDescending(r => r.width * r.height)
+                .ToArray();
+
+            List<string> optionsList = new List<string>();
+            int currentResolutionIndex = 0;
+
+            for (int i = 0; i < resolutionList.Length; i++)
+            {
+                string option = $"{resolutionList[i].width}x{resolutionList[i].height}";
+
+                if (!optionsList.Contains(option))
+                    optionsList.Add(option);
+
+                if (resolutionList[i].width == Screen.currentResolution.width &&
+                    resolutionList[i].height == Screen.currentResolution.height)
+                    currentResolutionIndex = optionsList.Count - 1;
+            }
+
+            resolutionDropdown.AddOptions(optionsList);
+
+            string savedResolution = PlayerPrefs.GetString(RESOLUTION_STRING, RESOLUTION_DEFAULT);
+            if (!string.IsNullOrEmpty(savedResolution))
+            {
+                int index = optionsList.IndexOf(savedResolution);
+                resolutionDropdown.value = index != -1 ? index : currentResolutionIndex;
+            }
+            else
+                resolutionDropdown.value = currentResolutionIndex;
+
+            resolutionDropdown.RefreshShownValue();
+        }
+        #endregion
+
+        #region Display Mode Methods
+        private void SetDisplayMode(int option)
+        {
+            string selectedOption = displayModeDropdown.options[option].text;
+            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedOption);
+            PlayerPrefs.Save();
+
+            ApplyDisplayMode((FullScreenMode)Enum.Parse(typeof(FullScreenMode), selectedOption));
+        }
+
+        private void ApplyDisplayMode(FullScreenMode selectedOption)
+        {
+            Screen.fullScreenMode = selectedOption;
+            Debug.Log($"Display Mode Applicated: {selectedOption}");
+        }
+
+        private void LoadDisplayModeOptions()
+        {
+            FullScreenMode mode = Screen.fullScreenMode;
+            List<string> displayModes = new List<string> {
+                Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen),
+                Enum.GetName(typeof(FullScreenMode), FullScreenMode.Windowed),
+                Enum.GetName(typeof(FullScreenMode),  FullScreenMode.FullScreenWindow),
+               };
+
+            displayModeDropdown.ClearOptions();
+            displayModeDropdown.AddOptions(displayModes);
+
+            string savedMode = PlayerPrefs.GetString(DISPLAY_MODE_STRING, Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen));
+            int index = displayModes.IndexOf(savedMode);
+            displayModeDropdown.value = index >= 0 ? index : 0;
+            displayModeDropdown.RefreshShownValue();
+        }
+        #endregion
+
+        #endregion
+
+        #region Delete Progress Methods
         public void DeleteAllProgress()
         {
             deletePopupUI.SetActive(false);
@@ -231,13 +431,17 @@ namespace FastAndFractured
             }
             PlayerPrefs.Save();
         }
+
         public void CloseDeletePopup()
         {
             deletePopupUI.SetActive(false);
         }
+
         public void OpenDeletePopup()
         {
             deletePopupUI.SetActive(true);
         }
+
+        #endregion
     }
 }

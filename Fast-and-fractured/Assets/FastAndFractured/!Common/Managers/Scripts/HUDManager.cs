@@ -1,37 +1,30 @@
 using Enums;
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Utilities;
+using UnityEngine.UI;
 
 namespace FastAndFractured
 {
-    public class HUDManager : MonoBehaviour
+    public class HUDManager : AbstractSingleton<HUDManager>
     {
-        #region Singleton
+        #region Public Fields
 
-        public static HUDManager Instance { get; private set; }
+        public Dictionary<UIElementType, UIDynamicElement> UIElements => _uiElements;
 
         #endregion
 
         #region Private Fields
 
-        private Dictionary<UIElementType, UIElement> _uiElements = new Dictionary<UIElementType, UIElement>();
+        private Dictionary<UIElementType, UIDynamicElement> _uiElements = new Dictionary<UIElementType, UIDynamicElement>();
+
+        private Image[] _goodEffects;
+        private Image[] _normalEffects;
+        private Image[] _badEffects;
 
         #endregion
 
         #region Unity Methods
-
-        private void Awake()
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
 
         private void Start()
         {
@@ -39,41 +32,114 @@ namespace FastAndFractured
             RegisterUIElements();
         }
 
-        private void OnEnable()
-        {
-            // Subscribe to events if necessary
-            
-            // Example
-            // EventManager.OnHealthUpdate += UpdateHealthBar;
-            // EventManager.OnCooldownUpdate += UpdateCooldown;
-            // EventManager.OnTimerUpdate += UpdateTimer;
-            // EventManager.OnEventTitleUpdate += UpdateEventTitle;
-        }
+        #endregion
 
-        private void OnDisable()
+        #region UI Elements Registration
+
+        void RegisterUIElements()
         {
-            // Unsubscribe from events if necessary
-            
-            // Example
-            // EventManager.OnHealthUpdate -= UpdateHealthBar;
-            // EventManager.OnCooldownUpdate -= UpdateCooldown;
-            // EventManager.OnTimerUpdate -= UpdateTimer;
-            // EventManager.OnEventTitleUpdate -= UpdateEventTitle;
+            foreach (UIDynamicElement element in FindObjectsOfType<UIDynamicElement>(true))
+            {
+                _uiElements[element.elementType] = element;
+            }
+
+            _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
         }
 
         #endregion
 
-        #region Private Methods
+        #region UI Modifications Methods
 
-        void RegisterUIElements()
+        /// <summary>
+        /// Updates the specified UI element.
+        /// <para>Accepts New Text, Sprite, or current and max value for Fill Amount.</para>
+        /// </summary>
+        public void UpdateUIElement(UIElementType type, string newText)
         {
-            foreach (UIElement element in FindObjectsOfType<UIElement>(true))
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.textReference != null)
             {
-                _uiElements[element.elementType] = element;
+                element.textReference.text = newText;
             }
         }
 
-        private bool TryGetUIElement(UIElementType type, out UIElement element)
+        public void UpdateUIElement(UIElementType type, Sprite newSprite)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
+            {
+                element.imageReference.sprite = newSprite;
+            }
+            else
+            {
+                switch (type)
+                {
+                    case UIElementType.GOOD_EFFECTS:
+                        UpdateEffectSprites(_goodEffects, newSprite);
+                        break;
+                    case UIElementType.NORMAL_EFFECTS:
+                        UpdateEffectSprites(_normalEffects, newSprite);
+                        break;
+                    case UIElementType.BAD_EFFECTS:
+                        UpdateEffectSprites(_badEffects, newSprite);
+                        break;
+                }
+            }
+        }
+
+        public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
+            {
+                float fillAmount = Mathf.Clamp01(currentValue / maxValue);
+
+                if (type == UIElementType.HEALTH_BAR)
+                {
+                    fillAmount = 1f - Mathf.Clamp01(currentValue / maxValue);
+                    element.imageReference.color = Color.Lerp(Color.yellow, Color.red, fillAmount);
+                }
+                
+                element.imageReference.fillAmount = fillAmount;
+            }
+        }
+
+        public void UpdateUIElement(UIElementType type, bool isActive)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element))
+            {
+                element.gameObject.SetActive(isActive);
+            }
+        }
+
+        /// <summary>
+        /// Returns the UI element of the specified type.
+        /// </summary>
+        public UIDynamicElement GetUIElement(UIElementType type)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element))
+            {
+                return element;
+            }
+            else return null;
+        }
+
+        public GameObject GetEffectGameObject(Sprite sprite)
+        {
+            GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
+            if (hudImage != null) return hudImage;
+
+            hudImage = FindEffectGameObject(_normalEffects, sprite);
+            if (hudImage != null) return hudImage;
+
+            hudImage = FindEffectGameObject(_badEffects, sprite);
+            return hudImage;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
         {
             if (!_uiElements.TryGetValue(type, out element))
             {
@@ -83,86 +149,28 @@ namespace FastAndFractured
             return true;
         }
 
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Updates the specified UI element.
-        /// <para>Accepts New Text, Sprite, or current and max value for Fill Amount.</para>
-        /// </summary>
-        public void UpdateUIElement(UIElementType type, string newText)
+        private void UpdateEffectSprites(Image[] effects, Sprite newSprite)
         {
-            if (TryGetUIElement(type, out UIElement element) && element.textReference != null)
+            foreach (Image image in effects)
             {
-                element.textReference.text = newText;
-            }
-        }
-
-        public void UpdateUIElement(UIElementType type, Sprite newSprite)
-        {
-            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
-            {
-                element.imageReference.sprite = newSprite;
-            }
-        }
-
-        public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
-        {
-            if (TryGetUIElement(type, out UIElement element) && element.imageReference != null)
-            {
-                float fillAmount = Mathf.Clamp01(currentValue / maxValue);
-                element.imageReference.fillAmount = fillAmount;
-
-                if (type == UIElementType.HEALTH_BAR)
+                if (!image.gameObject.activeSelf)
                 {
-                    element.imageReference.color = Color.Lerp(Color.red, Color.green, fillAmount);
+                    image.sprite = newSprite;
                 }
             }
         }
 
-        public void UpdateUIElement(UIElementType type, bool isActive)
+        private GameObject FindEffectGameObject(Image[] effects, Sprite sprite)
         {
-            if (TryGetUIElement(type, out UIElement element))
+            foreach (Image image in effects)
             {
-                element.gameObject.SetActive(isActive);
+                if (sprite == image.sprite)
+                {
+                    return image.gameObject;
+                }
             }
+            return null;
         }
-
-        public UIElement GetUIElement(UIElementType type)
-        {
-            if (TryGetUIElement(type, out UIElement element))
-            {
-                return element;
-            }
-            else return null;
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        // Placeholder methods for future event handling
-
-        // private void UpdateHealthBar()
-        // {
-        //     UpdateUIImageFillAmount(UIElementType.HealthBar, Player.currentHealth, Player.maxHealth);
-        // }
-
-        // private void UpdateCooldown(UIElementType type, float currentCooldown, float maxCooldown)
-        // {
-        //     UpdateUIImageFillAmount(type, currentCooldown, maxCooldown);
-        // }
-
-        // private void UpdateTimer(float time)
-        // {
-        //     UpdateUITextString(UIElementType.TimerText, time.ToString("F2"));
-        // }
-
-        // private void UpdateEventTitle(string title)
-        // {
-        //     UpdateUITextString(UIElementType.EventText, title);
-        // }
 
         #endregion
     }

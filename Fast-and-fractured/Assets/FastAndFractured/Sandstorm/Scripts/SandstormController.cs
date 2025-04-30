@@ -3,6 +3,7 @@ using UnityEngine.Rendering.HighDefinition;
 using System.Collections.Generic;
 using Utilities;
 using Utilities.Managers.PauseSystem;
+using System.Net.NetworkInformation;
 namespace FastAndFractured
 {
     public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
@@ -42,6 +43,13 @@ namespace FastAndFractured
         public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
         private bool _moveSandStorm = false;
 
+        [SerializeField]
+        private float fogDistancePlayerInsideSandstorm = 30f;
+        [SerializeField]
+        private float fogDistancePlayerOutsideSandstorm = 10f;
+        [SerializeField]
+        private float atenuationTime = 1f;
+
         public bool StormSpawnPointsSetted { get => _spawnPointsSet; }
 
         private bool _spawnPointsSet = false;
@@ -61,13 +69,23 @@ namespace FastAndFractured
         private ITimer _reduceKillTimeTimer;
 
         private bool _isPaused = false;
+        public List<GameObject> ItemsInsideSandstorm =>_itemsInsideSandstorm;
+        private List<GameObject> _itemsInsideSandstorm;
+        public List<GameObject>  CharactersInsideSandstorm => _charactersInsideSandstorm;
+        private List<GameObject> _charactersInsideSandstorm;
+
+        [SerializeField] private GameObject minimapSandstormDirection;
 
         const float HALF_FRONT_ANGLE = 90;
+        private const float MIN_VALUE_PER_SANDSTORM_DETECTION = 0.00000000001f;
         private void Start()
         {
             _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
             primaryFog?.gameObject.SetActive(false);
+            _itemsInsideSandstorm = new List<GameObject>();
+            _charactersInsideSandstorm = new List<GameObject>();
+            primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
         }
 
         private void OnEnable()
@@ -147,7 +165,9 @@ namespace FastAndFractured
             }
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
+            IngameEventsManager.Instance.CreateEvent("La tormenta de arena ha comenzado", 5f);
 
+            minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
         }
 
         /// <summary>
@@ -188,45 +208,98 @@ namespace FastAndFractured
             }
         }
 
-        public bool IsInsideStormCollider(Transform target)
+        public bool IsInsideStormCollider(GameObject target,float marginError=0f)
         {
-            Vector3 directionToTarget = target.position - (transform.position +  _stormCollider.size.z/2 * transform.forward);
-            directionToTarget.Normalize();
-            float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
-            float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
-            return !(angleToTarget < (HALF_FRONT_ANGLE));
+            if (marginError > 0)
+            {
+                Vector3 directionToTarget = target.transform.position - (transform.position + (_stormCollider.size.z / 2 + marginError) * transform.forward);
+                directionToTarget.Normalize();
+                float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
+                float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
+                return !(angleToTarget < HALF_FRONT_ANGLE);
+            }
+            else
+            {
+                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target);
+            }
+        }
+
+        private void ChangeSandstormVisuals(bool playerInside)
+        {
+            if (playerInside)
+            {
+                float progress = 1/(atenuationTime / Time.deltaTime);
+                float actualFogDistance = primaryFog.parameters.meanFreePath;
+                TimerSystem.Instance.CreateTimer(atenuationTime,onTimerDecreaseUpdate : (float time) => {
+                    primaryFog.parameters.meanFreePath = Mathf.Lerp(actualFogDistance, fogDistancePlayerInsideSandstorm,progress);
+                    progress += progress;
+                });
+            }
+            else
+            {
+                primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
+            }
         }
 
         private void OnTriggerEnter(Collider other)
-        {
-            if(other.TryGetComponent(out StatsController statsController))
+        {   
+            if (other.TryGetComponent(out StatsController statsController))
             {
-               StartKillNotify(statsController);
+                if (!other.GetComponent<Rigidbody>().isKinematic)
+                {
+
+                    StartKillNotify(statsController);
+                    _charactersInsideSandstorm.Add(other.gameObject);
+                    if (statsController.IsPlayer)
+                    {
+                        ChangeSandstormVisuals(true);
+                    }
+                }
+            }
+            else
+            {
+                _itemsInsideSandstorm.Add(other.gameObject);
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if(other.TryGetComponent(out StatsController statsController))
+            if (other.TryGetComponent(out StatsController statsController))
             {
-               CharacterEscapedDead(statsController);
+                if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
+                {
+                    if (!IsInsideStormCollider(other.gameObject,MIN_VALUE_PER_SANDSTORM_DETECTION))
+                    {
+                        CharacterEscapedDead(statsController);
+                        _charactersInsideSandstorm.Remove(other.gameObject);
+                    }
+                }
+            }
+            else
+            {
+                _itemsInsideSandstorm.Remove(other.gameObject);
             }
         }
 
-       public void StartKillNotify(StatsController statsController)
+        public void StartKillNotify(StatsController statsController)
        {
-         statsController.GetKilledNotify(this,false);
+         float damageXFrame = statsController.Endurance/_currentCharacterKillTime;
+         statsController.GetKilledNotify(this,false,damageXFrame);
        }
 
       public void CharacterEscapedDead(StatsController statsController)
-      {
-            statsController.GetKilledNotify(this, true);  
+      { 
+        statsController.GetKilledNotify(this, true,0);  
       }
 
-        public void OnPause()
+      public GameObject GetKillerGameObject()
+      {
+         return this.gameObject;
+      }
+
+      public void OnPause()
         {
-            _isPaused = true;
-            
+            _isPaused = true; 
         }
 
         public void OnResume()

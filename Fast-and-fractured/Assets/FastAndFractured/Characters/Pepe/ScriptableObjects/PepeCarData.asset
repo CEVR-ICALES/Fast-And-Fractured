@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: PepeCarData
   m_EditorClassIdentifier: 
   CharacterName: Pepe
-  AI: 0
   CarDefaultPrefab: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
   CarWithSkinsPrefabs:
-  - {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
-  MaxEndurance: 500
+  - {fileID: 5896435916326739545, guid: 12d45f1d22ddb9849a2c0d8b0e66c2ae, type: 3}
+  MaxEndurance: 1100
   MinEndurance: 0
   Invulnerable: 0
-  MaxSpeed: 100
-  MaxSpeedDashing: 140
+  MaxSpeed: 130
+  MaxSpeedDashing: 200
   MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 1500
+  MaxAcceleration: 13000
   MinAcceleration: 0
-  Acceleration: 3500
-  BrakeTorque: 12000
+  Acceleration: 10000
+  BrakeTorque: 70000
   Handling: 35
-  HandlingSmoothnes: 6
-  AerialRotationSpeed: 0
+  HandlingSmoothnes: 2
+  AerialRotationSpeed: 2.5
   DriftThreshold: 0.1
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
@@ -38,22 +37,23 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 1200
-  BaseForce: 300000
+  Weight: 1500
+  BaseForce: 400000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
-  BaseDownwardForce: 500
+  BaseDownwardForce: 1600
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 10
-  MaxNormalShootDMG: 25
-  MinNormalShootDMG: 5
+  NormalShootDMG: 20
+  MaxNormalShootDMG: 30
+  MinNormalShootDMG: 15
   PushShootFORCE: 400000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 150
+  NormalShootAngle: 180
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
@@ -67,4 +67,23 @@ MonoBehaviour:
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
   CooldownSpeed: 1
-  DeadDelay: 0
+  DeadDelay: 2.5
+  aiParameters:
+    fleeDistance: 5
+    sweepRadius: 20
+    shootingMarginErrorAngle: 0.02
+    damageAccumulationDuration: 5
+    fleeTriggerDamageThresholdPercentage: 40
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 10
+    decisionPercentageAcceleration: 10
+    decisionPercentageNormalShoot: 50
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 10
+  WinObjects:
+  - GameObject: {fileID: 0}
+    StringValue: 
+  LoseObjects: []

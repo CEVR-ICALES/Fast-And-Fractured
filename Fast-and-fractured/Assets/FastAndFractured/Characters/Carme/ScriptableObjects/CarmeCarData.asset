@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: CarmeCarData
   m_EditorClassIdentifier: 
   CharacterName: Carme
-  AI: 0
   CarDefaultPrefab: {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
   CarWithSkinsPrefabs:
-  - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
-  MaxEndurance: 500
+  - {fileID: 6067046011668277108, guid: 9a46dd806a6bbc44c8162ffabf2732cd, type: 3}
+  MaxEndurance: 650
   MinEndurance: 0
   Invulnerable: 0
-  MaxSpeed: 100
-  MaxSpeedDashing: 140
+  MaxSpeed: 180
+  MaxSpeedDashing: 240
   MaxSpeedMultiplier: 1
   MinSpeed: 0
-  MaxAcceleration: 1500
+  MaxAcceleration: 8000
   MinAcceleration: 0
-  Acceleration: 3500
-  BrakeTorque: 12000
+  Acceleration: 5500
+  BrakeTorque: 60000
   Handling: 35
-  HandlingSmoothnes: 6
-  AerialRotationSpeed: 0
+  HandlingSmoothnes: 5
+  AerialRotationSpeed: 2.5
   DriftThreshold: 0.1
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
@@ -38,16 +37,16 @@ MonoBehaviour:
   DashTime: 2
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
-  Weight: 1200
-  BaseForce: 300000
+  Weight: 1050
+  BaseForce: 275000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
-  BaseDownwardForce: 500
+  BaseDownwardForce: 1550
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 10
-  MaxNormalShootDMG: 25
-  MinNormalShootDMG: 5
+  NormalShootDMG: 15
+  MaxNormalShootDMG: 30
+  MinNormalShootDMG: 10
   PushShootFORCE: 400000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
@@ -67,4 +66,19 @@ MonoBehaviour:
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
   CooldownSpeed: 1
-  DeadDelay: 0
+  DeadDelay: 2.5
+  aiParameters:
+    fleeDistance: 5
+    sweepRadius: 20
+    shootingMarginErrorAngle: 2
+    damageAccumulationDuration: 5
+    fleeTriggerDamageThresholdPercentage: 40
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 10
+    decisionPercentageAcceleration: 10
+    decisionPercentageNormalShoot: 50
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 10

@@ -1,3 +1,4 @@
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace FastAndFractured
@@ -9,7 +10,7 @@ namespace FastAndFractured
         [SerializeField] private float movementThreshold;
         [SerializeField] private float speedToEmitAllParticles;
         private bool _carTrailParticlesActive = true;
-        [SerializeField] private float _movementTrailInitialEmmisionRate = 300f; // shopuld always match the emissio nrate if its going to be modified
+        [SerializeField] private float _movementTrailInitialEmmisionRate = 300f; // should always match the emission rate if its going to be modified
         private ParticleSystem.EmissionModule[] _trailEmissionModules; // necessary to modify rateOverTime
 
         [Header("Drift Trail")]
@@ -18,6 +19,34 @@ namespace FastAndFractured
         [Header("Impact")]
         [SerializeField] private ParticleSystem collisionVfx;
         [SerializeField] private LayerMask collisionLayers;
+
+        [Header("Dashing")]
+        [SerializeField] private ParticleSystem dashSpeedVfx;
+        [SerializeField] private ParticleSystem dashTurboVfx;
+
+        [Header("Car Endurance")]
+        [SerializeField] private ParticleSystem[] smokeVfx;
+        [SerializeField] private ParticleSystem lowEnduranceExclusiveSmokeVfx;
+        private ParticleSystem.EmissionModule[] _smokeEmmisionModules; // necessary to modify rateOverTime
+        private ParticleSystem.MainModule[] _smokeMainModules;
+        private bool _carEnduracenParticlesActive = false;
+        private bool _canPlayExlusiveSmokeVfx = false;
+        private const float START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD = 0.8f;
+        [SerializeField] private float hightEnduranceMinStartSpeed = 0.8f;
+        [SerializeField] private float highEnduranceMaxStartSpeed = 1.2f;
+        [SerializeField] private float highEnduranceEmmissionRate = 15f;
+        private const float ALMOST_HALF_ENDURANCE = 0.55f;
+        [SerializeField] private float halfEnduranceMinStartSpeed = 1.8f;
+        [SerializeField] private float haldEnduranceMaxStartSpeed = 2.4f;
+        [SerializeField] private float haldEnduranceEmmissionRate = 55f;
+        private const float ENDURANCE_SUPERLOW = 0.3f;
+        [SerializeField] private float lowEnduranceMinStartSpeed = 2.5f;
+        [SerializeField] private float lowEnduranceMaxStartSpeed = 3.3f;
+        [SerializeField] private float lowEnduranceEmmissionRate = 80f;
+
+        [Header("Die Vfx")]
+        [SerializeField] private ParticleSystem dieVfx;
+        [SerializeField] private GameObject[] carModel;   
 
 
         PhysicsBehaviour _physicsBehaviour;
@@ -30,10 +59,18 @@ namespace FastAndFractured
             _carMovementController = GetComponent<CarMovementController>();
 
             _trailEmissionModules = new ParticleSystem.EmissionModule[trailVfxs.Length];
+            _smokeEmmisionModules = new ParticleSystem.EmissionModule[smokeVfx.Length];
+            _smokeMainModules = new ParticleSystem.MainModule[smokeVfx.Length];
 
             for (int i = 0; i < trailVfxs.Length; i++)
             {
                 _trailEmissionModules[i] = trailVfxs[i].emission;
+            }
+
+            for (int i = 0; i < smokeVfx.Length; i++)
+            {
+                _smokeEmmisionModules[i] = smokeVfx[i].emission;
+                _smokeMainModules[i] = smokeVfx[i].main;
             }
         }
 
@@ -65,7 +102,7 @@ namespace FastAndFractured
         #region BrakeMarks
         private void HandleBrakeMarks()
         {
-            if (_carMovementController.IsBraking)
+            if (_carMovementController.IsBraking && _carMovementController.IsGrounded())
             {
                 StartBrakeMark();
             }
@@ -128,6 +165,87 @@ namespace FastAndFractured
 
         #endregion
 
+        #region Dash
+
+        public void StartDashVfx()
+        {
+            dashSpeedVfx.Play();
+            dashTurboVfx.Play();
+        }
+
+        public void StopDashVfx()
+        {
+            dashSpeedVfx.Stop();
+            dashTurboVfx.Stop();
+        }
+
+        #endregion
+
+        #region Endurance
+        
+        public void HandleOnEnduranceChanged(float enduranceFactor)
+        {
+            if(enduranceFactor > START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD)
+            {
+                if(_carEnduracenParticlesActive)
+                {
+                    StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
+                    lowEnduranceExclusiveSmokeVfx.Stop();
+                }
+            } else 
+            {
+                if (enduranceFactor <= ENDURANCE_SUPERLOW)
+                {
+                    UpdateEnduranceVfxValues(lowEnduranceMinStartSpeed, lowEnduranceMaxStartSpeed, lowEnduranceEmmissionRate);
+                    _canPlayExlusiveSmokeVfx = true;
+                }
+                else if (enduranceFactor <= ALMOST_HALF_ENDURANCE)
+                {
+                    UpdateEnduranceVfxValues(halfEnduranceMinStartSpeed, haldEnduranceMaxStartSpeed, haldEnduranceEmmissionRate);
+                    _canPlayExlusiveSmokeVfx = false;
+                }
+                else if (enduranceFactor <= START_EMMITTING_ENDURANCE_PARTICLES_THRESHOLD)
+                {
+                    UpdateEnduranceVfxValues(hightEnduranceMinStartSpeed, highEnduranceMaxStartSpeed, highEnduranceEmmissionRate);
+                    _canPlayExlusiveSmokeVfx = false;
+                }
+                if(!_carEnduracenParticlesActive)
+                    EnableParticles(smokeVfx, ref _carEnduracenParticlesActive);
+                if(_canPlayExlusiveSmokeVfx)
+                {
+                    if (!lowEnduranceExclusiveSmokeVfx.isPlaying)
+                        lowEnduranceExclusiveSmokeVfx.Play();
+                }   else
+                {
+                    if(lowEnduranceExclusiveSmokeVfx.isPlaying)
+                        lowEnduranceExclusiveSmokeVfx.Stop();
+                }
+            } 
+        }
+
+        private void UpdateEnduranceVfxValues(float minStartSpeed, float maxStartSpeed, float emmissionRate)
+        {
+            for(int i = 0; i < _smokeMainModules.Length; i++)
+            {
+                _smokeMainModules[i].startSpeed = new ParticleSystem.MinMaxCurve(minStartSpeed, maxStartSpeed);
+            }
+
+            for(int i = 0; i < _smokeEmmisionModules.Length; i++)
+            {
+                _smokeEmmisionModules[i].rateOverTime = emmissionRate;
+            }
+        }
+
+        #endregion
+
+        public void OnDead()
+        {
+            foreach(GameObject model in carModel)
+            {
+                model.SetActive(false);
+            }
+            dieVfx.Play();
+        }
 
         private void StopParticles(ParticleSystem[] particleSystems, ref bool boolToChange)
         {

@@ -89,6 +89,23 @@ namespace FastAndFractured {
             }
         }
 
+        public Vector3 GetCurrentParabolicMovementOfPushShoot(out float gravityMultiplier)
+        {
+            gravityMultiplier = characterStatsController.PushShootGravityMultiplier;
+            float range = characterStatsController.PushShootRange;
+            float angle = characterStatsController.PushShootAngle;
+            CalculateInitialVelocityForParabolicMovement(range, angle, out float Vx, out float Vy);
+
+            //Rotar el vectorX forward hacia el angulo del currentdirection 
+            Vector3 currentShootDirectionWithoutY = new Vector3(currentShootDirection.x, 0, currentShootDirection.z);
+            float directionAngle = Vector3.SignedAngle(transform.forward, currentShootDirectionWithoutY, Vector3.up);
+            Quaternion rotation = Quaternion.AngleAxis(directionAngle, Vector3.up);
+            Vector3 velocityVectorX = transform.forward * Vx;
+
+            //Finalmente, se calcula el vector rotado en X y se suma el vector Y.
+            return (rotation * velocityVectorX) + transform.up * Vy + physicsBehaviour.Rb.velocity;
+        }
+
         private void CalculateInitialVelocityForParabolicMovement(float range, float angle,out float Vx,out float Vy)
         {
             //Calcular la velocidad necesaria para llegar al rango especifico con angulo especifico. 

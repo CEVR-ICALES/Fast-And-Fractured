@@ -4,6 +4,7 @@ using StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
@@ -24,7 +25,7 @@ namespace FastAndFractured
         private int maxCharactersInGame = 8;
         private List<string> _allCharactersNameCode;
         private Dictionary<string, int> _characterSelectedLimit;
-
+        public List<string> InGameCharactersNameCodes { get => _inGameCharactersNameCodes; }
         private List<string> _inGameCharactersNameCodes;
         public List<GameObject> InGameCharacters { get => _inGameCharacters; }
         private List<GameObject> _inGameCharacters;
@@ -61,8 +62,18 @@ namespace FastAndFractured
         [SerializeField] private bool stormInDebugMode = false;
         private GameObject _playerReference;
         public GameObject playerReference { get=>_playerReference ;}
+        public bool HasPlayerWon { get => _hasPlayerWon; }
+        private bool _hasPlayerWon = false;
 
+        private int _aliveCharacterCount;
+        public GameObject[] characterIcons;
+        [SerializeField]
+        private float endGameDelayTime = 0.5f;
+        [SerializeField] private GameEndData gameEndDataScriptableObject;
 
+        private const float DISTANCE_TO_CHANGE_TO_KM = 1000f;
+        private const string METERS_TEXT = " m";
+        private const string KILOMETERS_TEXT = " km";
         private const char DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE = '_';
         private const int LENGHT_RESULT_OF_SPLITTED_CHARACTER_NAME = 2;
         private const int DEFAULT_SKIN = 0;
@@ -72,7 +83,6 @@ namespace FastAndFractured
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
         protected override void Awake()
         {
-            Debug.Log(gameObject.name);
             base.Awake();
             //Provisional For Debug
             if (debugMode)
@@ -102,10 +112,11 @@ namespace FastAndFractured
         //Maybe in Onenable?
         void Start()
         {
+            _aliveCharacterCount = maxCharactersInGame;
             Cursor.lockState = CursorLockMode.Locked;
             if (!useMyCharacters)
             {
-              StartLevelWithSpawnedCharacters();
+                StartLevelWithSpawnedCharacters();
             }
             else
             {
@@ -120,20 +131,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            // PlayerInputController.OnInputDeviceChanged += HandleInputChange;
         }
 
         private void OnDisable()
         {
-            // PlayerInputController.OnInputDeviceChanged -= HandleInputChange;
         }
 
-        // public void HandleInputChange(InputDeviceType inputType)
-        // {
-        //     usingController = PlayerInputController.Instance.IsUsingController;
-        //     _playerBindingInputs.HandleInputChange(usingController);
-        // }
-        // will be moved to gameManager
         
         private void StartLevelWithOwnCharacters()
         {
@@ -143,6 +146,7 @@ namespace FastAndFractured
 
 
             PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            _playerReference = FindObjectOfType<PlayerInputController>().GetComponentInChildren<StatsController>().gameObject;
             foreach (var aiBrain in aIBrains)
             {
                 _inGameCharacters.Add(aiBrain.gameObject);
@@ -165,6 +169,7 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
+            IngameEventsManager.Instance.SetCharactersTopElements();
             SpawnInGameCharacters(out bool succeded);
             if (!succeded)
             {
@@ -339,7 +344,6 @@ namespace FastAndFractured
 
         public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
         {
-            _inGameCharacters.Remove(character);
             if (_callStormTimer != null) {
                 if (TimerSystem.Instance.HasTimer(_callStormTimer))
                 {
@@ -352,11 +356,30 @@ namespace FastAndFractured
             TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
                 if (!isPlayer)
                 {
+                    _inGameCharacters.Remove(character);
+                    foreach (Transform child in character.transform)
+                    {
+                        foreach (GameObject icon in characterIcons)
+                        { 
+                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            {
+                                icon.SetActive(false);
+                            }
+                        }
+                    }
                     Destroy(character);
+                    _aliveCharacterCount--;
+                    if (_aliveCharacterCount == 1)
+                    {
+                        _hasPlayerWon = true;
+                        GetPlayerFinalStatsAndChangeScene();
+                    }
                 }
                 else
                 {
                     Debug.Log("Player Dead.");
+                    _hasPlayerWon = false;
+                    GetPlayerFinalStatsAndChangeScene();
                 }
             });
         }
@@ -370,9 +393,39 @@ namespace FastAndFractured
             _sandStormController.MoveSandStorm = true;
         }
 
-        public bool IsInsideSandstorm(Transform target)
+        public bool IsInsideSandstorm(GameObject target)
         {
             return _sandStormController.IsInsideStormCollider(target);
+        }
+
+        public bool IsInsideSandstorm(GameObject target, float marginError)
+        {
+            return _sandStormController.IsInsideStormCollider(target,marginError);
+        }
+
+        public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
+        {
+            List<GameObject> interactablesList = new List<GameObject>();
+            if (gameElement == GameElement.INTERACTABLE)
+            {
+                foreach (var item in InteractableHandler.Instance.GetStatBoostItems())
+                {
+                    interactablesList.Add(item.gameObject);
+                }
+            }
+            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
+                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+        }
+
+        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        {
+            foreach (T item in list1) {
+                if (!list2.Contains(item))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #region Resources
@@ -432,11 +485,35 @@ namespace FastAndFractured
             }
         }
         #endregion
-
-
-        private bool IsThePlayer(GameObject character)
+        private void GetPlayerFinalStatsAndChangeScene()
         {
-            return character.CompareTag("Player");
+            float distance = _playerReference.GetComponent<StatsController>().totalDistanceDriven;
+            string totalDistanceText;
+            if (distance < DISTANCE_TO_CHANGE_TO_KM)
+            {
+                distance = Mathf.Round(distance);
+                totalDistanceText = distance.ToString() + METERS_TEXT;
+            }
+            else
+            {
+                distance = Mathf.Round(distance / DISTANCE_TO_CHANGE_TO_KM * 10) / 10;
+                totalDistanceText = distance.ToString() + KILOMETERS_TEXT;
+            }
+            GameObject finalAnimation;
+            if(_hasPlayerWon)
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetWinObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            else
+            {
+                finalAnimation = _playerReference.GetComponent<StatsController>().GetLoseObjectByString(PlayerPrefs.GetString("Selected_Player"));
+            }
+            gameEndDataScriptableObject.isWin = _hasPlayerWon;
+            gameEndDataScriptableObject.totalDamageDealt = _playerReference.GetComponent<StatsController>().totalDamageDealt.ToString();;
+            gameEndDataScriptableObject.totalDamageTaken = _playerReference.GetComponent<StatsController>().totalDamageTaken.ToString();
+            gameEndDataScriptableObject.totalDistanceTraveled = totalDistanceText;
+            gameEndDataScriptableObject.finalAnimation = finalAnimation;
+            MainMenuManager.Instance.LoadScene(0);
         }
     }
 }
