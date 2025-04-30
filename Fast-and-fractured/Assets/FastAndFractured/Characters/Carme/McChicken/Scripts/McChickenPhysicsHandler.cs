@@ -139,7 +139,7 @@ namespace FastAndFractured
 
             // calculate only the X rotation we want
             float slopeAngle = Vector3.Angle(_groundNormal, Vector3.up);
-            float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _groundNormal));
+            float slopeSign = Mathf.Sign(Vector3.Dot(-transform.right, _groundNormal));
             float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -45f, 45f);
 
             // create new rotation (only X changes, Y/Z remain unchanged)
