@@ -359,6 +359,18 @@ PrefabInstance:
       value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[3]
+      value: 
+      objectReference: {fileID: 6767274261165021178}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[4]
+      value: 
+      objectReference: {fileID: 751540341392986462}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: highEnduranceMaxStartSpeed
       value: 1.8
       objectReference: {fileID: 0}
@@ -1037,6 +1049,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 8223204524156514999}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &751540341392986462 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8678631126281036777, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1723053678052375405 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7347399327733909978, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -1079,6 +1096,7 @@ MonoBehaviour:
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
+  isAbilityActive: 0
   spawnPoint: {fileID: 5404290905123533514}
   tomatoSpeed: 100
   descendingTomatoSpeed: 100
@@ -1094,6 +1112,11 @@ GameObject:
 --- !u!4 &6406879614907160408 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6767274261165021178 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3455528531979232589, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 8223204524156514999}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &7901825669716411893 stripped

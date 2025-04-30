@@ -511,6 +511,18 @@ PrefabInstance:
       value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[3]
+      value: 
+      objectReference: {fileID: 8651475269919417474}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[4]
+      value: 
+      objectReference: {fileID: 3428372950765003302}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: lowEnduranceEmmissionRate
       value: 55
       objectReference: {fileID: 0}
@@ -1283,6 +1295,7 @@ MonoBehaviour:
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
+  isAbilityActive: 0
   cooldownReductionMultiplier: 2
   statBoostMultiplier: 1.5
   uniqueAbilityDuration: 10
@@ -1310,6 +1323,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 6333387155377144271}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3428372950765003302 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8678631126281036777, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 6333387155377144271}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3608371544738285589 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7347399327733909978, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -1333,6 +1351,11 @@ Transform:
 --- !u!4 &8649009704732931736 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3450815660555630423, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 6333387155377144271}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8651475269919417474 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3455528531979232589, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 6333387155377144271}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &9012769299743810592 stripped
