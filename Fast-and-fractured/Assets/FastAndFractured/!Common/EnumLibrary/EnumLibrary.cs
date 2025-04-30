@@ -161,4 +161,9 @@ namespace Enums
         CHARACTER,
         INTERACTABLE
     }
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
+    }
 }
