@@ -52,6 +52,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2299261964696114453, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+      propertyPath: physicsBehaviour
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2299261964696114453, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+      propertyPath: characterStatsController
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3720076212828097957, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       propertyPath: m_Mass
       value: 12
@@ -66,7 +74,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543438247174020036, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6414098229381800387, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       propertyPath: m_Enabled
@@ -100,12 +108,28 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8498099819379441858, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+      propertyPath: physicsBehaviour
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8498099819379441858, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+      propertyPath: characterStatsController
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8789480297743576495, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedComponents:
+    - {fileID: 8415263379696310516, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 6414098229381800387, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 4370210325838085568, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 6496170438022619622, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 6672518072435184843, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 1723240950232034530, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    m_RemovedGameObjects:
+    - {fileID: 4135159331407545276, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+    - {fileID: 3024007835508768534, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}

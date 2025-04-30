@@ -18,7 +18,7 @@ namespace FastAndFractured
         [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
         [SerializeField] float sweepRadius = 20f;
         [Tooltip("The shooting error that AI has on normal shoot")]
-        [SerializeField] float shootingMarginErrorAngle = 2f;
+        [SerializeField] float shootingMarginErrorAngle = 0.02f;
         [SerializeField] LayerMask sweepLayerMask;
 
 
@@ -90,7 +90,7 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
 
-        [Range(-50,100)] [SerializeField] private int marginToFleeFromSandstorm = 0;
+        [Range(-50, 100)][SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -128,7 +128,7 @@ namespace FastAndFractured
             else
             {
                 GroundForces();
-                if (carMovementController.IsInFlipCase()||physicsBehaviour.IsTouchingGround)
+                if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
                 {
                     carMovementController.StartIsFlippedTimer();
                 }
@@ -151,7 +151,7 @@ namespace FastAndFractured
 
         private void GroundForces()
         {
-            if ((groundState == IAGroundState.AIR||groundState == IAGroundState.NONE)&&groundState!=IAGroundState.FLIP_SATE)
+            if ((groundState == IAGroundState.AIR || groundState == IAGroundState.NONE) && groundState != IAGroundState.FLIP_SATE)
             {
                 applyForceByState.ToggleAirFriction(false);
                 applyForceByState.ToggleCustomGravity(false);
@@ -162,7 +162,7 @@ namespace FastAndFractured
 
         private void AirForces()
         {
-            if (groundState == IAGroundState.GROUND||groundState == IAGroundState.NONE)
+            if (groundState == IAGroundState.GROUND || groundState == IAGroundState.NONE)
             {
                 applyForceByState.ToggleAirFriction(true);
                 applyForceByState.ToggleCustomGravity(true);
@@ -173,7 +173,7 @@ namespace FastAndFractured
 
         private void FlipStateForce()
         {
-            applyForceByState.ApplyFlipStateForce(physicsBehaviour.TouchingGroundNormal,physicsBehaviour.TouchingGroundPoint);
+            applyForceByState.ApplyFlipStateForce(physicsBehaviour.TouchingGroundNormal, physicsBehaviour.TouchingGroundPoint);
             applyForceByState.ToggleRollPrevention(false, 1);
         }
 
@@ -195,6 +195,7 @@ namespace FastAndFractured
             if (!carMovementController)
             {
                 carMovementController = GetComponentInChildren<CarMovementController>();
+                gameObject.name = gameObject.name.Replace("(Clone)", "") + " - " + carMovementController.gameObject.name;
             }
             if (!physicsBehaviour)
             {
@@ -261,7 +262,7 @@ namespace FastAndFractured
 
         public void UpdateTargetPosition()
         {
-            if (_currentTarget==null)
+            if (_currentTarget == null)
             {
                 return;
             }
@@ -415,6 +416,8 @@ namespace FastAndFractured
         #region CombatState
         public void NormalShoot()
         {
+            if (!TargetToShoot) return;
+
             normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             normalShootHandle.NormalShooting();
         }
@@ -428,6 +431,7 @@ namespace FastAndFractured
         }
         public void PushShoot()
         {
+            if (!_targetToShoot) return;
             pushShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             pushShootHandle.PushShooting();
         }
@@ -461,6 +465,7 @@ namespace FastAndFractured
         #region FleeState
         public void RunAwayFromCurrentTarget()
         {
+            if (!_currentTarget) return;
             _positionToDrive = -CalcNormalizedTargetDirection() * fleeDistance;
         }
 
@@ -474,7 +479,7 @@ namespace FastAndFractured
             GameObject nearestCharacter = CalcNearestCharacter();
             if (nearestCharacter != null)
             {
-                return Vector3.Distance(carMovementController.transform.position,nearestCharacter.transform.position) < sweepRadius;
+                return Vector3.Distance(carMovementController.transform.position, nearestCharacter.transform.position) < sweepRadius;
             }
             return false;
         }
@@ -609,43 +614,48 @@ namespace FastAndFractured
             RecalculateDecisionsPercentage();
         }
 
-        
+
 
         private Vector3 CalcNormalizedTargetDirection()
         {
             return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
         }
 
+        private Vector3 CalcNormalizedShootingDirection()
+        {
+            return (_currentTarget.transform.position - normalShootHandle.ShootPoint.position).normalized;
+        }
+
         private float GetAngleDirection(Vector3 axis)
         {
             Vector3 direction;
-            switch (pathMode)
+            if (_currentTarget)
             {
-                default:
-                case PathMode.SIMPLE:
-                    direction = CalcNormalizedTargetDirection();
-                    break;
-                case PathMode.ADVANCED:
-                    if (TryToCalculatePath())
-                    {
-                        CheckIfGoToNextPathPoint();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No path to follow" + _currentPath.ToString());
-                        if (Physics.Raycast(_positionToDrive, Vector3.down, out var hit, float.MaxValue, ignoreLayerMask))
+                switch (pathMode)
+                {
+                    default:
+                    case PathMode.SIMPLE:
+                        direction = CalcNormalizedTargetDirection();
+                        break;
+                    case PathMode.ADVANCED:
+                        if (TryToCalculatePath())
                         {
-                            Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
-
-                            _positionToDrive = hit.point;
-                            TryToCalculatePath();
                             CheckIfGoToNextPathPoint();
-
                         }
-                    }
-                    ;
+                        else
+                        {
+                            Debug.LogWarning("No path to follow" + _currentPath.ToString());
+                            if (Physics.Raycast(_positionToDrive, Vector3.down, out var hit, float.MaxValue, ignoreLayerMask))
+                            {
+                                Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
 
-                    break;
+                                _positionToDrive = hit.point;
+                                TryToCalculatePath();
+                                CheckIfGoToNextPathPoint();
+                            }
+                        }
+                        break;
+                }
             }
             direction = (_positionToDrive - carMovementController.transform.position);
 
@@ -669,9 +679,9 @@ namespace FastAndFractured
                 return true;
                 if (NavMesh.SamplePosition(transform.position, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
                 {
-                     _positionToDrive = hit.position;
-                     Debug.LogWarning("Emergency repositioning", this.gameObject);
-                     return true;
+                    _positionToDrive = hit.position;
+                    Debug.LogWarning("Emergency repositioning", this.gameObject);
+                    return true;
                 }
             }
             if (agent.CalculatePath(_positionToDrive, _currentPath))
@@ -701,7 +711,7 @@ namespace FastAndFractured
             switch (_currentPath.corners.Length)
             {
                 case 1:
-                    Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground",this.gameObject);
+                    Debug.LogError("THE PATH ONLY HAS ONE POINT. This is probably because you put the car too far away from the ground", this.gameObject);
 
                     return _currentPath.corners[0];
                 case > 0:
@@ -728,7 +738,7 @@ namespace FastAndFractured
 
         private Vector3 GetShootingDirectionWithError()
         {
-            Vector3 shootingDirection = CalcNormalizedTargetDirection();
+            Vector3 shootingDirection = CalcNormalizedShootingDirection();
 
             //Add shooting error 
             return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
@@ -776,12 +786,13 @@ namespace FastAndFractured
             ChangeTargetToGo(nearestTarget);
         }
 
-        private List<T> ListWithGameElementNotInsideSandstorm<T>(List<T> gameElementListIfInsideSandstorm)  where T : MonoBehaviour
+        private List<T> ListWithGameElementNotInsideSandstorm<T>(List<T> gameElementListIfInsideSandstorm) where T : MonoBehaviour
         {
             List<T> gameElementsNotInsideSandstorm = new List<T>();
-            foreach(T gameElement in gameElementListIfInsideSandstorm)
+            foreach (T gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject)){
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject))
+                {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
             }
@@ -793,7 +804,8 @@ namespace FastAndFractured
             List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
             foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement)){
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement))
+                {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
             }
@@ -802,7 +814,7 @@ namespace FastAndFractured
 
         public bool IsIAInsideSandstorm()
         {
-            return LevelController.Instance.IsInsideSandstorm(gameObject,marginToFleeFromSandstorm);
+            return LevelController.Instance.IsInsideSandstorm(gameObject, marginToFleeFromSandstorm);
         }
 
         public bool AreAllInteractablesInsideSandstorm()

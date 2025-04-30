@@ -241,8 +241,12 @@ namespace FastAndFractured
         {
             foreach(GameObject model in carModel)
             {
+                if(model != null)
                 model.SetActive(false);
             }
+            StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
+            lowEnduranceExclusiveSmokeVfx.Stop();
+            _carMovementController.OnDie();
             dieVfx.Play();
         }
 

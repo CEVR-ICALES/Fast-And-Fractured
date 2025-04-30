@@ -55,7 +55,7 @@ namespace FastAndFractured
         private bool _isFlipped = false;
 
         [SerializeField]
-        private float detectFlipTime = 3.5f;
+        private float detectFlipTime = 2f;
         private ITimer _flipTimer;
         private LayerMask _combinedMask;
         [SerializeField]
@@ -305,6 +305,13 @@ namespace FastAndFractured
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
                 _physicsBehaviour.IsCurrentlyDashing = true;
                 _canDash = false;
+
+                // Apply a small initial velocity to overcome static friction
+                if (_physicsBehaviour.Rb.velocity.magnitude < 1f)
+                {
+                    _physicsBehaviour.Rb.velocity += dashDirection * 0.5f;
+                }
+
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
                     FinishDash();
@@ -431,15 +438,6 @@ namespace FastAndFractured
                 Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
-                    //if (!_physicsBehaviour.IsTouchingGround)
-                    //{
-                    //    Ray ray = new Ray(transform.position,-transform.up);
-                    //    RaycastHit hit = new RaycastHit();
-                    //    if(Physics.Raycast(ray,out hit, Mathf.Infinity, _combinedMask)){
-                    //        _physicsBehaviour.TouchingGroundNormal = hit.normal;
-                    //        _physicsBehaviour.TouchingGroundPoint = transform.position;
-                    //    }
-                    //}
                     _flipTimer=null;
                 });
             }
@@ -551,6 +549,11 @@ namespace FastAndFractured
                 wheel.ApplyBrakeTorque(0f);
                 wheel.ApplyMotorTorque(0f);
             }
+        }
+
+        public void OnDie()
+        {
+            _physicsBehaviour.Rb.isKinematic = true;
         }
 
         private void UpdateWheelVisuals()

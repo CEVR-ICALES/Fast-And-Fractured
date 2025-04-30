@@ -832,12 +832,19 @@ MonoBehaviour:
   uphillForwardThreshold: 0.3
   downhillForwardThreshold: -0.3
   slopeSpeedThreshold: 3
-  maxGroundAngleThreshold: 65
+  maxGroundWheelsAngleThreshold: 65
+  maxGroundCarAngleThreshold: 12
   detectFlipTime: 3.5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  staticLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   isAi: 0
   statsController: {fileID: 2898550601115800401}
   vehicleVfxController: {fileID: 856863917156540184}
-  slowingDownAngularMomentumTime: 0
+  slowingDownAngularMomentumTime: 0.75
 --- !u!114 &5672472646167121783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -894,8 +901,11 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+  staticLayer:
+    serializedVersion: 2
+    m_Bits: 0
   _checkGroundTime: 0.5
-  slowDownFactor: 2
+  slowDownFactor: 0.95
   statsController: {fileID: 2898550601115800401}
 --- !u!114 &2898550601115800401
 MonoBehaviour:

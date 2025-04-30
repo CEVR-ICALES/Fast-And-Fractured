@@ -128,7 +128,7 @@ namespace FastAndFractured
 
                     if (otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
                     {
-                        otherComponentPhysicsBehaviours.StatsController.IsInvulnerable = false;
+                        otherComponentPhysicsBehaviours.StatsController.LoseInvulnerability();
                     }
                     else
                     {
@@ -144,10 +144,7 @@ namespace FastAndFractured
             if ((((groundLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)||
                 ((staticLayer & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer))
                 &&!_carMovementController.IsGrounded()) {
-                _groundTimer = TimerSystem.Instance.CreateTimer(_checkGroundTime, Enums.TimerDirection.INCREASE, () => { 
                     _isTouchingGround = true;
-                });
-
             }
         }
 
@@ -158,15 +155,6 @@ namespace FastAndFractured
             {
                 if (_isTouchingGround)
                     _isTouchingGround = false;
-                else
-                {
-                    if (_groundTimer != null)
-                    {
-                        _groundTimer.StopTimer();
-                    }
-                }
-                //_touchingGroundNormal = transform.up.normalized;
-                //_touchingGroundPoint = transform.position;
             }
         }
 

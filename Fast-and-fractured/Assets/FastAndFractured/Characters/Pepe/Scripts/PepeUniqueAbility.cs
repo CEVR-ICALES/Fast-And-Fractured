@@ -17,10 +17,15 @@ namespace FastAndFractured
         [SerializeField] private Pooltype pooltypeAscendingTomato;
         [SerializeField] private Pooltype pooltypeDescendingTomato;
 
-        public override void ActivateAbility()
+         
+        public override bool ActivateAbility()
         {
-            base.ActivateAbility();
-            AbilityEffect();
+            if (base.ActivateAbility())
+            {
+                AbilityEffect();
+                return true;
+            }
+            return false;
         }
         private void AbilityEffect()
         {
@@ -29,6 +34,8 @@ namespace FastAndFractured
             {
                 SetTomatoVariables(tomato);
             }
+
+            EndAbilityEffects();
         }
         private void SetTomatoVariables(GameObject tomato)
         {

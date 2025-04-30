@@ -12,7 +12,9 @@ namespace FastAndFractured
         public LocalVolumetricFog primaryFog;
 
         public float maxGrowthTime = 1.0f;
-
+        [SerializeField]
+        [Range(0.05f,0.9f)]
+        private float colliderLessGrowMultiplicator = 0.7f;
         private float _maxGrowth;
         private float _growthSpeed;
 
@@ -95,7 +97,7 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
         private void Update()
         {
@@ -187,7 +189,7 @@ namespace FastAndFractured
 
                     primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
                 }
-                float newZSizeCollider = _initialColliderSize.z + _currentGrowth;
+                float newZSizeCollider = _initialColliderSize.z + _currentGrowth * colliderLessGrowMultiplicator;
                 _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
 
@@ -211,7 +213,7 @@ namespace FastAndFractured
         {
             if (marginError > 0)
             {
-                Vector3 directionToTarget = target.transform.position - (transform.position + (_stormCollider.size.z / 2 + marginError) * transform.forward);
+                Vector3 directionToTarget = target.transform.position - (transform.position  + (_stormCollider.size.z / 2 + marginError + _stormCollider.center.z) * transform.forward);
                 directionToTarget.Normalize();
                 float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
                 float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;

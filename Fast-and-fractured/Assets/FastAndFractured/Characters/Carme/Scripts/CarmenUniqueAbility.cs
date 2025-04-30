@@ -8,6 +8,8 @@ namespace FastAndFractured
     {
         public GameObject chickenPrefab;
         public Transform uniqueAbilityShootPoint;
+        [SerializeField]
+        private PhysicsBehaviour physicsBehaviour;
 
         [Header("Land Point")]
         [SerializeField] private float rayCastDistance;
@@ -28,18 +30,23 @@ namespace FastAndFractured
         [SerializeField] private ShootingHandle shootingHandle;
 
 
-        public override void ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
+        public override bool ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
-            base.ActivateAbility();
-            _aimDirection = shootingHandle.CurrentShootDirection;
-            // remove vertical component while maintaining direction relative to car
-            _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
-            CalculateLandingPoint();
+            if (base.ActivateAbility())
+            {
+                _aimDirection = shootingHandle.CurrentShootDirection + physicsBehaviour.Rb.velocity ;
+                // remove vertical component while maintaining direction relative to car
+                _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
+                CalculateLandingPoint();
+                return true;
+            }
 
+            return false;
         }
 
         private void InitializeAbility(Vector3 landPoint)
         {
+            EndAbilityEffects();
             landPoint.y = landPoint.y + landPointYOffset;
             GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
             uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
@@ -47,11 +54,17 @@ namespace FastAndFractured
             {
                 DestroyUniqueAbility(uniqueAbility);
             });
+
+        }
+
+        private void OnAbilityCantBeInitialized()
+        {
+            EndAbilityEffects();
+            StopCooldown();
         }
 
         private void DestroyUniqueAbility(GameObject uniqueAbility)
         {
-            EndAbilityEffects();
             StopCooldown(); 
             Destroy(uniqueAbility);
         }
@@ -90,6 +103,9 @@ namespace FastAndFractured
             if (hitPoint)
             {
                 InitializeAbility(_groundHit.point);
+            } else
+            {
+                OnAbilityCantBeInitialized();
             }
         }
 

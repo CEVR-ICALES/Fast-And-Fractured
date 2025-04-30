@@ -82,7 +82,7 @@ namespace FastAndFractured
         private const string ERROR_STRING_MESSAGE = "empty list";
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
-        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
+        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 3;
         protected override void Awake()
         {
             base.Awake();
@@ -209,7 +209,7 @@ namespace FastAndFractured
             _inGameCharactersNameCodes = new List<string>();
             succeded = CreateAllCharactersNameCodesList();
             bool ignoreRepeatedCharacters;
-            if (ignoreRepeatedCharacters = _inGameCharactersNameCodes.Count < maxCharactersInGame)
+            if (ignoreRepeatedCharacters = _allCharactersNameCode.Count < maxCharactersInGame)
             {
                 Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
             }
@@ -364,16 +364,15 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
-                    foreach (Transform child in character.transform)
-                    {
+                    
                         foreach (GameObject icon in characterIcons)
                         { 
-                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            if (icon.GetComponent<CharacterIcon>().Character == character)
                             {
                                 icon.SetActive(false);
                             }
                         }
-                    }
+                    
                     Destroy(character.transform.parent.gameObject);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)

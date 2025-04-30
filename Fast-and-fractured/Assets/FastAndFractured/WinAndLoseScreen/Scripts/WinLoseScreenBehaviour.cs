@@ -9,7 +9,7 @@ using UnityEngine.Playables;
 using Enums;
 namespace FastAndFractured
 {
-    public class WinLoseScreenBehaviour : MonoBehaviour
+    public class WinLoseScreenBehaviour : AbstractSingleton<WinLoseScreenBehaviour>
     {
         [SerializeField] private GameObject resultText;
         [SerializeField] private GameObject totalDamageDealtText;
@@ -22,7 +22,6 @@ namespace FastAndFractured
         [SerializeField] private GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
-        [SerializeField] private GameObject mainMenuTimeline;
         private const string WIN_TEXT = "Menu.Win";
         private const string LOSE_TEXT = "Menu.Lose";
 
@@ -40,11 +39,12 @@ namespace FastAndFractured
             {
                 ShowMenu();
             }
-            ResetGameEndData();
         }
         public void ShowMenu()
         {
+            container.transform.parent.gameObject.SetActive(true);
             container.SetActive(true);
+            ResetGameEndData();
         }
         private void OnPlayableDirectorStopped(PlayableDirector obj)
         {
@@ -77,8 +77,7 @@ namespace FastAndFractured
         public void GoToMainMenu()
         {
             _spawnedObject.SetActive(false);
-            mainMenuTimeline.SetActive(true);
-            // MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
+            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
         }
     }
 }
