@@ -406,8 +406,27 @@ namespace FastAndFractured
 
         public void ChooseNearestSafeZone()
         {
-            //TODO
-            //Get list of safe zones and choose the nearest one
+            GameObject nearestTarget = CalcNearestSafeZone();
+            ChangeTargetToGo(nearestTarget);
+        }
+
+        public GameObject CalcNearestSafeZone()
+        {
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
+            GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
+            var nearestOne = float.MaxValue;
+
+            foreach (var safeZone in safeZonesOutsideSandstorm)
+            {
+                if (!safeZone) continue;
+                float characterDistance = (safeZone.transform.position - carMovementController.transform.position).sqrMagnitude;
+                if (characterDistance < nearestOne && safeZone.gameObject != carMovementController.gameObject)
+                {
+                    nearestOne = characterDistance;
+                    nearestSafeZone = safeZone;
+                }
+            }
+            return nearestSafeZone;
         }
 
 
@@ -820,6 +839,11 @@ namespace FastAndFractured
         public bool AreAllInteractablesInsideSandstorm()
         {
             return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+        }
+
+        public bool AreAllSafeZonesInsideSandstorm()
+        {
+            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

@@ -75,6 +75,8 @@ namespace FastAndFractured
         private List<GameObject> _itemsInsideSandstorm;
         public List<GameObject>  CharactersInsideSandstorm => _charactersInsideSandstorm;
         private List<GameObject> _charactersInsideSandstorm;
+        public List<GameObject> SafeZonesInsideSandstorm =>_safeZonesInsideSandstorm;
+        private List<GameObject> _safeZonesInsideSandstorm;
 
         [SerializeField] private GameObject minimapSandstormDirection;
 
@@ -259,7 +261,14 @@ namespace FastAndFractured
             }
             else
             {
-                _itemsInsideSandstorm.Add(other.gameObject);
+                if (other.TryGetComponent(out StatsBoostInteractable statsBoostInteractable))
+                {
+                    _itemsInsideSandstorm.Add(other.gameObject);
+                }
+                else
+                {
+                    _safeZonesInsideSandstorm.Add(other.gameObject);
+                }
             }
         }
 
@@ -278,7 +287,14 @@ namespace FastAndFractured
             }
             else
             {
-                _itemsInsideSandstorm.Remove(other.gameObject);
+                if (other.TryGetComponent(out StatsBoostInteractable statsBoostInteractable))
+                {
+                    _itemsInsideSandstorm.Remove(other.gameObject);
+                }
+                else
+                {
+                    _safeZonesInsideSandstorm.Remove(other.gameObject);
+                }
             }
         }
 

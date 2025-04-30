@@ -38,6 +38,8 @@ namespace FastAndFractured
 
         [SerializeField]
         private GameObject[] spawnPoints;
+        [SerializeField]
+        private List<GameObject> safeZones;
 
         [Header("Game Loop")]
         [SerializeField]
@@ -409,6 +411,19 @@ namespace FastAndFractured
             return _sandStormController.IsInsideStormCollider(target,marginError);
         }
 
+        public List<GameObject> SafeZonesOutsideSandstorm()
+        {
+            List<GameObject> safeZonesOutsideSandstorm = new List<GameObject>();
+            foreach (var safeZone in safeZones)
+            {
+                if (!IsInsideSandstorm(safeZone))
+                {
+                    safeZonesOutsideSandstorm.Add(safeZone);
+                }
+            }
+            return safeZonesOutsideSandstorm;
+        }
+
         public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
         {
             List<GameObject> interactablesList = new List<GameObject>();
@@ -419,8 +434,16 @@ namespace FastAndFractured
                     interactablesList.Add(item.gameObject);
                 }
             }
-            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
-                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+            switch (gameElement)
+            {
+                case GameElement.CHARACTER:
+                    return CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm);
+                case GameElement.INTERACTABLE:
+                    return CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+                case GameElement.SAFE_ZONES:
+                    return CheckIfListHaveTheSameElements(safeZones, _sandStormController.SafeZonesInsideSandstorm);
+            }
+            return false;
         }
 
         private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
