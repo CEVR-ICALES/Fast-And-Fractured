@@ -1,3 +1,4 @@
+using System;
 using FMODUnity;
 using UnityEngine;
 using System.Collections.Generic;
@@ -84,10 +85,10 @@ namespace FastAndFractured
             RotateCroquettes();
         }
 
-        public override void ActivateAbility()
+        public override bool ActivateAbility()
         {
-            if (IsAbilityActive || IsOnCooldown)
-                return;
+            if (!base.ActivateAbility())
+                return false;
 
             base.ActivateAbility();
 
@@ -96,7 +97,7 @@ namespace FastAndFractured
             if (_statsController == null)
             {
                 Debug.LogError("Stats Controller not Found");
-                return;
+                return false;
             }
 
             _statsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
@@ -114,7 +115,15 @@ namespace FastAndFractured
                 {
                     StopVFX();
                     ActivateHairEmission(false);
+                    SoundManager.Instance.StopSound(ssjUltiReference);
+                    EndAbilityEffects();
                 });
+            return true;
+        }
+
+        private void OnDestroy()
+        {
+            SoundManager.Instance?.StopSound(ssjUltiReference);
         }
 
         #region Croquette Methods
@@ -228,11 +237,15 @@ namespace FastAndFractured
         /// </summary>
         public void StopVFX()
         {
-            foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+            if (_vfxParent != null)
             {
-                ps.Stop();
+                foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+                {
+                    ps.Stop();
+                }
             }
         }
+
 
         /// <summary>
         /// Activates or deactivates the hair emissive effect by modifying the Exposure Weight.

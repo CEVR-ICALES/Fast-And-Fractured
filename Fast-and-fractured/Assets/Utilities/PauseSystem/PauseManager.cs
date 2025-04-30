@@ -105,6 +105,10 @@ namespace Utilities.Managers.PauseSystem
        
         public void UnregisterPausable(IPausable pausable)
         {
+            if (!gameObject)
+            {
+                return;
+            }
             if (pausable == null)
             {
                 Debug.LogError("Tried to unregister a null IPausable component.", this);

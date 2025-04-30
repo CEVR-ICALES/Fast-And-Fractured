@@ -13,7 +13,7 @@ namespace Utilities
         private const string TEXTURES_FOLDER_NAME = "Textures";
         private const string PREFABS_FOLDER_NAME = "Prefabs";
         private const string VISUALS_NODE_NAME = "Visuals";
-        private const string MODEL_NODE_NAME = "Model";
+        private const string MODEL_NODE_NAME = "Models";
         private const string BASE_PREFAB_VISUALS_TARGET = "Visuals";
         private const string BASEMAP_SUFFIX = "_BaseMap";
         private const string EMISSIVE_SUFFIX = "_Emissive";

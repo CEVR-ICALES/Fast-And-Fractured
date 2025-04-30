@@ -74,6 +74,7 @@ namespace FastAndFractured
         public float NormalShootSpeed = 100f;
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime = 0.3f;
         public float NormalShootMaxRange = 150f;
+        public float NormalShootAngle = 180f;
         [Tooltip("The angle include from 10� to 89�. 90� will return infinity.")]
         public float PushShootAngle = 40f;
         [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")]
@@ -100,6 +101,10 @@ namespace FastAndFractured
         [Header("AI")]
         [SerializeField] private AIParameters aiParameters;
         public AIParameters AIParameters => aiParameters;
+
+        [Header("FinalAnimations")]
+        public List<GameObjectStringPair> WinObjects;
+        public List<GameObjectStringPair> LoseObjects;
     }
 
 }
@@ -111,7 +116,7 @@ public class AIParameters
     [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
     [SerializeField] private float sweepRadius = 20f;
     [Tooltip("The shooting error that AI has on normal shoot")]
-    [SerializeField] private float shootingMarginErrorAngle = 2f;
+    [SerializeField] private float shootingMarginErrorAngle = 0.02f;
     
     [Header("Aggressiveness parameters")]
     [Tooltip("Duration of continuous damage required to reach this value")]
@@ -151,4 +156,10 @@ public class AIParameters
     public int DecisionPercentageNormalShoot { get => decisionPercentageNormalShoot; set => decisionPercentageNormalShoot = value; }
     public int DecisionPercentagePushShoot { get => decisionPercentagePushShoot; set => decisionPercentagePushShoot = value; }
     public int DecisionPercentageCooldown { get => decisionPercentageCooldown; set => decisionPercentageCooldown = value; }
+}
+[Serializable]
+public class GameObjectStringPair
+{
+    public GameObject GameObject;
+    public string StringValue;
 }

@@ -57,7 +57,10 @@ public class CarInjector : MonoBehaviour
             injectedCar.GetComponent<CarMovementController>().IsAi = true;
         }
         else{
-            injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
+            if (GameObject.Find("SpeedOverlay"))
+            {
+                injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
+            }
         } 
 
         return injectedCar;

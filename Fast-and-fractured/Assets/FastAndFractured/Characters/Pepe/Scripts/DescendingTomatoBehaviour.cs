@@ -4,9 +4,10 @@ using UnityEngine;
 using StateMachine;
 using Enums;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 namespace FastAndFractured
 {
-    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject
+    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
     {
         private bool initValues = true;
         public Pooltype pooltype;
@@ -14,14 +15,30 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         public GameObject objective;
         public float speed;
+        public float effectTime = 5f;
         public Vector3 randomRotation;
+        private bool _isPaused = false;
+
         public virtual void InitializeValues()
         {
             
         }
 
+        void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
+
         void Update()
         {
+            if (_isPaused)
+                return;
+
             if (objective != null)
             {
                 Vector3 direction = (objective.transform.position - transform.position).normalized;
@@ -35,24 +52,49 @@ namespace FastAndFractured
         }
         void OnTriggerEnter(Collider other)
         {
+            //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
+            if(objective == LevelController.Instance.playerReference)
+            {
+                IngameEventsManager.Instance.RemoveTomatoAlert();
+            }
+
+            
             if (other.gameObject.layer == LayerMask.NameToLayer("Characters"))
             {
-                EffectOnCharacter(other);
+                StatsController statsController = other.GetComponent<StatsController>();
+                if(statsController.IsInvulnerable)
+                {
+                    statsController.LoseInvulnerability();
+                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                }
+                else
+                {
+                    EffectOnCharacter(other);
+                }
             }
         }
         private void EffectOnCharacter(Collider other)
         {
-            Controller controller = other.GetComponent<Controller>();
-            EnemyAIBrain enemyAI = other.GetComponent<EnemyAIBrain>();
-            if(enemyAI != null)
+            if (other.gameObject == LevelController.Instance.playerReference)
             {
-                // Apply effect on the player that got hit by the tomato
+                IngameEventsManager.Instance.SetTomatoScreenEffect(effectTime);
             }
-            else if (controller != null)
+            else
             {
-                // Apply effect on the character AI that got hit by the tomato
+                //todo efect on IA
             }
+            
             ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }

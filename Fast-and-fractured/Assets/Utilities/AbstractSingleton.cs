@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Utilities
 {
@@ -6,7 +7,7 @@ namespace Utilities
     /// An abstract class that provides base functionalities of a singleton for its derived classes
     /// </summary>
     /// <typeparam name="T">The type of singleton instance</typeparam>
-    public abstract class AbstractSingleton<T> : MonoBehaviour where T : Component
+[DefaultExecutionOrder(-222)]    public abstract class AbstractSingleton<T> : MonoBehaviour where T : Component
     {
         static T s_Instance;
 
@@ -20,16 +21,13 @@ namespace Utilities
                 if (s_Instance == null)
                 {
                     s_Instance = FindObjectOfType<T>();
+                    return s_Instance;
                     if (s_Instance == null)
                     {
-                        //GameObject obj = new GameObject();
-                        //obj.name = typeof(T).Name;
-                        //s_Instance = obj.AddComponent<T>();
-
-                        //if(s_Instance != null)
-                        //{
-                           
-                        //}
+                        GameObject obj = new GameObject();
+                        Debug.LogError("Created Auxiliar singleton" + typeof(T).Name);
+                        obj.name = typeof(T).Name;
+                        s_Instance = obj.AddComponent<T>();
                     }
                 }
 
@@ -43,10 +41,11 @@ namespace Utilities
             {
                 s_Instance = this as T;
             }
-            else
+            else if (s_Instance != this)
             {
                 Destroy(gameObject);
             }
         }
+        
     }
 }

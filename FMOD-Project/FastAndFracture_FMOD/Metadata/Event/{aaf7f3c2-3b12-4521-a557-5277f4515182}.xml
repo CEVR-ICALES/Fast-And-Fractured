@@ -5,10 +5,10 @@
 			<value>ShootingSFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
-			<destination>{26a0582a-ad32-4077-b7de-0012350a8b78}</destination>
+			<destination>{07e1d877-4165-4e6c-965b-1779a21d1a0a}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{1dbdf354-4dd0-464d-b4ea-db487de37263}</destination>
@@ -119,6 +119,7 @@
 	<object class="MixerBusEffectChain" id="{e8646c70-1a99-407a-86e9-ec1af254240a}">
 		<relationship name="effects">
 			<destination>{c079d6cf-af52-4f02-be77-4e5bb4a75e8d}</destination>
+			<destination>{3fb09386-caf0-4a09-8b03-fb358e215f51}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{ae3770da-5e02-45c6-a471-c50b6dd923f0}" />
@@ -130,5 +131,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{31fa43fc-3535-4604-aa6a-6021586b83c4}" />
 	<object class="MixerBusFader" id="{c079d6cf-af52-4f02-be77-4e5bb4a75e8d}" />
+	<object class="SpatialiserEffect" id="{3fb09386-caf0-4a09-8b03-fb358e215f51}" />
 	<object class="MixerBusFader" id="{0e05b68a-f238-4ff9-817b-959706ef7193}" />
 </objects>

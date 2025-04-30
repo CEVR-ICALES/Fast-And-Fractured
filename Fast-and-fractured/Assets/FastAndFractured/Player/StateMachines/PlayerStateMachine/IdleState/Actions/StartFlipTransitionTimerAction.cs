@@ -11,7 +11,7 @@ namespace StateMachine {
         {
             CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
             PhysicsBehaviour physicsBehaviour = controller.GetBehaviour<PhysicsBehaviour>();
-            if (carMovementController.IsInWall()||physicsBehaviour.IsTouchingGround)
+            if (carMovementController.IsInFlipCase()||physicsBehaviour.IsTouchingGround)
             {
                carMovementController.StartIsFlippedTimer();
             }

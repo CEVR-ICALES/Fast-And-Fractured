@@ -25,6 +25,11 @@ namespace Utilities
             _index = indexInitValue;
         }
 
+        public List<GameObject> GetAllObjectsInPool()
+        {
+            return _objPoolList;
+        }
+
         public GameObject GetCurrentObject(out IPooledObject IpooledObject)
         {
             IpooledObject = null;
@@ -76,6 +81,7 @@ namespace Utilities
                     _objPoolList.Add(obj);
                     if (obj.TryGetComponent<IPooledObject>(out var IpooledObject))
                     {
+                        IpooledObject.Pooltype = _type;
                         _IpooledObjectsList.Add(IpooledObject);
                     }
                 }

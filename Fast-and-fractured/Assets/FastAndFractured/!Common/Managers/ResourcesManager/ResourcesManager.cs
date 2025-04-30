@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 [RequireComponent(typeof(ResourcesLoader))]
 public class ResourcesManager : AbstractSingleton<ResourcesManager>
@@ -27,9 +28,9 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     private Dictionary<UniqueAbilitiesIcons, Sprite> _uaIconsDictionary = new Dictionary<UniqueAbilitiesIcons, Sprite>();
     private Dictionary<ScreenEffects, Sprite> _screenEffectsDictionary = new Dictionary<ScreenEffects, Sprite>();
 
-
-    void Start()
+    protected override void Awake()
     {
+        base.Awake();
         _resourcesLoader = gameObject.GetComponent<ResourcesLoader>();
         _resourcesLoader.LoadResources(ref _playerIcons, ref _uniqueAbilitiesIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
 
@@ -37,6 +38,7 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
         InitScreenEffectsDictionary(_screenEffectsSprites);
     }
+ 
 
     void InitPlayerIconsDictionary(List<Sprite> playerIconsSprites)
     {
