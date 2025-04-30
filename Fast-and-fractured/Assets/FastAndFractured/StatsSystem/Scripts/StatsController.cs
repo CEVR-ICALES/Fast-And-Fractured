@@ -508,7 +508,7 @@ namespace FastAndFractured
         }
         #endregion  
 
-        private float GetCurrentStat(Stats type)
+        public float GetCurrentStat(Stats type)
         {
             switch (type)
             {
