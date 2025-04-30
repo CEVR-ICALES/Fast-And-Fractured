@@ -24,6 +24,7 @@ namespace FastAndFractured
 
         private Rigidbody _rb;
         private McChickenMovement _movementHandler;
+        private McChickenVisuals _visualsHandler;
         private Vector3 _groundNormal;
         private Vector3 _wallNormal;
         private float _lastBounceTime;
@@ -34,10 +35,11 @@ namespace FastAndFractured
         private ITimer _bounceTimer;
         private ITimer _charCollisionTimer;
         private const float ENDURANCE_DAMAGE_ON_COLLISION = 1f;
-        public void Initialize(Rigidbody rb, McChickenMovement movement)
+        public void Initialize(Rigidbody rb, McChickenMovement movement, McChickenVisuals visuals)
         {
             _rb = rb;
             _movementHandler = movement;
+            _visualsHandler = visuals;
         }
 
 

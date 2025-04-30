@@ -35,6 +35,7 @@ namespace FastAndFractured
         private bool _isInCeiling = false;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
+        private McChickenVisuals _visualsHandler;
         private const int NUMBER_OF_JUMPS = 1;
 
         void OnEnable()
@@ -46,10 +47,11 @@ namespace FastAndFractured
         {
             PauseManager.Instance?.UnregisterPausable(this);
         }
-        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
+        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics, McChickenVisuals visuals)
         {
             _rb = rb;
             _physicsHandler = physics;
+            _visualsHandler = visuals;
         }
 
         public void StartMoving(Vector3 direction)
