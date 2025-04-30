@@ -16,6 +16,7 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
+  - {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   MaxEndurance: 800
   MinEndurance: 0
   Invulnerable: 0
@@ -53,24 +54,25 @@ MonoBehaviour:
   NormalShootSpeed: 100
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 150
+  NormalShootAngle: 180
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
   PushShootBounceNum: 3
   PushShootBounceForce: 60
   MineShootAngle: 40
-  MineShootRange: 5
+  MineShootRange: 10
   DashCooldown: 2
   PushShootCooldown: 3
   MineExplosionTime: 5
   UniqueAbilityCooldown: 7
   NormalShootOverHeat: 5
   CooldownSpeed: 1
-  DeadDelay: 0
+  DeadDelay: 2.5
   aiParameters:
     fleeDistance: 5
     sweepRadius: 20
-    shootingMarginErrorAngle: 0.02
+    shootingMarginErrorAngle: 0.05
     damageAccumulationDuration: 5
     fleeTriggerDamageThresholdPercentage: 40
     _recoveryThresholdPercentageForSearch: 50
@@ -82,3 +84,7 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
+  WinObjects:
+  - GameObject: {fileID: 8929485945919532771, guid: 352b5740b9121db47ab741aff76fd2de, type: 3}
+    StringValue: Josefino_0
+  LoseObjects: []

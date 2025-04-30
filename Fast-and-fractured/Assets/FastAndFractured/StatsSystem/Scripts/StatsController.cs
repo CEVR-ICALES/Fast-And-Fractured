@@ -1,14 +1,21 @@
+using System;
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class StatsController : MonoBehaviour
+    public class StatsController : MonoBehaviour, IPausable
     {
         [SerializeField]
         private CharacterData charDataSO;
+
+        [SerializeField]
+        private VehicleVfxController vehicleVfxController;
 
         [Header("CURRENT STATS")]
 
@@ -18,7 +25,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value; }
+        public bool IsInvulnerable { get => charDataSO.Invulnerable;  private set => charDataSO.Invulnerable = value; }
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -61,6 +68,7 @@ namespace FastAndFractured
         [SerializeField] private float currentNormalShootDMG;
         [SerializeField] private float currentPushShootForce;
         public float NormalShootDamage { get => currentNormalShootDMG; }
+        public float NormalShootAngle { get => charDataSO.NormalShootAngle; }
         public float CurrentPushShootForce { get => currentPushShootForce; }
         public float PushShootForce { get => charDataSO.PushShootFORCE; }
         public float ExplosionRadius { get => charDataSO.ExplosionRadius; }
@@ -94,13 +102,18 @@ namespace FastAndFractured
         public float MineExplosionTime { get=>  charDataSO.MineExplosionTime; }
         public float UniqueCooldown { get => charDataSO.UniqueAbilityCooldown; }
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
-        #endregion
 
+        //SKINS
+        public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
+        #endregion
+        public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
         private const float ERROR_GET_STAT_FLOAT = -1;
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
         public UnityEvent<float,GameObject,bool> onDead;
+        public UnityEvent onInvulnerabilityAdded;
+        public UnityEvent onInvulnerabilityLost;
         private ITimer _deadTimer;
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
@@ -112,6 +125,9 @@ namespace FastAndFractured
         public float totalDistanceDriven = 0f;
         private Vector3 _lastPosition;
 
+        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
+        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -122,6 +138,15 @@ namespace FastAndFractured
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
+        }
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         #endregion
@@ -158,6 +183,16 @@ namespace FastAndFractured
         {
             TakeEndurance(100, false,gameObject);
         }
+        [ContextMenu(nameof(DebugRecover100Endurance))]
+        public void DebugRecover100Endurance()
+        {
+            RecoverEndurance(100, false);
+        }
+        [ContextMenu(nameof(DebugDie))]
+        public void DebugDie()
+        {
+            Dead();
+        }
 
 
         #region Health
@@ -165,12 +200,13 @@ namespace FastAndFractured
         {
             if (substract > 0)
             {
-                if (!charDataSO.Invulnerable)
+                if (!IsInvulnerable)
                 {
                     totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
+                        vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
@@ -182,10 +218,20 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    IsInvulnerable = false;
+                    LoseInvulnerability();
                 }
             }
             else Debug.LogWarning("Value can't be negative or 0.");
+        }
+        public void ActivateInvulnerability()
+        {
+            IsInvulnerable = true;
+            onInvulnerabilityAdded?.Invoke();
+        }
+        public void LoseInvulnerability()
+        {
+            IsInvulnerable = false;
+            onInvulnerabilityLost?.Invoke();
         }
 
         public void RecoverEndurance(float sum, bool isProduct)
@@ -195,12 +241,40 @@ namespace FastAndFractured
                 if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
+                    vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
+                    if(_isPlayer)
+                    {
+                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                    }
                 } else
                 {
                     Debug.LogWarning("Stat selected doesn't exist or can't be modified. " +
                                             "Comprove if ChooseCharToMod method of class Stats Controller contains this states");
                 }
             }
+        }
+        public GameObject GetWinObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in WinObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
+        }
+
+        public GameObject GetLoseObjectByString(string key)
+        {
+            foreach (GameObjectStringPair pair in LoseObjects)
+            {
+                if (pair.StringValue == key)
+                {
+                    return pair.GameObject;
+                }
+            }
+            return null;
         }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
@@ -222,6 +296,7 @@ namespace FastAndFractured
                     {
                         if (_deadTimer != null)
                         {
+                            _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
                             SetDeadTimer(killer, newTime,damageXFrame);
@@ -230,6 +305,7 @@ namespace FastAndFractured
                 }
                 else
                 {
+                    _currentKiller = killer;
                     SetDeadTimer(killer, killer.KillTime,damageXFrame);
                 }
             }
@@ -239,23 +315,39 @@ namespace FastAndFractured
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                _currentKiller = killer;
                 Dead();
                 _deadTimer = null;
             }, onTimerDecreaseUpdate : (float time) =>
             {
                 if (damageXFrame > 0)
                 {
+                    Debug.Log("DamagePlayer");
                     TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });
         }
 
+        public void OnPause()
+        {
+            if(_deadTimer != null)
+            {
+                _deadTimer.PauseTimer();
+            }
+        }
+
+        public void OnResume()
+        {
+            if (_deadTimer != null)
+            {
+                _deadTimer.ResumeTimer();
+            }
+        }
+
         public void Dead()
         {
-            Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
-            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
+            vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
+            onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
         }
 
         public float GetEndurancePercentage()

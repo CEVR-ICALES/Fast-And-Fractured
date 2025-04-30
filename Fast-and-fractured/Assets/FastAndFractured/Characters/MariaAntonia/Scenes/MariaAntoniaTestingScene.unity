@@ -10455,7 +10455,7 @@ MonoBehaviour:
   currentMaxSpeedDescend: 120
   currentAcceleration: 0
   currentNormalShootDMG: 0
-  currentPushShootDMG: 0
+  currentPushShootForce: 0
   currentCooldownSpeed: 0
   onEnduranceDamageTaken:
     m_PersistentCalls:
@@ -12226,7 +12226,7 @@ MonoBehaviour:
       Data2: 1159805714
       Data3: 2001885093
       Data4: -2108599820
-    Path: event:/ShootingSFX
+    Path: event:/ShootingEvents/ShootingSFX
   physicsBehaviour: {fileID: 0}
   onOverheatUpdate:
     m_PersistentCalls:
@@ -12506,7 +12506,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 3873926011737464807}
-  fleeMagnitude: 5
+  fleeDistance: 5
   sweepRadius: 20
   shootingMarginErrorAngle: 0.01
   sweepLayerMask:
@@ -12518,14 +12518,15 @@ MonoBehaviour:
   physicsBehaviour: {fileID: 0}
   statsController: {fileID: 0}
   uniqueAbility: {fileID: 0}
+  applyForceByState: {fileID: 0}
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 8
   damageAccumulationDuration: 5
   fleeTriggerDamageThresholdPercentage: 40
-  _recoveryThresholdPercentageForSearch: 50
-  _combatHealthAdvantageThreshold: 60
-  decision: 60
+  recoveryThresholdPercentageForSearch: 50
+  combatHealthAdvantageThreshold: 60
+  damageThresholdPercentage: 60
   decisionPercentageHealth: 10
   decisionPercentageMaxSpeed: 10
   decisionPercentageAcceleration: 10
@@ -39777,7 +39778,7 @@ MonoBehaviour:
   currentMaxSpeedDescend: 120
   currentAcceleration: 0
   currentNormalShootDMG: 0
-  currentPushShootDMG: 0
+  currentPushShootForce: 0
   currentCooldownSpeed: 0
   onEnduranceDamageTaken:
     m_PersistentCalls:
@@ -43125,8 +43126,8 @@ MonoBehaviour:
   LoadEvent: 1
   UnloadEvent: 2
   Banks:
-  - CarRelatedSoundsBank
   - ShootingSoundsBank
+  - VehicleRelatedSoundsBank
   CollisionTag: 
   PreloadSamples: 0
 --- !u!33 &5011437966534002204
@@ -44958,6 +44959,7 @@ MonoBehaviour:
   debugMode: 1
   useMyCharacters: 0
   repeatCharacters: 1
+  stormInDebugMode: 0
 --- !u!33 &5250109147072932984
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -59764,7 +59766,6 @@ MonoBehaviour:
   orbitCenter: {fileID: 8799588693811754048}
   _vfxParent: {fileID: 2433660702944971104}
   _hairMaterial: {fileID: 0}
-  activeExposureWeight: 1
   croquettePrefab: {fileID: 3196287454565126686, guid: 0a442841012210a47841e0e2a6ff06bf, type: 3}
   ssjUltiReference:
     Guid:
@@ -64158,6 +64159,7 @@ MonoBehaviour:
   sfxVolumeSlider: {fileID: 0}
   musicVolumeSlider: {fileID: 0}
   generalVolumeSlider: {fileID: 0}
+  muteToggle: {fileID: 0}
 --- !u!23 &7778730692614588221
 MeshRenderer:
   m_ObjectHideFlags: 0

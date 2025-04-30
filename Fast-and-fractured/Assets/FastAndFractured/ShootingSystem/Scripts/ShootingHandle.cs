@@ -24,7 +24,7 @@ namespace FastAndFractured
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
         [SerializeField]
-        private PhysicsBehaviour physicsBehaviour;
+        protected PhysicsBehaviour physicsBehaviour;
 
         protected virtual void Start()
         {

@@ -48,14 +48,20 @@ namespace FastAndFractured
         [Tooltip("Maximum forward ratio for downhill detection")]
         [Range(-1f, -0.1f)][SerializeField] private float downhillForwardThreshold = 0.3f;
         [SerializeField] private float slopeSpeedThreshold;
-        [SerializeField] private float maxGroundAngleThreshold = 65;
+        [SerializeField] private float maxGroundWheelsAngleThreshold = 65;
+        [SerializeField] private float maxGroundCarAngleThreshold = 12f;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
         private bool _isFlipped = false;
 
         [SerializeField]
-        private float detectFlipTime = 3.5f;
+        private float detectFlipTime = 2f;
         private ITimer _flipTimer;
+        private LayerMask _combinedMask;
+        [SerializeField]
+        private LayerMask groundLayer;
+        [SerializeField]
+        private LayerMask staticLayer;
 
         private const float WHEELS_IN_SLOPE = 2;
 
@@ -87,6 +93,7 @@ namespace FastAndFractured
             statsController.CustomStart();
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             SetMaxRbSpeedDelayed();
+            _combinedMask = groundLayer | staticLayer;
         }
 
         private void FixedUpdate()
@@ -120,10 +127,10 @@ namespace FastAndFractured
         { 
             if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
-                
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
+            
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
@@ -298,6 +305,13 @@ namespace FastAndFractured
                 _currentRbMaxVelocity = statsController.MaxSpeedDashing;
                 _physicsBehaviour.IsCurrentlyDashing = true;
                 _canDash = false;
+
+                // Apply a small initial velocity to overcome static friction
+                if (_physicsBehaviour.Rb.velocity.magnitude < 1f)
+                {
+                    _physicsBehaviour.Rb.velocity += dashDirection * 0.5f;
+                }
+
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
                     FinishDash();
@@ -405,16 +419,16 @@ namespace FastAndFractured
             return _physicsBehaviour.IsTouchingGround;
         }
 
+        public bool IsInFlipCase()
+        {
+            return IsInWall()||_physicsBehaviour.IsTouchingGround;
+        }
+
         public bool IsInWall()
         {
             float currentWheelsAngle = ReturnCurrentWheelsAngle(out int groundWheels);
-
-            if (groundWheels < WHEELS_IN_SLOPE || currentWheelsAngle < maxGroundAngleThreshold)
-            {
-                return false;
-            }
-            Debug.Log("IsWall");
-            return currentWheelsAngle >= maxGroundAngleThreshold;
+            float absoluteXRotationOfCar = Mathf.Abs(transform.localRotation.x) * Mathf.Rad2Deg;
+            return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
         public void StartIsFlippedTimer()
@@ -422,7 +436,10 @@ namespace FastAndFractured
             if (_flipTimer == null)
             {
                 Debug.Log("StartTimer");
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, TimerDirection.INCREASE, () => { _isFlipped = true; });
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
+                    _isFlipped = true;
+                    _flipTimer=null;
+                });
             }
         }
 
@@ -532,6 +549,11 @@ namespace FastAndFractured
                 wheel.ApplyBrakeTorque(0f);
                 wheel.ApplyMotorTorque(0f);
             }
+        }
+
+        public void OnDie()
+        {
+            _physicsBehaviour.Rb.isKinematic = true;
         }
 
         private void UpdateWheelVisuals()

@@ -34,10 +34,10 @@ RectTransform:
   - {fileID: 1977864993616557272}
   m_Father: {fileID: 5700803023121909799}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 192, y: -544}
-  m_SizeDelta: {x: 384, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8738505900098012919
 CanvasRenderer:
@@ -588,8 +588,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   screenType: 8
   canvasGroup: {fileID: 8804402145373938839}
-  backButton: {fileID: 2098279075632884128}
+  backButton: {fileID: 0}
   defaultButton: {fileID: 2098279075632884128}
+  settingsButton: {fileID: 0}
 --- !u!225 &8804402145373938839
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -777,7 +778,6 @@ GameObject:
   - component: {fileID: 7650979473144045849}
   - component: {fileID: 9043270656138847302}
   - component: {fileID: 2098279075632884128}
-  - component: {fileID: 8391548999310163081}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -800,10 +800,10 @@ RectTransform:
   - {fileID: 4916539398296586502}
   m_Father: {fileID: 5700803023121909799}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 192, y: -40}
-  m_SizeDelta: {x: 384, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7650979473144045849
 CanvasRenderer:
@@ -887,9 +887,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8391548999310163081}
-        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
-        m_MethodName: OpenScreen
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Utilities.Managers.PauseSystem.PauseManager, Assembly-CSharp
+        m_MethodName: ResumeGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -899,20 +899,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &8391548999310163081
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7851739351030149215}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenToOpen: 0
-  fadeDuration: 0.8
 --- !u!1 &7993217053051446485
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,10 +934,10 @@ RectTransform:
   - {fileID: 1937538709063767701}
   m_Father: {fileID: 5700803023121909799}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 192, y: -292}
-  m_SizeDelta: {x: 384, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1764544782723398839
 CanvasRenderer:
@@ -1060,7 +1046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   screenToOpen: 1
-  fadeDuration: 0.8
+  fadeDuration: -1
 --- !u!1 &8274427664414002975
 GameObject:
   m_ObjectHideFlags: 0
