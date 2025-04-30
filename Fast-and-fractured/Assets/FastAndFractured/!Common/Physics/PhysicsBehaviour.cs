@@ -105,6 +105,10 @@ namespace FastAndFractured
                 // check for any type of modified car state (joseifno & maria antonia unique ability)
                 if(!_carImpactHandler.CheckForModifiedCarState())
                 {
+                    if(otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState())
+                    {
+                        return;
+                    }
                      //detect if the contact was frontal
                     if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
                     {
@@ -157,6 +161,11 @@ namespace FastAndFractured
                     }
                 }
             }
+        }
+
+        private void ResolveImpactInteraction(PhysicsBehaviour otherCarPhysicsBehaviour, bool isTheOnToPush)
+        {
+
         }
 
         private void GroundCheck(Collision collision)
