@@ -7,7 +7,7 @@ namespace FastAndFractured
 
         private MariaAntoniaUniqueAbility _uniqueAbilityController;
 
-
+        private float forceMod = 1.3f; // testing value
 
         private void Awake()
         {
@@ -21,14 +21,16 @@ namespace FastAndFractured
             _uniqueAbilityController.ConsumeCroquette();
         }
 
-        //public override float ApplyModifierToPushForce(float forceToApply)
-        //{
-        //    if(_uniqueAbilityController.IsAbilityActive)
-        //    {
+        public override float ApplyModifierToPushForce(float forceToApply)
+        {
+            if (_uniqueAbilityController.IsAbilityActive)
+            {
+                return forceToApply *= forceMod;
+            }
 
-        //    }
-             
-        //}
+            return forceToApply;
+
+        }
     }
 }
 

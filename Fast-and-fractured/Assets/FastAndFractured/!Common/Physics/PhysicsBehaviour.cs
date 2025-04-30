@@ -107,6 +107,9 @@ namespace FastAndFractured
                 {
                     if(otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState())
                     {
+                        // the other car has a modified state so we notify him that hes been pushed so that it consumes that modified state
+                        _carImpactHandler.HandleOnCarImpact(true, otherComponentPhysicsBehaviours);
+                        otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
                         return;
                     }
                      //detect if the contact was frontal
@@ -124,7 +127,6 @@ namespace FastAndFractured
                                 isTheOneToPush = false;
                                 forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
                             }
-
                         }
                         else
                         {
@@ -139,33 +141,25 @@ namespace FastAndFractured
                     }
                 } else
                 {
-
+                    if(otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState())
+                    {
+                        _carImpactHandler.HandleOnCarImpact(true, otherComponentPhysicsBehaviours);
+                        otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
+                        return;
+                    }
+                    CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                    forceToApply = _carImpactHandler.ApplyModifierToPushForce(forceToApply);
+                    isTheOneToPush = true;
                 }
                 
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-
-                    if (otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
-                    {
-                        otherComponentPhysicsBehaviours.StatsController.LoseInvulnerability();
-                    }
-                    else
-                    {
-                        if (isTheOneToPush) 
-                            forceToApply = _carImpactHandler.ApplyModifierToPushForce(forceToApply);
-
-                        otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                        _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
-                        otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(!isTheOneToPush, otherComponentPhysicsBehaviours);
-                    }
+                    otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                    _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
+                    otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(!isTheOneToPush, otherComponentPhysicsBehaviours);
                 }
             }
-        }
-
-        private void ResolveImpactInteraction(PhysicsBehaviour otherCarPhysicsBehaviour, bool isTheOnToPush)
-        {
-
         }
 
         private void GroundCheck(Collision collision)
