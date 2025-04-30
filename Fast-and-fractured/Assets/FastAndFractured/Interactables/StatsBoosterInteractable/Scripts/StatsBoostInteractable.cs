@@ -31,7 +31,7 @@ namespace FastAndFractured
 
             foreach (var boost in boostList)
             {
-                var boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.GetCurrentStat(boost.StatToBoost)* boost.BoostValue:boost.BoostValue;
+                float boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.GetCurrentStat(boost.StatToBoost)* boost.BoostValue:boost.BoostValue;
 
                 switch (boost.StatToBoost)
                 {
