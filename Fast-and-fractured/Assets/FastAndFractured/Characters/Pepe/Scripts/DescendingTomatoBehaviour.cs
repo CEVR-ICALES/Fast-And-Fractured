@@ -61,15 +61,16 @@ namespace FastAndFractured
             
             if (other.gameObject.layer == LayerMask.NameToLayer("Characters"))
             {
-                StatsController statsController = other.GetComponent<StatsController>();
-                if(statsController.IsInvulnerable)
+                if (other.TryGetComponent(out CarImpactHandler otherCarImpactHandler))
                 {
-                    statsController.LoseInvulnerability();
-                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
-                }
-                else
-                {
-                    EffectOnCharacter(other);
+                    if(!otherCarImpactHandler.HandleIfTomatoeEffect())
+                    {
+                        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+
+                    } else
+                    {
+                        EffectOnCharacter(other);
+                    }
                 }
             }
         }

@@ -51,7 +51,6 @@ namespace FastAndFractured
         private CarImpactHandler _carImpactHandler;
 
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
-        const float THRESHOLD_TO_CONSIDER_PUSHING = 1200f;
         private void OnEnable()
         {
             if (!_rb)
