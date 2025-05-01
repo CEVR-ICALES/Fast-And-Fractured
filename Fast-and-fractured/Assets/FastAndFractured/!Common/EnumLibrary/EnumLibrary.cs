@@ -161,4 +161,12 @@ namespace Enums
         CHARACTER,
         INTERACTABLE
     }
+
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
 }
