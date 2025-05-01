@@ -755,6 +755,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3070e5be3d4855b4ab5e36f7485cdca1, type: 3}
   m_PrefabInstance: {fileID: 91348626}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &98560017 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1433943864205116795, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+  m_PrefabInstance: {fileID: 6788780915703739481}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &99203671
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6117,13 +6128,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1549158409}
     - target: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+      propertyPath: sfxVolumeSlider
+      value: 
+      objectReference: {fileID: 6788780915703739483}
+    - target: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       propertyPath: musicVolumeSlider
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 98560017}
     - target: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       propertyPath: generalVolumeSlider
       value: 
-      objectReference: {fileID: 6788780915703739483}
+      objectReference: {fileID: 1066681564}
     - target: {fileID: 3963758890375482599, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       propertyPath: Banks.Array.size
       value: 3
@@ -6187,8 +6202,22 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1092013333}
   m_SourcePrefab: {fileID: 100100000, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+--- !u!114 &1066681564 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 411837789063243153, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+  m_PrefabInstance: {fileID: 6788780915703739481}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1071019278
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6401,6 +6430,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072741957}
   m_CullTransparentMesh: 1
+--- !u!1 &1092013329 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+  m_PrefabInstance: {fileID: 1035482582}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1092013331 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1826749479773216028, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+  m_PrefabInstance: {fileID: 1035482582}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092013329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f26019d0bd8986d409035f36735a6962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1092013333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092013329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -856535926
+      Data2: 1172089298
+      Data3: -1662209897
+      Data4: -463786381
+    Path: event:/MusicEvents/MainMenuMusicEvent
+  Event: 
+  EventPlayTrigger: 1
+  EventStopTrigger: 2
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
 --- !u!1 &1109769472
 GameObject:
   m_ObjectHideFlags: 0
@@ -12084,6 +12160,22 @@ PrefabInstance:
       propertyPath: OnInitialized.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2086437004}
+    - target: {fileID: 1433943864205116795, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: m_Value
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1641292016863591811, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: m_IsOn
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1641292016863591811, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1092013331}
+    - target: {fileID: 1641292016863591811, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ToggleMuteAllSounds
+      objectReference: {fileID: 0}
     - target: {fileID: 2233425294774505000, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: skipText
       value: 
@@ -12216,6 +12308,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
       objectReference: {fileID: 540025684}
+    - target: {fileID: 6961342138707691321, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+      propertyPath: settingsButton
+      value: 
+      objectReference: {fileID: 913166042}
     - target: {fileID: 7283769755317512712, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
@@ -12244,6 +12340,7 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 6706067817708744642, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
     - {fileID: 7274506108731958926, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
+    - {fileID: 2485364313686036217, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2ff5261c098a0148a54fbe8169a6c99, type: 3}
