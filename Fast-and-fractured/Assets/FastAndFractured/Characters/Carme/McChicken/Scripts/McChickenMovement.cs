@@ -76,7 +76,6 @@ namespace FastAndFractured
 
                 KinematicMovement();
                 ApplyCustomGravity();
-                _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
 
@@ -94,7 +93,7 @@ namespace FastAndFractured
             if (_physicsHandler.IsGrounded)
             {
                 float slopeAngle = Vector3.Angle(_physicsHandler.GroundNormal, Vector3.up);
-                float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _physicsHandler.GroundNormal));
+                float slopeSign = Mathf.Sign(Vector3.Dot(-transform.right, _physicsHandler.GroundNormal));
                 float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -maxSlopeAngle, maxSlopeAngle);
 
                 Quaternion targetRot = Quaternion.Euler(
@@ -108,6 +107,9 @@ namespace FastAndFractured
                     targetRot,
                     rotationSpeed * Time.fixedDeltaTime
                 ));
+            } else
+            {
+                _rb.angularVelocity = Vector3.zero;
             }
 
             transform.position += _currentMoveDirection * moveForce * Time.fixedDeltaTime;

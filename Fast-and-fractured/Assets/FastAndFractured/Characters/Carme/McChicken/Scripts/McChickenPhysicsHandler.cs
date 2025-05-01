@@ -19,7 +19,6 @@ namespace FastAndFractured
         [SerializeField] private float bounceDuration;
         [SerializeField] private float climbingDotThreshold = 0.7f;
         [SerializeField] private float chickenForce;
-        [SerializeField] private float charCollisionDuration;
         private const float GROUNDED_GRACE_TIME = 0.2f;
 
         private Rigidbody _rb;
@@ -133,30 +132,6 @@ namespace FastAndFractured
         public void UpdateGroundState()
         {
             _isGrounded = Time.time < _lastGroundedTime + GROUNDED_GRACE_TIME;
-        }
-
-        public void ApplyRotation(float rotationSpeed)
-        {
-            Vector3 currentEuler = _rb.rotation.eulerAngles;
-
-            // calculate only the X rotation we want
-            float slopeAngle = Vector3.Angle(_groundNormal, Vector3.up);
-            float slopeSign = Mathf.Sign(Vector3.Dot(-transform.right, _groundNormal));
-            float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -45f, 45f);
-
-            // create new rotation (only X changes, Y/Z remain unchanged)
-            Quaternion targetRot = Quaternion.Euler(
-                targetXRotation,  
-                currentEuler.y,   
-                currentEuler.z    
-            );
-
-            // apply the rotation
-            _rb.MoveRotation(Quaternion.Slerp(
-                _rb.rotation,
-                targetRot,
-                rotationSpeed * Time.fixedDeltaTime
-            ));
         }
 
     }
