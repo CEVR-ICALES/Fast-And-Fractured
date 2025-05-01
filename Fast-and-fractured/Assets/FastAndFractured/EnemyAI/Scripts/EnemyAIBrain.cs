@@ -90,7 +90,7 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
 
-        [Range(-50, 100)][SerializeField] private int marginToFleeFromSandstorm = 0;
+        [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -866,17 +866,17 @@ namespace FastAndFractured
 
         public bool IsIAInsideSandstorm()
         {
-            return LevelController.Instance.IsInsideSandstorm(gameObject, marginToFleeFromSandstorm);
+            return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
 
         public bool AreAllInteractablesInsideSandstorm()
         {
-            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public bool AreAllSafeZonesInsideSandstorm()
         {
-            return !LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

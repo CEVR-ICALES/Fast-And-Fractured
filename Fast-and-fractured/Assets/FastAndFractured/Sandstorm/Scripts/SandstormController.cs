@@ -161,6 +161,7 @@ namespace FastAndFractured
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
             fogParent.transform.rotation = targetRotation;
+            fogParent.transform.LookAt(_mirrorPoint);
             _stormCollider.enabled = true;
             if (primaryFog != null)
             {
@@ -216,7 +217,7 @@ namespace FastAndFractured
         {
             if (marginError > 0)
             {
-                Vector3 directionToTarget = target.transform.position - (transform.position  + (_stormCollider.size.z / 2 + marginError + _stormCollider.center.z) * transform.forward);
+                Vector3 directionToTarget = target.transform.position - (transform.position  + ((_stormCollider.size.z / 2) + marginError + _stormCollider.center.z) * transform.forward);
                 directionToTarget.Normalize();
                 float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
                 float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
@@ -224,7 +225,7 @@ namespace FastAndFractured
             }
             else
             {
-                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target);
+                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target)||_safeZonesInsideSandstorm.Contains(target);
             }
         }
 
