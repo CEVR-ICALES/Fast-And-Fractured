@@ -405,7 +405,7 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(GameObject target)
         {
-            return _sandStormController.IsInsideStormCollider(target);
+            return _sandStormController.IsInsideStormCollider(target,0f);
         }
 
         public bool IsInsideSandstorm(GameObject target, float marginError)
@@ -450,6 +450,7 @@ namespace FastAndFractured
 
         private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
         {
+            if(list1 == null || list2 == null) return false;
             foreach (T item in list1) {
                 if (!list2.Contains(item))
                 {

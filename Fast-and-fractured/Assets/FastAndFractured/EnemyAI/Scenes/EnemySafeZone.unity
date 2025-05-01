@@ -9500,6 +9500,11 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.66800004, y: 3.1620002, z: 1.036}
   m_TimeToStationary: 0.5
+--- !u!1 &1087219553 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8837894182934861129, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+  m_PrefabInstance: {fileID: 1867144751}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1090280998
 GameObject:
   m_ObjectHideFlags: 0
@@ -17884,20 +17889,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8837894182934861129, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
       propertyPath: m_Layer
-      value: 9
+      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4427718371182597162, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8837894182934861129, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1867144758}
   m_SourcePrefab: {fileID: 100100000, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
 --- !u!114 &1867144755 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6586242171806106470, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
   m_PrefabInstance: {fileID: 1867144751}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1087219553}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2a846d43725d614b9a082538308dbe1, type: 3}
@@ -17908,6 +17916,33 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 362617908678673583, guid: cfdcf31ec71a27244ad5c1ca007504c4, type: 3}
   m_PrefabInstance: {fileID: 1867144751}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &1867144758
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087219553}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &1878524101
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21895,7 +21930,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: stormInDebugMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: _timeToCallTheStorm
@@ -21903,7 +21938,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: maxCharactersInGame
-      value: 3
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: _sandStormController

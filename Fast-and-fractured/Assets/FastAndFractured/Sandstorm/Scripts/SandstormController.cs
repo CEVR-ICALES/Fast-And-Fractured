@@ -89,6 +89,7 @@ namespace FastAndFractured
             primaryFog?.gameObject.SetActive(false);
             _itemsInsideSandstorm = new List<GameObject>();
             _charactersInsideSandstorm = new List<GameObject>();
+            _safeZonesInsideSandstorm = new List<GameObject>();
             primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
         }
 
@@ -211,7 +212,7 @@ namespace FastAndFractured
             }
         }
 
-        public bool IsInsideStormCollider(GameObject target,float marginError=0f)
+        public bool IsInsideStormCollider(GameObject target,float marginError)
         {
             if (marginError > 0)
             {
@@ -250,7 +251,6 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic)
                 {
-
                     StartKillNotify(statsController);
                     _charactersInsideSandstorm.Add(other.gameObject);
                     if (statsController.IsPlayer)
@@ -278,7 +278,7 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
                 {
-                    if (!IsInsideStormCollider(other.gameObject,MIN_VALUE_PER_SANDSTORM_DETECTION))
+                    if (other.GetComponentInParent<StatsBoostInteractable>() != null)
                     {
                         CharacterEscapedDead(statsController);
                         _charactersInsideSandstorm.Remove(other.gameObject);
@@ -287,7 +287,7 @@ namespace FastAndFractured
             }
             else
             {
-                if (other.TryGetComponent(out StatsBoostInteractable statsBoostInteractable))
+                if (other.GetComponentInParent<StatsBoostInteractable>()!=null)
                 {
                     _itemsInsideSandstorm.Remove(other.gameObject);
                 }
