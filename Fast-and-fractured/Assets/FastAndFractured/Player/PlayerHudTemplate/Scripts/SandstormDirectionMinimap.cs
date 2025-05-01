@@ -19,9 +19,12 @@ namespace FastAndFractured
         {
             if(_isDataReceived)
             {
-                Vector3 playerForward = _player.transform.forward;
-                float angle = -Vector3.SignedAngle(playerForward, _sandstormDirection, Vector3.up);
-                transform.rotation = Quaternion.Euler(0, 0, angle);     
+                if (_player != null)
+                {
+                    Vector3 playerForward = _player.transform.forward;
+                    float angle = -Vector3.SignedAngle(playerForward, _sandstormDirection, Vector3.up);
+                    transform.rotation = Quaternion.Euler(0, 0, angle);
+                }
             }
         }
         public void SetSandstormDirection(Vector3 direction)

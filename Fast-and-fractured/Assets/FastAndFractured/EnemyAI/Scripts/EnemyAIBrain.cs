@@ -97,6 +97,7 @@ namespace FastAndFractured
         private Stats _statToChoose;
 
         private IAGroundState groundState = IAGroundState.NONE;
+        private ITimer _flipForceTimer;
 
 
         private void OnEnable()
@@ -138,7 +139,14 @@ namespace FastAndFractured
                 }
                 if (carMovementController.IsFlipped)
                 {
-                    FlipStateForce();
+                    if (_flipForceTimer == null)
+                    {
+                        FlipStateForce();
+                        _flipForceTimer = TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                        {
+                            _flipForceTimer = null;
+                        });
+                    }
                     groundState = IAGroundState.FLIP_SATE;
                     if (!carMovementController.IsInFlipCase())
                     {
