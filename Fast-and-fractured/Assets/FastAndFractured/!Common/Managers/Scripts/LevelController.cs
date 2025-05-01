@@ -68,7 +68,7 @@ namespace FastAndFractured
         private bool _hasPlayerWon = false;
 
         private int _aliveCharacterCount;
-        public GameObject[] characterIcons;
+        public List<GameObject> characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
