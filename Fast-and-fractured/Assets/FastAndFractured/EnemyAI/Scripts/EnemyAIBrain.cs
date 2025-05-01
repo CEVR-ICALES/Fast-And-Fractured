@@ -21,7 +21,7 @@ namespace FastAndFractured
         [SerializeField] float shootingMarginErrorAngle = 0.02f;
         [SerializeField] LayerMask sweepLayerMask;
 
-
+        private Vector3 _currentPosition;
         private Vector3 _positionToDrive;
         //Reference is obtained via LevelController
         private GameObject _player;
@@ -55,7 +55,7 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
-        const float DISTANCE_MARGIN_ERROR = 5f;
+        const float DISTANCE_MARGIN_ERROR = 35f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private const int PERCENTAGE_VALUE = 100;
@@ -122,36 +122,40 @@ namespace FastAndFractured
 
         private void Update()
         {
-            if (!carMovementController.IsGrounded())
+            if (carMovementController != null)
             {
-                AirForces();
-            }
-            else
-            {
-                GroundForces();
-                if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                _currentPosition = carMovementController.transform.position;
+                if (!carMovementController.IsGrounded())
                 {
-                    carMovementController.StartIsFlippedTimer();
+                    AirForces();
                 }
                 else
                 {
-                    carMovementController.StopFlippedTimer();
-                }
-                if (carMovementController.IsFlipped)
-                {
-                    if (_flipForceTimer == null)
+                    GroundForces();
+                    if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
                     {
-                        FlipStateForce();
-                        _flipForceTimer = TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
-                        {
-                            _flipForceTimer = null;
-                        });
+                        carMovementController.StartIsFlippedTimer();
                     }
-                    groundState = IAGroundState.FLIP_SATE;
-                    if (!carMovementController.IsInFlipCase())
+                    else
                     {
-                        carMovementController.IsFlipped = false;
-                        groundState = IAGroundState.GROUND;
+                        carMovementController.StopFlippedTimer();
+                    }
+                    if (carMovementController.IsFlipped)
+                    {
+                        if (_flipForceTimer == null)
+                        {
+                            FlipStateForce();
+                            _flipForceTimer = TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                            {
+                                _flipForceTimer = null;
+                            });
+                        }
+                        groundState = IAGroundState.FLIP_SATE;
+                        if (!carMovementController.IsInFlipCase())
+                        {
+                            carMovementController.IsFlipped = false;
+                            groundState = IAGroundState.GROUND;
+                        }
                     }
                 }
             }
@@ -231,6 +235,7 @@ namespace FastAndFractured
             _startingPercentageHealth = decisionPercentageHealth;
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
+            _currentPosition = carMovementController.transform.position;
         }
         public void ReturnToStartPosition()
         {
@@ -300,7 +305,8 @@ namespace FastAndFractured
             {
                 return true;
             }
-            return Vector3.Distance(transform.position, _currentTarget.transform.position) < DISTANCE_MARGIN_ERROR;
+            float distance = Vector3.Distance(_currentPosition, _currentTarget.transform.position);
+            return distance < DISTANCE_MARGIN_ERROR;
         }
         #endregion
 
@@ -367,7 +373,7 @@ namespace FastAndFractured
             GameObject nearestTarget = items[0].gameObject;
             foreach (StatsBoostInteractable statItem in items)
             {
-                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                float itemDistance = (statItem.transform.position - _currentPosition).sqrMagnitude;
                 if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
                 {
                     nearestOne = itemDistance;
@@ -397,7 +403,7 @@ namespace FastAndFractured
             foreach (var character in inGameCharacters)
             {
                 if (!character) continue;
-                float characterDistance = (character.transform.position - carMovementController.transform.position).sqrMagnitude;
+                float characterDistance = (character.transform.position - _currentPosition).sqrMagnitude;
                 if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
                 {
                     nearestOne = characterDistance;
@@ -426,7 +432,7 @@ namespace FastAndFractured
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
-                float safeZoneDistance = (safeZone.transform.position - carMovementController.transform.position).sqrMagnitude;
+                float safeZoneDistance = (safeZone.transform.position - _currentPosition).sqrMagnitude;
                 if (safeZoneDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
                 {
                     nearestOne = safeZoneDistance;
@@ -445,7 +451,7 @@ namespace FastAndFractured
             foreach (var safeZone in safeZonesOutsideSandstorm)
             {
                 if (!safeZone) continue;
-                float characterDistance = (safeZone.transform.position - carMovementController.transform.position).sqrMagnitude;
+                float characterDistance = (safeZone.transform.position - _currentPosition).sqrMagnitude;
                 if (characterDistance < nearestOne && safeZone.gameObject != carMovementController.gameObject)
                 {
                     nearestOne = characterDistance;
@@ -525,7 +531,7 @@ namespace FastAndFractured
             GameObject nearestCharacter = CalcNearestCharacter();
             if (nearestCharacter != null)
             {
-                return Vector3.Distance(carMovementController.transform.position, nearestCharacter.transform.position) < sweepRadius;
+                return Vector3.Distance(_currentPosition, nearestCharacter.transform.position) < sweepRadius;
             }
             return false;
         }
@@ -560,7 +566,7 @@ namespace FastAndFractured
 
         public bool IsInValidRange(float distance)
         {
-            return distance > Vector3.Distance(carMovementController.transform.position, _positionToDrive);
+            return distance > Vector3.Distance(_currentPosition, _positionToDrive);
         }
 
         public bool IsInFront()
@@ -664,7 +670,7 @@ namespace FastAndFractured
 
         private Vector3 CalcNormalizedTargetDirection()
         {
-            return (_currentTarget.transform.position - carMovementController.transform.position).normalized;
+            return (_currentTarget.transform.position - _currentPosition).normalized;
         }
 
         private Vector3 CalcNormalizedShootingDirection()
@@ -703,7 +709,7 @@ namespace FastAndFractured
                         break;
                 }
             }
-            direction = (_positionToDrive - carMovementController.transform.position);
+            direction = (_positionToDrive - _currentPosition);
 
             //If it's negative, go left
             //If it's positive, go right
@@ -723,7 +729,7 @@ namespace FastAndFractured
                 //_positionToDrive = _positionToDrive;
                 //Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
                 //return true;
-                if (NavMesh.SamplePosition(transform.position, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
+                if (NavMesh.SamplePosition(_currentPosition, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
                 {
                     _positionToDrive = hit.position;
                     Debug.LogWarning("Emergency repositioning", this.gameObject);
@@ -769,7 +775,7 @@ namespace FastAndFractured
 
         private void CheckIfGoToNextPathPoint()
         {
-            if (Vector3.Distance(carMovementController.transform.position, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            if (Vector3.Distance(_currentPosition, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
                 (_pathIndex + 1) < _currentPath.corners.Length)
             {
                 _pathIndex++;
@@ -821,7 +827,7 @@ namespace FastAndFractured
             items = ListWithGameElementNotInsideSandstorm(items);
             foreach (StatsBoostInteractable statItem in items)
             {
-                float itemDistance = (statItem.transform.position - carMovementController.transform.position).sqrMagnitude;
+                float itemDistance = (statItem.transform.position - _currentPosition).sqrMagnitude;
                 if (itemDistance < nearestOne)
                 {
                     nearestOne = itemDistance;
