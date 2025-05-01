@@ -70,21 +70,6 @@ namespace FastAndFractured
             {
                 element.imageReference.sprite = newSprite;
             }
-            else
-            {
-                switch (type)
-                {
-                    case UIElementType.GOOD_EFFECTS:
-                        UpdateEffectSprites(_goodEffects, newSprite);
-                        break;
-                    case UIElementType.NORMAL_EFFECTS:
-                        UpdateEffectSprites(_normalEffects, newSprite);
-                        break;
-                    case UIElementType.BAD_EFFECTS:
-                        UpdateEffectSprites(_badEffects, newSprite);
-                        break;
-                }
-            }
         }
 
         public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
@@ -108,6 +93,31 @@ namespace FastAndFractured
             if (TryGetUIElement(type, out UIDynamicElement element))
             {
                 element.gameObject.SetActive(isActive);
+            }
+        }
+
+        public void UpdateUIEffect(UIElementType type, Sprite newSprite, float timeInscreen){
+            switch (type)
+            {
+                case UIElementType.GOOD_EFFECTS:
+                    UpdateEffectSprites(_goodEffects, newSprite);
+                    break;
+                case UIElementType.NORMAL_EFFECTS:
+                    UpdateEffectSprites(_normalEffects, newSprite);
+                    break;
+                case UIElementType.BAD_EFFECTS:
+                    UpdateEffectSprites(_badEffects, newSprite);
+                    break;
+            }
+
+            if(timeInscreen > 0f)
+            {
+                GameObject newSpriteGameObject = GetEffectGameObject(newSprite);
+                newSpriteGameObject.SetActive(true);
+                TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
+                {
+                    newSpriteGameObject.SetActive(false);
+                });
             }
         }
 
