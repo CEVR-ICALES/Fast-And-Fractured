@@ -1,4 +1,5 @@
 using UnityEngine;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -15,26 +16,22 @@ namespace FastAndFractured
             }
         }
 
-        public virtual bool CheckForModifiedCarState()
-        {
-            return false; // default car doesnt have any kind of modified car state
-        }
+        public virtual ModifiedCarState CheckForModifiedCarState() => ModifiedCarState.DEFAULT;
 
         public virtual void OnHasPushedOtherCar(PhysicsBehaviour otherCarPhysicsBehaviour)
         {
             otherCarPhysicsBehaviour.OnCarHasBeenPushed();
-            // specific char logic to handle something if neccesary when pushing somebody
+            // specific char logic to handle something if neccesary when pushing somebody (visuals, consuming something...)
         }
 
         public virtual void OnHasBeenPushed()
         {
-            // specific char logic to handle something if neccesary when getting pushed
+            // specific char logic to handle something if neccesary when getting pushed (visuals, consuming something....)
         }
 
-        public virtual float ApplyModifierToPushForce(float forceToApply) // override if is has a case where a modifier to the force can be applied
-        {
-            return forceToApply;
-        }
+        public virtual float ApplyModifierToPushForceAsAttacker(float forceToApply, ModifiedCarState otherCarModifiedState, bool isFrontalHit, bool isOtherCarDahsing) => forceToApply; // override if is has a case where a modifier to the force can be applied
+
+        public virtual float ApplyModifierToPushForceAsPushed(float forceToApply, ModifiedCarState otherCarModifiedState, bool isFrontalHit, bool isOtherCarDashing) => forceToApply;
     }
 }
 

@@ -1,3 +1,4 @@
+using Enums;
 using UnityEngine;
 
 namespace FastAndFractured
@@ -14,6 +15,11 @@ namespace FastAndFractured
             _uniqueAbilityController = gameObject.GetComponent<MariaAntoniaUniqueAbility>();
         }
 
+        public override ModifiedCarState CheckForModifiedCarState()
+        {
+            return ModifiedCarState.SUPER_MARIA_ANTONIA;
+        }
+
         public override void OnHasPushedOtherCar(PhysicsBehaviour otherCarPhysicsBehaviour)
         {
             base.OnHasPushedOtherCar(otherCarPhysicsBehaviour);
@@ -21,15 +27,15 @@ namespace FastAndFractured
             _uniqueAbilityController.ConsumeCroquette();
         }
 
-        public override float ApplyModifierToPushForce(float forceToApply)
+
+        public override float ApplyModifierToPushForceAsAttacker(float forceToApply, ModifiedCarState otherCarModifiedState, bool isFrontalHit, bool isOtherCarDahsing)
         {
-            if (_uniqueAbilityController.IsAbilityActive)
+            if(_uniqueAbilityController.IsAbilityActive)
             {
-                return forceToApply *= forceMod;
+                return forceToApply * forceMod;
             }
 
             return forceToApply;
-
         }
     }
 }
