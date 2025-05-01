@@ -13,11 +13,15 @@ namespace FastAndFractured
             _josefinoUniqueAbility = gameObject.GetComponent<JosefinoUniqueAbility>();
         }
 
-        public override void OnHasBeenPushed()
+        public override void OnHasBeenPushed(PhysicsBehaviour carPhysicsBehaviour)
         {
             if (_josefinoUniqueAbility.IsAbilityActive)
+            {
                 _josefinoUniqueAbility.OnInvulnerabilityLost();
-            base.OnHasBeenPushed();
+                return;
+            }
+
+            base.OnHasBeenPushed(carPhysicsBehaviour);
         }
 
         public override ModifiedCarState CheckForModifiedCarState()
@@ -36,6 +40,18 @@ namespace FastAndFractured
             }
 
             return forceToApply;
+        }
+
+        public override bool HandleIfTomatoeEffect()
+        {
+            if (_josefinoUniqueAbility.IsAbilityActive)
+            {
+                _josefinoUniqueAbility.OnInvulnerabilityLost();
+                return false;
+            } else
+            {
+                return true;
+            }
         }
     }
 

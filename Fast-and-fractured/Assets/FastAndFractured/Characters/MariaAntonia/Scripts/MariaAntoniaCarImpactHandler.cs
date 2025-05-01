@@ -20,9 +20,9 @@ namespace FastAndFractured
             return ModifiedCarState.SUPER_MARIA_ANTONIA;
         }
 
-        public override void OnHasPushedOtherCar(PhysicsBehaviour otherCarPhysicsBehaviour)
+        public override void OnHasPushedOtherCar(PhysicsBehaviour carPhysicsBehaviour)
         {
-            base.OnHasPushedOtherCar(otherCarPhysicsBehaviour);
+            base.OnHasPushedOtherCar(carPhysicsBehaviour);
             
             _uniqueAbilityController.ConsumeCroquette();
         }
