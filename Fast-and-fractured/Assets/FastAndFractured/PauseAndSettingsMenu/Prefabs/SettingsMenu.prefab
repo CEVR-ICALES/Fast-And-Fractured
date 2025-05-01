@@ -36922,7 +36922,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2879110340636880597}
+        m_TargetAssemblyTypeName: BrightnessManager, Assembly-CSharp
+        m_MethodName: SetBrightness
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6935158761148462192
 GameObject:
   m_ObjectHideFlags: 0
@@ -42676,6 +42688,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1203797810724591664}
+  - {fileID: 5378606926985219058}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -42700,19 +42713,20 @@ MonoBehaviour:
   accessibilitySettingsUI: {fileID: 187796045635345874}
   gamepadRemappingWindow: {fileID: 9001029127226173518}
   keyboardRemappingWindow: {fileID: 1698117059736595123}
-  masterVolumeSlider: {fileID: 9051466163854414761}
+  generalVolumeSlider: {fileID: 0}
   musicVolumeSlider: {fileID: 9213315030645378123}
   sfxVolumeSlider: {fileID: 2163637753146716210}
+  vsyncToggle: {fileID: 0}
+  sharpeningSlider: {fileID: 0}
+  brightnessSlider: {fileID: 4611262780514159129}
   fpsDropdown: {fileID: 4665586778287749733}
   resolutionDropdown: {fileID: 4741031037059217168}
-  vsyncDropdown: {fileID: 4182099397370785395}
+  displayModeDropdown: {fileID: 0}
   antiAliasingDropdown: {fileID: 7293484375750435259}
-  sharpeningDropdown: {fileID: 1701033364864479184}
-  rayTracingDropdown: {fileID: 8701830087354372120}
-  brightnessSlider: {fileID: 4611262780514159129}
+  sharpeningSliderContainer: {fileID: 0}
+  deleteButton: {fileID: 1255230650843674863}
   deletePopupUI: {fileID: 7014302488821106273}
   deletedProgressList: []
-  deleteButton: {fileID: 1255230650843674863}
 --- !u!114 &6006005545496892966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42729,6 +42743,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 7734855179802728181}
   backButton: {fileID: 4035553211626482213}
   defaultButton: {fileID: 2630144618673454}
+  settingsButton: {fileID: 0}
 --- !u!225 &7734855179802728181
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -48376,3 +48391,76 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_AlphaFadeSpeed: 0.15
+--- !u!1001 &6199432109825372238
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2324438517054154203}
+    m_Modifications:
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 951.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 615.39996
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4968453695881893714, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_Name
+      value: BrightnessManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+--- !u!114 &2879110340636880597 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8213555482436705947, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+  m_PrefabInstance: {fileID: 6199432109825372238}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4e2a372e3b1d434a8f7ed4ca71502c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &5378606926985219058 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+  m_PrefabInstance: {fileID: 6199432109825372238}
+  m_PrefabAsset: {fileID: 0}

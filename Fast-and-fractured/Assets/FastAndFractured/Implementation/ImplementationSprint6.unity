@@ -20540,6 +20540,63 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.66800004, y: 3.1620002, z: 1.036}
   m_TimeToStationary: 0.5
+--- !u!1001 &2120912410
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 951.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 615.39996
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2066140852985691068, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4968453695881893714, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
+      propertyPath: m_Name
+      value: BrightnessManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 710e8544aa0418d4c98d197338e1b75b, type: 3}
 --- !u!1 &2123850370
 GameObject:
   m_ObjectHideFlags: 0
@@ -21854,6 +21911,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3296757321263664280, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3597554143680823233, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: backButton
       value: 
@@ -22750,6 +22811,7 @@ GameObject:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 2120912410}
   - {fileID: 441166168}
   - {fileID: 6400545731412433952}
   - {fileID: 7708112764650138630}
