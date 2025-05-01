@@ -25,4 +25,14 @@ public class McChickenVisuals : MonoBehaviour
         chickenModel.SetActive(true);
         _spawnFeathersVfx.Play();
     }
+
+    public void OnChickenOnFloor()
+    {
+
+    }
+
+    public void OnChickenOffFloor()
+    {
+
+    }
 }
