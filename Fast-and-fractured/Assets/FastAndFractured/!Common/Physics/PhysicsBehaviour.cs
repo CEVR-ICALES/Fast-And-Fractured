@@ -211,14 +211,17 @@ namespace FastAndFractured
                     forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                 }
 
+                Debug.Log($"Impact Before Modifier {forceToApply}");
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                isTheOneToPush = forceToApply > THRESHOLD_TO_CONSIDER_PUSHING;
+                
 
+                Debug.Log($"Impact After Modifier {forceToApply}");
                 otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
-                otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(!isTheOneToPush, otherComponentPhysicsBehaviours);
+                otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
+
 
             }  
             
