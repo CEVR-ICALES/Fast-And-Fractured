@@ -720,9 +720,9 @@ namespace FastAndFractured
 
             if (!agent.isOnNavMesh)
             {
-                _positionToDrive = _positionToDrive;
-                Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
-                return true;
+                //_positionToDrive = _positionToDrive;
+                //Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
+                //return true;
                 if (NavMesh.SamplePosition(transform.position, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
                 {
                     _positionToDrive = hit.position;

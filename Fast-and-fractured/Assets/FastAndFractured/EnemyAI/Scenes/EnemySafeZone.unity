@@ -1651,7 +1651,7 @@ GameObject:
   - component: {fileID: 158737394}
   - component: {fileID: 158737393}
   - component: {fileID: 158737392}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5045,7 +5045,7 @@ GameObject:
   - component: {fileID: 577734603}
   - component: {fileID: 577734602}
   - component: {fileID: 577734601}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15117,7 +15117,7 @@ GameObject:
   - component: {fileID: 1599152997}
   - component: {fileID: 1599152996}
   - component: {fileID: 1599152995}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18244,7 +18244,7 @@ GameObject:
   - component: {fileID: 1908254209}
   - component: {fileID: 1908254208}
   - component: {fileID: 1908254207}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20577,7 +20577,7 @@ GameObject:
   - component: {fileID: 2063695914}
   - component: {fileID: 2063695913}
   - component: {fileID: 2063695912}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21073,7 +21073,7 @@ GameObject:
   - component: {fileID: 2099029089}
   - component: {fileID: 2099029088}
   - component: {fileID: 2099029087}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21291,7 +21291,7 @@ GameObject:
   - component: {fileID: 2124358642}
   - component: {fileID: 2124358641}
   - component: {fileID: 2124358640}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SafeZone (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21871,7 +21871,11 @@ PrefabInstance:
       objectReference: {fileID: 468952144}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: debugMode
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: justSpawnAI
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: playerCamera
@@ -21891,11 +21895,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: stormInDebugMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: _timeToCallTheStorm
-      value: 60
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6191875833710772605, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: maxCharactersInGame
