@@ -161,7 +161,7 @@ namespace Enums
         CHARACTER,
         INTERACTABLE
     }
-
+    
     public enum ModifiedCarState
     {
         JOSEFINO_INVULNERABLE,
@@ -169,4 +169,9 @@ namespace Enums
         DEFAULT
     }
 
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
+    }
 }
