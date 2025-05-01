@@ -97,12 +97,11 @@ namespace FastAndFractured
                 });
                 Vector3 collisionNormal = -collision.contacts[0].normal;
                 Vector3 finalForce = collisionNormal * chickenForce;
+                physicsBehaviour.StatsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION, false, gameObject);
+                physicsBehaviour.CarImpactHandler.OnHasBeenPushed();
                 physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
             }
-            if(collision.gameObject.TryGetComponent(out StatsController statsController))
-            {
-                statsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION,false,gameObject);
-            }
+
 
         }
 

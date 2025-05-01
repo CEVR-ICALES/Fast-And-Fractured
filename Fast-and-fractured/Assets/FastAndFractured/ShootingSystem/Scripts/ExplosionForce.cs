@@ -67,7 +67,7 @@ namespace FastAndFractured
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
                     otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * 1 - ((distanceToCenter / _explosionCollider.radius))); // for now we just apply an offset on the y axis provisional
-                    otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
+                    otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed();
                 }
             }
         }
