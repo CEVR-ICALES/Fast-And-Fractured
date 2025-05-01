@@ -23,7 +23,7 @@ namespace FastAndFractured
         public override void OnHasPushedOtherCar(PhysicsBehaviour otherCarPhysicsBehaviour)
         {
             base.OnHasPushedOtherCar(otherCarPhysicsBehaviour);
-
+            
             _uniqueAbilityController.ConsumeCroquette();
         }
 

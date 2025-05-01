@@ -89,84 +89,6 @@ namespace FastAndFractured
             ExitGroundCheck(collision);
         }
 
-        private void VehicleCollision(Collision collision)
-        {
-            float forceToApply = 0;
-            bool isTheOneToPush = false;
-            PhysicsBehaviour otherComponentPhysicsBehaviours = collision.gameObject.GetComponentInChildren<PhysicsBehaviour>();
-            if (otherComponentPhysicsBehaviours != null)
-            {
-                CancelDash();
-                otherComponentPhysicsBehaviours.CancelDash();
-                ModifiedCarState carModifiedState = _carImpactHandler.CheckForModifiedCarState();
-                ModifiedCarState otherCarModifiedState = otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState();
-                ContactPoint contactPoint = collision.contacts[0];
-                Vector3 collisionPos = contactPoint.point;
-                Vector3 collisionNormal = contactPoint.normal;
-                float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
-                float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
-                float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
-                // check for any type of modified car state (joseifno & maria antonia unique ability)
-                if(carModifiedState == ModifiedCarState.DEFAULT)
-                {
-                    if(otherCarModifiedState != ModifiedCarState.DEFAULT)
-                    {
-                        //HandleImpactToCarWithModifiedCarState()
-                        // the other car has a modified state so we notify him that hes been pushed so that it consumes that modified state
-                        _carImpactHandler.HandleOnCarImpact(true, otherComponentPhysicsBehaviours);
-                        otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
-                        return;
-                    }
-                     //detect if the contact was frontal
-                    if (Vector3.Angle(transform.forward, -collision.gameObject.transform.forward) <= statsController.FrontalHitAnlgeThreshold) //frontal hit
-                    {
-                        if (otherComponentPhysicsBehaviours.IsCurrentlyDashing)
-                        {
-                            if (DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding, otherComponentPhysicsBehaviours.Rb.velocity.magnitude))
-                            {
-                                isTheOneToPush = true;
-                                forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                            }
-                            else
-                            {
-                                isTheOneToPush = false;
-                                forceToApply = 0f; //lost frontal hit so u apply no force (the other car will sliughtly bounce by its own) in case it doesnt we should set forceToApply to a low value
-                            }
-                        }
-                        else
-                        {
-                            isTheOneToPush = true;
-                            forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                        }
-                    }
-                    else
-                    {
-                        isTheOneToPush = true;
-                        forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                    }
-                } else
-                {
-                    if(otherCarModifiedState != ModifiedCarState.DEFAULT)
-                    {
-                        _carImpactHandler.HandleOnCarImpact(true, otherComponentPhysicsBehaviours);
-                        otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
-                        return;
-                    }
-                    CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
-                    //forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply);
-                    isTheOneToPush = true;
-                }
-                
-
-                if (!otherComponentPhysicsBehaviours.HasBeenPushed)
-                {
-                    otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
-                    _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
-                    otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(!isTheOneToPush, otherComponentPhysicsBehaviours);
-                }
-            }
-        }
-
         private void RefactoredVehicleCollision(Collision collision)
         {
 
@@ -201,7 +123,13 @@ namespace FastAndFractured
                 {
                     if(isFrontalHit)
                     {
-                        forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                        if(DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance, Rb.velocity.magnitude))
+                        {
+                            forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                        } else
+                        {
+                            forceToApply = 0;
+                        }
                     } else
                     {
                         forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
@@ -215,14 +143,10 @@ namespace FastAndFractured
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                
-
                 Debug.Log($"Impact After Modifier {forceToApply}");
                 otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
-
-
             }  
             
         }
