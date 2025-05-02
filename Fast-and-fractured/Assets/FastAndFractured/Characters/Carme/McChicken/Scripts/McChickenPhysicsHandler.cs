@@ -95,14 +95,24 @@ namespace FastAndFractured
                 {
                     _rb.isKinematic = false;
                 });
+                if (physicsBehaviour.CarImpactHandler.CheckForModifiedCarState() == ModifiedCarState.JOSEFINO_INVULNERABLE)
+                {
+                    physicsBehaviour.CarImpactHandler.OnHasBeenPushed(physicsBehaviour);
+                    physicsBehaviour.OnCarHasBeenPushed();
+                    return;
+                }
                 Vector3 collisionNormal = -collision.contacts[0].normal;
                 Vector3 finalForce = collisionNormal * chickenForce;
-                physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
+                if(!physicsBehaviour.HasBeenPushed)
+                {
+                    
+                    physicsBehaviour.StatsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION, false, gameObject);
+                    physicsBehaviour.CarImpactHandler.OnHasBeenPushed(physicsBehaviour);
+                    physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
+                }
+                
             }
-            if(collision.gameObject.TryGetComponent(out StatsController statsController))
-            {
-                statsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION,false,gameObject);
-            }
+
 
         }
 

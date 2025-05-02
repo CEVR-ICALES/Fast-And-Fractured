@@ -4,7 +4,7 @@ using Utilities;
 
 namespace FastAndFractured
 {
-    public class CarmenUniqueAbility : BaseUniqueAbility
+    public class CarmeUniqueAbility : BaseUniqueAbility
     {
         public GameObject chickenPrefab;
         public Transform uniqueAbilityShootPoint;
