@@ -618,7 +618,6 @@ namespace FastAndFractured
             return listOfCarsThatMadeLotsOfDamage != null && listOfCarsThatMadeLotsOfDamage.Count > 0;
         }
         //State shootToWhoMadeMoreDamageState
-
         #endregion
 
         #region Helpers

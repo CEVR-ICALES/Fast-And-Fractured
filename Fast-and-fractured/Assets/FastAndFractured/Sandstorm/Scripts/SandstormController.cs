@@ -262,7 +262,7 @@ namespace FastAndFractured
             }
             else
             {
-                if (other.TryGetComponent(out StatsBoostInteractable statsBoostInteractable))
+                if (other.GetComponentInParent<StatsBoostInteractable>() != null)
                 {
                     _itemsInsideSandstorm.Add(other.gameObject);
                 }
