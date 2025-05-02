@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ClimbeableColliderAutomaticator : MonoBehaviour
 {
     public Collider mainCollider;
     public BoxCollider landeableCollider;
+
+    public Color gizmosColor;
 
     public float landeableColliderHeight = 0.03f;
     public float heightPositionOffset = 0.05f;
@@ -52,5 +55,22 @@ public class ClimbeableColliderAutomaticator : MonoBehaviour
 
             default: return Vector3.zero;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = gizmosColor;
+        DrawColliderGizmo(landeableCollider);
+    }
+
+    private void DrawColliderGizmo(BoxCollider collider)
+    {
+        Gizmos.matrix = Matrix4x4.TRS(
+                    transform.TransformPoint(collider.center),
+                    transform.rotation,
+                    transform.lossyScale
+                );
+        Gizmos.DrawCube(Vector3.zero, collider.size);
+        Gizmos.matrix = Matrix4x4.identity;
     }
 }
