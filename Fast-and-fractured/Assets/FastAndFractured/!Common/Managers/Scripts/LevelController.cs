@@ -405,12 +405,12 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(GameObject target)
         {
-            return _sandStormController.IsInsideStormCollider(target,0f);
+            return _callStormTimer==null ? _sandStormController.IsInsideStormCollider(target,0f) : false;
         }
 
         public bool IsInsideSandstorm(GameObject target, float marginError)
         {
-            return _sandStormController.IsInsideStormCollider(target,marginError);
+            return _callStormTimer==null ? _sandStormController.IsInsideStormCollider(target,marginError) : false;
         }
 
         public List<GameObject> SafeZonesOutsideSandstorm()
@@ -428,6 +428,8 @@ namespace FastAndFractured
 
         public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
         {
+            if (_callStormTimer != null)
+                return false;
             List<GameObject> interactablesList = new List<GameObject>();
             if (gameElement == GameElement.INTERACTABLE)
             {
