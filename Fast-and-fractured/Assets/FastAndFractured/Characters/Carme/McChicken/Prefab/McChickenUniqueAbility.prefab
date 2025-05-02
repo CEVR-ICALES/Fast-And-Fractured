@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 515776347792994909}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 512.48975, y: 607.6246, z: 87.89467}
+  m_LocalPosition: {x: 512.48975, y: 607.6246, z: 87.807}
   m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -184,16 +184,16 @@ MonoBehaviour:
   headPoint: {fileID: 5465407268476498367}
   headTargetRotationObj: {fileID: 410893916333515223}
   horizontalViewAngle: 100
-  verticalViewAngle: 35
-  targetDistance: 5
+  verticalViewAngle: 25
+  targetDistance: 2
   rotationMovementEasing:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -578,7 +578,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: 0, y: 0, z: 0}
+    m_Offset: {x: 30, y: 0, z: 30}
     m_MinLimit: -80
     m_MaxLimit: 80
     m_AimAxis: 4

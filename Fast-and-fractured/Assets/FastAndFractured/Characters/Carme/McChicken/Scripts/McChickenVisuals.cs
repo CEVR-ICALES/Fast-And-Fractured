@@ -20,15 +20,16 @@ public class McChickenVisuals : MonoBehaviour
     [Header("ChickenHead")]
     [SerializeField] private Transform headPoint;
     [SerializeField] private Transform headTargetRotationObj;
+    [SerializeField] private Transform lastHeadTargetRotationObj;
     [SerializeField] private float horizontalViewAngle;
     [SerializeField] private float verticalViewAngle;
     [SerializeField] private float targetDistance;
     [SerializeField] private AnimationCurve rotationMovementEasing;
 
-    private const float MIN_HEAD_MOVE_DURATION = 1f; 
-    private const float MAX_HEAD_MOVE_DURATION = 2f; 
-    private const float MIN_TIME_BETWEEN_HEAD_CHANGES = 2f; 
-    private const float MAX_TIME_BETWEEN_HEAD_CHANGES = 3f; 
+    private const float MIN_HEAD_MOVE_DURATION = 0.5f; 
+    private const float MAX_HEAD_MOVE_DURATION = 1f; 
+    private const float MIN_TIME_BETWEEN_HEAD_CHANGES = 1f; 
+    private const float MAX_TIME_BETWEEN_HEAD_CHANGES = 2f; 
 
     private ITimer _changeTimer;
     private ITimer _moveTimer;
@@ -70,6 +71,7 @@ public class McChickenVisuals : MonoBehaviour
         if(_changeTimer != null)
             _changeTimer.StopTimer();
     }
+
     #region ChickenLegs
     private void NotifyLegsOfGroundState(bool isGround)
     {
@@ -80,7 +82,6 @@ public class McChickenVisuals : MonoBehaviour
     }
 
     #endregion
-
 
     #region Head
     private void ScheduleNextHeadTargetChange()
@@ -95,7 +96,7 @@ public class McChickenVisuals : MonoBehaviour
 
     private void GenerateNewTargetPosition()
     {
-        // get random point ni the given ranges
+        // get random point in the given ranges
         float randomYaw = Random.Range(-horizontalViewAngle / 2f, horizontalViewAngle / 2f);
         float randomPitch = Random.Range(-verticalViewAngle / 2f, verticalViewAngle / 2f);
 
