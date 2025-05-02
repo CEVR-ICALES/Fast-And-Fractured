@@ -894,6 +894,7 @@ namespace FastAndFractured
             decisionPercentageNormalShoot = aIParameters.DecisionPercentageNormalShoot;
             decisionPercentagePushShoot = aIParameters.DecisionPercentagePushShoot;
             decisionPercentageCooldown = aIParameters.DecisionPercentageCooldown;
+            marginToFleeFromSandstorm = aIParameters.MarginToFleeFromSands;
         }
 
         /// <summary>
