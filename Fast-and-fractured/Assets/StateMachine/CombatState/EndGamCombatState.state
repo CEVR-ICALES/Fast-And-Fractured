@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: EndGamCombatState
+  m_EditorClassIdentifier: 
+  enterActions:
+  - {fileID: 11400000, guid: 23b77e1fe16460344a53cdd2b23d88f6, type: 2}
+  actions:
+  - {fileID: 11400000, guid: 42a69a49f663fa6428feda78a9811c1d, type: 2}
+  - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 5bda46e9b9f11894a80a6bb31f627567, type: 2}
+    trueState: {fileID: 11400000, guid: 87c3786bc08ac414eb0cd36747a24686, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: 0bccd747a703af74481d42d98c80409e, type: 2}
+    trueState: {fileID: 11400000, guid: 130b3d096bd40d6479cd3560d5fe6a35, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: 68281823b9e6ba744930cba5cbc05e63, type: 2}
+    trueState: {fileID: 11400000, guid: 1d8c770c90deb944d8555dbdf7aaf478, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: 838648e7f2a7f6642b0fc13b486c93b5, type: 2}
+    trueState: {fileID: 11400000, guid: 2f26391b6490642449037083af851173, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0

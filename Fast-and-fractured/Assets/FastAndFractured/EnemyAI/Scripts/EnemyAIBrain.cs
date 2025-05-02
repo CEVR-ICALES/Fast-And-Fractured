@@ -92,6 +92,7 @@ namespace FastAndFractured
 
         [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
         private const float ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM = 0.5f;
+        private const int NUM_CHARACTERS_TO_CONSIDER_END_GAME = 3;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -237,6 +238,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
+            _player = LevelController.Instance.playerReference;
         }
         public void ReturnToStartPosition()
         {
@@ -412,6 +414,23 @@ namespace FastAndFractured
                 }
             }
             return nearestTarget;
+        }
+
+        public void ChooseCharacterThatIsNotPlayer()
+        {
+            GameObject characterThatIsNotPlayer = ReturnCharacterThatIsNotPlayer();
+            ChangeTargetToShoot(characterThatIsNotPlayer);
+        }
+
+        private GameObject ReturnCharacterThatIsNotPlayer()
+        {
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            foreach (var character in inGameCharacters)
+            {
+                if(character!=_player)
+                    return character;
+            }
+            return _player;
         }
         public void ChooseNearestDangerZone()
         {
@@ -879,6 +898,11 @@ namespace FastAndFractured
         public bool AreAllSafeZonesInsideSandstorm()
         {
             return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
+        }
+
+        public bool IsOnEndGame()
+        {
+            return NUM_CHARACTERS_TO_CONSIDER_END_GAME <= LevelController.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)
