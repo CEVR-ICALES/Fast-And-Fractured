@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
+
 
 namespace FastAndFractured
 {
@@ -12,7 +9,7 @@ namespace FastAndFractured
         [SerializeField] private float ovalXRadius;
         [SerializeField] private float ovalYRadius;
         [SerializeField] private float speed;
-        [SerializeField] private float phaseOffeset; // offset between leg targets
+        [SerializeField] private float phaseOffeset; // offset between legs targets
         [SerializeField] private float offset;
 
         [Header("Gizmo")]
