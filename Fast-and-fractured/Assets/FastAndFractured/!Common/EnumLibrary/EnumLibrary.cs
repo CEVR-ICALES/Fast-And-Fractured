@@ -110,7 +110,8 @@ namespace Enums
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
+        SHOOTING_MECHANICS,
+        CANCEL_DASH
     }
 
     public enum Stats
