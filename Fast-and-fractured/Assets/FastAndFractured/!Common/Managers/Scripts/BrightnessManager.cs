@@ -18,6 +18,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     private const float DEFAULT_EXPOSURE = 16f;
     private const float MAX_EXPOSURE_OFFSET = -1.5f;
     private const float MIN_EXPOSURE_OFFSET = 1.5f;
+    private const float EXPOSURE_MULTIPLIER = 2f;
     #endregion
 
     protected override void Awake()
@@ -58,7 +59,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
             return DEFAULT_EXPOSURE;
         }
         //Brightness goes from 0 to 1;
-        return _startingExposure + (MIN_EXPOSURE_OFFSET + (brightness * MAX_EXPOSURE_OFFSET * 2f));
+        return _startingExposure + (MIN_EXPOSURE_OFFSET + (brightness * MAX_EXPOSURE_OFFSET * EXPOSURE_MULTIPLIER));
     }
 
     private void OnDestroy()
