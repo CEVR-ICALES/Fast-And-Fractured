@@ -5,12 +5,6 @@ namespace FastAndFractured
 {
     public class McChickenLegsMovement : MonoBehaviour
     {
-        [Header("Rigs")]
-        [SerializeField] private TwoBoneIKConstraint walkingLegRig;
-        [SerializeField] private Transform walkingTarget;
-        [SerializeField] private Transform flyingTarget;
-
-
         [Header("Oval settings")]
         [SerializeField] private float ovalXRadius;
         [SerializeField] private float ovalYRadius;
@@ -44,6 +38,9 @@ namespace FastAndFractured
                 float y = ovalYRadius * Mathf.Sin(currentAngle);
 
                 transform.localPosition = new Vector3(transform.localPosition.x, y, z);
+            } else
+            {
+                
             }
             
         }
@@ -51,17 +48,6 @@ namespace FastAndFractured
         public void SetIsWalking(bool isWalking)
         {
             _isWalking = isWalking;
-            var rigData = walkingLegRig.data;
-            if(_isWalking)
-            {
-                rigData.target = walkingTarget;
-            }
-            else
-            {
-                rigData.target = flyingTarget;
-            }
-
-            walkingLegRig.data = rigData;
         }
 
         void OnDrawGizmos()
