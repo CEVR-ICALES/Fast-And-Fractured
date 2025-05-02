@@ -30,7 +30,7 @@ namespace FastAndFractured
             // specific char logic to handle something if neccesary when getting pushed (visuals, consuming something....)
         }
 
-        public virtual bool HandleIfTomatoeEffect() 
+        public virtual bool HandleIfTomatoEffect() 
         {
             return true;
             // specific char logic to handle getting hit by a tomatoe

@@ -42,7 +42,7 @@ namespace FastAndFractured
             return forceToApply;
         }
 
-        public override bool HandleIfTomatoeEffect()
+        public override bool HandleIfTomatoEffect()
         {
             if (_josefinoUniqueAbility.IsAbilityActive)
             {

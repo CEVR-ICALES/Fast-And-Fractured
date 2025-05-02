@@ -63,7 +63,7 @@ namespace FastAndFractured
             {
                 if (other.TryGetComponent(out CarImpactHandler otherCarImpactHandler))
                 {
-                    if(!otherCarImpactHandler.HandleIfTomatoeEffect())
+                    if(!otherCarImpactHandler.HandleIfTomatoEffect())
                     {
                         ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
 
