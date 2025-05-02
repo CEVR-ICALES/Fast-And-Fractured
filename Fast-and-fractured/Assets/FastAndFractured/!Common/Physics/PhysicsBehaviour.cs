@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -48,6 +49,7 @@ namespace FastAndFractured
         private CarMovementController _carMovementController;
 
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
+        const string PUSHED_EFFECT_NAME = "Josefino_0";
         private void OnEnable()
         {
             if (!_rb)
@@ -188,6 +190,17 @@ namespace FastAndFractured
         {
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
+            if(StatsController.IsPlayer)
+            {
+                HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                GameObject hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                hudEffect.SetActive(!hudEffect.activeSelf);
+                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                {
+                    GameObject hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                    hudEffect.SetActive(!hudEffect.activeSelf);
+                });
+            }
         }
 
         public void AddForce(Vector3 force, ForceMode forceMode)

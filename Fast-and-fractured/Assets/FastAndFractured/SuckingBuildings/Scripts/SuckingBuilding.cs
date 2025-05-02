@@ -1,82 +1,97 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class SuckingBuilding : MonoBehaviour
+    public class SuckingBuilding : MonoBehaviour, IPausable
     {
-        public float detectionRadius = 10f;
-        public float coneAngle = 45f; 
+        public float detectionRadius = 40f;
         public float pullForce = 30f;
-        public bool mode = true;
+        private bool _isPaused = false;
+        private List<GameObject> _charactersList = new List<GameObject>();
+        public float elevationForce = 0.5f;
+        void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
 
         void FixedUpdate()
         {
-            if (mode)
-                DetectAndPullCharacters2();
-            else
-                DetectAndPullCharacters();
-        }
-        //this one doesnt have camera problems, but the sucking force doesnt work as intended, it doesnt feel like you ar being suck
-        void DetectAndPullCharacters()
-        {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRadius);
-            foreach (Collider collider in colliders)
+            if (_isPaused)
+                return;
+            if (_charactersList != null)
             {
-                Rigidbody rb = collider.GetComponent<Rigidbody>();
-                if (rb != null)
+                foreach (GameObject obj in _charactersList)
                 {
-                    Vector3 directionToTarget = (collider.transform.position - transform.position).normalized;
-                    float angle = Vector3.Angle(transform.forward, directionToTarget);
-
-                    if (angle < coneAngle / 2)
+                    if(obj!=null)
                     {
-                        Vector3 pullDirection = (transform.position - collider.transform.position).normalized;
-                        rb.AddForce(pullDirection * pullForce, ForceMode.Acceleration); 
+                        float distance = Vector3.Distance(transform.position, obj.transform.position);
+                        if(distance<=detectionRadius)
+                        {
+                            PullCharacter(obj, distance);
+                        }
                     }
                 }
             }
         }
-        //this on feels more good, the force is strong enough to pull the character, but allows you to fight against it, but the camera shakes because of the two forces fighting
-        void DetectAndPullCharacters2()
+        
+        void PullCharacter2(GameObject character, float distance)
         {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRadius);
-            foreach (Collider collider in colliders)
-            {
-                Rigidbody rb = collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    Vector3 directionToTarget = (collider.transform.position - transform.position).normalized;
-                    float angle = Vector3.Angle(transform.forward, directionToTarget);
+            Rigidbody rb = character.GetComponent<Rigidbody>();
+            Vector3 directionToTarget = (character.transform.position - transform.position).normalized;
+            float forceMultiplier = Mathf.Clamp01((detectionRadius - distance) / detectionRadius);
+            Vector3 pullDirection = (transform.position - character.transform.position).normalized;
+            rb.AddForce(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration); 
+        }
 
-                    if (angle < coneAngle / 2)
-                    {
-                        Vector3 pullDirection = (transform.position - collider.transform.position).normalized;
-                        Vector3 newPosition = rb.position + pullDirection * pullForce * Time.fixedDeltaTime;
-                        rb.MovePosition(newPosition);
-                    }
+        
+        void PullCharacter(GameObject character, float distance)
+        {
+            Rigidbody rb = character.GetComponent<Rigidbody>();
+            Vector3 directionToTarget = (character.transform.position - transform.position).normalized;
+            Vector3 pullDirection = (transform.position - character.transform.position).normalized;
+            float forceMultiplier = Mathf.Clamp01((detectionRadius - distance) / detectionRadius);
+            Vector3 newPosition = rb.position + pullDirection * (pullForce * forceMultiplier) * Time.fixedDeltaTime;
+            rb.MovePosition(newPosition);
+        }
+        private void OnTriggerEnter(Collider other)
+        {
+            StatsController statsController = other.gameObject.GetComponent<StatsController>();
+            if (statsController != null)
+            {
+                if (!_charactersList.Contains(other.gameObject))
+                {
+                    _charactersList.Add(other.gameObject);
                 }
             }
         }
-                    
-        void OnDrawGizmos()
+        private void OnTriggerExit(Collider other)
         {
-            // Dibuja el rango de detección como una esfera
-            Gizmos.color = new Color(0, 1, 0, 0.3f); // Verde semitransparente
-            Gizmos.DrawSphere(transform.position, detectionRadius);
+            StatsController statsController = other.gameObject.GetComponent<StatsController>();
+            if (statsController != null)
+            {
+                if (_charactersList.Contains(other.gameObject))
+                {
+                    _charactersList.Remove(other.gameObject);
+                }
+            }
+        }
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
 
-            // Dibuja el cono de absorción
-            Gizmos.color = Color.yellow;
-            Vector3 forward = transform.forward * detectionRadius;
-            Quaternion leftRayRotation = Quaternion.Euler(0, -coneAngle / 2, 0);
-            Quaternion rightRayRotation = Quaternion.Euler(0, coneAngle / 2, 0);
-
-            Vector3 leftRayDirection = leftRayRotation * forward;
-            Vector3 rightRayDirection = rightRayRotation * forward;
-
-            Gizmos.DrawRay(transform.position, leftRayDirection);
-            Gizmos.DrawRay(transform.position, rightRayDirection);
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }
