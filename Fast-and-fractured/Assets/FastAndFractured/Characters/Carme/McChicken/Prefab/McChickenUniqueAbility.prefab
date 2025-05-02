@@ -276,6 +276,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4081014821333450258}
+  - component: {fileID: 7891118171812455578}
   m_Layer: 0
   m_Name: LeftLegRig_target
   m_TagString: Untagged
@@ -298,6 +299,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4803893681246422212}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7891118171812455578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2973730612449508630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cebfd2dff3ddbda46947e6db9985fb88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ovalXRadius: 0.04
+  ovalYRadius: 0.018
+  speed: -6
+  phaseOffeset: 0
+  offset: 0.11
+  showOvalGizmo: 1
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  gizmoSegments: 32
 --- !u!1 &3304693843870445657
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +386,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4258215729194599574}
+  - component: {fileID: 3265667175652016322}
   m_Layer: 0
   m_Name: RightLegRig_target
   m_TagString: Untagged
@@ -387,6 +409,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6229213664100741218}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3265667175652016322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3943560179252826423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cebfd2dff3ddbda46947e6db9985fb88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ovalXRadius: 0.04
+  ovalYRadius: 0.018
+  speed: -6
+  phaseOffeset: 3.1
+  offset: 0.11
+  showOvalGizmo: 1
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  gizmoSegments: 32
 --- !u!1 &4225887545131942938
 GameObject:
   m_ObjectHideFlags: 0
