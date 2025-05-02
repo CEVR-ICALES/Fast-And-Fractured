@@ -91,6 +91,7 @@ namespace FastAndFractured
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
 
         [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
+        private const float ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM = 0.5f;
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -865,6 +866,8 @@ namespace FastAndFractured
 
         public bool IsIAInsideSandstorm()
         {
+            float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM;
+            float marginWithEnduranceToFleeTheSandstorm = marginToFleeFromSandstorm + marginToFleeFromSandstorm * enduranceFactor;
             return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
 
