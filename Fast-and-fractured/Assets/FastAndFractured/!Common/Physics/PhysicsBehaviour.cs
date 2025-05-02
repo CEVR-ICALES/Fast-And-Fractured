@@ -192,7 +192,10 @@ namespace FastAndFractured
 
         public void AddForce(Vector3 force, ForceMode forceMode)
         {
-            _rb.AddForce(force, forceMode);
+            if (_rb != null)
+            {
+                _rb.AddForce(force, forceMode);
+            }
         }
 
         public void AddTorque(Vector3 torque, ForceMode forceMode)
