@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class McChickenLegsMovement : MonoBehaviour
+    public class McChickenLegsMovement : MonoBehaviour, IPausable
     {
         [Header("Oval settings")]
         [SerializeField] private float ovalXRadius;
@@ -20,14 +21,28 @@ namespace FastAndFractured
         private bool _isWalking;
         private float _angle;
         private float initialRandomOffset;
+        private bool _isPaused = false;
 
         private void Start()
         {
             initialRandomOffset = Random.Range(-offset, offset);
         }
 
+        void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
+
         private void FixedUpdate()
         {
+            if (_isPaused)
+                return;
+
             if(_isWalking)
             {
                 _angle += speed * Time.deltaTime;
@@ -72,6 +87,16 @@ namespace FastAndFractured
                 }
                 prevPoint = currentPoint;
             }
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 
