@@ -161,7 +161,8 @@ namespace Enums
     public enum GameElement
     {
         CHARACTER,
-        INTERACTABLE
+        INTERACTABLE,
+        SAFE_ZONES
     }
     
     public enum ModifiedCarState

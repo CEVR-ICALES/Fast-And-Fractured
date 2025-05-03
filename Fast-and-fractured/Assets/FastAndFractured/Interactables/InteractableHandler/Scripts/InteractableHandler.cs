@@ -82,7 +82,7 @@ namespace FastAndFractured
             foreach (GameObject item in _shuffledActivePool)
             {
                 StatsBoostInteractable statItem = item.GetComponentInParent<StatsBoostInteractable>();
-                if (statItem)
+                if (statItem&&statItem.isActiveAndEnabled)
                 {
                     statsBoostInteractables.Add(statItem);
                 }
