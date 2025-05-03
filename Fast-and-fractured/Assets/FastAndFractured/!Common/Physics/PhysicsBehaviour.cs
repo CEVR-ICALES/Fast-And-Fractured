@@ -54,6 +54,8 @@ namespace FastAndFractured
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
 
+        GameObject hudEffect;
+
         private void OnEnable()
         {
             if (!_rb)
@@ -200,17 +202,21 @@ namespace FastAndFractured
         #region Force Applier
         public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
         {
+
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
             if(StatsController.IsPlayer)
             {
                 HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
-                GameObject hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
                 hudEffect.SetActive(!hudEffect.activeSelf);
                 TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
                 {
-                    GameObject hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
-                    hudEffect.SetActive(!hudEffect.activeSelf);
+                    if (hudEffect != null)
+                    {
+                        hudEffect.SetActive(!hudEffect.activeSelf);
+                        hudEffect = null;
+                    }
                 });
             }
         }
