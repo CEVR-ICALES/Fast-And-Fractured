@@ -4,13 +4,14 @@ using UnityEngine;
 using Utilities;
 using Assets.SimpleLocalization.Scripts;
 using Enums;
+using UnityEngine.UI;
 
 namespace FastAndFractured
 {
     public class IngameEventsManager : AbstractSingleton<IngameEventsManager>
     {
         private GameObject eventTextContainer;
-        private List<GameObject> inGameCharactersTopIcons;
+        private List<CharacterIcon> inGameCharactersTopIcons = new();
         [SerializeField] private GameObject tomatoAlertUI;
         [SerializeField] private GameObject tomatoScreenEfect;
         public bool IsAlertActive {get => _isAlertActive;}
@@ -19,8 +20,8 @@ namespace FastAndFractured
         private LocalizedText _localizedTextReference;
         private void Start()
         {
-            foreach (UIDynamicElement playerIcon in HUDManager.Instance.GetUIElement(UIElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<UIDynamicElement>()){
-                inGameCharactersTopIcons.Add(playerIcon.gameObject);
+            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
+                inGameCharactersTopIcons.Add(playerIcon);
             }
             eventTextContainer = HUDManager.Instance.GetUIElement(UIElementType.EVENT_TEXT).gameObject;
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
@@ -51,7 +52,7 @@ namespace FastAndFractured
             foreach (GameObject character in LevelController.Instance.InGameCharacters)
             {
                 inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelController.Instance.InGameCharactersNameCodes[i]);
-                inGameCharactersTopIcons[i].SetActive(true);
+                inGameCharactersTopIcons[i].gameObject.SetActive(true);
                 i++;
             }
             Debug.Log("Ingame Characters Top Icon: " + inGameCharactersTopIcons[4]);
@@ -67,13 +68,10 @@ namespace FastAndFractured
             tomatoAlertUI.SetActive(false);
             _isAlertActive = false;
         }
-        // public void SetScreenEffect(float time)
-        // {
-        //     tomatoScreenEfect.SetActive(true);
-        //     TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
-        //     {
-        //         tomatoScreenEfect.SetActive(false);
-        //     });
-        // }
+
+        public void UltEvent(){
+            
+        }
+
     }
 }
