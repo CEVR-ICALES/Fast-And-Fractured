@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -50,7 +51,11 @@ namespace FastAndFractured
         public CarImpactHandler CarImpactHandler { get => _carImpactHandler; }
         private CarImpactHandler _carImpactHandler;
 
+        const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
+
+        GameObject hudEffect;
+
         private void OnEnable()
         {
             if (!_rb)
@@ -197,8 +202,23 @@ namespace FastAndFractured
         #region Force Applier
         public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
         {
+
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
+            if(StatsController.IsPlayer)
+            {
+                HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
+                hudEffect.SetActive(!hudEffect.activeSelf);
+                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                {
+                    if (hudEffect != null)
+                    {
+                        hudEffect.SetActive(!hudEffect.activeSelf);
+                        hudEffect = null;
+                    }
+                });
+            }
         }
 
         public void AddForce(Vector3 force, ForceMode forceMode)

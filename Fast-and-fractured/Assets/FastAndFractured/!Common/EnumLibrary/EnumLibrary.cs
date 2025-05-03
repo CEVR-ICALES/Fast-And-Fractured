@@ -154,7 +154,8 @@ namespace Enums
     public enum ScreenEffects
     {
         SPEED_EFFECT,
-        TOMATO_EFFECT
+        TOMATO_EFFECT,
+        BROKEN_CRYSTAL
     }
  
     public enum GameElement
