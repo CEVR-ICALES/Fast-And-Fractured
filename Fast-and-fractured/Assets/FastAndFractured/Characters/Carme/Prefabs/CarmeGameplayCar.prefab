@@ -5763,6 +5763,18 @@ PrefabInstance:
       value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[3]
+      value: 
+      objectReference: {fileID: 1174731631163695137}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[4]
+      value: 
+      objectReference: {fileID: 5172751214111434373}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: lowEnduranceEmmissionRate
       value: 55
       objectReference: {fileID: 0}
@@ -6526,7 +6538,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3384570736318612827}
+    - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1105756456413416479}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+--- !u!1 &1174731631163695137 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3455528531979232589, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 4591979289224938860}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1535308796345475203 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -6553,6 +6573,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f944e01a4407be24983b64d9945d67c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5172751214111434373 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8678631126281036777, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 4591979289224938860}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5638207374499272474 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -6616,6 +6641,7 @@ MonoBehaviour:
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
+  isAbilityActive: 0
   chickenPrefab: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
   uniqueAbilityShootPoint: {fileID: 1988297944522183032}
   physicsBehaviour: {fileID: 8142885279693097499}
@@ -6630,6 +6656,18 @@ MonoBehaviour:
   landPointYOffset: 10
   drawDebugLines: 1
   shootingHandle: {fileID: 4055523234460972825}
+--- !u!114 &1105756456413416479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8284357542529456002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab5c4c273712824eae90dde9260c24d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &5012614545239056218
 PrefabInstance:
   m_ObjectHideFlags: 0

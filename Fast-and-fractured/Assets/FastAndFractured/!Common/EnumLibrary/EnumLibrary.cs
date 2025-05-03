@@ -110,7 +110,8 @@ namespace Enums
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
+        SHOOTING_MECHANICS,
+        CANCEL_DASH
     }
 
     public enum Stats
@@ -162,6 +163,14 @@ namespace Enums
         CHARACTER,
         INTERACTABLE
     }
+    
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
     public enum ValueNumberType
     {
         DIRECT_VALUE,
