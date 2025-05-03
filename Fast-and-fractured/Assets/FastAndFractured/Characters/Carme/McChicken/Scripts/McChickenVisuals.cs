@@ -21,6 +21,7 @@ public class McChickenVisuals : MonoBehaviour
     [SerializeField] private Transform headPoint;
     [SerializeField] private Transform headTargetRotationObj;
     [SerializeField] private Transform lastHeadTargetRotationObj;
+    [SerializeField] private Transform nextHeadTargetRotationObj;
     [SerializeField] private float horizontalViewAngle;
     [SerializeField] private float verticalViewAngle;
     [SerializeField] private float targetDistance;
@@ -33,8 +34,6 @@ public class McChickenVisuals : MonoBehaviour
 
     private ITimer _changeTimer;
     private ITimer _moveTimer;
-    private Vector3 _startMovePosition;
-    private Vector3 _targetMovePosition;
     private float _currentMoveDuration;
 
 
@@ -101,14 +100,14 @@ public class McChickenVisuals : MonoBehaviour
         float randomPitch = Random.Range(-verticalViewAngle / 2f, verticalViewAngle / 2f);
 
         Quaternion randomRotation = Quaternion.Euler(randomPitch, randomYaw, 0f);
-        _targetMovePosition = headPoint.position + randomRotation * Vector3.forward * targetDistance;
+        nextHeadTargetRotationObj.position = headPoint.position + randomRotation * Vector3.forward * targetDistance;
 
         StartHeadRotationSmoothMovement();
     }
 
     private void StartHeadRotationSmoothMovement()
     {
-        _startMovePosition = headTargetRotationObj.transform.position;
+        lastHeadTargetRotationObj.position = headTargetRotationObj.transform.position;
         _currentMoveDuration = Random.Range(MIN_HEAD_MOVE_DURATION, MAX_HEAD_MOVE_DURATION);
 
         _moveTimer = TimerSystem.Instance.CreateTimer(_currentMoveDuration, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
@@ -118,7 +117,7 @@ public class McChickenVisuals : MonoBehaviour
         }, onTimerIncreaseUpdate: (progress) =>
         {
             float easedProgress = rotationMovementEasing.Evaluate(progress);
-            headTargetRotationObj.transform.position = Vector3.Lerp(_startMovePosition, _targetMovePosition, easedProgress);
+            headTargetRotationObj.transform.position = Vector3.Lerp(lastHeadTargetRotationObj.position, nextHeadTargetRotationObj.position, easedProgress);
         });
     }
 

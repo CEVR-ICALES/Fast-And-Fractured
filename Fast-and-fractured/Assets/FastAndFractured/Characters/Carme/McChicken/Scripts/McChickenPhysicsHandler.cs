@@ -19,7 +19,7 @@ namespace FastAndFractured
         [SerializeField] private float bounceDuration;
         [SerializeField] private float climbingDotThreshold = 0.7f;
         [SerializeField] private float chickenForce;
-        private const float GROUNDED_GRACE_TIME = 0.2f;
+        private const float GROUNDED_GRACE_TIME = 0.8f;
 
         private Rigidbody _rb;
         private McChickenMovement _movementHandler;
