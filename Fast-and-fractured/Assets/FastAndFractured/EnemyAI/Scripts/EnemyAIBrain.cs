@@ -400,20 +400,24 @@ namespace FastAndFractured
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
-            GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
-            var nearestOne = float.MaxValue;
-
-            foreach (var character in inGameCharacters)
+            if (inGameCharacters.Count > 1)
             {
-                if (!character) continue;
-                float characterDistance = (character.transform.position - _currentPosition).sqrMagnitude;
-                if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
+                GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
+                var nearestOne = float.MaxValue;
+
+                foreach (var character in inGameCharacters)
                 {
-                    nearestOne = characterDistance;
-                    nearestTarget = character;
+                    if (!character) continue;
+                    float characterDistance = (character.transform.position - _currentPosition).sqrMagnitude;
+                    if (characterDistance < nearestOne && character.gameObject != carMovementController.gameObject)
+                    {
+                        nearestOne = characterDistance;
+                        nearestTarget = character;
+                    }
                 }
+                return nearestTarget;
             }
-            return nearestTarget;
+            return null;
         }
 
         public void ChooseCharacterThatIsNotPlayer()
@@ -902,7 +906,7 @@ namespace FastAndFractured
 
         public bool IsOnEndGame()
         {
-            return NUM_CHARACTERS_TO_CONSIDER_END_GAME <= LevelController.Instance.InGameCharacters.Count;
+            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelController.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

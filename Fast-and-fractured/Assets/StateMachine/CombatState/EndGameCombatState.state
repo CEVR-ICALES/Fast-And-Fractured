@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: EndGamCombatState
+  m_Name: EndGameCombatState
   m_EditorClassIdentifier: 
   enterActions:
   - {fileID: 11400000, guid: 23b77e1fe16460344a53cdd2b23d88f6, type: 2}
+  - {fileID: 11400000, guid: 21c74c3ab82a2d34da337e32106e8fc0, type: 2}
   actions:
   - {fileID: 11400000, guid: 42a69a49f663fa6428feda78a9811c1d, type: 2}
   - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
@@ -33,5 +34,9 @@ MonoBehaviour:
     hasExitTime: 0
   - decision: {fileID: 11400000, guid: 838648e7f2a7f6642b0fc13b486c93b5, type: 2}
     trueState: {fileID: 11400000, guid: 2f26391b6490642449037083af851173, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: b65bb2f3925e034499c9d6217d2d9176, type: 2}
+    trueState: {fileID: 11400000, guid: 302fcaff4d426024b99125e99c85e198, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0
