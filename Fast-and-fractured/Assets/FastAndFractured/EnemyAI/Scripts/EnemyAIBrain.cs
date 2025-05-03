@@ -403,9 +403,9 @@ namespace FastAndFractured
             if (inGameCharacters.Count > 1)
             {
                 GameObject nearestTarget = inGameCharacters[0].gameObject != carMovementController.gameObject ? inGameCharacters[0] : inGameCharacters[1];
-                var nearestOne = float.MaxValue;
+                float nearestOne = float.MaxValue;
 
-                foreach (var character in inGameCharacters)
+                foreach (GameObject character in inGameCharacters)
                 {
                     if (!character) continue;
                     float characterDistance = (character.transform.position - _currentPosition).sqrMagnitude;
@@ -429,7 +429,7 @@ namespace FastAndFractured
         private GameObject ReturnCharacterThatIsNotPlayer()
         {
             List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
-            foreach (var character in inGameCharacters)
+            foreach (GameObject character in inGameCharacters)
             {
                 if(character!=_player)
                     return character;
@@ -470,9 +470,9 @@ namespace FastAndFractured
         {
             List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
-            var nearestOne = float.MaxValue;
+            float nearestOne = float.MaxValue;
 
-            foreach (var safeZone in safeZonesOutsideSandstorm)
+            foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
                 if (!safeZone) continue;
                 float characterDistance = (safeZone.transform.position - _currentPosition).sqrMagnitude;
@@ -605,7 +605,7 @@ namespace FastAndFractured
             {
                 return false;
             }
-            var enemyStatsController = _targetToShoot.GetComponent<StatsController>();
+            StatsController enemyStatsController = _targetToShoot.GetComponent<StatsController>();
             if (enemyStatsController == null) { return false; }
 
 
@@ -720,7 +720,7 @@ namespace FastAndFractured
                         else
                         {
                             Debug.LogWarning("No path to follow" + _currentPath.ToString());
-                            if (Physics.Raycast(_positionToDrive, Vector3.down, out var hit, float.MaxValue, ignoreLayerMask))
+                            if (Physics.Raycast(_positionToDrive, Vector3.down, out RaycastHit hit, float.MaxValue, ignoreLayerMask))
                             {
                                 Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
 
@@ -752,7 +752,7 @@ namespace FastAndFractured
                 //_positionToDrive = _positionToDrive;
                 //Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
                 //return true;
-                if (NavMesh.SamplePosition(_currentPosition, out var hit, _emergencyRepositioningValue, NavMesh.AllAreas))
+                if (NavMesh.SamplePosition(_currentPosition, out NavMeshHit hit, _emergencyRepositioningValue, NavMesh.AllAreas))
                 {
                     _positionToDrive = hit.position;
                     Debug.LogWarning("Emergency repositioning", this.gameObject);

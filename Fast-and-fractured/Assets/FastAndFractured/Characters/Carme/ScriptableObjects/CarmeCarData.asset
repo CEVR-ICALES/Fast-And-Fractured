@@ -70,20 +70,20 @@ MonoBehaviour:
   CooldownSpeed: 1
   DeadDelay: 2.5
   aiParameters:
-    fleeDistance: 5
-    sweepRadius: 20
+    fleeDistance: 100
+    sweepRadius: 150
     shootingMarginErrorAngle: 0.05
-    damageAccumulationDuration: 5
-    fleeTriggerDamageThresholdPercentage: 40
+    damageAccumulationDuration: 2
+    fleeTriggerDamageThresholdPercentage: 50
     _recoveryThresholdPercentageForSearch: 50
     _combatHealthAdvantageThreshold: 60
     damageThresholdPercentage: 60
     decisionPercentageHealth: 10
-    decisionPercentageMaxSpeed: 10
-    decisionPercentageAcceleration: 10
-    decisionPercentageNormalShoot: 50
+    decisionPercentageMaxSpeed: 25
+    decisionPercentageAcceleration: 25
+    decisionPercentageNormalShoot: 10
     decisionPercentagePushShoot: 10
-    decisionPercentageCooldown: 10
+    decisionPercentageCooldown: 25
     marginToFleeFromSandstorm: 200
   WinObjects:
   - GameObject: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
