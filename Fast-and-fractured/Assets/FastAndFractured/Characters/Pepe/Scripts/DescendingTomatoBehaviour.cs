@@ -19,7 +19,8 @@ namespace FastAndFractured
         public float effectTime = 3f;
         public Vector3 randomRotation;
         private bool _isPaused = false;
-        const float PERCENT_DEBUFF_SPEED = -0.5f;
+        [Tooltip("Percent between -1.0 and 0.0")]
+        [SerializeField] private float percentDebuffSpeed = -0.5f;
 
         public virtual void InitializeValues()
         {
@@ -85,7 +86,7 @@ namespace FastAndFractured
             else
             {
                 StatsController stats = other.GetComponentInChildren<StatsController>();
-                stats.TemporalProductStat(Stats.MAX_SPEED, PERCENT_DEBUFF_SPEED, effectTime);
+                stats.TemporalProductStat(Stats.MAX_SPEED, percentDebuffSpeed, effectTime);
                 //todo efect on IA
             }
             
