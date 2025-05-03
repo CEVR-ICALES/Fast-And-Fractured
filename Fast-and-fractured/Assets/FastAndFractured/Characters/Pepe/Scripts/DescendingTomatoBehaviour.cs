@@ -5,9 +5,10 @@ using StateMachine;
 using Enums;
 using Utilities;
 using Utilities.Managers.PauseSystem;
+
 namespace FastAndFractured
 {
-    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
+    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable 
     {
         private bool initValues = true;
         public Pooltype pooltype;
@@ -15,7 +16,7 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         public GameObject objective;
         public float speed;
-        public float effectTime = 5f;
+        public float effectTime = 3f;
         public Vector3 randomRotation;
         private bool _isPaused = false;
 
@@ -82,6 +83,8 @@ namespace FastAndFractured
             }
             else
             {
+                StatsController stats = other.GetComponentInChildren<StatsController>();
+                stats.TemporalProductStat(Stats.MAX_SPEED, PERCENT_DEBUFF_SPEED, effectTime);
                 //todo efect on IA
             }
             
