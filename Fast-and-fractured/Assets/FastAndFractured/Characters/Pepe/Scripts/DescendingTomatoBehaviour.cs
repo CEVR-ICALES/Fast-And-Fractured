@@ -19,8 +19,8 @@ namespace FastAndFractured
         public float effectTime = 3f;
         public Vector3 randomRotation;
         private bool _isPaused = false;
-        [Tooltip("Percent between -1.0 and 0.0")]
-        [SerializeField] private float percentDebuffSpeed = -0.5f;
+        [Tooltip("Percent between 0.0 and 1.0")]
+        [SerializeField] private float percentDebuffSpeed = 0.5f;
 
         public virtual void InitializeValues()
         {
