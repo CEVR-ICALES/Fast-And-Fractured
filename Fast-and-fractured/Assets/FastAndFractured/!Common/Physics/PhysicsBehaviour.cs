@@ -49,7 +49,7 @@ namespace FastAndFractured
         private CarMovementController _carMovementController;
 
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 1.5f;
-        const string PUSHED_EFFECT_NAME = "Josefino_0";
+        const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         private void OnEnable()
         {
             if (!_rb)

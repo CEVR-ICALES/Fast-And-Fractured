@@ -12,7 +12,6 @@ namespace FastAndFractured
         public float pullForce = 30f;
         private bool _isPaused = false;
         private List<GameObject> _charactersList = new List<GameObject>();
-        public float elevationForce = 0.5f;
         void OnEnable()
         {
             PauseManager.Instance?.RegisterPausable(this);
@@ -42,25 +41,13 @@ namespace FastAndFractured
                 }
             }
         }
-        
-        void PullCharacter2(GameObject character, float distance)
+        void PullCharacter(GameObject character, float distance)
         {
             Rigidbody rb = character.GetComponent<Rigidbody>();
             Vector3 directionToTarget = (character.transform.position - transform.position).normalized;
             float forceMultiplier = Mathf.Clamp01((detectionRadius - distance) / detectionRadius);
             Vector3 pullDirection = (transform.position - character.transform.position).normalized;
             rb.AddForce(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration); 
-        }
-
-        
-        void PullCharacter(GameObject character, float distance)
-        {
-            Rigidbody rb = character.GetComponent<Rigidbody>();
-            Vector3 directionToTarget = (character.transform.position - transform.position).normalized;
-            Vector3 pullDirection = (transform.position - character.transform.position).normalized;
-            float forceMultiplier = Mathf.Clamp01((detectionRadius - distance) / detectionRadius);
-            Vector3 newPosition = rb.position + pullDirection * (pullForce * forceMultiplier) * Time.fixedDeltaTime;
-            rb.MovePosition(newPosition);
         }
         private void OnTriggerEnter(Collider other)
         {
