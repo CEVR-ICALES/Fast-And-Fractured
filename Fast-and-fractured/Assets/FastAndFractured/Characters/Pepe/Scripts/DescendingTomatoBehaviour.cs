@@ -19,6 +19,7 @@ namespace FastAndFractured
         public float effectTime = 3f;
         public Vector3 randomRotation;
         private bool _isPaused = false;
+        const float PERCENT_DEBUFF_SPEED = -0.5f;
 
         public virtual void InitializeValues()
         {
