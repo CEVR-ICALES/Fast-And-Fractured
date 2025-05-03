@@ -441,18 +441,19 @@ namespace FastAndFractured
             switch (gameElement)
             {
                 case GameElement.CHARACTER:
-                    return CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm);
+                    return CheckIfList1ElementsAreInList2(_inGameCharacters, _sandStormController.CharactersInsideSandstorm);
                 case GameElement.INTERACTABLE:
-                    return CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+                    return CheckIfList1ElementsAreInList2(interactablesList, _sandStormController.ItemsInsideSandstorm);
                 case GameElement.SAFE_ZONES:
-                    return CheckIfListHaveTheSameElements(safeZones, _sandStormController.SafeZonesInsideSandstorm);
+                    return CheckIfList1ElementsAreInList2(safeZones, _sandStormController.SafeZonesInsideSandstorm);
             }
             return false;
         }
 
-        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        private bool CheckIfList1ElementsAreInList2<T>(List<T> list1, List<T> list2)
         {
             if(list1 == null || list2 == null) return false;
+            if(list1.Count==0||list2.Count==0) return false;
             foreach (T item in list1) {
                 if (!list2.Contains(item))
                 {
