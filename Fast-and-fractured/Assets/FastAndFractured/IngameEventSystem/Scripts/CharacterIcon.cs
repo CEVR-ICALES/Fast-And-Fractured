@@ -10,12 +10,39 @@ namespace FastAndFractured
     {
         public GameObject Character { get=> _character; }
         private GameObject _character;
+
+        [SerializeField] private Image _characterIconImg;
+        [SerializeField] private GameObject _characterIconDeadEffect;
+        [SerializeField] private GameObject _characterIconUltEffect;
+
+        void Awake()
+        {
+            _characterIconImg = GetComponent<Image>();
+            _characterIconDeadEffect = transform.GetChild(0).gameObject;
+        }
+
         public void SetCharacterIcon(GameObject characterReceived, string characterIconName)
         {
             _character = characterReceived;
             if(_character != null)
             {
-                GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(characterIconName);
+                _characterIconImg.sprite = ResourcesManager.Instance.GetResourcesSprite(characterIconName);
+            }
+        }
+
+        public void SetPlayerDeadIconIsActive(bool isActive)
+        {
+            if(_characterIconDeadEffect != null && _character != null)
+            {
+                _characterIconDeadEffect.SetActive(isActive);
+            }
+        }
+
+        public void SetPlayerUltIconIsActive(bool isActive)
+        {
+            if(_characterIconUltEffect != null && _character != null)
+            {
+                _characterIconUltEffect.SetActive(isActive);
             }
         }
     }
