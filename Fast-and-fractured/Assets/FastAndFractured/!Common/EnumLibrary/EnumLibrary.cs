@@ -162,4 +162,17 @@ namespace Enums
         INTERACTABLE,
         SAFE_ZONES
     }
+    
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
+    }
 }
