@@ -8,7 +8,8 @@ using Enums;
 public class McChickenVisuals : MonoBehaviour
 {
     [Header("Particles")]
-    [SerializeField] private ParticleSystem _spawnFeathersVfx;
+    [SerializeField] private ParticleSystem spawnFeathersVfx;
+    [SerializeField] private ParticleSystem movementFeathersVfx;
 
     [Header("Models")]
     [SerializeField] private GameObject chickenModel;
@@ -49,7 +50,8 @@ public class McChickenVisuals : MonoBehaviour
         ScheduleNextHeadTargetChange();
         eggModel.SetActive(false);
         chickenModel.SetActive(true);
-        _spawnFeathersVfx.Play();
+        spawnFeathersVfx.Play();
+        movementFeathersVfx.Play();
     }
 
     public void OnChickenOnFloor()
