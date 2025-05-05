@@ -10,10 +10,11 @@ namespace StateMachine
     {
         [SerializeField] private UIElementType target;
         [SerializeField] private ScreenEffects spriteKey;
+        [SerializeField] private float timeInScreen = 0f;
 
         public override void Act(Controller controller)
         {
-            HUDManager.Instance.UpdateUIEffect(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey), 0f);
+            HUDManager.Instance.UpdateUIEffect(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey), timeInScreen);
         }
     }
 }

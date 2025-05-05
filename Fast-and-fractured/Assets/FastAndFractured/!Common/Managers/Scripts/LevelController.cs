@@ -366,7 +366,7 @@ namespace FastAndFractured
                         { 
                             if (icon.Character == character)
                             {
-                                icon.SetPlayerDeadIconIsActive(ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT));
+                                icon.SetPlayerDeadIconIsActive(true);
                             }
                         }
                     

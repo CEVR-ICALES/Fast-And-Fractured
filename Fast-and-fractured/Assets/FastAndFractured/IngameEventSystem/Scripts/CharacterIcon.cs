@@ -38,11 +38,22 @@ namespace FastAndFractured
             }
         }
 
-        public void SetPlayerUltIconIsActive(bool isActive)
+        public void SetPlayerUltIconIsActive(bool isActive, float timeInScreen)
         {
             if(_characterIconUltEffect != null && _character != null)
             {
                 _characterIconUltEffect.SetActive(isActive);
+            }
+
+            if (timeInScreen > 0f)
+            {
+                TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
+                {
+                    if(_characterIconUltEffect != null && _character != null)
+                    {
+                        _characterIconUltEffect.SetActive(!isActive);
+                    }
+                });
             }
         }
     }
