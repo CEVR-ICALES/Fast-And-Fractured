@@ -172,7 +172,6 @@ namespace FastAndFractured
             return null;
         }
 
-        #endregion
         public void FadeOutEffectSprites(GameObject hudEffect, float fadeOutTime)
         {
             if (hudEffect != null)
@@ -187,7 +186,9 @@ namespace FastAndFractured
                         image.CrossFadeAlpha(1f, 0f, true);
                     });
                 }
-            }   
+            }
         }
+        #endregion
+
     }
 }
