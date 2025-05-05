@@ -69,7 +69,7 @@ namespace FastAndFractured
             StartCooldown();
             return true;
         }  
-        private void StartCooldown()
+        protected void StartCooldown()
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration,
