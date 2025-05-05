@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Enums;
 namespace FastAndFractured
 {
     public class ExplosionForce : MonoBehaviour
@@ -36,11 +36,11 @@ namespace FastAndFractured
 
         private void OnTriggerEnter(Collider other)
         {
-            if(other.TryGetComponent(out PhysicsBehaviour otherComponentPhysicsBehaviours))
+            if(other.gameObject.TryGetComponent(out PhysicsBehaviour otherComponentPhysicsBehaviours))
             {
-                if(otherComponentPhysicsBehaviours.StatsController.IsInvulnerable)
+                if(otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState() == ModifiedCarState.JOSEFINO_INVULNERABLE)
                 {
-                    otherComponentPhysicsBehaviours.StatsController.LoseInvulnerability();
+                    otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                     return;
                 }
                 
@@ -67,7 +67,7 @@ namespace FastAndFractured
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
                     otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * 1 - ((distanceToCenter / _explosionCollider.radius))); // for now we just apply an offset on the y axis provisional
-                    otherComponentPhysicsBehaviours.OnCarHasBeenPushed();
+                    otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                 }
             }
         }

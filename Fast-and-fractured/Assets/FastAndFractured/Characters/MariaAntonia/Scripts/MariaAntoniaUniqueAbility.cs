@@ -49,6 +49,7 @@ namespace FastAndFractured
         [Tooltip("The material which will have its emissive texture modified")]
         [SerializeField] private Material _hairMaterial;
 
+
         // Store the original Exposure Weight value
         private float _originalExposureWeight;
 
@@ -78,6 +79,8 @@ namespace FastAndFractured
 
             if (_hairMaterial != null)
                 _originalExposureWeight = _hairMaterial.GetFloat(materialEmissive);
+
+            StartCooldown();
         }
 
         private void Update()
