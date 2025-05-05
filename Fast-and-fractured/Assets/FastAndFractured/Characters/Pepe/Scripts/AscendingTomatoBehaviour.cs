@@ -86,16 +86,16 @@ namespace FastAndFractured
                 float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
                 if (distance<=effectDistance)
                 {
-                    if(!IngameEventsManager.Instance.IsTomatoAlertActive)
+                    if(!IngameEventsManager.Instance.IsAlertActive)
                     {
-                        IngameEventsManager.Instance.SetTomatoAlert();
+                        IngameEventsManager.Instance.SetAlert();
                     }
                 }
                 else
                 {
-                    if(IngameEventsManager.Instance.IsTomatoAlertActive)
+                    if(IngameEventsManager.Instance.IsAlertActive)
                     {
-                        IngameEventsManager.Instance.RemoveTomatoAlert();
+                        IngameEventsManager.Instance.RemoveAlert();
                     }
                 }
             }
