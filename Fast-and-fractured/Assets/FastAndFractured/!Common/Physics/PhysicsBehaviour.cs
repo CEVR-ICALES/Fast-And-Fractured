@@ -210,11 +210,11 @@ namespace FastAndFractured
                 HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
                 hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
                 hudEffect.SetActive(!hudEffect.activeSelf);
-                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                TimerSystem.Instance.CreateTimer(0.3f, onTimerDecreaseComplete: () =>
                 {
                     if (hudEffect != null)
                     {
-                        hudEffect.SetActive(!hudEffect.activeSelf);
+                        HUDManager.Instance.FadeOutEffectSprites(hudEffect, 0.3f);
                         hudEffect = null;
                     }
                 });
