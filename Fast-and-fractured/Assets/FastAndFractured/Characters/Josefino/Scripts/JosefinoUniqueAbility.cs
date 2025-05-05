@@ -22,6 +22,7 @@ namespace FastAndFractured
 
         private void Start()
         {
+            StartCooldown();
             Controller controller = GetComponentInParent<Controller>();
             _statsController = controller.GetBehaviour<StatsController>();
         } 

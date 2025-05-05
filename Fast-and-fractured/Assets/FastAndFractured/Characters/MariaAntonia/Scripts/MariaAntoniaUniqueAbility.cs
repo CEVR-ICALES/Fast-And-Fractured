@@ -79,6 +79,8 @@ namespace FastAndFractured
 
             if (_hairMaterial != null)
                 _originalExposureWeight = _hairMaterial.GetFloat(materialEmissive);
+
+            StartCooldown();
         }
 
         private void Update()

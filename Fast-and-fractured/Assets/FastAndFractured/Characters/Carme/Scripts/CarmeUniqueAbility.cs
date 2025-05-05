@@ -29,6 +29,10 @@ namespace FastAndFractured
 
         [SerializeField] private ShootingHandle shootingHandle;
 
+        private void Start()
+        {
+            StartCooldown();
+        }
 
         public override bool ActivateAbility() //may be necessary to increase the range of the initial raycast considering teh car speed
         {
