@@ -26,10 +26,15 @@ namespace FastAndFractured
 
         #region Unity Methods
 
+        protected override void Awake()
+        {
+            base.Awake();
+            RegisterUIElements();
+        }
+
         private void Start()
         {
-            // Register all UI elements
-            RegisterUIElements();
+
         }
 
         #endregion
@@ -135,6 +140,7 @@ namespace FastAndFractured
 
         public GameObject GetEffectGameObject(Sprite sprite)
         {
+            Debug.Log($"GetEffectGameObject: {sprite.name}");
             GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
             if (hudImage != null) return hudImage;
 

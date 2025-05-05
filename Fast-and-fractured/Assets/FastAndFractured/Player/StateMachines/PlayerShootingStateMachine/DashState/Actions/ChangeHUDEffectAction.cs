@@ -13,7 +13,7 @@ namespace StateMachine
 
         public override void Act(Controller controller)
         {
-            HUDManager.Instance.UpdateUIElement(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey));
+            HUDManager.Instance.UpdateUIEffect(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey), 0f);
         }
     }
 }

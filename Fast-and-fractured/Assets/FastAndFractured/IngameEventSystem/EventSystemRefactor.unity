@@ -2779,7 +2779,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1 &286976364
 GameObject:
   m_ObjectHideFlags: 0
@@ -2873,7 +2874,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!224 &301975829 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3293693287902946572, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
@@ -3629,7 +3631,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1 &441166167
 GameObject:
   m_ObjectHideFlags: 0
@@ -3869,63 +3872,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &452998175
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 452998178}
-  - component: {fileID: 452998177}
-  - component: {fileID: 452998176}
-  m_Layer: 0
-  m_Name: ResourceManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &452998176
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 452998175}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4263659b2d9f8549aa7916fde302e0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &452998177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 452998175}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5278cfdfde7d7e40b5717fb9e43aa77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &452998178
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 452998175}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 458.2656, y: -165.25243, z: -808.5679}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &462260759 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6d00fc4e3639648b2b54e77af996be72, type: 3}
@@ -4864,7 +4810,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!114 &555649635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5251,7 +5198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!114 &573790781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7956,7 +7904,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1 &854692636 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 238a6656b20284242a3fe33bfbd6b7f7, type: 3}
@@ -8557,7 +8506,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1001 &928377686
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11629,7 +11579,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!114 &1195835719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16422,7 +16373,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!114 &1636030969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18712,7 +18664,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1 &1843978950
 GameObject:
   m_ObjectHideFlags: 0
@@ -20875,7 +20828,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1001 &1981869584
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22188,7 +22142,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterIconImg: {fileID: 0}
-  _characterIconEffect: {fileID: 0}
+  _characterIconDeadEffect: {fileID: 0}
+  _characterIconUltEffect: {fileID: 0}
 --- !u!1001 &2094909077
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23479,6 +23434,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2637012881041367283, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+      propertyPath: elementType
+      value: 19
+      objectReference: {fileID: 0}
     - target: {fileID: 2738135377285133627, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -351
@@ -24674,7 +24633,6 @@ SceneRoots:
   - {fileID: 7708112764650138630}
   - {fileID: 1636176051}
   - {fileID: 703970103}
-  - {fileID: 452998178}
   - {fileID: 1517100025}
   - {fileID: 787765029}
   - {fileID: 529357599}
