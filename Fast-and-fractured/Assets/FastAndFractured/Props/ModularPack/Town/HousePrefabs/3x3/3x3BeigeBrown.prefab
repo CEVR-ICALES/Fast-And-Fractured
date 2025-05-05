@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7130479913400300367}
-  m_Layer: 0
+  - component: {fileID: 3860893372054741081}
+  m_Layer: 10
   m_Name: 3x3BeigeBrown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,6 +125,27 @@ Transform:
   - {fileID: 5686603300169461667}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3860893372054741081
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4006896117886934068}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 13.038624, y: 10.537585, z: 13.392731}
+  m_Center: {x: 6.36575, y: 3.8810585, z: -3.805482}
 --- !u!1001 &154218878612607640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -181,6 +203,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (4)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -205,6 +231,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -324,9 +354,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5394885086951363494, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
       propertyPath: m_Name
       value: ThinnerWindowModern_C (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
       propertyPath: m_IsActive
@@ -396,6 +434,10 @@ PrefabInstance:
       value: modularHouses_LightTilesRoofSeparator_A (3)
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -428,6 +470,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -543,9 +589,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -619,10 +673,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (10)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -685,6 +744,10 @@ PrefabInstance:
       value: modularHouses_LightTilesRoofSeparator_A (2)
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -715,8 +778,16 @@ PrefabInstance:
       value: NormalWindow_B (1)
       objectReference: {fileID: 0}
     - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3615714319322853312, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8854430562210956597, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_LocalScale.x
@@ -794,8 +865,16 @@ PrefabInstance:
       value: GarageDoorRound_Metal
       objectReference: {fileID: 0}
     - target: {fileID: 3540936910972078121, guid: 26d79975c484a9d448b75ae57b180eaf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3540936910972078121, guid: 26d79975c484a9d448b75ae57b180eaf, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5524610329951365507, guid: 26d79975c484a9d448b75ae57b180eaf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8146232051720504313, guid: 26d79975c484a9d448b75ae57b180eaf, type: 3}
       propertyPath: m_LocalScale.x
@@ -917,10 +996,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (8)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -987,10 +1071,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (2)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1057,10 +1146,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (9)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1083,8 +1177,16 @@ PrefabInstance:
       value: SquaredCastillianDoor_C
       objectReference: {fileID: 0}
     - target: {fileID: 2921015739559085785, guid: d3df39831fb75874eae774bdbb135759, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2921015739559085785, guid: d3df39831fb75874eae774bdbb135759, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6125243874429740915, guid: d3df39831fb75874eae774bdbb135759, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7541099357060336905, guid: d3df39831fb75874eae774bdbb135759, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1194,10 +1296,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (7)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1218,6 +1325,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (12)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -1342,8 +1453,16 @@ PrefabInstance:
       value: WindowGrill_Posh (1)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -1407,6 +1526,10 @@ PrefabInstance:
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_Name
       value: modularHouses_WhiteHalfWall (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_IsActive
@@ -1483,10 +1606,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (1)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1507,6 +1635,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -1585,6 +1717,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -1693,6 +1829,10 @@ PrefabInstance:
       value: modularHouses_WhiteHalfWall (1)
       objectReference: {fileID: 0}
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -1725,6 +1865,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (11)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -1836,9 +1980,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -1870,6 +2022,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (9)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -1990,8 +2146,16 @@ PrefabInstance:
       value: WindowGrill_Posh (2)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2060,9 +2224,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -2090,6 +2262,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -2166,6 +2342,10 @@ PrefabInstance:
       value: GrayBrown_ModularLowWall (8)
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -2236,6 +2416,10 @@ PrefabInstance:
       value: GrayBrown_ModularLowWall (2)
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -2302,8 +2486,16 @@ PrefabInstance:
       value: NormalWindow_B (2)
       objectReference: {fileID: 0}
     - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3615714319322853312, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8854430562210956597, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_LocalScale.x
@@ -2433,8 +2625,16 @@ PrefabInstance:
       value: WindowGrill_Posh (6)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2512,8 +2712,16 @@ PrefabInstance:
       value: WindowGrill_Posh (11)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2577,6 +2785,10 @@ PrefabInstance:
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_Name
       value: modularHouses_WhiteHalfWall (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_IsActive
@@ -2652,9 +2864,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -2724,8 +2944,16 @@ PrefabInstance:
       value: NormalWindow_A (2)
       objectReference: {fileID: 0}
     - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8829099877528652707, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2789,6 +3017,10 @@ PrefabInstance:
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_Name
       value: modularHouses_WhiteHalfWall (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1787039672309147390, guid: fe4345f55c4c6454c9deb27b7ea9a88e, type: 3}
       propertyPath: m_IsActive
@@ -2863,6 +3095,10 @@ PrefabInstance:
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_Name
       value: modularHouses_WoodSeparator (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
@@ -2943,8 +3179,16 @@ PrefabInstance:
       value: WindowGrill_Posh (3)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2972,6 +3216,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -3084,6 +3332,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (3)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -3110,8 +3362,16 @@ PrefabInstance:
       value: SquaredModernDoor_C
       objectReference: {fileID: 0}
     - target: {fileID: 4198716609899592515, guid: 9185793b6bb7d524d862b965d77f6757, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198716609899592515, guid: 9185793b6bb7d524d862b965d77f6757, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5173617883609291497, guid: 9185793b6bb7d524d862b965d77f6757, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8820866381351514259, guid: 9185793b6bb7d524d862b965d77f6757, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3172,9 +3432,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7130479913400300367}
     m_Modifications:
+    - target: {fileID: 1086947222759473495, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
       propertyPath: m_Name
       value: ThinWindowBlind_D
+      objectReference: {fileID: 0}
+    - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
       propertyPath: m_IsActive
@@ -3244,8 +3512,16 @@ PrefabInstance:
       value: NormalWindow_B (4)
       objectReference: {fileID: 0}
     - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3615714319322853312, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8854430562210956597, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_LocalScale.x
@@ -3375,8 +3651,16 @@ PrefabInstance:
       value: WindowGrill_Posh (8)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -3444,6 +3728,10 @@ PrefabInstance:
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_Name
       value: modularHouses_WoodSeparator (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
@@ -3516,6 +3804,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (5)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -3542,8 +3834,16 @@ PrefabInstance:
       value: NormalWindow_B (3)
       objectReference: {fileID: 0}
     - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3615714319322853312, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8854430562210956597, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_LocalScale.x
@@ -3661,8 +3961,16 @@ PrefabInstance:
       value: NormalWindow_A
       objectReference: {fileID: 0}
     - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8829099877528652707, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -3686,6 +3994,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -3757,9 +4069,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7130479913400300367}
     m_Modifications:
+    - target: {fileID: 1086947222759473495, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
       propertyPath: m_Name
       value: ThinWindowBlind_D (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3191413643697997233, guid: b41d50381d36e5b43a97f3a6ce60a636, type: 3}
       propertyPath: m_IsActive
@@ -3873,6 +4193,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (1)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -3951,8 +4275,16 @@ PrefabInstance:
       value: WindowGrill_Posh (4)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -4022,10 +4354,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (6)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -4100,8 +4437,16 @@ PrefabInstance:
       value: WindowGrill_Posh (7)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -4165,6 +4510,10 @@ PrefabInstance:
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_Name
       value: modularHouses_LightTilesRoofSeparator_A (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
@@ -4240,9 +4589,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -4272,8 +4629,16 @@ PrefabInstance:
       value: ThinWindow_D (1)
       objectReference: {fileID: 0}
     - target: {fileID: 2246016493659092523, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2246016493659092523, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4356323791348871885, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8410505025550604344, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
       propertyPath: m_LocalScale.x
@@ -4353,6 +4718,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -4477,8 +4846,16 @@ PrefabInstance:
       value: WindowGrill_Posh (5)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -4548,10 +4925,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (11)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -4618,10 +5000,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (4)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -4696,8 +5083,16 @@ PrefabInstance:
       value: WindowGrill_Posh
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -4767,10 +5162,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (12)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -4836,9 +5236,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -4912,6 +5320,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (2)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -4936,6 +5348,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -5051,9 +5467,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -5085,6 +5509,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -5196,9 +5624,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 5439388050163023645, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_Name
       value: NormalWindowBlind_B (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7503885304611339259, guid: 1d47f90ab46765d46be9b83dcce26edf, type: 3}
       propertyPath: m_IsActive
@@ -5272,10 +5708,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (3)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -5298,8 +5739,16 @@ PrefabInstance:
       value: NormalWindow_B
       objectReference: {fileID: 0}
     - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257111731404106534, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3615714319322853312, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8854430562210956597, guid: db6bed76759e8c347aa722050cd36d5a, type: 3}
       propertyPath: m_LocalScale.x
@@ -5377,6 +5826,10 @@ PrefabInstance:
       value: Gray_ModularWall (11)
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -5451,6 +5904,10 @@ PrefabInstance:
       value: GrayBrown_ModularLowWall (12)
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -5515,6 +5972,10 @@ PrefabInstance:
     - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
       propertyPath: m_Name
       value: modularHouses_HorizontalSeparator (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
       propertyPath: m_IsActive
@@ -5585,6 +6046,10 @@ PrefabInstance:
     - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
       propertyPath: m_Name
       value: modularHouses_HorizontalSeparator (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8310431520710378283, guid: 237e0845cace04a4d9932219aaef5ce7, type: 3}
       propertyPath: m_IsActive
@@ -5709,8 +6174,16 @@ PrefabInstance:
       value: WindowGrill_Posh (10)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -5788,8 +6261,16 @@ PrefabInstance:
       value: WindowGrill_Posh (9)
       objectReference: {fileID: 0}
     - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253448846096828295, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762040362055549793, guid: 5625e631bb21df54f910aa5ce9a64ac1, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -5813,6 +6294,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -5883,6 +6368,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -5957,6 +6446,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (8)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -6073,6 +6566,10 @@ PrefabInstance:
       value: modularHouses_WoodSeparator (8)
       objectReference: {fileID: 0}
     - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8733555830700076964, guid: af34c8ebc81ab42ab889a04f864f8a0e, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -6097,6 +6594,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -6216,9 +6717,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5394885086951363494, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
       propertyPath: m_Name
       value: ThinnerWindowModern_C
+      objectReference: {fileID: 0}
+    - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7602579844333868864, guid: 9eaefa676cb29fc4fb126b716a7f9a4d, type: 3}
       propertyPath: m_IsActive
@@ -6288,6 +6797,10 @@ PrefabInstance:
       value: modularHouses_LightTilesRoofSeparator_A (6)
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -6316,6 +6829,10 @@ PrefabInstance:
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_Name
       value: Gray_ModularWall (9)
+      objectReference: {fileID: 0}
+    - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 569252212464085793, guid: d0f608bb40e2d4e06950ae995a2d9460, type: 3}
       propertyPath: m_IsActive
@@ -6428,8 +6945,16 @@ PrefabInstance:
       value: NormalWindow_A (1)
       objectReference: {fileID: 0}
     - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6474191641163009861, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8829099877528652707, guid: ab87c014ec5a5df43bc3de4cbef463f7, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -6499,10 +7024,15 @@ PrefabInstance:
       value: modularHouses_Roof_A (5)
       objectReference: {fileID: 0}
     - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3324654042404967835, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5490618038203256866, guid: 116ee5748890a4087b0bf9e272184dd0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -6525,8 +7055,16 @@ PrefabInstance:
       value: ThinWindow_D (2)
       objectReference: {fileID: 0}
     - target: {fileID: 2246016493659092523, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2246016493659092523, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4356323791348871885, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8410505025550604344, guid: f1b3fee75dbc58b49b452e2100bc81ba, type: 3}
       propertyPath: m_LocalScale.x
@@ -6606,6 +7144,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
@@ -6718,6 +7260,10 @@ PrefabInstance:
       value: modularHouses_LightTilesRoofSeparator_A (4)
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -6788,6 +7334,10 @@ PrefabInstance:
       value: modularHouses_LightTilesRoofSeparator_A (1)
       objectReference: {fileID: 0}
     - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420156061573813845, guid: 2242db6ef8c4d49b4814bfe88462b68c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -6820,6 +7370,10 @@ PrefabInstance:
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_Name
       value: GrayBrown_ModularLowWall (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3632654242168732131, guid: 19cc6f5fd81244178a16c387fcc8318e, type: 3}
       propertyPath: m_IsActive
