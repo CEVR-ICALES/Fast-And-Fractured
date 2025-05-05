@@ -102,26 +102,28 @@ namespace FastAndFractured
         }
 
         public void UpdateUIEffect(UIElementType type, Sprite newSprite, float timeInscreen){
+            GameObject effectGameObj = null;
+            
             switch (type)
             {
                 case UIElementType.GOOD_EFFECTS:
-                    UpdateEffectSprites(_goodEffects, newSprite);
+                    effectGameObj = UpdateEffectSprites(_goodEffects, newSprite);
                     break;
                 case UIElementType.NORMAL_EFFECTS:
-                    UpdateEffectSprites(_normalEffects, newSprite);
+                    effectGameObj = UpdateEffectSprites(_normalEffects, newSprite);
                     break;
                 case UIElementType.BAD_EFFECTS:
-                    UpdateEffectSprites(_badEffects, newSprite);
+                    effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
                     break;
             }
 
             if(timeInscreen > 0f)
             {
-                GameObject newSpriteGameObject = GetEffectGameObject(newSprite);
+                GameObject newSpriteGameObject = effectGameObj;
                 newSpriteGameObject.SetActive(true);
                 TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
                 {
-                    newSpriteGameObject.SetActive(false);
+                    FadeOutEffectSprites(newSpriteGameObject.GetComponent<Image>(), 0.3f);
                 });
             }
         }
@@ -165,15 +167,19 @@ namespace FastAndFractured
             return true;
         }
 
-        private void UpdateEffectSprites(Image[] effects, Sprite newSprite)
+        private GameObject UpdateEffectSprites(Image[] effects, Sprite newSprite)
         {
+            GameObject effectGameObject = null;
             foreach (Image image in effects)
             {
                 if (!image.gameObject.activeSelf)
                 {
                     image.sprite = newSprite;
+                    effectGameObject = image.gameObject;
                 }
             }
+
+            return effectGameObject;
         }
 
         private GameObject FindEffectGameObject(Image[] effects, Sprite sprite)
@@ -188,20 +194,16 @@ namespace FastAndFractured
             return null;
         }
 
-        public void FadeOutEffectSprites(GameObject hudEffect, float fadeOutTime)
+        private void FadeOutEffectSprites(Image hudEffect, float fadeOutTime)
         {
             if (hudEffect != null)
             {
-                Image image = hudEffect.GetComponent<Image>();
-                if (image != null)
+                hudEffect.CrossFadeAlpha(0f, fadeOutTime, true);
+                TimerSystem.Instance.CreateTimer(fadeOutTime, onTimerDecreaseComplete: () =>
                 {
-                    image.CrossFadeAlpha(0f, fadeOutTime, true);
-                    TimerSystem.Instance.CreateTimer(fadeOutTime, onTimerDecreaseComplete: () =>
-                    {
-                        hudEffect.SetActive(false);
-                        image.CrossFadeAlpha(1f, 0f, true);
-                    });
-                }
+                    hudEffect.gameObject.SetActive(false);
+                    hudEffect.CrossFadeAlpha(1f, 0f, true);
+                });
             }
         }
         #endregion
