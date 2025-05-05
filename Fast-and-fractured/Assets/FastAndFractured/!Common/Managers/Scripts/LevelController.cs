@@ -69,7 +69,7 @@ namespace FastAndFractured
         private bool _hasPlayerWon = false;
 
         private int _aliveCharacterCount;
-        public GameObject[] characterIcons;
+        public List<CharacterIcon> characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
@@ -184,12 +184,12 @@ namespace FastAndFractured
             }
             else
             {
+                IngameEventsManager.Instance.SetCharactersTopElements();
                 if (debugMode)
                     SetStormParameters(stormInDebugMode);
                 else
                     SetStormParameters(true);
             }
-            IngameEventsManager.Instance.SetCharactersTopElements();
         }
 
         private void SetStormParameters(bool callStorm)
@@ -200,9 +200,6 @@ namespace FastAndFractured
                 _callStormTimer = TimerSystem.Instance.CreateTimer(_timeToCallTheStorm, TimerDirection.DECREASE, onTimerDecreaseComplete: () => { CallStorm(); _callStormTimer = null; });
             }
         }
-
-        
-
 
         #region SpawnCharacters
         private void SpawnInGameCharacters(out bool succeded,bool onlyAIs)
@@ -369,11 +366,11 @@ namespace FastAndFractured
                 {
                     _inGameCharacters.Remove(character);
                     
-                        foreach (GameObject icon in characterIcons)
+                        foreach (CharacterIcon icon in characterIcons)
                         { 
-                            if (icon.GetComponent<CharacterIcon>().Character == character)
+                            if (icon.Character == character)
                             {
-                                icon.SetActive(false);
+                                icon.SetPlayerDeadIconIsActive(true);
                             }
                         }
                     

@@ -58,7 +58,7 @@ namespace FastAndFractured
             //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
             if(objective == LevelController.Instance.playerReference)
             {
-                IngameEventsManager.Instance.RemoveTomatoAlert();
+                IngameEventsManager.Instance.RemoveAlert();
             }
 
             
@@ -81,7 +81,7 @@ namespace FastAndFractured
         {
             if (other.gameObject == LevelController.Instance.playerReference)
             {
-                IngameEventsManager.Instance.SetTomatoScreenEffect(effectTime);
+                HUDManager.Instance.UpdateUIEffect(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }
             else
             {

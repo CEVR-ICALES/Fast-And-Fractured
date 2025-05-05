@@ -26,10 +26,15 @@ namespace FastAndFractured
 
         #region Unity Methods
 
+        protected override void Awake()
+        {
+            base.Awake();
+            RegisterUIElements();
+        }
+
         private void Start()
         {
-            // Register all UI elements
-            RegisterUIElements();
+
         }
 
         #endregion
@@ -70,21 +75,6 @@ namespace FastAndFractured
             {
                 element.imageReference.sprite = newSprite;
             }
-            else
-            {
-                switch (type)
-                {
-                    case UIElementType.GOOD_EFFECTS:
-                        UpdateEffectSprites(_goodEffects, newSprite);
-                        break;
-                    case UIElementType.NORMAL_EFFECTS:
-                        UpdateEffectSprites(_normalEffects, newSprite);
-                        break;
-                    case UIElementType.BAD_EFFECTS:
-                        UpdateEffectSprites(_badEffects, newSprite);
-                        break;
-                }
-            }
         }
 
         public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
@@ -111,6 +101,31 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateUIEffect(UIElementType type, Sprite newSprite, float timeInscreen){
+            switch (type)
+            {
+                case UIElementType.GOOD_EFFECTS:
+                    UpdateEffectSprites(_goodEffects, newSprite);
+                    break;
+                case UIElementType.NORMAL_EFFECTS:
+                    UpdateEffectSprites(_normalEffects, newSprite);
+                    break;
+                case UIElementType.BAD_EFFECTS:
+                    UpdateEffectSprites(_badEffects, newSprite);
+                    break;
+            }
+
+            if(timeInscreen > 0f)
+            {
+                GameObject newSpriteGameObject = GetEffectGameObject(newSprite);
+                newSpriteGameObject.SetActive(true);
+                TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
+                {
+                    newSpriteGameObject.SetActive(false);
+                });
+            }
+        }
+
         /// <summary>
         /// Returns the UI element of the specified type.
         /// </summary>
@@ -125,6 +140,7 @@ namespace FastAndFractured
 
         public GameObject GetEffectGameObject(Sprite sprite)
         {
+            Debug.Log($"GetEffectGameObject: {sprite.name}");
             GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
             if (hudImage != null) return hudImage;
 
