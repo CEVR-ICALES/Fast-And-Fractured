@@ -110,7 +110,8 @@ namespace Enums
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
+        SHOOTING_MECHANICS,
+        CANCEL_DASH
     }
 
     public enum Stats
@@ -153,12 +154,27 @@ namespace Enums
     public enum ScreenEffects
     {
         SPEED_EFFECT,
-        TOMATO_EFFECT
+        TOMATO_EFFECT,
+        BROKEN_CRYSTAL
     }
  
     public enum GameElement
     {
         CHARACTER,
-        INTERACTABLE
+        INTERACTABLE,
+        SAFE_ZONES
+    }
+    
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
     }
 }

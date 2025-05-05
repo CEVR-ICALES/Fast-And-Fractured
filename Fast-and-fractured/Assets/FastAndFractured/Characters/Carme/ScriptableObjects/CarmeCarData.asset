@@ -17,7 +17,7 @@ MonoBehaviour:
   CarWithSkinsPrefabs:
   - {fileID: 6067046011668277108, guid: 9a46dd806a6bbc44c8162ffabf2732cd, type: 3}
   - {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
-  MaxEndurance: 650
+  MaxEndurance: 800
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 180
@@ -35,23 +35,23 @@ MonoBehaviour:
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
   DriftForce: 30
-  DashTime: 2
+  DashTime: 1.25
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 1050
-  BaseForce: 275000
+  BaseForce: 350000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
   BaseDownwardForce: 1550
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 15
-  MaxNormalShootDMG: 30
-  MinNormalShootDMG: 10
-  PushShootFORCE: 400000
+  NormalShootDMG: 40
+  MaxNormalShootDMG: 60
+  MinNormalShootDMG: 30
+  PushShootFORCE: 800000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
-  NormalShootSpeed: 100
+  NormalShootSpeed: 120
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 150
   NormalShootAngle: 180
@@ -62,28 +62,29 @@ MonoBehaviour:
   PushShootBounceForce: 60
   MineShootAngle: 40
   MineShootRange: 5
-  DashCooldown: 2
-  PushShootCooldown: 3
+  DashCooldown: 4
+  PushShootCooldown: 6
   MineExplosionTime: 5
-  UniqueAbilityCooldown: 7
+  UniqueAbilityCooldown: 35
   NormalShootOverHeat: 5
   CooldownSpeed: 1
   DeadDelay: 2.5
   aiParameters:
-    fleeDistance: 5
-    sweepRadius: 20
+    fleeDistance: 100
+    sweepRadius: 150
     shootingMarginErrorAngle: 0.05
-    damageAccumulationDuration: 5
-    fleeTriggerDamageThresholdPercentage: 40
+    damageAccumulationDuration: 2
+    fleeTriggerDamageThresholdPercentage: 50
     _recoveryThresholdPercentageForSearch: 50
     _combatHealthAdvantageThreshold: 60
     damageThresholdPercentage: 60
     decisionPercentageHealth: 10
-    decisionPercentageMaxSpeed: 10
-    decisionPercentageAcceleration: 10
-    decisionPercentageNormalShoot: 50
+    decisionPercentageMaxSpeed: 25
+    decisionPercentageAcceleration: 25
+    decisionPercentageNormalShoot: 10
     decisionPercentagePushShoot: 10
-    decisionPercentageCooldown: 10
+    decisionPercentageCooldown: 25
+    marginToFleeFromSandstorm: 200
   WinObjects:
   - GameObject: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
     StringValue: Carme_0
