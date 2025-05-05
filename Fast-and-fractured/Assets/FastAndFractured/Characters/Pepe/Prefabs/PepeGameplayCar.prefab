@@ -359,6 +359,18 @@ PrefabInstance:
       value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[3]
+      value: 
+      objectReference: {fileID: 6767274261165021178}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: carModel.Array.data[4]
+      value: 
+      objectReference: {fileID: 751540341392986462}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: highEnduranceMaxStartSpeed
       value: 1.8
       objectReference: {fileID: 0}
@@ -1031,10 +1043,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1723240950232034530}
+    - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6734046443132658938}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
 --- !u!4 &259418342896148673 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &751540341392986462 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8678631126281036777, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 8223204524156514999}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1723053678052375405 stripped
@@ -1079,6 +1099,7 @@ MonoBehaviour:
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
+  isAbilityActive: 0
   spawnPoint: {fileID: 5404290905123533514}
   tomatoSpeed: 100
   descendingTomatoSpeed: 100
@@ -1086,6 +1107,18 @@ MonoBehaviour:
   ascendingTime: 2
   pooltypeAscendingTomato: 4
   pooltypeDescendingTomato: 5
+--- !u!114 &6734046443132658938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562356898158092377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f69ba9792e1f21f45a44432fca710157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5404290905123533514 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4098650610201051261, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
@@ -1094,6 +1127,11 @@ GameObject:
 --- !u!4 &6406879614907160408 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6767274261165021178 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3455528531979232589, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 8223204524156514999}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &7901825669716411893 stripped

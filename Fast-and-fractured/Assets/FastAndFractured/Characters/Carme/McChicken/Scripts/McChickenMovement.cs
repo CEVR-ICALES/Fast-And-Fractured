@@ -19,8 +19,6 @@ namespace FastAndFractured
         [SerializeField] private float rotationSpeed = 10f;
         [SerializeField] private float maxSlopeAngle = 45f;
 
-
-
         [Header("Climbing")]
         [SerializeField] private float jumpDuration = 3f;
         [SerializeField] private float jumpHeight = 3f;
@@ -28,13 +26,14 @@ namespace FastAndFractured
         [Header("Gravity")]
         [SerializeField] private float customGravity;
 
-
-
         private Vector3 _currentMoveDirection;
         private bool _isClimbing;
         private bool _isInCeiling = false;
+        private bool _canSendIsGrounded = true;
+        private bool _canSendIsNotGrounded = true;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
+        private McChickenVisuals _visualsHandler;
         private const int NUMBER_OF_JUMPS = 1;
 
         void OnEnable()
@@ -46,10 +45,11 @@ namespace FastAndFractured
         {
             PauseManager.Instance?.UnregisterPausable(this);
         }
-        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
+        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics, McChickenVisuals visuals)
         {
             _rb = rb;
             _physicsHandler = physics;
+            _visualsHandler = visuals;
         }
 
         public void StartMoving(Vector3 direction)
@@ -74,7 +74,6 @@ namespace FastAndFractured
 
                 KinematicMovement();
                 ApplyCustomGravity();
-                _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
 
@@ -91,8 +90,14 @@ namespace FastAndFractured
             // handle slope rotation
             if (_physicsHandler.IsGrounded)
             {
+                if(_canSendIsGrounded)
+                {
+                    _visualsHandler.OnChickenOnFloor();
+                    _canSendIsNotGrounded = true;
+                    _canSendIsGrounded = false;
+                }
                 float slopeAngle = Vector3.Angle(_physicsHandler.GroundNormal, Vector3.up);
-                float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _physicsHandler.GroundNormal));
+                float slopeSign = Mathf.Sign(Vector3.Dot(-transform.right, _physicsHandler.GroundNormal));
                 float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -maxSlopeAngle, maxSlopeAngle);
 
                 Quaternion targetRot = Quaternion.Euler(
@@ -106,6 +111,15 @@ namespace FastAndFractured
                     targetRot,
                     rotationSpeed * Time.fixedDeltaTime
                 ));
+            } else
+            {
+                if(_canSendIsNotGrounded)
+                {
+                    _visualsHandler.OnChickenOffFloor();
+                    _canSendIsGrounded = true;
+                    _canSendIsNotGrounded = false;
+                }
+                _rb.angularVelocity = Vector3.zero;
             }
 
             transform.position += _currentMoveDirection * moveForce * Time.fixedDeltaTime;
@@ -114,6 +128,7 @@ namespace FastAndFractured
 
         public void PrepareClimbing(Vector3 climbPoint)
         {
+            _visualsHandler.OnChickenOffFloor();
             _isClimbing = true;
             _rb.isKinematic = true;
             _rb.useGravity = true;
@@ -128,6 +143,7 @@ namespace FastAndFractured
 
         public void StopClimbing()
         {
+            _visualsHandler.OnChickenOnFloor();
             _isClimbing = false;
             _rb.useGravity = true;
             _rb.isKinematic = false;
