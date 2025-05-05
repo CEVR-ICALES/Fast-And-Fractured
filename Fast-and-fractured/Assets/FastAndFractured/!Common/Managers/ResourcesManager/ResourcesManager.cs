@@ -11,6 +11,10 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
 
     public List<Sprite> PlayerIcons => _playerIcons;
     private List<Sprite> _playerIcons;
+    public List<Sprite> PlayerPortraits => _playerPortraits;
+    private List<Sprite> _playerPortraits;
+    public List<Sprite> PlayerHalfBody => _playerHalfBody;
+    private List<Sprite> _playerHalfBody;
     public List<Sprite> UniqueAbilitiesIcons => _uniqueAbilitiesIcons;
     private List<Sprite> _uniqueAbilitiesIcons;
     public List<Sprite> ScreenEffectsSprites => _screenEffectsSprites;
@@ -32,7 +36,7 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     {
         base.Awake();
         _resourcesLoader = gameObject.GetComponent<ResourcesLoader>();
-        _resourcesLoader.LoadResources(ref _playerIcons, ref _uniqueAbilitiesIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
+        _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits,ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
 
         InitPlayerIconsDictionary(_playerIcons);
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
