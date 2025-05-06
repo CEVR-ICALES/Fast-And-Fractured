@@ -52,6 +52,8 @@ namespace FastAndFractured
         private CarImpactHandler _carImpactHandler;
 
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
+        const float TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED = 0.3f;
+        const float TIME_UNTIL_CAR_PUSH_EFFECT_FADE_OUT = 0.3f;
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
 
         GameObject hudEffect;
@@ -210,11 +212,11 @@ namespace FastAndFractured
                 HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
                 hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
                 hudEffect.SetActive(!hudEffect.activeSelf);
-                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                TimerSystem.Instance.CreateTimer(TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED, onTimerDecreaseComplete: () =>
                 {
                     if (hudEffect != null)
                     {
-                        hudEffect.SetActive(!hudEffect.activeSelf);
+                        HUDManager.Instance.FadeOutEffectSprites(hudEffect, TIME_UNTIL_CAR_PUSH_EFFECT_FADE_OUT);
                         hudEffect = null;
                     }
                 });

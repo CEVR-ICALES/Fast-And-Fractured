@@ -20,9 +20,9 @@ namespace Utilities
         #endregion
 
         #region Slider and Toggle Variables
-        [SerializeField] private Slider sfxVolumeSlider;
-        [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private Slider generalVolumeSlider;
+        [SerializeField] private Slider musicVolumeSlider;
+        [SerializeField] private Slider sfxVolumeSlider;
 
         [SerializeField] private Toggle muteToggle;
         #endregion
