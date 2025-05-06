@@ -44,6 +44,7 @@ GameObject:
   m_Component:
   - component: {fileID: 742999951481237971}
   - component: {fileID: 8598308109603905528}
+  - component: {fileID: 942754985171119713}
   m_Layer: 7
   m_Name: PushShootForce
   m_TagString: Untagged
@@ -100,6 +101,27 @@ MonoBehaviour:
         m_Calls: []
   ingameEventText: Push shoot force increased
   ingameEventTimeOnScreen: 2
+--- !u!65 &942754985171119713
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648937306464986492}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 5, z: 1}
+  m_Center: {x: 0, y: 2, z: 0}
 --- !u!1 &6341529456656757396
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,7 +395,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5320581603355700329, guid: 1717b37a2bcbb5643a67ec0db1eff0d4, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 5767492206470393883, guid: 1717b37a2bcbb5643a67ec0db1eff0d4, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5897522658599315640, guid: 1717b37a2bcbb5643a67ec0db1eff0d4, type: 3}
       propertyPath: m_Name
@@ -381,7 +407,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5897522658599315640, guid: 1717b37a2bcbb5643a67ec0db1eff0d4, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

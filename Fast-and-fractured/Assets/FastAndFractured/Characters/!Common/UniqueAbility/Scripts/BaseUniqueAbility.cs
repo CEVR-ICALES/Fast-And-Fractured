@@ -52,6 +52,16 @@ namespace FastAndFractured
 
             _isAbilityActive = true;
             isAbilityActive = _isAbilityActive;
+            // if (LevelController.Instance.characterIcons != null && LevelController.Instance.characterIcons.Count > 0)
+            // {
+            //     foreach (CharacterIcon characterIcon in LevelController.Instance.characterIcons)
+            //     {
+            //         if (characterIcon.Character.name == statsController.)
+            //         {
+            //             characterIcon.SetPlayerUltIconIsActive(true, abilityData.UltEffectDuration);
+            //         }
+            //     }
+            // }
 
             PlayActivateAbilitySound();
             StartAbilityEffects();
@@ -59,7 +69,7 @@ namespace FastAndFractured
             StartCooldown();
             return true;
         }  
-        private void StartCooldown()
+        protected void StartCooldown()
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration,
