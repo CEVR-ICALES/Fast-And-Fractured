@@ -26,10 +26,15 @@ namespace FastAndFractured
 
         #region Unity Methods
 
+        protected override void Awake()
+        {
+            base.Awake();
+            RegisterUIElements();
+        }
+
         private void Start()
         {
-            // Register all UI elements
-            RegisterUIElements();
+
         }
 
         #endregion
@@ -70,21 +75,6 @@ namespace FastAndFractured
             {
                 element.imageReference.sprite = newSprite;
             }
-            else
-            {
-                switch (type)
-                {
-                    case UIElementType.GOOD_EFFECTS:
-                        UpdateEffectSprites(_goodEffects, newSprite);
-                        break;
-                    case UIElementType.NORMAL_EFFECTS:
-                        UpdateEffectSprites(_normalEffects, newSprite);
-                        break;
-                    case UIElementType.BAD_EFFECTS:
-                        UpdateEffectSprites(_badEffects, newSprite);
-                        break;
-                }
-            }
         }
 
         public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
@@ -111,6 +101,33 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateUIEffect(UIElementType type, Sprite newSprite, float timeInscreen){
+            GameObject effectGameObj = null;
+            
+            switch (type)
+            {
+                case UIElementType.GOOD_EFFECTS:
+                    effectGameObj = UpdateEffectSprites(_goodEffects, newSprite);
+                    break;
+                case UIElementType.NORMAL_EFFECTS:
+                    effectGameObj = UpdateEffectSprites(_normalEffects, newSprite);
+                    break;
+                case UIElementType.BAD_EFFECTS:
+                    effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
+                    break;
+            }
+
+            if(timeInscreen > 0f)
+            {
+                GameObject newSpriteGameObject = effectGameObj;
+                newSpriteGameObject.SetActive(true);
+                TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
+                {
+                    FadeOutEffectSprites(newSpriteGameObject.GetComponent<Image>(), 0.3f);
+                });
+            }
+        }
+
         /// <summary>
         /// Returns the UI element of the specified type.
         /// </summary>
@@ -125,6 +142,7 @@ namespace FastAndFractured
 
         public GameObject GetEffectGameObject(Sprite sprite)
         {
+            Debug.Log($"GetEffectGameObject: {sprite.name}");
             GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
             if (hudImage != null) return hudImage;
 
@@ -149,15 +167,19 @@ namespace FastAndFractured
             return true;
         }
 
-        private void UpdateEffectSprites(Image[] effects, Sprite newSprite)
+        private GameObject UpdateEffectSprites(Image[] effects, Sprite newSprite)
         {
+            GameObject effectGameObject = null;
             foreach (Image image in effects)
             {
                 if (!image.gameObject.activeSelf)
                 {
                     image.sprite = newSprite;
+                    effectGameObject = image.gameObject;
                 }
             }
+
+            return effectGameObject;
         }
 
         private GameObject FindEffectGameObject(Image[] effects, Sprite sprite)
@@ -172,6 +194,19 @@ namespace FastAndFractured
             return null;
         }
 
+        private void FadeOutEffectSprites(Image hudEffect, float fadeOutTime)
+        {
+            if (hudEffect != null)
+            {
+                hudEffect.CrossFadeAlpha(0f, fadeOutTime, true);
+                TimerSystem.Instance.CreateTimer(fadeOutTime, onTimerDecreaseComplete: () =>
+                {
+                    hudEffect.gameObject.SetActive(false);
+                    hudEffect.CrossFadeAlpha(1f, 0f, true);
+                });
+            }
+        }
         #endregion
+
     }
 }

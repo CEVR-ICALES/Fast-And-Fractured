@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using StateMachine;
 
@@ -8,17 +6,39 @@ namespace FastAndFractured
     public class JosefinoUniqueAbility : BaseUniqueAbility
     {
         [SerializeField] private float enduranceRecoveryAmount = 0f;
+        private StatsController _statsController;
 
-        public override void ActivateAbility()
+        public override bool ActivateAbility()
         {
-            base.ActivateAbility();
-            AbilityEffect();
+            if (base.ActivateAbility())
+            {
+                AbilityEffect();
+                return true;
+            }
+       
+
+            return false;
         }
+
+        private void Start()
+        {
+            StartCooldown();
+            Controller controller = GetComponentInParent<Controller>();
+            _statsController = controller.GetBehaviour<StatsController>();
+        } 
+        
+        private void OnDestroy()
+        {
+        }
+
         private void AbilityEffect()
         {
-            Controller controller = GetComponentInParent<Controller>();
-            controller.GetBehaviour<StatsController>().RecoverEndurance(enduranceRecoveryAmount, false);
-            controller.GetBehaviour<StatsController>().IsInvulnerable = true;
+           _statsController.RecoverEndurance(enduranceRecoveryAmount, false);
+        }
+        public void OnInvulnerabilityLost()
+        {
+            Debug.Log("Invulnerability Lost");
+            EndAbilityEffects();
         }
     }
 

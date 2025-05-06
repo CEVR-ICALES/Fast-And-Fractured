@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using StateMachine;
@@ -8,6 +9,7 @@ using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
+using Random = UnityEngine.Random;
 
 namespace FastAndFractured
 {
@@ -36,6 +38,8 @@ namespace FastAndFractured
 
         [SerializeField]
         private GameObject[] spawnPoints;
+        [SerializeField]
+        private List<GameObject> safeZones;
 
         [Header("Game Loop")]
         [SerializeField]
@@ -57,16 +61,15 @@ namespace FastAndFractured
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
         [SerializeField] private bool useMyCharacters = false;
-        [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
-        [SerializeField] private bool repeatCharacters = true;
         [SerializeField] private bool stormInDebugMode = false;
+        [SerializeField] private bool justSpawnAI = false;
         private GameObject _playerReference;
         public GameObject playerReference { get=>_playerReference ;}
         public bool HasPlayerWon { get => _hasPlayerWon; }
         private bool _hasPlayerWon = false;
 
         private int _aliveCharacterCount;
-        public GameObject[] characterIcons;
+        public List<CharacterIcon> characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
@@ -80,7 +83,7 @@ namespace FastAndFractured
         private const string ERROR_STRING_MESSAGE = "empty list";
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
-        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 2;
+        private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 3;
         protected override void Awake()
         {
             base.Awake();
@@ -137,7 +140,12 @@ namespace FastAndFractured
         {
         }
 
-        
+        private void OnDestroy()
+        {
+            Cursor.lockState = CursorLockMode.None;
+
+        }
+
         private void StartLevelWithOwnCharacters()
         {
             _inGameCharacters = new List<GameObject>();
@@ -169,14 +177,14 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
-            IngameEventsManager.Instance.SetCharactersTopElements();
-            SpawnInGameCharacters(out bool succeded);
+            SpawnInGameCharacters(out bool succeded,debugMode&&justSpawnAI);
             if (!succeded)
             {
                 Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
             }
             else
             {
+                IngameEventsManager.Instance.SetCharactersTopElements();
                 if (debugMode)
                     SetStormParameters(stormInDebugMode);
                 else
@@ -193,29 +201,29 @@ namespace FastAndFractured
             }
         }
 
-        
-
-
         #region SpawnCharacters
-        private void SpawnInGameCharacters(out bool succeded)
+        private void SpawnInGameCharacters(out bool succeded,bool onlyAIs)
         {
             _inGameCharactersNameCodes = new List<string>();
             succeded = CreateAllCharactersNameCodesList();
             bool ignoreRepeatedCharacters;
-            if (ignoreRepeatedCharacters = _inGameCharactersNameCodes.Count < maxCharactersInGame)
+            if (ignoreRepeatedCharacters = _allCharactersNameCode.Count < maxCharactersInGame)
             {
                 Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
             }
-            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
-            if (!succeded)
-                return;
-            if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
+            if (!onlyAIs)
             {
-                _inGameCharactersNameCodes.Add(selectedPlayer);
+                string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+                if (!succeded)
+                    return;
+                if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
+                {
+                    _inGameCharactersNameCodes.Add(selectedPlayer);
+                }
+                else
+                    return;
             }
-            else
-                return;
-            int totalAICharacters = maxCharactersInGame - _currentPlayers;
+            int totalAICharacters = !onlyAIs ? maxCharactersInGame - _currentPlayers : maxCharactersInGame;
             for (int aiCharacterCount = 0; aiCharacterCount < totalAICharacters && succeded; aiCharacterCount++)
             {
                 string aiName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
@@ -231,10 +239,10 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                SpawnCharactersInScene();
+                SpawnCharactersInScene(onlyAIs);
             }
         }
-        private void SpawnCharactersInScene()
+        private void SpawnCharactersInScene(bool onlyAIs)
         {
             if (spawnPoints.Length >= maxCharactersInGame)
             {
@@ -244,7 +252,7 @@ namespace FastAndFractured
                 GameObject playerCar = null;
                 GameObject player = null;
                 ShuffleList(spawnPoints);
-                for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
+                for (; charactersCount < _currentPlayers&&charactersCount<allCharacters&&!onlyAIs; charactersCount++)
                 {
                     CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
                     player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
@@ -357,17 +365,16 @@ namespace FastAndFractured
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
-                    foreach (Transform child in character.transform)
-                    {
-                        foreach (GameObject icon in characterIcons)
+                    
+                        foreach (CharacterIcon icon in characterIcons)
                         { 
-                            if (icon.GetComponent<CharacterIcon>().Character == child.gameObject)
+                            if (icon.Character == character)
                             {
-                                icon.SetActive(false);
+                                icon.SetPlayerDeadIconIsActive(true);
                             }
                         }
-                    }
-                    Destroy(character);
+                    
+                    Destroy(character.transform.parent.gameObject);
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
                     {
@@ -395,16 +402,31 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(GameObject target)
         {
-            return _sandStormController.IsInsideStormCollider(target);
+            return _callStormTimer==null ? _sandStormController.IsInsideStormCollider(target,0f) : false;
         }
 
         public bool IsInsideSandstorm(GameObject target, float marginError)
         {
-            return _sandStormController.IsInsideStormCollider(target,marginError);
+            return _callStormTimer==null ? _sandStormController.IsInsideStormCollider(target,marginError) : false;
+        }
+
+        public List<GameObject> SafeZonesOutsideSandstorm()
+        {
+            List<GameObject> safeZonesOutsideSandstorm = new List<GameObject>();
+            foreach (var safeZone in safeZones)
+            {
+                if (!IsInsideSandstorm(safeZone))
+                {
+                    safeZonesOutsideSandstorm.Add(safeZone);
+                }
+            }
+            return safeZonesOutsideSandstorm;
         }
 
         public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
         {
+            if (_callStormTimer != null)
+                return false;
             List<GameObject> interactablesList = new List<GameObject>();
             if (gameElement == GameElement.INTERACTABLE)
             {
@@ -413,12 +435,22 @@ namespace FastAndFractured
                     interactablesList.Add(item.gameObject);
                 }
             }
-            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
-                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+            switch (gameElement)
+            {
+                case GameElement.CHARACTER:
+                    return CheckIfList1ElementsAreInList2(_inGameCharacters, _sandStormController.CharactersInsideSandstorm);
+                case GameElement.INTERACTABLE:
+                    return CheckIfList1ElementsAreInList2(interactablesList, _sandStormController.ItemsInsideSandstorm);
+                case GameElement.SAFE_ZONES:
+                    return CheckIfList1ElementsAreInList2(safeZones, _sandStormController.SafeZonesInsideSandstorm);
+            }
+            return false;
         }
 
-        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        private bool CheckIfList1ElementsAreInList2<T>(List<T> list1, List<T> list2)
         {
+            if(list1 == null || list2 == null) return false;
+            if(list1.Count==0||list2.Count==0) return false;
             foreach (T item in list1) {
                 if (!list2.Contains(item))
                 {

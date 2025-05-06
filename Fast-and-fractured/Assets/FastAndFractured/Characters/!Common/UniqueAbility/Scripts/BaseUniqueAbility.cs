@@ -25,6 +25,8 @@ namespace FastAndFractured
         public bool IsAbilityActive => _isAbilityActive;
         public bool IsOnCooldown => _isOnCooldown;
 
+        public UnityEvent<float, float> onCooldownUpdate;
+        public bool isAbilityActive;
         private void Awake()
         {
             if (abilityData == null)
@@ -34,32 +36,52 @@ namespace FastAndFractured
             }
 
             _isAbilityActive = false;
-            
+            isAbilityActive = _isAbilityActive;
             _isAI = GetComponentInParent<EnemyAIBrain>();
             statsController = GetComponent<StatsController>();
             abilityData.CooldownDuration = statsController.UniqueCooldown;
         }
 
-
-        public virtual void ActivateAbility()
+        [ContextMenu(nameof(ActivateAbility))]
+        public virtual bool ActivateAbility()
         {
             if (_isAbilityActive || _isOnCooldown)
             {
-                return;
+                return false;
             }
 
             _isAbilityActive = true;
+            isAbilityActive = _isAbilityActive;
+            // if (LevelController.Instance.characterIcons != null && LevelController.Instance.characterIcons.Count > 0)
+            // {
+            //     foreach (CharacterIcon characterIcon in LevelController.Instance.characterIcons)
+            //     {
+            //         if (characterIcon.Character.name == statsController.)
+            //         {
+            //             characterIcon.SetPlayerUltIconIsActive(true, abilityData.UltEffectDuration);
+            //         }
+            //     }
+            // }
+
             PlayActivateAbilitySound();
             StartAbilityEffects();
             onAbilityActivated?.Invoke();
             StartCooldown();
+            return true;
         }  
-        private void StartCooldown()
+        protected void StartCooldown()
         {
             _currentCooldownTime = abilityData.CooldownDuration;  
-            _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration, onTimerDecreaseComplete:StopCooldown) ;
+            _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration,
+                onTimerDecreaseUpdate:OnUniqueAbilityCooldownDecrease, 
+                onTimerDecreaseComplete:StopCooldown) ;
             ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
             _isOnCooldown = true;
+        }
+
+        private void OnUniqueAbilityCooldownDecrease(float currentvalue)
+        {
+            onCooldownUpdate?.Invoke(currentvalue, statsController.UniqueCooldown);
         }
 
         protected virtual void PlayActivateAbilitySound()
@@ -93,6 +115,8 @@ namespace FastAndFractured
         {
             DestroySpawnedGameObjectsInstances();
             _isAbilityActive = false;
+            isAbilityActive = _isAbilityActive;
+
             onAbilityEnded?.Invoke();
         } 
         

@@ -1,22 +1,23 @@
 using DG.Tweening;
 using UnityEngine;
 using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
-    public class McChickenMovement : MonoBehaviour
+    public class McChickenMovement : MonoBehaviour, IPausable
     {
         public Vector3 MoveDirection => _currentMoveDirection;
         public bool IsClimbing => _isClimbing;
 
         public bool IsInCeling => _isInCeiling;
 
+        bool _isPaused = false;
+
         [Header("Movement Settings")]
         [SerializeField] private float moveForce = 5f;
         [SerializeField] private float rotationSpeed = 10f;
         [SerializeField] private float maxSlopeAngle = 45f;
-
-
 
         [Header("Climbing")]
         [SerializeField] private float jumpDuration = 3f;
@@ -25,19 +26,30 @@ namespace FastAndFractured
         [Header("Gravity")]
         [SerializeField] private float customGravity;
 
-
-
         private Vector3 _currentMoveDirection;
         private bool _isClimbing;
         private bool _isInCeiling = false;
+        private bool _canSendIsGrounded = true;
+        private bool _canSendIsNotGrounded = true;
         private Rigidbody _rb;
         private McChickenPhysicsHandler _physicsHandler;
+        private McChickenVisuals _visualsHandler;
         private const int NUMBER_OF_JUMPS = 1;
 
-        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics)
+        void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
+        public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics, McChickenVisuals visuals)
         {
             _rb = rb;
             _physicsHandler = physics;
+            _visualsHandler = visuals;
         }
 
         public void StartMoving(Vector3 direction)
@@ -48,6 +60,9 @@ namespace FastAndFractured
 
         private void FixedUpdate()
         {
+            if (_isPaused)
+                return;
+
             _physicsHandler.UpdateGroundState();
 
             if (_isClimbing)
@@ -56,9 +71,9 @@ namespace FastAndFractured
             }
             else
             {
+
                 KinematicMovement();
                 ApplyCustomGravity();
-                _physicsHandler.ApplyRotation(rotationSpeed);
             }
         }
 
@@ -66,7 +81,6 @@ namespace FastAndFractured
         {
             if(!_physicsHandler.IsGrounded)
             {
-                Debug.Log("gravity");
                 _rb.AddForce(Vector3.down * customGravity, ForceMode.Impulse);
             }
         }
@@ -76,8 +90,14 @@ namespace FastAndFractured
             // handle slope rotation
             if (_physicsHandler.IsGrounded)
             {
+                if(_canSendIsGrounded)
+                {
+                    _visualsHandler.OnChickenOnFloor();
+                    _canSendIsNotGrounded = true;
+                    _canSendIsGrounded = false;
+                }
                 float slopeAngle = Vector3.Angle(_physicsHandler.GroundNormal, Vector3.up);
-                float slopeSign = Mathf.Sign(Vector3.Dot(transform.right, _physicsHandler.GroundNormal));
+                float slopeSign = Mathf.Sign(Vector3.Dot(-transform.right, _physicsHandler.GroundNormal));
                 float targetXRotation = Mathf.Clamp(slopeAngle * slopeSign, -maxSlopeAngle, maxSlopeAngle);
 
                 Quaternion targetRot = Quaternion.Euler(
@@ -91,6 +111,15 @@ namespace FastAndFractured
                     targetRot,
                     rotationSpeed * Time.fixedDeltaTime
                 ));
+            } else
+            {
+                if(_canSendIsNotGrounded)
+                {
+                    _visualsHandler.OnChickenOffFloor();
+                    _canSendIsGrounded = true;
+                    _canSendIsNotGrounded = false;
+                }
+                _rb.angularVelocity = Vector3.zero;
             }
 
             transform.position += _currentMoveDirection * moveForce * Time.fixedDeltaTime;
@@ -99,6 +128,7 @@ namespace FastAndFractured
 
         public void PrepareClimbing(Vector3 climbPoint)
         {
+            _visualsHandler.OnChickenOffFloor();
             _isClimbing = true;
             _rb.isKinematic = true;
             _rb.useGravity = true;
@@ -113,9 +143,20 @@ namespace FastAndFractured
 
         public void StopClimbing()
         {
+            _visualsHandler.OnChickenOnFloor();
             _isClimbing = false;
             _rb.useGravity = true;
             _rb.isKinematic = false;
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }

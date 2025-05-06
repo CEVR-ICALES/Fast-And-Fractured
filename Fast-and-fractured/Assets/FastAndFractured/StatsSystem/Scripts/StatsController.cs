@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Utilities;
 using Utilities.Managers.PauseSystem;
 
@@ -24,7 +25,7 @@ namespace FastAndFractured
         [SerializeField] private float currentEndurance;
         public float Endurance { get => currentEndurance; }
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
-        public bool IsInvulnerable { get => charDataSO.Invulnerable; set => charDataSO.Invulnerable = value; }
+        public bool IsInvulnerable { get => charDataSO.Invulnerable;  private set => charDataSO.Invulnerable = value; }
 
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
@@ -111,6 +112,8 @@ namespace FastAndFractured
         public UnityEvent<float,GameObject> onEnduranceDamageTaken;
         public UnityEvent<float> onEnduranceDamageHealed;
         public UnityEvent<float,GameObject,bool> onDead;
+        public UnityEvent onInvulnerabilityAdded;
+        public UnityEvent onInvulnerabilityLost;
         private ITimer _deadTimer;
         public IKillCharacters CurrentKiller { get => _currentKiller; }
         private IKillCharacters _currentKiller;
@@ -143,7 +146,7 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            PauseManager.Instance.UnregisterPausable(this);
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         #endregion
@@ -197,7 +200,7 @@ namespace FastAndFractured
         {
             if (substract > 0)
             {
-                if (!charDataSO.Invulnerable)
+                if (!IsInvulnerable)
                 {
                     totalDamageTaken += substract;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
@@ -215,10 +218,20 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    IsInvulnerable = false;
+                    LoseInvulnerability();
                 }
             }
             else Debug.LogWarning("Value can't be negative or 0.");
+        }
+        public void ActivateInvulnerability()
+        {
+            IsInvulnerable = true;
+            onInvulnerabilityAdded?.Invoke();
+        }
+        public void LoseInvulnerability()
+        {
+            IsInvulnerable = false;
+            onInvulnerabilityLost?.Invoke();
         }
 
         public void RecoverEndurance(float sum, bool isProduct)
@@ -332,10 +345,9 @@ namespace FastAndFractured
 
         public void Dead()
         {
-            Debug.Log("He muerto soy " + transform.parent.name);
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
-            onDead?.Invoke(charDataSO.DeadDelay,transform.parent.gameObject,_isPlayer);
+            onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
         }
 
         public float GetEndurancePercentage()
@@ -472,22 +484,7 @@ namespace FastAndFractured
 
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
-            float mod;
-
-            if (iscurrentBigger)
-            {
-                if (currentValue / previousValue > 1)
-                    mod = 1 / (currentValue / previousValue);
-                else
-                    mod = -(currentValue - previousValue);
-            }
-            else
-            {
-                if (previousValue / currentValue > 1)
-                    mod = previousValue / currentValue;
-                else
-                    mod = previousValue - currentValue;
-            }
+            float mod = iscurrentBigger ? 1 / (currentValue / previousValue) : previousValue / currentValue;
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
@@ -496,7 +493,7 @@ namespace FastAndFractured
         }
         #endregion  
 
-        private float GetCurrentStat(Stats type)
+        public float GetCurrentStat(Stats type)
         {
             switch (type)
             {

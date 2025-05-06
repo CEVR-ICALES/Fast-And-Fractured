@@ -16,7 +16,8 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
-  MaxEndurance: 800
+  - {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+  MaxEndurance: 1000
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 155
@@ -34,24 +35,24 @@ MonoBehaviour:
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
   DriftForce: 30
-  DashTime: 2
+  DashTime: 1.25
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 1200
-  BaseForce: 300000
+  BaseForce: 425000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
   BaseDownwardForce: 800
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 10
-  MaxNormalShootDMG: 25
-  MinNormalShootDMG: 5
-  PushShootFORCE: 400000
+  NormalShootDMG: 48
+  MaxNormalShootDMG: 72
+  MinNormalShootDMG: 36
+  PushShootFORCE: 1000000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
-  NormalShootSpeed: 100
-  NormalShootCadenceTime: 0.3
+  NormalShootSpeed: 120
+  NormalShootCadenceTime: 0.35
   NormalShootMaxRange: 150
   NormalShootAngle: 180
   PushShootAngle: 40
@@ -60,20 +61,20 @@ MonoBehaviour:
   PushShootBounceNum: 3
   PushShootBounceForce: 60
   MineShootAngle: 40
-  MineShootRange: 5
-  DashCooldown: 2
-  PushShootCooldown: 3
+  MineShootRange: 10
+  DashCooldown: 4
+  PushShootCooldown: 6
   MineExplosionTime: 5
-  UniqueAbilityCooldown: 7
+  UniqueAbilityCooldown: 30
   NormalShootOverHeat: 5
   CooldownSpeed: 1
   DeadDelay: 2.5
   aiParameters:
     fleeDistance: 5
     sweepRadius: 20
-    shootingMarginErrorAngle: 0.02
+    shootingMarginErrorAngle: 0.05
     damageAccumulationDuration: 5
-    fleeTriggerDamageThresholdPercentage: 40
+    fleeTriggerDamageThresholdPercentage: 5
     _recoveryThresholdPercentageForSearch: 50
     _combatHealthAdvantageThreshold: 60
     damageThresholdPercentage: 60
@@ -83,7 +84,14 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
+    marginToFleeFromSandstorm: 150
   WinObjects:
   - GameObject: {fileID: 8929485945919532771, guid: 352b5740b9121db47ab741aff76fd2de, type: 3}
     StringValue: Josefino_0
-  LoseObjects: []
+  - GameObject: {fileID: 4889075022116190059, guid: b4f349ddcc130c4449e3ad5a50ac9590, type: 3}
+    StringValue: Josefino_1
+  LoseObjects:
+  - GameObject: {fileID: 8665009037830383912, guid: 7d343e5bf7d46ad4e90fce35445d754b, type: 3}
+    StringValue: Josefino_0
+  - GameObject: {fileID: 2547003088129276055, guid: f68bbc51aefda2749ac3e91dd707a8d0, type: 3}
+    StringValue: Josefino_1

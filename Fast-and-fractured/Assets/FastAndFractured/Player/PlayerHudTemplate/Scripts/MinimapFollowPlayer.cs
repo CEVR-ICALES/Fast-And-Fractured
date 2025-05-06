@@ -29,10 +29,13 @@ namespace FastAndFractured
                 Debug.Log("Selected Player: " + icon);
                 characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
             }
-            Vector3 newPosition = player.transform.position;
-            newPosition.y = transform.position.y;
-            transform.position = newPosition; 
-            transform.rotation = Quaternion.Euler(90, player.transform.eulerAngles.y, 0);
+            if (player != null)
+            {
+                Vector3 newPosition = player.transform.position;
+                newPosition.y = transform.position.y;
+                transform.position = newPosition;
+                transform.rotation = Quaternion.Euler(90, player.transform.eulerAngles.y, 0);
+            }
             
         }
     }

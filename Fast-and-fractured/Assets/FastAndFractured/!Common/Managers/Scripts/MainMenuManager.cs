@@ -10,13 +10,22 @@ using UnityEngine.Events;
 
 namespace FastAndFractured
 {
-    public class MainMenuManager : MonoBehaviour
+    public class MainMenuManager : AbstractSingleton<MainMenuManager>
     {
-        #region Singleton
+        #region Public Fields
 
-        public static MainMenuManager Instance { get; private set; }
+        public MenuScreen CurrentScreen => _currentScreen;
+        public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
 
         #endregion
+
+        // #region Serialized Fields
+
+        // [SerializeField] private GameObject mainMenuTimeline;
+        // [SerializeField] private GameObject pauseMenuTimeline;
+
+        // #endregion
+
 
         #region Private Fields
 
@@ -25,22 +34,20 @@ namespace FastAndFractured
         private bool isCurrentScreenInteractable;
         private ITimer _fadeInTimer;
         private ITimer _fadeOutTimer;
+        EventSystem _eventSystem;
 
         #endregion
         public UnityEvent OnInitialized;
 
         #region Unity Methods
 
-        private void Awake()
+        protected override void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            base.Awake();
+            _eventSystem = EventSystem.current;
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         private void Start()
@@ -167,7 +174,7 @@ namespace FastAndFractured
 
         public void UseBackButton()
         {
-            if (_currentScreen.backButton != null && isCurrentScreenInteractable)
+            if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
             {
                 _currentScreen.backButton.onClick.Invoke();
             }
@@ -177,7 +184,7 @@ namespace FastAndFractured
         {
             if (_currentScreen.defaultButton != null)
             {
-                EventSystem.current.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
+                _eventSystem.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
             }
             else
             {

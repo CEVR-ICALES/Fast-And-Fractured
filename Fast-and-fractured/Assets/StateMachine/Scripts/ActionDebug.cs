@@ -9,7 +9,6 @@ namespace StateMachine
         public override void Act(Controller controller)
         {
             //Debug.Log($"{messageToDebug}");
-            FinishAction();
         }
     }
 }

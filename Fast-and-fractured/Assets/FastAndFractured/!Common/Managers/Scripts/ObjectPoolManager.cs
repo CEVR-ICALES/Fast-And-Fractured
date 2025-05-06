@@ -50,16 +50,20 @@ namespace Utilities
         {
             GameObject[] gameObjectsPooled = new GameObject[num];
             int variantCount = 0;
-            int variantMaxCount = prefabVariants.Length;
+            int variantMaxCount = 0;
+            if (prefabVariants != null)
+            {
+                variantMaxCount = prefabVariants.Length;
+            }
             for (int i = 0; i < num; i++) {
                 GameObject gameObjectPooled = null;
-                if (variantCount == 0)
+                if (i != 0 && variantMaxCount > 0)
                 {
-                   gameObjectPooled = Instantiate(gameobjectToPool, parent);
+                    gameObjectPooled = Instantiate(prefabVariants[i], parent);
                 }
                 else
                 {
-                    gameObjectPooled = Instantiate(prefabVariants[i],parent);
+                    gameObjectPooled = Instantiate(gameobjectToPool, parent);
                 }
                 if (gameObjectPooled.TryGetComponent<IPooledObject>(out var pooledObject))
                 {

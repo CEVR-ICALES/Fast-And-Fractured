@@ -293,37 +293,6 @@ PositionConstraint:
   m_Sources:
   - sourceTransform: {fileID: 5665284770835654702}
     weight: 1
---- !u!1 &5275205294305993634
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3043994864104211412}
-  m_Layer: 0
-  m_Name: PushShootPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3043994864104211412
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5275205294305993634}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1426858998874784265}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5345970465943410736
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,7 +377,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3043994864104211412}
   - {fileID: 1908139064557856404}
   - {fileID: 3728334910070835358}
   - {fileID: 7472318638569064716}
@@ -452,7 +420,7 @@ MonoBehaviour:
   hitMarkCollision: {fileID: 1201796692016743653}
   hitMarkCollision2: {fileID: 3161782438040814939}
   delayTimeForSecondThrow: 0.2
-  pushShootPoint: {fileID: 3043994864104211412}
+  pushShootPoint: {fileID: 0}
   pushShootHandle: {fileID: 0}
   lineRenderer: {fileID: 8960978884606166482}
   toleranceToVelocityMarginError: 0.001
