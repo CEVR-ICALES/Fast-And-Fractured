@@ -214,6 +214,12 @@ namespace FastAndFractured
                     ToggleShootingInputs(false);
                     _isShootingInputsBlocked = true;
                     break;
+                case InputBlockTypes.CANCEL_DASH:
+                    ToggleShootingInputs(false);
+                    ToggleDashMovementInputs(false);
+                    _isShootingInputsBlocked = true;
+                    _isMovementInputsBlocked = true;
+                    break;
             }
         }
 
@@ -236,6 +242,12 @@ namespace FastAndFractured
                 case InputBlockTypes.SHOOTING_MECHANICS:
                     ToggleShootingInputs(true);
                     _isShootingInputsBlocked = false;
+                    break;
+                case InputBlockTypes.CANCEL_DASH:
+                    ToggleShootingInputs(true);
+                    ToggleDashMovementInputs(true);
+                    _isShootingInputsBlocked = false;
+                    _isMovementInputsBlocked = false;
                     break;
             }
         }
@@ -271,6 +283,22 @@ namespace FastAndFractured
                 _inputActions.PlayerInputActions.Accelerate.Disable();
                 _inputActions.PlayerInputActions.Movement.Disable();
                 _inputActions.PlayerInputActions.Brake.Disable();
+                _inputActions.PlayerInputActions.Reverse.Disable();
+            }
+        }
+
+        private void ToggleDashMovementInputs(bool enable)
+        {
+            if (enable)
+            {
+                _inputActions.PlayerInputActions.Accelerate.Enable();
+                _inputActions.PlayerInputActions.Movement.Enable();
+                _inputActions.PlayerInputActions.Reverse.Enable();
+            }
+            else
+            {
+                _inputActions.PlayerInputActions.Accelerate.Disable();
+                _inputActions.PlayerInputActions.Movement.Disable();
                 _inputActions.PlayerInputActions.Reverse.Disable();
             }
         }

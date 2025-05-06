@@ -40,14 +40,7 @@ namespace Enums
         ULT_BINDING,
         PUSH_BINDING,
         SHOOT_BINDING,
-        PLAYER_0,
-        PLAYER_1,
-        PLAYER_2,
-        PLAYER_3,
-        PLAYER_4,
-        PLAYER_5,
-        PLAYER_6,
-        PLAYER_7,
+        PLAYER_ICONS,
         BAD_EFFECTS,
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
@@ -110,7 +103,8 @@ namespace Enums
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
+        SHOOTING_MECHANICS,
+        CANCEL_DASH
     }
 
     public enum Stats
@@ -142,6 +136,30 @@ namespace Enums
         MARIAANTONIA_1
     }
 
+    public enum PlayerPortraits
+    {
+        CARME_PORTRAIT_0,
+        JOSEFINO_PORTRAIT_0,
+        PEPE_PORTRAIT_0,
+        MARIAANTONIA_PORTRAIT_0,
+        CARME_PORTRAIT_1,
+        JOSEFINO_PORTRAIT_1,
+        PEPE_PORTRAIT_1,
+        MARIAANTONIA_PORTRAIT_1,
+    }
+    
+    public enum PlayerHalfBody
+    {
+        CARME_HALF_BODY_0,
+        JOSEFINO_HALF_BODY_0,
+        PEPE_HALF_BODY_0,
+        MARIAANTONIA_HALF_BODY_0,
+        CARME_HALF_BODY_1,
+        JOSEFINO_HALF_BODY_1,
+        PEPE_HALF_BODY_1,
+        MARIAANTONIA_HALF_BODY_1
+    }
+
     public enum UniqueAbilitiesIcons
     {
         CARME_UA,
@@ -153,12 +171,27 @@ namespace Enums
     public enum ScreenEffects
     {
         SPEED_EFFECT,
-        TOMATO_EFFECT
+        TOMATO_EFFECT,
+        BROKEN_CRYSTAL
     }
  
     public enum GameElement
     {
         CHARACTER,
-        INTERACTABLE
+        INTERACTABLE,
+        SAFE_ZONES
+    }
+    
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
     }
 }

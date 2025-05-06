@@ -484,22 +484,7 @@ namespace FastAndFractured
 
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
-            float mod;
-
-            if (iscurrentBigger)
-            {
-                if (currentValue / previousValue > 1)
-                    mod = 1 / (currentValue / previousValue);
-                else
-                    mod = -(currentValue - previousValue);
-            }
-            else
-            {
-                if (previousValue / currentValue > 1)
-                    mod = previousValue / currentValue;
-                else
-                    mod = previousValue - currentValue;
-            }
+            float mod = iscurrentBigger ? 1 / (currentValue / previousValue) : previousValue / currentValue;
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
@@ -508,7 +493,7 @@ namespace FastAndFractured
         }
         #endregion  
 
-        private float GetCurrentStat(Stats type)
+        public float GetCurrentStat(Stats type)
         {
             switch (type)
             {

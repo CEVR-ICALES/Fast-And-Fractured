@@ -17,7 +17,7 @@ MonoBehaviour:
   CarWithSkinsPrefabs:
   - {fileID: 5896435916326739545, guid: 12d45f1d22ddb9849a2c0d8b0e66c2ae, type: 3}
   - {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
-  MaxEndurance: 1100
+  MaxEndurance: 1300
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 130
@@ -35,24 +35,24 @@ MonoBehaviour:
   DriftingFactorToSpeed: 80
   DriftingSmoothFactor: 0.1
   DriftForce: 30
-  DashTime: 2
+  DashTime: 1.25
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 1500
-  BaseForce: 400000
+  BaseForce: 500000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 0.5
   BaseDownwardForce: 1600
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 20
-  MaxNormalShootDMG: 30
-  MinNormalShootDMG: 15
-  PushShootFORCE: 400000
+  NormalShootDMG: 70
+  MaxNormalShootDMG: 105
+  MinNormalShootDMG: 52.5
+  PushShootFORCE: 1250000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
-  NormalShootSpeed: 100
-  NormalShootCadenceTime: 0.3
+  NormalShootSpeed: 120
+  NormalShootCadenceTime: 0.5
   NormalShootMaxRange: 150
   NormalShootAngle: 180
   PushShootAngle: 40
@@ -62,10 +62,10 @@ MonoBehaviour:
   PushShootBounceForce: 60
   MineShootAngle: 40
   MineShootRange: 10
-  DashCooldown: 2
-  PushShootCooldown: 3
+  DashCooldown: 4
+  PushShootCooldown: 6
   MineExplosionTime: 5
-  UniqueAbilityCooldown: 7
+  UniqueAbilityCooldown: 40
   NormalShootOverHeat: 5
   CooldownSpeed: 1
   DeadDelay: 2.5
@@ -84,6 +84,7 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
+    marginToFleeFromSandstorm: 50
   WinObjects:
   - GameObject: {fileID: 2180426808490395825, guid: 7eff110620e709d449eb6974f1b3b011, type: 3}
     StringValue: Pepe_0
