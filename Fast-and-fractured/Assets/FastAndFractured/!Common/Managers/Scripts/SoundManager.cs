@@ -3,10 +3,11 @@ using UnityEngine;
 using FMOD.Studio;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class SoundManager : AbstractSingleton<SoundManager>
+    public class SoundManager : AbstractSingleton<SoundManager>, IPausable
     {
         #region Variables
         #region Volume Variables
@@ -31,17 +32,29 @@ namespace Utilities
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
         #endregion
 
+        EventReference musicGameLoopReference;
         #endregion
 
         protected override void Awake()
         {
             base.Awake();
+            musicGameLoopReference.Path = "event:/MusicEvents/GameLoopMusicEvent";
         }
 
         private void Start()
         {
             if (muteToggle != null)
                 ToggleMuteAllSounds();
+        }
+
+        private void OnEnable()
+        {
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance.UnregisterPausable(this);
         }
 
         #region Play Sounds Methods
@@ -111,6 +124,15 @@ namespace Utilities
                 instance.setPaused(true);
         }
 
+        public void PauseAllSounds()
+        {
+            foreach (EventInstance instance in _activeEvents.Values)
+            {
+                instance.setPaused(true);
+            }
+            ResumeAudio(musicGameLoopReference);
+        }
+
         /// <summary>
         /// Resumes a paused sound event
         /// </summary>
@@ -119,6 +141,14 @@ namespace Utilities
         {
             if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
                 instance.setPaused(false);
+        }
+
+        public void ResumeAllSounds()
+        {
+            foreach (EventInstance instance in _activeEvents.Values)
+            {
+                instance.setPaused(false);
+            }
         }
         #endregion
 
@@ -204,5 +234,15 @@ namespace Utilities
         }
         #endregion
         #endregion
+
+        public void OnPause()
+        {
+            PauseAllSounds();
+        }
+
+        public void OnResume()
+        {
+            ResumeAllSounds();
+        }
     }
 }
