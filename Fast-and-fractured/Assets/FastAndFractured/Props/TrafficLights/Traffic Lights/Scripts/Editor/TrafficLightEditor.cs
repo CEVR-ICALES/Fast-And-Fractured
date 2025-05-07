@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-[CustomEditor(typeof(TrafficLightBehaviour),false)]
+using Utilities;
+[CustomEditor(typeof(TrafficLightLamp),false)]
 [CanEditMultipleObjects]
 
 public class TrafficLightEditor : Editor
@@ -12,7 +13,7 @@ public class TrafficLightEditor : Editor
         base.OnInspectorGUI();
         if(GUILayout.Button("Update light state"))
         {
-            ((TrafficLightBehaviour)target).UpdateLights();
+           // ((TrafficLightLamp)target).UpdateLights();
         }
     }
 }

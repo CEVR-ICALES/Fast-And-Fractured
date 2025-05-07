@@ -40,7 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7350752657353995067}
-  - component: {fileID: 8097499063316585523}
+  - component: {fileID: 266702824720625360}
   m_Layer: 0
   m_Name: BaseTrafficLight
   m_TagString: Untagged
@@ -64,7 +64,7 @@ Transform:
   - {fileID: 682117148500011472}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8097499063316585523
+--- !u!114 &266702824720625360
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,12 +73,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1752902136969420183}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Script: {fileID: 11500000, guid: 33aee50f4aceb494d9e0a51a707c3e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lightMeshRenderer: []
-  numberOfTrafficLights: 1
-  numberOfLightsInTrafficLights: 1
-  baseColorType: 0
-  greenMaterial: {fileID: 2100000, guid: 5d47cf0c54dea69488487c9308df1085, type: 2}
-  greyMaterial: {fileID: 2100000, guid: d3e36e339d2e7fa4c912d6d68425ac00, type: 2}
+  poleRenderer: {fileID: 0}
+  greenPoleMaterial: {fileID: 2100000, guid: 5d47cf0c54dea69488487c9308df1085, type: 2}
+  greyPoleMaterial: {fileID: 2100000, guid: d3e36e339d2e7fa4c912d6d68425ac00, type: 2}
+  initialPoleColor: 1
+  lightOnMaterial: {fileID: 2100000, guid: 616eb1f7ed511c0458a16492a288bcd1, type: 2}
+  lightOffMaterial: {fileID: 2100000, guid: f79a9c3f02e54d34b9fbedc365a93d22, type: 2}
+  trafficUnits: []
+  activateOnStart: 1
+  setInitialStateOnStart: 1
