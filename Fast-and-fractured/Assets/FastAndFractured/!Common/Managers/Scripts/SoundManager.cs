@@ -85,15 +85,15 @@ namespace Utilities
             }
         }
 
-        //private void OnEnable()
-        //{
-        //    PauseManager.Instance.RegisterPausable(this);
-        //}
+        private void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
 
-        //private void OnDisable()
-        //{
-        //    PauseManager.Instance.UnregisterPausable(this);
-        //}
+        private void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
+        }
 
         #region Play Sounds Methods
         /// <summary>
