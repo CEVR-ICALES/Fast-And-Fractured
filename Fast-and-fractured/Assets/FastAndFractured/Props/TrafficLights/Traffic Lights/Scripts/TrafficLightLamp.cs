@@ -3,17 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
- 
- 
+
+
 
 public class TrafficLightLamp : MonoBehaviour
 {
-    [Tooltip("El tipo de luz que representa este componente (Roja, Amarilla, Verde, etc.)")]
     public LampType lampType;
-    [Tooltip("Renderer de la malla para esta luz espec?fica.")]
     public MeshRenderer lampRenderer;
 
-    private Material _originalMaterial; // Para restaurar si es necesario, aunque cambiaremos entre On/Off
+    private Material _originalMaterial;
     private Material _lightOnMaterial;
     private Material _lightOffMaterial;
     private bool _isInitialized = false;
@@ -25,15 +23,15 @@ public class TrafficLightLamp : MonoBehaviour
             lampRenderer = GetComponent<MeshRenderer>();
             if (lampRenderer == null)
             {
-                Debug.LogError($"TrafficLightLamp en {gameObject.name} no tiene MeshRenderer asignado y no se encontr? uno.", gameObject);
+                Debug.LogError($"TrafficLightLamp   {gameObject.name} does not have meshrenderer", gameObject);
                 return;
             }
         }
-        _originalMaterial = lampRenderer.sharedMaterial; // Guardar el material original por si acaso
+        _originalMaterial = lampRenderer.sharedMaterial;
         _lightOnMaterial = lightOnMaterial;
         _lightOffMaterial = lightOffMaterial;
         _isInitialized = true;
-        TurnOff(); // Por defecto, apagada
+        TurnOff();
     }
 
     public void TurnOn()
@@ -43,12 +41,7 @@ public class TrafficLightLamp : MonoBehaviour
         {
             lampRenderer.material = _lightOnMaterial;
         }
-        else
-        {
-            // Fallback si no hay material "On", podr?amos usar emisi?n en el original.
-            // Pero basado en tu descripci?n, deber?as tener un material "On".
-            Debug.LogWarning($"LightOnMaterial no asignado para {gameObject.name}. La luz no se encender? correctamente.");
-        }
+
     }
 
     public void TurnOff()
@@ -58,12 +51,7 @@ public class TrafficLightLamp : MonoBehaviour
         {
             lampRenderer.material = _lightOffMaterial;
         }
-        else
-        {
-            // Fallback si no hay material "Off"
-            lampRenderer.material = _originalMaterial;
-            Debug.LogWarning($"LightOffMaterial no asignado para {gameObject.name}. Se usar? el material original.");
-        }
+
     }
 
     void OnValidate()
@@ -85,7 +73,7 @@ public enum LampType
     Red,
     Yellow,
     Green,
-    PedestrianRed,    // O "Don't Walk"
-    PedestrianGreen,  // O "Walk"
-    Off // Un estado donde ninguna luz de la unidad est? activa, si es necesario en la secuencia
+    PedestrianRed,
+    PedestrianGreen,
+    Off
 }

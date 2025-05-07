@@ -2,30 +2,23 @@
 using System.Collections.Generic;
 using System;
 using Utilities;
-using UnityEditor; // Para TimerSystem
-
-[RequireComponent(typeof(TrafficLightLampCollector))] // Para ayudar a encontrar las luces
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+[RequireComponent(typeof(TrafficLightLampCollector))]
 public class TrafficLightUnit : MonoBehaviour
 {
     [Serializable]
     public struct LightStateDefinition
     {
-        [Tooltip("El tipo de luz que estará activa en este estado (Roja, Verde, etc.).")]
         public LampType activeLamp;
-        [Tooltip("Duración de este estado en segundos.")]
         public float duration;
-        [Tooltip("¿Esta luz parpadea durante este estado?")]
         public bool isFlashing;
-        [Tooltip("Tiempo encendida durante el parpadeo (si isFlashing es true).")]
         public float flashOnTime;
-        [Tooltip("Tiempo apagada durante el parpadeo (si isFlashing es true).")]
         public float flashOffTime;
     }
 
-    [Tooltip("Secuencia de estados por los que ciclará esta unidad de semáforo.")]
     public List<LightStateDefinition> stateSequence = new List<LightStateDefinition>();
-
-    [Tooltip("Lista de lámparas gestionadas por esta unidad. Rellenar en el editor o usar 'Auto-Collect Lamps'.")]
     public List<TrafficLightLamp> lamps = new List<TrafficLightLamp>();
 
     private int _currentStateIndex = -1;
@@ -45,7 +38,7 @@ public class TrafficLightUnit : MonoBehaviour
 
         if (lamps.Count == 0)
         {
-            Debug.LogWarning($"TrafficLightUnit en {gameObject.name} no tiene lámparas asignadas. Intenta usar 'Auto-Collect Lamps' en el TrafficLightPole.", gameObject);
+            Debug.LogWarning($"There are no lightlmps use 'Auto-Collect Lamps' in TrafficLightPole. to assign them or make it manually", gameObject);
         }
 
         foreach (var lamp in lamps)
@@ -55,19 +48,19 @@ public class TrafficLightUnit : MonoBehaviour
                 lamp.Initialize(_lightOnMaterial, _lightOffMaterial);
             }
         }
-        _currentStateIndex = -1; // Asegura que empiece desde el primer estado al activar
+        _currentStateIndex = -1;
     }
 
     public void ActivateUnit()
     {
         if (stateSequence.Count == 0)
         {
-            Debug.LogWarning($"TrafficLightUnit en {gameObject.name} no tiene secuencia de estados. No se puede activar.", gameObject);
+            Debug.LogWarning($"TrafficLightUnit does not have states", gameObject);
             TurnAllLampsOff();
             return;
         }
         _isUnitActive = true;
-        _currentStateIndex = -1; // Para que AdvanceState empiece en el 0
+        _currentStateIndex = -1;
         AdvanceState();
     }
 
@@ -108,7 +101,7 @@ public class TrafficLightUnit : MonoBehaviour
     {
         if (!_isUnitActive || stateSequence.Count == 0) return;
 
-        StopCurrentTimers(); // Detiene timers anteriores antes de empezar uno nuevo
+        StopCurrentTimers();
 
         _currentStateIndex = (_currentStateIndex + 1) % stateSequence.Count;
         LightStateDefinition currentState = stateSequence[_currentStateIndex];
@@ -123,11 +116,11 @@ public class TrafficLightUnit : MonoBehaviour
 
     private void ApplyState(LightStateDefinition stateDef)
     {
-        TurnAllLampsOff(); // Apaga todas primero
+        TurnAllLampsOff();
 
-        _currentFlashingLamp = null; // Resetea la lámpara que parpadea
+        _currentFlashingLamp = null;
 
-        if (stateDef.activeLamp != LampType.Off) // Si no es un estado 'Todo Apagado'
+        if (stateDef.activeLamp != LampType.Off)
         {
             TrafficLightLamp lampToActivate = FindLamp(stateDef.activeLamp);
             if (lampToActivate != null)
@@ -135,7 +128,7 @@ public class TrafficLightUnit : MonoBehaviour
                 if (stateDef.isFlashing)
                 {
                     _currentFlashingLamp = lampToActivate;
-                    _isFlashingLampOn = false; // Empezar apagado para el primer tick de flash
+                    _isFlashingLampOn = false;
                     StartFlashing();
                 }
                 else
@@ -145,7 +138,7 @@ public class TrafficLightUnit : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"No se encontró la lámpara de tipo {stateDef.activeLamp} en {gameObject.name} para el estado actual.", gameObject);
+                Debug.LogWarning($"lamp {stateDef.activeLamp} in {gameObject.name}  not found for current state", gameObject);
             }
         }
     }
@@ -155,7 +148,7 @@ public class TrafficLightUnit : MonoBehaviour
         if (_currentFlashingLamp == null || !stateSequence[_currentStateIndex].isFlashing) return;
 
         LightStateDefinition currentState = stateSequence[_currentStateIndex];
-        _isFlashingLampOn = !_isFlashingLampOn; // Invertir estado
+        _isFlashingLampOn = !_isFlashingLampOn;
 
         if (_isFlashingLampOn)
         {
@@ -192,67 +185,57 @@ public class TrafficLightUnit : MonoBehaviour
         }
     }
 
-    // En TrafficLightUnit.cs
 
     public void Editor_CollectLamps()
     {
         lamps.Clear();
 
-        // 1. Buscar TrafficLightLamp existentes en toda la jerarquía descendiente de ESTA UNIDAD.
         TrafficLightLamp[] existingLamps = GetComponentsInChildren<TrafficLightLamp>(true);
         foreach (var lamp in existingLamps)
         {
-            // GetComponentsInChildren asegura que 'lamp' es un descendiente de este TrafficLightUnit.
             if (!lamps.Contains(lamp))
             {
                 lamps.Add(lamp);
             }
         }
 
-        // 2. Fallback: Si no se encontraron lámparas con el componente, buscar MeshRenderers
-        //    bajo esta unidad y añadirles el componente TrafficLightLamp.
         if (lamps.Count == 0)
         {
-            // Buscar todos los MeshRenderers descendientes de esta unidad.
             MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>(true);
             foreach (var r in renderers)
             {
-                // Asegurarse de que el GameObject con el MeshRenderer no sea la propia unidad
-                // (las unidades no suelen tener su propio renderer, son contenedores).
+
                 if (r.gameObject == this.gameObject) continue;
 
                 TrafficLightLamp lampComponent = r.gameObject.GetComponent<TrafficLightLamp>();
-                if (lampComponent == null) // Solo añadir si no existe ya
+                if (lampComponent == null)
                 {
                     lampComponent = r.gameObject.AddComponent<TrafficLightLamp>();
-                    lampComponent.lampRenderer = r; // Asignar el renderer encontrado
-
-                    // Intenta adivinar el tipo de lámpara por el nombre del GameObject.
+                    lampComponent.lampRenderer = r;
                     string nameLower = r.gameObject.name.ToLower();
                     if (nameLower.Contains("pedestrian") || nameLower.Contains("peaton"))
                     {
                         if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.PedestrianRed;
                         else if (nameLower.Contains("green") || nameLower.Contains("walk") || nameLower.Contains("verde")) lampComponent.lampType = LampType.PedestrianGreen;
                     }
-                    else // Asumir semáforo de vehículos
+                    else
                     {
                         if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.Red;
                         else if (nameLower.Contains("yellow") || nameLower.Contains("amber") || nameLower.Contains("amarillo")) lampComponent.lampType = LampType.Yellow;
                         else if (nameLower.Contains("green") || nameLower.Contains("verde")) lampComponent.lampType = LampType.Green;
                     }
                 }
-                // Añadir a la lista (incluso si ya existía pero no fue recogido en el primer paso, aunque es improbable).
                 if (!lamps.Contains(lampComponent))
                 {
                     lamps.Add(lampComponent);
                 }
             }
         }
-        // Mark dirty para que los cambios se guarden
+#if UNITY_EDITOR
         EditorUtility.SetDirty(this);
         foreach (var lamp in lamps) if (lamp != null) EditorUtility.SetDirty(lamp);
+#endif
     }
 }
-
-// Pequeño helper para el botón en el editor de TrafficLightUnit
+[Obsolete ("Not needed anymore")]
 public class TrafficLightLampCollector : MonoBehaviour { }

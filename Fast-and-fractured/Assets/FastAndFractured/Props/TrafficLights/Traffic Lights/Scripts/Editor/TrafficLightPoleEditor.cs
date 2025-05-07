@@ -31,7 +31,6 @@ public class TrafficLightPoleEditor : Editor
 
         if (GUILayout.Button("Apply Initial Light States (Preview)"))
         {
-            // Es importante registrar todos los objetos que podr?an cambiar
             List<UnityEngine.Object> objectsToRecord = new List<UnityEngine.Object>();
             objectsToRecord.Add(pole);
             foreach (var unit in pole.trafficUnits)
@@ -59,15 +58,15 @@ public class TrafficLightPoleEditor : Editor
         {
             if (GUILayout.Button(pole.activateOnStart ? "Deactivate System (Runtime)" : "Activate System (Runtime)"))
             {
-                if (pole.activateOnStart) // actualmente activo o configurado para activarse
+                if (pole.activateOnStart)
                 {
                     pole.DeactivateSystem();
-                    pole.activateOnStart = false; // Reflejar el cambio en la UI del editor
+                    pole.activateOnStart = false;
                 }
                 else
                 {
                     pole.ActivateSystem();
-                    pole.activateOnStart = true; // Reflejar el cambio
+                    pole.activateOnStart = true;
                 }
             }
         }

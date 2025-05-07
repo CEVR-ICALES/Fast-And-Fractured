@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5588201474673517770}
   - component: {fileID: 1747565588919516875}
   - component: {fileID: 4767488575423342050}
+  - component: {fileID: 1313186917898096272}
   m_Layer: 0
   m_Name: GreenLight_Cevr_Icales
   m_TagString: Untagged
@@ -83,6 +84,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1313186917898096272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830386038703355792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lampType: 2
+  lampRenderer: {fileID: 4767488575423342050}
 --- !u!1 &3291864532957465775
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,8 +107,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7977205058367833966}
+  - component: {fileID: 2552387320318984049}
   m_Layer: 0
-  m_Name: Models
+  m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -114,10 +130,41 @@ Transform:
   m_Children:
   - {fileID: 5588201474673517770}
   - {fileID: 2599668831176648722}
-  - {fileID: 7655946629161853672}
   - {fileID: 669987211716509471}
   m_Father: {fileID: 8304698666431917938}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2552387320318984049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3291864532957465775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94e71d76dcd175a489e405ac9f6390ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stateSequence:
+  - activeLamp: 0
+    duration: 2
+    isFlashing: 0
+    flashOnTime: 0
+    flashOffTime: 0
+  - activeLamp: 1
+    duration: 2
+    isFlashing: 1
+    flashOnTime: 0.4
+    flashOffTime: 0.4
+  - activeLamp: 2
+    duration: 2
+    isFlashing: 0
+    flashOnTime: 0.4
+    flashOffTime: 0.4
+  lamps:
+  - {fileID: 1313186917898096272}
+  - {fileID: 3000466732561827754}
+  - {fileID: 3242919807008599228}
 --- !u!1 &4379264538220473488
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,6 +176,7 @@ GameObject:
   - component: {fileID: 2599668831176648722}
   - component: {fileID: 3537554850785312250}
   - component: {fileID: 7288061099770388666}
+  - component: {fileID: 3000466732561827754}
   m_Layer: 0
   m_Name: RedLight_Cevr_Icales
   m_TagString: Untagged
@@ -201,6 +249,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &3000466732561827754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4379264538220473488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lampType: 0
+  lampRenderer: {fileID: 7288061099770388666}
 --- !u!1 &6031296728190478711
 GameObject:
   m_ObjectHideFlags: 0
@@ -212,6 +274,7 @@ GameObject:
   - component: {fileID: 669987211716509471}
   - component: {fileID: 8562179178054559845}
   - component: {fileID: 8122668672083840848}
+  - component: {fileID: 3242919807008599228}
   m_Layer: 0
   m_Name: YellowLight_Cevr_Icales
   m_TagString: Untagged
@@ -284,6 +347,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &3242919807008599228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6031296728190478711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lampType: 1
+  lampRenderer: {fileID: 8122668672083840848}
 --- !u!1 &6335082743088197722
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,12 +387,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6335082743088197722}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7977205058367833966}
+  m_Father: {fileID: 8304698666431917938}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8107494956039540127
 MeshFilter:
@@ -375,6 +452,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: poleRenderer
+      value: 
+      objectReference: {fileID: 1746110296600154653}
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: trafficUnits.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: trafficUnits.Array.data[0]
+      value: 
+      objectReference: {fileID: 2552387320318984049}
     - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_Name
       value: ThreeZeroTrafficLight
@@ -450,6 +539,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7655946629161853672}
     - targetCorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7977205058367833966}

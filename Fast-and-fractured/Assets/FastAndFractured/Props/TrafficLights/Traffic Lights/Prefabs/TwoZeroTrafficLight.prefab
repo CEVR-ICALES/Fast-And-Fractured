@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1122820776836162636}
   - component: {fileID: 2901753933073594757}
   - component: {fileID: 5854435048315728583}
+  - component: {fileID: 5918981951846418821}
   m_Layer: 0
   m_Name: WalkLight_Cevr_Icales
   m_TagString: Untagged
@@ -26,12 +27,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3928967568673920897}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6135099033660866389}
+  m_Father: {fileID: 8361605674112080059}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2901753933073594757
 MeshFilter:
@@ -61,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5d47cf0c54dea69488487c9308df1085, type: 2}
+  - {fileID: 2100000, guid: f79a9c3f02e54d34b9fbedc365a93d22, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -83,6 +84,85 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5918981951846418821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3928967568673920897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lampType: 4
+  lampRenderer: {fileID: 5854435048315728583}
+--- !u!1 &4361803561083098583
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8361605674112080059}
+  - component: {fileID: 7628469656586842384}
+  m_Layer: 0
+  m_Name: 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8361605674112080059
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4361803561083098583}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3983112873027217786}
+  - {fileID: 1122820776836162636}
+  m_Father: {fileID: 6135099033660866389}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7628469656586842384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4361803561083098583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94e71d76dcd175a489e405ac9f6390ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stateSequence:
+  - activeLamp: 2
+    duration: 2
+    isFlashing: 0
+    flashOnTime: 0.3
+    flashOffTime: 0.3
+  - activeLamp: 1
+    duration: 2
+    isFlashing: 1
+    flashOnTime: 0.25
+    flashOffTime: 0.25
+  - activeLamp: 0
+    duration: 2
+    isFlashing: 0
+    flashOnTime: 0.25
+    flashOffTime: 0.25
+  lamps:
+  - {fileID: 6943022158213369911}
+  - {fileID: 5918981951846418821}
 --- !u!1 &6526194482563927216
 GameObject:
   m_ObjectHideFlags: 0
@@ -109,8 +189,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6526194482563927216}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -177,6 +257,7 @@ GameObject:
   - component: {fileID: 3983112873027217786}
   - component: {fileID: 1818148579802923214}
   - component: {fileID: 1814899483702125136}
+  - component: {fileID: 6943022158213369911}
   m_Layer: 0
   m_Name: WaitLight_Cevr_Icales
   m_TagString: Untagged
@@ -192,12 +273,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8327854430336097620}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6135099033660866389}
+  m_Father: {fileID: 8361605674112080059}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1818148579802923214
 MeshFilter:
@@ -227,7 +308,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5d47cf0c54dea69488487c9308df1085, type: 2}
+  - {fileID: 2100000, guid: f79a9c3f02e54d34b9fbedc365a93d22, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -249,6 +330,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6943022158213369911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8327854430336097620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39527885cc4d14281b1efa9b77d1ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lampType: 3
+  lampRenderer: {fileID: 1814899483702125136}
 --- !u!1 &8379416000722388282
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,8 +374,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 794243129207912904}
-  - {fileID: 3983112873027217786}
-  - {fileID: 1122820776836162636}
+  - {fileID: 8361605674112080059}
   m_Father: {fileID: 1011328139985562960}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &540335728634725504
@@ -291,6 +385,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: poleRenderer
+      value: 
+      objectReference: {fileID: 4757522319693662694}
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: trafficUnits.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: trafficUnits.Array.data[0]
+      value: 
+      objectReference: {fileID: 7628469656586842384}
     - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_Name
       value: TwoZeroTrafficLight
