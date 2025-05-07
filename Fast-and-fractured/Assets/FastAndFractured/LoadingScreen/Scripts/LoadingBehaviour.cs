@@ -14,7 +14,7 @@ namespace FastAndFractured
         [SerializeField] private Image progressBarImage;
         private ITimer _timerReference;
         private const float IMAGE_TIMER_DURATION = 5f;
-        private const float SCENE_LOAD_DELAY = 0.01f;
+        private const float SCENE_LOAD_DELAY = 0.1f;
         private AsyncOperation _operation;
         private bool _isLoadingScene = false;
         private float _visualProgress = 0f;
