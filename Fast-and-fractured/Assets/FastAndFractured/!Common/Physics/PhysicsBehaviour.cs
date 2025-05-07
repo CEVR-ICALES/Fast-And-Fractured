@@ -209,17 +209,7 @@ namespace FastAndFractured
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
             if(StatsController.IsPlayer)
             {
-                HUDManager.Instance.UpdateUIElement(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
-                hudEffect = HUDManager.Instance.GetEffectGameObject(ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME));
-                hudEffect.SetActive(!hudEffect.activeSelf);
-                TimerSystem.Instance.CreateTimer(TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED, onTimerDecreaseComplete: () =>
-                {
-                    if (hudEffect != null)
-                    {
-                        HUDManager.Instance.FadeOutEffectSprites(hudEffect, TIME_UNTIL_CAR_PUSH_EFFECT_FADE_OUT);
-                        hudEffect = null;
-                    }
-                });
+                HUDManager.Instance.UpdateUIEffect(UIElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
             }
         }
 
