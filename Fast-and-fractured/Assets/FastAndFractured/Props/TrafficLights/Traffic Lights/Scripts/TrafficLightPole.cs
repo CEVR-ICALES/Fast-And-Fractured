@@ -9,7 +9,7 @@ public class TrafficLightPole : MonoBehaviour
     public MeshRenderer poleRenderer;
     public Material greenPoleMaterial;
     public Material greyPoleMaterial;
-    public PoleMaterialType initialPoleColor = PoleMaterialType.Grey;
+    public PoleMaterialType initialPoleColor = PoleMaterialType.GREY;
 
     [Header("Light Materials")]
     public Material lightOnMaterial;
@@ -51,7 +51,7 @@ public class TrafficLightPole : MonoBehaviour
     {
         if (poleRenderer != null)
         {
-            poleRenderer.material = initialPoleColor == PoleMaterialType.Green ? greenPoleMaterial : greyPoleMaterial;
+            poleRenderer.material = initialPoleColor == PoleMaterialType.GREEN ? greenPoleMaterial : greyPoleMaterial;
         }
     }
 

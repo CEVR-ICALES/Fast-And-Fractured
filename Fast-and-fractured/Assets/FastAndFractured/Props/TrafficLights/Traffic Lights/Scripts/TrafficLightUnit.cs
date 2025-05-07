@@ -120,7 +120,7 @@ public class TrafficLightUnit : MonoBehaviour
 
         _currentFlashingLamp = null;
 
-        if (stateDef.activeLamp != LampType.Off)
+        if (stateDef.activeLamp != LampType.OFF)
         {
             TrafficLightLamp lampToActivate = FindLamp(stateDef.activeLamp);
             if (lampToActivate != null)
@@ -215,14 +215,14 @@ public class TrafficLightUnit : MonoBehaviour
                     string nameLower = r.gameObject.name.ToLower();
                     if (nameLower.Contains("pedestrian") || nameLower.Contains("peaton"))
                     {
-                        if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.PedestrianRed;
-                        else if (nameLower.Contains("green") || nameLower.Contains("walk") || nameLower.Contains("verde")) lampComponent.lampType = LampType.PedestrianGreen;
+                        if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.PEDESTRIAN_RED;
+                        else if (nameLower.Contains("green") || nameLower.Contains("walk") || nameLower.Contains("verde")) lampComponent.lampType = LampType.PEDESTRIAN_GREEN;
                     }
                     else
                     {
-                        if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.Red;
-                        else if (nameLower.Contains("yellow") || nameLower.Contains("amber") || nameLower.Contains("amarillo")) lampComponent.lampType = LampType.Yellow;
-                        else if (nameLower.Contains("green") || nameLower.Contains("verde")) lampComponent.lampType = LampType.Green;
+                        if (nameLower.Contains("red") || nameLower.Contains("rojo")) lampComponent.lampType = LampType.RED;
+                        else if (nameLower.Contains("yellow") || nameLower.Contains("amber") || nameLower.Contains("amarillo")) lampComponent.lampType = LampType.YELLOW;
+                        else if (nameLower.Contains("green") || nameLower.Contains("verde")) lampComponent.lampType = LampType.GREEN;
                     }
                 }
                 if (!lamps.Contains(lampComponent))

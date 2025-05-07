@@ -64,16 +64,16 @@ public class TrafficLightLamp : MonoBehaviour
 }
 public enum PoleMaterialType
 {
-    Green,
-    Grey
+    GREEN,
+    GREY
 }
 
 public enum LampType
 {
-    Red,
-    Yellow,
-    Green,
-    PedestrianRed,
-    PedestrianGreen,
-    Off
+    RED,
+    YELLOW,
+    GREEN,
+    PEDESTRIAN_RED,
+    PEDESTRIAN_GREEN,
+    OFF
 }
