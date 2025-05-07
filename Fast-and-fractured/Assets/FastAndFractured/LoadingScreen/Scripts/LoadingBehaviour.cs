@@ -11,10 +11,14 @@ namespace FastAndFractured
     {
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite[] backgroundSprites;
-        [SerializeField] private Slider progressBar; // Opcional: barra de progreso
-        private ITimer timerReference;
+        [SerializeField] private Image progressBarImage;
+        private ITimer _timerReference;
         private const float IMAGE_TIMER_DURATION = 5f;
-        private const float SCENE_LOAD_DELAY = 0.1f;
+        private const float SCENE_LOAD_DELAY = 0.01f;
+        private AsyncOperation _operation;
+        private bool _isLoadingScene = false;
+        private float _visualProgress = 0f;
+        private float _smoothVelocity = 0f;
 
         void OnEnable()
         {
@@ -22,10 +26,34 @@ namespace FastAndFractured
         }
         void OnDisable()
         {
-            if (timerReference != null)
+            if (_timerReference != null)
             {
-                timerReference.StopTimer();
-                timerReference = null;
+                _timerReference.StopTimer();
+                _timerReference = null;
+            }
+        }
+
+        
+        void Update()
+        {
+            if (_isLoadingScene && _operation != null)
+            {
+                float targetProgress = Mathf.Clamp01(_operation.progress / 0.9f);
+                _visualProgress = Mathf.SmoothDamp(_visualProgress, targetProgress, ref _smoothVelocity, 0.5f);
+
+                if (progressBarImage != null)
+                {
+                    progressBarImage.fillAmount = _visualProgress;
+                }
+
+                if (_operation.progress >= 0.9f && !_operation.allowSceneActivation)
+                {
+                    if (progressBarImage != null && progressBarImage.fillAmount >= 0.9999f)
+                    {
+                        _operation.allowSceneActivation = true;
+                        _isLoadingScene = false;
+                    }
+                }
             }
         }
 
@@ -33,31 +61,15 @@ namespace FastAndFractured
         {
             TimerSystem.Instance.CreateTimer(SCENE_LOAD_DELAY, onTimerDecreaseComplete: () =>
             {
-                StartCoroutine(LoadSceneAsync(sceneBuildIndex));
+                StartSceneLoading(sceneBuildIndex);
             });
         }
 
-        private IEnumerator LoadSceneAsync(int sceneBuildIndex)
+        private void StartSceneLoading(int sceneBuildIndex)
         {
-            // Inicia la carga de la escena en segundo plano
-            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneBuildIndex);
-            operation.allowSceneActivation = false; // Espera antes de activar la escena
-
-            while (!operation.isDone)
-            {
-                float progress = Mathf.Clamp01(operation.progress / 0.9f); // Normaliza el progreso (0 a 1)
-                Debug.Log($"Loading progress: {progress}");
-                if (progressBar != null)
-                {
-                    progressBar.value = progress;
-                }
-                if (operation.progress >= 0.9f)
-                {
-
-                    operation.allowSceneActivation = true; // Activa la escena cuando esté lista
-                }
-                yield return null;
-            }
+            _operation = SceneManager.LoadSceneAsync(sceneBuildIndex);
+            _operation.allowSceneActivation = false;
+            _isLoadingScene = true;
         }
 
         private void SetRandomBackgroundImage()
@@ -66,7 +78,7 @@ namespace FastAndFractured
             {
                 int randomIndex = Random.Range(0, backgroundSprites.Length);
                 backgroundImage.sprite = backgroundSprites[randomIndex];
-                timerReference = TimerSystem.Instance.CreateTimer(IMAGE_TIMER_DURATION, onTimerDecreaseComplete: () =>
+                _timerReference = TimerSystem.Instance.CreateTimer(IMAGE_TIMER_DURATION, onTimerDecreaseComplete: () =>
                 {
                     SetRandomBackgroundImage();
                 });
