@@ -8,10 +8,11 @@ namespace FastAndFractured
 {
     public class MinimapFollowPlayer : MonoBehaviour
     {
-        [SerializeField] private GameObject player;
+        private GameObject _player;
         [SerializeField] private float cameraSize = 80f;
         [SerializeField] private GameObject characterIconMinimap;
-        private bool isPlayerReceived = false;
+        private bool _isPlayerReceived = false;
+        private Camera _cameraReference;
         void Start()
         {
             Camera camera = GetComponent<Camera>();
@@ -35,30 +36,31 @@ namespace FastAndFractured
         
         void Update()
         {
-            if (player != null && isPlayerReceived)
+            if (_player != null && _isPlayerReceived)
             {
-                Vector3 newPosition = player.transform.position;
+                Vector3 newPosition = _player.transform.position;
                 newPosition.y = transform.position.y;
                 transform.position = newPosition;
-                Camera mainCamera = Camera.main;
-                if (mainCamera != null)
+                
+                if (_cameraReference != null)
                 {
-                    Vector3 forward = mainCamera.transform.forward;
+                    Vector3 forward = _cameraReference.transform.forward;
                     Quaternion newRotation = Quaternion.LookRotation(forward, Vector3.up);
                     transform.rotation = Quaternion.Euler(90, newRotation.eulerAngles.y, 0);
                 }
-                characterIconMinimap.transform.rotation = Quaternion.Euler(90, player.transform.eulerAngles.y, 0);
+                characterIconMinimap.transform.rotation = Quaternion.Euler(90, _player.transform.eulerAngles.y, 0);
             }
             
         }
         private void OnCharactersCustomStart()
         {
-            if (!isPlayerReceived)
+            if (!_isPlayerReceived)
             {
-                player = LevelController.Instance.playerReference;
-                isPlayerReceived = true;
+                _player = LevelController.Instance.playerReference;
+                _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
+                _cameraReference = _player.transform.parent.GetComponent<CameraHolder>().CameraToHold;
             }
         }
     }
