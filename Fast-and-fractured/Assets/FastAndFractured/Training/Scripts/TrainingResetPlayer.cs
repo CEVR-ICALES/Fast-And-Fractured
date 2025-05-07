@@ -7,11 +7,13 @@ public class TrainingResetPlayer : MonoBehaviour
 {
     [SerializeField]
     private List<StatsController> charactersToReset;
-    [SerializeField]
-    private Transform[] spawnPosition;
+    private List<Vector3> _spawnPosition;
     private void Start()
     {
-
+        foreach (var character in charactersToReset)
+        {
+            _spawnPosition.Add(character.transform.position);
+        }
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -25,7 +27,7 @@ public class TrainingResetPlayer : MonoBehaviour
     {
         for (int i = 0; i < charactersToReset.Count; i++)
         {
-            charactersToReset[i].gameObject.transform.position = spawnPosition[i].position;
+            charactersToReset[i].gameObject.transform.position = _spawnPosition[i];
             charactersToReset[i].RecoverEndurance(charactersToReset[i].MaxEndurance, false);
         }
     }

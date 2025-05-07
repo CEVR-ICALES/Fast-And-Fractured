@@ -10,10 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
-  m_Name: TrainingAction
+  m_Name: TrainingActionState
   m_EditorClassIdentifier: 
-  enterActions: []
+  enterActions:
+  - {fileID: 11400000, guid: ef47ce152114ce84a93514ec655bfbf3, type: 2}
   actions:
   - {fileID: 11400000, guid: 594daf70a51beea4f94044d704f6bbe3, type: 2}
+  - {fileID: 11400000, guid: 2faa2739a380e5342815a5678448c730, type: 2}
   exitActions: []
-  transitions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
+    trueState: {fileID: 11400000, guid: 3ef2855fe966bf84dbae4249ae0af53e, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
