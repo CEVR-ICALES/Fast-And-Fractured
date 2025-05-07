@@ -5,26 +5,28 @@ using UnityEngine;
 
 public class TrainingResetPlayer : MonoBehaviour
 {
-    StatsController[] players;
-    List<Vector3> startingPositions = new List<Vector3>();
+    [SerializeField]
+    private List<StatsController> charactersToReset;
+    [SerializeField]
+    private Transform[] spawnPosition;
     private void Start()
     {
-        players = FindObjectsOfType<StatsController>();
-        foreach (StatsController player in players)
-        {
-            startingPositions.Add(player.gameObject.transform.position);
-        }
 
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out StatsController controller))
+        if (other.TryGetComponent(out StatsController character))
         {
-            for (int i = 0; i < players.Length; i++)
-            {
-                players[i].gameObject.transform.position = startingPositions[i];
-                players[i].RecoverEndurance(players[i].MaxEndurance, false);
-            }
+            ResetLevel();
+        }
+    }
+
+   public void ResetLevel()
+    {
+        for (int i = 0; i < charactersToReset.Count; i++)
+        {
+            charactersToReset[i].gameObject.transform.position = spawnPosition[i].position;
+            charactersToReset[i].RecoverEndurance(charactersToReset[i].MaxEndurance, false);
         }
     }
 }
