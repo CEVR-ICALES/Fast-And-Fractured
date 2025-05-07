@@ -153,16 +153,7 @@ namespace Utilities
         #endregion
 
         #region Volume Methods
-        /// <summary>
-        /// Sets the volume of the specified FMOD parameter
-        /// </summary>
-        /// <param name="parameterName">Name of the FMOD parameter</param>
-        /// <param name="value">New volume value (0.0 - 1.0) </param>
-        public void SetVolume(string parameterName, float value)
-        {
-            RuntimeManager.StudioSystem.setParameterByName(parameterName, value);
-        }
-
+     
         public void SetSFXVolume(float value) => SetVCAVolume("vca:/SFX", value);
         public void SetMusicVolume(float value) => SetVCAVolume("vca:/Music", value);
         public void SetGeneralVolume(float value) => SetVCAVolume("vca:/General", value);
