@@ -253,6 +253,10 @@ namespace FastAndFractured
 
         private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
         {
+            if(_brakeSlowDownTimer != null)
+            {
+                _brakeSlowDownTimer.StopTimer();
+            }
             float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (statsController.DriftingFactorToSpeed / SPEED_TO_METERS_PER_SECOND));
 
             Vector3 targetDriftDirection = transform.right * _driftDirection;
