@@ -49,7 +49,6 @@ namespace FastAndFractured
         [Tooltip("The material which will have its emissive texture modified")]
         [SerializeField] private Material hairMaterial;
 
-
         // Store the original Exposure Weight value
         private float _originalExposureWeight;
 
@@ -60,7 +59,7 @@ namespace FastAndFractured
 
         public EventReference ssjUltiReference;
 
-        [SerializeField] private StatsController statsController;
+        [SerializeField] private StatsController mariaAntoniaStatsController;
 
         private ITimer _timer;
 
@@ -97,17 +96,17 @@ namespace FastAndFractured
 
             SoundManager.Instance.PlayOneShot(ssjUltiReference, transform.position);
 
-            if (statsController == null)
+            if (mariaAntoniaStatsController == null)
             {
                 Debug.LogError("Stats Controller not Found");
                 return false;
             }
 
-            statsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
-            statsController.TemporalProductStat(Enums.Stats.MAX_SPEED, statBoostMultiplier, uniqueAbilityDuration);
-            statsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
-            statsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
-            statsController.TemporalProductStat(Enums.Stats.PUSH_FORCE, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.MAX_SPEED, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.PUSH_FORCE, statBoostMultiplier, uniqueAbilityDuration);
 
             GenerateCroquettes(numberOfCroquettes);
             StartVFX();
