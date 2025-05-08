@@ -13,6 +13,8 @@ namespace FastAndFractured
         [SerializeField] private GameObject characterIconMinimap;
         private bool _isPlayerReceived = false;
         private Camera _cameraReference;
+        private const int IMAGE_X_ROTATION = 90;
+        private const int IMAGE_Z_ROTATION = 0;
         void Start()
         {
             Camera camera = GetComponent<Camera>();
@@ -46,9 +48,9 @@ namespace FastAndFractured
                 {
                     Vector3 forward = _cameraReference.transform.forward;
                     Quaternion newRotation = Quaternion.LookRotation(forward, Vector3.up);
-                    transform.rotation = Quaternion.Euler(90, newRotation.eulerAngles.y, 0);
+                    transform.rotation = Quaternion.Euler(IMAGE_X_ROTATION, newRotation.eulerAngles.y, IMAGE_Z_ROTATION);
                 }
-                characterIconMinimap.transform.rotation = Quaternion.Euler(90, _player.transform.eulerAngles.y, 0);
+                characterIconMinimap.transform.rotation = Quaternion.Euler(IMAGE_X_ROTATION, _player.transform.eulerAngles.y, IMAGE_Z_ROTATION);
             }
             
         }

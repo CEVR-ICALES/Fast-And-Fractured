@@ -19,6 +19,8 @@ namespace FastAndFractured
         private bool _isLoadingScene = false;
         private float _visualProgress = 0f;
         private float _smoothVelocity = 0f;
+        private const float SMOOTH_TIME = 0.5f;
+        private const float OPERATION_PROGRESS_TARGET = 0.9f;
 
         void OnEnable()
         {
@@ -38,17 +40,17 @@ namespace FastAndFractured
         {
             if (_isLoadingScene && _operation != null)
             {
-                float targetProgress = Mathf.Clamp01(_operation.progress / 0.9f);
-                _visualProgress = Mathf.SmoothDamp(_visualProgress, targetProgress, ref _smoothVelocity, 0.5f);
+                float targetProgress = Mathf.Clamp01(_operation.progress / OPERATION_PROGRESS_TARGET);
+                _visualProgress = Mathf.SmoothDamp(_visualProgress, targetProgress, ref _smoothVelocity, SMOOTH_TIME);
 
                 if (progressBarImage != null)
                 {
                     progressBarImage.fillAmount = _visualProgress;
                 }
 
-                if (_operation.progress >= 0.9f && !_operation.allowSceneActivation)
+                if (_operation.progress >= OPERATION_PROGRESS_TARGET && !_operation.allowSceneActivation)
                 {
-                    if (progressBarImage != null && progressBarImage.fillAmount >= 0.9999f)
+                    if (progressBarImage != null && Mathf.Approximately(progressBarImage.fillAmount, 1f))
                     {
                         _operation.allowSceneActivation = true;
                         _isLoadingScene = false;
