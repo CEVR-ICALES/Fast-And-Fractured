@@ -7,7 +7,7 @@ public class Windmill : MonoBehaviour
     [SerializeField] float maxSpeed =10f;
     [SerializeField] float windmillInitialSpeed;
     [SerializeField] float speedIncreasePerSecond = 1;
-    private float currentSpeed;
+    private float _currentSpeed;
     [SerializeField] GameObject transformVisual;
     [SerializeField] Vector3 rotationDirection = Vector3.forward;
 
@@ -17,8 +17,8 @@ public class Windmill : MonoBehaviour
     }
     void Update()
     {
-        currentSpeed = Mathf.Min(currentSpeed + Time.deltaTime, maxSpeed);
-        transformVisual.transform.Rotate(rotationDirection, currentSpeed,Space.Self);
+        currentSpeed = Mathf.Min(_currentSpeed + Time.deltaTime, maxSpeed);
+        transformVisual.transform.Rotate(rotationDirection, _currentSpeed,Space.Self);
 
     }
 }
