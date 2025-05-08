@@ -34,17 +34,20 @@ namespace Utilities
         #endregion
 
         #region Constants
-        private const string PREV_GENERAL_VOLUME_STRING = "PreviousGeneralVolume";
-        private const string PREV_MUSIC_VOLUME_STRING = "PreviousMusicVolume";
-        private const string PREV_SFX_VOLUME_STRING = "PreviousSFXVolume";
-
         private const string GENERAL_VOLUME_STRING = "GeneralVolume";
         private const string MUSIC_VOLUME_STRING = "MusicVolume";
         private const string SFX_VOLUME_STRING = "SFXVolume";
 
-        private const string MUTE_ALL_STRING = "MuteAll";
+        private const string AMBIENCE_ZONE_PARAM_NAME = "AmbienceZone";
          
+        private const string MUTE_ALL_STRING = "MuteAll";
+
         private const float DEFAULT_VOLUME_SLIDER_VALUE = 0.5f;
+        #endregion
+
+        #region Ambience Sounds Variables
+        private EventInstance _ambienceInstance;
+        [SerializeField] private EventReference ambienceEventReference;
         #endregion
 
         EventReference musicGameLoopReference;
@@ -84,6 +87,8 @@ namespace Utilities
                 muteToggle.isOn = PlayerPrefs.GetInt(MUTE_ALL_STRING, 0) == 1;
                 ToggleMuteAllSounds();
             }
+
+            InitializeAmbience();
         }
 
         private void OnEnable()
@@ -192,7 +197,6 @@ namespace Utilities
         #endregion
 
         #region Volume Methods
-
         public void SetSFXVolume(float value) => SetVCAVolume("vca:/SFX", value);
         public void SetMusicVolume(float value) => SetVCAVolume("vca:/Music", value);
         public void SetGeneralVolume(float value) => SetVCAVolume("vca:/General", value);
@@ -257,6 +261,23 @@ namespace Utilities
             PlayerPrefs.Save();
         }
         #endregion
+        #endregion
+
+        #region Ambience Methods
+        private void InitializeAmbience()
+        {
+            if (_ambienceInstance.isValid()) return;
+
+            _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
+            _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
+            _ambienceInstance.start();
+            _ambienceInstance.release();
+        }
+
+        public void SetAmbienceZone(float zoneValue)
+        {
+            _ambienceInstance.setParameterByName(AMBIENCE_ZONE_PARAM_NAME, zoneValue);
+        }
         #endregion
 
         public void OnPause()
