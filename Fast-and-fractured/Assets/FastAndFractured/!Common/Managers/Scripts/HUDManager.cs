@@ -21,6 +21,7 @@ namespace FastAndFractured
         private Image[] _goodEffects;
         private Image[] _normalEffects;
         private Image[] _badEffects;
+        private Image[] _bulletEffects;
 
         #endregion
 
@@ -51,6 +52,7 @@ namespace FastAndFractured
             _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
         }
 
         #endregion
@@ -114,6 +116,24 @@ namespace FastAndFractured
                     break;
                 case UIElementType.BAD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
+                    break;
+                case UIElementType.BULLET_EFFECT:
+                    effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
+                    GameObject bulletContainer = GetUIElement(UIElementType.BULLET_EFFECT).gameObject;
+                    if (bulletContainer != null && effectGameObj != null)
+                    {
+                        RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
+                        RectTransform effectRect = effectGameObj.GetComponent<RectTransform>();
+
+                        if (containerRect != null && effectRect != null)
+                        {
+                            float halfWidth = containerRect.rect.width / 2f;
+                            float halfHeight = containerRect.rect.height / 2f;
+                            float randomX = Random.Range(-halfWidth, halfWidth);
+                            float randomY = Random.Range(-halfHeight, halfHeight);
+                            effectRect.anchoredPosition = new Vector2(randomX, randomY);
+                        }
+                    }
                     break;
             }
 
