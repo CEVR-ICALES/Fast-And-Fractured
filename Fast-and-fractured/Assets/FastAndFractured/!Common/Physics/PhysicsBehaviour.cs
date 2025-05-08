@@ -209,7 +209,7 @@ namespace FastAndFractured
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
             if(StatsController.IsPlayer)
             {
-                HUDManager.Instance.UpdateUIEffect(UIElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
+                HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
             }
         }
 

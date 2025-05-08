@@ -8,7 +8,7 @@ namespace StateMachine
 
     public class ChangeHUDEffectAction : Action
     {
-        [SerializeField] private UIElementType target;
+        [SerializeField] private UIDynamicElementType target;
         [SerializeField] private ScreenEffects spriteKey;
         [SerializeField] private float timeInScreen = 0f;
 
