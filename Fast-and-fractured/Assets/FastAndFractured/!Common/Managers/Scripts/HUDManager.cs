@@ -74,7 +74,7 @@ namespace FastAndFractured
             UpdateUIElement(UIDynamicElementType.SHOOT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerShoot));
             UpdateUIElement(UIDynamicElementType.PUSH_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerPush));
             UpdateUIElement(UIDynamicElementType.ULT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerUA));
-            UpdateUIElement(UIDynamicElementType.SELECTED_PLAYER_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayer));
+            UpdateUIElement(UIDynamicElementType.SELECTED_PLAYER_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerPortrait));
         }
 
         #endregion
