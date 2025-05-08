@@ -128,6 +128,9 @@ namespace FastAndFractured
         public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
         public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
 
+        const string BULLET_EFFECT_NAME = "Bullet_Effect";
+        const float TIME_IN_SCREEN = 0.2f;
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -210,6 +213,7 @@ namespace FastAndFractured
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateUIEffect(UIElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
                         }
                     }
                     else
