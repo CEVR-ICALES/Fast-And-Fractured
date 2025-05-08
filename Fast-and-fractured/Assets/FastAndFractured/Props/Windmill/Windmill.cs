@@ -13,11 +13,11 @@ public class Windmill : MonoBehaviour
 
     private void Start()
     {
-        currentSpeed = windmillInitialSpeed;
+        _currentSpeed = windmillInitialSpeed;
     }
     void Update()
     {
-        currentSpeed = Mathf.Min(_currentSpeed + Time.deltaTime, maxSpeed);
+        _currentSpeed = Mathf.Min(_currentSpeed + Time.deltaTime, maxSpeed);
         transformVisual.transform.Rotate(rotationDirection, _currentSpeed,Space.Self);
 
     }
