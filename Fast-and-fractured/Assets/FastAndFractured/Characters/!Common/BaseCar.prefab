@@ -825,6 +825,40 @@ MonoBehaviour:
   SteeringMode: 0
   brakeMode: 3
   usesCustomBraking: 1
+  brakeSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -1.1769649
+      outSlope: -1.1769649
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.06086044
+    - serializedVersion: 3
+      time: 0.49013016
+      value: 0.51296914
+      inSlope: -0.44666314
+      outSlope: -0.44666314
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.13012518
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1.7402627
+      outSlope: -1.7402627
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.050367296
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  brakeSlowDownTime: 1.3
   usingPhysicsDash: 1
   dashForce: 5000
   airUseDashLimit: 1
@@ -937,6 +971,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onDead:
+    m_PersistentCalls:
+      m_Calls: []
+  onInvulnerabilityAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  onInvulnerabilityLost:
     m_PersistentCalls:
       m_Calls: []
   totalDamageTaken: 0
