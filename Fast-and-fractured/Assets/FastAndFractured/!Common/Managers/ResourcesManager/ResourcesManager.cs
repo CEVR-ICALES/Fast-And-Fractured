@@ -46,6 +46,8 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
 
         InitPlayerIconsDictionary(_playerIcons);
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
+        InitPushShootIconsDictionary(_pushShootIcons);
+        InitNormalShootIconsDictionary(_normalShootIcons);
         InitScreenEffectsDictionary(_screenEffectsSprites);
     }
  
