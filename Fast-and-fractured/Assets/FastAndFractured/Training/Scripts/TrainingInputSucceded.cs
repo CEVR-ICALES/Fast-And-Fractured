@@ -26,6 +26,8 @@ namespace FastAndFractured
 
         [SerializeField]
         private InputMechanics inputMechanics;
+        [SerializeField]
+        private List<TrafficLightLamp> trafficLightLamps;
 
         private void Start()
         {
@@ -90,7 +92,8 @@ namespace FastAndFractured
                         SeeIfInputPressed(PlayerInputController.Instance.IsUsingAbility);
                     }; break;
             }
-
+            trafficLightLamps[0].TurnOn();
+            trafficLightLamps[1].TurnOff();
         }
 
         private void Update()
@@ -103,7 +106,15 @@ namespace FastAndFractured
 
         private void SeeIfInputPressed(bool input)
         {
-            _inputPressed = input;
+            if (!_inputPressed)
+            {
+                _inputPressed = input;
+                if (input)
+                {
+                    trafficLightLamps[0].TurnOff();
+                    trafficLightLamps[1].TurnOn();
+                }
+            }
         }
 
         private void OnTriggerEnter(Collider other)
