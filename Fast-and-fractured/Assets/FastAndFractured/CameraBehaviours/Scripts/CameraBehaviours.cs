@@ -3,18 +3,34 @@ using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
 using Utilities;
+using Utilities.Managers.PauseSystem;
+
 
 namespace FastAndFractured
 {
-    public class CameraBehaviours : AbstractSingleton<CameraBehaviours>
+    public class CameraBehaviours : AbstractSingleton<CameraBehaviours>, IPausable
     {
         [SerializeField] CinemachineFreeLook freeLookCamera;
         private PlayerInputController _inputController;
+
+        private bool _paused = false;
+
+        private float _cameraSpeedX;
+        private float _cameraSpeedY;
+
 
 
         void OnEnable()
         {
             _inputController = PlayerInputController.Instance;
+            _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
+            _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         void Update()
@@ -30,6 +46,8 @@ namespace FastAndFractured
 
         private void UpdateCameraMovement()
         {
+            if (_paused) return;
+
             if (freeLookCamera != null && PlayerInputController.Instance.CameraInput != Vector2.zero)
             {
                 // to do invert depending on user settings
@@ -46,6 +64,8 @@ namespace FastAndFractured
 
         public void ResetCameraPosition()
         {
+            if (_paused) return;
+
             if (freeLookCamera != null)
             {
                 freeLookCamera.m_YAxisRecentering.m_enabled = true;
@@ -59,6 +79,20 @@ namespace FastAndFractured
                     _inputController.IsResettingCamera = false;
                 });
             }
+        }
+
+        public void OnPause()
+        {
+            freeLookCamera.m_XAxis.m_MaxSpeed = 0f;
+            freeLookCamera.m_YAxis.m_MaxSpeed = 0f;
+            _paused = true;
+        }
+
+        public void OnResume()
+        {
+            freeLookCamera.m_XAxis.m_MaxSpeed = _cameraSpeedX;
+            freeLookCamera.m_YAxis.m_MaxSpeed = _cameraSpeedY;
+            _paused = false;
         }
     }
 }

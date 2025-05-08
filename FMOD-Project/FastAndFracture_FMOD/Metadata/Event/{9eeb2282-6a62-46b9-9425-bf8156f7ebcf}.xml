@@ -99,6 +99,9 @@
 		<property name="timelockedOffset">
 			<value>0.33000000000000007</value>
 		</property>
+		<relationship name="modulators">
+			<destination>{5f6c958e-3e3f-44e9-9a52-987e024cd594}</destination>
+		</relationship>
 		<relationship name="audioFile">
 			<destination>{bb587631-cc48-428a-8049-936b51d5fb79}</destination>
 		</relationship>
@@ -125,6 +128,14 @@
 	</object>
 	<object class="MixerBusPanner" id="{a3b94581-d290-495a-b79a-9287cd633e4a}" />
 	<object class="MixerBusFader" id="{e066dc6f-9221-4b14-aabd-0e6e73af61e8}" />
+	<object class="RandomizerModulator" id="{5f6c958e-3e3f-44e9-9a52-987e024cd594}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>pitch</value>
+		</property>
+		<property name="amount">
+			<value>6.25</value>
+		</property>
+	</object>
 	<object class="MixerBusEffectChain" id="{006179b0-1c7b-4b7b-b27a-8aca4656c26c}">
 		<relationship name="effects">
 			<destination>{39aaaa54-985e-40af-8751-e3e99bf44602}</destination>
