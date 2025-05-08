@@ -29,7 +29,7 @@ public class CarInjector : MonoBehaviour
             prefab = prefabToInstall;
         }
         //TODO optimize this if posible
-        var injectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
+        var injectedCar = Instantiate(prefab, this.transform.position, transform.rotation, transform);
         var controllers = GetComponentsInChildren<Controller>();
         var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
 
