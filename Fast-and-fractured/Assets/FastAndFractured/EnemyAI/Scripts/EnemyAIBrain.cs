@@ -61,6 +61,7 @@ namespace FastAndFractured
         private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
         private Quaternion startRotation;
+        private float speedMultiplier=1;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -273,8 +274,9 @@ namespace FastAndFractured
             Vector2 input = new Vector2(inputX, inputY);
 
 
-            carMovementController.HandleSteeringInput(input);
+            carMovementController.HandleSteeringInput(input* speedMultiplier);
         }
+
 
         public void UpdateTargetPosition()
         {
@@ -961,10 +963,17 @@ namespace FastAndFractured
             {
                 _positionToDrive = _currentTarget.transform.position;
             }
+        } 
+
+        public void ModifySpeedMultiplier(float multiplier)
+        { 
+            speedMultiplier = Mathf.Clamp01(multiplier);
+
         }
 
         #endregion
     }
+
 }
 
 public class CarDamagedMe
