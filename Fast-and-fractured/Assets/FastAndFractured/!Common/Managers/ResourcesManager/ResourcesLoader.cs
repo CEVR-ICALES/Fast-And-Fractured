@@ -21,8 +21,8 @@ public class ResourcesLoader : MonoBehaviour
         playerPortraits = new List<Sprite>(Resources.LoadAll<Sprite>(PLAYER_PORTRAITS_FOLDER));
         playerHalfBody = new List<Sprite>(Resources.LoadAll<Sprite>(PLAYER_HALF_BODY_FOLDER));
         uniqueAbilitiesIcons = new List<Sprite>(Resources.LoadAll<Sprite>(UNIQUE_ABILITIES_ICONS_FOLDER));
-        pushShootIcons = new List<Sprite>(Resources.LoadAll<Sprite>(PLAYER_ICONS_FOLDER + PUSH_SHOOT_ICONS_FOLDER));
-        normalShootIcons = new List<Sprite>(Resources.LoadAll<Sprite>(PLAYER_ICONS_FOLDER + NORMAL_SHOOT_ICONS_FOLDER));
+        pushShootIcons = new List<Sprite>(Resources.LoadAll<Sprite>(PUSH_SHOOT_ICONS_FOLDER));
+        normalShootIcons = new List<Sprite>(Resources.LoadAll<Sprite>(NORMAL_SHOOT_ICONS_FOLDER));
         screenEffectsSprites = new List<Sprite>(Resources.LoadAll<Sprite>(SCREEN_EFFECTS_SPRITES_FOLDER));
         keyboardIcons = new List<Sprite>(Resources.LoadAll<Sprite>(INPUT_ICONS_FOLDER + "/Keyboard"));
         xboxIcons = new List<Sprite>(Resources.LoadAll<Sprite>(INPUT_ICONS_FOLDER + "/Xbox"));

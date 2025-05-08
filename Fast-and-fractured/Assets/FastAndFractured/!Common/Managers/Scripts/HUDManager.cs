@@ -24,6 +24,7 @@ namespace FastAndFractured
         private Image[] _effectIcons;
 
         private string selectedPlayer;
+        private string selectedPlayerPortrait;
         private string selectedPlayerUA;
         private string selectedPlayerPush;
         private string selectedPlayerShoot;
@@ -43,6 +44,8 @@ namespace FastAndFractured
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
             Debug.Log($"Selected Player: {selectedPlayer}");
             string splittedPlayer = selectedPlayer.Split('_')[0];
+            string splittedPlayerNumber = selectedPlayer.Split('_')[1];
+            selectedPlayerPortrait = splittedPlayer + "_PORTRAIT_" + splittedPlayerNumber;
             selectedPlayerUA = splittedPlayer + "_UA";
             selectedPlayerPush = splittedPlayer + "_PUSH";
             selectedPlayerShoot = splittedPlayer + "_SHOOT";
