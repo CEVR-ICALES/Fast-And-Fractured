@@ -209,7 +209,7 @@ namespace FastAndFractured
                         vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
-                            HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                         }
                     }
                     else
@@ -244,7 +244,7 @@ namespace FastAndFractured
                     vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                     if(_isPlayer)
                     {
-                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
                 } else
                 {
