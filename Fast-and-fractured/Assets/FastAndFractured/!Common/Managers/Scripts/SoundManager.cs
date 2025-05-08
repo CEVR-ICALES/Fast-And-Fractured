@@ -60,21 +60,18 @@ namespace Utilities
             if (generalVolumeSlider != null)
             {
                 generalVolumeSlider.value = PlayerPrefs.GetFloat(GENERAL_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
-                _previousGeneralVolume = generalVolumeSlider.value;
                 UpdateGeneralVolume();
             }
 
             if (musicVolumeSlider != null)
             {
                 musicVolumeSlider.value = PlayerPrefs.GetFloat(MUSIC_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
-                _previousMusicVolume = musicVolumeSlider.value;
                 UpdateMusicVolume();
             }
 
             if (sfxVolumeSlider != null)
             {
                 sfxVolumeSlider.value = PlayerPrefs.GetFloat(SFX_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
-                _previousSFXVolume = sfxVolumeSlider.value;
                 UpdateSFXVolume();
             }
 
@@ -208,20 +205,10 @@ namespace Utilities
 
             if (muteToggle.isOn)
             {
-                _previousGeneralVolume = generalVolumeSlider.value;
-                _previousMusicVolume = musicVolumeSlider.value;
-                _previousSFXVolume = sfxVolumeSlider.value;
-
-                generalVolumeSlider.value = 0;
-                musicVolumeSlider.value = 0;
-                sfxVolumeSlider.value = 0;
-
-            }
-            else
-            {
-                generalVolumeSlider.value = _previousGeneralVolume;
-                musicVolumeSlider.value = _previousMusicVolume;
-                sfxVolumeSlider.value = _previousSFXVolume;
+                SetGeneralVolume(0);
+                SetMusicVolume(0);
+                SetSFXVolume(0);
+                return;
             }
 
             UpdateGeneralVolume();
@@ -234,6 +221,7 @@ namespace Utilities
         #region Slider Volume Methods
         public void UpdateSFXVolume()
         {
+            if (muteToggle.isOn) return;
             _sfxVolume = sfxVolumeSlider.value;
             SetSFXVolume(sfxVolumeSlider.value);
             PlayerPrefs.SetFloat(SFX_VOLUME_STRING, _sfxVolume);
@@ -242,6 +230,7 @@ namespace Utilities
 
         public void UpdateMusicVolume()
         {
+            if (muteToggle.isOn) return;
             _musicVolume = musicVolumeSlider.value;
             SetMusicVolume(musicVolumeSlider.value);
             PlayerPrefs.SetFloat(MUSIC_VOLUME_STRING, _musicVolume);
@@ -250,6 +239,7 @@ namespace Utilities
 
         public void UpdateGeneralVolume()
         {
+            if (muteToggle.isOn) return;
             _generalVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
             PlayerPrefs.SetFloat(GENERAL_VOLUME_STRING, _generalVolume);
