@@ -29,6 +29,7 @@ namespace Utilities
         #endregion
 
         #region Dictionary Variables
+        private List<EventReference> fmodEvents = new List<EventReference>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
         #endregion
 
@@ -103,7 +104,7 @@ namespace Utilities
         /// <param name="worldPosition">The world position to play the sound at</param>
         public void PlayOneShot(EventReference eventReference, Vector3 worldPosition)
         {
-            RuntimeManager.PlayOneShot(eventReference, worldPosition);
+            PlaySound3D(eventReference, worldPosition);
         }
 
         /// <summary>
