@@ -44,7 +44,8 @@ namespace Enums
         BAD_EFFECTS,
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
-        SHOOTING_CROSSHAIR
+        SHOOTING_CROSSHAIR,
+        SELECTED_PLAYER_ICON
     }
 
     public enum ScreensType
