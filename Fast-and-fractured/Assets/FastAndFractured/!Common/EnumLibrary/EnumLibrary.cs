@@ -44,7 +44,8 @@ namespace Enums
         BAD_EFFECTS,
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
-        SHOOTING_CROSSHAIR
+        SHOOTING_CROSSHAIR,
+        BULLET_EFFECT
     }
 
     public enum ScreensType
@@ -172,7 +173,8 @@ namespace Enums
     {
         SPEED_EFFECT,
         TOMATO_EFFECT,
-        BROKEN_CRYSTAL
+        BROKEN_CRYSTAL,
+        BULLET_EFFECT
     }
  
     public enum GameElement
