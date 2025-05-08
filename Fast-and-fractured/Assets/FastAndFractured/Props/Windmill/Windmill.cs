@@ -9,11 +9,16 @@ public class Windmill : MonoBehaviour
     [SerializeField] float speedIncreasePerSecond = 1;
     private float currentSpeed;
     [SerializeField] GameObject transformVisual;
-    // Update is called once per frame
+    [SerializeField] Vector3 rotationDirection = Vector3.forward;
+
+    private void Start()
+    {
+        currentSpeed = windmillInitialSpeed;
+    }
     void Update()
     {
         currentSpeed = Mathf.Min(currentSpeed + Time.deltaTime, maxSpeed);
-        transformVisual.transform.Rotate(Vector3.right, currentSpeed,Space.Self);
+        transformVisual.transform.Rotate(rotationDirection, currentSpeed,Space.Self);
 
     }
 }
