@@ -256,6 +256,12 @@ namespace FastAndFractured
 
         private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
         {
+            if (!IsGrounded())
+            {
+                EndDrift();
+                return;
+            }
+
             if(_brakeSlowDownTimer != null)
             {
                 _brakeSlowDownTimer.StopTimer();
