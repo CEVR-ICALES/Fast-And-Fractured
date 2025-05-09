@@ -10,13 +10,13 @@ namespace FastAndFractured
     {
         #region Public Fields
 
-        public Dictionary<UIElementType, UIDynamicElement> UIElements => _uiElements;
+        public Dictionary<UIDynamicElementType, UIDynamicElement> UIElements => _uiElements;
 
         #endregion
 
         #region Private Fields
 
-        private Dictionary<UIElementType, UIDynamicElement> _uiElements = new Dictionary<UIElementType, UIDynamicElement>();
+        private Dictionary<UIDynamicElementType, UIDynamicElement> _uiElements = new Dictionary<UIDynamicElementType, UIDynamicElement>();
 
         private Image[] _goodEffects;
         private Image[] _normalEffects;
@@ -53,7 +53,7 @@ namespace FastAndFractured
 
         #endregion
 
-        #region UI Elements Registration
+        #region UI Elements Registration and Set methods
 
         void RegisterUIElements()
         {
@@ -61,14 +61,12 @@ namespace FastAndFractured
             {
                 _uiElements[element.elementType] = element;
             }
-            
             _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
-            _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
-        }
-
+            _bulletEffects = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+		}
 
         void SetPlayerStartingSprites()
         {
@@ -86,7 +84,7 @@ namespace FastAndFractured
         /// Updates the specified UI element.
         /// <para>Accepts New Text, Sprite, or current and max value for Fill Amount.</para>
         /// </summary>
-        public void UpdateUIElement(UIElementType type, string newText)
+        public void UpdateUIElement(UIDynamicElementType type, string newText)
         {
             if (TryGetUIElement(type, out UIDynamicElement element) && element.textReference != null)
             {
@@ -94,7 +92,7 @@ namespace FastAndFractured
             }
         }
 
-        public void UpdateUIElement(UIElementType type, Sprite newSprite)
+        public void UpdateUIElement(UIDynamicElementType type, Sprite newSprite)
         {
             if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
             {
@@ -102,13 +100,13 @@ namespace FastAndFractured
             }
         }
 
-        public void UpdateUIElement(UIElementType type, float currentValue, float maxValue)
+        public void UpdateUIElement(UIDynamicElementType type, float currentValue, float maxValue)
         {
             if (TryGetUIElement(type, out UIDynamicElement element) && element.imageReference != null)
             {
                 float fillAmount = Mathf.Clamp01(currentValue / maxValue);
 
-                if (type == UIElementType.HEALTH_BAR)
+                if (type == UIDynamicElementType.HEALTH_BAR)
                 {
                     fillAmount = 1f - Mathf.Clamp01(currentValue / maxValue);
                     element.imageReference.color = Color.Lerp(Color.yellow, Color.red, fillAmount);
@@ -118,7 +116,7 @@ namespace FastAndFractured
             }
         }
 
-        public void UpdateUIElement(UIElementType type, bool isActive)
+        public void UpdateUIElement(UIDynamicElementType type, bool isActive)
         {
             if (TryGetUIElement(type, out UIDynamicElement element))
             {
@@ -126,23 +124,27 @@ namespace FastAndFractured
             }
         }
 
-        public void UpdateUIEffect(UIElementType type, Sprite newSprite, float timeInscreen){
+        /// <summary>
+        /// Updates the specified UI effect with the given sprite.
+        /// <para>If timeInscreen is greater than 0, the effect will fade out after the given time.</para>
+        /// </summary>
+        public void UpdateUIEffect(UIDynamicElementType type, Sprite newSprite, float timeInscreen){
             GameObject effectGameObj = null;
             
             switch (type)
             {
-                case UIElementType.GOOD_EFFECTS:
+                case UIDynamicElementType.GOOD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_goodEffects, newSprite);
                     break;
-                case UIElementType.NORMAL_EFFECTS:
+                case UIDynamicElementType.NORMAL_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_normalEffects, newSprite);
                     break;
-                case UIElementType.BAD_EFFECTS:
+                case UIDynamicElementType.BAD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
                     break;
-                case UIElementType.BULLET_EFFECT:
+                case UIDynamicElementType.BULLET_EFFECT:
                     effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
-                    GameObject bulletContainer = GetUIElement(UIElementType.BULLET_EFFECT).gameObject;
+                    GameObject bulletContainer = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject;
                     if (bulletContainer != null && effectGameObj != null)
                     {
                         RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
@@ -157,6 +159,7 @@ namespace FastAndFractured
                             effectRect.anchoredPosition = new Vector2(randomX, randomY);
                         }
                     }
+                    break;
                 case UIDynamicElementType.EFFECT_ICONS_CONTAINER:
                     effectGameObj = UpdateEffectSprites(_effectIcons, newSprite);
                     break;
@@ -176,7 +179,7 @@ namespace FastAndFractured
         /// <summary>
         /// Returns the UI element of the specified type.
         /// </summary>
-        public UIDynamicElement GetUIElement(UIElementType type)
+        public UIDynamicElement GetUIElement(UIDynamicElementType type)
         {
             if (TryGetUIElement(type, out UIDynamicElement element))
             {
@@ -195,6 +198,9 @@ namespace FastAndFractured
             if (hudImage != null) return hudImage;
 
             hudImage = FindEffectGameObject(_badEffects, sprite);
+            if (hudImage != null) return hudImage;
+
+            hudImage = FindEffectGameObject(_effectIcons, sprite);
             return hudImage;
         }
 
@@ -202,7 +208,7 @@ namespace FastAndFractured
 
         #region Helpers
 
-        private bool TryGetUIElement(UIElementType type, out UIDynamicElement element)
+        private bool TryGetUIElement(UIDynamicElementType type, out UIDynamicElement element)
         {
             if (!_uiElements.TryGetValue(type, out element))
             {
