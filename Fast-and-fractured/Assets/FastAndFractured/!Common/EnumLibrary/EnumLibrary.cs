@@ -23,7 +23,7 @@ namespace Enums
         ALL_WHEEL
     }
 
-    public enum UIElementType
+    public enum UIDynamicElementType
     {
         HEALTH_BAR,
         DASH_COOLDOWN,
@@ -48,7 +48,7 @@ namespace Enums
         SELECTED_PLAYER_ICON,
         SPEED_INDICATOR,
         EFFECT_ICONS_CONTAINER,
-		    BULLET_EFFECT
+		BULLET_EFFECT
     }
 
     public enum ScreensType
@@ -170,6 +170,22 @@ namespace Enums
         JOSEFINO_UA,
         PEPE_UA,
         MARIAANTONIA_UA
+    }
+
+    public enum PushShootIcons
+    {
+        CARME_PUSH,
+        JOSEFINO_PUSH,
+        PEPE_PUSH,
+        MARIAANTONIA_PUSH
+    }
+
+    public enum NormalShootIcons
+    {
+        CARME_SHOOT,
+        JOSEFINO_SHOOT,
+        PEPE_SHOOT,
+        MARIAANTONIA_SHOOT
     }
 
     public enum ScreenEffects
