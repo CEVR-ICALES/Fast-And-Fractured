@@ -4,8 +4,7 @@ using UnityEngine.Rendering.HighDefinition;
 
 public class ColorBlindModeController : MonoBehaviour
 {
-    [Header("Volume Settings")]
-    [SerializeField] private Volume globalVolume;
+    [Header("Volume Settings")] 
     private ChannelMixer _channelMixer;
     private int _colorblindModeIndex = 0;
 
@@ -19,8 +18,9 @@ public class ColorBlindModeController : MonoBehaviour
     }
 
     public void UpdateColorBlindMode(bool isEnabled)
-    {
-        if (!globalVolume.profile.TryGet(out _channelMixer))
+    {   
+        Volume currentVolume = VolumeManager.Instance.CurrentVolumeComponent;
+        if (!currentVolume.profile.TryGet(out _channelMixer))
         {
             Debug.LogError("Channel Mixer not found in HDRP Volume Profile!");
             return;

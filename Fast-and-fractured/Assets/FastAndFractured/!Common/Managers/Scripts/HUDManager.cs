@@ -21,6 +21,7 @@ namespace FastAndFractured
         private Image[] _goodEffects;
         private Image[] _normalEffects;
         private Image[] _badEffects;
+        private Image[] _bulletEffects;
         private Image[] _effectIcons;
 
         private string selectedPlayer;
@@ -60,12 +61,12 @@ namespace FastAndFractured
             {
                 _uiElements[element.elementType] = element;
             }
-
             _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
-        }
+            _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+		}
 
         void SetPlayerStartingSprites()
         {
@@ -141,6 +142,23 @@ namespace FastAndFractured
                 case UIDynamicElementType.BAD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
                     break;
+                case UIElementType.BULLET_EFFECT:
+                    effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
+                    GameObject bulletContainer = GetUIElement(UIElementType.BULLET_EFFECT).gameObject;
+                    if (bulletContainer != null && effectGameObj != null)
+                    {
+                        RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
+                        RectTransform effectRect = effectGameObj.GetComponent<RectTransform>();
+
+                        if (containerRect != null && effectRect != null)
+                        {
+                            float halfWidth = containerRect.rect.width / 2f;
+                            float halfHeight = containerRect.rect.height / 2f;
+                            float randomX = Random.Range(-halfWidth, halfWidth);
+                            float randomY = Random.Range(-halfHeight, halfHeight);
+                            effectRect.anchoredPosition = new Vector2(randomX, randomY);
+                        }
+                    }
                 case UIDynamicElementType.EFFECT_ICONS_CONTAINER:
                     effectGameObj = UpdateEffectSprites(_effectIcons, newSprite);
                     break;
