@@ -10,7 +10,10 @@ public class TrainingHandle : MonoBehaviour
     private TrainingInputSucceded[] _trainingInputSuccededs;
     private int _trainingInputSuccededCount;
     private ITimer _trainingTimer;
-    // Start is called before the first frame update
+    [SerializeField]
+    private TMPro.TMP_Text trainingTextTime;
+    [SerializeField]
+    private float trainingMessageDuration = 4.5f;
     void Start()
     {
         _trainingInputSuccededs = FindObjectsOfType<TrainingInputSucceded>();
@@ -29,7 +32,8 @@ public class TrainingHandle : MonoBehaviour
         {
             //Finish
             _trainingTimer.PauseTimer();
-            Debug.Log("Training Finished in " + _trainingTimer.GetData().CurrentTime);
+            IngameEventsManager.Instance.CreateEvent("Training.Finish",trainingMessageDuration);
+            trainingTextTime.text = _trainingTimer.GetData().ToString();
             _trainingTimer.StopTimer();
         }
     }
