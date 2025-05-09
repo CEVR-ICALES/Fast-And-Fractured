@@ -178,8 +178,17 @@ namespace Utilities
 
             if (profileNames.Length == 0) return;
 
-            if (GUILayout.Button("Add Prefab to Profile"))
-                ShowPrefabSelectionDialog();
+            EditorGUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button("Add Single Prefab"))
+                    ShowPrefabSelectionDialog();
+
+
+                if (GUILayout.Button("Add Folder of Prefabs"))
+                    ShowFolderSelectionDialog();
+
+            }
+            EditorGUILayout.EndHorizontal();
 
             if (prefabs.Count > 0)
             {
@@ -273,6 +282,46 @@ namespace Utilities
                     profileNames[selectedProfileIndex],
                     relativePath);
                 RefreshPrefabs();
+            }
+        }
+
+        private void ShowFolderSelectionDialog()
+        {
+            string folderPath = EditorUtility.OpenFolderPanel("Select Folder with Prefabs",
+            Application.dataPath, "");
+
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                string relativeFolderPath = "Assets" + folderPath.Substring(Application.dataPath.Length);
+
+                // search for all the .prefab in the secleted folder
+                string[] allFiles = Directory.GetFiles(folderPath, "*.prefab", SearchOption.AllDirectories);
+
+                if (allFiles.Length == 0)
+                {
+                    EditorUtility.DisplayDialog("No Prefabs Found", $"Folder: {folderPath} is empty",
+                         "OK");
+                    return;
+                }
+
+                int addedCount = 0;
+
+                foreach (string filePath in allFiles)
+                {
+                    // normalize to desired slashes format
+                    string relativePath = "Assets" + filePath.Substring(Application.dataPath.Length)
+                                           .Replace('\\', '/'); 
+
+                    PrefabProfileManager.AddPrefabToProfile(
+                        profileNames[selectedProfileIndex],
+                        relativePath);
+
+                    addedCount++;
+                }
+
+                RefreshPrefabs();
+                EditorUtility.DisplayDialog("Prefabs Added",
+                    $"{addedCount} prefabs added from the folder", "OK");
             }
         }
 
