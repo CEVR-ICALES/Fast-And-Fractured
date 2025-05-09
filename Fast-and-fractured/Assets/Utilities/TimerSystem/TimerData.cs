@@ -81,5 +81,26 @@ namespace Utilities
                                  t.Minutes,
                                  t.Seconds);
         }
+        public string GetFormattedTime(TimeFormatStyle style)
+        {
+            switch (style)
+            {
+                case TimeFormatStyle.MINUTES_SECONDS:
+                    var tsMs = TimeSpan.FromSeconds(CurrentTime);
+                    return $"{tsMs.Minutes:D2}:{tsMs.Seconds:D2}";
+
+                case TimeFormatStyle.HOURS_MINUTES_SECONDS:
+                    var totalHours = (int)Math.Floor(TimeSpan.FromSeconds(CurrentTime).TotalHours);
+                    var ts = TimeSpan.FromSeconds(CurrentTime);
+                    return $"{totalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(style), style, null);
+            }
+        }
+        public enum TimeFormatStyle
+        {
+            MINUTES_SECONDS,     
+            HOURS_MINUTES_SECONDS  
     }
 }
