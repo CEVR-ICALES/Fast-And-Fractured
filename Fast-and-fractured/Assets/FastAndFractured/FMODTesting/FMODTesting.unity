@@ -8208,6 +8208,80 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 238a6656b20284242a3fe33bfbd6b7f7, type: 3}
   m_PrefabInstance: {fileID: 1008936113}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1010061291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1010061292}
+  - component: {fileID: 1010061293}
+  - component: {fileID: 1010061294}
+  m_Layer: 0
+  m_Name: Empy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1010061292
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010061291}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 640.021, y: 58.712597, z: 93.3126}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1010061293
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010061291}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 178.62799, y: 60.185875, z: 227.73318}
+  m_Center: {x: 42.45877, y: -1.4903488, z: 57.510635}
+--- !u!114 &1010061294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010061291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 217688106066ca94a8a7b6582b75590e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _zoneType: 3
+  ambienceEventReference:
+    Guid:
+      Data1: 815912839
+      Data2: 1131339253
+      Data3: 794483866
+      Data4: -667412220
+    Path: event:/AmbienceSounds/ConstructionZoneAmbience
 --- !u!114 &1011100135 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 752286112063728480, guid: 7a6fdf1322c44374c8f520691a9a7db8, type: 3}
@@ -20004,7 +20078,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6400545731412433953}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
@@ -20012,11 +20086,11 @@ MonoBehaviour:
   CollisionTag: 
   EventReference:
     Guid:
-      Data1: -1910185011
-      Data2: 1213923717
-      Data3: -1015605575
-      Data4: 343383849
-    Path: event:/MusicEvents/GameLoopMusicEvent
+      Data1: 815912839
+      Data2: 1131339253
+      Data3: 794483866
+      Data4: -667412220
+    Path: event:/AmbienceSounds/ConstructionZoneAmbience
   Event: 
   EventPlayTrigger: 1
   EventStopTrigger: 2
@@ -21589,3 +21663,4 @@ SceneRoots:
   - {fileID: 2058929437}
   - {fileID: 468952142}
   - {fileID: 1398698822}
+  - {fileID: 1010061292}

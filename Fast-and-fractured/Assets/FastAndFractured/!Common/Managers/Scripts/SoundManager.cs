@@ -1,3 +1,4 @@
+using Enums;
 using FMOD.Studio;
 using FMODUnity;
 using System;
@@ -49,7 +50,7 @@ namespace Utilities
 
         #region Ambience Sounds Variables
         private EventInstance _ambienceInstance;
-        [SerializeField] private EventReference ambienceEventReference;
+        //[SerializeField] private EventReference ambienceEventReference;
         #endregion
 
         [SerializeField] private List<EventInstance> _trackedInstances = new List<EventInstance>();
@@ -89,7 +90,7 @@ namespace Utilities
                 ToggleMuteAllSounds();
             }
 
-            InitializeAmbience();
+            //InitializeAmbience();
         }
 
         private void OnEnable()
@@ -274,20 +275,24 @@ namespace Utilities
         #endregion
 
         #region Ambience Methods
-        private void InitializeAmbience()
-        {
-            if (_ambienceInstance.isValid()) return;
+        //private void InitializeAmbience()
+        //{
+        //    if (_ambienceInstance.isValid()) return;
 
-            _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
-            _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
-            _ambienceInstance.start();
-            _ambienceInstance.release();
-        }
+        //    SetAmbienceZone((float)AmbienceZoneType.NONE);
 
-        public void SetAmbienceZone(float zoneValue)
-        {
-            _ambienceInstance.setParameterByName(AMBIENCE_ZONE_PARAM_NAME, zoneValue);
-        }
+        //    _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
+        //    _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
+        //    _ambienceInstance.start();
+        //}
+
+        //public void SetAmbienceZone(float zoneValue)
+        //{
+        //    if (!_ambienceInstance.isValid())
+        //        InitializeAmbience();
+
+        //    _ambienceInstance.setParameterByName(AMBIENCE_ZONE_PARAM_NAME, zoneValue);
+        //}
         #endregion
 
         public void OnPause()

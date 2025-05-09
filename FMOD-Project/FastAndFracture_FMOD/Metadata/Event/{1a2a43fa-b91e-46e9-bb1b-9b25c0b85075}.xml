@@ -107,11 +107,14 @@
 	</object>
 	<object class="EventMixerGroup" id="{5c19b76d-a224-44c3-8c0a-35e0895282cc}">
 		<property name="volume">
-			<value>-20.5</value>
+			<value>-16</value>
 		</property>
 		<property name="name">
 			<value>AmbienceCrowd</value>
 		</property>
+		<relationship name="modulators">
+			<destination>{d8ecde5f-602f-4ce0-8c8a-8bb3548c1460}</destination>
+		</relationship>
 		<relationship name="effectChain">
 			<destination>{332a9f3a-7501-4f1f-b90c-741fcf6653b9}</destination>
 		</relationship>
@@ -143,6 +146,35 @@
 	</object>
 	<object class="MixerBusPanner" id="{a80effbd-d5ab-4297-8b80-7b128155c36b}" />
 	<object class="MixerBusFader" id="{7538b80d-4fda-4e51-9d13-d88abc545e06}" />
+	<object class="ADSRModulator" id="{d8ecde5f-602f-4ce0-8c8a-8bb3548c1460}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>volume</value>
+		</property>
+		<property name="initialValue">
+			<value>-80</value>
+		</property>
+		<property name="attackTime">
+			<value>3000</value>
+		</property>
+		<property name="attackShape">
+			<value>-0.516696215</value>
+		</property>
+		<property name="holdTime">
+			<value>0</value>
+		</property>
+		<property name="decayTime">
+			<value>0</value>
+		</property>
+		<property name="releaseTime">
+			<value>3000</value>
+		</property>
+		<property name="releaseShape">
+			<value>0.978295267</value>
+		</property>
+		<property name="finalValue">
+			<value>-80</value>
+		</property>
+	</object>
 	<object class="MixerBusEffectChain" id="{332a9f3a-7501-4f1f-b90c-741fcf6653b9}">
 		<relationship name="effects">
 			<destination>{c19000f7-7cc7-4ddd-800f-adeba4a5cebc}</destination>
