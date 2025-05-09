@@ -56,12 +56,12 @@ public class CarInjector : MonoBehaviour
             enemyAIBrain.InstallAIParameters(injectedCar.GetComponent<StatsController>().CharacterData.AIParameters);
             injectedCar.GetComponent<CarMovementController>().IsAi = true;
         }
-        else{
-            if (GameObject.Find("SpeedOverlay"))
-            {
-                injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
-            }
-        } 
+        // else{
+        //     if (GameObject.Find("SpeedOverlay"))
+        //     {
+        //         injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
+        //     }
+        // } 
 
         return injectedCar;
     }
