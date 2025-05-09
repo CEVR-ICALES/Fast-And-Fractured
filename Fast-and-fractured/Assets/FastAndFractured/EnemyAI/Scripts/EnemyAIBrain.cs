@@ -102,6 +102,13 @@ namespace FastAndFractured
         private IAGroundState groundState = IAGroundState.NONE;
         private ITimer _flipForceTimer;
 
+        //Training Values
+        public bool PlayerNear { get => _playerNear; set => _playerNear = value; }
+        private bool _playerNear = false;
+
+        public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
+        private bool _doTrainingAction;
+
 
         private void OnEnable()
         {
@@ -540,6 +547,7 @@ namespace FastAndFractured
 
         #endregion
 
+
         #region FleeState
         public void RunAwayFromCurrentTarget()
         {
@@ -644,7 +652,18 @@ namespace FastAndFractured
             return listOfCarsThatMadeLotsOfDamage != null && listOfCarsThatMadeLotsOfDamage.Count > 0;
         }
         //State shootToWhoMadeMoreDamageState
+        #region TraningState
+        public bool CanPerformeTrainingAction()
+        {
+            return _doTrainingAction;
+        }
+        public void DesactivateTrainingAction()
+        {
+            _doTrainingAction = false;
+        }
         #endregion
+        #endregion
+
 
         #region Helpers
 

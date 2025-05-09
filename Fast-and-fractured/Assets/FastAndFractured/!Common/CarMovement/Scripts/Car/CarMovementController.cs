@@ -39,6 +39,7 @@ namespace FastAndFractured
         [SerializeField] private float dashForce; //force for the dash with phyisics
         public bool IsDashing => _isDashing;
         private bool _isDashing = false;
+        private float _previousSteeringYValue = 0;
 
         public bool CanDash { get => _canDash; }
         private bool _canDash = true;
@@ -134,6 +135,7 @@ namespace FastAndFractured
             {
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
+                _previousSteeringYValue = steeringInput.y;
             }
             
             _targetSteerAngle = statsController.Handling * steeringInput.x;
