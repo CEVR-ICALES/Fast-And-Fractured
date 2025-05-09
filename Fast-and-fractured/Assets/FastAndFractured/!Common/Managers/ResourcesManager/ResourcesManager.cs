@@ -17,6 +17,10 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     private List<Sprite> _playerHalfBody;
     public List<Sprite> UniqueAbilitiesIcons => _uniqueAbilitiesIcons;
     private List<Sprite> _uniqueAbilitiesIcons;
+    public List<Sprite> PushShootIcons => _pushShootIcons;
+    private List<Sprite> _pushShootIcons;
+    public List<Sprite> NormalShootIcons => _normalShootIcons;
+    private List<Sprite> _normalShootIcons;
     public List<Sprite> ScreenEffectsSprites => _screenEffectsSprites;
     private List<Sprite> _screenEffectsSprites;
     public List<Sprite> KeyboardIcons => _keyboardIcons;
@@ -30,13 +34,15 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
 
     private Dictionary<PlayerIcons, Sprite> _playerIconsDictionary = new Dictionary<PlayerIcons, Sprite>();
     private Dictionary<UniqueAbilitiesIcons, Sprite> _uaIconsDictionary = new Dictionary<UniqueAbilitiesIcons, Sprite>();
+    private Dictionary<PushShootIcons, Sprite> _pushShootIconsDictionary = new Dictionary<PushShootIcons, Sprite>();
+    private Dictionary<NormalShootIcons, Sprite> _normalShootIconsDictionary = new Dictionary<NormalShootIcons, Sprite>();
     private Dictionary<ScreenEffects, Sprite> _screenEffectsDictionary = new Dictionary<ScreenEffects, Sprite>();
 
     protected override void Awake()
     {
         base.Awake();
         _resourcesLoader = gameObject.GetComponent<ResourcesLoader>();
-        _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits,ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
+        _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits,ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _pushShootIcons, ref _normalShootIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
 
         InitPlayerIconsDictionary(_playerIcons);
         InitUAIconsDictionary(_uniqueAbilitiesIcons);
@@ -70,6 +76,36 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
             else
             {
                 Debug.LogWarning($"Icon {icon.name} not found in UniqueAbilitiesIcons enum.");
+            }
+        }
+    }
+
+    void InitPushShootIconsDictionary(List<Sprite> pushShootSprites)
+    {
+        foreach (Sprite icon in pushShootSprites)
+        {
+            if (System.Enum.TryParse(icon.name.ToUpper(), out PushShootIcons iconEnum))
+            {
+                _pushShootIconsDictionary.Add(iconEnum, icon);
+            }
+            else
+            {
+                Debug.LogWarning($"Icon {icon.name} not found in PushshootIcons enum.");
+            }
+        }
+    }
+
+    void InitNormalShootIconsDictionary(List<Sprite> normalShootSprites)
+    {
+        foreach (Sprite icon in normalShootSprites)
+        {
+            if (System.Enum.TryParse(icon.name.ToUpper(), out NormalShootIcons iconEnum))
+            {
+                _normalShootIconsDictionary.Add(iconEnum, icon);
+            }
+            else
+            {
+                Debug.LogWarning($"Icon {icon.name} not found in NormalShootIcons enum.");
             }
         }
     }
@@ -116,6 +152,30 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     }
 
     // Overload
+    public Sprite GetResourcesSprite(PushShootIcons iconKey)
+    {
+        if (_pushShootIconsDictionary.TryGetValue(iconKey, out Sprite icon))
+        {
+            return icon;
+        }
+
+        Debug.LogWarning($"Push shoot icon for key {iconKey} not found.");
+        return null;
+    }
+
+    // Overload
+    public Sprite GetResourcesSprite(NormalShootIcons iconKey)
+    {
+        if (_normalShootIconsDictionary.TryGetValue(iconKey, out Sprite icon))
+        {
+            return icon;
+        }
+
+        Debug.LogWarning($"Normal shoot icon for key {iconKey} not found.");
+        return null;
+    }
+
+    // Overload
     public Sprite GetResourcesSprite(ScreenEffects spriteKey)
     {
         if (_screenEffectsDictionary.TryGetValue(spriteKey, out Sprite sprite))
@@ -140,8 +200,17 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
             if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
         }
 
-
         foreach (Sprite sprite in _uaIconsDictionary.Values)
+        {
+            if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        foreach (Sprite sprite in _pushShootIconsDictionary.Values)
+        {
+            if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        foreach (Sprite sprite in _normalShootIconsDictionary.Values)
         {
             if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
         }
