@@ -47,7 +47,8 @@ namespace Enums
         SHOOTING_CROSSHAIR,
         SELECTED_PLAYER_ICON,
         SPEED_INDICATOR,
-        EFFECT_ICONS_CONTAINER
+        EFFECT_ICONS_CONTAINER,
+		BULLET_EFFECT
     }
 
     public enum ScreensType
@@ -191,7 +192,8 @@ namespace Enums
     {
         SPEED_EFFECT,
         TOMATO_EFFECT,
-        BROKEN_CRYSTAL
+        BROKEN_CRYSTAL,
+        BULLET_EFFECT
     }
 
     public enum GameElement
@@ -212,5 +214,13 @@ namespace Enums
     {
         DIRECT_VALUE,
         PERCENTAGE,
+    }
+
+    public enum AmbienceZoneType
+    {
+        NONE,
+        FOREST,
+        MERCADILLO,
+        CONSTRUCTION_ZONE
     }
 }
