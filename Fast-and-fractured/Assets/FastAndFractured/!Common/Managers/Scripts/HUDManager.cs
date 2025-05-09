@@ -42,9 +42,8 @@ namespace FastAndFractured
         private void Start()
         {
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
-            Debug.Log($"Selected Player: {selectedPlayer}");
+            selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
             string splittedPlayer = selectedPlayer.Split('_')[0];
-            string splittedPlayerNumber = selectedPlayer.Split('_')[1];
             selectedPlayerUA = splittedPlayer + "_UA";
             selectedPlayerPush = splittedPlayer + "_PUSH";
             selectedPlayerShoot = splittedPlayer + "_SHOOT";
