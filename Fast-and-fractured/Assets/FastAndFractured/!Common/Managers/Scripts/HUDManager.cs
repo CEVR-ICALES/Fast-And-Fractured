@@ -61,13 +61,14 @@ namespace FastAndFractured
             {
                 _uiElements[element.elementType] = element;
             }
-
+            
             _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
             _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
         }
+
 
         void SetPlayerStartingSprites()
         {
@@ -156,6 +157,8 @@ namespace FastAndFractured
                             effectRect.anchoredPosition = new Vector2(randomX, randomY);
                         }
                     }
+                case UIDynamicElementType.EFFECT_ICONS_CONTAINER:
+                    effectGameObj = UpdateEffectSprites(_effectIcons, newSprite);
                     break;
             }
 

@@ -212,8 +212,8 @@ namespace FastAndFractured
                         vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
-                            HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
-                            HUDManager.Instance.UpdateUIEffect(UIElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
+                            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
                         }
                     }
                     else

@@ -45,7 +45,10 @@ namespace Enums
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR,
-        BULLET_EFFECT
+        SELECTED_PLAYER_ICON,
+        SPEED_INDICATOR,
+        EFFECT_ICONS_CONTAINER,
+		    BULLET_EFFECT
     }
 
     public enum ScreensType
