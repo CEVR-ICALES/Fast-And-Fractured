@@ -9,10 +9,16 @@ namespace FastAndFractured
         [SerializeField]
         private EnemyAIBrain enemyAIBrain;
         private bool _lisentInput = false;
+        private BaseUniqueAbility _uniqueAbility;
+
+        private void Start()
+        {
+            _uniqueAbility = PlayerInputController.Instance.gameObject.GetComponentInChildren<BaseUniqueAbility>();
+        }
 
         private void Update()
         {
-            if (_lisentInput && PlayerInputController.Instance.IsUsingAbility&&!enemyAIBrain.DoTrainingAction)
+            if (_lisentInput && (_uniqueAbility.IsAbilityActive)&&!enemyAIBrain.DoTrainingAction)
             {
                 enemyAIBrain.DoTrainingAction = true;
             }

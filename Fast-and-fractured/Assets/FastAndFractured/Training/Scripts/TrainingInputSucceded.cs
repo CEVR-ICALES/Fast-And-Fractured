@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 namespace FastAndFractured
 {
     public enum InputMechanics
@@ -20,7 +21,6 @@ namespace FastAndFractured
     public class TrainingInputSucceded : MonoBehaviour
     {
         private bool _inputPressed = false;
-        public bool InputPressed {get=>_inputPressed;}
         private bool _isWaitingInput =  false;
         private Action _waitInputAction;
 
@@ -31,6 +31,9 @@ namespace FastAndFractured
         private CarMovementController _playerCarMovement;
         private NormalShootHandle _playerNormalShootHandle;
         private PushShootHandle _playerPushShootHandle;
+        private BaseUniqueAbility _uniqueAbility;
+
+        public UnityEvent onInputPerformed;
 
         private void Start()
         {
@@ -94,9 +97,10 @@ namespace FastAndFractured
                         SeeIfInputPressed(PlayerInputController.Instance.IsThrowingMine && _playerPushShootHandle.CanShoot);
                     }; break;
                 case InputMechanics.UNIQUE_ABILITY:
+                    _uniqueAbility = PlayerInputController.Instance.gameObject.GetComponentInChildren<BaseUniqueAbility>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsUsingAbility);
+                        SeeIfInputPressed(_uniqueAbility.isAbilityActive);
                     }; break;
             }
             trafficLightLamps[0].TurnOn();
@@ -120,6 +124,7 @@ namespace FastAndFractured
                 {
                     trafficLightLamps[0].TurnOff();
                     trafficLightLamps[1].TurnOn();
+                    onInputPerformed?.Invoke();
                 }
             }
         }
