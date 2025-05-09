@@ -52,7 +52,7 @@ namespace Utilities
         protected override void Awake()
         {
             base.Awake();
-            musicGameLoopReference.Path = "event:/MusicEvents/GameLoopMusicEvent";
+            //musicGameLoopReference.Path = "event:/MusicEvents/GameLoopMusicEvent";
         }
 
         private void Start()
@@ -165,7 +165,7 @@ namespace Utilities
             {
                 instance.setPaused(true);
             }
-            ResumeAudio(musicGameLoopReference);
+            //ResumeAudio(musicGameLoopReference);
         }
 
         /// <summary>

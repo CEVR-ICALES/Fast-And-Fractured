@@ -11,7 +11,7 @@ public class ColorBlindModeController : MonoBehaviour
     private const string COLORBLIND_KEY = "ColorBlindMode";
     private const string COLORBLIND_INDEX_KEY = "ColorBlindModeIndex";
 
-    private void Awake()
+    private void Start()
     {
         _colorblindModeIndex = PlayerPrefs.GetInt(COLORBLIND_INDEX_KEY);
         UpdateColorBlindMode(PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1);

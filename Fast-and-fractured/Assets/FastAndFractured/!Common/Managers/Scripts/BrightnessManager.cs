@@ -25,9 +25,11 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     {
         base.Awake();
         _brightness = PlayerPrefs.GetFloat(PLAYER_PREF_BRIGHTNESS_STRING, DEFAULT_BRIGHTNESS);
-        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
-        boxVolume = GameObject.Find("Box Volume").GetComponent<Volume>();
+    public void Start()
+    {
+        boxVolume = VolumeManager.Instance.CurrentVolumeGameObject.transform.GetChild(2).GetComponent<Volume>();
         if (boxVolume == null)
         {
             Debug.LogError("NO VOLUME FOUND. IS THERE A VOLUME? IS IT CALLED \"Box Volume\"????");
@@ -35,9 +37,8 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
 
         exposure = GetComponentOfTypeOnVolume<Exposure>(boxVolume);
         _startingExposure = exposure.fixedExposure.value;
-
+        ApplyBrightnessToScene();
     }
-
     static T GetComponentOfTypeOnVolume<T>(Volume vol) where T : VolumeComponent
     {
         T returnVal = null;
@@ -60,16 +61,6 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
         }
         //Brightness goes from 0 to 1;
         return _startingExposure + (MIN_EXPOSURE_OFFSET + (brightness * MAX_EXPOSURE_OFFSET * EXPOSURE_MULTIPLIER));
-    }
-
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        ApplyBrightnessToScene();
     }
 
     public void SetBrightness(float value)

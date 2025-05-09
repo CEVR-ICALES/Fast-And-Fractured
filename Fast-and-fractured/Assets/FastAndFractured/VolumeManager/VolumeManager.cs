@@ -15,18 +15,16 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
     public GameObject CurrentVolumeGameObject  => currentVolumeObject ;
     public Volume CurrentVolumeComponent => currentVolumeObject.GetComponentInChildren<Volume>();    
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
         if (volumeList.Count == 0) return;
         ChangeCurrentVolume(volumeList.First());
         if (randomStart)
         {
             int selected =  Random.Range(0, volumeList.Count);
             ChangeCurrentVolume(volumeList[selected]);
-
-
         }
-
     }
 
     private void ChangeCurrentVolume(GameObject newVolume)
