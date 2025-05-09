@@ -17,6 +17,7 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
 
     protected override void Awake()
     {
+        base.Awake();
         if (volumeList.Count == 0) return;
         ChangeCurrentVolume(volumeList.First());
         if (randomStart)
