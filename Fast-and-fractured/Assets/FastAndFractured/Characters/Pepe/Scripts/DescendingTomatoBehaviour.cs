@@ -81,7 +81,7 @@ namespace FastAndFractured
         {
             if (other.gameObject == LevelController.Instance.playerReference)
             {
-                HUDManager.Instance.UpdateUIEffect(UIElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
+                HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }
             else
             {

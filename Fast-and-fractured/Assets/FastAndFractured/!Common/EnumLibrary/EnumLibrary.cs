@@ -23,7 +23,7 @@ namespace Enums
         ALL_WHEEL
     }
 
-    public enum UIElementType
+    public enum UIDynamicElementType
     {
         HEALTH_BAR,
         DASH_COOLDOWN,
@@ -45,7 +45,10 @@ namespace Enums
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
         SHOOTING_CROSSHAIR,
-        BULLET_EFFECT
+        SELECTED_PLAYER_ICON,
+        SPEED_INDICATOR,
+        EFFECT_ICONS_CONTAINER,
+		BULLET_EFFECT
     }
 
     public enum ScreensType
@@ -139,26 +142,26 @@ namespace Enums
 
     public enum PlayerPortraits
     {
-        CARME_PORTRAIT_0,
-        JOSEFINO_PORTRAIT_0,
-        PEPE_PORTRAIT_0,
-        MARIAANTONIA_PORTRAIT_0,
-        CARME_PORTRAIT_1,
-        JOSEFINO_PORTRAIT_1,
-        PEPE_PORTRAIT_1,
-        MARIAANTONIA_PORTRAIT_1,
+        CARME_0_PORTRAIT,
+        JOSEFINO_0_PORTRAIT,
+        PEPE_0_PORTRAIT,
+        MARIAANTONIA_0_PORTRAIT,
+        CARME_1_PORTRAIT,
+        JOSEFINO_1_PORTRAIT,
+        PEPE_1_PORTRAIT,
+        MARIAANTONIA_1_PORTRAIT,
     }
-    
+
     public enum PlayerHalfBody
     {
-        CARME_HALF_BODY_0,
-        JOSEFINO_HALF_BODY_0,
-        PEPE_HALF_BODY_0,
-        MARIAANTONIA_HALF_BODY_0,
-        CARME_HALF_BODY_1,
-        JOSEFINO_HALF_BODY_1,
-        PEPE_HALF_BODY_1,
-        MARIAANTONIA_HALF_BODY_1
+        CARME_0_HALFBODY,
+        JOSEFINO_0_HALFBODY,
+        PEPE_0_HALFBODY,
+        MARIAANTONIA_0_HALFBODY,
+        CARME_1_HALFBODY,
+        JOSEFINO_1_HALFBODY,
+        PEPE_1_HALFBODY,
+        MARIAANTONIA_1_HALFBODY
     }
 
     public enum UniqueAbilitiesIcons
@@ -169,6 +172,22 @@ namespace Enums
         MARIAANTONIA_UA
     }
 
+    public enum PushShootIcons
+    {
+        CARME_PUSH,
+        JOSEFINO_PUSH,
+        PEPE_PUSH,
+        MARIAANTONIA_PUSH
+    }
+
+    public enum NormalShootIcons
+    {
+        CARME_SHOOT,
+        JOSEFINO_SHOOT,
+        PEPE_SHOOT,
+        MARIAANTONIA_SHOOT
+    }
+
     public enum ScreenEffects
     {
         SPEED_EFFECT,
@@ -176,14 +195,14 @@ namespace Enums
         BROKEN_CRYSTAL,
         BULLET_EFFECT
     }
- 
+
     public enum GameElement
     {
         CHARACTER,
         INTERACTABLE,
         SAFE_ZONES
     }
-    
+
     public enum ModifiedCarState
     {
         JOSEFINO_INVULNERABLE,
