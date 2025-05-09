@@ -22,6 +22,13 @@ namespace FastAndFractured
         private Image[] _normalEffects;
         private Image[] _badEffects;
         private Image[] _bulletEffects;
+        private Image[] _effectIcons;
+
+        private string selectedPlayer;
+        private string selectedPlayerHalfBody;
+        private string selectedPlayerUA;
+        private string selectedPlayerPush;
+        private string selectedPlayerShoot;
 
         #endregion
 
@@ -35,7 +42,13 @@ namespace FastAndFractured
 
         private void Start()
         {
-
+            selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+            selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
+            string splittedPlayer = selectedPlayer.Split('_')[0];
+            selectedPlayerUA = splittedPlayer + "_UA";
+            selectedPlayerPush = splittedPlayer + "_PUSH";
+            selectedPlayerShoot = splittedPlayer + "_SHOOT";
+            SetPlayerStartingSprites();
         }
 
         #endregion
@@ -49,10 +62,19 @@ namespace FastAndFractured
                 _uiElements[element.elementType] = element;
             }
 
-            _goodEffects = GetUIElement(UIElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _normalEffects = GetUIElement(UIElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _badEffects = GetUIElement(UIElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
+            _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
             _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+        }
+
+        void SetPlayerStartingSprites()
+        {
+            UpdateUIElement(UIDynamicElementType.SHOOT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerShoot));
+            UpdateUIElement(UIDynamicElementType.PUSH_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerPush));
+            UpdateUIElement(UIDynamicElementType.ULT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerUA));
+            UpdateUIElement(UIDynamicElementType.SELECTED_PLAYER_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerHalfBody));
         }
 
         #endregion
