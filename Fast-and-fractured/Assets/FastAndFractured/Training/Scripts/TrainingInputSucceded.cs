@@ -42,7 +42,7 @@ namespace FastAndFractured
                 case InputMechanics.MOVING:
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.MoveInput!=Vector2.zero);
+                      SeeIfInputPressed(PlayerInputController.Instance.MoveInput!=Vector2.zero);
                     };
                     break;
                 case InputMechanics.MOVING_CAMERA:
@@ -87,14 +87,14 @@ namespace FastAndFractured
                     _playerPushShootHandle = PlayerInputController.Instance.gameObject.GetComponentInChildren<PushShootHandle>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsPushShooting);
+                        SeeIfInputPressed(PlayerInputController.Instance.IsPushShooting&&_playerPushShootHandle.IsPushShooting);
                     };
                     break;
                 case InputMechanics.MINE_SHOOT:
                     _playerPushShootHandle = PlayerInputController.Instance.gameObject.GetComponentInChildren<PushShootHandle>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsThrowingMine && _playerPushShootHandle.CanShoot);
+                        SeeIfInputPressed((PlayerInputController.Instance.IsThrowingMine&&_playerPushShootHandle.ShootingMine));
                     }; break;
                 case InputMechanics.UNIQUE_ABILITY:
                     _uniqueAbility = PlayerInputController.Instance.gameObject.GetComponentInChildren<BaseUniqueAbility>();
