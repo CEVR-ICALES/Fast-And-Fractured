@@ -28,6 +28,9 @@ namespace FastAndFractured
         private InputMechanics inputMechanics;
         [SerializeField]
         private List<TrafficLightLamp> trafficLightLamps;
+        private CarMovementController _playerCarMovement;
+        private NormalShootHandle _playerNormalShootHandle;
+        private PushShootHandle _playerPushShootHandle;
 
         private void Start()
         {
@@ -46,9 +49,10 @@ namespace FastAndFractured
                     };
                     break;
                 case InputMechanics.DASH:
+                    _playerCarMovement = PlayerInputController.Instance.gameObject.GetComponentInChildren<CarMovementController>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsDashing);
+                        SeeIfInputPressed(_playerCarMovement.IsDashing);
                     };
                     break;
                 case InputMechanics.BRAKE:
@@ -58,9 +62,10 @@ namespace FastAndFractured
                     };
                     break;
                 case InputMechanics.NORMAL_SHOOT:
+                    _playerNormalShootHandle = PlayerInputController.Instance.gameObject.GetComponentInChildren<NormalShootHandle>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsShooting);
+                        SeeIfInputPressed(PlayerInputController.Instance.IsShooting&&_playerNormalShootHandle.CanShoot);
                     };
                     break;
                 case InputMechanics.DRIFT:
@@ -76,15 +81,17 @@ namespace FastAndFractured
                     };
                     break;
                 case InputMechanics.PUSH_SHOOT:
+                    _playerPushShootHandle = PlayerInputController.Instance.gameObject.GetComponentInChildren<PushShootHandle>();
                     _waitInputAction = () =>
                     {
                         SeeIfInputPressed(PlayerInputController.Instance.IsPushShooting);
                     };
                     break;
                 case InputMechanics.MINE_SHOOT:
+                    _playerPushShootHandle = PlayerInputController.Instance.gameObject.GetComponentInChildren<PushShootHandle>();
                     _waitInputAction = () =>
                     {
-                        SeeIfInputPressed(PlayerInputController.Instance.IsThrowingMine);
+                        SeeIfInputPressed(PlayerInputController.Instance.IsThrowingMine && _playerPushShootHandle.CanShoot);
                     }; break;
                 case InputMechanics.UNIQUE_ABILITY:
                     _waitInputAction = () =>
