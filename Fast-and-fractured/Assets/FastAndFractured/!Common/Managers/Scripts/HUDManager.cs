@@ -65,7 +65,7 @@ namespace FastAndFractured
             _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
             _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
-            _bulletEffects = GetUIElement(UIElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+            _bulletEffects = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
 		}
 
         void SetPlayerStartingSprites()
@@ -142,9 +142,9 @@ namespace FastAndFractured
                 case UIDynamicElementType.BAD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_badEffects, newSprite);
                     break;
-                case UIElementType.BULLET_EFFECT:
+                case UIDynamicElementType.BULLET_EFFECT:
                     effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
-                    GameObject bulletContainer = GetUIElement(UIElementType.BULLET_EFFECT).gameObject;
+                    GameObject bulletContainer = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject;
                     if (bulletContainer != null && effectGameObj != null)
                     {
                         RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
@@ -159,6 +159,7 @@ namespace FastAndFractured
                             effectRect.anchoredPosition = new Vector2(randomX, randomY);
                         }
                     }
+                    break;
                 case UIDynamicElementType.EFFECT_ICONS_CONTAINER:
                     effectGameObj = UpdateEffectSprites(_effectIcons, newSprite);
                     break;
