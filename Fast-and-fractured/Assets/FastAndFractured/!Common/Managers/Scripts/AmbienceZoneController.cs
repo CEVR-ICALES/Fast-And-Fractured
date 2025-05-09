@@ -32,11 +32,10 @@ public class AmbienceZoneController : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
 
-        // Detener el evento con fade-out si la instancia es válida
         if (_ambienceInstance.isValid())
         {
-            _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT); // Fade-out
-            _ambienceInstance.release(); // Liberar la instancia
+            _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            _ambienceInstance.release(); 
         }
 
         Debug.Log("Left Zone");

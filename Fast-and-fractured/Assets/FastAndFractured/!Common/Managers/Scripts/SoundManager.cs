@@ -1,9 +1,6 @@
-using Enums;
 using FMOD.Studio;
 using FMODUnity;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
 using Utilities.Managers.PauseSystem;
@@ -48,11 +45,6 @@ namespace Utilities
         private const float DEFAULT_VOLUME_SLIDER_VALUE = 0.5f;
         #endregion
 
-        #region Ambience Sounds Variables
-        private EventInstance _ambienceInstance;
-        //[SerializeField] private EventReference ambienceEventReference;
-        #endregion
-
         [SerializeField] private List<EventInstance> _trackedInstances = new List<EventInstance>();
 
         EventReference musicGameLoopReference;
@@ -89,8 +81,6 @@ namespace Utilities
                 muteToggle.isOn = PlayerPrefs.GetInt(MUTE_ALL_STRING, 0) == 1;
                 ToggleMuteAllSounds();
             }
-
-            //InitializeAmbience();
         }
 
         private void OnEnable()
@@ -272,27 +262,6 @@ namespace Utilities
             PlayerPrefs.Save();
         }
         #endregion
-        #endregion
-
-        #region Ambience Methods
-        //private void InitializeAmbience()
-        //{
-        //    if (_ambienceInstance.isValid()) return;
-
-        //    SetAmbienceZone((float)AmbienceZoneType.NONE);
-
-        //    _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
-        //    _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
-        //    _ambienceInstance.start();
-        //}
-
-        //public void SetAmbienceZone(float zoneValue)
-        //{
-        //    if (!_ambienceInstance.isValid())
-        //        InitializeAmbience();
-
-        //    _ambienceInstance.setParameterByName(AMBIENCE_ZONE_PARAM_NAME, zoneValue);
-        //}
         #endregion
 
         public void OnPause()
