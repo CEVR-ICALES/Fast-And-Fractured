@@ -75,11 +75,7 @@ namespace Utilities
         }
         public override string ToString()
         {
-            TimeSpan t = TimeSpan.FromSeconds(CurrentTime);
-            return string.Format("{0:D2}:{1:D2}:{2:D2}",
-                                 t.Hours,
-                                 t.Minutes,
-                                 t.Seconds);
+            return GetFormattedTime(TimeFormatStyle.HOURS_MINUTES_SECONDS);
         }
         public string GetFormattedTime(TimeFormatStyle style)
         {
@@ -100,7 +96,8 @@ namespace Utilities
         }
         public enum TimeFormatStyle
         {
-            MINUTES_SECONDS,     
-            HOURS_MINUTES_SECONDS  
+            MINUTES_SECONDS,
+            HOURS_MINUTES_SECONDS
+        }
     }
 }
