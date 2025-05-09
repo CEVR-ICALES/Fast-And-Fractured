@@ -73,5 +73,13 @@ namespace Utilities
             Direction = (Direction == TimerDirection.INCREASE) ? TimerDirection.DECREASE : TimerDirection.INCREASE;
             return Direction;
         }
+        public override string ToString()
+        {
+            TimeSpan t = TimeSpan.FromSeconds(CurrentTime);
+            return string.Format("{0:D2}:{1:D2}:{2:D2}",
+                                 t.Hours,
+                                 t.Minutes,
+                                 t.Seconds);
+        }
     }
 }
