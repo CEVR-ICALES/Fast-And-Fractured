@@ -1,8 +1,10 @@
-using FMODUnity;
-using UnityEngine;
 using FMOD.Studio;
-using UnityEngine.UI;
+using FMODUnity;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using UnityEngine;
+using UnityEngine.UI;
 using Utilities.Managers.PauseSystem;
 
 namespace Utilities
@@ -39,7 +41,7 @@ namespace Utilities
         private const string SFX_VOLUME_STRING = "SFXVolume";
 
         private const string AMBIENCE_ZONE_PARAM_NAME = "AmbienceZone";
-         
+
         private const string MUTE_ALL_STRING = "MuteAll";
 
         private const float DEFAULT_VOLUME_SLIDER_VALUE = 0.5f;
@@ -49,6 +51,8 @@ namespace Utilities
         private EventInstance _ambienceInstance;
         [SerializeField] private EventReference ambienceEventReference;
         #endregion
+
+        [SerializeField] private List<EventInstance> _trackedInstances = new List<EventInstance>();
 
         EventReference musicGameLoopReference;
         #endregion
@@ -119,7 +123,9 @@ namespace Utilities
             EventInstance soundInstance = RuntimeManager.CreateInstance(eventReference);
             soundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
             soundInstance.start();
+
             _activeEvents[eventReference] = soundInstance;
+            AddEventInstance(soundInstance);
 
             return soundInstance;
         }
@@ -167,10 +173,17 @@ namespace Utilities
 
         public void PauseAllSounds()
         {
-            foreach (EventInstance instance in _activeEvents.Values)
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
             {
-                instance.setPaused(true);
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    _trackedInstances.RemoveAt(i);
+                else
+                    instance.setPaused(true);
             }
+
             ResumeAudio(musicGameLoopReference);
         }
 
@@ -186,9 +199,16 @@ namespace Utilities
 
         public void ResumeAllSounds()
         {
-            foreach (EventInstance instance in _activeEvents.Values)
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
             {
-                instance.setPaused(false);
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    RemoveEventInstance(instance);
+                else
+                    instance.setPaused(false);
+
             }
         }
         #endregion
@@ -278,6 +298,22 @@ namespace Utilities
         public void OnResume()
         {
             ResumeAllSounds();
+        }
+
+        internal void AddEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state != PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Add(instance);
+        }
+
+        internal void RemoveEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state == PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Remove(instance);
         }
     }
 }
