@@ -1,8 +1,8 @@
-using FMODUnity;
-using UnityEngine;
 using FMOD.Studio;
-using UnityEngine.UI;
+using FMODUnity;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 using Utilities.Managers.PauseSystem;
 
 namespace Utilities
@@ -29,22 +29,23 @@ namespace Utilities
         #endregion
 
         #region Dictionary Variables
+        private List<EventReference> fmodEvents = new List<EventReference>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
         #endregion
 
         #region Constants
-        private const string PREV_GENERAL_VOLUME_STRING = "PreviousGeneralVolume";
-        private const string PREV_MUSIC_VOLUME_STRING = "PreviousMusicVolume";
-        private const string PREV_SFX_VOLUME_STRING = "PreviousSFXVolume";
-
         private const string GENERAL_VOLUME_STRING = "GeneralVolume";
         private const string MUSIC_VOLUME_STRING = "MusicVolume";
         private const string SFX_VOLUME_STRING = "SFXVolume";
 
+        private const string AMBIENCE_ZONE_PARAM_NAME = "AmbienceZone";
+
         private const string MUTE_ALL_STRING = "MuteAll";
-         
+
         private const float DEFAULT_VOLUME_SLIDER_VALUE = 0.5f;
         #endregion
+
+        [SerializeField] private List<EventInstance> _trackedInstances = new List<EventInstance>();
 
         EventReference musicGameLoopReference;
         #endregion
@@ -52,7 +53,6 @@ namespace Utilities
         protected override void Awake()
         {
             base.Awake();
-            musicGameLoopReference.Path = "event:/MusicEvents/GameLoopMusicEvent";
         }
 
         private void Start()
@@ -100,7 +100,7 @@ namespace Utilities
         /// <param name="worldPosition">The world position to play the sound at</param>
         public void PlayOneShot(EventReference eventReference, Vector3 worldPosition)
         {
-            RuntimeManager.PlayOneShot(eventReference, worldPosition);
+            PlaySound3D(eventReference, worldPosition);
         }
 
         /// <summary>
@@ -113,7 +113,9 @@ namespace Utilities
             EventInstance soundInstance = RuntimeManager.CreateInstance(eventReference);
             soundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
             soundInstance.start();
+
             _activeEvents[eventReference] = soundInstance;
+            AddEventInstance(soundInstance);
 
             return soundInstance;
         }
@@ -161,10 +163,17 @@ namespace Utilities
 
         public void PauseAllSounds()
         {
-            foreach (EventInstance instance in _activeEvents.Values)
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
             {
-                instance.setPaused(true);
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    _trackedInstances.RemoveAt(i);
+                else
+                    instance.setPaused(true);
             }
+
             ResumeAudio(musicGameLoopReference);
         }
 
@@ -180,15 +189,21 @@ namespace Utilities
 
         public void ResumeAllSounds()
         {
-            foreach (EventInstance instance in _activeEvents.Values)
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
             {
-                instance.setPaused(false);
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    RemoveEventInstance(instance);
+                else
+                    instance.setPaused(false);
+
             }
         }
         #endregion
 
         #region Volume Methods
-
         public void SetSFXVolume(float value) => SetVCAVolume("vca:/SFX", value);
         public void SetMusicVolume(float value) => SetVCAVolume("vca:/Music", value);
         public void SetGeneralVolume(float value) => SetVCAVolume("vca:/General", value);
@@ -256,6 +271,22 @@ namespace Utilities
         public void OnResume()
         {
             ResumeAllSounds();
+        }
+
+        internal void AddEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state != PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Add(instance);
+        }
+
+        internal void RemoveEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state == PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Remove(instance);
         }
     }
 }

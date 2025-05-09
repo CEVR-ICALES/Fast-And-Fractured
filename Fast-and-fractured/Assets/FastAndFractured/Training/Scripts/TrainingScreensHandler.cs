@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Enums;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
+using System.Linq;
 
 public class TrainingScreensHandler : MonoBehaviour
 {
@@ -16,7 +18,10 @@ public class TrainingScreensHandler : MonoBehaviour
 
     private int _currentScreenIndex = 0;
     private GameObject _currentScreen;
+    private List<GameObject> activeScreens = new List<GameObject>();
     private bool _hasDpadBeenReleased = false;
+    [SerializeField]
+    private bool showInOneScreen = true;
 
     private InputDeviceType _currentInputDeviceType;
 
@@ -24,7 +29,14 @@ public class TrainingScreensHandler : MonoBehaviour
     private void OnEnable()
     {
         PlayerInputController.OnInputDeviceChanged += HandleInputDeviceChanged;
-        SelectDeviceScreen();
+        if (!showInOneScreen)
+        {
+            SelectDeviceScreen();
+        }
+        else
+        {
+            SelectDevicesScreen();
+        }
     }
 
     private void OnDisable()
@@ -34,7 +46,10 @@ public class TrainingScreensHandler : MonoBehaviour
 
     private void Update()
     {
-        CheckIfNextScreenHasBeeenClicked();
+        if (!showInOneScreen)
+        {
+            CheckIfNextScreenHasBeeenClicked();
+        }
     }
 
     private void HandleInputDeviceChanged(InputDeviceType currentDecive)
@@ -48,7 +63,14 @@ public class TrainingScreensHandler : MonoBehaviour
         {
             nextScreenImagee.sprite = gamepadNextSprite;
         }
-        SelectDeviceScreen();
+        if (!showInOneScreen)
+        {
+            SelectDeviceScreen();
+        }
+        else
+        {
+            SelectDevicesScreen();
+        }
     }
 
     public void OpenNextScreen()
@@ -76,6 +98,29 @@ public class TrainingScreensHandler : MonoBehaviour
 
         _currentScreen.SetActive(true);
     }
+    private void SelectDevicesScreen()
+    {
+        if (activeScreens.Count > 0)
+        {
+            foreach (var screens in activeScreens)
+            {
+                screens.gameObject.SetActive(false);
+            }
+            activeScreens.Clear();
+        }
+            if (_currentInputDeviceType == InputDeviceType.KEYBOARD_MOUSE)
+            {
+                activeScreens = keyboardScreens.ToList();
+            }
+            else
+            {
+                activeScreens = gamepadScreens.ToList();
+            }
+        foreach (var screen in activeScreens)
+        {
+            screen.gameObject.SetActive(true);
+        }
+    }
 
     private void CheckIfNextScreenHasBeeenClicked()
     {
@@ -95,9 +140,6 @@ public class TrainingScreensHandler : MonoBehaviour
                 _hasDpadBeenReleased = true;
             }
         }
-
-        
-
     }
 
     
