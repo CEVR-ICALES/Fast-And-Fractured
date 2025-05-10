@@ -477,12 +477,12 @@ namespace FastAndFractured
             return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
-        public void StartIsFlippedTimer()
+        public void StartIsFlippedTimer(float decreseTimeFactor)
         {
             if (_flipTimer == null)
             {
                 Debug.Log("StartTimer");
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime*decreseTimeFactor, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
                     _flipTimer=null;
                 });
