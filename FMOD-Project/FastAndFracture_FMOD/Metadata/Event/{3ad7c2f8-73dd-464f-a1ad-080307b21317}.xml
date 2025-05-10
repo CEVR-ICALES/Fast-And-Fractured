@@ -5,7 +5,7 @@
 			<value>MariaAntoniaDefeatAlt</value>
 		</property>
 		<property name="outputFormat">
-			<value>0</value>
+			<value>1</value>
 		</property>
 		<relationship name="folder">
 			<destination>{c8c9e381-0c30-4117-ad7c-f92ff5d622d4}</destination>
@@ -61,6 +61,7 @@
 	<object class="GroupTrack" id="{b65297fd-3698-4e60-9859-1fd384511e01}">
 		<relationship name="modules">
 			<destination>{1e6f31d4-97b9-46ec-9d75-865f6c5d4ee0}</destination>
+			<destination>{39b7b562-1485-49b1-a7cf-a8501eb89a53}</destination>
 		</relationship>
 		<relationship name="mixerGroup">
 			<destination>{917852d2-a971-4502-aac4-3e865e8083a2}</destination>
@@ -69,6 +70,7 @@
 	<object class="Timeline" id="{add3152e-b636-4b85-be73-5185bdfc1271}">
 		<relationship name="modules">
 			<destination>{1e6f31d4-97b9-46ec-9d75-865f6c5d4ee0}</destination>
+			<destination>{39b7b562-1485-49b1-a7cf-a8501eb89a53}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{9b6e808d-3656-4dfc-9028-0fc3aeb75111}">
@@ -94,6 +96,23 @@
 		</property>
 		<relationship name="audioFile">
 			<destination>{616677ae-544b-4d46-882d-c85ed45aa254}</destination>
+		</relationship>
+	</object>
+	<object class="SingleSound" id="{39b7b562-1485-49b1-a7cf-a8501eb89a53}">
+		<property name="start">
+			<value>3.5265306122448981</value>
+		</property>
+		<property name="length">
+			<value>1.9734693877551024</value>
+		</property>
+		<property name="timelockedOffset">
+			<value>0.47346938775510194</value>
+		</property>
+		<property name="pitch">
+			<value>-3.60000014</value>
+		</property>
+		<relationship name="audioFile">
+			<destination>{e135962f-b4f3-4c7c-af48-0c73ab6e6c54}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerGroup" id="{917852d2-a971-4502-aac4-3e865e8083a2}">
