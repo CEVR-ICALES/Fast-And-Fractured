@@ -458,6 +458,10 @@ namespace FastAndFractured
                     return true;
                 }
             }
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             return _physicsBehaviour.IsTouchingGround;
         }
 
