@@ -213,7 +213,10 @@ namespace FastAndFractured
                         if (_isPlayer)
                         {
                             HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
-                            HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
+                            if (whoMadeTheDamage.GetComponent<CarMovementController>()!= null)
+                            {
+                                HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
+                            }
                         }
                     }
                     else
