@@ -96,7 +96,10 @@ namespace FastAndFractured
         private void Start()
         {
             statsController.CustomStart();
-            _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
             speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
@@ -455,11 +458,19 @@ namespace FastAndFractured
                     return true;
                 }
             }
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             return _physicsBehaviour.IsTouchingGround;
         }
 
         public bool IsInFlipCase()
         {
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             return IsInWall()||_physicsBehaviour.IsTouchingGround;
         }
 
