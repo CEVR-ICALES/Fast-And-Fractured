@@ -138,15 +138,22 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         charCarMaxSpeed.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f) * 100f).ToString() + "%";
         charCarMaxEndurance.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f) * 100f).ToString() + "%";
         charCarBaseForce.text = Math.Round(Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f) * 100f).ToString() + "%";
-        charCarAcceleration.text = (100f - Math.Round(Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f) * 100f)).ToString() + "%";  //create acceleration distinction 
-        charCarManuver.text = Math.Round(Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f) * 100f).ToString() + "%";  //create manuver distinction 
+        charCarManuver.text = Math.Round(Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f) * 100f).ToString() + "%";
 
         charCarWeightImage.fillAmount = Mathf.Clamp01(character.CharacterStats.Weight / 2000f);
         charCarMaxSpeedImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f);
         charCarMaxEnduranceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f);
         charCarBaseForceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f);
-        charCarAccelerationImage.fillAmount = 1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f);
         charCarManuverImage.fillAmount = Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f);
+        
+        if(character.CharacterName == "Pepe"){
+            charCarAcceleration.text = Math.Round((1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f)) * 100f).ToString() + "%";
+            charCarAccelerationImage.fillAmount = 1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f);
+        }
+        else {
+            charCarAcceleration.text = Math.Round(Mathf.Clamp01(character.CharacterStats.Acceleration / 8000f) * 100f).ToString() + "%";
+            charCarAccelerationImage.fillAmount = Mathf.Clamp01(character.CharacterStats.Acceleration / 8000f);
+        }
     }
 
     private void ChangePlayerIcon()
