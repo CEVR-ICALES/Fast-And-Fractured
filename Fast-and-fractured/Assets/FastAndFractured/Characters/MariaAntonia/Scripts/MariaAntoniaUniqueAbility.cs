@@ -75,7 +75,10 @@ namespace FastAndFractured
         {
             if (orbitCenter == null)
                 orbitCenter = transform;
-
+            if (mariaAntoniaStatsController == null)
+            {
+                mariaAntoniaStatsController = GetComponent<StatsController>();
+            }
             if (hairMaterial != null)
                 _originalExposureWeight = hairMaterial.GetFloat(MATERIAL_EMISSIVE);
                 
