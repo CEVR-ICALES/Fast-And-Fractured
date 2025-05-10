@@ -16,7 +16,6 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 6067046011668277108, guid: 9a46dd806a6bbc44c8162ffabf2732cd, type: 3}
-  - {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
   MaxEndurance: 800
   MinEndurance: 0
   Invulnerable: 0
@@ -72,7 +71,7 @@ MonoBehaviour:
   aiParameters:
     fleeDistance: 100
     sweepRadius: 150
-    shootingMarginErrorAngle: 0.05
+    shootingMarginErrorAngle: 0.15
     damageAccumulationDuration: 2
     fleeTriggerDamageThresholdPercentage: 50
     _recoveryThresholdPercentageForSearch: 50
@@ -84,7 +83,7 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 10
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 25
-    marginToFleeFromSandstorm: 200
+    marginToFleeFromSandstorm: 250
   WinObjects:
   - GameObject: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
     StringValue: Carme_0

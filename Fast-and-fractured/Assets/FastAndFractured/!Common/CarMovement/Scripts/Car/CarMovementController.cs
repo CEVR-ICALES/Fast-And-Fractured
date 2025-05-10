@@ -613,9 +613,9 @@ namespace FastAndFractured
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
-            if (_dashCooldown != null)
+            if (_dashCooldown != null&& TimerSystem.Instance.HasTimer(_dashCooldown))
             {
-                TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
+              TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
             }
         }
     }

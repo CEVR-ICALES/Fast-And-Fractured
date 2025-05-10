@@ -16,10 +16,9 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 2299859702755162595, guid: c06f8ab003558b849b900acc4b42dd01, type: 3}
-  - {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
   MaxEndurance: 700
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 200
   MaxSpeedDashing: 260
   MaxSpeedMultiplier: 1
@@ -84,7 +83,7 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
-    marginToFleeFromSandstorm: -10
+    marginToFleeFromSandstorm: 200
   WinObjects:
   - GameObject: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
     StringValue: MariaAntonia_0

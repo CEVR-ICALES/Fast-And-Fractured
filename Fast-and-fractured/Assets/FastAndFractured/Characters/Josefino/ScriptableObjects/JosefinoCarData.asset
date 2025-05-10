@@ -16,7 +16,6 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
-  - {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   MaxEndurance: 1000
   MinEndurance: 0
   Invulnerable: 0
@@ -72,7 +71,7 @@ MonoBehaviour:
   aiParameters:
     fleeDistance: 5
     sweepRadius: 20
-    shootingMarginErrorAngle: 0.05
+    shootingMarginErrorAngle: 0.1
     damageAccumulationDuration: 5
     fleeTriggerDamageThresholdPercentage: 5
     _recoveryThresholdPercentageForSearch: 50
@@ -84,7 +83,7 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
-    marginToFleeFromSandstorm: 150
+    marginToFleeFromSandstorm: 300
   WinObjects:
   - GameObject: {fileID: 8929485945919532771, guid: 352b5740b9121db47ab741aff76fd2de, type: 3}
     StringValue: Josefino_0
