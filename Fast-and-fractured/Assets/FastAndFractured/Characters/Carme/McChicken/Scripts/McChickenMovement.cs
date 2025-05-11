@@ -15,7 +15,9 @@ namespace FastAndFractured
         bool _isPaused = false;
 
         [Header("Movement Settings")]
-        [SerializeField] private float moveForce = 5f;
+        [SerializeField] private float initialMoveSpeed = 5f;
+        [SerializeField] private float airSpeed = 0.5f;
+        private float currentSpeed;
         [SerializeField] private float rotationSpeed = 10f;
         [SerializeField] private float maxSlopeAngle = 45f;
 
@@ -56,6 +58,7 @@ namespace FastAndFractured
         {
             _currentMoveDirection = direction;
             _rb.constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+            currentSpeed = initialMoveSpeed;
         }
 
         private void FixedUpdate()
@@ -73,7 +76,15 @@ namespace FastAndFractured
             {
 
                 KinematicMovement();
-                ApplyCustomGravity();
+                if(!_physicsHandler.IsGrounded)
+                {
+                    currentSpeed = airSpeed;
+                    ApplyCustomGravity();
+                    _rb.angularVelocity = Vector3.zero;
+                } else
+                {
+                    currentSpeed = initialMoveSpeed;
+                }
             }
         }
 
@@ -122,7 +133,7 @@ namespace FastAndFractured
                 _rb.angularVelocity = Vector3.zero;
             }
 
-            transform.position += _currentMoveDirection * moveForce * Time.fixedDeltaTime;
+            transform.position += _currentMoveDirection * currentSpeed * Time.fixedDeltaTime;
 
         }
 
@@ -147,6 +158,12 @@ namespace FastAndFractured
             _isClimbing = false;
             _rb.useGravity = true;
             _rb.isKinematic = false;
+            _physicsHandler.UpdateGroundStateBool(false);
+        }
+
+        public void StopIsOnCeiling()
+        {
+            _isInCeiling = false;
         }
 
         public void OnPause()
