@@ -215,4 +215,12 @@ namespace Enums
         DIRECT_VALUE,
         PERCENTAGE,
     }
+
+    public enum AmbienceZoneType
+    {
+        NONE,
+        FOREST,
+        MERCADILLO,
+        CONSTRUCTION_ZONE
+    }
 }
