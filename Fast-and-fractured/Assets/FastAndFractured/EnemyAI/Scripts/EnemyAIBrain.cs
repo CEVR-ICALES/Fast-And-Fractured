@@ -109,6 +109,8 @@ namespace FastAndFractured
         public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
         private bool _doTrainingAction;
 
+        private const float DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND = 0.75f;
+
 
         private void OnEnable()
         {
@@ -142,13 +144,16 @@ namespace FastAndFractured
                 else
                 {
                     GroundForces();
-                    if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                    if (!carMovementController.IsFlipped)
                     {
-                        carMovementController.StartIsFlippedTimer();
-                    }
-                    else
-                    {
-                        carMovementController.StopFlippedTimer();
+                        if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                        {
+                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND : 1);
+                        }
+                        else
+                        {
+                            carMovementController.StopFlippedTimer();
+                        }
                     }
                     if (carMovementController.IsFlipped)
                     {
