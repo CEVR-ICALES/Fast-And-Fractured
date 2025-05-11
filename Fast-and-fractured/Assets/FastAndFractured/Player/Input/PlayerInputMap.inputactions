@@ -139,6 +139,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DebugRemoveUltimateAbilityCooldown",
+                    "type": "Button",
+                    "id": "909adfcd-465a-471b-a7b7-80d412a8ccda",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -449,6 +458,17 @@
                     "action": "DebugAIResetPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "18becf51-2637-4d85-827f-69f182904120",
+                    "path": "<Keyboard>/u",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugRemoveUltimateAbilityCooldown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -547,7 +567,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "UnlockSkins",
+                    "name": "DebugUnlockSkins",
                     "type": "Button",
                     "id": "3023a69b-e852-4400-9968-35c232da33c8",
                     "expectedControlType": "",
@@ -685,7 +705,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "UnlockSkins",
+                    "action": "DebugUnlockSkins",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

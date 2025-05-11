@@ -161,6 +161,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugRemoveUltimateAbilityCooldown"",
+                    ""type"": ""Button"",
+                    ""id"": ""909adfcd-465a-471b-a7b7-80d412a8ccda"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -471,6 +480,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""DebugAIResetPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""18becf51-2637-4d85-827f-69f182904120"",
+                    ""path"": ""<Keyboard>/u"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugRemoveUltimateAbilityCooldown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -569,7 +589,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""UnlockSkins"",
+                    ""name"": ""DebugUnlockSkins"",
                     ""type"": ""Button"",
                     ""id"": ""3023a69b-e852-4400-9968-35c232da33c8"",
                     ""expectedControlType"": """",
@@ -707,7 +727,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""UnlockSkins"",
+                    ""action"": ""DebugUnlockSkins"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -733,6 +753,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_Dash = m_PlayerInputActions.FindAction("Dash", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
+        m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown = m_PlayerInputActions.FindAction("DebugRemoveUltimateAbilityCooldown", throwIfNotFound: true);
         // MenuInputActions
         m_MenuInputActions = asset.FindActionMap("MenuInputActions", throwIfNotFound: true);
         m_MenuInputActions_GoBack = m_MenuInputActions.FindAction("GoBack", throwIfNotFound: true);
@@ -745,7 +766,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_MenuInputActions_LeftSkin = m_MenuInputActions.FindAction("LeftSkin", throwIfNotFound: true);
         m_MenuInputActions_RightSkin = m_MenuInputActions.FindAction("RightSkin", throwIfNotFound: true);
         m_MenuInputActions_StartGame = m_MenuInputActions.FindAction("StartGame", throwIfNotFound: true);
-        m_MenuInputActions_UnlockSkins = m_MenuInputActions.FindAction("UnlockSkins", throwIfNotFound: true);
+        m_MenuInputActions_DebugUnlockSkins = m_MenuInputActions.FindAction("DebugUnlockSkins", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -828,6 +849,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_Dash;
     private readonly InputAction m_PlayerInputActions_DebugAIChangeState;
     private readonly InputAction m_PlayerInputActions_DebugAIResetPosition;
+    private readonly InputAction m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
     public struct PlayerInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -847,6 +869,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Dash => m_Wrapper.m_PlayerInputActions_Dash;
         public InputAction @DebugAIChangeState => m_Wrapper.m_PlayerInputActions_DebugAIChangeState;
         public InputAction @DebugAIResetPosition => m_Wrapper.m_PlayerInputActions_DebugAIResetPosition;
+        public InputAction @DebugRemoveUltimateAbilityCooldown => m_Wrapper.m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -901,6 +924,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugAIResetPosition.started += instance.OnDebugAIResetPosition;
             @DebugAIResetPosition.performed += instance.OnDebugAIResetPosition;
             @DebugAIResetPosition.canceled += instance.OnDebugAIResetPosition;
+            @DebugRemoveUltimateAbilityCooldown.started += instance.OnDebugRemoveUltimateAbilityCooldown;
+            @DebugRemoveUltimateAbilityCooldown.performed += instance.OnDebugRemoveUltimateAbilityCooldown;
+            @DebugRemoveUltimateAbilityCooldown.canceled += instance.OnDebugRemoveUltimateAbilityCooldown;
         }
 
         private void UnregisterCallbacks(IPlayerInputActionsActions instance)
@@ -950,6 +976,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugAIResetPosition.started -= instance.OnDebugAIResetPosition;
             @DebugAIResetPosition.performed -= instance.OnDebugAIResetPosition;
             @DebugAIResetPosition.canceled -= instance.OnDebugAIResetPosition;
+            @DebugRemoveUltimateAbilityCooldown.started -= instance.OnDebugRemoveUltimateAbilityCooldown;
+            @DebugRemoveUltimateAbilityCooldown.performed -= instance.OnDebugRemoveUltimateAbilityCooldown;
+            @DebugRemoveUltimateAbilityCooldown.canceled -= instance.OnDebugRemoveUltimateAbilityCooldown;
         }
 
         public void RemoveCallbacks(IPlayerInputActionsActions instance)
@@ -981,7 +1010,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_MenuInputActions_LeftSkin;
     private readonly InputAction m_MenuInputActions_RightSkin;
     private readonly InputAction m_MenuInputActions_StartGame;
-    private readonly InputAction m_MenuInputActions_UnlockSkins;
+    private readonly InputAction m_MenuInputActions_DebugUnlockSkins;
     public struct MenuInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -996,7 +1025,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @LeftSkin => m_Wrapper.m_MenuInputActions_LeftSkin;
         public InputAction @RightSkin => m_Wrapper.m_MenuInputActions_RightSkin;
         public InputAction @StartGame => m_Wrapper.m_MenuInputActions_StartGame;
-        public InputAction @UnlockSkins => m_Wrapper.m_MenuInputActions_UnlockSkins;
+        public InputAction @DebugUnlockSkins => m_Wrapper.m_MenuInputActions_DebugUnlockSkins;
         public InputActionMap Get() { return m_Wrapper.m_MenuInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1036,9 +1065,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @StartGame.started += instance.OnStartGame;
             @StartGame.performed += instance.OnStartGame;
             @StartGame.canceled += instance.OnStartGame;
-            @UnlockSkins.started += instance.OnUnlockSkins;
-            @UnlockSkins.performed += instance.OnUnlockSkins;
-            @UnlockSkins.canceled += instance.OnUnlockSkins;
+            @DebugUnlockSkins.started += instance.OnDebugUnlockSkins;
+            @DebugUnlockSkins.performed += instance.OnDebugUnlockSkins;
+            @DebugUnlockSkins.canceled += instance.OnDebugUnlockSkins;
         }
 
         private void UnregisterCallbacks(IMenuInputActionsActions instance)
@@ -1073,9 +1102,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @StartGame.started -= instance.OnStartGame;
             @StartGame.performed -= instance.OnStartGame;
             @StartGame.canceled -= instance.OnStartGame;
-            @UnlockSkins.started -= instance.OnUnlockSkins;
-            @UnlockSkins.performed -= instance.OnUnlockSkins;
-            @UnlockSkins.canceled -= instance.OnUnlockSkins;
+            @DebugUnlockSkins.started -= instance.OnDebugUnlockSkins;
+            @DebugUnlockSkins.performed -= instance.OnDebugUnlockSkins;
+            @DebugUnlockSkins.canceled -= instance.OnDebugUnlockSkins;
         }
 
         public void RemoveCallbacks(IMenuInputActionsActions instance)
@@ -1110,6 +1139,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnDash(InputAction.CallbackContext context);
         void OnDebugAIChangeState(InputAction.CallbackContext context);
         void OnDebugAIResetPosition(InputAction.CallbackContext context);
+        void OnDebugRemoveUltimateAbilityCooldown(InputAction.CallbackContext context);
     }
     public interface IMenuInputActionsActions
     {
@@ -1123,6 +1153,6 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnLeftSkin(InputAction.CallbackContext context);
         void OnRightSkin(InputAction.CallbackContext context);
         void OnStartGame(InputAction.CallbackContext context);
-        void OnUnlockSkins(InputAction.CallbackContext context);
+        void OnDebugUnlockSkins(InputAction.CallbackContext context);
     }
 }
