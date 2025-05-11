@@ -17,7 +17,7 @@ MonoBehaviour:
   CarWithSkinsPrefabs:
   - {fileID: 4771895532738125504, guid: 92a45c869ac151945a9e415883c523f3, type: 3}
   - {fileID: 740157352063507834, guid: 395f6b88ffcc17e44ad0cd84c1ce382a, type: 3}
-  MaxEndurance: 1000
+  MaxEndurance: 1200
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 155
@@ -45,7 +45,7 @@ MonoBehaviour:
   BaseDownwardForce: 800
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 48
+  NormalShootDMG: 42
   MaxNormalShootDMG: 72
   MinNormalShootDMG: 36
   PushShootFORCE: 1000000
@@ -72,7 +72,7 @@ MonoBehaviour:
   aiParameters:
     fleeDistance: 5
     sweepRadius: 20
-    shootingMarginErrorAngle: 0.1
+    shootingMarginErrorAngle: 0.25
     damageAccumulationDuration: 5
     fleeTriggerDamageThresholdPercentage: 5
     _recoveryThresholdPercentageForSearch: 50
