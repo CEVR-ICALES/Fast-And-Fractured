@@ -11325,6 +11325,12 @@ PrefabInstance:
       insertIndex: 0
       addedObject: {fileID: 248848809}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3584438058941168784, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1458278735}
+    - targetCorrespondingSourceObject: {fileID: 3584438058941168784, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1458278736}
     - targetCorrespondingSourceObject: {fileID: 4954922675590567163, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1458278731}
@@ -11397,6 +11403,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1162733266713914643, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 92387395}
+    - targetCorrespondingSourceObject: {fileID: 433262217107908697, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1458278733}
+    - targetCorrespondingSourceObject: {fileID: 433262217107908697, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1458278737}
     - targetCorrespondingSourceObject: {fileID: 8063125083530320372, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 395834303}
@@ -11503,6 +11515,120 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 6.365783, y: 2.1237316, z: -3.8054903}
   m_TimeToStationary: 0.5
+--- !u!1 &1458278732 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 433262217107908697, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+  m_PrefabInstance: {fileID: 1458278729}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1458278733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458278732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b08136352af2148ac1dfc627067b12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: 2003180923
+      Data2: 1098536040
+      Data3: 2131467180
+      Data4: 2026689587
+    Path: event:/VoicedEvents/Alien/AlienVoiceLine
+  Event: event:/VoicedEvents/Alien/AlienVoiceLine
+  EventPlayTrigger: 3
+  EventStopTrigger: 4
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 100
+--- !u!1 &1458278734 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3584438058941168784, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+  m_PrefabInstance: {fileID: 1458278729}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1458278735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458278734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b08136352af2148ac1dfc627067b12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: 1342964069
+      Data2: 1166345517
+      Data3: -1737542221
+      Data4: 266468685
+    Path: event:/VoicedEvents/MercadilloWomenEvents/BasicWomanSelling
+  Event: event:/VoicedEvents/MercadilloWomenEvents/BasicWomanSelling
+  EventPlayTrigger: 3
+  EventStopTrigger: 4
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 100
+--- !u!135 &1458278736
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458278734}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 25
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!135 &1458278737
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458278732}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 43
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &1481643928
 PrefabInstance:
   m_ObjectHideFlags: 0
