@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 1747565588919516875}
   - component: {fileID: 4767488575423342050}
   - component: {fileID: 1313186917898096272}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: GreenLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5588201474673517770
 Transform:
@@ -108,12 +108,12 @@ GameObject:
   m_Component:
   - component: {fileID: 7977205058367833966}
   - component: {fileID: 2552387320318984049}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7977205058367833966
 Transform:
@@ -177,12 +177,12 @@ GameObject:
   - component: {fileID: 3537554850785312250}
   - component: {fileID: 7288061099770388666}
   - component: {fileID: 3000466732561827754}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: RedLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2599668831176648722
 Transform:
@@ -275,12 +275,12 @@ GameObject:
   - component: {fileID: 8562179178054559845}
   - component: {fileID: 8122668672083840848}
   - component: {fileID: 3242919807008599228}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: YellowLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &669987211716509471
 Transform:
@@ -372,12 +372,12 @@ GameObject:
   - component: {fileID: 7655946629161853672}
   - component: {fileID: 8107494956039540127}
   - component: {fileID: 1746110296600154653}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Semaforo_Ver3_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7655946629161853672
 Transform:
@@ -464,9 +464,25 @@ PrefabInstance:
       propertyPath: trafficUnits.Array.data[0]
       value: 
       objectReference: {fileID: 2552387320318984049}
+    - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_Name
       value: ThreeZeroTrafficLight
+      objectReference: {fileID: 0}
+    - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7350752657353995067, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -545,8 +561,56 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7977205058367833966}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2049831348753597955}
+    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3555518159382451803}
   m_SourcePrefab: {fileID: 100100000, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+--- !u!1 &7090044281905994549 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+  m_PrefabInstance: {fileID: 8806624700254783138}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &2049831348753597955
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7090044281905994549}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.44040522, y: 11.203131, z: 0.5070311}
+  m_Center: {x: -0.01980035, y: 5.6780987, z: -0.025211692}
+--- !u!208 &3555518159382451803
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7090044281905994549}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.22020261, y: 5.6015654, z: 0.25351554}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.01980035, y: 5.6780987, z: -0.025211692}
+  m_TimeToStationary: 0.5
 --- !u!4 &8304698666431917938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}

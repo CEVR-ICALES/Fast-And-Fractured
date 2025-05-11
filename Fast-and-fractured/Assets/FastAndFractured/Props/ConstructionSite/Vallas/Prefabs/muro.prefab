@@ -11,12 +11,14 @@ GameObject:
   - component: {fileID: 5539207768246595457}
   - component: {fileID: 4195604226298563988}
   - component: {fileID: 3714777648023448385}
-  m_Layer: 0
+  - component: {fileID: 6526783596426120926}
+  - component: {fileID: 1917091216409326175}
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5539207768246595457
 Transform:
@@ -83,6 +85,43 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &6526783596426120926
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6326928800120299324}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 25.667976, y: 3.1059208, z: 2.7993393}
+  m_Center: {x: -0.63461685, y: 0.48821664, z: 0.0070858}
+--- !u!208 &1917091216409326175
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6326928800120299324}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 12.833988, y: 1.5529604, z: 1.3996696}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.63461685, y: 0.48821664, z: 0.0070858}
+  m_TimeToStationary: 0.5
 --- !u!1001 &2705803459608429345
 PrefabInstance:
   m_ObjectHideFlags: 0
