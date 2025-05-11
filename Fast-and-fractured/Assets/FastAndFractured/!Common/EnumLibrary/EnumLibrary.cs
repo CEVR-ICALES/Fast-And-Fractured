@@ -137,7 +137,11 @@ namespace Enums
         CARME_1,
         JOSEFINO_1,
         PEPE_1,
-        MARIAANTONIA_1
+        MARIAANTONIA_1,
+        CARME_2,
+        JOSEFINO_2,
+        PEPE_2,
+        MARIAANTONIA_2
     }
 
     public enum PlayerPortraits
@@ -150,6 +154,10 @@ namespace Enums
         JOSEFINO_1_PORTRAIT,
         PEPE_1_PORTRAIT,
         MARIAANTONIA_1_PORTRAIT,
+        CARME_2_PORTRAIT,
+        JOSEFINO_2_PORTRAIT,
+        PEPE_2_PORTRAIT,
+        MARIAANTONIA_2_PORTRAIT
     }
 
     public enum PlayerHalfBody
@@ -161,7 +169,11 @@ namespace Enums
         CARME_1_HALFBODY,
         JOSEFINO_1_HALFBODY,
         PEPE_1_HALFBODY,
-        MARIAANTONIA_1_HALFBODY
+        MARIAANTONIA_1_HALFBODY,
+        CARME_2_HALFBODY,
+        JOSEFINO_2_HALFBODY,
+        PEPE_2_HALFBODY,
+        MARIAANTONIA_2_HALFBODY
     }
 
     public enum UniqueAbilitiesIcons

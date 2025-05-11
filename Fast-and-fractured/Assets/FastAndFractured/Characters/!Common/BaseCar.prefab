@@ -748,6 +748,7 @@ GameObject:
   - component: {fileID: 856863917156540184}
   - component: {fileID: 3418725416974131902}
   - component: {fileID: 3354677737533228885}
+  - component: {fileID: 9016514513498141912}
   m_Layer: 6
   m_Name: BaseCar
   m_TagString: Untagged
@@ -857,7 +858,6 @@ MonoBehaviour:
   - {fileID: 521567174495699549}
   - {fileID: 7830080552734713148}
   - {fileID: 1642934431999857238}
-  speedOverlay: {fileID: 0}
   applyRollPrevention: 1
   SteeringMode: 0
   brakeMode: 3
@@ -1139,6 +1139,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetBehind: {fileID: 603032991224008183}
+--- !u!114 &9016514513498141912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832e173dd0c7ec544ba81de193ece178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputActionReference: {fileID: 9195400025280521654, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
+  onInputPerformedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
