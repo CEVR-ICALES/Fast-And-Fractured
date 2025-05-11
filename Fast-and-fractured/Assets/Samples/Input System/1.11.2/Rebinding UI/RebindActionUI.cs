@@ -410,7 +410,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         if (keyPath.StartsWith("<Keyboard>/") && !inputsList.Contains(keyPath) ||
                             keyPath.StartsWith("<Mouse>/"))
                         {
-                            m_RebindOverlay.GetComponentInChildren<Text>().text = " " + keyPath + "Key not allowed. Please choose another.";
+                            //m_RebindOverlay.GetComponentInChildren<Text>().text = " " + keyPath + "Key not allowed. Please choose another.";
                             Debug.Log("Key not allowed. Please choose another.");
                             action.RemoveBindingOverride(bindingIndex);
                             PerformInteractiveRebind(action, bindingIndex, allCompositeParts);
