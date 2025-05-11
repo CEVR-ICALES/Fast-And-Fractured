@@ -13,6 +13,9 @@ GameObject:
   - component: {fileID: 8202669164086830982}
   - component: {fileID: 661012075387887665}
   - component: {fileID: 6296706275142682845}
+  - component: {fileID: 4714435477804484651}
+  - component: {fileID: 8402129891423872754}
+  - component: {fileID: 6800480687285736520}
   m_Layer: 10
   m_Name: DoubleTallBeige
   m_TagString: Untagged
@@ -189,6 +192,57 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 4.0983276, y: 1.2213435, z: 7.1788464}
   m_Center: {x: 10.773499, y: 6.0928307, z: -3.9594393}
+--- !u!114 &4714435477804484651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3289339207672511313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 3643009034108532453}
+  landeableCollider: {fileID: 6800480687285736520}
+  gizmosColor: {r: 0.990566, g: 0.11681201, b: 0.8862745, a: 0.7882353}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!114 &8402129891423872754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3289339207672511313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 6800480687285736520}
+--- !u!65 &6800480687285736520
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3289339207672511313}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8.450842, y: 0.03, z: 4.3}
+  m_Center: {x: 4.3847046, y: 16.4, z: -4.136483}
 --- !u!1001 &5088227877493631
 PrefabInstance:
   m_ObjectHideFlags: 0
