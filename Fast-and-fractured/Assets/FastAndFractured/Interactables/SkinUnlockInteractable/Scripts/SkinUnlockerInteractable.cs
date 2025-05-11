@@ -17,8 +17,10 @@ namespace FastAndFractured
         private const string PEPE_NAME = "Pepe";
         private const string MARIA_ANTONIA_NAME = "Maria";
         [SerializeField] List<GameObject> visuals;
-        private void Start()
+
+        public void InitializeUnlockeable(string skinToUnlock)
         {
+            _skinToUnlock = skinToUnlock;
             GameObject player = LevelController.Instance.playerReference;
             if (player != null)
             {
@@ -43,16 +45,18 @@ namespace FastAndFractured
                         break;
                 }
             }
-            
         }
         public override void OnInteract(GameObject interactionFrom, GameObject interactionTo)
         {
-            if(interactionFrom.TryGetComponent(out PlayerInputController inputController))
+            if(interactionFrom.TryGetComponent(out StatsController statsController))
             {
-                PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
-                InteractableHandler.Instance.DestroySkinInteractable(gameObject);
-                IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
-                //If the int of player prefs is 5, skin is unlocked
+                if(statsController.IsPlayer)
+                {
+                    PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                    InteractableHandler.Instance.DestroySkinInteractable(gameObject);
+                    IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
+                    //If the int of player prefs is 5, skin is unlocked
+                }
             }
         }
 
