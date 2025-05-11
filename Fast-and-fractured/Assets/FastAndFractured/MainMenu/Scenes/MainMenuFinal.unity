@@ -7817,6 +7817,23 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 20
+--- !u!320 &253626833
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 253626828}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: 7b8afb7c9177a8047ba1565940627cbe, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
 --- !u!1 &258817076
 GameObject:
   m_ObjectHideFlags: 0
@@ -13461,6 +13478,63 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1001 &838403848
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 745186151221367158, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_Name
+      value: PepeDefeatTimeline Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5861308103150528042, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
 --- !u!1001 &852140664
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18668,6 +18742,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       insertIndex: -1
       addedObject: {fileID: 253626832}
+    - targetCorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 253626833}
   m_SourcePrefab: {fileID: 100100000, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
 --- !u!1001 &1433084952
 PrefabInstance:
@@ -30206,3 +30283,4 @@ SceneRoots:
   - {fileID: 2135760751}
   - {fileID: 1407645431}
   - {fileID: 1261673698}
+  - {fileID: 838403848}
