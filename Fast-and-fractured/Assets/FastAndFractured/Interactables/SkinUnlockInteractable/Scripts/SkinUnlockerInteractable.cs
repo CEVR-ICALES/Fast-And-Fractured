@@ -22,6 +22,7 @@ namespace FastAndFractured
             GameObject player = LevelController.Instance.playerReference;
             if (player != null)
             {
+                IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
                 switch (player.name)
                 {
                     case string name when name.Contains(CARME_NAME):
@@ -33,6 +34,10 @@ namespace FastAndFractured
 
                     case string name when name.Contains(MARIA_ANTONIA_NAME):
                         visuals[3].SetActive(true);
+                        break;
+
+                    case string name when name.Contains(JOSEFINO_NAME):
+                        visuals[4].SetActive(true);
                         break;
                     default:
                         visuals[0].SetActive(true);
