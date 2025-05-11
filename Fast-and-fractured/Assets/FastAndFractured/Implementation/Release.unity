@@ -3114,6 +3114,80 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4323647905329792515, guid: 2a8cc028606c2134395fe5ca03041cbf, type: 3}
   m_PrefabInstance: {fileID: 529357599}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &531625840
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 531625841}
+  - component: {fileID: 531625842}
+  - component: {fileID: 531625843}
+  m_Layer: 0
+  m_Name: ConstructionZoneAmbience
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &531625841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531625840}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -181.2, y: -95.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1594623395}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &531625842
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531625840}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 245.69287, y: 64.881195, z: 895.9752}
+  m_Center: {x: 97.846436, y: 3.5244884, z: -10.471558}
+--- !u!114 &531625843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531625840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 217688106066ca94a8a7b6582b75590e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _zoneType: 3
+  ambienceEventReference:
+    Guid:
+      Data1: 815912839
+      Data2: 1131339253
+      Data3: 794483866
+      Data4: -667412220
+    Path: event:/AmbienceSounds/ConstructionZoneAmbience
 --- !u!1001 &531700328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5320,6 +5394,80 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 110058327009129817, guid: c7c1940be2e16904fba39e996d478848, type: 3}
   m_PrefabInstance: {fileID: 825565935}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &833338376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 833338377}
+  - component: {fileID: 833338378}
+  - component: {fileID: 833338379}
+  m_Layer: 0
+  m_Name: MercadilloAmbience
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &833338377
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833338376}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 484.35355, y: -93.3668, z: 53.25585}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1594623395}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &833338378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833338376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 217688106066ca94a8a7b6582b75590e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _zoneType: 2
+  ambienceEventReference:
+    Guid:
+      Data1: 438977530
+      Data2: 1189722398
+      Data3: 630922171
+      Data4: 1968224448
+    Path: event:/AmbienceSounds/MercadilloAmbience
+--- !u!65 &833338379
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833338376}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 210.2349, y: 31.417164, z: 263.2651}
+  m_Center: {x: 51.267044, y: 10.708582, z: -1.5242462}
 --- !u!1 &835088310 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5334474793573486784, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
@@ -12171,6 +12319,39 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &1594623394
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1594623395}
+  m_Layer: 0
+  m_Name: AmbienceZoneEmpties
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1594623395
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1594623394}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -466.79633, y: 90.77764, z: -65.36123}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 833338377}
+  - {fileID: 531625841}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1617064217
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18179,3 +18360,4 @@ SceneRoots:
   - {fileID: 1458278729}
   - {fileID: 1310868914}
   - {fileID: 488381573}
+  - {fileID: 1594623395}
