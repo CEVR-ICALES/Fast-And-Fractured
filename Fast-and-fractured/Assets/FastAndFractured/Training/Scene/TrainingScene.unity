@@ -2834,6 +2834,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2863533934334091773, guid: 1e7a90152402800438a0af1ee5776e64, type: 3}
   m_PrefabInstance: {fileID: 424623337}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &427071742 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2335148309138898220, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+  m_PrefabInstance: {fileID: 6400545731412433952}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2971857b8254c81b49865d1989562af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &435855257 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3000466732561827754, guid: 8b1bc6682d27a83488a91249d0b2a914, type: 3}
@@ -14581,10 +14592,10 @@ PrefabInstance:
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 427071742}
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ResumeGame
+      value: TogglePauseGame
       objectReference: {fileID: 0}
     - target: {fileID: 2766195949448390822, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -15373,6 +15384,10 @@ PrefabInstance:
     - target: {fileID: 7342799377406305724, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_LookAt
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7371785178131040260, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
+      propertyPath: LocalizationKey
+      value: Settings.AudioButton
       objectReference: {fileID: 0}
     - target: {fileID: 7388291685531258015, guid: ba812e8a8c8ac90449a5fd7aa6b3747f, type: 3}
       propertyPath: m_AnchorMax.y
