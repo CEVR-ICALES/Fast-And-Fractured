@@ -16,12 +16,6 @@ namespace FastAndFractured
         private const string MARIA_ANTONIA_NAME = "Maria";
         [SerializeField] List<GameObject> visuals;
 
-        //private void OnEnable()
-        //{
-        //    if(SkinUnlockHandler.Instance != null)
-        //        SkinUnlockHandler.Instance.CheckDespawnSkinInteractables();
-        //}
-
         public void ChangeVisual(string skinToUnlock)
         {
             DisableAllVisuals();
