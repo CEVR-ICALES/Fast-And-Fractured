@@ -52,7 +52,13 @@ namespace FastAndFractured
         private void MoveCredits()
         {
             float scrollAmount;
-
+            float containerHeight = creditsListContainer.GetComponent<RectTransform>().rect.height;
+            float canvasHeight = creditsCanvasGroup.GetComponent<RectTransform>().rect.height;
+            float currentY = creditsListContainer.transform.localPosition.y;
+            if (currentY >= containerHeight - canvasHeight)
+            {
+                return;
+            }
             if (Input.anyKeyDown)
             {
                 _fastMode = !_fastMode;
