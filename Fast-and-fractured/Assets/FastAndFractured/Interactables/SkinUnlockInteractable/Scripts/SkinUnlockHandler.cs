@@ -16,7 +16,6 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     }
     private void OnDisable()
     {
-        InteractableHandler.Instance.onPoolInitialize.RemoveListener(CheckDespawnSkinInteractables);
         StopAllCoroutines();
     }
  
@@ -57,7 +56,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
         return skinsToUnlock != null && skinsToUnlock.Count > 0;
     }
 
-    private void CheckDespawnSkinInteractables()
+    public void CheckDespawnSkinInteractables()
     {
         List<GameObject> skinInteractables = InteractableHandler.Instance.ShuffledActivePool.FindAll(s => s.GetComponentInChildren<SkinUnlockerInteractable>() != null);
 
@@ -85,7 +84,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
             }
             else
             {
-                skinInteractables[i].GetComponentInChildren<SkinUnlockerInteractable>().SkinToUnlock = playerSkinId;
+                skinInteractables[i].GetComponentInChildren<SkinUnlockerInteractable>().ChangeVisual(playerSkinId);
             }
         }
     }
