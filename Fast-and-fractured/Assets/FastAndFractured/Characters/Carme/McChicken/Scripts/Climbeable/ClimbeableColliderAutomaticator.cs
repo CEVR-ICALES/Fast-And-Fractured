@@ -40,7 +40,7 @@ public class ClimbeableColliderAutomaticator : MonoBehaviour
         switch(mainCollider)
         {
             case BoxCollider box:
-                return new Vector3(box.size.x, 0f, box.size.z);
+                return new Vector3(box.size.x - 0.1f, 0f, box.size.z- 0.1f);
 
             default: return Vector3.zero;
         }
