@@ -54,6 +54,10 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Josefino_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_2", FULLY_UNLOCKED_VALUE);
 
 
         if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
@@ -185,7 +189,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
-        selectAndStartButton.enabled = CheckIfSkinUnlocked();
+        selectAndStartButton.interactable = CheckIfSkinUnlocked();
     }
     public bool CheckIfSkinUnlocked()
     {
