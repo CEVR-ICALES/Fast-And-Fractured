@@ -96,10 +96,7 @@ namespace FastAndFractured
         private void Start()
         {
             statsController.CustomStart();
-            if (_physicsBehaviour == null)
-            {
-                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            }
+            _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
             speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
@@ -458,19 +455,11 @@ namespace FastAndFractured
                     return true;
                 }
             }
-            if (_physicsBehaviour == null)
-            {
-                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            }
             return _physicsBehaviour.IsTouchingGround;
         }
 
         public bool IsInFlipCase()
         {
-            if (_physicsBehaviour == null)
-            {
-                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            }
             return IsInWall()||_physicsBehaviour.IsTouchingGround;
         }
 
@@ -481,12 +470,12 @@ namespace FastAndFractured
             return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
-        public void StartIsFlippedTimer(float decreseTimeFactor)
+        public void StartIsFlippedTimer()
         {
             if (_flipTimer == null)
             {
                 Debug.Log("StartTimer");
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime*decreseTimeFactor, onTimerDecreaseComplete : () => { 
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
                     _flipTimer=null;
                 });

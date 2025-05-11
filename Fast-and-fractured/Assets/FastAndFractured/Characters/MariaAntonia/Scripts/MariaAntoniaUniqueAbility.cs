@@ -75,14 +75,15 @@ namespace FastAndFractured
         {
             if (orbitCenter == null)
                 orbitCenter = transform;
-            if (mariaAntoniaStatsController == null)
-            {
-                mariaAntoniaStatsController = GetComponent<StatsController>();
-            }
+
             if (hairMaterial != null)
                 _originalExposureWeight = hairMaterial.GetFloat(MATERIAL_EMISSIVE);
                 
             StartCooldown();
+            if(mariaAntoniaStatsController == null)
+            {
+                mariaAntoniaStatsController = GetComponent<StatsController>();
+            }
         }
 
         private void Update()
@@ -122,7 +123,6 @@ namespace FastAndFractured
                     ActivateHairEmission(false);
                     SoundManager.Instance.StopSound(ssjUltiReference);
                     EndAbilityEffects();
-                    ClearCroquettes();
                 });
             return true;
         }

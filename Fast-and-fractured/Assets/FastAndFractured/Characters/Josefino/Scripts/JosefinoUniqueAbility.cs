@@ -23,7 +23,8 @@ namespace FastAndFractured
         private void Start()
         {
             StartCooldown();
-            _statsController = GetComponent<StatsController>();
+            Controller controller = GetComponentInParent<Controller>();
+            _statsController = controller.GetBehaviour<StatsController>();
         } 
         
         private void OnDestroy()
