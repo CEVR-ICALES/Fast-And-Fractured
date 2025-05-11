@@ -5,6 +5,7 @@ using Utilities;
 using Assets.SimpleLocalization.Scripts;
 using Enums;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace FastAndFractured
 {
@@ -18,6 +19,8 @@ namespace FastAndFractured
         private bool _isAlertActive = false;
         private ITimer _timerReference;
         private LocalizedText _localizedTextReference;
+        private const string RELASE_SCENE_NAME = "Release";
+
         private void Start()
         {
             foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
@@ -25,11 +28,13 @@ namespace FastAndFractured
             }
             eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
-            TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+            if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
             {
-                CreateEvent("Events.Start", 5f);
-            });
-            
+                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                {
+                    CreateEvent("Events.Start", 5f);
+                });
+            }
         }
 
         public void CreateEvent(string eventText, float timeInScreen)
