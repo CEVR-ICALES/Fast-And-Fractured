@@ -46,20 +46,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     private void OnEnable()
     {
-        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Josefino_2", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_2", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_2", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_2", FULLY_UNLOCKED_VALUE);
-
-
+        FullUnlockSkins();
         if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
             foreach (CharacterMenuData character in allCharacters)
             {
@@ -205,5 +192,21 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
+    }
+
+    public void FullUnlockSkins()
+    {
+        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Josefino_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_2", FULLY_UNLOCKED_VALUE);
     }
 }
