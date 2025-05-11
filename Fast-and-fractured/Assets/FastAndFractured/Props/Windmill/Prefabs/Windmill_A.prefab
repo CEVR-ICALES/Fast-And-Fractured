@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6008282678505637703}
   - component: {fileID: 6060296800020245345}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Windmill_A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,6 +49,7 @@ MonoBehaviour:
   windmillInitialSpeed: 0
   speedIncreasePerSecond: 0.1
   transformVisual: {fileID: 7635372748562070647}
+  rotationDirection: {x: 1, y: 0, z: 0}
 --- !u!1 &8632012013030518642
 GameObject:
   m_ObjectHideFlags: 0
@@ -58,7 +59,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6594335479363379494}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -138,6 +139,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: AspasMolino
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d180d12eae571bb43b57496faea2a21c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d180d12eae571bb43b57496faea2a21c, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -208,6 +217,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 8a45f7f701cad14458ab6b9df80fd135, type: 3}
       propertyPath: m_Name
       value: molinoSinAspas
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8a45f7f701cad14458ab6b9df80fd135, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8a45f7f701cad14458ab6b9df80fd135, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
