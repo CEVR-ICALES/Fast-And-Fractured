@@ -19,6 +19,12 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
     {
         base.Awake();
         if (volumeList.Count == 0) return;
+
+        foreach (GameObject vol in volumeList)
+        {
+            vol.SetActive(false);
+        }
+
         ChangeCurrentVolume(volumeList.First());
         if (randomStart)
         {

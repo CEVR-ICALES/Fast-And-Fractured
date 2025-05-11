@@ -76,6 +76,9 @@ GameObject:
   - component: {fileID: 3877070212100348466}
   - component: {fileID: 5279912687145588103}
   - component: {fileID: 2251800656417898233}
+  - component: {fileID: 9184905540683832860}
+  - component: {fileID: 8249128928213614592}
+  - component: {fileID: 4385176681633464927}
   m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
@@ -169,3 +172,54 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 14.538172, y: 13.48403, z: 12.297542}
   m_Center: {x: 0.8801472, y: 6.734833, z: 1.3908626}
+--- !u!114 &9184905540683832860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071737301638319462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 4385176681633464927}
+--- !u!114 &8249128928213614592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071737301638319462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 2251800656417898233}
+  landeableCollider: {fileID: 4385176681633464927}
+  gizmosColor: {r: 0.8773585, g: 0.22761661, b: 0.22761661, a: 0.7882353}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!65 &4385176681633464927
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071737301638319462}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 14.438171, y: 0.03, z: 12.197541}
+  m_Center: {x: 0.8801472, y: 13.8, z: 1.3908626}

@@ -36,14 +36,14 @@ namespace FastAndFractured
 
         private void OnTriggerEnter(Collider other)
         {
-            if(other.gameObject.TryGetComponent(out PhysicsBehaviour otherComponentPhysicsBehaviours))
+            if (other.gameObject.TryGetComponent(out PhysicsBehaviour otherComponentPhysicsBehaviours))
             {
-                if(otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState() == ModifiedCarState.JOSEFINO_INVULNERABLE)
+                if (otherComponentPhysicsBehaviours.CarImpactHandler.CheckForModifiedCarState() == ModifiedCarState.JOSEFINO_INVULNERABLE)
                 {
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                     return;
                 }
-                
+
                 otherComponentPhysicsBehaviours.CancelDash();
                 float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
                 float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
@@ -57,7 +57,7 @@ namespace FastAndFractured
                 Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
 
                 Vector3 direction = vectorCenterToContactPoint.normalized;
-                
+
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
@@ -69,6 +69,20 @@ namespace FastAndFractured
                     otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * 1 - ((distanceToCenter / _explosionCollider.radius))); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                 }
+            }
+            else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody)) {
+                Vector3 otherPosition = other.transform.position;
+
+                Vector3 contactPoint = _explosionCollider.ClosestPoint(otherPosition);
+
+                Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
+
+                Vector3 direction = vectorCenterToContactPoint.normalized;
+
+                direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
+
+                float distanceToCenter = vectorCenterToContactPoint.magnitude;
+                otherRigidbody.AddForceAtPosition(_pushForce/100 * direction, contactPoint, ForceMode.Impulse);
             }
         }
 
