@@ -34,10 +34,6 @@ namespace FastAndFractured
                     case string name when name.Contains(MARIA_ANTONIA_NAME):
                         visuals[3].SetActive(true);
                         break;
-
-                    case string name when name.Contains(JOSEFINO_NAME):
-                        visuals[4].SetActive(true);
-                        break;
                     default:
                         visuals[0].SetActive(true);
                         break;
@@ -47,13 +43,9 @@ namespace FastAndFractured
         }
         public override void OnInteract(GameObject interactionFrom, GameObject interactionTo)
         {
-            if(interactionFrom.TryGetComponent(out PlayerInputController inputController))
-            {
-                PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
-                InteractableHandler.Instance.DestroySkinInteractable(gameObject);
-                IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
-                //If the int of player prefs is 5, skin is unlocked
-            }
+            PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+            InteractableHandler.Instance.DestroySkinInteractable(gameObject);
+            //If the int of player prefs is 5, skin is unlocked
         }
 
     }

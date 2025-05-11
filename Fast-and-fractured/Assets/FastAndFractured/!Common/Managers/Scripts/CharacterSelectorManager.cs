@@ -1,4 +1,3 @@
-using Assets.SimpleLocalization.Scripts;
 using System;
 using TMPro;
 using UnityEngine;
@@ -133,8 +132,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     private void UpdateInformationTexts(CharacterMenuData character) // PROVISIONAL
     {
         charName.text = character.CharacterName;
-        charDescription.GetComponent<LocalizedText>().LocalizationKey = character.CharacterDescription;
-        charDescription.GetComponent<LocalizedText>().Localize();
+        charDescription.text = character.CharacterDescription;
 
         charCarWeight.text = Math.Round(Mathf.Clamp01(character.CharacterStats.Weight / 2000f) * 100f).ToString() + "%";
         charCarMaxSpeed.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f) * 100f).ToString() + "%";

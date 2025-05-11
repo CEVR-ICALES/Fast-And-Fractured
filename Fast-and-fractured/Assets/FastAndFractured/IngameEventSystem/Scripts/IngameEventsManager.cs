@@ -25,11 +25,7 @@ namespace FastAndFractured
             }
             eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
-            TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
-            {
-                CreateEvent("Events.Start", 5f);
-            });
-            
+            CreateEvent("¡¡¡¡Empuja a todos fuera del mapa antes de que llegue la tormenta!!!!", 5f);
         }
 
         public void CreateEvent(string eventText, float timeInScreen)

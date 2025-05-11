@@ -1,5 +1,45 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6978042477427961809
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7649d9368d3a5c4ab8ad01a63e04962, type: 3}
+  m_Name: ChannelMixer
+  m_EditorClassIdentifier: 
+  active: 1
+  redOutRedIn:
+    m_OverrideState: 0
+    m_Value: 100
+  redOutGreenIn:
+    m_OverrideState: 0
+    m_Value: 0
+  redOutBlueIn:
+    m_OverrideState: 0
+    m_Value: 0
+  greenOutRedIn:
+    m_OverrideState: 0
+    m_Value: 0
+  greenOutGreenIn:
+    m_OverrideState: 0
+    m_Value: 100
+  greenOutBlueIn:
+    m_OverrideState: 0
+    m_Value: 0
+  blueOutRedIn:
+    m_OverrideState: 0
+    m_Value: 0
+  blueOutGreenIn:
+    m_OverrideState: 0
+    m_Value: 0
+  blueOutBlueIn:
+    m_OverrideState: 0
+    m_Value: 100
 --- !u!114 &-4042285918494690922
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -151,13 +191,13 @@ MonoBehaviour:
     m_Value: 1
   horizonTint:
     m_OverrideState: 1
-    m_Value: {r: 0.9933408, g: 0.7783019, b: 1, a: 1}
+    m_Value: {r: 0.84036773, g: 0.6367924, b: 1, a: 1}
   zenithTint:
     m_OverrideState: 1
-    m_Value: {r: 0.45480394, g: 0.059362773, b: 0.5471698, a: 1}
+    m_Value: {r: 0.016731933, g: 0.022997502, b: 0.0754717, a: 1}
   horizonZenithShift:
     m_OverrideState: 1
-    m_Value: -0.34
+    m_Value: -0.77
   numberOfBounces:
     m_OverrideState: 1
     m_Value: 3
