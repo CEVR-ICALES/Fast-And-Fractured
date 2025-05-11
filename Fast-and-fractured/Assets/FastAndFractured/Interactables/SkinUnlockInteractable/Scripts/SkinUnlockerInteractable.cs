@@ -22,7 +22,6 @@ namespace FastAndFractured
             GameObject player = LevelController.Instance.playerReference;
             if (player != null)
             {
-                IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
                 switch (player.name)
                 {
                     case string name when name.Contains(CARME_NAME):
@@ -48,9 +47,13 @@ namespace FastAndFractured
         }
         public override void OnInteract(GameObject interactionFrom, GameObject interactionTo)
         {
-            PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
-            InteractableHandler.Instance.DestroySkinInteractable(gameObject);
-            //If the int of player prefs is 5, skin is unlocked
+            if(interactionFrom.TryGetComponent(out PlayerInputController inputController))
+            {
+                PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                InteractableHandler.Instance.DestroySkinInteractable(gameObject);
+                IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
+                //If the int of player prefs is 5, skin is unlocked
+            }
         }
 
     }
