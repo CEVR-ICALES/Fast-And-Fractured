@@ -9,12 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 38267872129033574}
-  m_Layer: 0
+  - component: {fileID: 8642789674998104592}
+  - component: {fileID: 8896170714692136992}
+  m_Layer: 10
   m_Name: Madera2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &38267872129033574
 Transform:
@@ -32,6 +34,43 @@ Transform:
   - {fileID: 1053456565469449188}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &8642789674998104592
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 850094844607987676}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 5.2307334, y: 2.6292496, z: 1.7937255}
+  m_Center: {x: 0.43852115, y: -0.04075259, z: 0.7094617}
+--- !u!208 &8896170714692136992
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 850094844607987676}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 2.6153667, y: 1.3146248, z: 0.89686275}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.43852115, y: -0.04075259, z: 0.7094617}
+  m_TimeToStationary: 0.5
 --- !u!1 &3366626343976040616
 GameObject:
   m_ObjectHideFlags: 0
@@ -41,12 +80,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1053456565469449188}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1053456565469449188
 Transform:
@@ -75,12 +114,12 @@ GameObject:
   - component: {fileID: 8096033698820560133}
   - component: {fileID: 3823099451483096843}
   - component: {fileID: 3298791573572186997}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8096033698820560133
 Transform:

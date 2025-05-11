@@ -9,12 +9,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2062715786756681161}
-  m_Layer: 0
+  - component: {fileID: 6762276499338401749}
+  m_Layer: 10
   m_Name: tree_cypressThicc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2062715786756681161
 Transform:
@@ -32,6 +33,27 @@ Transform:
   - {fileID: 5744852970313755597}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6762276499338401749
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8626826833777199230}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6951691, y: 9.466954, z: 0.41484097}
+  m_Center: {x: 0.013434827, y: -4.233476, z: 0.119402245}
 --- !u!1 &8978123253095341714
 GameObject:
   m_ObjectHideFlags: 0
@@ -41,12 +63,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5744852970313755597}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5744852970313755597
 Transform:
@@ -75,12 +97,12 @@ GameObject:
   - component: {fileID: 5495498082437864549}
   - component: {fileID: 1807461658592496880}
   - component: {fileID: 786020336332725208}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5495498082437864549
 Transform:

@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7413397818310943907}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7413397818310943907
 Transform:
@@ -41,12 +41,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5203860709808221804}
-  m_Layer: 0
+  - component: {fileID: 2788143782997434043}
+  - component: {fileID: 288746733410000444}
+  m_Layer: 10
   m_Name: Madera1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5203860709808221804
 Transform:
@@ -64,6 +66,43 @@ Transform:
   - {fileID: 7413397818310943907}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2788143782997434043
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4862765073867437270}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.2746358, y: 6.428304, z: 1.8137593}
+  m_Center: {x: 0.009013653, y: 0.21367764, z: 0.7305987}
+--- !u!208 &288746733410000444
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4862765073867437270}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.6373179, y: 3.214152, z: 0.90687966}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.009013653, y: 0.21367764, z: 0.7305987}
+  m_TimeToStationary: 0.5
 --- !u!1 &5922609274094180410
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,12 +114,12 @@ GameObject:
   - component: {fileID: 1056977499856732005}
   - component: {fileID: 5065896643383144019}
   - component: {fileID: 9139422473805756857}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1056977499856732005
 Transform:

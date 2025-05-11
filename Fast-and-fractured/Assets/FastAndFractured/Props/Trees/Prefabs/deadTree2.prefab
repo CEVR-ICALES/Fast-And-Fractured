@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 2922428972416932298}
   - component: {fileID: 1139471106992578688}
   - component: {fileID: 1738977097663003251}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2922428972416932298
 Transform:
@@ -92,12 +92,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6709402792066485433}
-  m_Layer: 0
+  - component: {fileID: 5035857619784171907}
+  - component: {fileID: 4800980040934429264}
+  m_Layer: 10
   m_Name: deadTree2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &6709402792066485433
 Transform:
@@ -115,6 +117,43 @@ Transform:
   - {fileID: 8645852742402617792}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5035857619784171907
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3843836595012925906}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.41162556, y: 1.945251, z: 0.4122964}
+  m_Center: {x: 0.114587374, y: -1.0991061, z: 0.2938518}
+--- !u!208 &4800980040934429264
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3843836595012925906}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.20581278, y: 0.9726255, z: 0.2061482}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.114587374, y: -1.0991061, z: 0.2938518}
+  m_TimeToStationary: 0.5
 --- !u!1 &7594760107845180419
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,12 +163,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8645852742402617792}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8645852742402617792
 Transform:
