@@ -170,7 +170,7 @@ namespace FastAndFractured
             }
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
-            IngameEventsManager.Instance.CreateEvent("La tormenta de arena ha comenzado", 5f);
+            IngameEventsManager.Instance.CreateEvent("Events.Sandstorm", 5f);
 
             minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
         }

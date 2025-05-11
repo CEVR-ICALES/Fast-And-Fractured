@@ -102,6 +102,15 @@ namespace FastAndFractured
         private IAGroundState groundState = IAGroundState.NONE;
         private ITimer _flipForceTimer;
 
+        //Training Values
+        public bool PlayerNear { get => _playerNear; set => _playerNear = value; }
+        private bool _playerNear = false;
+
+        public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
+        private bool _doTrainingAction;
+
+        private const float DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND = 0.75f;
+
 
         private void OnEnable()
         {
@@ -135,13 +144,16 @@ namespace FastAndFractured
                 else
                 {
                     GroundForces();
-                    if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                    if (!carMovementController.IsFlipped)
                     {
-                        carMovementController.StartIsFlippedTimer();
-                    }
-                    else
-                    {
-                        carMovementController.StopFlippedTimer();
+                        if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                        {
+                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND : 1);
+                        }
+                        else
+                        {
+                            carMovementController.StopFlippedTimer();
+                        }
                     }
                     if (carMovementController.IsFlipped)
                     {
@@ -540,6 +552,7 @@ namespace FastAndFractured
 
         #endregion
 
+
         #region FleeState
         public void RunAwayFromCurrentTarget()
         {
@@ -644,7 +657,18 @@ namespace FastAndFractured
             return listOfCarsThatMadeLotsOfDamage != null && listOfCarsThatMadeLotsOfDamage.Count > 0;
         }
         //State shootToWhoMadeMoreDamageState
+        #region TraningState
+        public bool CanPerformeTrainingAction()
+        {
+            return _doTrainingAction;
+        }
+        public void DesactivateTrainingAction()
+        {
+            _doTrainingAction = false;
+        }
         #endregion
+        #endregion
+
 
         #region Helpers
 

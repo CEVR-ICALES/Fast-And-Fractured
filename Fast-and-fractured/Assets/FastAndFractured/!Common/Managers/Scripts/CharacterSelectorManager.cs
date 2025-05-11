@@ -1,3 +1,5 @@
+using Assets.SimpleLocalization.Scripts;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +20,12 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public TextMeshProUGUI charCarBaseForce;
     public TextMeshProUGUI charCarAcceleration;
     public TextMeshProUGUI charCarManuver;
+    public Image charCarWeightImage;
+    public Image charCarMaxSpeedImage;
+    public Image charCarMaxEnduranceImage;
+    public Image charCarBaseForceImage;
+    public Image charCarAccelerationImage;
+    public Image charCarManuverImage;
 
     [Header("Car Anims Related")]
     [SerializeField] private Transform modelSpawnPosition;
@@ -125,13 +133,22 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     private void UpdateInformationTexts(CharacterMenuData character) // PROVISIONAL
     {
         charName.text = character.CharacterName;
-        charDescription.text = character.CharacterDescription;
-        charCarWeight.text ="Weight: " + character.CharacterStats.Weight.ToString();
-        charCarMaxSpeed.text = "MaxSpeed: " + character.CharacterStats.MaxSpeed.ToString();
-        charCarMaxEndurance.text = "Endurance: " + character.CharacterStats.MaxEndurance.ToString();
-        charCarBaseForce.text = "Base Force: " + character.CharacterStats.BaseForce.ToString();
-        charCarAcceleration.text = "Acceleration: " + character.CharacterStats.Acceleration.ToString(); //create acceleration distinction 
-        charCarManuver.text = "Manuver: " + character.CharacterStats.DriftingSmoothFactor.ToString(); //create manuver distinction 
+        charDescription.GetComponent<LocalizedText>().LocalizationKey = character.CharacterDescription;
+        charDescription.GetComponent<LocalizedText>().Localize();
+
+        charCarWeight.text = Math.Round(Mathf.Clamp01(character.CharacterStats.Weight / 2000f) * 100f).ToString() + "%";
+        charCarMaxSpeed.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f) * 100f).ToString() + "%";
+        charCarMaxEndurance.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f) * 100f).ToString() + "%";
+        charCarBaseForce.text = Math.Round(Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f) * 100f).ToString() + "%";
+        charCarAcceleration.text = (100f - Math.Round(Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f) * 100f)).ToString() + "%";  //create acceleration distinction 
+        charCarManuver.text = Math.Round(Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f) * 100f).ToString() + "%";  //create manuver distinction 
+
+        charCarWeightImage.fillAmount = Mathf.Clamp01(character.CharacterStats.Weight / 2000f);
+        charCarMaxSpeedImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f);
+        charCarMaxEnduranceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f);
+        charCarBaseForceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f);
+        charCarAccelerationImage.fillAmount = 1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f);
+        charCarManuverImage.fillAmount = Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f);
     }
 
     private void ChangePlayerIcon()

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -45,7 +46,14 @@ namespace FastAndFractured
 
         [Header("Die Vfx")]
         [SerializeField] private ParticleSystem dieVfx;
-        [SerializeField] private GameObject[] carModel;   
+        [SerializeField] private GameObject[] carModel;
+
+        [Header("StatsBoosters")]
+        [SerializeField] private ParticleSystem maxSpeedVfx;
+        [SerializeField] private ParticleSystem recoverHealthVfx;
+        [SerializeField] private ParticleSystem cooldownsVfx;
+        [SerializeField] private ParticleSystem moreDamageVfx;
+        [SerializeField] private ParticleSystem morePushVfx;
 
 
         PhysicsBehaviour _physicsBehaviour;
@@ -87,6 +95,14 @@ namespace FastAndFractured
                 HandleCollisionVfx(collision);
             }
         }
+
+        private void UpdateStatsBoostersDurations()
+        {
+            var mainSpeed = maxSpeedVfx.main;
+            //mainSpeed.duration = 
+        }
+
+        
 
         private void HandleCollisionVfx(Collision collision) // if we pool this type of particle since its likely that a lot of impacts are going to happen this will be changed
         {
@@ -235,6 +251,35 @@ namespace FastAndFractured
             }
         }
 
+        #endregion
+
+        #region StatsBoosters
+
+        public void OnStatsBoosterGrabbed(Stats boosterType)
+        {
+            switch(boosterType)
+            {
+                case Stats.MAX_SPEED:
+                    maxSpeedVfx.Play();
+                    break;
+
+                case Stats.COOLDOWN_SPEED:                     
+                    cooldownsVfx.Play();
+                    break;
+
+                case Stats.NORMAL_DAMAGE: 
+                    moreDamageVfx.Play();
+                    break;
+
+                case Stats.PUSH_FORCE: 
+                    morePushVfx.Play();
+                    break;
+
+                case Stats.ENDURANCE:
+                    recoverHealthVfx.Play();    
+                    break;
+            }
+        }
         #endregion
 
         public void OnDead()

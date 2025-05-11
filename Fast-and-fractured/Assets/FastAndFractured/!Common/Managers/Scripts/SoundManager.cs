@@ -53,7 +53,6 @@ namespace Utilities
         protected override void Awake()
         {
             base.Awake();
-            musicGameLoopReference.Path = "event:/MusicEvents/GameLoopMusicEvent";
         }
 
         private void Start()

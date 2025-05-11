@@ -20,12 +20,16 @@ namespace FastAndFractured
         private LocalizedText _localizedTextReference;
         private void Start()
         {
-            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
+            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
                 inGameCharactersTopIcons.Add(playerIcon);
             }
-            eventTextContainer = HUDManager.Instance.GetUIElement(UIElementType.EVENT_TEXT).gameObject;
+            eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
-            CreateEvent("¡¡¡¡Empuja a todos fuera del mapa antes de que llegue la tormenta!!!!", 5f);
+            TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+            {
+                CreateEvent("Events.Start", 5f);
+            });
+            
         }
 
         public void CreateEvent(string eventText, float timeInScreen)

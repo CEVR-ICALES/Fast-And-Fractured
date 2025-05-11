@@ -99,7 +99,7 @@ MonoBehaviour:
     _onBoostEndEvent:
       m_PersistentCalls:
         m_Calls: []
-  ingameEventText: Damage increased
+  ingameEventText: Events.DamageBoost
   ingameEventTimeOnScreen: 2
 --- !u!65 &80419172001467264
 BoxCollider:
@@ -120,7 +120,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 5, z: 1}
+  m_Size: {x: 5, y: 8, z: 5}
   m_Center: {x: 0, y: 2, z: 0}
 --- !u!1 &6341529456656757396
 GameObject:
@@ -383,11 +383,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8756758797081983225, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
       propertyPath: m_Color.b
-      value: 0.0141509175
+      value: 0.015686274
       objectReference: {fileID: 0}
     - target: {fileID: 8756758797081983225, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
       propertyPath: m_Color.g
-      value: 0.58001167
+      value: 0.2251426
       objectReference: {fileID: 0}
     - target: {fileID: 8756758797081983225, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
       propertyPath: m_Color.r
