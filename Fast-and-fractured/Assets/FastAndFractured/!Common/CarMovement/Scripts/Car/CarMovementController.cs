@@ -96,7 +96,10 @@ namespace FastAndFractured
         private void Start()
         {
             statsController.CustomStart();
-            _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
             speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
@@ -455,11 +458,19 @@ namespace FastAndFractured
                     return true;
                 }
             }
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             return _physicsBehaviour.IsTouchingGround;
         }
 
         public bool IsInFlipCase()
         {
+            if (_physicsBehaviour == null)
+            {
+                _physicsBehaviour = GetComponent<PhysicsBehaviour>();
+            }
             return IsInWall()||_physicsBehaviour.IsTouchingGround;
         }
 
@@ -470,12 +481,12 @@ namespace FastAndFractured
             return currentWheelsAngle >= maxGroundWheelsAngleThreshold || absoluteXRotationOfCar >= maxGroundCarAngleThreshold;
         }
 
-        public void StartIsFlippedTimer()
+        public void StartIsFlippedTimer(float decreseTimeFactor)
         {
             if (_flipTimer == null)
             {
                 Debug.Log("StartTimer");
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime, onTimerDecreaseComplete : () => { 
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime*decreseTimeFactor, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
                     _flipTimer=null;
                 });
@@ -613,9 +624,9 @@ namespace FastAndFractured
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
-            if (_dashCooldown != null)
+            if (_dashCooldown != null&& TimerSystem.Instance.HasTimer(_dashCooldown))
             {
-                TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
+              TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
             }
         }
     }

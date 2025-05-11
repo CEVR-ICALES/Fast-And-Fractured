@@ -315,10 +315,20 @@ namespace FastAndFractured
                 characterSkinCount = DEFAULT_SKIN + 1;
                 _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
+
                 foreach (var characterSkin in character.CarWithSkinsPrefabs)
                 {
                     _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
                     characterSkinCount++;
+                }
+
+                if ((character.CarWithSkinsPrefabs.Count + 1) < LIMIT_OF_SAME_CHARACTER_SPAWNED)
+                {
+                    int differenceBetween = LIMIT_OF_SAME_CHARACTER_SPAWNED - (character.CarWithSkinsPrefabs.Count + 1);
+                    for (int i = 0; i < differenceBetween; i++)
+                    {
+                        _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
+                    }
                 }
             }
             return true;

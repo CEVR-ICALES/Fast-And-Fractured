@@ -130,7 +130,7 @@ namespace FastAndFractured {
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
-            if (_pushShootCooldown != null)
+            if (_pushShootCooldown != null&&TimerSystem.Instance.HasTimer(_pushShootCooldown))
             {
                 TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: newTimerSpeed);   
             }
