@@ -567,6 +567,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UnlockSkins"",
+                    ""type"": ""Button"",
+                    ""id"": ""3023a69b-e852-4400-9968-35c232da33c8"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -690,6 +699,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""StartGame"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9a28c38e-20f5-4e43-8c3f-81f8c020b8d3"",
+                    ""path"": ""<Keyboard>/u"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""UnlockSkins"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -725,6 +745,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_MenuInputActions_LeftSkin = m_MenuInputActions.FindAction("LeftSkin", throwIfNotFound: true);
         m_MenuInputActions_RightSkin = m_MenuInputActions.FindAction("RightSkin", throwIfNotFound: true);
         m_MenuInputActions_StartGame = m_MenuInputActions.FindAction("StartGame", throwIfNotFound: true);
+        m_MenuInputActions_UnlockSkins = m_MenuInputActions.FindAction("UnlockSkins", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -960,6 +981,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_MenuInputActions_LeftSkin;
     private readonly InputAction m_MenuInputActions_RightSkin;
     private readonly InputAction m_MenuInputActions_StartGame;
+    private readonly InputAction m_MenuInputActions_UnlockSkins;
     public struct MenuInputActionsActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -974,6 +996,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @LeftSkin => m_Wrapper.m_MenuInputActions_LeftSkin;
         public InputAction @RightSkin => m_Wrapper.m_MenuInputActions_RightSkin;
         public InputAction @StartGame => m_Wrapper.m_MenuInputActions_StartGame;
+        public InputAction @UnlockSkins => m_Wrapper.m_MenuInputActions_UnlockSkins;
         public InputActionMap Get() { return m_Wrapper.m_MenuInputActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1013,6 +1036,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @StartGame.started += instance.OnStartGame;
             @StartGame.performed += instance.OnStartGame;
             @StartGame.canceled += instance.OnStartGame;
+            @UnlockSkins.started += instance.OnUnlockSkins;
+            @UnlockSkins.performed += instance.OnUnlockSkins;
+            @UnlockSkins.canceled += instance.OnUnlockSkins;
         }
 
         private void UnregisterCallbacks(IMenuInputActionsActions instance)
@@ -1047,6 +1073,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @StartGame.started -= instance.OnStartGame;
             @StartGame.performed -= instance.OnStartGame;
             @StartGame.canceled -= instance.OnStartGame;
+            @UnlockSkins.started -= instance.OnUnlockSkins;
+            @UnlockSkins.performed -= instance.OnUnlockSkins;
+            @UnlockSkins.canceled -= instance.OnUnlockSkins;
         }
 
         public void RemoveCallbacks(IMenuInputActionsActions instance)
@@ -1094,5 +1123,6 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnLeftSkin(InputAction.CallbackContext context);
         void OnRightSkin(InputAction.CallbackContext context);
         void OnStartGame(InputAction.CallbackContext context);
+        void OnUnlockSkins(InputAction.CallbackContext context);
     }
 }
