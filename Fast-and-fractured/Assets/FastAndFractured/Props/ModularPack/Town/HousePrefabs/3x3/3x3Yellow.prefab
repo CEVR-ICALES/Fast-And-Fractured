@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 2910912361126926217}
   - component: {fileID: 8826384879963239439}
   - component: {fileID: 436884603415035504}
+  - component: {fileID: 1178084448339604412}
+  - component: {fileID: 3361318478388549910}
+  - component: {fileID: 4616921598712160784}
   m_Layer: 10
   m_Name: 3x3Yellow
   m_TagString: Untagged
@@ -168,6 +171,57 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 13.119507, y: 1.4800541, z: 9.120835}
   m_Center: {x: 6.48813, y: 5.954745, z: -4.0513144}
+--- !u!114 &1178084448339604412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7378207723115496259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 8826384879963239439}
+  landeableCollider: {fileID: 4616921598712160784}
+  gizmosColor: {r: 1, g: 0, b: 0, a: 0.8352941}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!114 &3361318478388549910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7378207723115496259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 4616921598712160784}
+--- !u!65 &4616921598712160784
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7378207723115496259}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 13.169826, y: 0.03, z: 3.08}
+  m_Center: {x: 6.5632896, y: 9.53, z: -4.0101986}
 --- !u!1001 &77189154739334601
 PrefabInstance:
   m_ObjectHideFlags: 0

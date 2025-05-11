@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 2205386290249869819}
   - component: {fileID: 7953269649016890657}
   - component: {fileID: 415496289124003613}
+  - component: {fileID: 6428077695762108143}
+  - component: {fileID: 7866057041231861548}
+  - component: {fileID: 6885552914492447872}
   m_Layer: 10
   m_Name: 3x3GrayGray
   m_TagString: Untagged
@@ -168,6 +171,57 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 13.2712965, y: 2.0679724, z: 5.7439938}
   m_Center: {x: 6.640003, y: 6.564633, z: -4.151505}
+--- !u!114 &6428077695762108143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052100988837134664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 7953269649016890657}
+  landeableCollider: {fileID: 6885552914492447872}
+  gizmosColor: {r: 1, g: 0, b: 0, a: 0.92941177}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!114 &7866057041231861548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052100988837134664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 6885552914492447872}
+--- !u!65 &6885552914492447872
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052100988837134664}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 13.171296, y: 0.03, z: 3.21}
+  m_Center: {x: 6.640003, y: 9.25, z: -3.9825675}
 --- !u!1001 &222159906512183197
 PrefabInstance:
   m_ObjectHideFlags: 0
