@@ -5,10 +5,8 @@ using UnityEngine.AI;
 public class BoxColliderToNavMeshObstacleTool  
 { 
     private const string GAME_OBJECT_MENU_ITEM_PATH = "Tools/Utilities/Add NavMesh Obstacle from BoxCollider";
-    // Path for the BoxCollider context menu
     private const string CONTEXT_MENU_ITEM_PATH = "CONTEXT/BoxCollider/Create NavMesh Obstacle (from this)";
 
-    // Action method for the BoxCollider context menu
     [MenuItem(CONTEXT_MENU_ITEM_PATH, false, 1500)]
     private static void CreateNavMeshObstacleFromContext(MenuCommand command)
     {
@@ -24,7 +22,6 @@ public class BoxColliderToNavMeshObstacleTool
         ConfigureNavMeshObstacle(selectedObject, boxCollider);
     }
 
-    // Validation for the BoxCollider context menu
     [MenuItem(CONTEXT_MENU_ITEM_PATH, true)]
     private static bool ValidateCreateNavMeshObstacleFromContext(MenuCommand command)
     {
@@ -32,7 +29,6 @@ public class BoxColliderToNavMeshObstacleTool
     }
 
 
-    // --- Opcional: Mantener también la opción en el menú GameObject ---
     [MenuItem(GAME_OBJECT_MENU_ITEM_PATH, false, 10)]
     private static void CreateNavMeshObstacleFromGameObjectMenu()
     {
@@ -65,10 +61,7 @@ public class BoxColliderToNavMeshObstacleTool
         }
         return false;
     }
-    // --- Fin de la sección opcional ---
-
-
-    // --- Lógica Central para NavMeshObstacle ---
+   
     private static void ConfigureNavMeshObstacle(GameObject targetObject, BoxCollider sourceBoxCollider)
     {
         if (targetObject == null || sourceBoxCollider == null) return;
@@ -83,23 +76,10 @@ public class BoxColliderToNavMeshObstacleTool
             Undo.RecordObject(navMeshObstacle, "Configure NavMeshObstacle");
         }
 
-        // Configurar el NavMeshObstacle para que coincida con el BoxCollider
         navMeshObstacle.shape = NavMeshObstacleShape.Box;
-        navMeshObstacle.center = sourceBoxCollider.center; // Usa el centro local del BoxCollider
-
-        // El tamaño del NavMeshObstacle es un Vector3, pero el BoxCollider.size
-        // ya es un Vector3 que representa las dimensiones completas.
-        // Hay que tener en cuenta la escala del GameObject.
-        // El NavMeshObstacle.size es en el espacio local del objeto.
+        navMeshObstacle.center = sourceBoxCollider.center; 
         navMeshObstacle.size = sourceBoxCollider.size;
-
-
-        // Opciones adicionales que podrías querer configurar (descomenta y ajusta según necesidad):
-        navMeshObstacle.carving = true; // Para que talle el NavMesh (si el NavMeshSurface lo permite)
-        // navMeshObstacle.carveOnlyStationary = true; // Si solo debe tallar cuando está quieto
-        // navMeshObstacle.carvingMoveThreshold = 0.1f; // Distancia que debe moverse antes de volver a tallar
-        // navMeshObstacle.carvingTimeToStationary = 0.5f; // Tiempo que debe estar quieto para ser considerado estacionario
-
+        navMeshObstacle.carving = true; 
         EditorUtility.SetDirty(navMeshObstacle);
         Debug.Log($"NavMeshObstacle configured on '{targetObject.name}' using BoxCollider dimensions. Carving: {navMeshObstacle.carving}", targetObject);
     }
