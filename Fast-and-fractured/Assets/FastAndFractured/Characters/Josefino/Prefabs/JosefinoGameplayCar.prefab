@@ -485,7 +485,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7640792408387003874, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.423
       objectReference: {fileID: 0}
     - target: {fileID: 7640792408387003874, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -493,7 +493,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7640792408387003874, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.118
+      value: -3.511
       objectReference: {fileID: 0}
     - target: {fileID: 7640792408387003874, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -523,7 +523,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7051360493746972050, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
+    - {fileID: 2377885654308796278, guid: e95c464cc1322e44da8655c36e9801b4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1287,6 +1289,30 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.7
       objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7663214881706065365}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ModifySpeedOfExistingTimer
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FastAndFractured.BaseUniqueAbility, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 9017862046783433866, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.98
@@ -1410,7 +1436,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   isAbilityActive: 0
-  enduranceRecoveryAmount: 200
+  enduranceRecoveryAmount: 300
 --- !u!114 &6569174849314156201
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -93,6 +93,7 @@ namespace FastAndFractured
 
         private void UpdateExistingCooldowns(GameObject character, float speed)
         {
+            if (character == null) return;
             ITimeSpeedModifiable[] cooldowns = character.GetComponentsInChildren<ITimeSpeedModifiable>();
             foreach (ITimeSpeedModifiable cd in cooldowns)
             {

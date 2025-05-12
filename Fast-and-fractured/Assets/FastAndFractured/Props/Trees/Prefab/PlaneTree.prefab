@@ -9,12 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6921733180581778973}
-  m_Layer: 0
+  - component: {fileID: 3356463554381792366}
+  - component: {fileID: 2875862569566565235}
+  m_Layer: 10
   m_Name: PlaneTree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &6921733180581778973
 Transform:
@@ -33,6 +35,43 @@ Transform:
   - {fileID: 7517049010696390231}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -44.443, z: 0}
+--- !u!65 &3356463554381792366
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 975633884517949118}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.22836076, y: 1.7679154, z: 0.19673051}
+  m_Center: {x: -0.30345812, y: -1.3465703, z: 0.12598255}
+--- !u!208 &2875862569566565235
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 975633884517949118}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.11418038, y: 0.8839577, z: 0.098365255}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.30345812, y: -1.3465703, z: 0.12598255}
+  m_TimeToStationary: 0.5
 --- !u!1001 &8060129704218190268
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -101,6 +140,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlatanaceaeTreeLeaves
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b228079e5a8ef4da28ec25701d828f76, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b228079e5a8ef4da28ec25701d828f76, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -166,6 +213,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a8b37d4e5b03b438695a471b81801300, type: 3}
       propertyPath: m_Name
       value: PlatanaceaeTreeTrunk
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a8b37d4e5b03b438695a471b81801300, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a8b37d4e5b03b438695a471b81801300, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
