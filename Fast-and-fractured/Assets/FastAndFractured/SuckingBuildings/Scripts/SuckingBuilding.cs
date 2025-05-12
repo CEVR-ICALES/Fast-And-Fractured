@@ -56,6 +56,7 @@ namespace FastAndFractured
                     vfx.Stop();
             }
         }
+
         void PullCharacter(GameObject character, float distance)
         {
             Rigidbody rb = character.GetComponent<Rigidbody>();
