@@ -26,7 +26,7 @@ namespace FastAndFractured
             {
                 switch (player.name)
                 {
-                    case string name when name.Contains(CARME_NAME):
+                    case string name when name.Contains(JOSEFINO_NAME):
                         visuals[0].SetActive(true);
                         break;
                     case string name when name.Contains(PEPE_NAME):
@@ -37,7 +37,7 @@ namespace FastAndFractured
                         visuals[2].SetActive(true);
                         break;
 
-                    case string name when name.Contains(JOSEFINO_NAME):
+                    case string name when name.Contains(CARME_NAME):
                         visuals[3].SetActive(true);
                         break;
                     default:
