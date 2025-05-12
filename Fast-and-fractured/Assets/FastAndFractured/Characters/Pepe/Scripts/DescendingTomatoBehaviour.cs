@@ -5,9 +5,10 @@ using StateMachine;
 using Enums;
 using Utilities;
 using Utilities.Managers.PauseSystem;
+
 namespace FastAndFractured
 {
-    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
+    public class DescendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable 
     {
         private bool initValues = true;
         public Pooltype pooltype;
@@ -15,9 +16,11 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         public GameObject objective;
         public float speed;
-        public float effectTime = 5f;
+        public float effectTime = 3f;
         public Vector3 randomRotation;
         private bool _isPaused = false;
+        [Tooltip("Percent between 0.0 and 1.0")]
+        [SerializeField] private float percentDebuffSpeed = 0.5f;
 
         public virtual void InitializeValues()
         {
@@ -55,21 +58,22 @@ namespace FastAndFractured
             //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
             if(objective == LevelController.Instance.playerReference)
             {
-                IngameEventsManager.Instance.RemoveTomatoAlert();
+                IngameEventsManager.Instance.RemoveAlert();
             }
 
             
             if (other.gameObject.layer == LayerMask.NameToLayer("Characters"))
             {
-                StatsController statsController = other.GetComponent<StatsController>();
-                if(statsController.IsInvulnerable)
+                if (other.TryGetComponent(out CarImpactHandler otherCarImpactHandler))
                 {
-                    statsController.LoseInvulnerability();
-                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
-                }
-                else
-                {
-                    EffectOnCharacter(other);
+                    if(!otherCarImpactHandler.HandleIfTomatoEffect())
+                    {
+                        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+
+                    } else
+                    {
+                        EffectOnCharacter(other);
+                    }
                 }
             }
         }
@@ -77,10 +81,12 @@ namespace FastAndFractured
         {
             if (other.gameObject == LevelController.Instance.playerReference)
             {
-                IngameEventsManager.Instance.SetTomatoScreenEffect(effectTime);
+                HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }
             else
             {
+                StatsController stats = other.GetComponentInChildren<StatsController>();
+                stats.TemporalProductStat(Stats.MAX_SPEED, percentDebuffSpeed, effectTime);
                 //todo efect on IA
             }
             

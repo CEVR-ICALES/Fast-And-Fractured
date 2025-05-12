@@ -18,6 +18,7 @@ namespace FastAndFractured
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
+            VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
             GameObject player = LevelController.Instance.playerReference;
             if (interactionFrom == player)
             {
@@ -28,23 +29,25 @@ namespace FastAndFractured
 
             base.OnInteract(interactionFrom, intearactionTo);
 
-
             foreach (var boost in boostList)
             {
+                float boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.GetCurrentStat(boost.StatToBoost)* boost.BoostValue:boost.BoostValue;
+
+                vehicleVfxController.OnStatsBoosterGrabbed(boost.StatToBoost);
                 switch (boost.StatToBoost)
                 {
                     case Stats.ENDURANCE:
                         if (boost.BoostValue < 0)
                         {
-                            statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
+                            statsController.TakeEndurance(boostAmount, false,this.gameObject);
                         }
                         else
                         {
-                            statsController.RecoverEndurance(boost.BoostValue, false);
+                            statsController.RecoverEndurance(boostAmount, false);
                         }
                         break;
                     default:
-                        statsController.UpgradeCharStat(boost.StatToBoost, boost.BoostValue);
+                        statsController.UpgradeCharStat(boost.StatToBoost, boostAmount);
                         break;
                 }
 
@@ -60,17 +63,17 @@ namespace FastAndFractured
                     switch (boost.StatToBoost)
                     {
                         case Stats.ENDURANCE:
-                            if (boost.BoostValue < 0)
+                            if (boostAmount < 0)
                             {
-                                statsController.RecoverEndurance(boost.BoostValue, false);
+                                statsController.RecoverEndurance(boostAmount, false);
                             }
                             else
                             {
-                                statsController.TakeEndurance(boost.BoostValue, false,this.gameObject);
+                                statsController.TakeEndurance(boostAmount, false,this.gameObject);
                             }
                             break;
                         default:
-                            statsController.ReduceCharStat(boost.StatToBoost, boost.BoostValue);
+                            statsController.ReduceCharStat(boost.StatToBoost, boostAmount);
                             break;
                     }
 
@@ -90,6 +93,7 @@ namespace FastAndFractured
 
         private void UpdateExistingCooldowns(GameObject character, float speed)
         {
+            if (character == null) return;
             ITimeSpeedModifiable[] cooldowns = character.GetComponentsInChildren<ITimeSpeedModifiable>();
             foreach (ITimeSpeedModifiable cd in cooldowns)
             {
@@ -100,6 +104,7 @@ namespace FastAndFractured
         [Serializable]
         public class StatsBoost
         {
+            [SerializeField] private ValueNumberType valueNumberType = ValueNumberType.DIRECT_VALUE; 
             [SerializeField] private Stats _statToBoost;
             [SerializeField] private float _boostValue = -1;
 
@@ -110,6 +115,11 @@ namespace FastAndFractured
             [SerializeField] UnityEvent _onBoostStartEvent;
             [SerializeField] UnityEvent _onBoostEndEvent;
 
+            public ValueNumberType ValueType
+            {
+                get => valueNumberType;
+                set => valueNumberType = value;
+            }
             public Stats StatToBoost
             {
                 get => _statToBoost;
@@ -141,4 +151,5 @@ namespace FastAndFractured
             }
         }
     }
+    
 }

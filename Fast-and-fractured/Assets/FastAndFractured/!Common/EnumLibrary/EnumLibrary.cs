@@ -23,7 +23,7 @@ namespace Enums
         ALL_WHEEL
     }
 
-    public enum UIElementType
+    public enum UIDynamicElementType
     {
         HEALTH_BAR,
         DASH_COOLDOWN,
@@ -40,18 +40,15 @@ namespace Enums
         ULT_BINDING,
         PUSH_BINDING,
         SHOOT_BINDING,
-        PLAYER_0,
-        PLAYER_1,
-        PLAYER_2,
-        PLAYER_3,
-        PLAYER_4,
-        PLAYER_5,
-        PLAYER_6,
-        PLAYER_7,
+        PLAYER_ICONS,
         BAD_EFFECTS,
         NORMAL_EFFECTS,
         GOOD_EFFECTS,
-        SHOOTING_CROSSHAIR
+        SHOOTING_CROSSHAIR,
+        SELECTED_PLAYER_ICON,
+        SPEED_INDICATOR,
+        EFFECT_ICONS_CONTAINER,
+		BULLET_EFFECT
     }
 
     public enum ScreensType
@@ -110,7 +107,8 @@ namespace Enums
     {
         ALL_MECHANICS,
         MOVEMENT_MECHANICS,
-        SHOOTING_MECHANICS
+        SHOOTING_MECHANICS,
+        CANCEL_DASH
     }
 
     public enum Stats
@@ -139,7 +137,43 @@ namespace Enums
         CARME_1,
         JOSEFINO_1,
         PEPE_1,
-        MARIAANTONIA_1
+        MARIAANTONIA_1,
+        CARME_2,
+        JOSEFINO_2,
+        PEPE_2,
+        MARIAANTONIA_2
+    }
+
+    public enum PlayerPortraits
+    {
+        CARME_0_PORTRAIT,
+        JOSEFINO_0_PORTRAIT,
+        PEPE_0_PORTRAIT,
+        MARIAANTONIA_0_PORTRAIT,
+        CARME_1_PORTRAIT,
+        JOSEFINO_1_PORTRAIT,
+        PEPE_1_PORTRAIT,
+        MARIAANTONIA_1_PORTRAIT,
+        CARME_2_PORTRAIT,
+        JOSEFINO_2_PORTRAIT,
+        PEPE_2_PORTRAIT,
+        MARIAANTONIA_2_PORTRAIT
+    }
+
+    public enum PlayerHalfBody
+    {
+        CARME_0_HALFBODY,
+        JOSEFINO_0_HALFBODY,
+        PEPE_0_HALFBODY,
+        MARIAANTONIA_0_HALFBODY,
+        CARME_1_HALFBODY,
+        JOSEFINO_1_HALFBODY,
+        PEPE_1_HALFBODY,
+        MARIAANTONIA_1_HALFBODY,
+        CARME_2_HALFBODY,
+        JOSEFINO_2_HALFBODY,
+        PEPE_2_HALFBODY,
+        MARIAANTONIA_2_HALFBODY
     }
 
     public enum UniqueAbilitiesIcons
@@ -150,15 +184,55 @@ namespace Enums
         MARIAANTONIA_UA
     }
 
+    public enum PushShootIcons
+    {
+        CARME_PUSH,
+        JOSEFINO_PUSH,
+        PEPE_PUSH,
+        MARIAANTONIA_PUSH
+    }
+
+    public enum NormalShootIcons
+    {
+        CARME_SHOOT,
+        JOSEFINO_SHOOT,
+        PEPE_SHOOT,
+        MARIAANTONIA_SHOOT
+    }
+
     public enum ScreenEffects
     {
         SPEED_EFFECT,
-        TOMATO_EFFECT
+        TOMATO_EFFECT,
+        BROKEN_CRYSTAL,
+        BULLET_EFFECT
     }
- 
+
     public enum GameElement
     {
         CHARACTER,
-        INTERACTABLE
+        INTERACTABLE,
+        SAFE_ZONES
+    }
+
+    public enum ModifiedCarState
+    {
+        JOSEFINO_INVULNERABLE,
+        SUPER_MARIA_ANTONIA,
+        DEFAULT
+    }
+
+    public enum ValueNumberType
+    {
+        DIRECT_VALUE,
+        PERCENTAGE,
+    }
+
+    public enum AmbienceZoneType
+    {
+        NONE,
+        FOREST,
+        MERCADILLO,
+        CONSTRUCTION_ZONE
     }
 }

@@ -128,6 +128,9 @@ namespace FastAndFractured
         public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
         public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
 
+        const string BULLET_EFFECT_NAME = "Bullet_Effect";
+        const float TIME_IN_SCREEN = 0.2f;
+
         #region START EVENTS
         public void CustomStart()
         {
@@ -209,7 +212,11 @@ namespace FastAndFractured
                         vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
-                            HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            if (whoMadeTheDamage.GetComponent<CarMovementController>()!= null)
+                            {
+                                HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
+                            }
                         }
                     }
                     else
@@ -244,7 +251,7 @@ namespace FastAndFractured
                     vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                     if(_isPlayer)
                     {
-                        HUDManager.Instance.UpdateUIElement(UIElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
                     }
                 } else
                 {
@@ -484,22 +491,7 @@ namespace FastAndFractured
 
         private void RemoveStatModificationByTimer(float previousValue, float currentValue, Stats stat, bool iscurrentBigger, float time)
         {
-            float mod;
-
-            if (iscurrentBigger)
-            {
-                if (currentValue / previousValue > 1)
-                    mod = 1 / (currentValue / previousValue);
-                else
-                    mod = -(currentValue - previousValue);
-            }
-            else
-            {
-                if (previousValue / currentValue > 1)
-                    mod = previousValue / currentValue;
-                else
-                    mod = previousValue - currentValue;
-            }
+            float mod = iscurrentBigger ? 1 / (currentValue / previousValue) : previousValue / currentValue;
 
             TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
@@ -508,7 +500,7 @@ namespace FastAndFractured
         }
         #endregion  
 
-        private float GetCurrentStat(Stats type)
+        public float GetCurrentStat(Stats type)
         {
             switch (type)
             {

@@ -38,6 +38,8 @@ namespace FastAndFractured
 
         [SerializeField]
         private GameObject[] spawnPoints;
+        [SerializeField]
+        private List<GameObject> safeZones;
 
         [Header("Game Loop")]
         [SerializeField]
@@ -48,27 +50,26 @@ namespace FastAndFractured
         [SerializeField]
         private SandstormController _sandStormController;
 
-       
+
         [Header("Injector prefabs")]
         [SerializeField] CarInjector PlayerPrefab;
         [SerializeField] CarInjector AIPrefab;
 
         [Header("Testing Values (Old Level Controller)")]
-         private EnemyAIBrain[] _ais;
+        private EnemyAIBrain[] _ais;
         [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
         [SerializeField] private bool useMyCharacters = false;
-        [Tooltip("In case there is not that much variety of characters un characters data, repeting will be allowed.")]
-        [SerializeField] private bool repeatCharacters = true;
         [SerializeField] private bool stormInDebugMode = false;
+        [SerializeField] private bool justSpawnAI = false;
         private GameObject _playerReference;
-        public GameObject playerReference { get=>_playerReference ;}
+        public GameObject playerReference { get => _playerReference; }
         public bool HasPlayerWon { get => _hasPlayerWon; }
         private bool _hasPlayerWon = false;
 
         private int _aliveCharacterCount;
-        public GameObject[] characterIcons;
+        public List<CharacterIcon> characterIcons;
         [SerializeField]
         private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
@@ -119,6 +120,13 @@ namespace FastAndFractured
             if (!useMyCharacters)
             {
                 StartLevelWithSpawnedCharacters();
+                GameObject nearestCharacter = GetNearestCharacterToCharacter(InGameCharacters[0].gameObject);
+                EnemyAIBrain enemyAIBrain = nearestCharacter.GetComponentInParent<EnemyAIBrain>();
+                if (enemyAIBrain)
+                {
+                    enemyAIBrain.ChoosePlayer();
+                    enemyAIBrain.GetComponent<AIDebugStateChanger>().NextState();
+                }
             }
             else
             {
@@ -128,7 +136,7 @@ namespace FastAndFractured
 
         private void Update()
         {
-          
+
         }
 
         private void OnEnable()
@@ -152,7 +160,7 @@ namespace FastAndFractured
             EnemyAIBrain[] aIBrains = FindObjectsOfType<EnemyAIBrain>();
 
 
-            PlayerInputController playerCar= FindObjectOfType<PlayerInputController>();
+            PlayerInputController playerCar = FindObjectOfType<PlayerInputController>();
             _playerReference = FindObjectOfType<PlayerInputController>().GetComponentInChildren<StatsController>().gameObject;
             foreach (var aiBrain in aIBrains)
             {
@@ -176,19 +184,19 @@ namespace FastAndFractured
 
         private void StartLevelWithSpawnedCharacters()
         {
-            SpawnInGameCharacters(out bool succeded);
+            SpawnInGameCharacters(out bool succeded, debugMode && justSpawnAI);
             if (!succeded)
             {
                 Debug.LogError("Characters can't be spawned, read the warning messages for more information.");
             }
             else
             {
+                IngameEventsManager.Instance.SetCharactersTopElements();
                 if (debugMode)
                     SetStormParameters(stormInDebugMode);
                 else
                     SetStormParameters(true);
             }
-            IngameEventsManager.Instance.SetCharactersTopElements();
         }
 
         private void SetStormParameters(bool callStorm)
@@ -200,11 +208,8 @@ namespace FastAndFractured
             }
         }
 
-        
-
-
         #region SpawnCharacters
-        private void SpawnInGameCharacters(out bool succeded)
+        private void SpawnInGameCharacters(out bool succeded, bool onlyAIs)
         {
             _inGameCharactersNameCodes = new List<string>();
             succeded = CreateAllCharactersNameCodesList();
@@ -213,16 +218,19 @@ namespace FastAndFractured
             {
                 Debug.LogWarning("Caution, there is not sufficient variety of characters on the characterData to spawn only " + LIMIT_OF_SAME_CHARACTER_SPAWNED + " skins of a same character. Game will run ignoring the limit of same character spawned.");
             }
-            string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
-            if (!succeded)
-                return;
-            if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
+            if (!onlyAIs)
             {
-                _inGameCharactersNameCodes.Add(selectedPlayer);
+                string selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+                if (!succeded)
+                    return;
+                if (succeded = CheckIfCharacterExistInList(selectedPlayer, ignoreRepeatedCharacters))
+                {
+                    _inGameCharactersNameCodes.Add(selectedPlayer);
+                }
+                else
+                    return;
             }
-            else
-                return;
-            int totalAICharacters = maxCharactersInGame - _currentPlayers;
+            int totalAICharacters = !onlyAIs ? maxCharactersInGame - _currentPlayers : maxCharactersInGame;
             for (int aiCharacterCount = 0; aiCharacterCount < totalAICharacters && succeded; aiCharacterCount++)
             {
                 string aiName = GetRandomValueFromShuffleList(_allCharactersNameCode, ERROR_STRING_MESSAGE);
@@ -238,10 +246,10 @@ namespace FastAndFractured
             }
             if (succeded)
             {
-                SpawnCharactersInScene();
+                SpawnCharactersInScene(onlyAIs);
             }
         }
-        private void SpawnCharactersInScene()
+        private void SpawnCharactersInScene(bool onlyAIs)
         {
             if (spawnPoints.Length >= maxCharactersInGame)
             {
@@ -251,27 +259,28 @@ namespace FastAndFractured
                 GameObject playerCar = null;
                 GameObject player = null;
                 ShuffleList(spawnPoints);
-                for (; charactersCount < _currentPlayers&&charactersCount<allCharacters; charactersCount++)
+                for (; charactersCount < _currentPlayers && charactersCount < allCharacters && !onlyAIs; charactersCount++)
                 {
                     CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
                     player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
-                   playerCar= carInjector.Install(player);
+                    playerCar = carInjector.Install(player);
 
                     _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
                     _playerReference = playerCar;
                 }
-                for(;charactersCount < allCharacters; charactersCount++)
+                for (; charactersCount < allCharacters; charactersCount++)
                 {
                     var aiCharacter = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
 
                     CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
-                    GameObject injectedCar= carInjector.Install(aiCharacter);
+                    GameObject injectedCar = carInjector.Install(aiCharacter);
                     _inGameCharacters.Add(injectedCar);
                     //Provisional
                     carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
                 }
                 charactersCustomStart?.Invoke();
+
             }
         }
 
@@ -306,10 +315,20 @@ namespace FastAndFractured
                 characterSkinCount = DEFAULT_SKIN + 1;
                 _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
+
                 foreach (var characterSkin in character.CarWithSkinsPrefabs)
                 {
                     _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
                     characterSkinCount++;
+                }
+
+                if ((character.CarWithSkinsPrefabs.Count + 1) < LIMIT_OF_SAME_CHARACTER_SPAWNED)
+                {
+                    int differenceBetween = LIMIT_OF_SAME_CHARACTER_SPAWNED - (character.CarWithSkinsPrefabs.Count + 1);
+                    for (int i = 0; i < differenceBetween; i++)
+                    {
+                        _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
+                    }
                 }
             }
             return true;
@@ -324,7 +343,7 @@ namespace FastAndFractured
                 List<string> copyOfAllCharactersNameCode = new List<string>(_allCharactersNameCode);
                 for (int notCurrentInstanceCharacterCount = 0; notCurrentInstanceCharacterCount < copyOfAllCharactersNameCode.Count; notCurrentInstanceCharacterCount++)
                 {
-                    if (copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount].Contains(nameWithoutCode)&&
+                    if (copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount].Contains(nameWithoutCode) &&
                         _allCharactersNameCode.Contains(copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount]))
                     {
                         _allCharactersNameCode.Remove(copyOfAllCharactersNameCode[notCurrentInstanceCharacterCount]);
@@ -337,7 +356,7 @@ namespace FastAndFractured
         {
             if (_allCharactersNameCode.Contains(nameCode))
             {
-                DivideNameCode(nameCode,out string name);
+                DivideNameCode(nameCode, out string name);
                 if (!ignoreRepeated)
                 {
                     RemoveSelectedCharacterFromAllCharactersNameCodes(nameCode, name);
@@ -349,31 +368,35 @@ namespace FastAndFractured
         }
         #endregion
 
-        public void OnPlayerDead(float delayTime,GameObject character,bool isPlayer)
+        public void OnPlayerDead(float delayTime, GameObject character, bool isPlayer)
         {
-            if (_callStormTimer != null) {
+            if (_callStormTimer != null)
+            {
                 if (TimerSystem.Instance.HasTimer(_callStormTimer))
                 {
-                  TimerData stormTimer = _callStormTimer.GetData();
+                    TimerData stormTimer = _callStormTimer.GetData();
                     float newTime = stormTimer.CurrentTime - _playerDeadReductionTime;
                     Mathf.Clamp(newTime, 0, _timeToCallTheStorm);
                     TimerSystem.Instance.ModifyTimer(_callStormTimer, newCurrentTime: newTime);
                 }
             }
-            TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete : ()=> {
+            TimerSystem.Instance.CreateTimer(delayTime, onTimerDecreaseComplete: () =>
+            {
                 if (!isPlayer)
                 {
                     _inGameCharacters.Remove(character);
-                    
-                        foreach (GameObject icon in characterIcons)
-                        { 
-                            if (icon.GetComponent<CharacterIcon>().Character == character)
-                            {
-                                icon.SetActive(false);
-                            }
+
+                    foreach (CharacterIcon icon in characterIcons)
+                    {
+                        if (icon.Character == character)
+                        {
+                            icon.SetPlayerDeadIconIsActive(true);
                         }
-                    
-                    Destroy(character.transform.parent.gameObject);
+                    }
+                    if (character != null)
+                    {
+                        Destroy(character.transform.parent.gameObject);
+                    }
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
                     {
@@ -401,16 +424,31 @@ namespace FastAndFractured
 
         public bool IsInsideSandstorm(GameObject target)
         {
-            return _sandStormController.IsInsideStormCollider(target);
+            return _callStormTimer == null ? _sandStormController.IsInsideStormCollider(target, 0f) : false;
         }
 
         public bool IsInsideSandstorm(GameObject target, float marginError)
         {
-            return _sandStormController.IsInsideStormCollider(target,marginError);
+            return _callStormTimer == null ? _sandStormController.IsInsideStormCollider(target, marginError) : false;
+        }
+
+        public List<GameObject> SafeZonesOutsideSandstorm()
+        {
+            List<GameObject> safeZonesOutsideSandstorm = new List<GameObject>();
+            foreach (var safeZone in safeZones)
+            {
+                if (!IsInsideSandstorm(safeZone))
+                {
+                    safeZonesOutsideSandstorm.Add(safeZone);
+                }
+            }
+            return safeZonesOutsideSandstorm;
         }
 
         public bool AreAllThisGameElementsInsideSandstorm(GameElement gameElement)
         {
+            if (_callStormTimer != null)
+                return false;
             List<GameObject> interactablesList = new List<GameObject>();
             if (gameElement == GameElement.INTERACTABLE)
             {
@@ -419,13 +457,24 @@ namespace FastAndFractured
                     interactablesList.Add(item.gameObject);
                 }
             }
-            return gameElement == GameElement.CHARACTER ? CheckIfListHaveTheSameElements(_inGameCharacters, _sandStormController.CharactersInsideSandstorm) :
-                CheckIfListHaveTheSameElements(interactablesList, _sandStormController.ItemsInsideSandstorm);
+            switch (gameElement)
+            {
+                case GameElement.CHARACTER:
+                    return CheckIfList1ElementsAreInList2(_inGameCharacters, _sandStormController.CharactersInsideSandstorm);
+                case GameElement.INTERACTABLE:
+                    return CheckIfList1ElementsAreInList2(interactablesList, _sandStormController.ItemsInsideSandstorm);
+                case GameElement.SAFE_ZONES:
+                    return CheckIfList1ElementsAreInList2(safeZones, _sandStormController.SafeZonesInsideSandstorm);
+            }
+            return false;
         }
 
-        private bool CheckIfListHaveTheSameElements<T>(List<T> list1, List<T> list2)
+        private bool CheckIfList1ElementsAreInList2<T>(List<T> list1, List<T> list2)
         {
-            foreach (T item in list1) {
+            if (list1 == null || list2 == null) return false;
+            if (list1.Count == 0 || list2.Count == 0) return false;
+            foreach (T item in list1)
+            {
                 if (!list2.Contains(item))
                 {
                     return false;
@@ -506,7 +555,7 @@ namespace FastAndFractured
                 totalDistanceText = distance.ToString() + KILOMETERS_TEXT;
             }
             GameObject finalAnimation;
-            if(_hasPlayerWon)
+            if (_hasPlayerWon)
             {
                 finalAnimation = _playerReference.GetComponent<StatsController>().GetWinObjectByString(PlayerPrefs.GetString("Selected_Player"));
             }
@@ -515,12 +564,36 @@ namespace FastAndFractured
                 finalAnimation = _playerReference.GetComponent<StatsController>().GetLoseObjectByString(PlayerPrefs.GetString("Selected_Player"));
             }
             gameEndDataScriptableObject.isWin = _hasPlayerWon;
-            gameEndDataScriptableObject.totalDamageDealt = _playerReference.GetComponent<StatsController>().totalDamageDealt.ToString();;
+            gameEndDataScriptableObject.totalDamageDealt = _playerReference.GetComponent<StatsController>().totalDamageDealt.ToString(); ;
             gameEndDataScriptableObject.totalDamageTaken = _playerReference.GetComponent<StatsController>().totalDamageTaken.ToString();
             gameEndDataScriptableObject.totalDistanceTraveled = totalDistanceText;
             gameEndDataScriptableObject.finalAnimation = finalAnimation;
             MainMenuManager.Instance.LoadScene(0);
         }
+        public GameObject GetNearestCharacterToCharacter(GameObject sourceCharacter)
+        {
+            List<GameObject> inGameCharacters = this.InGameCharacters;
+            if (inGameCharacters.Count > 1)
+            {
+                GameObject nearestTarget = inGameCharacters[0].gameObject != sourceCharacter.gameObject ? inGameCharacters[0] : inGameCharacters[1];
+                float nearestOne = float.MaxValue;
+
+                foreach (GameObject character in inGameCharacters)
+                {
+                    if (!character) continue;
+                    float characterDistance = (character.transform.position - sourceCharacter.transform.position).sqrMagnitude;
+                    if (characterDistance < nearestOne && character.gameObject != sourceCharacter.gameObject)
+                    {
+                        nearestOne = characterDistance;
+                        nearestTarget = character;
+                    }
+                }
+                return nearestTarget;
+            }
+            return null;
+        }
     }
+
+
 }
 

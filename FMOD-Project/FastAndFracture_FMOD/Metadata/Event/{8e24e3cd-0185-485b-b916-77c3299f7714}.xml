@@ -53,7 +53,7 @@
 			<destination>{0c382c64-2269-40e8-a3b7-fd0bd2aef9b2}</destination>
 		</relationship>
 		<relationship name="output">
-			<destination>{e0873f05-c492-4763-8ccd-327f68c22537}</destination>
+			<destination>{2dcb20cc-31e1-4a45-8b3e-3facbb3c1a61}</destination>
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{c3b56a28-4c7a-4749-970b-9080d6a33e69}" />
@@ -100,9 +100,15 @@
 		</relationship>
 	</object>
 	<object class="EventMixerGroup" id="{47a657b9-fe1b-4925-b6b8-c332f3de4877}">
+		<property name="volume">
+			<value>-20</value>
+		</property>
 		<property name="name">
 			<value>Audio 1</value>
 		</property>
+		<relationship name="modulators">
+			<destination>{83998dea-1f82-441a-82e7-e0c143554e47}</destination>
+		</relationship>
 		<relationship name="effectChain">
 			<destination>{5a8e70af-1632-4ec2-9613-2d2b69908784}</destination>
 		</relationship>
@@ -134,6 +140,35 @@
 	</object>
 	<object class="MixerBusPanner" id="{c651b176-8a5d-4753-9c8f-03ec0ef0bcf0}" />
 	<object class="MixerBusFader" id="{27cfbf1a-a01d-40b5-9bae-b63d2c397e65}" />
+	<object class="ADSRModulator" id="{83998dea-1f82-441a-82e7-e0c143554e47}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>volume</value>
+		</property>
+		<property name="initialValue">
+			<value>-80</value>
+		</property>
+		<property name="attackTime">
+			<value>3000</value>
+		</property>
+		<property name="attackShape">
+			<value>-0.516696215</value>
+		</property>
+		<property name="holdTime">
+			<value>0</value>
+		</property>
+		<property name="decayTime">
+			<value>0</value>
+		</property>
+		<property name="releaseTime">
+			<value>3000</value>
+		</property>
+		<property name="releaseShape">
+			<value>0.978295267</value>
+		</property>
+		<property name="finalValue">
+			<value>-80</value>
+		</property>
+	</object>
 	<object class="MixerBusEffectChain" id="{5a8e70af-1632-4ec2-9613-2d2b69908784}">
 		<relationship name="effects">
 			<destination>{7c30ac7f-978b-4c6c-815d-8b246194c707}</destination>

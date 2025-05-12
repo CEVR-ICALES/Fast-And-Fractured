@@ -341,7 +341,7 @@ namespace Utilities
             if (_overrideMaterial == null && _useManualTextureOverrides && _useSharedMaterial && _selectedFBXAssets.Count > 0)
             {
                 sharedBatchMaterial = CreateAndPrepareSharedMaterial("Shared_BaseVariant_Mat");
-                if (sharedBatchMaterial == null)  
+                if (sharedBatchMaterial == null)
                 {
                     Debug.LogWarning("Shared material creation cancelled or failed. Proceeding with unique materials if possible.");
                 }
@@ -366,7 +366,7 @@ namespace Utilities
                         break;
                     }
 
-                    if (ProcessSingleFBX(fbxAsset, newlyCreatedBasePrefab,sharedBatchMaterial)) successCount++;
+                    if (ProcessSingleFBX(fbxAsset, newlyCreatedBasePrefab, sharedBatchMaterial)) successCount++;
                     else failCount++;
                 }
             }
@@ -388,21 +388,38 @@ namespace Utilities
         {
             if (fbxAsset == null || !IsValidModelAsset(fbxAsset)) return false;
 
-            string assetPath = AssetDatabase.GetAssetPath(fbxAsset);
+            string assetPath = NormalizePath(AssetDatabase.GetAssetPath(fbxAsset));
             string assetFolder = Path.GetDirectoryName(assetPath);
-            string parentFolder = Directory.GetParent(assetFolder)?.FullName;
-            if (string.IsNullOrEmpty(parentFolder) || !parentFolder.StartsWith(Application.dataPath.Replace('/', '\\')))
+            if (string.IsNullOrEmpty(assetFolder)) { Debug.LogError($"Cannot get asset folder for {fbxAsset.name}"); return false; }
+
+            DirectoryInfo parentDirInfo = Directory.GetParent(assetFolder);
+            if (parentDirInfo == null) { Debug.LogError($"Cannot get parent directory for {assetFolder}"); return false; }
+            string parentFullName = NormalizePath(parentDirInfo.FullName);
+            string normalizedDataPath = NormalizePath(Application.dataPath);
+
+            if (!parentFullName.StartsWith(normalizedDataPath))
             {
-                Debug.LogError($"Invalid parent: {assetPath}");
+                Debug.LogError($"FBX Processor: Parent folder '{parentFullName}' of asset '{assetPath}' is outside the project's data path '{normalizedDataPath}'. This is unexpected.");
                 return false;
             }
-
-            string relativeParentFolder = "Assets" + parentFolder.Substring(Application.dataPath.Length);
-            relativeParentFolder = relativeParentFolder.Replace('\\', '/');
-            string materialsFolderPath = Path.Combine(relativeParentFolder, MATERIALS_FOLDER_NAME).Replace('\\', '/');
-            string texturesFolderPath =
-                Path.Combine(relativeParentFolder, TEXTURES_FOLDER_NAME).Replace('\\', '/');
-            string prefabsFolderPath = Path.Combine(relativeParentFolder, PREFABS_FOLDER_NAME).Replace('\\', '/');
+            string relativeParentFolder;
+            if (parentFullName.Length == normalizedDataPath.Length)
+            {
+                relativeParentFolder = "Assets";
+            }
+            else if (parentFullName.Length > normalizedDataPath.Length)
+            {
+                string subPath = parentFullName.Substring(normalizedDataPath.Length).TrimStart('/');
+                relativeParentFolder = NormalizePath(Path.Combine("Assets", subPath));
+            }
+            else
+            {
+                Debug.LogError($"FBX Processor: Path logic error for parent folder. Parent: '{parentFullName}', DataPath: '{normalizedDataPath}'");
+                return false;
+            }
+            string materialsFolderPath = NormalizePath(Path.Combine(relativeParentFolder, MATERIALS_FOLDER_NAME));
+            string texturesFolderPath = NormalizePath(Path.Combine(relativeParentFolder, TEXTURES_FOLDER_NAME));
+            string prefabsFolderPath = NormalizePath(Path.Combine(relativeParentFolder, PREFABS_FOLDER_NAME));
             EnsureFolderExists(relativeParentFolder, MATERIALS_FOLDER_NAME);
             EnsureFolderExists(relativeParentFolder, TEXTURES_FOLDER_NAME);
             EnsureFolderExists(relativeParentFolder, PREFABS_FOLDER_NAME);
@@ -412,27 +429,28 @@ namespace Utilities
             Material materialToUse = null;
             bool createdUniqueMaterial = false;
             bool setupTexturesForThisMaterial = false;
-           
+
             if (_overrideMaterial != null)
             {
                 if (!AssetDatabase.Contains(_overrideMaterial)) { Debug.LogError($"Override Mat '{_overrideMaterial.name}' invalid. Skip {modelName}."); return false; }
                 materialToUse = _overrideMaterial;
                 Debug.Log($"Decision for {modelName}: USING EXPLICIT OVERRIDE MATERIAL '{materialToUse.name}'.");
-                setupTexturesForThisMaterial = false; 
+                setupTexturesForThisMaterial = false;
             }
-            else 
+            else
             if (sharedMaterial != null)
             {
                 if (!AssetDatabase.Contains(sharedMaterial)) { Debug.LogError($"Passed shared Mat '{sharedMaterial.name}' is invalid/deleted. Creating unique for {modelName}."); }
-                else {
+                else
+                {
                     materialToUse = sharedMaterial;
                     Debug.Log($"Decision for {modelName}: USING BATCH SHARED MATERIAL '{materialToUse.name}'.");
-                    setupTexturesForThisMaterial = false; 
+                    setupTexturesForThisMaterial = false;
                 }
             }
-            
-            
-            if (materialToUse == null)  
+
+
+            if (materialToUse == null)
             {
                 string materialPath = Path.Combine(materialsFolderPath, $"{modelName}_Mat.mat").Replace('\\', '/');
                 materialToUse = CreateHDRPMaterial(materialPath);
@@ -453,15 +471,15 @@ namespace Utilities
                 }
                 Debug.Log($"Decision for {modelName}: CREATING UNIQUE MATERIAL '{materialToUse.name}'.");
                 setupTexturesForThisMaterial = true;
-             }
+            }
             if (setupTexturesForThisMaterial)
             {
                 Debug.Log($"   -> Setting up textures for unique material '{materialToUse.name}'...");
-                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);  
-                EditorUtility.SetDirty(materialToUse);  
+                this.FindAndAssignTexturesHDRP(materialToUse, texturesFolderPath, modelName);
+                EditorUtility.SetDirty(materialToUse);
             }
 
-             string prefabPath = Path.Combine(prefabsFolderPath, $"{modelName}.prefab").Replace('\\', '/');
+            string prefabPath = Path.Combine(prefabsFolderPath, $"{modelName}.prefab").Replace('\\', '/');
             bool success;
             Debug.Log($"   -> Creating Prefab/Variant '{prefabPath}' using material '{materialToUse.name}'...");
             if (optionalBasePrefab == null)
@@ -470,7 +488,7 @@ namespace Utilities
             }
             else
             {
-                if (!PrefabUtility.IsPartOfPrefabAsset(optionalBasePrefab)) {  return false; }
+                if (!PrefabUtility.IsPartOfPrefabAsset(optionalBasePrefab)) { return false; }
                 success = this.CreateVariantPrefab(fbxAsset, materialToUse, optionalBasePrefab, prefabPath, modelName);
             }
 
@@ -621,7 +639,7 @@ namespace Utilities
 
         private static void EnsureFolderExists(string parentPath, string folderName)
         {
-            string fullPath = Path.Combine(parentPath, folderName);
+            string fullPath = NormalizePath(Path.Combine(parentPath, folderName));
             if (!AssetDatabase.IsValidFolder(fullPath))
             {
                 AssetDatabase.CreateFolder(parentPath, folderName);
@@ -766,7 +784,7 @@ namespace Utilities
             {
                 string currentPath = AssetDatabase.GUIDToAssetPath(guid);
                 string currentFileName = Path.GetFileNameWithoutExtension(currentPath);
-                bool startsCorrectly = currentFileName.StartsWith(modelNamePrefix + "_");
+                bool startsCorrectly = currentFileName.StartsWith(modelNamePrefix + "_", System.StringComparison.OrdinalIgnoreCase);
                 bool endsCorrectly = currentFileName.EndsWith(textureSuffix, System.StringComparison.OrdinalIgnoreCase);
                 if (startsCorrectly && endsCorrectly)
                 {
@@ -847,7 +865,7 @@ namespace Utilities
                 string relativeParentFolder = "Assets" + parentFolder.Substring(Application.dataPath.Length);
                 relativeParentFolder = relativeParentFolder.Replace('\\', '/');
                 string materialsFolderPath =
-                    Path.Combine(relativeParentFolder, MATERIALS_FOLDER_NAME).Replace('\\', '/');
+                     NormalizePath(Path.Combine(relativeParentFolder, MATERIALS_FOLDER_NAME));
                 EnsureFolderExists(relativeParentFolder, MATERIALS_FOLDER_NAME);
 
 
@@ -885,7 +903,11 @@ namespace Utilities
 
             return sharedMaterial;
         }
-
+        public static string NormalizePath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+            return path.Replace('\\', '/');
+        }
         #endregion
 
         #region Other Helpers  related to Instance

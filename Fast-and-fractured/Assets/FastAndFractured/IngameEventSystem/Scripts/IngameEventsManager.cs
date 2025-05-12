@@ -3,23 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 using Assets.SimpleLocalization.Scripts;
+using Enums;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 namespace FastAndFractured
 {
     public class IngameEventsManager : AbstractSingleton<IngameEventsManager>
     {
-        [SerializeField] private GameObject eventTextContainer;
-        public GameObject[] inGameCharactersTopIcons;
+        private GameObject eventTextContainer;
+        private List<CharacterIcon> inGameCharactersTopIcons = new();
         [SerializeField] private GameObject tomatoAlertUI;
         [SerializeField] private GameObject tomatoScreenEfect;
-        public bool IsTomatoAlertActive {get => _isTomatoAlertActive;}
-        private bool _isTomatoAlertActive = false;
+        public bool IsAlertActive {get => _isAlertActive;}
+        private bool _isAlertActive = false;
         private ITimer _timerReference;
         private LocalizedText _localizedTextReference;
+        private const string RELASE_SCENE_NAME = "Release";
+
         private void Start()
         {
+            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
+                inGameCharactersTopIcons.Add(playerIcon);
+            }
+            eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
-            IngameEventsManager.Instance.CreateEvent("¡¡¡¡Empuja a todos fuera del mapa antes de que llegue la tormenta!!!!", 5f);
+            if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
+            {
+                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                {
+                    CreateEvent("Events.Start", 5f);
+                });
+            }
         }
+
         public void CreateEvent(string eventText, float timeInScreen)
         {
             if (_localizedTextReference != null)
@@ -44,29 +61,26 @@ namespace FastAndFractured
             foreach (GameObject character in LevelController.Instance.InGameCharacters)
             {
                 inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelController.Instance.InGameCharactersNameCodes[i]);
-                inGameCharactersTopIcons[i].SetActive(true);
+                inGameCharactersTopIcons[i].gameObject.SetActive(true);
                 i++;
             }
             Debug.Log("Ingame Characters Top Icon: " + inGameCharactersTopIcons[4]);
             LevelController.Instance.characterIcons = inGameCharactersTopIcons;
         }
-        public void SetTomatoAlert()
+        public void SetAlert()
         {
             tomatoAlertUI.SetActive(true);
-            _isTomatoAlertActive = true;
+            _isAlertActive = true;
         }
-        public void RemoveTomatoAlert()
+        public void RemoveAlert()
         {
             tomatoAlertUI.SetActive(false);
-            _isTomatoAlertActive = false;
+            _isAlertActive = false;
         }
-        public void SetTomatoScreenEffect(float time)
-        {
-            tomatoScreenEfect.SetActive(true);
-            TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
-            {
-                tomatoScreenEfect.SetActive(false);
-            });
+
+        public void UltEvent(){
+            
         }
+
     }
 }

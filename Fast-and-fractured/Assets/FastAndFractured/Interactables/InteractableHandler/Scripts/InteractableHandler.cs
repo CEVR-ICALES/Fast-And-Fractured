@@ -21,6 +21,17 @@ namespace FastAndFractured
         List<GameObject> _interactablesOnCooldown = new();
         public UnityEvent onPoolInitialize;
 
+
+        private void OnEnable()
+        {
+            LevelController.Instance.charactersCustomStart.AddListener(MakeInitialPool);
+        }
+
+        private void OnDisable()
+        {
+            LevelController.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
+            
+        }
         protected override void Awake()
         {
             base.Awake();
@@ -33,10 +44,6 @@ namespace FastAndFractured
             }
         }
 
-        void Start()
-        {
-            MakeInitialPool();
-        }
 
         void MakeInitialPool()
         {
@@ -52,6 +59,8 @@ namespace FastAndFractured
             {
                 GameObject interactable = _shuffledActivePool[i];
                 interactable.SetActive(true);
+                if (interactable.TryGetComponent(out SkinUnlockerInteractable skinUnlocker))
+                    SkinUnlockHandler.Instance.CheckDespawnSkinInteractables();    
             }
             for (int i = numberOfItemsActiveAtSameTime; i < _shuffledActivePool.Count; i++)
             {
@@ -82,7 +91,7 @@ namespace FastAndFractured
             foreach (GameObject item in _shuffledActivePool)
             {
                 StatsBoostInteractable statItem = item.GetComponentInParent<StatsBoostInteractable>();
-                if (statItem)
+                if (statItem&&statItem.isActiveAndEnabled)
                 {
                     statsBoostInteractables.Add(statItem);
                 }

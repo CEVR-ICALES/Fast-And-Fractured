@@ -19,6 +19,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d924728ce58fa3c46b536352237af052, type: 2}
   exitActions: []
   transitions:
+  - decision: {fileID: 11400000, guid: f9188ff8ecb7cf64badfbaddc8fff9f3, type: 2}
+    trueState: {fileID: 11400000, guid: 302fcaff4d426024b99125e99c85e198, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
   - decision: {fileID: 11400000, guid: 1e70ec409c064174c8373f087a758c99, type: 2}
     trueState: {fileID: 11400000, guid: af09f32b6ace34644b519ed5d2a99d02, type: 2}
     falseState: {fileID: 0}
@@ -27,11 +31,11 @@ MonoBehaviour:
     trueState: {fileID: 11400000, guid: bd66dd9158804eb4783edab06e337be5, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0
-  - decision: {fileID: 11400000, guid: 2637d4b22d78a064a8e49892a654a675, type: 2}
-    trueState: {fileID: 11400000, guid: 023d1fc9b8864364687b4797ce5d9ad2, type: 2}
-    falseState: {fileID: 0}
-    hasExitTime: 0
   - decision: {fileID: 11400000, guid: 04e64bc4069e75042953a63f87ac4c4a, type: 2}
     trueState: {fileID: 11400000, guid: af09f32b6ace34644b519ed5d2a99d02, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 1
+  - decision: {fileID: 11400000, guid: 2637d4b22d78a064a8e49892a654a675, type: 2}
+    trueState: {fileID: 11400000, guid: 023d1fc9b8864364687b4797ce5d9ad2, type: 2}
     falseState: {fileID: 0}
     hasExitTime: 0
