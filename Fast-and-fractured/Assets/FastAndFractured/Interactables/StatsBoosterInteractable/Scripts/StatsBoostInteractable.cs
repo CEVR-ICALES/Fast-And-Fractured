@@ -32,6 +32,11 @@ namespace FastAndFractured
             foreach (var boost in boostList)
             {
                 float boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.GetCurrentStat(boost.StatToBoost)* boost.BoostValue:boost.BoostValue;
+                if (boost.StatToBoost == Stats.ENDURANCE)
+                {
+                      boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.MaxEndurance * boost.BoostValue : boost.BoostValue;
+
+                }
 
                 vehicleVfxController.OnStatsBoosterGrabbed(boost.StatToBoost);
                 switch (boost.StatToBoost)
