@@ -68,8 +68,64 @@ PrefabInstance:
       propertyPath: m_Name
       value: deadTree3
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5754915935975990019}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9124344671066006460}
   m_SourcePrefab: {fileID: 100100000, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+--- !u!1 &8022788021518246830 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f949c2dbba0d34ca99339349286a3f99, type: 3}
+  m_PrefabInstance: {fileID: 7176418811834769151}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &5754915935975990019
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8022788021518246830}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.57124865, y: 3.6474152, z: 0.5159285}
+  m_Center: {x: -0.17352623, y: -1.3237076, z: 0.09665342}
+--- !u!208 &9124344671066006460
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8022788021518246830}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.28562433, y: 1.8237076, z: 0.25796425}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.17352623, y: -1.3237076, z: 0.09665342}
+  m_TimeToStationary: 0.5

@@ -27,6 +27,9 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public Image charCarAccelerationImage;
     public Image charCarManuverImage;
 
+    public TextMeshProUGUI skinUnlockedValueText;
+    public GameObject skinUnlockedLock;
+
     [Header("Car Anims Related")]
     [SerializeField] private Transform modelSpawnPosition;
     [SerializeField] private Button selectAndStartButton;
@@ -46,7 +49,11 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     private void OnEnable()
     {
-        FullUnlockSkins();
+        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+        
         if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
             foreach (CharacterMenuData character in allCharacters)
             {
@@ -168,8 +175,8 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
             _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
             _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
             {
-                carStopCollider.enabled = true;
                 Destroy(lastModelInstance);
+                carStopCollider.enabled = true;
                 _modelChangeTimer = null;
             });
         }
@@ -181,9 +188,11 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public bool CheckIfSkinUnlocked()
     {
         int skinUnlockedValue = PlayerPrefs.GetInt(_currentModelInstance.name);
+        skinUnlockedValueText.text = $"{skinUnlockedValue} / {FULLY_UNLOCKED_VALUE}";
         
         bool isEnabled;
         isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
+        skinUnlockedLock.SetActive(!isEnabled);
 
         return isEnabled;
     }
@@ -196,10 +205,6 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     public void FullUnlockSkins()
     {
-        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);

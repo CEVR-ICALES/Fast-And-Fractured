@@ -57,8 +57,16 @@ PrefabInstance:
       value: modularHouses_BricksSeparator
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -67,6 +75,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2095641283760839762}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1030076682917874237}
   m_SourcePrefab: {fileID: 100100000, guid: 6faa4921f052a401c83f1b102c4405d1, type: 3}
 --- !u!1 &583857020985056608 stripped
 GameObject:
@@ -94,3 +105,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.524709, y: 3.5364766, z: 0.54612803}
   m_Center: {x: -0.00000023841858, y: -0.00000035762787, z: -0.00000011920929}
+--- !u!208 &1030076682917874237
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 583857020985056608}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.2623545, y: 1.7682383, z: 0.27306402}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.00000023841858, y: -0.00000035762787, z: -0.00000011920929}
+  m_TimeToStationary: 0.5

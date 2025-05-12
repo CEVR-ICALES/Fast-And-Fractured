@@ -56,8 +56,64 @@ PrefabInstance:
       propertyPath: m_Name
       value: tree_cypressNormal
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1826804965294593208}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 615508036715542940}
   m_SourcePrefab: {fileID: 100100000, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+--- !u!1 &7387636075854471944 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e6bc12258d1d04a819664a244af8a2b7, type: 3}
+  m_PrefabInstance: {fileID: 7658175519764487769}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &1826804965294593208
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7387636075854471944}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6790515, y: 12.330753, z: 0.7330955}
+  m_Center: {x: 0.0074985772, y: -1.3693409, z: 0.0206635}
+--- !u!208 &615508036715542940
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7387636075854471944}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.33952576, y: 6.1653767, z: 0.36654776}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.0074985772, y: -1.3693409, z: 0.0206635}
+  m_TimeToStationary: 0.5
