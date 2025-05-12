@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8705397035416282589
+--- !u!114 &-7485262138544524587
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,7 +40,7 @@ MonoBehaviour:
   blueOutBlueIn:
     m_OverrideState: 0
     m_Value: 100
---- !u!114 &-6679574545365301090
+--- !u!114 &-6961522345520012766
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,7 +61,7 @@ MonoBehaviour:
     m_Value: 0
   exposure:
     m_OverrideState: 1
-    m_Value: 2.12
+    m_Value: 2.71
   multiplier:
     m_OverrideState: 1
     m_Value: 1
@@ -127,7 +127,7 @@ MonoBehaviour:
     m_Value: 0
   groundTint:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.538904, b: 0.31199998, a: 1}
+    m_Value: {r: 0.759434, g: 0.87908816, b: 1, a: 1}
   groundColorTexture:
     m_OverrideState: 1
     m_Value: {fileID: 0}
@@ -160,13 +160,13 @@ MonoBehaviour:
     m_Value: 1
   horizonTint:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.61947215, b: 0, a: 1}
+    m_Value: {r: 0.9433962, g: 0.41264975, b: 0.20024922, a: 1}
   zenithTint:
     m_OverrideState: 1
-    m_Value: {r: 0.94509804, g: 0.57254905, b: 0.7086425, a: 1}
+    m_Value: {r: 0.2673891, g: 0.09229262, b: 0.3207547, a: 1}
   horizonZenithShift:
     m_OverrideState: 1
-    m_Value: -0.44
+    m_Value: -0.42
   numberOfBounces:
     m_OverrideState: 1
     m_Value: 3
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_ObsoleteEarthPreset:
     m_OverrideState: 1
     m_Value: 1
---- !u!114 &-5326607950310399833
+--- !u!114 &-3734156974284247787
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -183,44 +183,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24f077503be6ae942a1e1245dbd53ea9, type: 3}
-  m_Name: Bloom
+  m_Script: {fileID: 11500000, guid: 0d7593b3a9277ac4696b20006c21dde2, type: 3}
+  m_Name: VisualEnvironment
   m_EditorClassIdentifier: 
   active: 1
-  quality:
+  skyType:
     m_OverrideState: 1
-    m_Value: 1
-  threshold:
-    m_OverrideState: 1
-    m_Value: 0
-  intensity:
-    m_OverrideState: 1
-    m_Value: 0.219
-  scatter:
-    m_OverrideState: 1
-    m_Value: 0.603
-  tint:
-    m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
-  dirtTexture:
-    m_OverrideState: 1
-    m_Value: {fileID: 0}
-  dirtIntensity:
+    m_Value: 4
+  cloudType:
     m_OverrideState: 1
     m_Value: 0
-  anamorphic:
+  skyAmbientMode:
     m_OverrideState: 0
     m_Value: 1
-  m_Resolution:
-    m_OverrideState: 1
-    m_Value: 2
-  m_HighQualityPrefiltering:
-    m_OverrideState: 1
+  windOrientation:
+    m_OverrideState: 0
     m_Value: 0
-  m_HighQualityFiltering:
-    m_OverrideState: 1
-    m_Value: 1
---- !u!114 &-1043543529409261705
+  windSpeed:
+    m_OverrideState: 0
+    m_Value: 0
+  fogType:
+    m_OverrideState: 0
+    m_Value: 0
+--- !u!114 &-1808336289991330915
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -318,15 +303,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: GB_Sunset
+  m_Name: GB_EveningFix
   m_EditorClassIdentifier: 
   components:
-  - {fileID: 3220836251887623969}
-  - {fileID: -6679574545365301090}
-  - {fileID: -5326607950310399833}
-  - {fileID: -1043543529409261705}
-  - {fileID: 2391663424159316854}
---- !u!114 &2391663424159316854
+  - {fileID: -3734156974284247787}
+  - {fileID: -6961522345520012766}
+  - {fileID: 5409911707993316204}
+  - {fileID: -1808336289991330915}
+  - {fileID: -7485262138544524587}
+--- !u!114 &5409911707993316204
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -335,65 +320,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7649d9368d3a5c4ab8ad01a63e04962, type: 3}
-  m_Name: ChannelMixer
+  m_Script: {fileID: 11500000, guid: 24f077503be6ae942a1e1245dbd53ea9, type: 3}
+  m_Name: Bloom
   m_EditorClassIdentifier: 
   active: 1
-  redOutRedIn:
-    m_OverrideState: 0
-    m_Value: 100
-  redOutGreenIn:
-    m_OverrideState: 0
-    m_Value: 0
-  redOutBlueIn:
-    m_OverrideState: 0
-    m_Value: 0
-  greenOutRedIn:
-    m_OverrideState: 0
-    m_Value: 0
-  greenOutGreenIn:
-    m_OverrideState: 0
-    m_Value: 100
-  greenOutBlueIn:
-    m_OverrideState: 0
-    m_Value: 0
-  blueOutRedIn:
-    m_OverrideState: 0
-    m_Value: 0
-  blueOutGreenIn:
-    m_OverrideState: 0
-    m_Value: 0
-  blueOutBlueIn:
-    m_OverrideState: 0
-    m_Value: 100
---- !u!114 &3220836251887623969
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d7593b3a9277ac4696b20006c21dde2, type: 3}
-  m_Name: VisualEnvironment
-  m_EditorClassIdentifier: 
-  active: 1
-  skyType:
+  quality:
     m_OverrideState: 1
-    m_Value: 4
-  cloudType:
+    m_Value: 1
+  threshold:
     m_OverrideState: 1
     m_Value: 0
-  skyAmbientMode:
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.219
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.603
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  dirtTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+  dirtIntensity:
+    m_OverrideState: 1
+    m_Value: 0
+  anamorphic:
     m_OverrideState: 0
     m_Value: 1
-  windOrientation:
-    m_OverrideState: 0
+  m_Resolution:
+    m_OverrideState: 1
+    m_Value: 2
+  m_HighQualityPrefiltering:
+    m_OverrideState: 1
     m_Value: 0
-  windSpeed:
-    m_OverrideState: 0
-    m_Value: 0
-  fogType:
-    m_OverrideState: 0
-    m_Value: 0
+  m_HighQualityFiltering:
+    m_OverrideState: 1
+    m_Value: 1
