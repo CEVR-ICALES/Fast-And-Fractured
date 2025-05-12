@@ -8550,23 +8550,6 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 20
---- !u!320 &253626833
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 253626828}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: 7b8afb7c9177a8047ba1565940627cbe, type: 2}
-  m_InitialState: 1
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings: []
-  m_ExposedReferences:
-    m_References: []
 --- !u!1 &258817076
 GameObject:
   m_ObjectHideFlags: 0
@@ -10275,6 +10258,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5278cfdfde7d7e40b5717fb9e43aa77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &374111369
+GameObject:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 374111371}
+  - component: {fileID: 374111370}
+  m_Layer: 0
+  m_Name: StaticLightingSky
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &374111370
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374111369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 441482e8936e35048a1dffac814e3ef8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Profile: {fileID: 0}
+  m_StaticLightingSkyUniqueID: 0
+  m_StaticLightingCloudsUniqueID: 0
+  m_StaticLightingVolumetricClouds: 0
+--- !u!4 &374111371
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374111369}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &376537616
 GameObject:
   m_ObjectHideFlags: 0
@@ -22261,6 +22292,7 @@ GameObject:
   - component: {fileID: 1374826667}
   - component: {fileID: 1374826666}
   - component: {fileID: 1374826665}
+  - component: {fileID: 1374826669}
   m_Layer: 5
   m_Name: CharacterScreen
   m_TagString: Untagged
@@ -22365,6 +22397,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1374826663}
   m_CullTransparentMesh: 1
+--- !u!114 &1374826669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374826663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 832e173dd0c7ec544ba81de193ece178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputActionReference: {fileID: 5525246328697006140, guid: d700e822a8e40e2439606ea8fee08e29, type: 3}
+  onInputPerformedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1374826665}
+        m_TargetAssemblyTypeName: CharacterSelectorManager, Assembly-CSharp
+        m_MethodName: FullUnlockSkins
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1400571940
 GameObject:
   m_ObjectHideFlags: 0
@@ -22813,9 +22873,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
       insertIndex: -1
       addedObject: {fileID: 253626832}
-    - targetCorrespondingSourceObject: {fileID: 8157454403206286546, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 253626833}
   m_SourcePrefab: {fileID: 100100000, guid: a7396ae9f6d81ee43bc0f2ee9a4b48be, type: 3}
 --- !u!1001 &1433084952
 PrefabInstance:
@@ -39140,3 +39197,4 @@ SceneRoots:
   - {fileID: 1135872606}
   - {fileID: 1073459652}
   - {fileID: 778717810}
+  - {fileID: 374111371}
