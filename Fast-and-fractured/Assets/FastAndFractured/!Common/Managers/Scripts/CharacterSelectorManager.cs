@@ -175,8 +175,8 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
             _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
             _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
             {
-                carStopCollider.enabled = true;
                 Destroy(lastModelInstance);
+                carStopCollider.enabled = true;
                 _modelChangeTimer = null;
             });
         }
