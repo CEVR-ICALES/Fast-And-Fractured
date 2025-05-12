@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 7142211839941023425}
   - component: {fileID: 4956100699040463310}
   - component: {fileID: 5486037620797054504}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: WalkLight_Cevr_Icales.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &230025825481659174
 Transform:
@@ -110,12 +110,12 @@ GameObject:
   - component: {fileID: 2491970593716430159}
   - component: {fileID: 5869957264933185547}
   - component: {fileID: 4330750928260350383}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: GreenLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1490988948798371096
 Transform:
@@ -208,12 +208,12 @@ GameObject:
   - component: {fileID: 5243955778636135937}
   - component: {fileID: 6564637287455364994}
   - component: {fileID: 5110212635021902958}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: WaitLight_Cevr_Icales.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8147631610240860879
 Transform:
@@ -303,12 +303,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8734174074923806167}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8734174074923806167
 Transform:
@@ -340,12 +340,12 @@ GameObject:
   - component: {fileID: 838023632761858224}
   - component: {fileID: 162333955752402082}
   - component: {fileID: 2770378082850065128}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: RedLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7928470962417658670
 Transform:
@@ -438,12 +438,12 @@ GameObject:
   - component: {fileID: 5830760423496700926}
   - component: {fileID: 1449487944346962}
   - component: {fileID: 7890222438099770453}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: YellowLight_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5865566175039811568
 Transform:
@@ -535,12 +535,12 @@ GameObject:
   - component: {fileID: 588163684424544362}
   - component: {fileID: 982556414883030224}
   - component: {fileID: 4940827668351982542}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Semaforo_Ver1_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &588163684424544362
 Transform:
@@ -617,12 +617,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1364349836503928204}
   - component: {fileID: 2395102337892634340}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1364349836503928204
 Transform:
@@ -682,12 +682,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3699206154740693969}
   - component: {fileID: 4111403247320403343}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3699206154740693969
 Transform:
@@ -759,9 +759,25 @@ PrefabInstance:
       propertyPath: trafficUnits.Array.data[1]
       value: 
       objectReference: {fileID: 2395102337892634340}
+    - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_Name
       value: TrafficLight_Ver1_Cevr_Icales
+      objectReference: {fileID: 0}
+    - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7350752657353995067, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -809,8 +825,56 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8734174074923806167}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2484812435757997910}
+    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8504351259664057455}
   m_SourcePrefab: {fileID: 100100000, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+--- !u!1 &2781702458548687746 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
+  m_PrefabInstance: {fileID: 4524174312536919573}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &2484812435757997910
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2781702458548687746}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.49030256, y: 11.616019, z: 0.465465}
+  m_Center: {x: 0.0109731555, y: 5.3080087, z: -0.034710072}
+--- !u!208 &8504351259664057455
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2781702458548687746}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.24515128, y: 5.8080096, z: 0.2327325}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.0109731555, y: 5.3080087, z: -0.034710072}
+  m_TimeToStationary: 0.5
 --- !u!4 &4016724331760347077 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}

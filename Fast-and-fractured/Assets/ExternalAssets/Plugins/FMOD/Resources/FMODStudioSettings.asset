@@ -339,8 +339,16 @@ MonoBehaviour:
   VirtualChannelSettings: []
   RealChannelSettings: []
   Plugins: []
-  MasterBanks: []
-  Banks: []
+  MasterBanks:
+  - Master
+  Banks:
+  - AmbienceBank
+  - MusicBank
+  - ShootingSoundsBank
+  - SoundEffectsBank
+  - UIRelatedEventsBank
+  - VehicleRelatedSoundsBank
+  - VoicedRelatedEventsBank
   BanksToLoad: []
   LiveUpdatePort: 9264
   EnableMemoryTracking: 0
