@@ -18,6 +18,7 @@ namespace FastAndFractured
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
+            VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
             GameObject player = LevelController.Instance.playerReference;
             if (interactionFrom == player)
             {
@@ -28,11 +29,11 @@ namespace FastAndFractured
 
             base.OnInteract(interactionFrom, intearactionTo);
 
-
             foreach (var boost in boostList)
             {
                 float boostAmount = boost.ValueType == ValueNumberType.PERCENTAGE ? statsController.GetCurrentStat(boost.StatToBoost)* boost.BoostValue:boost.BoostValue;
 
+                vehicleVfxController.OnStatsBoosterGrabbed(boost.StatToBoost);
                 switch (boost.StatToBoost)
                 {
                     case Stats.ENDURANCE:
@@ -92,6 +93,7 @@ namespace FastAndFractured
 
         private void UpdateExistingCooldowns(GameObject character, float speed)
         {
+            if (character == null) return;
             ITimeSpeedModifiable[] cooldowns = character.GetComponentsInChildren<ITimeSpeedModifiable>();
             foreach (ITimeSpeedModifiable cd in cooldowns)
             {

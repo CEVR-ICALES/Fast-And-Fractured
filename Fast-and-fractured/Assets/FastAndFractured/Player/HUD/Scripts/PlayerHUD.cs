@@ -54,22 +54,22 @@ namespace FastAndFractured
 
         private void UpdateOverheatHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.SHOOT_COOLDOWN, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOT_COOLDOWN, currentValue, maxValue);
         }
 
         private void UpdatePushCooldownHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.PUSH_COOLDOWN, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.PUSH_COOLDOWN, currentValue, maxValue);
         }
 
         private void UpdateDashCooldownHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.DASH_COOLDOWN, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.DASH_COOLDOWN, currentValue, maxValue);
         }
 
         private void UpdateUniqueAbilityCooldownHUD(float currentValue, float maxValue)
         {
-            HUDManager.Instance.UpdateUIElement(UIElementType.ULT_COOLDOWN, currentValue, maxValue);
+            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.ULT_COOLDOWN, currentValue, maxValue);
         }
 
     }

@@ -13,6 +13,11 @@ namespace FastAndFractured
 {
     public class SettingsMenuBehaviour : MonoBehaviour
     {
+        [Header("Settings Buttons")]
+        [SerializeField] private Button audioSettingsButton;
+        [SerializeField] private Button videoSettingsButton;
+        [SerializeField] private Button accessibilitySettingsButton;
+
         [Header("Menu Settings UI")]
         [SerializeField] private GameObject audioSettingsUI;
         [SerializeField] private GameObject videoSettingsUI;
@@ -440,6 +445,21 @@ namespace FastAndFractured
         public void OpenDeletePopup()
         {
             deletePopupUI.SetActive(true);
+        }
+
+        public void ChangeHeaderButtonsDirections(Selectable interactable)
+        {
+            Navigation navigation = audioSettingsButton.navigation;
+            navigation.selectOnDown = interactable;
+            audioSettingsButton.navigation = navigation;
+
+            navigation = videoSettingsButton.navigation;
+            navigation.selectOnDown = interactable;
+            videoSettingsButton.navigation = navigation;
+
+            navigation = accessibilitySettingsButton.navigation;
+            navigation.selectOnDown = interactable;
+            accessibilitySettingsButton.navigation = navigation;
         }
 
         #endregion

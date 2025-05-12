@@ -1,12 +1,13 @@
-using FMODUnity;
-using UnityEngine;
 using FMOD.Studio;
-using UnityEngine.UI;
+using FMODUnity;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class SoundManager : AbstractSingleton<SoundManager>
+    public class SoundManager : AbstractSingleton<SoundManager>, IPausable
     {
         #region Variables
         #region Volume Variables
@@ -28,9 +29,25 @@ namespace Utilities
         #endregion
 
         #region Dictionary Variables
+        private List<EventReference> fmodEvents = new List<EventReference>();
         private Dictionary<EventReference, EventInstance> _activeEvents = new Dictionary<EventReference, EventInstance>();
         #endregion
 
+        #region Constants
+        private const string GENERAL_VOLUME_STRING = "GeneralVolume";
+        private const string MUSIC_VOLUME_STRING = "MusicVolume";
+        private const string SFX_VOLUME_STRING = "SFXVolume";
+
+        private const string AMBIENCE_ZONE_PARAM_NAME = "AmbienceZone";
+
+        private const string MUTE_ALL_STRING = "MuteAll";
+
+        private const float DEFAULT_VOLUME_SLIDER_VALUE = 0.5f;
+        #endregion
+
+        [SerializeField] private List<EventInstance> _trackedInstances = new List<EventInstance>();
+
+        EventReference musicGameLoopReference;
         #endregion
 
         protected override void Awake()
@@ -40,8 +57,39 @@ namespace Utilities
 
         private void Start()
         {
+            if (generalVolumeSlider != null)
+            {
+                generalVolumeSlider.value = PlayerPrefs.GetFloat(GENERAL_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
+                UpdateGeneralVolume();
+            }
+
+            if (musicVolumeSlider != null)
+            {
+                musicVolumeSlider.value = PlayerPrefs.GetFloat(MUSIC_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
+                UpdateMusicVolume();
+            }
+
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.value = PlayerPrefs.GetFloat(SFX_VOLUME_STRING, DEFAULT_VOLUME_SLIDER_VALUE);
+                UpdateSFXVolume();
+            }
+
             if (muteToggle != null)
+            {
+                muteToggle.isOn = PlayerPrefs.GetInt(MUTE_ALL_STRING, 0) == 1;
                 ToggleMuteAllSounds();
+            }
+        }
+
+        private void OnEnable()
+        {
+            PauseManager.Instance?.RegisterPausable(this);
+        }
+
+        private void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         #region Play Sounds Methods
@@ -52,7 +100,7 @@ namespace Utilities
         /// <param name="worldPosition">The world position to play the sound at</param>
         public void PlayOneShot(EventReference eventReference, Vector3 worldPosition)
         {
-            RuntimeManager.PlayOneShot(eventReference, worldPosition);
+            PlaySound3D(eventReference, worldPosition);
         }
 
         /// <summary>
@@ -65,7 +113,9 @@ namespace Utilities
             EventInstance soundInstance = RuntimeManager.CreateInstance(eventReference);
             soundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
             soundInstance.start();
+
             _activeEvents[eventReference] = soundInstance;
+            AddEventInstance(soundInstance);
 
             return soundInstance;
         }
@@ -111,6 +161,22 @@ namespace Utilities
                 instance.setPaused(true);
         }
 
+        public void PauseAllSounds()
+        {
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
+            {
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    _trackedInstances.RemoveAt(i);
+                else
+                    instance.setPaused(true);
+            }
+
+            ResumeAudio(musicGameLoopReference);
+        }
+
         /// <summary>
         /// Resumes a paused sound event
         /// </summary>
@@ -120,89 +186,107 @@ namespace Utilities
             if (_activeEvents.TryGetValue(eventReference, out EventInstance instance))
                 instance.setPaused(false);
         }
+
+        public void ResumeAllSounds()
+        {
+            for (int i = _trackedInstances.Count - 1; i >= 0; i--)
+            {
+                EventInstance instance = _trackedInstances[i];
+                instance.getPlaybackState(out PLAYBACK_STATE state);
+
+                if (state == PLAYBACK_STATE.STOPPED)
+                    RemoveEventInstance(instance);
+                else
+                    instance.setPaused(false);
+
+            }
+        }
         #endregion
 
         #region Volume Methods
-        /// <summary>
-        /// Sets the volume of the specified FMOD parameter
-        /// </summary>
-        /// <param name="parameterName">Name of the FMOD parameter</param>
-        /// <param name="value">New volume value (0.0 - 1.0) </param>
-        public void SetVolume(string parameterName, float value)
-        {
-            RuntimeManager.StudioSystem.setParameterByName(parameterName, value);
-        }
-
         public void SetSFXVolume(float value) => SetVCAVolume("vca:/SFX", value);
         public void SetMusicVolume(float value) => SetVCAVolume("vca:/Music", value);
         public void SetGeneralVolume(float value) => SetVCAVolume("vca:/General", value);
 
         public void SetVCAVolume(string vcaPath, float value)
         {
-            VCA vca= RuntimeManager.GetVCA(vcaPath);
+            VCA vca = RuntimeManager.GetVCA(vcaPath);
             vca.setVolume(value);
         }
 
         public void ToggleMuteAllSounds()
         {
+            PlayerPrefs.SetInt(MUTE_ALL_STRING, muteToggle.isOn ? 1 : 0);
+
             if (muteToggle.isOn)
             {
-                _previousGeneralVolume = generalVolumeSlider != null ? generalVolumeSlider.value : _generalVolume;
-                _previousMusicVolume = musicVolumeSlider != null ? musicVolumeSlider.value : _musicVolume;
-                _previousSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : _sfxVolume;
-
-                generalVolumeSlider.value = 0;
-                musicVolumeSlider.value = 0;
-                sfxVolumeSlider.value = 0;
-
-                UpdateGeneralVolume();
-                UpdateMusicVolume();
-                UpdateSFXVolume();
+                SetGeneralVolume(0);
+                SetMusicVolume(0);
+                SetSFXVolume(0);
+                return;
             }
-            else
-            {
-                generalVolumeSlider.value = 0.5f;
-                musicVolumeSlider.value = 0.5f;
-                sfxVolumeSlider.value = 0.5f;
 
-                UpdateGeneralVolume();
-                UpdateMusicVolume();
-                UpdateSFXVolume();
+            UpdateGeneralVolume();
+            UpdateMusicVolume();
+            UpdateSFXVolume();
 
-                if (generalVolumeSlider != null) generalVolumeSlider.value = _previousGeneralVolume;
-                if (musicVolumeSlider != null) musicVolumeSlider.value = _previousMusicVolume;
-                if (sfxVolumeSlider != null) sfxVolumeSlider.value = _previousSFXVolume;
-            }
+            PlayerPrefs.Save();
         }
 
         #region Slider Volume Methods
         public void UpdateSFXVolume()
         {
-            if (_sfxVolume != 0)
-                _previousSFXVolume = _sfxVolume;
-
+            if (muteToggle.isOn) return;
             _sfxVolume = sfxVolumeSlider.value;
             SetSFXVolume(sfxVolumeSlider.value);
+            PlayerPrefs.SetFloat(SFX_VOLUME_STRING, _sfxVolume);
+            PlayerPrefs.Save();
         }
 
         public void UpdateMusicVolume()
         {
-            if (_musicVolume != 0)
-                _previousMusicVolume = _musicVolume;
-
+            if (muteToggle.isOn) return;
             _musicVolume = musicVolumeSlider.value;
             SetMusicVolume(musicVolumeSlider.value);
+            PlayerPrefs.SetFloat(MUSIC_VOLUME_STRING, _musicVolume);
+            PlayerPrefs.Save();
         }
 
         public void UpdateGeneralVolume()
         {
-            if (_generalVolume != 0)
-                _previousGeneralVolume = _generalVolume;
-
+            if (muteToggle.isOn) return;
             _generalVolume = generalVolumeSlider.value;
             SetGeneralVolume(generalVolumeSlider.value);
+            PlayerPrefs.SetFloat(GENERAL_VOLUME_STRING, _generalVolume);
+            PlayerPrefs.Save();
         }
         #endregion
         #endregion
+
+        public void OnPause()
+        {
+            PauseAllSounds();
+        }
+
+        public void OnResume()
+        {
+            ResumeAllSounds();
+        }
+
+        internal void AddEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state != PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Add(instance);
+        }
+
+        internal void RemoveEventInstance(EventInstance instance)
+        {
+            instance.getPlaybackState(out PLAYBACK_STATE state);
+
+            if (state == PLAYBACK_STATE.STOPPED)
+                _trackedInstances.Remove(instance);
+        }
     }
 }

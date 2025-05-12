@@ -363,6 +363,7 @@ namespace FastAndFractured
             if (!_isPushShootMode)
             {
                 _isPushShootMode = true;
+                _isShooting = false;
             }
             else
             {

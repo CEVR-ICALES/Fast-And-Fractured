@@ -133,6 +133,7 @@ namespace FastAndFractured
 
             if (!IsInLayerMask(collision.gameObject.layer, groundLayerMask)) return;
 
+            _movementHandler.StopIsOnCeiling();
             _groundNormal = collision.contacts[0].normal;
             _isGrounded = true;
             _lastGroundedTime = Time.time;
@@ -142,6 +143,11 @@ namespace FastAndFractured
         public void UpdateGroundState()
         {
             _isGrounded = Time.time < _lastGroundedTime + GROUNDED_GRACE_TIME;
+        }
+
+        public void UpdateGroundStateBool(bool value)
+        {
+            _isGrounded = value;
         }
 
     }

@@ -61,6 +61,7 @@ namespace FastAndFractured
         private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
         private Quaternion startRotation;
+        private float speedMultiplier=1;
 
         [Header("Aggressiveness parameters")]
         [Tooltip("Duration of continuous damage required to reach this value")]
@@ -101,6 +102,15 @@ namespace FastAndFractured
         private IAGroundState groundState = IAGroundState.NONE;
         private ITimer _flipForceTimer;
 
+        //Training Values
+        public bool PlayerNear { get => _playerNear; set => _playerNear = value; }
+        private bool _playerNear = false;
+
+        public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
+        private bool _doTrainingAction;
+
+        private const float DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND = 0.75f;
+
 
         private void OnEnable()
         {
@@ -134,13 +144,16 @@ namespace FastAndFractured
                 else
                 {
                     GroundForces();
-                    if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                    if (!carMovementController.IsFlipped)
                     {
-                        carMovementController.StartIsFlippedTimer();
-                    }
-                    else
-                    {
-                        carMovementController.StopFlippedTimer();
+                        if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
+                        {
+                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND : 1);
+                        }
+                        else
+                        {
+                            carMovementController.StopFlippedTimer();
+                        }
                     }
                     if (carMovementController.IsFlipped)
                     {
@@ -273,8 +286,9 @@ namespace FastAndFractured
             Vector2 input = new Vector2(inputX, inputY);
 
 
-            carMovementController.HandleSteeringInput(input);
+            carMovementController.HandleSteeringInput(input* speedMultiplier);
         }
+
 
         public void UpdateTargetPosition()
         {
@@ -538,6 +552,7 @@ namespace FastAndFractured
 
         #endregion
 
+
         #region FleeState
         public void RunAwayFromCurrentTarget()
         {
@@ -642,7 +657,18 @@ namespace FastAndFractured
             return listOfCarsThatMadeLotsOfDamage != null && listOfCarsThatMadeLotsOfDamage.Count > 0;
         }
         //State shootToWhoMadeMoreDamageState
+        #region TraningState
+        public bool CanPerformeTrainingAction()
+        {
+            return _doTrainingAction;
+        }
+        public void DesactivateTrainingAction()
+        {
+            _doTrainingAction = false;
+        }
         #endregion
+        #endregion
+
 
         #region Helpers
 
@@ -961,10 +987,17 @@ namespace FastAndFractured
             {
                 _positionToDrive = _currentTarget.transform.position;
             }
+        } 
+
+        public void ModifySpeedMultiplier(float multiplier)
+        { 
+            speedMultiplier = Mathf.Clamp01(multiplier);
+
         }
 
         #endregion
     }
+
 }
 
 public class CarDamagedMe

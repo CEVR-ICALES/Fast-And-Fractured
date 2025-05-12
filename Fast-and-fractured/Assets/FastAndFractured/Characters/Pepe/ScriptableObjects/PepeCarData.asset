@@ -16,10 +16,10 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
   CarWithSkinsPrefabs:
   - {fileID: 5896435916326739545, guid: 12d45f1d22ddb9849a2c0d8b0e66c2ae, type: 3}
-  - {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
-  MaxEndurance: 1300
+  - {fileID: 6528960802763026162, guid: bb1a925feeb03af41a71fc2b20671bc6, type: 3}
+  MaxEndurance: 1500
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 130
   MaxSpeedDashing: 200
   MaxSpeedMultiplier: 1
@@ -45,7 +45,7 @@ MonoBehaviour:
   BaseDownwardForce: 1600
   TurningForceMultiplier: 2.5
   SpeedForceMultiplier: 0.6
-  NormalShootDMG: 70
+  NormalShootDMG: 62
   MaxNormalShootDMG: 105
   MinNormalShootDMG: 52.5
   PushShootFORCE: 1250000
@@ -58,8 +58,8 @@ MonoBehaviour:
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
-  PushShootBounceNum: 3
-  PushShootBounceForce: 60
+  PushShootBounceNum: 2
+  PushShootBounceForce: 50
   MineShootAngle: 40
   MineShootRange: 10
   DashCooldown: 4
@@ -72,7 +72,7 @@ MonoBehaviour:
   aiParameters:
     fleeDistance: 5
     sweepRadius: 20
-    shootingMarginErrorAngle: 0.02
+    shootingMarginErrorAngle: 0.25
     damageAccumulationDuration: 5
     fleeTriggerDamageThresholdPercentage: 40
     _recoveryThresholdPercentageForSearch: 50
@@ -84,14 +84,18 @@ MonoBehaviour:
     decisionPercentageNormalShoot: 50
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
-    marginToFleeFromSandstorm: 50
+    marginToFleeFromSandstorm: 250
   WinObjects:
   - GameObject: {fileID: 2180426808490395825, guid: 7eff110620e709d449eb6974f1b3b011, type: 3}
     StringValue: Pepe_0
   - GameObject: {fileID: 5219670610695390990, guid: aed235aaca3ca9a45a368771c9af1744, type: 3}
     StringValue: Pepe_1
+  - GameObject: {fileID: 7907508526594898877, guid: e05139847703df54f8dedda4cb6cfcde, type: 3}
+    StringValue: Pepe_2
   LoseObjects:
   - GameObject: {fileID: 745186151221367158, guid: 64c48b7deb36cb041b59e5169ff1a5b2, type: 3}
     StringValue: Pepe_0
   - GameObject: {fileID: 3539357376104037097, guid: 26d44d4b556776d4b9afc604aef0f7dc, type: 3}
     StringValue: Pepe_1
+  - GameObject: {fileID: 2500150028079004301, guid: 8d09ee3e20397664ab75cbe5c0babf82, type: 3}
+    StringValue: Pepe_2

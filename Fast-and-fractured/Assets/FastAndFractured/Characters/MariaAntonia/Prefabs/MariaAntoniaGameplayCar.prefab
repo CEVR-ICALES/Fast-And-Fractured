@@ -20,6 +20,10 @@ PrefabInstance:
       propertyPath: InitialModule.startColor.maxColor.r
       value: 0.631
       objectReference: {fileID: 0}
+    - target: {fileID: 6047772418944385993, guid: f7f1b0329a4db6e45b06c3fed6a31fe2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6056872553733142612, guid: f7f1b0329a4db6e45b06c3fed6a31fe2, type: 3}
       propertyPath: InitialModule.startColor.maxColor.b
       value: 0.3216863
@@ -118,7 +122,7 @@ PrefabInstance:
     - target: {fileID: 2790314059788887351, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 9070717077970976422, guid: 2db2bdb2b12163b4b942535b71113d11, type: 3}
+      objectReference: {fileID: 2100000, guid: 3469fd7f6810c5b409a00e01bd5c40e6, type: 2}
     - target: {fileID: 5741219229547406639, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Name
       value: MariaAntoniaCarWheel (2)
@@ -246,7 +250,7 @@ PrefabInstance:
     - target: {fileID: 2790314059788887351, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 9070717077970976422, guid: 2db2bdb2b12163b4b942535b71113d11, type: 3}
+      objectReference: {fileID: 2100000, guid: 3469fd7f6810c5b409a00e01bd5c40e6, type: 2}
     - target: {fileID: 3959230347343912536, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
@@ -328,7 +332,7 @@ PrefabInstance:
     - target: {fileID: 2790314059788887351, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 9070717077970976422, guid: 2db2bdb2b12163b4b942535b71113d11, type: 3}
+      objectReference: {fileID: 2100000, guid: 3469fd7f6810c5b409a00e01bd5c40e6, type: 2}
     - target: {fileID: 5741219229547406639, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Name
       value: MariaAntoniaCarWheel (2)
@@ -490,29 +494,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 320347321817242489, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: pooltype
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: bulletSound.Path
-      value: event:/ShootingEvents/CroquetteShoot
+      value: event:/ShootingEvents/CroquetteShootNoOil
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: bulletSound.Guid.Data1
-      value: 1847511064
+      value: -743936464
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: bulletSound.Guid.Data2
-      value: 1264910131
+      value: 1330464501
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: bulletSound.Guid.Data3
-      value: 24861848
+      value: -1582019410
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: bulletSound.Guid.Data4
-      value: -1985299510
+      value: -1198126147
       objectReference: {fileID: 0}
     - target: {fileID: 572485126669709941, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: directionCenterOffSet.y
@@ -602,6 +610,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1.593
       objectReference: {fileID: 0}
+    - target: {fileID: 2298384361198966400, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 2308404931098106160, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.92
@@ -641,6 +653,10 @@ PrefabInstance:
     - target: {fileID: 2308404931098106160, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 12.097
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559160976370585720, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 2607063736163652628, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -762,6 +778,10 @@ PrefabInstance:
       propertyPath: collisionType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3625380813813887859, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 3800277089519839925, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.85
@@ -866,6 +886,14 @@ PrefabInstance:
       propertyPath: m_SidewaysFriction.m_AsymptoteValue
       value: 0.85
       objectReference: {fileID: 0}
+    - target: {fileID: 4389358730684620718, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4476844342814978466, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 4646307668731615321, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.09
@@ -889,6 +917,10 @@ PrefabInstance:
     - target: {fileID: 4700368457746794078, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: 1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702684487721948854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 4819824608313735464, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
@@ -929,6 +961,10 @@ PrefabInstance:
     - target: {fileID: 4819824608313735464, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_SidewaysFriction.m_AsymptoteValue
       value: 0.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 5250239764957105399, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 5358090728621550099, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -994,6 +1030,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1.93
       objectReference: {fileID: 0}
+    - target: {fileID: 6535546635460616988, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 6679896942987676810, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -1045,6 +1085,10 @@ PrefabInstance:
     - target: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.409
+      objectReference: {fileID: 0}
+    - target: {fileID: 7032962198243109382, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 7200528592949526990, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Mesh
@@ -1101,6 +1145,10 @@ PrefabInstance:
     - target: {fileID: 7656301979064582024, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7668963846695960571, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 7861354206915016599, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1190,6 +1238,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 2.98
       objectReference: {fileID: 0}
+    - target: {fileID: 8046618569999058095, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.866
@@ -1201,6 +1253,14 @@ PrefabInstance:
     - target: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.z
       value: 1.923
+      objectReference: {fileID: 0}
+    - target: {fileID: 8278681642435654730, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 8465318407412982650, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Size.x
@@ -1225,6 +1285,34 @@ PrefabInstance:
     - target: {fileID: 8639848427772867770, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_Center.z
       value: 0.35885882
+      objectReference: {fileID: 0}
+    - target: {fileID: 8729563304913778789, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6615745590694277767}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ModifySpeedOfExistingTimer
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FastAndFractured.BaseUniqueAbility, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 9016514513498141912, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: onInputPerformedEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 9017862046783433866, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1322,8 +1410,8 @@ MonoBehaviour:
   verticalOscillationAmplitude: 0.5
   xRotationSpeed: 40
   orbitCenter: {fileID: 4250718481767986776}
-  _vfxParent: {fileID: 7321467167139881742}
-  _hairMaterial: {fileID: 2100000, guid: 27fa003b99e10e24eac64d6c589027cd, type: 2}
+  vfxParent: {fileID: 7321467167139881742}
+  hairMaterial: {fileID: 2100000, guid: 27fa003b99e10e24eac64d6c589027cd, type: 2}
   croquettePrefab: {fileID: 3196287454565126686, guid: 0a442841012210a47841e0e2a6ff06bf, type: 3}
   ssjUltiReference:
     Guid:
@@ -1332,7 +1420,7 @@ MonoBehaviour:
       Data3: -1023862356
       Data4: -154867332
     Path: event:/SpecialAbilityEvents/SuperSaiyanMariaAntonia
-  _statsController: {fileID: 9213536243823301278}
+  mariaAntoniaStatsController: {fileID: 0}
 --- !u!114 &399298732723464029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1390,17 +1478,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3096083880910808559, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
   m_PrefabInstance: {fileID: 6333387155377144271}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &9213536243823301278 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2898550601115800401, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
-  m_PrefabInstance: {fileID: 6333387155377144271}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1921552221463974689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fb199b8e3d92e748aff50c11154d785, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &7213940406890200417
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1412,7 +1489,7 @@ PrefabInstance:
     - target: {fileID: 2790314059788887351, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 9070717077970976422, guid: 2db2bdb2b12163b4b942535b71113d11, type: 3}
+      objectReference: {fileID: 2100000, guid: 3469fd7f6810c5b409a00e01bd5c40e6, type: 2}
     - target: {fileID: 5741219229547406639, guid: 70bdb4a5cbf06fc44a4e6fda286e7f16, type: 3}
       propertyPath: m_Name
       value: MariaAntoniaCarWheel (1)

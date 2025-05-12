@@ -10,6 +10,7 @@ namespace FastAndFractured
     {
         public float detectionRadius = 40f;
         public float pullForce = 30f;
+        [SerializeField] private ParticleSystem vfx;
         private bool _isPaused = false;
         private List<GameObject> _charactersList = new List<GameObject>();
         void OnEnable()
@@ -28,6 +29,7 @@ namespace FastAndFractured
                 return;
             if (_charactersList != null)
             {
+                HandleVfx();
                 foreach (GameObject obj in _charactersList)
                 {
                     if(obj!=null)
@@ -41,6 +43,20 @@ namespace FastAndFractured
                 }
             }
         }
+
+        private void HandleVfx()
+        {
+            if(_charactersList.Count > 0)
+            {
+                if(!vfx.isPlaying)
+                   vfx.Play();
+            } else
+            {
+                if(vfx.isPlaying)
+                    vfx.Stop();
+            }
+        }
+
         void PullCharacter(GameObject character, float distance)
         {
             Rigidbody rb = character.GetComponent<Rigidbody>();

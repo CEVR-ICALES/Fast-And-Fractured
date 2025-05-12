@@ -56,8 +56,64 @@ PrefabInstance:
       propertyPath: m_Name
       value: tree_cypressTall
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8447131370563490526}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1814652569388921885}
   m_SourcePrefab: {fileID: 100100000, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+--- !u!1 &3893302031124048867 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 04bb7586b6bea4da58c1574a2b230100, type: 3}
+  m_PrefabInstance: {fileID: 4235248697341482674}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &8447131370563490526
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893302031124048867}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.56186426, y: 18.673912, z: 0.5677011}
+  m_Center: {x: -0.023594424, y: -3.9700184, z: -0.042246282}
+--- !u!208 &1814652569388921885
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893302031124048867}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.28093213, y: 9.336956, z: 0.28385055}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.023594424, y: -3.9700184, z: -0.042246282}
+  m_TimeToStationary: 0.5
