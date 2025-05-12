@@ -38,10 +38,11 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
             return null;
         }
 
-        for (int i = 0; i < numOfSkins; i++)
+        for (int i = 1; i <= numOfSkins; i++)
         {
             string skinToCheck = _playerSelected + "_" + i;
-            if (PlayerPrefs.GetInt(skinToCheck) < PIECES_TO_UNLOCK_SKIN)
+            var piecesNeed = PlayerPrefs.GetInt(skinToCheck);
+            if (piecesNeed < PIECES_TO_UNLOCK_SKIN)
             {
                 unlockableSkins.Add(skinToCheck);
             }
