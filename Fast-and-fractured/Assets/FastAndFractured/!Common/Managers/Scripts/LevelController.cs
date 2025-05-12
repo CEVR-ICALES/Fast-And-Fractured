@@ -120,6 +120,9 @@ namespace FastAndFractured
             if (!useMyCharacters)
             {
                 StartLevelWithSpawnedCharacters();
+                if (InGameCharacters==null) { 
+                    Debug.LogError("Culpa del project lead"); return;
+                }
                 GameObject nearestCharacter = GetNearestCharacterToCharacter(InGameCharacters[0].gameObject);
                 EnemyAIBrain enemyAIBrain = nearestCharacter.GetComponentInParent<EnemyAIBrain>();
                 if (enemyAIBrain)
