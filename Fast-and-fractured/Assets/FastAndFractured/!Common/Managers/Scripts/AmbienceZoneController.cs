@@ -1,4 +1,5 @@
 using Enums;
+using FastAndFractured;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -21,9 +22,15 @@ public class AmbienceZoneController : MonoBehaviour
     {
         if (_ambienceInstance.isValid())
         {
-            _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
-            _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
-            _ambienceInstance.start();
+            if (other.TryGetComponent(out StatsController statsController))
+            {
+                if (statsController.IsPlayer)
+                {
+                    _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
+                    _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
+                    _ambienceInstance.start();
+                }
+            }
         }
 
         Debug.Log("Entered Zone");
@@ -31,14 +38,18 @@ public class AmbienceZoneController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-
         if (_ambienceInstance.isValid())
         {
-            _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-            _ambienceInstance.release(); 
+            if (other.TryGetComponent(out StatsController statsController))
+            {
+                if (statsController.IsPlayer)
+                {
+                    _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                    _ambienceInstance.release();
+                }
+            }
+
+            Debug.Log("Left Zone");
         }
-
-        Debug.Log("Left Zone");
     }
-
 }
