@@ -393,8 +393,10 @@ namespace FastAndFractured
                             icon.SetPlayerDeadIconIsActive(true);
                         }
                     }
-
-                    Destroy(character.transform.parent.gameObject);
+                    if (character != null)
+                    {
+                        Destroy(character.transform.parent.gameObject);
+                    }
                     _aliveCharacterCount--;
                     if (_aliveCharacterCount == 1)
                     {
