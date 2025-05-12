@@ -95,10 +95,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20cc9b9c931c5e04e81ecc529ba31113, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveForce: 15
+  initialMoveSpeed: 15
+  airSpeed: 6
   rotationSpeed: 2
-  maxSlopeAngle: 70
-  jumpDuration: 3
+  maxSlopeAngle: 22
+  jumpDuration: 2.5
   jumpHeight: 3
   customGravity: 80
 --- !u!114 &145357936756548396
@@ -115,7 +116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundLayerMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 1032
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 525312
