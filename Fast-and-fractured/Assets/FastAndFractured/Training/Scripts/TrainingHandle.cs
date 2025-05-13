@@ -29,7 +29,6 @@ public class TrainingHandle : MonoBehaviour
         {
             //Finish
             _trainingTimer.PauseTimer();
-            Debug.Log("Training Finished in " + _trainingTimer.GetData().CurrentTime);
             _trainingTimer.StopTimer();
         }
     }

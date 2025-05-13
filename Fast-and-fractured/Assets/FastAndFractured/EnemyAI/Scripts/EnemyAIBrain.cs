@@ -697,10 +697,6 @@ namespace FastAndFractured
                     _carsThatDamagedAI[whoIsMakingDamage].timeThatHasPassed = Time.time;
                     TimerSystem.Instance.ModifyTimer(_carsThatDamagedAI[whoIsMakingDamage].timerUntilRemove, newCurrentTime: 0);
                 }
-                else
-                {
-                    Debug.Log("Added new car that damaged me");
-                }
                 _carsThatDamagedAI[whoIsMakingDamage].damageMade += damageTaken;
 
 

@@ -36,7 +36,6 @@ namespace FastAndFractured
         }
         public void OnInvulnerabilityLost()
         {
-            Debug.Log("Invulnerability Lost");
             EndAbilityEffects();
         }
     }
