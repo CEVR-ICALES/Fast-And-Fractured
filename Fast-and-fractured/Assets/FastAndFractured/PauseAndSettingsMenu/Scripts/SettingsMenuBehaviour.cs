@@ -316,10 +316,6 @@ namespace FastAndFractured
                 float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, SHARPENING_DEFAULT);
                 hdCameraData.taaSharpenStrength = savedSharpening;
             }
-
-
-
-            Debug.Log("Applied AntiAliasing: " + hdCameraData.antialiasing);
         }
 
         private void UpdateTAASharpening()
@@ -402,7 +398,6 @@ namespace FastAndFractured
         private void ApplyDisplayMode(FullScreenMode selectedOption)
         {
             Screen.fullScreenMode = selectedOption;
-            Debug.Log($"Display Mode Applicated: {selectedOption}");
         }
 
         private void LoadDisplayModeOptions()

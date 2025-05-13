@@ -328,7 +328,6 @@ namespace FastAndFractured
             {
                 if (damageXFrame > 0)
                 {
-                    Debug.Log("DamagePlayer");
                     TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });

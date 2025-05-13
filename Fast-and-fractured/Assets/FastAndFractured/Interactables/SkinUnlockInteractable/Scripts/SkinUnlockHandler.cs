@@ -66,7 +66,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
 
         if (skinsPlayerCanUnlock.Count == 0)
         {
-            Debug.Log($"SkinUnlockHandler: Player {_playerSelected} has no skins to unlock. Despawning all {activeSkinInteractables.Count} active SkinInteractables.");
+            Debug.LogWarning($"SkinUnlockHandler: Player {_playerSelected} has no skins to unlock. Despawning all {activeSkinInteractables.Count} active SkinInteractables.");
             DestroySkins(activeSkinInteractables);
             return;
         }

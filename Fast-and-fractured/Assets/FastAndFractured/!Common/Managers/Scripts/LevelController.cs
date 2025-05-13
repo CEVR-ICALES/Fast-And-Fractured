@@ -409,7 +409,6 @@ namespace FastAndFractured
                 }
                 else
                 {
-                    Debug.Log("Player Dead.");
                     _hasPlayerWon = false;
                     GetPlayerFinalStatsAndChangeScene();
                 }
@@ -418,7 +417,6 @@ namespace FastAndFractured
 
         private void CallStorm()
         {
-            Debug.Log("Storm Called");
             if (!_sandStormController.StormSpawnPointsSetted)
                 _sandStormController.SetSpawnPoints(debugMode);
             _sandStormController.SpawnFogs();

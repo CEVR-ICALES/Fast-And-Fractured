@@ -37,7 +37,6 @@ namespace Utilities.Managers.PauseSystem
                 pausable?.OnPause();  
             }
 
-            //Debug.Log("Game Paused");
         }
 
        
@@ -55,7 +54,6 @@ namespace Utilities.Managers.PauseSystem
             {
                 pausable?.OnResume();  
             }
-            //Debug.Log("Game Resumed");
         }
 
         

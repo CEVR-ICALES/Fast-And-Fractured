@@ -485,7 +485,6 @@ namespace FastAndFractured
         {
             if (_flipTimer == null)
             {
-                Debug.Log("StartTimer");
                 _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime*decreseTimeFactor, onTimerDecreaseComplete : () => { 
                     _isFlipped = true;
                     _flipTimer=null;
@@ -497,7 +496,6 @@ namespace FastAndFractured
         {
             if (_flipTimer != null)
             {
-                Debug.Log("StopTimer");
                 _flipTimer.StopTimer();
                 _flipTimer = null;
             }
