@@ -6,39 +6,61 @@ namespace FastAndFractured
 {
     public class CreditsBehaviour : MonoBehaviour
     {
-        [SerializeField] private CreditsListData creditsListData;
+        [SerializeField] private CreditsListData creditsListDataProgrammer;
+        [SerializeField] private CreditsListData creditsListDataArtist;
         [SerializeField] private GameObject namePrefab;
         [SerializeField] private GameObject titlePrefab;
         [SerializeField] private GameObject nameContainerPrefab;
         [SerializeField] private GameObject creditsListContainer;
+        [SerializeField] private GameObject creditsLeftContainer;
+        [SerializeField] private GameObject creditsRightContainer;
         [SerializeField] private CanvasGroup creditsCanvasGroup;
         [SerializeField] private float scrollSpeed = 50f;
         [SerializeField] private float maxScrollSpeed = 200f;
+        private float startYPosition;
         private bool _fastMode = false;
         
         void Start()
         {
             InsertCreditsData();
+            startYPosition = creditsListContainer.transform.position.y;
         }
         void OnDisable()
         {
             _fastMode = false;
-            creditsListContainer.transform.position = new Vector3(creditsListContainer.transform.position.x, 0, creditsListContainer.transform.position.z);
+            creditsListContainer.transform.position = new Vector3(creditsListContainer.transform.position.x, startYPosition, creditsListContainer.transform.position.z);
         }
         private void InsertCreditsData()
         {
-            foreach (var entry in creditsListData.creditsEntry)
+            foreach (var entry in creditsListDataProgrammer.creditsEntry)
             {
-                GameObject titleObject = Instantiate(titlePrefab, creditsListContainer.transform);
+                GameObject titleObject = Instantiate(titlePrefab, creditsLeftContainer.transform);
                 titleObject.transform.localScale = new Vector3(entry.sizeMultiplier, entry.sizeMultiplier, entry.sizeMultiplier);
                 titleObject.GetComponent<LocalizedText>().LocalizationKey = entry.titleLocalizationKey;
 
-                GameObject nameContainer = Instantiate(nameContainerPrefab, creditsListContainer.transform);
+                GameObject nameContainer = Instantiate(nameContainerPrefab, creditsLeftContainer.transform);
 
-                foreach (var name in entry.names)
+                foreach (var nameWithSize in entry.names)
                 {
                     GameObject nameObject = Instantiate(namePrefab, nameContainer.transform);
-                    nameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = name;
+                    nameObject.transform.localScale = new Vector3(nameWithSize.sizeMultiplier, nameWithSize.sizeMultiplier, nameWithSize.sizeMultiplier);
+                    nameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = nameWithSize.name;
+                }
+            }
+
+            foreach (var entry in creditsListDataArtist.creditsEntry)
+            {
+                GameObject titleObject = Instantiate(titlePrefab, creditsRightContainer.transform);
+                titleObject.transform.localScale = new Vector3(entry.sizeMultiplier, entry.sizeMultiplier, entry.sizeMultiplier);
+                titleObject.GetComponent<LocalizedText>().LocalizationKey = entry.titleLocalizationKey;
+
+                GameObject nameContainer = Instantiate(nameContainerPrefab, creditsRightContainer.transform);
+
+                foreach (var nameWithSize in entry.names)
+                {
+                    GameObject nameObject = Instantiate(namePrefab, nameContainer.transform);
+                    nameObject.transform.localScale = new Vector3(nameWithSize.sizeMultiplier, nameWithSize.sizeMultiplier, nameWithSize.sizeMultiplier);
+                    nameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = nameWithSize.name;
                 }
             }
         }
