@@ -1,13 +1,10 @@
-using Enums;
 using FastAndFractured;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
-using Utilities;
 
-public class AmbienceZoneController : MonoBehaviour
+public class TriggerAudioController : MonoBehaviour
 {
-    [SerializeField] private AmbienceZoneType _zoneType;
     [SerializeField] private EventReference ambienceEventReference;
 
     private EventInstance _ambienceInstance;
@@ -32,8 +29,6 @@ public class AmbienceZoneController : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log("Entered Zone");
     }
 
     private void OnTriggerExit(Collider other)
@@ -48,8 +43,6 @@ public class AmbienceZoneController : MonoBehaviour
                     _ambienceInstance.release();
                 }
             }
-
-            Debug.Log("Left Zone");
         }
     }
 }
