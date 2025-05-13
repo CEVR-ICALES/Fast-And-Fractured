@@ -16,6 +16,7 @@ public class TrainingHandle : MonoBehaviour
     private float trainingMessageDuration = 4.5f;
     void Start()
     {
+        trainingTextTime.text = string.Empty;
         _trainingInputSuccededs = FindObjectsOfType<TrainingInputSucceded>();
         _trainingInputSuccededCount = 0;
         foreach (var trainingInputSucceded in _trainingInputSuccededs)
@@ -34,6 +35,10 @@ public class TrainingHandle : MonoBehaviour
             _trainingTimer.PauseTimer();
             IngameEventsManager.Instance.CreateEvent("Training.Finish",trainingMessageDuration);
             trainingTextTime.text = _trainingTimer.GetData().ToString();
+            TimerSystem.Instance.CreateTimer(trainingMessageDuration, onTimerDecreaseComplete: () =>
+            {
+                trainingTextTime.text = string.Empty;
+            });
             _trainingTimer.StopTimer();
         }
     }
