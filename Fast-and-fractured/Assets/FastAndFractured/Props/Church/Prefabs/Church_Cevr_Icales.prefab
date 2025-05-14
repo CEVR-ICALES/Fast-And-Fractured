@@ -12,6 +12,9 @@ GameObject:
   - component: {fileID: 310392089444576549}
   - component: {fileID: 3162104154243729471}
   - component: {fileID: 9051040064969898539}
+  - component: {fileID: 1941679498177359200}
+  - component: {fileID: 3572082322774224975}
+  - component: {fileID: 5004435820043176022}
   m_Layer: 10
   m_Name: Church_Cevr_Icales
   m_TagString: Untagged
@@ -93,6 +96,57 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0.4566905, z: 0.19466457}
   m_TimeToStationary: 0.5
+--- !u!65 &1941679498177359200
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593060340624854447}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.7271709, y: 1.5652182, z: 0.010343056}
+  m_Center: {x: -0.016796347, y: 0.42425346, z: 0.41948467}
+--- !u!114 &3572082322774224975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593060340624854447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 310392089444576549}
+  landeableCollider: {fileID: 1941679498177359200}
+  gizmosColor: {r: 1, g: 0, b: 0, a: 1}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!114 &5004435820043176022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593060340624854447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 1941679498177359200}
 --- !u!1 &4301387800610957916
 GameObject:
   m_ObjectHideFlags: 0
