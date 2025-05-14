@@ -233,6 +233,9 @@ GameObject:
   - component: {fileID: 3472401849019761457}
   - component: {fileID: 2097361969496352616}
   - component: {fileID: 7907339606683596444}
+  - component: {fileID: 1752729927768958482}
+  - component: {fileID: 6150168551868746661}
+  - component: {fileID: 6745502939151139397}
   m_Layer: 10
   m_Name: Lottery_Cevr_Icales
   m_TagString: Untagged
@@ -316,3 +319,54 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.050932884, y: 9.121497, z: 0.11395264}
   m_TimeToStationary: 0.5
+--- !u!114 &1752729927768958482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8558711008514065115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdae3f0738fe3a2429da60d07190da06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCollider: {fileID: 3472401849019761457}
+  landeableCollider: {fileID: 6745502939151139397}
+  gizmosColor: {r: 1, g: 0, b: 0, a: 1}
+  landeableColliderHeight: 0.03
+  heightPositionOffset: 0.05
+--- !u!114 &6150168551868746661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8558711008514065115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23aae58d777c124da98028658c2fd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderSurface: {fileID: 6745502939151139397}
+--- !u!65 &6745502939151139397
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8558711008514065115}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 7.405118, y: 0.28951722, z: 22.468885}
+  m_Center: {x: 0.009302805, y: 27.444921, z: 0.17866558}
