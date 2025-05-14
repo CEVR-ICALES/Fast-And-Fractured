@@ -235,7 +235,7 @@ namespace FastAndFractured
         private void UpdateVSync(bool isActive)
         {
             QualitySettings.vSyncCount = isActive ? 1 : VSYNC_DEFAULT_STATE;
-            Application.targetFrameRate = isActive ? -1 : FPS_DEFAULT;
+            Application.targetFrameRate = isActive ? -1 : PlayerPrefs.GetInt("MaxFPS", FPS_DEFAULT);
 
             PlayerPrefs.SetInt(VSYNC_STRING, QualitySettings.vSyncCount);
             PlayerPrefs.Save();

@@ -314,13 +314,19 @@ namespace FastAndFractured
 
         public void BlockRigidBodyRotations()
         {
-            _rb.constraints = RigidbodyConstraints.FreezeRotationY;
-            _rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+            if (_rb != null)
+            {
+                _rb.constraints = RigidbodyConstraints.FreezeRotationY;
+                _rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+            }
         }
 
         public void UnblockRigidBodyRotations()
         {
-            _rb.constraints = RigidbodyConstraints.None;
+            if (_rb != null)
+            {
+                _rb.constraints = RigidbodyConstraints.None;
+            }
         }
 
         public Vector3 GetCurrentRbVelocity()

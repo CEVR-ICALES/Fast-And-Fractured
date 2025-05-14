@@ -20,6 +20,7 @@ namespace FastAndFractured
         [SerializeField] private float climbingDotThreshold = 0.7f;
         [SerializeField] private float chickenForce;
         private const float GROUNDED_GRACE_TIME = 0.8f;
+        private const float FORCE_Y_OFFSET = 0.25f;
 
         private Rigidbody _rb;
         private McChickenMovement _movementHandler;
@@ -103,7 +104,7 @@ namespace FastAndFractured
                     return;
                 }
                 Vector3 collisionNormal = -collision.contacts[0].normal;
-                Vector3 finalForce = collisionNormal * chickenForce;
+                Vector3 finalForce = (collisionNormal + Vector3.up * FORCE_Y_OFFSET).normalized * chickenForce;
                 if(!physicsBehaviour.HasBeenPushed)
                 {
                     
