@@ -1,11 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Utilities;
 using Assets.SimpleLocalization.Scripts;
 using Enums;
-using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using Utilities;
 
 namespace FastAndFractured
 {
@@ -21,6 +20,8 @@ namespace FastAndFractured
         private LocalizedText _localizedTextReference;
         private const string RELASE_SCENE_NAME = "Release";
 
+        public const float EVENT_START_DELAY = 0.5f;
+
         private void Start()
         {
             foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
@@ -30,14 +31,21 @@ namespace FastAndFractured
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
             if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
             {
-                TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
-                {
-                    CreateEvent("Events.Start", 5f);
-                });
+                LevelController.Instance?.charactersCustomStart.AddListener(CreateStartEvent);
             }
         }
 
-        public void CreateEvent(string eventText, float timeInScreen)
+        private void OnDisable()
+        {
+                LevelController.Instance?.charactersCustomStart.RemoveListener(CreateStartEvent);
+        }
+
+        private void CreateStartEvent()
+        {
+            CreateEvent("Events.Start", 5f);
+        }
+
+        public void CreateEvent(string eventText, float timeInScreen,Action onEventComplete=null)
         {
             if (_localizedTextReference != null)
             {
@@ -52,6 +60,7 @@ namespace FastAndFractured
                 {
                     _localizedTextReference.LocalizationKey = string.Empty;
                     _localizedTextReference.Localize();
+                    onEventComplete?.Invoke();
                 });
             }
         }

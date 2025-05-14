@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 using Enums;
+using DG.Tweening;
 namespace FastAndFractured
 {
     public class MinimapFollowPlayer : MonoBehaviour
@@ -24,7 +25,7 @@ namespace FastAndFractured
         {
             if (LevelController.Instance != null)
             {
-                LevelController.Instance.charactersCustomStart.AddListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
             }
         }
 
@@ -32,7 +33,7 @@ namespace FastAndFractured
         {
             if (LevelController.Instance != null)
             {
-                LevelController.Instance.charactersCustomStart.RemoveListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
             }
         }
         

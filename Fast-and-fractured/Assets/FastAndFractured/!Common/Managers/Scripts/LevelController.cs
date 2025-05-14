@@ -10,6 +10,8 @@ using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
 using Random = UnityEngine.Random;
+using TMPro;
+using DG.Tweening;
 
 namespace FastAndFractured
 {
@@ -17,6 +19,7 @@ namespace FastAndFractured
     {
         public bool usingController;
         [Header("Character Spawn")]
+        public UnityEvent onLevelPreStart;
         public UnityEvent charactersCustomStart;
         [SerializeField] private List<CharacterData> charactersData;
         [SerializeField] private string playerCharacter = "Pepe_0";
@@ -66,6 +69,8 @@ namespace FastAndFractured
         private GameObject _playerReference;
         public GameObject playerReference { get => _playerReference; }
         public bool HasPlayerWon { get => _hasPlayerWon; }
+        public float DelayUntilGameStarts { get => delayUntilGameStarts; set => delayUntilGameStarts = value; }
+
         private bool _hasPlayerWon = false;
 
         private int _aliveCharacterCount;
@@ -84,6 +89,10 @@ namespace FastAndFractured
         // Default values is 2. If you want to add more of two types of the same character,
         // increse this value. If you are trying to add only one type of character, set the same value as allCharactersNum. 
         private const int LIMIT_OF_SAME_CHARACTER_SPAWNED = 3;
+        [Header("Game start delay")]
+        [SerializeField] private float delayUntilGameStarts = 3.5f;
+        [SerializeField] private ITimer _delayUntilGameStartsTimer;
+
         protected override void Awake()
         {
             base.Awake();
@@ -109,7 +118,9 @@ namespace FastAndFractured
                 }
             }
             else
+            {
                 useMyCharacters = false;
+            }
         }
 
         //Maybe in Onenable?
@@ -120,6 +131,7 @@ namespace FastAndFractured
             if (!useMyCharacters)
             {
                 StartLevelWithSpawnedCharacters();
+                _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(DelayUntilGameStarts, onTimerDecreaseComplete: ActivateCharactersInput);
                 if (InGameCharacters==null) { 
                     Debug.LogError("Culpa del project lead"); return;
                 }
@@ -130,11 +142,32 @@ namespace FastAndFractured
                     enemyAIBrain.ChoosePlayer();
                     enemyAIBrain.GetComponent<AIDebugStateChanger>().NextState();
                 }
+                onLevelPreStart?.Invoke();
             }
             else
             {
                 StartLevelWithOwnCharacters();
+                charactersCustomStart?.Invoke();
+
             }
+        }
+        public void ActivateCharactersInput() {
+            EnemyAIBrain enemyAIBrain;
+            if(playerReference)
+            playerReference.GetComponentInParent<PlayerInputController>().enabled = true;
+            foreach (var character in InGameCharacters)
+            {
+                enemyAIBrain = GetComponentInParent<EnemyAIBrain>();
+                if (enemyAIBrain)
+                {
+                    enemyAIBrain.enabled = true;
+                }
+
+                character.GetComponentInParent<Controller>().enabled = true;
+
+            }
+            charactersCustomStart?.Invoke();
+
         }
 
         private void Update()
@@ -182,7 +215,6 @@ namespace FastAndFractured
 
             }
             SetStormParameters(stormInDebugMode);
-            charactersCustomStart?.Invoke();
         }
 
         private void StartLevelWithSpawnedCharacters()
@@ -271,6 +303,8 @@ namespace FastAndFractured
                     _inGameCharacters.Add(playerCar);
                     _playerBindingInputs = player.GetComponentInChildren<CarMovementController>();
                     _playerReference = playerCar;
+                    playerCar.GetComponentInParent<PlayerInputController>().enabled = false;
+                    playerCar.GetComponentInParent<Controller>().enabled = false;
                 }
                 for (; charactersCount < allCharacters; charactersCount++)
                 {
@@ -279,11 +313,11 @@ namespace FastAndFractured
                     CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
                     GameObject injectedCar = carInjector.Install(aiCharacter);
                     _inGameCharacters.Add(injectedCar);
-                    //Provisional
-                    carInjector.GetComponent<EnemyAIBrain>().Player = playerCar;
+                    EnemyAIBrain enemyAIBrain = carInjector.GetComponent<EnemyAIBrain>();
+                    enemyAIBrain.Player = playerCar;
+                    enemyAIBrain.enabled = false;
+                    carInjector.GetComponentInParent<Controller>().enabled = false;
                 }
-                charactersCustomStart?.Invoke();
-
             }
         }
 

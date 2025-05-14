@@ -124,8 +124,11 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
-            statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
-            statsController.onEnduranceDamageHealed.RemoveListener(OnTakeEnduranceHealed);
+            if (statsController)
+            { 
+                statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
+                statsController.onEnduranceDamageHealed.RemoveListener(OnTakeEnduranceHealed);
+            }
         }
         private void Awake()
         {
