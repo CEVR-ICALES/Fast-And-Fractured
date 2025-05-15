@@ -31,20 +31,14 @@ namespace FastAndFractured
             _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
             if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
             {
-                LevelController.Instance?.charactersCustomStart.AddListener(CreateStartEvent);
             }
         }
 
         private void OnDisable()
         {
-                LevelController.Instance?.charactersCustomStart.RemoveListener(CreateStartEvent);
-        }
+         }
 
-        private void CreateStartEvent()
-        {
-            CreateEvent("Events.Start", 5f);
-        }
-
+      
         public void CreateEvent(string eventText, float timeInScreen,Action onEventComplete=null)
         {
             if (_localizedTextReference != null)
