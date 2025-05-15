@@ -5,27 +5,29 @@ using UnityEngine;
 
 public class TriggerAudioController : MonoBehaviour
 {
-    [SerializeField] private EventReference ambienceEventReference;
+    [SerializeField] private EventReference audioEventReference;
 
-    private EventInstance _ambienceInstance;
+    private EventInstance _audioInstance;
+
+    [SerializeField] private bool isAmbienceZone;
 
     private void Start()
     {
-        _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
-        _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
+        _audioInstance = RuntimeManager.CreateInstance(audioEventReference);
+        _audioInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_ambienceInstance.isValid())
+        if (_audioInstance.isValid())
         {
             if (other.TryGetComponent(out StatsController statsController))
             {
                 if (statsController.IsPlayer)
                 {
-                    _ambienceInstance = RuntimeManager.CreateInstance(ambienceEventReference);
-                    _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
-                    _ambienceInstance.start();
+                    _audioInstance = RuntimeManager.CreateInstance(audioEventReference);
+                    _audioInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
+                    _audioInstance.start();
                 }
             }
         }
@@ -33,14 +35,17 @@ public class TriggerAudioController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (_ambienceInstance.isValid())
+        if (_audioInstance.isValid())
         {
             if (other.TryGetComponent(out StatsController statsController))
             {
                 if (statsController.IsPlayer)
                 {
-                    _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-                    _ambienceInstance.release();
+                    if (isAmbienceZone)
+                    {
+                        _audioInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                        _audioInstance.release();
+                    }                    
                 }
             }
         }
