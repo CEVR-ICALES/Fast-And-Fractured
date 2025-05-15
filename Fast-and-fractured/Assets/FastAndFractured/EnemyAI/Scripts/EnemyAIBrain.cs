@@ -745,7 +745,7 @@ namespace FastAndFractured
                         else
                         {
                             Debug.LogWarning("No path to follow" + _currentPath.ToString());
-                            if (Physics.Raycast(_positionToDrive, Vector3.down, out RaycastHit hit, float.MaxValue, ignoreLayerMask))
+                            if (Physics.Raycast(_positionToDrive, Vector3.down, out RaycastHit hit, 100f, ignoreLayerMask))
                             {
                                 Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
 
@@ -764,7 +764,7 @@ namespace FastAndFractured
             return Vector3.SignedAngle(direction, carMovementController.transform.forward, axis);
         }
 
-        private float _emergencyRepositioningValue = 100f;
+        private float _emergencyRepositioningValue = 200f;
         bool TryToCalculatePath()
         {
             if (!carMovementController.IsGrounded())
@@ -777,6 +777,7 @@ namespace FastAndFractured
                 //_positionToDrive = _positionToDrive;
                 //Debug.LogWarning("No navmesh so trying to go to position to drive manually", this.gameObject);
                 //return true;
+
                 if (NavMesh.SamplePosition(_currentPosition, out NavMeshHit hit, _emergencyRepositioningValue, NavMesh.AllAreas))
                 {
                     _positionToDrive = hit.position;

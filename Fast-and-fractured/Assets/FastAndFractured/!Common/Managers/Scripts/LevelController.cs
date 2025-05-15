@@ -157,11 +157,11 @@ namespace FastAndFractured
             playerReference.GetComponentInParent<PlayerInputController>().enabled = true;
             foreach (var character in InGameCharacters)
             {
-                enemyAIBrain = GetComponentInParent<EnemyAIBrain>();
+                /*enemyAIBrain = GetComponentInParent<EnemyAIBrain>(true);
                 if (enemyAIBrain)
                 {
                     enemyAIBrain.enabled = true;
-                }
+                }*/
 
                 character.GetComponentInParent<Controller>().enabled = true;
 
@@ -315,7 +315,6 @@ namespace FastAndFractured
                     _inGameCharacters.Add(injectedCar);
                     EnemyAIBrain enemyAIBrain = carInjector.GetComponent<EnemyAIBrain>();
                     enemyAIBrain.Player = playerCar;
-                    enemyAIBrain.enabled = false;
                     carInjector.GetComponentInParent<Controller>().enabled = false;
                 }
             }
