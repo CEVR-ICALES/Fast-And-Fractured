@@ -157,11 +157,11 @@ namespace FastAndFractured
             playerReference.GetComponentInParent<PlayerInputController>().enabled = true;
             foreach (var character in InGameCharacters)
             {
-                enemyAIBrain = GetComponentInParent<EnemyAIBrain>();
+                /*enemyAIBrain = GetComponentInParent<EnemyAIBrain>(true);
                 if (enemyAIBrain)
                 {
                     enemyAIBrain.enabled = true;
-                }
+                }*/
 
                 character.GetComponentInParent<Controller>().enabled = true;
 
@@ -296,7 +296,7 @@ namespace FastAndFractured
                 ShuffleList(spawnPoints);
                 for (; charactersCount < _currentPlayers && charactersCount < allCharacters && !onlyAIs; charactersCount++)
                 {
-                    CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    CarInjector carInjector = Instantiate(PlayerPrefab, spawnPoints[charactersCount].transform.position, spawnPoints[charactersCount].transform.rotation);
                     player = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
                     playerCar = carInjector.Install(player);
 
@@ -310,12 +310,11 @@ namespace FastAndFractured
                 {
                     var aiCharacter = SearchCharacterInList(_inGameCharactersNameCodes[charactersCount]);
 
-                    CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, Quaternion.identity);
+                    CarInjector carInjector = Instantiate(AIPrefab, spawnPoints[charactersCount].transform.position, spawnPoints[charactersCount].transform.rotation);
                     GameObject injectedCar = carInjector.Install(aiCharacter);
                     _inGameCharacters.Add(injectedCar);
                     EnemyAIBrain enemyAIBrain = carInjector.GetComponent<EnemyAIBrain>();
                     enemyAIBrain.Player = playerCar;
-                    enemyAIBrain.enabled = false;
                     carInjector.GetComponentInParent<Controller>().enabled = false;
                 }
             }
