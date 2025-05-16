@@ -26,8 +26,6 @@ public class TriggerAudioController : MonoBehaviour
                 _audioInstance = RuntimeManager.CreateInstance(audioEventReference);
                 _audioInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
                 _audioInstance.start();
-
-                Debug.LogError("ENTERED ZONE!!!!!!!!!!!!");
             }
         }
     }
@@ -42,7 +40,6 @@ public class TriggerAudioController : MonoBehaviour
                 {
                     _audioInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
                     _audioInstance.release();
-                    Debug.LogError("EXITED ZONE!!!!!!!!!!");
                 }
             }
         }
