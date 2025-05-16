@@ -19,33 +19,27 @@ public class TriggerAudioController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_audioInstance.isValid())
+        if (other.TryGetComponent(out StatsController statsController))
         {
-            if (other.TryGetComponent(out StatsController statsController))
+            if (statsController.IsPlayer)
             {
-                if (statsController.IsPlayer)
-                {
-                    _audioInstance = RuntimeManager.CreateInstance(audioEventReference);
-                    _audioInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
-                    _audioInstance.start();
-                }
+                _audioInstance = RuntimeManager.CreateInstance(audioEventReference);
+                _audioInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
+                _audioInstance.start();
             }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (_audioInstance.isValid())
+        if (other.TryGetComponent(out StatsController statsController))
         {
-            if (other.TryGetComponent(out StatsController statsController))
+            if (statsController.IsPlayer)
             {
-                if (statsController.IsPlayer)
+                if (isAmbienceZone)
                 {
-                    if (isAmbienceZone)
-                    {
-                        _audioInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-                        _audioInstance.release();
-                    }                    
+                    _audioInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                    _audioInstance.release();
                 }
             }
         }
