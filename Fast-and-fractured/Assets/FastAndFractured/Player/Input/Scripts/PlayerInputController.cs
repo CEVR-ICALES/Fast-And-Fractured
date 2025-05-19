@@ -30,6 +30,9 @@ namespace FastAndFractured
         public Vector2 CameraInput => _cameraInput;
         private Vector2 _cameraInput = Vector2.zero;
 
+        public Vector2 CameraMouseInput => _cameraMouseInput;
+        private Vector2 _cameraMouseInput = Vector2.zero;
+
         // Action Flags with private backing fields
         public float IsAccelerating => _isAccelerating;
         private float _isAccelerating;
@@ -99,6 +102,9 @@ namespace FastAndFractured
             // Camera Input
             _inputActions.PlayerInputActions.CameraMove.performed += ctx => _cameraInput = ctx.ReadValue<Vector2>();
             _inputActions.PlayerInputActions.CameraMove.canceled += ctx => _cameraInput = Vector2.zero;
+
+            _inputActions.PlayerInputActions.CameraMoveMouse.performed += ctx => _cameraMouseInput = ctx.ReadValue<Vector2>();
+            _inputActions.PlayerInputActions.CameraMoveMouse.canceled += ctx => _cameraMouseInput = Vector2.zero;
 
             // Action Inputs
             _inputActions.PlayerInputActions.Accelerate.performed += ctx => _isAccelerating = ctx.ReadValue<float>();
