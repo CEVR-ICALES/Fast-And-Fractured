@@ -111,6 +111,7 @@ namespace FastAndFractured
                 _currentScreen.SetInteractable(true);
                 isCurrentScreenInteractable = true;
                 _currentScreen.gameObject.SetActive(true);
+                LockFocusOnButton();
                 return;
 
             }

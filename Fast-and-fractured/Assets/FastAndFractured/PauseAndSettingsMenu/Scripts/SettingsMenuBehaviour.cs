@@ -104,9 +104,9 @@ namespace FastAndFractured
         private void SetDefaultSelectedButton()
         {
 
-            if (audioSettingsUI.activeSelf) { _menuScreen.defaultButton = audioSettingsButton; EventSystem.current.SetSelectedGameObject(audioSettingsButton.gameObject); return; }
-            if (videoSettingsUI.activeSelf) { _menuScreen.defaultButton = videoSettingsButton; EventSystem.current.SetSelectedGameObject(videoSettingsButton.gameObject); return; }
-            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultButton = accessibilitySettingsButton; EventSystem.current.SetSelectedGameObject(accessibilitySettingsButton.gameObject); return; }
+            if (audioSettingsUI.activeSelf) { _menuScreen.defaultButton = audioSettingsButton; audioSettingsButton.onClick.Invoke(); return; }
+            if (videoSettingsUI.activeSelf) { _menuScreen.defaultButton = videoSettingsButton; videoSettingsButton.onClick.Invoke(); return; }
+            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultButton = accessibilitySettingsButton; accessibilitySettingsButton.onClick.Invoke(); return; }
 
         }
 
@@ -461,6 +461,8 @@ namespace FastAndFractured
             deletePopupUI.SetActive(true);
         }
 
+
+        #endregion
         public void ChangeHeaderButtonsDirections(Selectable interactable)
         {
             Navigation navigation = audioSettingsButton.navigation;
@@ -475,7 +477,5 @@ namespace FastAndFractured
             navigation.selectOnDown = interactable;
             accessibilitySettingsButton.navigation = navigation;
         }
-
-        #endregion
     }
 }
