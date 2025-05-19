@@ -20,7 +20,7 @@ namespace FastAndFractured
                 MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE,-1);
                 mainMenuTimeline.SetActive(false);
                 MenuSkipInitialCutscene.Instance.timeLine = gameEndData.finalAnimation.GetComponentInChildren<PlayableDirector>();
-                MenuSkipInitialCutscene.Instance.skipText.SetActive(true);
+                MenuSkipInitialCutscene.Instance.skipText.SetActive(false);
             }
             else
             {

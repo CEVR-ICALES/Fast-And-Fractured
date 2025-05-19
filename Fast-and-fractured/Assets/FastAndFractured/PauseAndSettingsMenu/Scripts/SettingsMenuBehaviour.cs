@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.HighDefinition;
 using System;
+using UnityEngine.EventSystems;
 
 namespace FastAndFractured
 {
@@ -63,9 +64,13 @@ namespace FastAndFractured
 
         Camera _camera;
 
+        private MenuScreen _menuScreen;
+
         void Start()
         {
             SetStartValues();
+            _menuScreen = GetComponent<MenuScreen>();
+            SetDefaultSelectedButton();
 
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
@@ -89,6 +94,20 @@ namespace FastAndFractured
                 deleteButton.SetActive(true);
             }
             _camera = Camera.main;
+        }
+
+        void OnEnable()
+        {
+            SetDefaultSelectedButton();
+        }
+
+        private void SetDefaultSelectedButton()
+        {
+
+            if (audioSettingsUI.activeSelf) { _menuScreen.defaultButton = audioSettingsButton; EventSystem.current.SetSelectedGameObject(audioSettingsButton.gameObject); return; }
+            if (videoSettingsUI.activeSelf) { _menuScreen.defaultButton = videoSettingsButton; EventSystem.current.SetSelectedGameObject(videoSettingsButton.gameObject); return; }
+            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultButton = accessibilitySettingsButton; EventSystem.current.SetSelectedGameObject(accessibilitySettingsButton.gameObject); return; }
+
         }
 
         private void SetStartValues()
