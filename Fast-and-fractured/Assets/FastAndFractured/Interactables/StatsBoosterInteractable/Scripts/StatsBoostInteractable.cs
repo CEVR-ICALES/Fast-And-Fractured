@@ -4,12 +4,14 @@ using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
 using Enums;
+using FMODUnity;
 
 namespace FastAndFractured
 {
     public class StatsBoostInteractable : GenericInteractable
     {
         [SerializeField] private StatsBoost[] boostList;
+        [SerializeField] private EventReference pickUpSound;
         public StatsBoost[] BoostList => boostList;
         private const float PERMANENT_BOOST_VALUE = -1;
         public string ingameEventText;
