@@ -47,7 +47,6 @@ public class GameReadyScript : MonoBehaviour
                         TimerSystem.Instance.CreateTimer(TRANSITION_DURATION, onTimerDecreaseComplete: () =>
                         {
                             soundReference = soundReady;
-                            AnimateText();
                         });
                     });
                 });
