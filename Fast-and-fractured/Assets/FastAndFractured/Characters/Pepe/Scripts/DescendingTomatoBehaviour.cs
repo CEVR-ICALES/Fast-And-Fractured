@@ -56,7 +56,7 @@ namespace FastAndFractured
         void OnTriggerEnter(Collider other)
         {
             //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
-            if(objective == LevelController.Instance.playerReference)
+            if(objective == LevelControllerButBetter.Instance.playerReference)
             {
                 IngameEventsManager.Instance.RemoveAlert();
             }
@@ -79,7 +79,7 @@ namespace FastAndFractured
         }
         private void EffectOnCharacter(Collider other)
         {
-            if (other.gameObject == LevelController.Instance.playerReference)
+            if (other.gameObject == LevelControllerButBetter.Instance.playerReference)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }

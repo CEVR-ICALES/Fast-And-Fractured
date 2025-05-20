@@ -24,12 +24,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(MakeInitialPool);
+            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(MakeInitialPool);
         }
 
         private void OnDisable()
         {
-            LevelController.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
+            LevelControllerButBetter.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
             
         }
         protected override void Awake()

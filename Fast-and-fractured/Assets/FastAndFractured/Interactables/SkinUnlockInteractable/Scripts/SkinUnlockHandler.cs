@@ -28,7 +28,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     {
         List<string> unlockableSkins = new List<string>();
 
-        int numOfSkins = LevelController.Instance.playerReference!=null ? LevelController.Instance.playerReference.GetComponentInChildren<StatsController>().SkinCount : 0;
+        int numOfSkins = LevelControllerButBetter.Instance.playerReference!=null ? LevelControllerButBetter.Instance.playerReference.GetComponentInChildren<StatsController>().SkinCount : 0;
 
         if (_playerSelected == "")
         {

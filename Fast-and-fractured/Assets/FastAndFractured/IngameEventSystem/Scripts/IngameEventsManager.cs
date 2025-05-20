@@ -61,13 +61,13 @@ namespace FastAndFractured
         public void SetCharactersTopElements()
         {
             int i = 0;
-            foreach (GameObject character in LevelController.Instance.InGameCharacters)
+            foreach (GameObject character in LevelControllerButBetter.Instance.InGameCharacters)
             {
-                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelController.Instance.InGameCharactersNameCodes[i]);
+                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelControllerButBetter.Instance.InGameCharactersNameCodes[i]);
                 inGameCharactersTopIcons[i].gameObject.SetActive(true);
                 i++;
             }
-            LevelController.Instance.characterIcons = inGameCharactersTopIcons;
+            LevelControllerButBetter.Instance.characterIcons = inGameCharactersTopIcons;
         }
         public void SetAlert()
         {

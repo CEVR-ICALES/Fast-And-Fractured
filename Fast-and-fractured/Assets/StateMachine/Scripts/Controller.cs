@@ -19,7 +19,7 @@ namespace StateMachine
         // Start is called before the first frame update
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(CustomStart);
+            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(CustomStart);
         }
         public void CustomStart()
         {

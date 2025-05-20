@@ -132,7 +132,7 @@ namespace FastAndFractured
         }
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitializeAIValues);
         }
 
         private void Update()
@@ -254,7 +254,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
-            _player = LevelController.Instance.playerReference;
+            _player = LevelControllerButBetter.Instance.playerReference;
         }
         public void ReturnToStartPosition()
         {
@@ -415,7 +415,7 @@ namespace FastAndFractured
 
         public GameObject CalcNearestCharacter()
         {
-            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
             inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
             if (inGameCharacters.Count > 1)
             {
@@ -445,7 +445,7 @@ namespace FastAndFractured
 
         private GameObject ReturnCharacterThatIsNotPlayer()
         {
-            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
             foreach (GameObject character in inGameCharacters)
             {
                 if(character!=_player)
@@ -469,7 +469,7 @@ namespace FastAndFractured
         {
             float angle = GetAngleDirection(Vector3.up);
             float nearestOne = float.MaxValue;
-            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
@@ -485,7 +485,7 @@ namespace FastAndFractured
 
         public GameObject CalcNearestSafeZone()
         {
-            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             float nearestOne = float.MaxValue;
 
@@ -648,7 +648,7 @@ namespace FastAndFractured
 
         public bool HasTargetToShoot()
         {
-            return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
+            return LevelControllerButBetter.Instance.InGameCharacters.Contains(TargetToShoot);
         }
 
         public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
@@ -892,7 +892,7 @@ namespace FastAndFractured
             List<T> gameElementsNotInsideSandstorm = new List<T>();
             foreach (T gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject))
+                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement.gameObject))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -905,7 +905,7 @@ namespace FastAndFractured
             List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
             foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelController.Instance.IsInsideSandstorm(gameElement))
+                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -917,22 +917,22 @@ namespace FastAndFractured
         {
             float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM;
             float marginWithEnduranceToFleeTheSandstorm = marginToFleeFromSandstorm + marginToFleeFromSandstorm * enduranceFactor;
-            return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
+            return LevelControllerButBetter.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
 
         public bool AreAllInteractablesInsideSandstorm()
         {
-            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public bool AreAllSafeZonesInsideSandstorm()
         {
-            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
+            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
         }
 
         public bool IsOnEndGame()
         {
-            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelController.Instance.InGameCharacters.Count;
+            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelControllerButBetter.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)

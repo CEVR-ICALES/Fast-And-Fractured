@@ -86,7 +86,7 @@ namespace FastAndFractured
         protected override void Awake()
         {
             base.Awake();
-            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
+            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(BindActions);
         }
 
         private void BindActions()
