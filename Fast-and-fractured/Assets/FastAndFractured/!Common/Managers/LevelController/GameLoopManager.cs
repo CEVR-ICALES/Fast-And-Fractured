@@ -37,6 +37,7 @@ namespace FastAndFractured
             _inGameCharacters = inGameCharacters;
             _playerReference = playerReference;
             _charactersCustomStartEvent = charactersCustomStartEvent;
+
         }
 
         public void StartGameInitializationDelay(float delay, System.Action onTimerComplete)

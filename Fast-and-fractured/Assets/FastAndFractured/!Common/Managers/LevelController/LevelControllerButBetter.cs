@@ -108,12 +108,14 @@ namespace FastAndFractured
 
             if (useMyCharacters && debugMode)  
             {
-                StartLevelWithSpawnedCharacters();
+                StartLevelWithOwnCharacters();
+
             }
 
             else
             {
-                StartLevelWithOwnCharacters();
+                StartLevelWithSpawnedCharacters();
+
             }
         }
         
@@ -209,10 +211,14 @@ namespace FastAndFractured
                     }
                 }
             }
-        }
-        //todo arreglar this
-        public void ReportCharacterDeath(GameObject character, bool isPlayer)
+            foreach (var character in InGameCharacters) {
+
+                character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath); 
+                }
+            }
+        public void ReportCharacterDeath(float delay, GameObject character,bool isPlayer)
         {
+            character.GetComponent<StatsController>().onDead.RemoveListener(ReportCharacterDeath);
             _gameLoopManager.OnCharacterDied(character, isPlayer, endGameDelayTime, characterIcons, 
                 ProcessPlayerWin, ProcessPlayerLoss);
         }

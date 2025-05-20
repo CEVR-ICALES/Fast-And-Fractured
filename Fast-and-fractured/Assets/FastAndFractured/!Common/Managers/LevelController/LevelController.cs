@@ -15,6 +15,8 @@ using DG.Tweening;
 
 namespace FastAndFractured
 {
+
+    [Obsolete("Use LevelControllerButBetter instead")]
     public class LevelController : AbstractSingleton<LevelController>
     {
         public bool usingController;

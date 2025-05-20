@@ -41,7 +41,7 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
             if (!other.GetComponent<Rigidbody>().isKinematic)
             {
                 StartKillNotify(statsController);
-                if (LevelController.Instance.playerReference == statsController.gameObject)
+                if (LevelControllerButBetter.Instance.playerReference == statsController.gameObject)
                 {
                     IngameEventsManager.Instance.CreateEvent("Events.OutsideMap", 2f);
                 }

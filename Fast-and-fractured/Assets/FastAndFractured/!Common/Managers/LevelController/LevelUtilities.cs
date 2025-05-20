@@ -5,24 +5,9 @@ namespace FastAndFractured
 {
     public static class LevelUtilities
     {
-        public static T GetRandomValueFromList<T>(List<T> list, T defaultValue)
-        {
-            if (list == null || list.Count == 0)
-            {
-                return defaultValue;
-            }
-            return list[Random.Range(0, list.Count)];
-        }
+       
 
-        public static void ShuffleList<T>(IList<T> list)
-        {
-            if (list == null) return;
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
-            }
-        }
+       
 
         public static void ParseCharacterNameCode(string nameCode, out string name, out int skinNum)
         {

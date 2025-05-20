@@ -52,9 +52,9 @@ namespace FastAndFractured
 
             _isAbilityActive = true;
             isAbilityActive = _isAbilityActive;
-            // if (LevelController.Instance.characterIcons != null && LevelController.Instance.characterIcons.Count > 0)
+            // if (LevelControllerButBetter.Instance.characterIcons != null && LevelControllerButBetter.Instance.characterIcons.Count > 0)
             // {
-            //     foreach (CharacterIcon characterIcon in LevelController.Instance.characterIcons)
+            //     foreach (CharacterIcon characterIcon in LevelControllerButBetter.Instance.characterIcons)
             //     {
             //         if (characterIcon.Character.name == statsController.)
             //         {

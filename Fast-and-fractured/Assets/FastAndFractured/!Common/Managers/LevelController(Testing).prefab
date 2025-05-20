@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2057355190036813191}
+  - component: {fileID: 7869669430191183688}
   - component: {fileID: 974663299248581994}
   m_Layer: 0
   m_Name: LevelController(Testing)
@@ -32,6 +33,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7869669430191183688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6284926943504238984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0ca2c67c9478114d8d628ab87d87e56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onLevelPreStart:
+    m_PersistentCalls:
+      m_Calls: []
+  charactersCustomStart:
+    m_PersistentCalls:
+      m_Calls: []
+  charactersData:
+  - {fileID: 11400000, guid: 9e1d142e444b1b94dafdd1b92d03cabf, type: 2}
+  - {fileID: 11400000, guid: 4bcd8dfa1e06f184497af484462dd6fc, type: 2}
+  - {fileID: 11400000, guid: b3db279bba37e2f4c8ccf9030f214c50, type: 2}
+  - {fileID: 11400000, guid: d4a890fa6d77b894080f079f5e77f171, type: 2}
+  playerCharacter: Carme_0
+  maxCharactersInGame: 12
+  spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  safeZones:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _timeToCallTheStorm: 180
+  _playerDeadReductionTime: 15
+  _sandStormController: {fileID: 0}
+  PlayerPrefab: {fileID: 2405317262010205209, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  AIPrefab: {fileID: -3036050522178857462, guid: 45be17976ae08674ea849f0e35bb9274, type: 3}
+  debugMode: 0
+  useMyCharacters: 0
+  stormInDebugMode: 0
+  justSpawnAI: 0
+  delayUntilGameStarts: 3.5
+  characterIcons: []
+  endGameDelayTime: 0.5
+  gameEndDataScriptableObject: {fileID: 11400000, guid: d6586914b10116444a99eddca7cff681, type: 2}
 --- !u!114 &974663299248581994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,8 +107,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   usingController: 0
-  poolSOList: []
-  characters: []
-  ai: {fileID: 0}
-  killCharacterHandles: []
-  controllers: []
+  onLevelPreStart:
+    m_PersistentCalls:
+      m_Calls: []
+  charactersCustomStart:
+    m_PersistentCalls:
+      m_Calls: []
+  charactersData: []
+  playerCharacter: Pepe_0
+  maxCharactersInGame: 8
+  playerCamera: {fileID: 0}
+  spawnPoints: []
+  safeZones: []
+  _timeToCallTheStorm: 190
+  _playerDeadReductionTime: 40
+  _sandStormController: {fileID: 0}
+  PlayerPrefab: {fileID: 0}
+  AIPrefab: {fileID: 0}
+  debugMode: 1
+  useMyCharacters: 0
+  stormInDebugMode: 0
+  justSpawnAI: 0
+  characterIcons: []
+  endGameDelayTime: 0.5
+  gameEndDataScriptableObject: {fileID: 0}
+  delayUntilGameStarts: 3.5

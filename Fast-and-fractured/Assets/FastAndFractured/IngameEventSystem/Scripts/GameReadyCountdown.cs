@@ -28,7 +28,7 @@ public class GameReadyScript : MonoBehaviour
     {
         evenText.rectTransform.DOLocalMoveY(300, downTextDuration).From();
         evenText.DOFade(0, TRANSITION_DURATION).From();
-        SoundManager.Instance.PlayOneShot(soundReference,LevelController.Instance.playerReference.transform.position);
+        SoundManager.Instance.PlayOneShot(soundReference,LevelControllerButBetter.Instance.playerReference.transform.position);
     }
     void StartEventCountdown()
     {

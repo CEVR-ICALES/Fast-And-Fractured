@@ -22,7 +22,7 @@ namespace FastAndFractured
 
         void Start()
         {
-            _statsController = LevelController.Instance.playerReference.GetComponent<StatsController>();
+            _statsController = LevelControllerButBetter.Instance.playerReference.GetComponent<StatsController>();
         }
 
         void OnEnable()

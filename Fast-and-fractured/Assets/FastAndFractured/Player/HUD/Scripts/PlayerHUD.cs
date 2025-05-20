@@ -12,7 +12,7 @@ namespace FastAndFractured
         [SerializeField] BaseUniqueAbility uniqueAbility;
         private void Awake()
         {
-            LevelController.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
+            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
         }
         private void GetComponentsNeededInChildren()
         {
