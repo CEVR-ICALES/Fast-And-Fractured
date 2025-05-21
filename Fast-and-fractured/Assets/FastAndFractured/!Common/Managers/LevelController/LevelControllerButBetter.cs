@@ -191,26 +191,31 @@ namespace FastAndFractured
 
             onLevelPreStart?.Invoke();
             _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
-        }
 
-        private void OnGameStartDelayComplete()
-        {
-            _gameLoopManager.ActivateCharacterControls();
-
-            if (!useMyCharacters && InGameCharacters.Count > 0) {
-                GameObject firstCharacter = InGameCharacters[0];  
+            if (!useMyCharacters && InGameCharacters.Count > 0)
+            {
+                GameObject firstCharacter = InGameCharacters[0];
                 GameObject nearestToFirst = GetNearestCharacterToCharacter(firstCharacter);
                 if (nearestToFirst != null)
                 {
                     EnemyAIBrain enemyAIBrain = nearestToFirst.GetComponentInParent<EnemyAIBrain>();
                     if (enemyAIBrain)
                     {
-                         enemyAIBrain.ChoosePlayer(); 
-                         var aiDebugChanger = nearestToFirst.GetComponent<AIDebugStateChanger>();
-                         if (aiDebugChanger) aiDebugChanger.NextState();
+                        enemyAIBrain.ChoosePlayer();
+                        var aiDebugChanger = nearestToFirst.GetComponent<AIDebugStateChanger>();
+                        if (aiDebugChanger) aiDebugChanger.NextState();
                     }
                 }
+                else { Debug.LogError("aaaaaaaaaaaaaaaaaaaaaaaaaa"); }
+                Debug.LogError($"eL AFORTUNADO ES {nearestToFirst.name}");
+
             }
+        }
+
+        private void OnGameStartDelayComplete()
+        {
+            _gameLoopManager.ActivateCharacterControls();
+
             foreach (var character in InGameCharacters) {
 
                 character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath); 

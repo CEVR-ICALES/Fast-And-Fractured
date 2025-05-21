@@ -47,6 +47,7 @@ namespace FastAndFractured
                 _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete:()=>{
                     onTimerComplete?.Invoke();
                     _delayUntilGameStartsTimer = null;
+                 
                 
                 });
             }
