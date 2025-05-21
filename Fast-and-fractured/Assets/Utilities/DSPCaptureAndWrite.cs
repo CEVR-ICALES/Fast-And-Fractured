@@ -171,11 +171,24 @@ class DSPCaptureAndWrite : MonoBehaviour
 
     void OnDestroy()
     {
+        Debug.Log("FMOD: Stopped capturing audio data, writing audio to file at " + mFilePath);
+        mRecording = false;
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        mFilePath = Path.Combine(Application.dataPath, $"{timestamp}.wav"); fs = File.Create(mFilePath);
+        bw = new BinaryWriter(fs);
+        WriteWavHeader(mAudioData.Count);
+        byte[] bytes = new byte[mAudioData.Count * 4];
+        Buffer.BlockCopy(mAudioData.ToArray(), 0, bytes, 0, bytes.Length);
+        fs.Write(bytes);
+        fs.Close();
+        bw.Close();
+        mAudioData.Clear();
         if (mObjHandle != null)
         {
             RemoveDSP();
             mObjHandle.Free();
         }
+        
     }
 
     void WriteWavHeader(int length)
