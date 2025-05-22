@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 4673045361195267231}
   - component: {fileID: 4945749402247764819}
   - component: {fileID: 2310576845984796102}
-  - component: {fileID: 6147234506337493173}
   m_Layer: 5
   m_Name: SplashScreen_Button
   m_TagString: Untagged
@@ -121,32 +120,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6147234506337493173}
-        m_TargetAssemblyTypeName: FastAndFractured.MenuTransitionButton, Assembly-CSharp
-        m_MethodName: OpenScreen
-        m_Mode: 1
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: FastAndFractured.MainMenuManager, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &6147234506337493173
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 521049734404760606}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccc55a5401effde45bf0b7c5a399ec74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenToOpen: 0
-  fadeDuration: 1
 --- !u!1 &1582968608073267095
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,8 +216,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7123952447957130878}
-  - component: {fileID: 5247208402100254308}
   - component: {fileID: 8496988083940352317}
+  - component: {fileID: 8759752538448083998}
   m_Layer: 5
   m_Name: SplashScreen
   m_TagString: Untagged
@@ -261,23 +246,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5247208402100254308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8237893958044745819}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd534419699c40a4a8c3d751bf8dddf3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenType: 6
-  canvasGroup: {fileID: 8496988083940352317}
-  backButton: {fileID: 0}
-  defaultButton: {fileID: 2310576845984796102}
-  settingsButton: {fileID: 0}
 --- !u!225 &8496988083940352317
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -290,3 +258,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &8759752538448083998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8237893958044745819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd534419699c40a4a8c3d751bf8dddf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenType: 6
+  canvasGroup: {fileID: 0}
+  backButton: {fileID: 0}
+  defaultButton: {fileID: 2310576845984796102}
+  settingsButton: {fileID: 0}
