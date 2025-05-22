@@ -170,6 +170,15 @@ namespace FastAndFractured
             //}
         }
 
+        // Overload
+        public void LoadScene(int sceneIndex, float time)
+        {
+            TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
+            {
+                LoadScene(sceneIndex);
+            });
+        }
+
         public void UseBackButton()
         {
             if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
