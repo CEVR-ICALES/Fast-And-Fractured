@@ -69,6 +69,11 @@ namespace FastAndFractured
             {
                 TransitionBetweenScreens(_currentScreen.screenType, 1);
             }
+
+            if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
+            {
+                LoadScene(1, 5);
+            }
             OnInitialized?.Invoke();
         }
 
