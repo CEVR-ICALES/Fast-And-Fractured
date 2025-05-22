@@ -244,7 +244,7 @@ namespace FMODUnity
             }
         }
 
-        private void PlayInstance()
+        protected virtual void PlayInstance()
         {
             if (!instance.isValid())
             {
@@ -264,7 +264,7 @@ namespace FMODUnity
             if (!instance.isValid())
             {
                 eventDescription.createInstance(out instance);
-
+                
                 // Only want to update if we need to set 3D attributes
                 if (is3D)
                 {

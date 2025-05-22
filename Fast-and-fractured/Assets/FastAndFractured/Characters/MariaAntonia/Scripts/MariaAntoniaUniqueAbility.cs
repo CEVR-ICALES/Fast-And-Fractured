@@ -8,7 +8,7 @@ namespace FastAndFractured
 {
     public class MariaAntoniaUniqueAbility : BaseUniqueAbility
     {
-        private const string materialEmissive = "_EmissiveExposureWeight";
+        private const string MATERIAL_EMISSIVE = "_EmissiveExposureWeight";
         #region Variables
         [Tooltip("Multiplier to reduce the cooldown timers (example: 1.5 increases the cooldown timer by 50%)")]
         public float cooldownReductionMultiplier;
@@ -44,10 +44,10 @@ namespace FastAndFractured
         public Transform orbitCenter;
 
         [Tooltip("Parent object that contains all particle systems for the VFX")]
-        [SerializeField] private GameObject _vfxParent;
+        [SerializeField] private GameObject vfxParent;
 
         [Tooltip("The material which will have its emissive texture modified")]
-        [SerializeField] private Material _hairMaterial;
+        [SerializeField] private Material hairMaterial;
 
         // Store the original Exposure Weight value
         private float _originalExposureWeight;
@@ -59,7 +59,7 @@ namespace FastAndFractured
 
         public EventReference ssjUltiReference;
 
-        [SerializeField] private StatsController _statsController;
+        [SerializeField] private StatsController mariaAntoniaStatsController;
 
         private ITimer _timer;
 
@@ -75,9 +75,14 @@ namespace FastAndFractured
         {
             if (orbitCenter == null)
                 orbitCenter = transform;
-
-            if (_hairMaterial != null)
-                _originalExposureWeight = _hairMaterial.GetFloat(materialEmissive);
+            if (mariaAntoniaStatsController == null)
+            {
+                mariaAntoniaStatsController = GetComponent<StatsController>();
+            }
+            if (hairMaterial != null)
+                _originalExposureWeight = hairMaterial.GetFloat(MATERIAL_EMISSIVE);
+                
+            StartCooldown();
         }
 
         private void Update()
@@ -94,17 +99,17 @@ namespace FastAndFractured
 
             SoundManager.Instance.PlayOneShot(ssjUltiReference, transform.position);
 
-            if (_statsController == null)
+            if (mariaAntoniaStatsController == null)
             {
                 Debug.LogError("Stats Controller not Found");
                 return false;
             }
 
-            _statsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
-            _statsController.TemporalProductStat(Enums.Stats.MAX_SPEED, statBoostMultiplier, uniqueAbilityDuration);
-            _statsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
-            _statsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
-            _statsController.TemporalProductStat(Enums.Stats.PUSH_FORCE, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.COOLDOWN_SPEED, cooldownReductionMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.MAX_SPEED, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.ACCELERATION, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.NORMAL_DAMAGE, statBoostMultiplier, uniqueAbilityDuration);
+            mariaAntoniaStatsController.TemporalProductStat(Enums.Stats.PUSH_FORCE, statBoostMultiplier, uniqueAbilityDuration);
 
             GenerateCroquettes(numberOfCroquettes);
             StartVFX();
@@ -117,6 +122,7 @@ namespace FastAndFractured
                     ActivateHairEmission(false);
                     SoundManager.Instance.StopSound(ssjUltiReference);
                     EndAbilityEffects();
+                    ClearCroquettes();
                 });
             return true;
         }
@@ -226,9 +232,12 @@ namespace FastAndFractured
         /// </summary>
         public void StartVFX()
         {
-            foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+            if (vfxParent != null)
             {
-                ps.Play();
+                foreach (ParticleSystem ps in vfxParent.GetComponentsInChildren<ParticleSystem>())
+                {
+                    ps.Play();
+                }
             }
         }
 
@@ -237,9 +246,9 @@ namespace FastAndFractured
         /// </summary>
         public void StopVFX()
         {
-            if (_vfxParent != null)
+            if (vfxParent != null)
             {
-                foreach (ParticleSystem ps in _vfxParent.GetComponentsInChildren<ParticleSystem>())
+                foreach (ParticleSystem ps in vfxParent.GetComponentsInChildren<ParticleSystem>())
                 {
                     ps.Stop();
                 }
@@ -253,16 +262,16 @@ namespace FastAndFractured
         /// </summary>
         private void ActivateHairEmission(bool isActive)
         {
-            if (_hairMaterial != null)
+            if (hairMaterial != null)
             {
                 if (isActive)
                 {
-                    _hairMaterial.SetFloat(materialEmissive, _activeExposureWeight);
+                    hairMaterial.SetFloat(MATERIAL_EMISSIVE, _activeExposureWeight);
                     DynamicGI.UpdateEnvironment();
                 }
                 else
                 {
-                    _hairMaterial.SetFloat(materialEmissive, _originalExposureWeight);
+                    hairMaterial.SetFloat(MATERIAL_EMISSIVE, _originalExposureWeight);
                     DynamicGI.UpdateEnvironment();
                 }
             }

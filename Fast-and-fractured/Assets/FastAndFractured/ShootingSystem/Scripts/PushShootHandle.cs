@@ -11,7 +11,10 @@ namespace FastAndFractured {
     public class PushShootHandle : ShootingHandle, ITimeSpeedModifiable
     {
         public UnityEvent<float, float> onCooldownUpdate;
+        public bool ShootingMine => _shootingMine;
         private bool _shootingMine = false;
+        public bool IsPushShooting => _isPushShooting;
+        private bool _isPushShooting = false;
         public Transform PushShootPoint=>shootPoint;
 
         ITimer _pushShootCooldown;
@@ -42,6 +45,7 @@ namespace FastAndFractured {
             if (canShoot)
             {
                 canShoot = false;
+                _isPushShooting = true;
                float range = characterStatsController.PushShootRange;
                float angle = characterStatsController.PushShootAngle;
                 CalculateInitialVelocityForParabolicMovement(range, angle, out float Vx, out float Vy);
@@ -58,6 +62,7 @@ namespace FastAndFractured {
                 _pushShootCooldown = TimerSystem.Instance.CreateTimer(characterStatsController.PushCooldown, onTimerDecreaseComplete:
                     () => { 
                         canShoot = true;
+                        _isPushShooting = false;
                     },
                     onTimerDecreaseUpdate: OnPushShootCooldownDecrease
                     );
@@ -125,7 +130,7 @@ namespace FastAndFractured {
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
-            if (_pushShootCooldown != null)
+            if (_pushShootCooldown != null&&TimerSystem.Instance.HasTimer(_pushShootCooldown))
             {
                 TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: newTimerSpeed);   
             }

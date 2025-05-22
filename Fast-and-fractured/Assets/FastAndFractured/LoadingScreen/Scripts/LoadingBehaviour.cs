@@ -1,42 +1,86 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utilities;
+
 namespace FastAndFractured
 {
-    public class LoadingBehaviour : MonoBehaviour
+    public class LoadingManager : MonoBehaviour
     {
-        [SerializeField] private GameObject loadingScreenUI;
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite[] backgroundSprites;
-        [SerializeField] private float imageTimerDuration = 5f;
-        private ITimer timerReference;
-        void Start()
+        [SerializeField] private Image progressBarImage;
+        private ITimer _timerReference;
+        private const float IMAGE_TIMER_DURATION = 5f;
+        private const float SCENE_LOAD_DELAY = 0.1f;
+        private AsyncOperation _operation;
+        private bool _isLoadingScene = false;
+        private float _visualProgress = 0f;
+        private float _smoothVelocity = 0f;
+        private const float SMOOTH_TIME = 0.5f;
+        private const float OPERATION_PROGRESS_TARGET = 0.9f;
+
+        void OnEnable()
         {
-            loadingScreenUI.SetActive(true);
             SetRandomBackgroundImage();
-        }
-        void Update()
-        {
-            // TODO: call HideLoadingScreen() when game is ready(level controller task)
         }
         void OnDisable()
         {
-            timerReference.StopTimer();
-            timerReference = null;
+            if (_timerReference != null)
+            {
+                _timerReference.StopTimer();
+                _timerReference = null;
+            }
         }
-        public void HideLoadingScreen()
+
+        
+        void Update()
         {
-            loadingScreenUI.SetActive(false);
+            if (_isLoadingScene && _operation != null)
+            {
+                float targetProgress = Mathf.Clamp01(_operation.progress / OPERATION_PROGRESS_TARGET);
+                _visualProgress = Mathf.SmoothDamp(_visualProgress, targetProgress, ref _smoothVelocity, SMOOTH_TIME);
+
+                if (progressBarImage != null)
+                {
+                    progressBarImage.fillAmount = _visualProgress;
+                }
+
+                if (_operation.progress >= OPERATION_PROGRESS_TARGET && !_operation.allowSceneActivation)
+                {
+                    if (progressBarImage != null && Mathf.Approximately(progressBarImage.fillAmount, 1f))
+                    {
+                        _operation.allowSceneActivation = true;
+                        _isLoadingScene = false;
+                    }
+                }
+            }
         }
-        public void SetRandomBackgroundImage()
+
+        public void LoadScene(int sceneBuildIndex)
         {
-            if (backgroundSprites.Length > 0)
+            TimerSystem.Instance.CreateTimer(SCENE_LOAD_DELAY, onTimerDecreaseComplete: () =>
+            {
+                StartSceneLoading(sceneBuildIndex);
+            });
+        }
+
+        private void StartSceneLoading(int sceneBuildIndex)
+        {
+            _operation = SceneManager.LoadSceneAsync(sceneBuildIndex);
+            _operation.allowSceneActivation = false;
+            _isLoadingScene = true;
+        }
+
+        private void SetRandomBackgroundImage()
+        {
+            if (backgroundSprites.Length > 0 && backgroundImage != null)
             {
                 int randomIndex = Random.Range(0, backgroundSprites.Length);
                 backgroundImage.sprite = backgroundSprites[randomIndex];
-                timerReference = TimerSystem.Instance.CreateTimer(imageTimerDuration, onTimerDecreaseComplete: () =>
+                _timerReference = TimerSystem.Instance.CreateTimer(IMAGE_TIMER_DURATION, onTimerDecreaseComplete: () =>
                 {
                     SetRandomBackgroundImage();
                 });

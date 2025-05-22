@@ -10,6 +10,7 @@ using TMPro;
 public class CarInjector : MonoBehaviour
 {
     [SerializeField] GameObject prefab;
+    [SerializeField] GameObject spawnPoint;
     [SerializeField] bool autoInject = false;
 
 
@@ -29,7 +30,7 @@ public class CarInjector : MonoBehaviour
             prefab = prefabToInstall;
         }
         //TODO optimize this if posible
-        var injectedCar = Instantiate(prefab, this.transform.position, Quaternion.identity, transform);
+        var injectedCar = Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation, transform);
         var controllers = GetComponentsInChildren<Controller>();
         var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
 
@@ -56,12 +57,12 @@ public class CarInjector : MonoBehaviour
             enemyAIBrain.InstallAIParameters(injectedCar.GetComponent<StatsController>().CharacterData.AIParameters);
             injectedCar.GetComponent<CarMovementController>().IsAi = true;
         }
-        else{
-            if (GameObject.Find("SpeedOverlay"))
-            {
-                injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
-            }
-        } 
+        // else{
+        //     if (GameObject.Find("SpeedOverlay"))
+        //     {
+        //         injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
+        //     }
+        // } 
 
         return injectedCar;
     }

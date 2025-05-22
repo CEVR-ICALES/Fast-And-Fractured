@@ -22,7 +22,6 @@ public class ResetDeviceBindings : MonoBehaviour
             foreach (InputAction action in map.actions)
             {
                 action.RemoveBindingOverride(InputBinding.MaskByGroup(targetControlScheme));
-                Debug.Log("reset");
             }
         }
     }

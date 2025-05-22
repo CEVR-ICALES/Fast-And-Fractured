@@ -142,6 +142,8 @@ public class AIParameters
     [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
     [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
     [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+    [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
+
     public float FleeDistance { get => fleeDistance; set => fleeDistance = value; }
     public float SweepRadius { get => sweepRadius; set => sweepRadius = value; }
     public float ShootingMarginErrorAngle { get => shootingMarginErrorAngle; set => shootingMarginErrorAngle = value; }
@@ -156,6 +158,7 @@ public class AIParameters
     public int DecisionPercentageNormalShoot { get => decisionPercentageNormalShoot; set => decisionPercentageNormalShoot = value; }
     public int DecisionPercentagePushShoot { get => decisionPercentagePushShoot; set => decisionPercentagePushShoot = value; }
     public int DecisionPercentageCooldown { get => decisionPercentageCooldown; set => decisionPercentageCooldown = value; }
+    public int MarginToFleeFromSands { get => marginToFleeFromSandstorm; set => marginToFleeFromSandstorm = value; }
 }
 [Serializable]
 public class GameObjectStringPair

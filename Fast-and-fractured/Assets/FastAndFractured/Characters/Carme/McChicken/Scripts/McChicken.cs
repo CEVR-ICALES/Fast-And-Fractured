@@ -24,6 +24,7 @@ namespace FastAndFractured
         private Rigidbody _rb;
         private McChickenMovement _movementHandler;
         private McChickenPhysicsHandler _phyisicsHandler;
+        private McChickenVisuals _visualsHandler;
 
         // movement tracking
         private Vector3 _moveDirection;
@@ -39,11 +40,12 @@ namespace FastAndFractured
             _mainCollider = GetComponent<Collider>();
             _movementHandler = GetComponent<McChickenMovement>();
             _phyisicsHandler = GetComponent<McChickenPhysicsHandler>();
+            _visualsHandler = GetComponent<McChickenVisuals>();
             _mainCollider.enabled = false;
             _rb.isKinematic = true;
 
-            _movementHandler.Initialize(_rb, _phyisicsHandler);
-            _phyisicsHandler.Initialize(_rb, _movementHandler);
+            _movementHandler.Initialize(_rb, _phyisicsHandler, _visualsHandler);
+            _phyisicsHandler.Initialize(_rb, _movementHandler, _visualsHandler);
         }
 
         public void InitializeChicken(Vector3 targetPosition, Vector3 direction)
@@ -64,7 +66,7 @@ namespace FastAndFractured
             _rb.freezeRotation = false;
             _rb.isKinematic = false;
             _rb.velocity = Vector3.zero;
-
+            _visualsHandler.OnLand();
             transform.DOScale(finalScale, finalScaleDuration)
                 .SetEase(Ease.OutBack)
                 .OnComplete(() => _movementHandler.StartMoving(_moveDirection));

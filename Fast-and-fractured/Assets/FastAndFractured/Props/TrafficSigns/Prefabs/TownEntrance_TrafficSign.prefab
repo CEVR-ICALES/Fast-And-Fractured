@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7177147321757177608}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7177147321757177608
 Transform:
@@ -41,12 +41,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3433959777093883352}
-  m_Layer: 0
+  - component: {fileID: 3923075402470871490}
+  m_Layer: 10
   m_Name: TownEntrance_TrafficSign
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3433959777093883352
 Transform:
@@ -64,6 +65,27 @@ Transform:
   - {fileID: 7177147321757177608}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3923075402470871490
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3828362870755084374}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3456116, y: 1, z: 4.219886}
+  m_Center: {x: 0.08, y: -0.52, z: -0.01}
 --- !u!1 &6104658302066044333
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,12 +97,12 @@ GameObject:
   - component: {fileID: 8118174884543268801}
   - component: {fileID: 4453052347146345941}
   - component: {fileID: 692867936915889226}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8118174884543268801
 Transform:

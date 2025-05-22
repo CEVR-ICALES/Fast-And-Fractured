@@ -11,27 +11,27 @@ namespace Utilities
         public float CurrentTime { get; set; }
         public bool IsRunning { get; set; }
         public bool IsPaused { get; set; }
-        public float SpeedMultiplier {  get; set; }
+        public float SpeedMultiplier { get; set; }
         public TimerDirection Direction { get; set; }
 
         public Action OnTimerComplete { get; set; }
 
-         
+
         public Action<float> OnTimerUpdate { get; set; }
-        public Action OnTimerIncreaseComplete { get; set; } 
+        public Action OnTimerIncreaseComplete { get; set; }
 
-        public Action OnTimerDecreaseComplete { get; set; }  
+        public Action OnTimerDecreaseComplete { get; set; }
 
-        public Action<float> OnTimerIncreaseUpdate { get; set; } 
+        public Action<float> OnTimerIncreaseUpdate { get; set; }
 
         public Action<float>
             OnTimerDecreaseUpdate
         {
             get;
             set;
-        }  
+        }
 
-        public Action OnTimerPause { get; set; }  
+        public Action OnTimerPause { get; set; }
         public Action OnTimerResume { get; set; }
 
         public TimerData(string id, float duration, TimerDirection direction, Action onTimerComplete,
@@ -40,9 +40,9 @@ namespace Utilities
             ID = id;
             Duration = duration;
             Direction = direction;
-            OnTimerComplete = onTimerComplete;  
+            OnTimerComplete = onTimerComplete;
             OnTimerUpdate =
-                onTimerUpdate;  
+                onTimerUpdate;
 
             CurrentTime = (direction == TimerDirection.INCREASE) ? 0 : duration;
             IsRunning = false;
@@ -53,7 +53,7 @@ namespace Utilities
         public void SetTimerDirection(TimerDirection newDirection)
         {
             Direction = newDirection;
-            
+
         }
 
         public float NormalizedProgress
@@ -68,14 +68,10 @@ namespace Utilities
         }
 
 
-        public TimerDirection InvertDirection()  
+        public TimerDirection InvertDirection()
         {
             Direction = (Direction == TimerDirection.INCREASE) ? TimerDirection.DECREASE : TimerDirection.INCREASE;
             return Direction;
-        }
-        public override string ToString()
-        {
-            return GetFormattedTime(TimeFormatStyle.HOURS_MINUTES_SECONDS);
         }
         public string GetFormattedTime(TimeFormatStyle style)
         {
@@ -94,10 +90,14 @@ namespace Utilities
                     throw new ArgumentOutOfRangeException(nameof(style), style, null);
             }
         }
-        public enum TimeFormatStyle
+        public override string ToString()
         {
-            MINUTES_SECONDS,
-            HOURS_MINUTES_SECONDS
+            return GetFormattedTime(TimeFormatStyle.HOURS_MINUTES_SECONDS);
         }
     }
+}
+public enum TimeFormatStyle
+{
+    MINUTES_SECONDS,
+    HOURS_MINUTES_SECONDS
 }

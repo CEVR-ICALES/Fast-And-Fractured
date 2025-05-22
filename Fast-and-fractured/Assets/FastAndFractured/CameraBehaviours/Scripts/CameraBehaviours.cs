@@ -1,20 +1,41 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using Enums;
 using UnityEngine;
 using Utilities;
+using Utilities.Managers.PauseSystem;
+
 
 namespace FastAndFractured
 {
-    public class CameraBehaviours : AbstractSingleton<CameraBehaviours>
+    public class CameraBehaviours : AbstractSingleton<CameraBehaviours>, IPausable
     {
         [SerializeField] CinemachineFreeLook freeLookCamera;
         private PlayerInputController _inputController;
+        private StatsController _statsController;
 
+        private bool _paused = false;
+
+        private float _cameraSpeedX;
+        private float _cameraSpeedY;
+
+        void Start()
+        {
+            _statsController = LevelControllerButBetter.Instance.playerReference.GetComponent<StatsController>();
+        }
 
         void OnEnable()
         {
             _inputController = PlayerInputController.Instance;
+            _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
+            _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
+            PauseManager.Instance.RegisterPausable(this);
+        }
+
+        void OnDisable()
+        {
+            PauseManager.Instance?.UnregisterPausable(this);
         }
 
         void Update()
@@ -26,12 +47,20 @@ namespace FastAndFractured
                     UpdateCameraMovement();
                 }
             }
+            Debug.Log(_inputController.CameraMouseInput);
+            if (_inputController.CameraMouseInput != Vector2.zero)
+            {
+                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
+            }
         }
 
         private void UpdateCameraMovement()
         {
+            if (_paused) return;
+
             if (freeLookCamera != null && PlayerInputController.Instance.CameraInput != Vector2.zero)
             {
+
                 // to do invert depending on user settings
                 float newXAxisValue = freeLookCamera.m_XAxis.Value + _inputController.CameraInput.x * freeLookCamera.m_XAxis.m_MaxSpeed * Time.deltaTime;
                 float newYAxisValue = freeLookCamera.m_YAxis.Value + -_inputController.CameraInput.y * freeLookCamera.m_YAxis.m_MaxSpeed * Time.deltaTime;
@@ -40,12 +69,16 @@ namespace FastAndFractured
 
                 freeLookCamera.m_XAxis.Value = newXAxisValue;
                 freeLookCamera.m_YAxis.Value = newYAxisValue;
+
+                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2);
             }
 
         }
 
         public void ResetCameraPosition()
         {
+            if (_paused) return;
+
             if (freeLookCamera != null)
             {
                 freeLookCamera.m_YAxisRecentering.m_enabled = true;
@@ -59,6 +92,20 @@ namespace FastAndFractured
                     _inputController.IsResettingCamera = false;
                 });
             }
+        }
+
+        public void OnPause()
+        {
+            freeLookCamera.m_XAxis.m_MaxSpeed = 0f;
+            freeLookCamera.m_YAxis.m_MaxSpeed = 0f;
+            _paused = true;
+        }
+
+        public void OnResume()
+        {
+            freeLookCamera.m_XAxis.m_MaxSpeed = _cameraSpeedX;
+            freeLookCamera.m_YAxis.m_MaxSpeed = _cameraSpeedY;
+            _paused = false;
         }
     }
 }

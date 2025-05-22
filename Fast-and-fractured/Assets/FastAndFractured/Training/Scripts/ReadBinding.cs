@@ -235,7 +235,6 @@ namespace FastAndFractured
             {
                 
                 string bindingPath = binding.effectivePath;
-                Debug.Log(bindingPath);
                 if(!string.IsNullOrEmpty(bindingPath))
                 {
                     string[] parts = bindingPath.Split('/');
@@ -253,7 +252,6 @@ namespace FastAndFractured
                             }
                         }
 
-                        Debug.Log($"Device: {deviceType}, Key: {key}");
                         Sprite icon = GetIconSprite(deviceType, key);
 
                         UpdateIcons(currentIconIndex, deviceType, icon, ref currentIconIndex);

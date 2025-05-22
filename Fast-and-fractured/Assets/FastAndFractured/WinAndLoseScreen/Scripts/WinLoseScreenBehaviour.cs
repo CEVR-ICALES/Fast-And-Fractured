@@ -61,9 +61,10 @@ namespace FastAndFractured
             {
                 resultText.GetComponent<LocalizedText>().LocalizationKey = LOSE_TEXT;
             }
-            
+
+            string totalDamageTaken = Mathf.RoundToInt(float.Parse(gameEndData.totalDamageTaken)).ToString();
             totalDamageDealtText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDamageDealt;
-            totalDamageTakenText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDamageTaken;
+            totalDamageTakenText.GetComponent<TextMeshProUGUI>().text = totalDamageTaken;
             totalDistanceText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDistanceTraveled;
         }
         private void ResetGameEndData()

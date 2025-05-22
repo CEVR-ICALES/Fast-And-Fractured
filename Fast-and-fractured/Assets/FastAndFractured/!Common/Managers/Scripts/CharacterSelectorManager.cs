@@ -1,3 +1,5 @@
+using Assets.SimpleLocalization.Scripts;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +20,15 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public TextMeshProUGUI charCarBaseForce;
     public TextMeshProUGUI charCarAcceleration;
     public TextMeshProUGUI charCarManuver;
+    public Image charCarWeightImage;
+    public Image charCarMaxSpeedImage;
+    public Image charCarMaxEnduranceImage;
+    public Image charCarBaseForceImage;
+    public Image charCarAccelerationImage;
+    public Image charCarManuverImage;
+
+    public TextMeshProUGUI skinUnlockedValueText;
+    public GameObject skinUnlockedLock;
 
     [Header("Car Anims Related")]
     [SerializeField] private Transform modelSpawnPosition;
@@ -42,12 +53,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
-
-
+        
         if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
             foreach (CharacterMenuData character in allCharacters)
             {
@@ -125,13 +131,29 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     private void UpdateInformationTexts(CharacterMenuData character) // PROVISIONAL
     {
         charName.text = character.CharacterName;
-        charDescription.text = character.CharacterDescription;
-        charCarWeight.text ="Weight: " + character.CharacterStats.Weight.ToString();
-        charCarMaxSpeed.text = "MaxSpeed: " + character.CharacterStats.MaxSpeed.ToString();
-        charCarMaxEndurance.text = "Endurance: " + character.CharacterStats.MaxEndurance.ToString();
-        charCarBaseForce.text = "Base Force: " + character.CharacterStats.BaseForce.ToString();
-        charCarAcceleration.text = "Acceleration: " + character.CharacterStats.Acceleration.ToString(); //create acceleration distinction 
-        charCarManuver.text = "Manuver: " + character.CharacterStats.DriftingSmoothFactor.ToString(); //create manuver distinction 
+        charDescription.GetComponent<LocalizedText>().LocalizationKey = character.CharacterDescription;
+        charDescription.GetComponent<LocalizedText>().Localize();
+
+        charCarWeight.text = Math.Round(Mathf.Clamp01(character.CharacterStats.Weight / 2000f) * 100f).ToString() + "%";
+        charCarMaxSpeed.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f) * 100f).ToString() + "%";
+        charCarMaxEndurance.text = Math.Round(Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f) * 100f).ToString() + "%";
+        charCarBaseForce.text = Math.Round(Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f) * 100f).ToString() + "%";
+        charCarManuver.text = Math.Round(Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f) * 100f).ToString() + "%";
+
+        charCarWeightImage.fillAmount = Mathf.Clamp01(character.CharacterStats.Weight / 2000f);
+        charCarMaxSpeedImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxSpeed / 250f);
+        charCarMaxEnduranceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.MaxEndurance / 1500f);
+        charCarBaseForceImage.fillAmount = Mathf.Clamp01(character.CharacterStats.BaseForce / 600000f);
+        charCarManuverImage.fillAmount = Mathf.Clamp01(character.CharacterStats.HandlingSmoothnes / 10f);
+        
+        if(character.CharacterName == "Pepe"){
+            charCarAcceleration.text = Math.Round((1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f)) * 100f).ToString() + "%";
+            charCarAccelerationImage.fillAmount = 1f - Mathf.Clamp01(character.CharacterStats.Acceleration / 12000f);
+        }
+        else {
+            charCarAcceleration.text = Math.Round(Mathf.Clamp01(character.CharacterStats.Acceleration / 8000f) * 100f).ToString() + "%";
+            charCarAccelerationImage.fillAmount = Mathf.Clamp01(character.CharacterStats.Acceleration / 8000f);
+        }
     }
 
     private void ChangePlayerIcon()
@@ -153,22 +175,24 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
             _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
             _modelChangeTimer = TimerSystem.Instance.CreateTimer(modelChangeTimerDuration, onTimerDecreaseComplete: () =>
             {
-                carStopCollider.enabled = true;
                 Destroy(lastModelInstance);
+                carStopCollider.enabled = true;
                 _modelChangeTimer = null;
             });
         }
         _currentModelInstance = Instantiate(character.Models[_currentSkinIndex], modelSpawnPosition.position, Quaternion.identity); // instantiate new model
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
-        selectAndStartButton.enabled = CheckIfSkinUnlocked();
+        selectAndStartButton.interactable = CheckIfSkinUnlocked();
     }
     public bool CheckIfSkinUnlocked()
     {
         int skinUnlockedValue = PlayerPrefs.GetInt(_currentModelInstance.name);
+        skinUnlockedValueText.text = $"{skinUnlockedValue} / {FULLY_UNLOCKED_VALUE}";
         
         bool isEnabled;
         isEnabled = skinUnlockedValue == FULLY_UNLOCKED_VALUE;
+        skinUnlockedLock.SetActive(!isEnabled);
 
         return isEnabled;
     }
@@ -177,5 +201,17 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     {
         CharacterMenuData character = allCharacters[_currentCharacterIndex];
         PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
+    }
+
+    public void FullUnlockSkins()
+    {
+        PlayerPrefs.SetInt("Josefino_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_1", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Josefino_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Carme_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("Pepe_2", FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.SetInt("MariaAntonia_2", FULLY_UNLOCKED_VALUE);
     }
 }

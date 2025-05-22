@@ -7,7 +7,7 @@ namespace FastAndFractured
 {
     public class UIDynamicElement : MonoBehaviour
     {
-        public UIElementType elementType;
+        public UIDynamicElementType elementType;
         public Image imageReference;
         public TextMeshProUGUI textReference;
 

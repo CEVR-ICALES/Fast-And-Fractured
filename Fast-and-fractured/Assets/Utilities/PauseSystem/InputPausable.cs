@@ -20,7 +20,7 @@ public class InputPausable : MonoBehaviour, IPausable
     {
         if (playerInputController)
         {
-            playerInputController.InputActions.PlayerInputActions.Disable();
+            playerInputController.InputActions?.PlayerInputActions.Disable();
         }
     }
 
@@ -28,7 +28,7 @@ public class InputPausable : MonoBehaviour, IPausable
     {
         if (playerInputController)
         {
-            playerInputController.InputActions.PlayerInputActions.Enable();
+            playerInputController.InputActions?.PlayerInputActions.Enable();
         }
     }
 

@@ -17,7 +17,11 @@ namespace FastAndFractured
         [SerializeField] private Pooltype pooltypeAscendingTomato;
         [SerializeField] private Pooltype pooltypeDescendingTomato;
 
-         
+
+        private void Start()
+        {
+            StartCooldown();
+        }
         public override bool ActivateAbility()
         {
             if (base.ActivateAbility())

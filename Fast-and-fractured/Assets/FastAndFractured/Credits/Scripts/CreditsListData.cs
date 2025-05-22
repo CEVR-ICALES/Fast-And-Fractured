@@ -11,9 +11,15 @@ namespace FastAndFractured
         {
             public string titleLocalizationKey;
             public float sizeMultiplier;
-            public List<string> names = new List<string>();
+            public List<NameWithSize> names = new List<NameWithSize>();
         }
 
         public List<CreditsEntry> creditsEntry = new List<CreditsEntry>();
+        [System.Serializable]
+        public class NameWithSize
+        {
+            public string name;
+            public float sizeMultiplier;
+        }
     }
 }

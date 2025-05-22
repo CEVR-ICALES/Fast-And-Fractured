@@ -5,26 +5,49 @@ using UnityEngine;
 
 public class TrainingResetPlayer : MonoBehaviour
 {
-    StatsController[] players;
-    List<Vector3> startingPositions = new List<Vector3>();
+    [SerializeField]
+    private List<GameObject> charactersToReset;
+    private List<StatsController> _characterToResetStatsController = new List<StatsController>();
+    private List<PhysicsBehaviour> _charactersPhysicsBehaivours =  new List<PhysicsBehaviour>();
+    private List<Vector3> _spawnPosition = new List<Vector3>();
+    [SerializeField]
+    private Transform playerBaseCar;
+    private GameObject _actualPlayer;
+    private Vector3 _playerInitialPosition;
+    private PhysicsBehaviour _playerPhysicsBehaivour;
     private void Start()
     {
-        players = FindObjectsOfType<StatsController>();
-        foreach (StatsController player in players)
+        foreach (var character in charactersToReset)
         {
-            startingPositions.Add(player.gameObject.transform.position);
+            _spawnPosition.Add(character.transform.position);
+            _characterToResetStatsController.Add(character.GetComponentInChildren<StatsController>());
+            _charactersPhysicsBehaivours.Add(character.GetComponentInChildren<PhysicsBehaviour>());
         }
-
+        _actualPlayer = playerBaseCar.transform.GetComponentInChildren<StatsController>().gameObject;
+        _playerPhysicsBehaivour = _actualPlayer.GetComponent<PhysicsBehaviour>();
+        _playerInitialPosition = _actualPlayer.transform.position;
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out StatsController controller))
+        if (other.TryGetComponent(out StatsController character))
         {
-            for (int i = 0; i < players.Length; i++)
+            ResetLevel();
+            if (character.IsPlayer)
             {
-                players[i].gameObject.transform.position = startingPositions[i];
-                players[i].RecoverEndurance(players[i].MaxEndurance, false);
+                _actualPlayer.transform.position = _playerInitialPosition;
+                _playerPhysicsBehaivour.Rb.velocity = Vector3.zero;
             }
+        }
+    }
+
+   public void ResetLevel()
+    {
+        for (int i = 0; i < charactersToReset.Count; i++)
+        {
+            _characterToResetStatsController[i].gameObject.transform.position = _spawnPosition[i];
+            _characterToResetStatsController[i].gameObject.transform.rotation = charactersToReset[i].transform.rotation;
+            _characterToResetStatsController[i].RecoverEndurance(_characterToResetStatsController[i].MaxEndurance, false);
+            _charactersPhysicsBehaivours[i].Rb.velocity = Vector3.zero;
         }
     }
 }

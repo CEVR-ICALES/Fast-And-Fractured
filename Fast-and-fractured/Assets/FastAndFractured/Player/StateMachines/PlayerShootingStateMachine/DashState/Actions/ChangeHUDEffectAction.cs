@@ -8,12 +8,13 @@ namespace StateMachine
 
     public class ChangeHUDEffectAction : Action
     {
-        [SerializeField] private UIElementType target;
+        [SerializeField] private UIDynamicElementType target;
         [SerializeField] private ScreenEffects spriteKey;
+        [SerializeField] private float timeInScreen = 0f;
 
         public override void Act(Controller controller)
         {
-            HUDManager.Instance.UpdateUIElement(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey));
+            HUDManager.Instance.UpdateUIEffect(target, ResourcesManager.Instance.GetResourcesSprite(spriteKey), timeInScreen);
         }
     }
 }

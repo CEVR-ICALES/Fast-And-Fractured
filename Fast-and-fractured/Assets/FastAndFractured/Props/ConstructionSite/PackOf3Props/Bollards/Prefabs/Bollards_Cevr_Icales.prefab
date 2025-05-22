@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 8823938295852664762}
   - component: {fileID: 9038688018042176721}
   - component: {fileID: 6609934893359371865}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8823938295852664762
 Transform:
@@ -92,12 +92,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7422490843712701584}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7422490843712701584
 Transform:
@@ -124,12 +124,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5916478472614041479}
-  m_Layer: 0
+  - component: {fileID: 2225743826450814831}
+  m_Layer: 10
   m_Name: Bollards_Cevr_Icales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5916478472614041479
 Transform:
@@ -147,3 +148,24 @@ Transform:
   - {fileID: 7422490843712701584}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2225743826450814831
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6754648149246222819}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.23032421, y: 2.3119109, z: 0.30742204}
+  m_Center: {x: 0, y: 1.0853773, z: 0.08946383}

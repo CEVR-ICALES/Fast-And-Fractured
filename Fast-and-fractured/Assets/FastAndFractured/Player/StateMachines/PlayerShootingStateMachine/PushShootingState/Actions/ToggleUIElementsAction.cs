@@ -9,11 +9,11 @@ namespace StateMachine
 
     public class ToggleUIElementsAction : Action
     {
-        [SerializeField] private List<UIElementType> uiElementsType;
+        [SerializeField] private List<UIDynamicElementType> uiElementsType;
 
         public override void Act(Controller controller)
         {
-            foreach (UIElementType uiElementType in uiElementsType)
+            foreach (UIDynamicElementType uiElementType in uiElementsType)
             {
                 UIDynamicElement uiElement = HUDManager.Instance.GetUIElement(uiElementType);
                 uiElement.gameObject.SetActive(!uiElement.gameObject.activeSelf);

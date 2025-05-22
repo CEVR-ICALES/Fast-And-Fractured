@@ -10,7 +10,7 @@ namespace StateMachine
     {
         public override bool Decide(Controller controller)
         {
-            return controller.GetBehaviour<EnemyAIBrain>().AreAllInteractablesInsideSandstorm();
+            return!controller.GetBehaviour<EnemyAIBrain>().AreAllInteractablesInsideSandstorm();
         }
     }
 }

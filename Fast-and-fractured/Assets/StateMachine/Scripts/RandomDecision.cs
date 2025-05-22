@@ -10,11 +10,7 @@ namespace StateMachine
         public override bool Decide(Controller controller)
         {
 
-            if (seed != -1)
-            {
-                UnityEngine.Random.InitState(seed);
-
-            }
+          
             return UnityEngine.Random.Range(0, 2) == 1;
         }
     }

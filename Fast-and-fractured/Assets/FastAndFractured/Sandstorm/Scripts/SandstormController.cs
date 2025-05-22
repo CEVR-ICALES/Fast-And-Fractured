@@ -75,6 +75,8 @@ namespace FastAndFractured
         private List<GameObject> _itemsInsideSandstorm;
         public List<GameObject>  CharactersInsideSandstorm => _charactersInsideSandstorm;
         private List<GameObject> _charactersInsideSandstorm;
+        public List<GameObject> SafeZonesInsideSandstorm =>_safeZonesInsideSandstorm;
+        private List<GameObject> _safeZonesInsideSandstorm;
 
         [SerializeField] private GameObject minimapSandstormDirection;
 
@@ -87,6 +89,7 @@ namespace FastAndFractured
             primaryFog?.gameObject.SetActive(false);
             _itemsInsideSandstorm = new List<GameObject>();
             _charactersInsideSandstorm = new List<GameObject>();
+            _safeZonesInsideSandstorm = new List<GameObject>();
             primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
         }
 
@@ -120,12 +123,9 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            //Probably change for better aplication. Like an utility
-            LevelController.Instance.ShuffleList(possibleAngels);
+            possibleAngels.ShuffleList();
 
             float spawnAngle = possibleAngels[0];
-
-            Debug.Log("Spawn Point Angle : " + spawnAngle);
             Quaternion vectorRotation = Quaternion.AngleAxis(spawnAngle, Vector3.up);
             Vector3 rotatedSpawnVector = vectorRotation * sphereCenter.forward;
 
@@ -158,6 +158,7 @@ namespace FastAndFractured
             _direction = (_mirrorPoint - _spawnPoint).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(_direction);
             fogParent.transform.rotation = targetRotation;
+            fogParent.transform.LookAt(_mirrorPoint);
             _stormCollider.enabled = true;
             if (primaryFog != null)
             {
@@ -166,7 +167,7 @@ namespace FastAndFractured
             }
             _initialColliderSize = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
-            IngameEventsManager.Instance.CreateEvent("La tormenta de arena ha comenzado", 5f);
+            IngameEventsManager.Instance.CreateEvent("Events.Sandstorm", 5f);
 
             minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
         }
@@ -209,11 +210,11 @@ namespace FastAndFractured
             }
         }
 
-        public bool IsInsideStormCollider(GameObject target,float marginError=0f)
+        public bool IsInsideStormCollider(GameObject target,float marginError)
         {
             if (marginError > 0)
             {
-                Vector3 directionToTarget = target.transform.position - (transform.position  + (_stormCollider.size.z / 2 + marginError + _stormCollider.center.z) * transform.forward);
+                Vector3 directionToTarget = target.transform.position - (transform.position  + ((_stormCollider.size.z / 2) + marginError + _stormCollider.center.z) * transform.forward);
                 directionToTarget.Normalize();
                 float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
                 float angleToTarget = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
@@ -221,7 +222,7 @@ namespace FastAndFractured
             }
             else
             {
-                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target);
+                return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target)||_safeZonesInsideSandstorm.Contains(target);
             }
         }
 
@@ -248,7 +249,6 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic)
                 {
-
                     StartKillNotify(statsController);
                     _charactersInsideSandstorm.Add(other.gameObject);
                     if (statsController.IsPlayer)
@@ -259,7 +259,14 @@ namespace FastAndFractured
             }
             else
             {
-                _itemsInsideSandstorm.Add(other.gameObject);
+                if (other.GetComponentInParent<StatsBoostInteractable>() != null)
+                {
+                    _itemsInsideSandstorm.Add(other.gameObject);
+                }
+                else
+                {
+                    _safeZonesInsideSandstorm.Add(other.gameObject);
+                }
             }
         }
 
@@ -269,7 +276,7 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
                 {
-                    if (!IsInsideStormCollider(other.gameObject,MIN_VALUE_PER_SANDSTORM_DETECTION))
+                    if (other.GetComponentInParent<StatsBoostInteractable>() != null)
                     {
                         CharacterEscapedDead(statsController);
                         _charactersInsideSandstorm.Remove(other.gameObject);
@@ -278,7 +285,14 @@ namespace FastAndFractured
             }
             else
             {
-                _itemsInsideSandstorm.Remove(other.gameObject);
+                if (other.GetComponentInParent<StatsBoostInteractable>()!=null)
+                {
+                    _itemsInsideSandstorm.Remove(other.gameObject);
+                }
+                else
+                {
+                    _safeZonesInsideSandstorm.Remove(other.gameObject);
+                }
             }
         }
 
