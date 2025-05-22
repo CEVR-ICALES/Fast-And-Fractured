@@ -16,6 +16,7 @@ namespace FastAndFractured
 
         public MenuScreen CurrentScreen => _currentScreen;
         public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
+        public ScreensType defaultScreenType = ScreensType.MAIN_MENU;
 
         #endregion
 
@@ -30,7 +31,7 @@ namespace FastAndFractured
         #region Private Fields
 
         private Dictionary<ScreensType, MenuScreen> _menuScreens = new Dictionary<ScreensType, MenuScreen>();
-        private MenuScreen _currentScreen;
+        private MenuScreen _currentScreen; 
         private bool isCurrentScreenInteractable;
         private ITimer _fadeInTimer;
         private ITimer _fadeOutTimer;
@@ -54,7 +55,7 @@ namespace FastAndFractured
         {
             // Register all Screens in scene
             RegisterScreens();
-            if(_menuScreens.TryGetValue(ScreensType.MAIN_MENU, out MenuScreen menuScreen))
+            if(_menuScreens.TryGetValue(defaultScreenType, out MenuScreen menuScreen))
                 _currentScreen = menuScreen;
 
             foreach (var screen in _menuScreens.Values)
