@@ -66,11 +66,7 @@ namespace FastAndFractured
             
             if(_currentScreen != null)
             {
-                _currentScreen.gameObject.SetActive(true);
-                _currentScreen.SetAlpha(1);
-                _currentScreen.SetInteractable(true);
-                isCurrentScreenInteractable = true;
-                LockFocusOnButton();
+                TransitionBetweenScreens(_currentScreen.screenType, 1);
             }
             OnInitialized?.Invoke();
         }
