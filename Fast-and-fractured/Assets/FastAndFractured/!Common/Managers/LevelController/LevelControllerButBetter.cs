@@ -206,9 +206,6 @@ namespace FastAndFractured
                         if (aiDebugChanger) aiDebugChanger.NextState();
                     }
                 }
-                else { Debug.LogError("aaaaaaaaaaaaaaaaaaaaaaaaaa"); }
-                Debug.LogError($"eL AFORTUNADO ES {nearestToFirst.name}");
-
             }
         }
 

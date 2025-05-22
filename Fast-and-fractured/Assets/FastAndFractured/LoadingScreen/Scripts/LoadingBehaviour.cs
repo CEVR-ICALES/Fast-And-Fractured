@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utilities;
+using TMPro;
+using Assets.SimpleLocalization.Scripts;
 
 namespace FastAndFractured
 {
@@ -12,6 +14,7 @@ namespace FastAndFractured
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite[] backgroundSprites;
         [SerializeField] private Image progressBarImage;
+        [SerializeField] private GameObject tipText;
         private ITimer _timerReference;
         private const float IMAGE_TIMER_DURATION = 5f;
         private const float SCENE_LOAD_DELAY = 0.1f;
@@ -21,6 +24,7 @@ namespace FastAndFractured
         private float _smoothVelocity = 0f;
         private const float SMOOTH_TIME = 0.5f;
         private const float OPERATION_PROGRESS_TARGET = 0.9f;
+        private const string LOADING_TIP_TEXT = "Tips.Tip";
 
         void OnEnable()
         {
@@ -80,6 +84,9 @@ namespace FastAndFractured
             {
                 int randomIndex = Random.Range(0, backgroundSprites.Length);
                 backgroundImage.sprite = backgroundSprites[randomIndex];
+                int randomTipIndex = Random.Range(1, 22);
+                tipText.GetComponent<LocalizedText>().LocalizationKey = LOADING_TIP_TEXT + randomTipIndex.ToString();
+                
                 _timerReference = TimerSystem.Instance.CreateTimer(IMAGE_TIMER_DURATION, onTimerDecreaseComplete: () =>
                 {
                     SetRandomBackgroundImage();
