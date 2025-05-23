@@ -23,7 +23,7 @@ public class MenuInputsController : MonoBehaviour
             _inputActions.MenuInputActions.RightCharacter.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectNextCharacter();};
             _inputActions.MenuInputActions.LeftSkin.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectPreviousSkin();};
             _inputActions.MenuInputActions.RightSkin.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectNextSkin();};
-            _inputActions.MenuInputActions.StartGame.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) LoadSceneIfReady(1);};
+            _inputActions.MenuInputActions.StartGame.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) LoadSceneIfReady(2);};
         }
 
         private void OnDisable()
@@ -40,6 +40,7 @@ public class MenuInputsController : MonoBehaviour
         {
             if(CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION) && CharacterSelectorManager.Instance.CheckIfSkinUnlocked())
             {
+                CharacterSelectorManager.Instance.SaveCurrentSelected();
                 MainMenuManager.Instance.LoadScene(sceneIndex);
             }
         }
