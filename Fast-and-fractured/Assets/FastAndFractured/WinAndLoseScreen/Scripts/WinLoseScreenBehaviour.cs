@@ -42,7 +42,7 @@ namespace FastAndFractured
         }
         public void ShowMenu()
         {
-            container.transform.parent.gameObject.SetActive(true);
+            // container.transform.parent.gameObject.SetActive(true);
             container.SetActive(true);
             ResetGameEndData();
         }

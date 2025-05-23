@@ -70,7 +70,7 @@ namespace FastAndFractured
             
             if(_currentScreen != null)
             {
-                TransitionBetweenScreens(_currentScreen.screenType, 1f);
+                TransitionBetweenScreens(_currentScreen.screenType, -1f);
                 if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
                 {
                     // Play splash particles after 0.5 seconds
@@ -115,7 +115,7 @@ namespace FastAndFractured
         {
             if (fadeDuration == -1)
             {
-                if(_currentScreen!=null)
+                if (_currentScreen != null)
                     _currentScreen.gameObject.SetActive(false);
                 _currentScreen = _menuScreens[nextScreen];
                 _currentScreen.SetInteractable(true);
