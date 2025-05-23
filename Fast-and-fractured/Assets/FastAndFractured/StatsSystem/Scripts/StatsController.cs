@@ -134,7 +134,6 @@ namespace FastAndFractured
         #region START EVENTS
         public void CustomStart()
         {
-            onDead.AddListener(LevelController.Instance.OnPlayerDead);
             //just for try propouses
             charDataSO.Invulnerable = false;
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
@@ -328,7 +327,6 @@ namespace FastAndFractured
             {
                 if (damageXFrame > 0)
                 {
-                    Debug.Log("DamagePlayer");
                     TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });

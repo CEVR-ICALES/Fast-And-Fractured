@@ -213,8 +213,8 @@ Transform:
   m_GameObject: {fileID: 5570125813969195386}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 1.48, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8213073240112307182}
@@ -275,7 +275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6440435046285434399
 Transform:
   m_ObjectHideFlags: 0
@@ -312,11 +312,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   disableGameObjectOnInteract: 0
+  pickUpSound:
+    Guid:
+      Data1: 2104902708
+      Data2: 1130174527
+      Data3: -2122479171
+      Data4: 1424200078
+    Path: event:/OtherSFXs/HealingSFX
   visuals:
   - {fileID: 4323647905329792515}
-  - {fileID: 6418224172044180765}
   - {fileID: 6243532600379459588}
   - {fileID: 3241891953534089044}
+  - {fileID: 6418224172044180765}
 --- !u!65 &4039936245389803597
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -336,7 +343,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 10, z: 1}
+  m_Size: {x: 5, y: 12, z: 5}
   m_Center: {x: 0, y: 4.5, z: 0}
 --- !u!114 &2231344108757140322
 MonoBehaviour:
@@ -546,7 +553,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8577152792565151256, guid: bbfe3044b9dae4644b4cf10d7d2a1a78, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8937041795504890386, guid: bbfe3044b9dae4644b4cf10d7d2a1a78, type: 3}
       propertyPath: m_LocalPosition.x

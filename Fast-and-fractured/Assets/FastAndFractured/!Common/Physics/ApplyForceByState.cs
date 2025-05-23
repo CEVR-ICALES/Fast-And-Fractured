@@ -73,7 +73,6 @@ namespace FastAndFractured {
             //apply force
             Vector3 forceDirection = -_rb.transform.up;
             _rb.AddForce(forceDirection * downWardForce, ForceMode.Impulse);
-            //Debug.Log("Roll Prevention" + gameObject.name);
         }
 
         public void ApplyCustomGravity()

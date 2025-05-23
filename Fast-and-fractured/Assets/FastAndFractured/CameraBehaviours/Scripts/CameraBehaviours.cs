@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using Enums;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -12,13 +13,20 @@ namespace FastAndFractured
     {
         [SerializeField] CinemachineFreeLook freeLookCamera;
         private PlayerInputController _inputController;
+        private StatsController _statsController;
 
         private bool _paused = false;
 
         private float _cameraSpeedX;
         private float _cameraSpeedY;
 
-
+        void Start()
+        {
+            TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
+            {
+                _statsController = LevelControllerButBetter.Instance.playerReference.GetComponent<StatsController>();
+            });
+        }
 
         void OnEnable()
         {
@@ -42,6 +50,11 @@ namespace FastAndFractured
                     UpdateCameraMovement();
                 }
             }
+
+            // if (_inputController.CameraMouseInput != Vector2.zero)
+            // {
+            //     HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
+            // }
         }
 
         private void UpdateCameraMovement()
@@ -50,6 +63,7 @@ namespace FastAndFractured
 
             if (freeLookCamera != null && PlayerInputController.Instance.CameraInput != Vector2.zero)
             {
+
                 // to do invert depending on user settings
                 float newXAxisValue = freeLookCamera.m_XAxis.Value + _inputController.CameraInput.x * freeLookCamera.m_XAxis.m_MaxSpeed * Time.deltaTime;
                 float newYAxisValue = freeLookCamera.m_YAxis.Value + -_inputController.CameraInput.y * freeLookCamera.m_YAxis.m_MaxSpeed * Time.deltaTime;
@@ -58,6 +72,8 @@ namespace FastAndFractured
 
                 freeLookCamera.m_XAxis.Value = newXAxisValue;
                 freeLookCamera.m_YAxis.Value = newYAxisValue;
+
+                // HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
             }
 
         }

@@ -8,12 +8,18 @@ namespace FastAndFractured
 {
     public class BuildingDeadZone : MonoBehaviour
     { 
+        private StatsController _lastDead = null;
         private void OnTriggerEnter(Collider other)
         {
             StatsController statsController = other.gameObject.GetComponent<StatsController>();
             if (statsController != null)
             {
-                statsController.Dead();
+                if (_lastDead != statsController)
+                {
+                    statsController.Dead();
+                    _lastDead = statsController;
+                    Debug.Log("Dead: " + statsController.gameObject.name);
+                }
             }
         }
     }

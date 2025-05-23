@@ -16,6 +16,10 @@ namespace FastAndFractured
 
         public MenuScreen CurrentScreen => _currentScreen;
         public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
+        public ScreensType defaultScreenType = ScreensType.MAIN_MENU;
+
+        [Header("Splash Screen")]
+        [SerializeField] private ParticleSystem splashParticles;
 
         #endregion
 
@@ -30,7 +34,7 @@ namespace FastAndFractured
         #region Private Fields
 
         private Dictionary<ScreensType, MenuScreen> _menuScreens = new Dictionary<ScreensType, MenuScreen>();
-        private MenuScreen _currentScreen;
+        private MenuScreen _currentScreen; 
         private bool isCurrentScreenInteractable;
         private ITimer _fadeInTimer;
         private ITimer _fadeOutTimer;
@@ -54,7 +58,7 @@ namespace FastAndFractured
         {
             // Register all Screens in scene
             RegisterScreens();
-            if(_menuScreens.TryGetValue(ScreensType.MAIN_MENU, out MenuScreen menuScreen))
+            if(_menuScreens.TryGetValue(defaultScreenType, out MenuScreen menuScreen))
                 _currentScreen = menuScreen;
 
             foreach (var screen in _menuScreens.Values)
@@ -66,12 +70,18 @@ namespace FastAndFractured
             
             if(_currentScreen != null)
             {
-                _currentScreen.gameObject.SetActive(true);
-                _currentScreen.SetAlpha(1);
-                _currentScreen.SetInteractable(true);
-                isCurrentScreenInteractable = true;
-                LockFocusOnButton();
+                TransitionBetweenScreens(_currentScreen.screenType, -1f);
+                if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
+                {
+                    // Play splash particles after 0.5 seconds
+                    TimerSystem.Instance.CreateTimer(2.5f, onTimerDecreaseComplete: () =>
+                    {
+                        splashParticles.Play();
+                    });
+                    LoadScene(1, 6);
+                }
             }
+
             OnInitialized?.Invoke();
         }
 
@@ -105,12 +115,13 @@ namespace FastAndFractured
         {
             if (fadeDuration == -1)
             {
-                if(_currentScreen!=null)
+                if (_currentScreen != null)
                     _currentScreen.gameObject.SetActive(false);
                 _currentScreen = _menuScreens[nextScreen];
                 _currentScreen.SetInteractable(true);
                 isCurrentScreenInteractable = true;
                 _currentScreen.gameObject.SetActive(true);
+                LockFocusOnButton();
                 return;
 
             }
@@ -172,6 +183,15 @@ namespace FastAndFractured
             //}
         }
 
+        // Overload
+        public void LoadScene(int sceneIndex, float time)
+        {
+            TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
+            {
+                LoadScene(sceneIndex);
+            });
+        }
+
         public void UseBackButton()
         {
             if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
@@ -182,9 +202,9 @@ namespace FastAndFractured
 
         private void LockFocusOnButton()
         {
-            if (_currentScreen.defaultButton != null)
+            if (_currentScreen.defaultInteractable != null)
             {
-                _eventSystem.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
+                _eventSystem.SetSelectedGameObject(_currentScreen.defaultInteractable.gameObject);
             }
             else
             {

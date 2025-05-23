@@ -119,7 +119,6 @@ public class CarTestingHelper : MonoBehaviour
         {
             // Set mass from the slider
             rb.mass = massSlider.value;
-            Debug.Log($"Mass set to: {massSlider.value}");
         }
 
         // Check if the object is a PlayerOne (has PhysicsBehaviour component)
@@ -128,8 +127,7 @@ public class CarTestingHelper : MonoBehaviour
         {
             //physicsBehaviour._maxEndurance = currentMaxEndurance;
             //physicsBehaviour._endurance = enduranceSlider.value;
-            Debug.Log($"Max Endurance set to: {currentMaxEndurance}");
-            Debug.Log($"Endurance set to: {enduranceSlider.value}");
+          
         }
     }
 
@@ -139,7 +137,6 @@ public class CarTestingHelper : MonoBehaviour
         {
             currentMaxEndurance = newMaxEndurance;
             enduranceSlider.maxValue = currentMaxEndurance;
-            Debug.Log($"Max Endurance updated to: {currentMaxEndurance}");
         }
         else
         {

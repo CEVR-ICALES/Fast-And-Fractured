@@ -24,6 +24,9 @@ public class ColorBlindModeController : MonoBehaviour
         {
             Debug.LogError("Channel Mixer not found in HDRP Volume Profile!");
             return;
+        } else
+        {
+            EnableOverrideColorblind();
         }
 
         if (!isEnabled) 
@@ -38,11 +41,9 @@ public class ColorBlindModeController : MonoBehaviour
             case 0:
                 SetProtanopiaChannels();
                 break;
-
             case 1:
                 SetDeuteranopiaChannels();
                 break;
-
             case 2:
                 SetTritanopiaChannels();
                 break;
@@ -127,5 +128,18 @@ public class ColorBlindModeController : MonoBehaviour
         _channelMixer.blueOutBlueIn.value = 52.5f;
     }
 
+    private void EnableOverrideColorblind()
+    {
+        _channelMixer.redOutRedIn.overrideState = true;
+        _channelMixer.redOutGreenIn.overrideState = true;
+        _channelMixer.redOutBlueIn.overrideState = true;
 
+        _channelMixer.greenOutRedIn.overrideState = true;
+        _channelMixer.greenOutGreenIn.overrideState = true;
+        _channelMixer.greenOutBlueIn.overrideState = true;
+
+        _channelMixer.blueOutRedIn.overrideState = true;
+        _channelMixer.blueOutGreenIn.overrideState = true;
+        _channelMixer.blueOutBlueIn.overrideState = true;
+    }
 }

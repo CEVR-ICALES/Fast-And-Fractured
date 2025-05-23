@@ -9,7 +9,7 @@ namespace FastAndFractured
         public ScreensType screenType;
         [SerializeField] private CanvasGroup canvasGroup;
         public Button backButton;
-        public Button defaultButton;
+        public Selectable defaultInteractable;
         public Button settingsButton;
 
         public void SetAlpha(float alpha)

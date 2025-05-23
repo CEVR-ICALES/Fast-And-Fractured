@@ -143,7 +143,7 @@ namespace FastAndFractured
         public void PreviousColorblindMode()
         {
             _colorblindModeIndex--;
-            if (_languageIndex < 0)
+            if (_colorblindModeIndex < 0)
             {
                 _colorblindModeIndex = COLORBLIND_MODES_COUNT - 1;
             }
