@@ -1912,8 +1912,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7827201620173868544}
-  - component: {fileID: 761109788809576135}
-  - component: {fileID: 8804402145373938839}
   - component: {fileID: 6006653223233342158}
   - component: {fileID: 4606516725019989426}
   m_Layer: 5
@@ -1943,35 +1941,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &761109788809576135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6363687441494416225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd534419699c40a4a8c3d751bf8dddf3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenType: 9
-  canvasGroup: {fileID: 8804402145373938839}
-  backButton: {fileID: 0}
-  defaultInteractable: {fileID: 0}
-  settingsButton: {fileID: 0}
---- !u!225 &8804402145373938839
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6363687441494416225}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!95 &6006653223233342158
 Animator:
   serializedVersion: 5
@@ -2165,6 +2134,8 @@ GameObject:
   - component: {fileID: 7034327660794342589}
   - component: {fileID: 263657611334489473}
   - component: {fileID: 5764200787213467477}
+  - component: {fileID: 4934152896366981235}
+  - component: {fileID: 5914459397648504897}
   m_Layer: 5
   m_Name: Container
   m_TagString: Untagged
@@ -2232,6 +2203,35 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4934152896366981235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7845287845871939432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd534419699c40a4a8c3d751bf8dddf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenType: 9
+  canvasGroup: {fileID: 5914459397648504897}
+  backButton: {fileID: 4748384214353549437}
+  defaultInteractable: {fileID: 2098279075632884128}
+  settingsButton: {fileID: 0}
+--- !u!225 &5914459397648504897
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7845287845871939432}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7851739351030149215
 GameObject:
   m_ObjectHideFlags: 0

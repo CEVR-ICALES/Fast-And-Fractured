@@ -50,11 +50,11 @@ namespace FastAndFractured
                     UpdateCameraMovement();
                 }
             }
-            Debug.Log(_inputController.CameraMouseInput);
-            if (_inputController.CameraMouseInput != Vector2.zero)
-            {
-                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
-            }
+
+            // if (_inputController.CameraMouseInput != Vector2.zero)
+            // {
+            //     HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
+            // }
         }
 
         private void UpdateCameraMovement()
@@ -73,7 +73,7 @@ namespace FastAndFractured
                 freeLookCamera.m_XAxis.Value = newXAxisValue;
                 freeLookCamera.m_YAxis.Value = newYAxisValue;
 
-                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2);
+                // HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, !(Mathf.Abs(freeLookCamera.m_XAxis.Value) > _statsController.NormalShootAngle / 2));
             }
 
         }
