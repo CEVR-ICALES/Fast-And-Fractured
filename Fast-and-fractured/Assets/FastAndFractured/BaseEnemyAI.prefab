@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 2595824583793223957}
-  fleeMagnitude: 5
+  fleeDistance: 5
   sweepRadius: 20
   shootingMarginErrorAngle: 0.2
   sweepLayerMask:
@@ -63,9 +63,23 @@ MonoBehaviour:
   physicsBehaviour: {fileID: 752286112063728480}
   statsController: {fileID: 7850261787687352134}
   uniqueAbility: {fileID: 0}
+  applyForceByState: {fileID: 0}
   ignoreLayerMask:
     serializedVersion: 2
     m_Bits: 8
+  damageAccumulationDuration: 5
+  fleeTriggerDamageThresholdPercentage: 40
+  recoveryThresholdPercentageForSearch: 50
+  combatHealthAdvantageThreshold: 60
+  damageThresholdPercentage: 60
+  decisionPercentageHealth: 10
+  decisionPercentageMaxSpeed: 10
+  decisionPercentageAcceleration: 10
+  decisionPercentageNormalShoot: 50
+  decisionPercentagePushShoot: 10
+  decisionPercentageCooldown: 10
+  marginToFleeFromSandstorm: 0
+  forgetDuration: 5
 --- !u!114 &2846110653258749907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,6 +96,7 @@ MonoBehaviour:
   - {fileID: 8561768894680828726}
   - {fileID: 4844153401698309730}
   firstState: {fileID: 11400000, guid: 72c439f94d26ff941b8a8dfa65e19b9c, type: 2}
+  _isDebugging: 0
 --- !u!114 &3801468461104530425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,7 +223,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 7294852104538691334}
   m_Enabled: 1
   m_AgentTypeID: -334000983
-  m_Radius: 1
+  m_Radius: 5
   m_Speed: 0
   m_Acceleration: 0
   avoidancePriority: 50
@@ -217,7 +232,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
   m_AutoRepath: 1
-  m_Height: 0.1
+  m_Height: 6
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
@@ -742,6 +757,10 @@ MonoBehaviour:
   onAbilityEnded:
     m_PersistentCalls:
       m_Calls: []
+  onCooldownUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  isAbilityActive: 0
   enduranceRecoveryAmount: 0
 --- !u!114 &752286112063728480 stripped
 MonoBehaviour:

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.HighDefinition;
 using System;
+using UnityEngine.EventSystems;
 
 namespace FastAndFractured
 {
@@ -63,9 +64,13 @@ namespace FastAndFractured
 
         Camera _camera;
 
+        private MenuScreen _menuScreen;
+
         void Start()
         {
             SetStartValues();
+            _menuScreen = GetComponent<MenuScreen>();
+            SetDefaultSelectedButton();
 
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
             resolutionDropdown.onValueChanged.AddListener(delegate { SetResolution(resolutionDropdown.value); });
@@ -89,6 +94,20 @@ namespace FastAndFractured
                 deleteButton.SetActive(true);
             }
             _camera = Camera.main;
+        }
+
+        void OnEnable()
+        {
+            SetDefaultSelectedButton();
+        }
+
+        private void SetDefaultSelectedButton()
+        {
+
+            if (audioSettingsUI.activeSelf) { _menuScreen.defaultInteractable = audioSettingsButton; audioSettingsButton.onClick.Invoke(); return; }
+            if (videoSettingsUI.activeSelf) { _menuScreen.defaultInteractable = videoSettingsButton; videoSettingsButton.onClick.Invoke(); return; }
+            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultInteractable = accessibilitySettingsButton; accessibilitySettingsButton.onClick.Invoke(); return; }
+
         }
 
         private void SetStartValues()
@@ -235,7 +254,7 @@ namespace FastAndFractured
         private void UpdateVSync(bool isActive)
         {
             QualitySettings.vSyncCount = isActive ? 1 : VSYNC_DEFAULT_STATE;
-            Application.targetFrameRate = isActive ? -1 : FPS_DEFAULT;
+            Application.targetFrameRate = isActive ? -1 : PlayerPrefs.GetInt("MaxFPS", FPS_DEFAULT);
 
             PlayerPrefs.SetInt(VSYNC_STRING, QualitySettings.vSyncCount);
             PlayerPrefs.Save();
@@ -316,10 +335,6 @@ namespace FastAndFractured
                 float savedSharpening = PlayerPrefs.GetFloat(TAA_SHARPENING_STRING, SHARPENING_DEFAULT);
                 hdCameraData.taaSharpenStrength = savedSharpening;
             }
-
-
-
-            Debug.Log("Applied AntiAliasing: " + hdCameraData.antialiasing);
         }
 
         private void UpdateTAASharpening()
@@ -402,7 +417,6 @@ namespace FastAndFractured
         private void ApplyDisplayMode(FullScreenMode selectedOption)
         {
             Screen.fullScreenMode = selectedOption;
-            Debug.Log($"Display Mode Applicated: {selectedOption}");
         }
 
         private void LoadDisplayModeOptions()
@@ -447,6 +461,8 @@ namespace FastAndFractured
             deletePopupUI.SetActive(true);
         }
 
+
+        #endregion
         public void ChangeHeaderButtonsDirections(Selectable interactable)
         {
             Navigation navigation = audioSettingsButton.navigation;
@@ -461,7 +477,5 @@ namespace FastAndFractured
             navigation.selectOnDown = interactable;
             accessibilitySettingsButton.navigation = navigation;
         }
-
-        #endregion
     }
 }

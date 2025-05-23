@@ -11,21 +11,27 @@ public class MenuSkipInitialCutscene : AbstractSingleton<MenuSkipInitialCutscene
     public PlayableDirector timeLine;
     public GameObject skipText;
 
-    private bool alreadySkipped;
+    // make it get set for alreadty skipped
+    public bool AlreadySkipped
+    {
+        get => _alreadySkipped;
+        set => _alreadySkipped = value;
+    }
+    private bool _alreadySkipped;
 
     protected override void Awake()
     {
         base.Awake();
 
-        alreadySkipped = false;
+        _alreadySkipped = false;
     }
 
     private void Update()
     {
-        if(Input.anyKeyDown && !alreadySkipped)
+        if(Input.anyKeyDown && !AlreadySkipped)
         {
             SkipTimeline();
-            alreadySkipped = true;
+            _alreadySkipped = true;
         }
     }
 

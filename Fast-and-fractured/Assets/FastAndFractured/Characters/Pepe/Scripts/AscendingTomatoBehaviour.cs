@@ -44,7 +44,7 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
-            charactersList = LevelController.Instance.InGameCharacters;
+            charactersList = LevelControllerButBetter.Instance.InGameCharacters;
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
@@ -78,12 +78,12 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-            GameObject player= LevelController.Instance.playerReference;
+            GameObject player= LevelControllerButBetter.Instance.playerReference;
 
             if (Caster == null) return;
             if (player&&!player.transform.IsChildOf(Caster.transform))
             {
-                float distance = Vector3.Distance(OriginPosition, LevelController.Instance.playerReference.transform.position);
+                float distance = Vector3.Distance(OriginPosition, LevelControllerButBetter.Instance.playerReference.transform.position);
                 if (distance<=effectDistance)
                 {
                     if(!IngameEventsManager.Instance.IsAlertActive)

@@ -145,11 +145,9 @@ namespace FastAndFractured
                     forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                 }
 
-                Debug.Log($"Impact Before Modifier {forceToApply}");
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                Debug.Log($"Impact After Modifier {forceToApply}");
                 otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
@@ -244,7 +242,6 @@ namespace FastAndFractured
         {
             float force = CalculateForceToApplyToOtherCar(oCarEnduranceFactor, oCarWeight, oCarEnduranceImportance);
             // TO DO decide how we want this to behave (stronger push for the one who looses, more equitative approach¿?)
-            Debug.Log("This is a frontal Push");
             return force;
         }
 
@@ -257,7 +254,6 @@ namespace FastAndFractured
 
             float force = statsController.BaseForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
 
-            Debug.Log(force);
             return force;
         }
 
@@ -318,13 +314,19 @@ namespace FastAndFractured
 
         public void BlockRigidBodyRotations()
         {
-            _rb.constraints = RigidbodyConstraints.FreezeRotationY;
-            _rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+            if (_rb != null)
+            {
+                _rb.constraints = RigidbodyConstraints.FreezeRotationY;
+                _rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+            }
         }
 
         public void UnblockRigidBodyRotations()
         {
-            _rb.constraints = RigidbodyConstraints.None;
+            if (_rb != null)
+            {
+                _rb.constraints = RigidbodyConstraints.None;
+            }
         }
 
         public Vector3 GetCurrentRbVelocity()

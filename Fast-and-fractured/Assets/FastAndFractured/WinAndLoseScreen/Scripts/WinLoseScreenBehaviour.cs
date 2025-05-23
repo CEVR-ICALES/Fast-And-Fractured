@@ -42,8 +42,9 @@ namespace FastAndFractured
         }
         public void ShowMenu()
         {
-            container.transform.parent.gameObject.SetActive(true);
-            container.SetActive(true);
+            MenuSkipInitialCutscene.Instance.AlreadySkipped = true;
+            MenuSkipInitialCutscene.Instance.skipText.SetActive(false);
+            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, 0.5f);
             ResetGameEndData();
         }
         private void OnPlayableDirectorStopped(PlayableDirector obj)

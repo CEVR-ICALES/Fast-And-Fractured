@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 using Enums;
+using DG.Tweening;
 namespace FastAndFractured
 {
     public class MinimapFollowPlayer : MonoBehaviour
@@ -22,17 +23,17 @@ namespace FastAndFractured
         }
         void OnEnable()
         {
-            if (LevelController.Instance != null)
+            if (LevelControllerButBetter.Instance != null)
             {
-                LevelController.Instance.charactersCustomStart.AddListener(OnCharactersCustomStart);
+                LevelControllerButBetter.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
             }
         }
 
         void OnDestroy()
         {
-            if (LevelController.Instance != null)
+            if (LevelControllerButBetter.Instance != null)
             {
-                LevelController.Instance.charactersCustomStart.RemoveListener(OnCharactersCustomStart);
+                LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
             }
         }
         
@@ -58,7 +59,7 @@ namespace FastAndFractured
         {
             if (!_isPlayerReceived)
             {
-                _player = LevelController.Instance.playerReference;
+                _player = LevelControllerButBetter.Instance.playerReference;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);

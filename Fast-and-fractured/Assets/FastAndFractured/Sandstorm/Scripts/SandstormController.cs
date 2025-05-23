@@ -123,12 +123,9 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            //Probably change for better aplication. Like an utility
-            LevelController.Instance.ShuffleList(possibleAngels);
+            possibleAngels.ShuffleList();
 
             float spawnAngle = possibleAngels[0];
-
-            Debug.Log("Spawn Point Angle : " + spawnAngle);
             Quaternion vectorRotation = Quaternion.AngleAxis(spawnAngle, Vector3.up);
             Vector3 rotatedSpawnVector = vectorRotation * sphereCenter.forward;
 

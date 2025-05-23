@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Utilities;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 namespace FastAndFractured
 {
@@ -190,7 +191,6 @@ namespace FastAndFractured
 
         public GameObject GetEffectGameObject(Sprite sprite)
         {
-            Debug.Log($"GetEffectGameObject: {sprite.name}");
             GameObject hudImage = FindEffectGameObject(_goodEffects, sprite);
             if (hudImage != null) return hudImage;
 

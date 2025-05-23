@@ -77,15 +77,17 @@ namespace FastAndFractured
                 float angle = Vector3.Angle(shootingDirection, transform.forward);
                 if (angle > characterStatsController.NormalShootAngle / 2)
                 {
-                    Vector3 clampedDirection = Vector3.RotateTowards(
-                        transform.forward,
-                        shootingDirection,
-                        Mathf.Deg2Rad * (characterStatsController.NormalShootAngle / 2),
-                        0f
-                    );
-                    clampedDirection.y = shootingDirection.y;
-                    shootingDirection = clampedDirection.normalized;
+                    return;
                 }
+                //    Vector3 clampedDirection = Vector3.RotateTowards(
+                //        transform.forward,
+                //        shootingDirection,
+                //        Mathf.Deg2Rad * (characterStatsController.NormalShootAngle / 2),
+                //        0f
+                //    );
+                    //clampedDirection.y = shootingDirection.y;
+                    //shootingDirection = clampedDirection.normalized;
+             //   }
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
