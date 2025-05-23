@@ -71,17 +71,17 @@ namespace FastAndFractured
             if(_currentScreen != null)
             {
                 TransitionBetweenScreens(_currentScreen.screenType, 1f);
+                if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
+                {
+                    // Play splash particles after 0.5 seconds
+                    TimerSystem.Instance.CreateTimer(2.5f, onTimerDecreaseComplete: () =>
+                    {
+                        splashParticles.Play();
+                    });
+                    LoadScene(1, 6);
+                }
             }
 
-            if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
-            {
-                // Play splash particles after 0.5 seconds
-                TimerSystem.Instance.CreateTimer(2.5f, onTimerDecreaseComplete: () =>
-                {
-                    splashParticles.Play();
-                });
-                LoadScene(1, 6);
-            }
             OnInitialized?.Invoke();
         }
 
