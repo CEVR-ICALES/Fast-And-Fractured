@@ -202,9 +202,9 @@ namespace FastAndFractured
 
         private void LockFocusOnButton()
         {
-            if (_currentScreen.defaultButton != null)
+            if (_currentScreen.defaultInteractable != null)
             {
-                _eventSystem.SetSelectedGameObject(_currentScreen.defaultButton.gameObject);
+                _eventSystem.SetSelectedGameObject(_currentScreen.defaultInteractable.gameObject);
             }
             else
             {
