@@ -18,6 +18,9 @@ namespace FastAndFractured
         public Dictionary<ScreensType, MenuScreen> menuScreens => _menuScreens;
         public ScreensType defaultScreenType = ScreensType.MAIN_MENU;
 
+        [Header("Splash Screen")]
+        [SerializeField] private ParticleSystem splashParticles;
+
         #endregion
 
         // #region Serialized Fields
@@ -67,12 +70,17 @@ namespace FastAndFractured
             
             if(_currentScreen != null)
             {
-                TransitionBetweenScreens(_currentScreen.screenType, 1);
+                TransitionBetweenScreens(_currentScreen.screenType, 1f);
             }
 
             if (_currentScreen.screenType == ScreensType.SPLASH_SCREEN)
             {
-                LoadScene(1, 5);
+                // Play splash particles after 0.5 seconds
+                TimerSystem.Instance.CreateTimer(2.5f, onTimerDecreaseComplete: () =>
+                {
+                    splashParticles.Play();
+                });
+                LoadScene(1, 6);
             }
             OnInitialized?.Invoke();
         }
