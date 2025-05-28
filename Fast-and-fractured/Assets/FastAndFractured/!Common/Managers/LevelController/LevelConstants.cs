@@ -10,6 +10,6 @@ namespace FastAndFractured
         public const float DISTANCE_TO_CHANGE_TO_KM = 1000f;
         public const string METERS_TEXT = " m";
         public const string KILOMETERS_TEXT = " km";
-        public const int MAIN_MENU_SCENE_BUILD_INDEX = 0;
+        public const int MAIN_MENU_SCENE_BUILD_INDEX = 1;
     }
 }

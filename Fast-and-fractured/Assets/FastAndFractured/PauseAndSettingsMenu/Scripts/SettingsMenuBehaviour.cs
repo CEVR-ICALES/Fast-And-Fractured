@@ -104,9 +104,9 @@ namespace FastAndFractured
         private void SetDefaultSelectedButton()
         {
 
-            if (audioSettingsUI.activeSelf) { _menuScreen.defaultButton = audioSettingsButton; audioSettingsButton.onClick.Invoke(); return; }
-            if (videoSettingsUI.activeSelf) { _menuScreen.defaultButton = videoSettingsButton; videoSettingsButton.onClick.Invoke(); return; }
-            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultButton = accessibilitySettingsButton; accessibilitySettingsButton.onClick.Invoke(); return; }
+            if (audioSettingsUI.activeSelf) { _menuScreen.defaultInteractable = audioSettingsButton; audioSettingsButton.onClick.Invoke(); return; }
+            if (videoSettingsUI.activeSelf) { _menuScreen.defaultInteractable = videoSettingsButton; videoSettingsButton.onClick.Invoke(); return; }
+            if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultInteractable = accessibilitySettingsButton; accessibilitySettingsButton.onClick.Invoke(); return; }
 
         }
 

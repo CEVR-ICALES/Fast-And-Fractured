@@ -43,7 +43,7 @@ namespace FastAndFractured
         }
         private void OnDisable()
         {
-            if (normalShootHandle.onOverheatUpdate != null)
+            if (normalShootHandle && normalShootHandle.onOverheatUpdate != null)
             {
                 normalShootHandle.onOverheatUpdate?.RemoveListener(UpdateOverheatHUD);
                 pushShootHandle.onCooldownUpdate?.RemoveListener(UpdatePushCooldownHUD);

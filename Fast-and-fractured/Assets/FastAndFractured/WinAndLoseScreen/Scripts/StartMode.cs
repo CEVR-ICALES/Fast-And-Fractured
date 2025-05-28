@@ -11,20 +11,21 @@ namespace FastAndFractured
         [SerializeField] private GameEndData gameEndData;
         [SerializeField] private GameObject mainMenuTimeline;
         [SerializeField] private GameObject skipText;
+        [SerializeField] private GameObject winLoseScreenParent;
 
 
         public void ExecuteAfterMainMenuManager()
         {
             if (gameEndData.finalAnimation != null)
             {
-                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE,-1);
+                winLoseScreenParent.SetActive(true);
                 mainMenuTimeline.SetActive(false);
                 MenuSkipInitialCutscene.Instance.timeLine = gameEndData.finalAnimation.GetComponentInChildren<PlayableDirector>();
-                MenuSkipInitialCutscene.Instance.skipText.SetActive(false);
+                MenuSkipInitialCutscene.Instance.skipText.SetActive(true);
             }
             else
             {
-                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU,-1);
+                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
                 mainMenuTimeline.SetActive(true);
             }
         }

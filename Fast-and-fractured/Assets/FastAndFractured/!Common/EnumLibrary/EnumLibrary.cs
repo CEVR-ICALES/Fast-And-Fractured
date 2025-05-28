@@ -62,7 +62,8 @@ namespace Enums
         SPLASH_SCREEN,
         EXIT_POPUP,
         PAUSE,
-        WIN_LOSE
+        WIN_LOSE,
+        HOW_TO_PLAY
     }
 
     public enum Pooltype

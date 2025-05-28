@@ -18,7 +18,14 @@ namespace FastAndFractured
             onInteractEmpty?.Invoke();
             onInteract?.Invoke(interactionFrom, interactionTo);
 
-            SoundManager.Instance.PlayOneShot(pickUpSound,this.transform.position);
+            if (interactionFrom.TryGetComponent(out StatsController statsController))
+            {
+                if (statsController.IsPlayer)
+                {
+                    SoundManager.Instance.PlayOneShot(pickUpSound, this.transform.position);
+                }
+            }
+            
             if (disableGameObjectOnInteract)
             {
                 gameObject.SetActive(false);

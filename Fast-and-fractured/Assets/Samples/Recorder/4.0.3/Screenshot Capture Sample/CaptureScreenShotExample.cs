@@ -52,6 +52,11 @@ namespace UnityEngine.Recorder.Examples
                 m_RecorderController.PrepareRecording();
                 m_RecorderController.StartRecording();
             }
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                m_RecorderController.PrepareRecording();
+                m_RecorderController.StartRecording();
+            }
         }
     }
 }

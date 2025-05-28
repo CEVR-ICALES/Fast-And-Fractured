@@ -21,7 +21,6 @@ namespace FastAndFractured
             if (vsync != VSYNC_DEFAULT)
                 isVsyncEnabled = true;
             QualitySettings.vSyncCount = isVsyncEnabled ? 1 : VSYNC_DEFAULT;
-            Debug.Log("vsync :" + isVsyncEnabled);
             Application.targetFrameRate = isVsyncEnabled ? -1 : PlayerPrefs.GetInt("MaxFPS", FPS_DEFAULT);
         }
     }

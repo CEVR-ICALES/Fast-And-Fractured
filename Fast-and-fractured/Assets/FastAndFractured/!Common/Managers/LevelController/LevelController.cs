@@ -604,7 +604,7 @@ namespace FastAndFractured
             gameEndDataScriptableObject.totalDamageTaken = _playerReference.GetComponent<StatsController>().totalDamageTaken.ToString();
             gameEndDataScriptableObject.totalDistanceTraveled = totalDistanceText;
             gameEndDataScriptableObject.finalAnimation = finalAnimation;
-            MainMenuManager.Instance.LoadScene(0);
+            MainMenuManager.Instance.LoadScene(1, 2f);
         }
         public GameObject GetNearestCharacterToCharacter(GameObject sourceCharacter)
         {
