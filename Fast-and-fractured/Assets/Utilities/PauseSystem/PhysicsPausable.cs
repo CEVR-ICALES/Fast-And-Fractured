@@ -26,9 +26,9 @@ public class PhysicsPausable : MonoBehaviour, IPausable
     public void OnPause()
     {
         if (rigidbodyToPause == null){ return;}
-        _originalVelocity = rigidbodyToPause.velocity;
+        _originalVelocity = rigidbodyToPause.linearVelocity;
         _originalAngularVelocity = rigidbodyToPause.angularVelocity;
-        rigidbodyToPause.velocity = Vector3.zero;
+        rigidbodyToPause.linearVelocity = Vector3.zero;
         rigidbodyToPause.angularVelocity = Vector3.zero;
         _wasKinematic = rigidbodyToPause.isKinematic;
         rigidbodyToPause.isKinematic = true;
@@ -38,7 +38,7 @@ public class PhysicsPausable : MonoBehaviour, IPausable
     {
         if (rigidbodyToPause == null){ return;}
         rigidbodyToPause.isKinematic = _wasKinematic; 
-        rigidbodyToPause.velocity = _originalVelocity;
+        rigidbodyToPause.linearVelocity = _originalVelocity;
         rigidbodyToPause.angularVelocity = _originalAngularVelocity;
 
     }

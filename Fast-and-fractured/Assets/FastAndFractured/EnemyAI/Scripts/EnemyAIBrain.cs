@@ -849,7 +849,7 @@ namespace FastAndFractured
         public void StopMovement()
         {
             physicsBehaviour.Rb.angularVelocity = Vector3.zero;
-            physicsBehaviour.Rb.velocity = Vector3.zero;
+            physicsBehaviour.Rb.linearVelocity = Vector3.zero;
             carMovementController.StopAllCarMovement();
         }
 

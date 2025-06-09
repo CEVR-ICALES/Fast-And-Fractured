@@ -38,7 +38,7 @@ namespace FastAndFractured
         {
             if (base.ActivateAbility())
             {
-                _aimDirection = shootingHandle.CurrentShootDirection + physicsBehaviour.Rb.velocity ;
+                _aimDirection = shootingHandle.CurrentShootDirection + physicsBehaviour.Rb.linearVelocity ;
                 // remove vertical component while maintaining direction relative to car
                 _aimDirection = Vector3.ProjectOnPlane(_aimDirection, Vector3.up).normalized;
                 CalculateLandingPoint();

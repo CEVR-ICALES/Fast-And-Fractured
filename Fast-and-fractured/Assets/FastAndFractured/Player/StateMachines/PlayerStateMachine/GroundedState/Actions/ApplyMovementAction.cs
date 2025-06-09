@@ -42,14 +42,14 @@ namespace StateMachine
             carMovementController.HandleAccelerateInput(0f);
             carMovementController.HandleSteeringInput(new Vector2(moveInput.x, 0f));
 
-            if (physicsBehaviour.Rb.velocity.magnitude > 0.1f)
+            if (physicsBehaviour.Rb.linearVelocity.magnitude > 0.1f)
             {
-                Vector3 decelerationForce = -physicsBehaviour.Rb.velocity.normalized * 10f;
+                Vector3 decelerationForce = -physicsBehaviour.Rb.linearVelocity.normalized * 10f;
                 physicsBehaviour.Rb.AddForce(decelerationForce, ForceMode.Acceleration);
             }
             else
             {
-                physicsBehaviour.Rb.velocity = Vector3.zero;
+                physicsBehaviour.Rb.linearVelocity = Vector3.zero;
             }
         }
 

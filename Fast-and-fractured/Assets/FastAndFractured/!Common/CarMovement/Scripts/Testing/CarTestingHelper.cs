@@ -150,7 +150,7 @@ public class CarTestingHelper : MonoBehaviour
         player.rotation = zones[zoneIndex].rotation;
 
         player.gameObject.GetComponent<CarMovementController>().StopAllCarMovement();
-        player.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        player.gameObject.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
     }
 
     public void WindowClicked()

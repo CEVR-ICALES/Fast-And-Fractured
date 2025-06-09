@@ -54,7 +54,7 @@ namespace FastAndFractured
 
         protected virtual void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
-            bulletBehaivour.Velocity = _velocity + physicsBehaviour.Rb.velocity;
+            bulletBehaivour.Velocity = _velocity + physicsBehaviour.Rb.linearVelocity;
             bulletBehaivour.Range = _range;
             bulletBehaivour.Damage = _damage;
         }

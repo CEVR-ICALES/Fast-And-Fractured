@@ -11,7 +11,7 @@ namespace StateMachine
         private bool activateAim = true;
         public override void Act(Controller controller)
         {
-            if (controller.GetBehaviour<PhysicsBehaviour>().Rb.velocity != Vector3.zero)
+            if (controller.GetBehaviour<PhysicsBehaviour>().Rb.linearVelocity != Vector3.zero)
             {
                 if (controller.GetBehaviour<AimPushShootTrace>() != null)
                 {
