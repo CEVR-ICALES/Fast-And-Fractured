@@ -67,7 +67,7 @@ namespace FastAndFractured {
         public void ApplyRollPrevention()
         {
             //calculate downward foce based 
-            float speedFactor = _rb.velocity.magnitude * statsController.SpeedForceMultiplier ;
+            float speedFactor = _rb.linearVelocity.magnitude * statsController.SpeedForceMultiplier ;
             float downWardForce = statsController.BaseDownwardForce + (_steeringInputMagnitude * statsController.TurningForceMultiplier * speedFactor);
 
             //apply force
@@ -82,7 +82,7 @@ namespace FastAndFractured {
 
         public void ApplyAirFricction()
         {
-            _rb.AddForce(-_rb.velocity.normalized * AIR_FRICTION, ForceMode.Acceleration);
+            _rb.AddForce(-_rb.linearVelocity.normalized * AIR_FRICTION, ForceMode.Acceleration);
         }
 
         public void ApplyFlipStateForce(Vector3 forceDirection, Vector3 forcePoint)

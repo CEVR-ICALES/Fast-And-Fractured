@@ -41,7 +41,7 @@ namespace FastAndFractured {
         {
             if (_useCustomGravity)
             {
-                rb.velocity += _customGravity * Time.fixedDeltaTime;
+                rb.linearVelocity += _customGravity * Time.fixedDeltaTime;
             }
         }
 
@@ -87,7 +87,7 @@ namespace FastAndFractured {
                 _currentBouncingNum++;
                 _currentBounceStrenght = _bounceStrenght * (1f - (_currentBouncingNum / _bouncingNum));
                 var newDirection = collision.GetContact(0).normal * _currentBounceStrenght;
-                rb.velocity += newDirection;
+                rb.linearVelocity += newDirection;
                 if (_firstTime)
                 {
                     Debug.Log(Vector3.Distance(transform.position, initialPosition));
@@ -96,7 +96,7 @@ namespace FastAndFractured {
             }
             if (_currentBouncingNum >= _bouncingNum)
             {
-                rb.velocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
                 rb.constraints = RigidbodyConstraints.FreezePosition;
                 rb.constraints = RigidbodyConstraints.FreezeRotation;
                 if (_timeToExplode > 0)

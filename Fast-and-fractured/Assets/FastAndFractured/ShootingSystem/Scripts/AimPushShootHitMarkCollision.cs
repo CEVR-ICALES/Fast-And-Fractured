@@ -22,7 +22,7 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
     {
         if (simulating)
         {
-            rb.velocity += _customGravity * Time.fixedDeltaTime;
+            rb.linearVelocity += _customGravity * Time.fixedDeltaTime;
         }
     }
     public void SimulateThrow(Vector3 velocity,Vector3 initialPosition,Vector3 customGravity)
@@ -32,7 +32,7 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
             transform.position = initialPosition;
             if (rb == null)
                 rb = GetComponent<Rigidbody>();
-            rb.velocity = velocity;
+            rb.linearVelocity = velocity;
             _customGravity = customGravity;
             simulating = true;
         }
@@ -47,7 +47,7 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
         if (gameObject.activeSelf)
         {
             onCollision?.Invoke(contactPoint.point);
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             simulating = false;
         }
     }

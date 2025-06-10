@@ -129,7 +129,7 @@ namespace FastAndFractured
                 {
                     if(isFrontalHit)
                     {
-                        if(DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance, Rb.velocity.magnitude))
+                        if(DecideIfWinsFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance, Rb.linearVelocity.magnitude))
                         {
                             forceToApply = CalculateForceToApplyToOtherCarWhenFrontalCollision(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
                         } else
@@ -259,7 +259,7 @@ namespace FastAndFractured
 
         private bool DecideIfWinsFrontalCollision(float oCarEnduranceFactor, float oCarWeight, float oEnduranceImportance, float oCurrentRbSpeed)
         {
-            if (CalculateCurrentSimulationWeight((statsController.MaxEndurance / statsController.Endurance), statsController.Weight, statsController.EnduranceImportanceWhenColliding, _rb.velocity.magnitude) > CalculateCurrentSimulationWeight(oCarEnduranceFactor, oCarWeight, oEnduranceImportance, oCurrentRbSpeed))
+            if (CalculateCurrentSimulationWeight((statsController.MaxEndurance / statsController.Endurance), statsController.Weight, statsController.EnduranceImportanceWhenColliding, _rb.linearVelocity.magnitude) > CalculateCurrentSimulationWeight(oCarEnduranceFactor, oCarWeight, oEnduranceImportance, oCurrentRbSpeed))
             {
                 return true;
             } else
@@ -290,12 +290,12 @@ namespace FastAndFractured
 
         public void LimitRigidBodySpeed(float maxSpeed)
         {
-            Vector3 clampedVelocity = _rb.velocity;
+            Vector3 clampedVelocity = _rb.linearVelocity;
 
             if (clampedVelocity.magnitude > (maxSpeed / SPEED_TO_METER_PER_SECOND))
             {
                 clampedVelocity = clampedVelocity.normalized * (maxSpeed / SPEED_TO_METER_PER_SECOND);
-                _rb.velocity = clampedVelocity;                
+                _rb.linearVelocity = clampedVelocity;                
             }
         }
 
@@ -331,12 +331,12 @@ namespace FastAndFractured
 
         public Vector3 GetCurrentRbVelocity()
         {
-            return _rb.velocity;
+            return _rb.linearVelocity;
         }
 
         public bool IsVehicleMoving()
         {
-            if (_rb.velocity.magnitude > isMovingThreshold)
+            if (_rb.linearVelocity.magnitude > isMovingThreshold)
             {
                 return true;
             }

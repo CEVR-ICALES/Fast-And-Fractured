@@ -35,7 +35,7 @@ public class TrainingResetPlayer : MonoBehaviour
             if (character.IsPlayer)
             {
                 _actualPlayer.transform.position = _playerInitialPosition;
-                _playerPhysicsBehaivour.Rb.velocity = Vector3.zero;
+                _playerPhysicsBehaivour.Rb.linearVelocity = Vector3.zero;
             }
         }
     }
@@ -47,7 +47,7 @@ public class TrainingResetPlayer : MonoBehaviour
             _characterToResetStatsController[i].gameObject.transform.position = _spawnPosition[i];
             _characterToResetStatsController[i].gameObject.transform.rotation = charactersToReset[i].transform.rotation;
             _characterToResetStatsController[i].RecoverEndurance(_characterToResetStatsController[i].MaxEndurance, false);
-            _charactersPhysicsBehaivours[i].Rb.velocity = Vector3.zero;
+            _charactersPhysicsBehaivours[i].Rb.linearVelocity = Vector3.zero;
         }
     }
 }

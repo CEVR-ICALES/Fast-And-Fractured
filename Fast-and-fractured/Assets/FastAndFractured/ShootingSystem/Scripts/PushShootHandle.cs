@@ -109,7 +109,7 @@ namespace FastAndFractured {
             Vector3 velocityVectorX = transform.forward * Vx;
 
             //Finalmente, se calcula el vector rotado en X y se suma el vector Y.
-            return (rotation * velocityVectorX) + transform.up * Vy + physicsBehaviour.Rb.velocity;
+            return (rotation * velocityVectorX) + transform.up * Vy + physicsBehaviour.Rb.linearVelocity;
         }
 
         private void CalculateInitialVelocityForParabolicMovement(float range, float angle,out float Vx,out float Vy)

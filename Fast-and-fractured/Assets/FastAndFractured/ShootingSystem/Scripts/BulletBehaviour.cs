@@ -42,14 +42,14 @@ namespace FastAndFractured
                 particles.SetActive(false);
             }
             initPosition = transform.position;
-            rb.velocity = velocity;
+            rb.linearVelocity = velocity;
         }
 
         protected virtual void OnBulletEndTrayectory()
         {
             if (particles != null)
             {
-                rb.velocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
                 ownCollider.enabled = false;
                 visuals.SetActive(false);
                 rb.constraints = RigidbodyConstraints.FreezePosition;
