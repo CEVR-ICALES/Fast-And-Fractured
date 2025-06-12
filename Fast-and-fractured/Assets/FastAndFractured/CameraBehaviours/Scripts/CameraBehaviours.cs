@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
 using Enums;
+using Unity.Cinemachine;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
