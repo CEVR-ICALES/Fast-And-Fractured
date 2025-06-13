@@ -19,7 +19,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
         StopAllCoroutines();
     }
 
-    public void Start()
+    protected override void Initialize()
     {
         _playerSelected = PlayerPrefs.GetString("Selected_Player").Split("_")[0];
     }

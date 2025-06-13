@@ -73,7 +73,9 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
         UpdateCharacterDisplay();
     }
-
+    protected override void Initialize()
+    {
+    }
     public void SelectNextCharacter()
     {
         if (_modelChangeTimer != null) return;
