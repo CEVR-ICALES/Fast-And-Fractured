@@ -12,6 +12,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
 
     private void OnEnable()
     {
+        if (InteractableHandler.Instance)
         InteractableHandler.Instance.onPoolInitialize.AddListener(CheckDespawnSkinInteractables);
     }
     private void OnDisable()
@@ -19,6 +20,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
         StopAllCoroutines();
     }
 
+   
     protected override void Initialize()
     {
         _playerSelected = PlayerPrefs.GetString("Selected_Player").Split("_")[0];
@@ -28,7 +30,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     {
         List<string> unlockableSkins = new List<string>();
 
-        int numOfSkins = LevelControllerButBetter.Instance.playerReference!=null ? LevelControllerButBetter.Instance.playerReference.GetComponentInChildren<StatsController>().SkinCount : 0;
+        int numOfSkins = LevelControllerButBetter.Instance.LocalPlayer!=null ? LevelControllerButBetter.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
 
         if (_playerSelected == "")
         {

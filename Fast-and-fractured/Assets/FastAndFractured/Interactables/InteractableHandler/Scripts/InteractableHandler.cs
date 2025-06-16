@@ -32,9 +32,9 @@ namespace FastAndFractured
             LevelControllerButBetter.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
             
         }
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             foreach (var item in interactablesToToggle)
             {
                 GenericInteractable interactable = item.GetComponentInParent<GenericInteractable>();

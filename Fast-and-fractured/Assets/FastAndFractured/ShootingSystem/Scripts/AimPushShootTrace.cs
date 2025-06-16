@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using FastAndFractured;
+using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Events;
@@ -10,7 +11,7 @@ using UnityEngine.UIElements;
 using Utilities;
 
 
-public class AimPushShootTrace : MonoBehaviour
+public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
 {
     [Header("Settings")]
     [Range(1f, 5f)] [SerializeField] private int frames = 1;
@@ -50,8 +51,13 @@ public class AimPushShootTrace : MonoBehaviour
         hitMarkCollision.onCollision.AddListener(SetPointForHitMark);
         hitMarkCollision2.onCollision.AddListener(SetPointForHitMark);
     }
-    void Start()
+    protected override void Construct()
     {
+        
+    }
+    protected override void Initialize()
+    {
+        base.Initialize();
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
         if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
         _pushShootPoint = pushShootHandle.PushShootPoint;

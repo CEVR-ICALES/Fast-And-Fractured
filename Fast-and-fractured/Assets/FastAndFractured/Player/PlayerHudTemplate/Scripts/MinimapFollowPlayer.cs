@@ -59,7 +59,7 @@ namespace FastAndFractured
         {
             if (!_isPlayerReceived)
             {
-                _player = LevelControllerButBetter.Instance.playerReference;
+                _player = LevelControllerButBetter.Instance.LocalPlayer;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);

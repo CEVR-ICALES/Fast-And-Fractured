@@ -20,7 +20,7 @@ namespace FastAndFractured
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
             VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
-            GameObject player = LevelControllerButBetter.Instance.playerReference;
+            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
             if (interactionFrom == player)
             {
                 IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;

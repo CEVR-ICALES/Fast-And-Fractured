@@ -22,12 +22,7 @@ namespace FastAndFractured.Core
         {
             if (_autoConstructOnAwake)
                 PerformConstruct();
-        }
-
-        // Original provided code had a HandleAutoInitializationAwake also calling Construct.
-        // This was likely a typo. Construct is for Awake, Initialize for Start.
-        // Removed HandleAutoInitializationAwake as PerformConstruct covers the Awake phase.
-
+        } 
         protected virtual void Start()
         {
             HandleAutoInitializationStart();
@@ -44,7 +39,7 @@ namespace FastAndFractured.Core
                 PerformInitialize();
         }
 
-        public void PerformConstruct() //
+        public void PerformConstruct()  
         {
             if (_isConstructed) return;
             _isConstructed = true;
@@ -84,7 +79,11 @@ namespace FastAndFractured.Core
             Deconstruct();
         }
 
-        protected virtual void Deconstruct() { }
+        protected virtual void Deconstruct() {
+        
+            _isInitialized = false;
+            _isConstructed =false;
+        }
 
     }
 } 
