@@ -117,7 +117,7 @@ namespace FastAndFractured
             }
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
-
+            SmoothAccelerationAndDeacceleration();
         }
 
         private void Update()
@@ -128,6 +128,12 @@ namespace FastAndFractured
         private void SetMaxRbSpeedDelayed()
         {
             _currentRbMaxVelocity = statsController.MaxSpeed;
+        }
+
+        private void SmoothAccelerationAndDeacceleration()
+        {
+            //check direction of the car (comparing it to the cars forward), then compare to the users input direction to smooth stopping the car
+
         }
 
         #region Refactorized Code
@@ -148,6 +154,7 @@ namespace FastAndFractured
         {
             if (PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
+                _previousSteeringYValue = rawAccelerationInput;
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
