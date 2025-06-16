@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class ListUtilities  
 {
-    public static T GetRandomValueFromList<T>(this List<T> list, T defaultValue)
+    public static T GetRandomValueFromList<T>(this List<T> list, T defaultValue = default(T) )
     {
         if (list == null || list.Count == 0)
         {

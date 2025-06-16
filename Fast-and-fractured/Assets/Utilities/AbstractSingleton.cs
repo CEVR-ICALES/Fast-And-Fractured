@@ -1,3 +1,4 @@
+using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,10 +8,10 @@ namespace Utilities
     /// An abstract class that provides base functionalities of a singleton for its derived classes
     /// </summary>
     /// <typeparam name="T">The type of singleton instance</typeparam>
-[DefaultExecutionOrder(-222)]    public abstract class AbstractSingleton<T> : MonoBehaviour where T : Component
+    [DefaultExecutionOrder(-222)]
+    public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour where T : Component
     {
         static T s_Instance;
-
         /// <summary>
         /// static Singleton instance
         /// </summary>
@@ -20,7 +21,7 @@ namespace Utilities
             {
                 if (s_Instance == null)
                 {
-                    s_Instance = FindObjectOfType<T>();
+                    s_Instance = FindFirstObjectByType<T>();
                     return s_Instance;
                     if (s_Instance == null)
                     {
@@ -34,8 +35,11 @@ namespace Utilities
                 return s_Instance;
             }
         }
-
-        protected virtual void Awake()
+        protected override void Construct()
+        {
+            InitializeSingleton();
+        }
+        public void InitializeSingleton()
         {
             if (s_Instance == null)
             {
@@ -46,6 +50,6 @@ namespace Utilities
                 Destroy(gameObject);
             }
         }
-        
+
     }
 }

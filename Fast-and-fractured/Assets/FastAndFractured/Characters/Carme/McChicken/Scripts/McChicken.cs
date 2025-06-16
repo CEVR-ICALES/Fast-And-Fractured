@@ -65,7 +65,7 @@ namespace FastAndFractured
             _mainCollider.enabled = true;
             _rb.freezeRotation = false;
             _rb.isKinematic = false;
-            _rb.velocity = Vector3.zero;
+            _rb.linearVelocity = Vector3.zero;
             _visualsHandler.OnLand();
             transform.DOScale(finalScale, finalScaleDuration)
                 .SetEase(Ease.OutBack)

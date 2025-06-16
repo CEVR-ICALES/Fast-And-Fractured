@@ -254,7 +254,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
-            _player = LevelControllerButBetter.Instance.playerReference;
+            _player = LevelControllerButBetter.Instance.LocalPlayer;
         }
         public void ReturnToStartPosition()
         {
@@ -849,7 +849,7 @@ namespace FastAndFractured
         public void StopMovement()
         {
             physicsBehaviour.Rb.angularVelocity = Vector3.zero;
-            physicsBehaviour.Rb.velocity = Vector3.zero;
+            physicsBehaviour.Rb.linearVelocity = Vector3.zero;
             carMovementController.StopAllCarMovement();
         }
 

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Utilities; 
-using Enums;  
+using Utilities;
+using Enums;
 
 namespace FastAndFractured
 {
@@ -14,12 +14,12 @@ namespace FastAndFractured
         public UnityEvent onLevelPreStart;
         public UnityEvent charactersCustomStart;
         [SerializeField] private List<CharacterData> charactersData;
-        [SerializeField] private string playerCharacter = "Pepe_0"; 
+        [SerializeField] private string playerCharacter = "Pepe_0";
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField] private int maxCharactersInGame = 8;
-        
-         public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); }
- 
+
+        public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); }
+
 
         [SerializeField] private GameObject[] spawnPoints;
         [SerializeField] private List<GameObject> safeZones;
@@ -38,36 +38,37 @@ namespace FastAndFractured
         [Tooltip("Debug mode allow to have characters in scene spawned. If you desactive this bool, remove all characters in scene or it will not work.")]
         [SerializeField] private bool debugMode = true;
         [Tooltip("Setting to false, will mean that the characters will be spawned in the Start, setting to true, you can use characters you place in the scene.")]
-        [SerializeField] private bool useMyCharacters = false;  
+        [SerializeField] private bool useMyCharacters = false;
         [SerializeField] private bool stormInDebugMode = false;
-        [SerializeField] private bool justSpawnAI = false;  
-        
-        
-        public GameObject playerReference { get => _playerReferenceInternal; }
-        private GameObject _playerReferenceInternal;
-        
-         
+        [SerializeField] private bool justSpawnAI = false;
+
+
+        public GameObject LocalPlayer { get => _localPlayer; }
+        private GameObject _localPlayer;
+
+
         [SerializeField] private float delayUntilGameStarts = 3.5f;
-        public List<CharacterIcon> characterIcons; 
-        [SerializeField] private float endGameDelayTime = 0.5f; 
+        public List<CharacterIcon> characterIcons;
+        [SerializeField] private float endGameDelayTime = 0.5f;
         [SerializeField] private GameEndData gameEndDataScriptableObject;
         #endregion
 
-    
+
         private CharacterDataProvider _characterDataProvider;
         private CharacterSpawner _characterSpawner;
         private GameLoopManager _gameLoopManager;
         private SandstormInteractionManager _sandstormInteractionManager;
         private GameEndHandler _gameEndHandler;
 
-         public GameObject PlayerReference => _playerReferenceInternal;
+        [SerializeField] public List<GameObject> availablePlayer;
         public List<GameObject> InGameCharacters => _characterSpawner?.InGameCharacters ?? new List<GameObject>();
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
-        private bool _isStormActive = false; 
+        private bool _isStormActive = false;
 
-        protected override void Awake()
+        [SerializeField] private List<string> _playersCharacterNameCodes;
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             InitializeHandlers();
 
             //Provisional For Debug 
@@ -78,7 +79,7 @@ namespace FastAndFractured
 
                 if (!useMyCharacters)
                 {
-                    StatsController[] debugControllers = FindObjectsOfType<StatsController>();
+                    StatsController[] debugControllers = FindObjectsByType<StatsController>(FindObjectsSortMode.None);
                     foreach (var character in debugControllers)
                     {
                         if (character.transform.parent != null) character.transform.parent.gameObject.SetActive(false);
@@ -88,7 +89,7 @@ namespace FastAndFractured
             }
             else
             {
-                useMyCharacters = false;  
+                useMyCharacters = false;
             }
         }
 
@@ -97,16 +98,16 @@ namespace FastAndFractured
             _characterDataProvider = new CharacterDataProvider(charactersData);
             _characterSpawner = new CharacterSpawner(_characterDataProvider, PlayerPrefab, AIPrefab, spawnPoints);
             _gameLoopManager = new GameLoopManager(_timeToCallTheStorm, _playerDeadReductionTime, _sandStormController);
-            _sandstormInteractionManager = new SandstormInteractionManager(_sandStormController, safeZones, false); 
+            _sandstormInteractionManager = new SandstormInteractionManager(_sandStormController, safeZones, false);
             _gameEndHandler = new GameEndHandler(gameEndDataScriptableObject);
         }
 
-        void Start()
+        protected override void Initialize()
         {
             Cursor.lockState = CursorLockMode.Locked;
             _isStormActive = false;
 
-            if (useMyCharacters && debugMode)  
+            if (useMyCharacters && debugMode)
             {
                 StartLevelWithOwnCharacters();
 
@@ -118,56 +119,72 @@ namespace FastAndFractured
 
             }
         }
-        
+
         private void StartLevelWithOwnCharacters()
         {
             Debug.Log("Starting level with pre-placed characters (debug mode).");
             List<GameObject> foundCharacters = new List<GameObject>();
-            PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
-            
-            if (playerCtrl != null)
+            if (availablePlayer.Count == 0)
             {
-                StatsController playerStats = playerCtrl.GetComponentInChildren<StatsController>();
-                if (playerStats != null)
+                PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
+
+                if (playerCtrl != null)
                 {
-                    _playerReferenceInternal = playerStats.gameObject;  
-                    foundCharacters.Add(playerCtrl.gameObject);  
+                    StatsController playerStats = playerCtrl.GetComponentInChildren<StatsController>();
+                    if (playerStats != null)
+                    {
+                        _localPlayer = playerStats.gameObject;
+                        foundCharacters.Add(playerCtrl.gameObject);
+                    }
+                    else Debug.LogError("PlayerInputController found, but no child StatsController.");
                 }
-                else Debug.LogError("PlayerInputController found, but no child StatsController.");
-            } else if (!justSpawnAI) {  
-                 Debug.LogWarning("useMyCharacters is true, but no PlayerInputController found in scene.");
+                else if (!justSpawnAI)
+                {
+                    Debug.LogWarning("useMyCharacters is true, but no PlayerInputController found in scene.");
+                }
+
             }
+            else
+            {
+
+
+            }
+
 
 
             EnemyAIBrain[] aiBrains = FindObjectsOfType<EnemyAIBrain>();
             foreach (var aiBrain in aiBrains)
             {
-                foundCharacters.Add(aiBrain.GetComponentInChildren<StatsController>().gameObject);  
-                if (playerCtrl != null)
-                {
-                    aiBrain.Player = playerCtrl.gameObject;  
-                }
+                foundCharacters.Add(aiBrain.GetComponentInChildren<StatsController>().gameObject);
+                aiBrain.Player = GetARandomPlayer();
+
             }
-            
+
             _characterSpawner.InGameCharacters.Clear();
             _characterSpawner.InGameCharacters.AddRange(foundCharacters);
-            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _playerReferenceInternal, charactersCustomStart);
-            _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);  
-            _gameLoopManager.ActivateCharacterControls(); 
+            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _localPlayer, charactersCustomStart);
+            _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
+            _gameLoopManager.ActivateCharacterControls();
         }
 
         private void StartLevelWithSpawnedCharacters()
         {
             Debug.Log("Starting level with spawned characters.");
-            string actualPlayerCharacter = justSpawnAI ? "" : PlayerPrefs.GetString("Selected_Player", playerCharacter);
-            int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num",1);
+            if (_playersCharacterNameCodes.Count == 0)
+            {
+                string actualPlayerCharacter = justSpawnAI ? "" : PlayerPrefs.GetString("Selected_Player", playerCharacter);
+                _playersCharacterNameCodes.Add(actualPlayerCharacter);
+                availablePlayer.Add(new GameObject("symbolic player WIP"));
+             }
+            int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num", availablePlayer.Count);
+
 
             bool spawnSucceeded = _characterSpawner.TrySpawnCharacters(
                 maxCharactersInGame,
-                actualPlayerCharacter,
+                _playersCharacterNameCodes,
                 actualCurrentPlayers,
                 justSpawnAI,
-                out GameObject playerForAI 
+                out GameObject playerForAI
             );
 
             if (!spawnSucceeded || InGameCharacters.Count == 0)
@@ -175,8 +192,8 @@ namespace FastAndFractured
                 Debug.LogError("Character spawning failed or resulted in no characters. Level cannot continue as intended.");
                 return;
             }
-            
-            _playerReferenceInternal = _characterSpawner.PlayerReference;  
+
+            _localPlayer = _characterSpawner.PlayerReference;
 
             if (IngameEventsManager.Instance != null)
             {
@@ -184,8 +201,8 @@ namespace FastAndFractured
                 //todo replace by event callback or put on onLevelPreStart
             }
 
-            _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _playerReferenceInternal, charactersCustomStart);
-            
+            _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _localPlayer, charactersCustomStart);
+
             bool shouldCallStorm = !debugMode || stormInDebugMode;
             _gameLoopManager.SetupStorm(shouldCallStorm, debugMode);
 
@@ -213,15 +230,16 @@ namespace FastAndFractured
         {
             _gameLoopManager.ActivateCharacterControls();
 
-            foreach (var character in InGameCharacters) {
+            foreach (var character in InGameCharacters)
+            {
 
-                character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath); 
-                }
+                character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath);
             }
-        public void ReportCharacterDeath(float delay, GameObject character,bool isPlayer)
+        }
+        public void ReportCharacterDeath(float delay, GameObject character, bool isPlayer)
         {
             character.GetComponent<StatsController>().onDead.RemoveListener(ReportCharacterDeath);
-            _gameLoopManager.OnCharacterDied(character, isPlayer, endGameDelayTime, characterIcons, 
+            _gameLoopManager.OnCharacterDied(character, isPlayer, endGameDelayTime, characterIcons,
                 ProcessPlayerWin, ProcessPlayerLoss);
         }
 
@@ -229,16 +247,16 @@ namespace FastAndFractured
         {
             // Called by GameLoopManager when player wins
             Debug.Log("Player has won!");
-            _gameEndHandler.ProcessGameEnd(true, _playerReferenceInternal, "Selected_Player");
+            _gameEndHandler.ProcessGameEnd(true, _localPlayer, "Selected_Player");
         }
 
         private void ProcessPlayerLoss()
         {
             // Called by GameLoopManager when player loses (player character died)
             Debug.Log("Player has lost!");
-            _gameEndHandler.ProcessGameEnd(false, _playerReferenceInternal, "Selected_Player");
+            _gameEndHandler.ProcessGameEnd(false, _localPlayer, "Selected_Player");
         }
-        
+
         #region Public Accessors / Wrappers
         // This method is called by SandstormController when storm is actually active
         public void NotifyStormIsActive()
@@ -286,6 +304,14 @@ namespace FastAndFractured
         private void OnDestroy()
         {
             Cursor.lockState = CursorLockMode.None;
+        }
+
+        public GameObject GetARandomPlayer()
+        {
+            return availablePlayer.GetRandomValueFromList();
+        }
+        public void AddCharacterToListOfSelectedCharacters(string character) {
+            _playersCharacterNameCodes.Add(character);
         }
 
     }

@@ -78,12 +78,12 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-            GameObject player= LevelControllerButBetter.Instance.playerReference;
+            GameObject player= LevelControllerButBetter.Instance.LocalPlayer;
 
             if (Caster == null) return;
             if (player&&!player.transform.IsChildOf(Caster.transform))
             {
-                float distance = Vector3.Distance(OriginPosition, LevelControllerButBetter.Instance.playerReference.transform.position);
+                float distance = Vector3.Distance(OriginPosition, LevelControllerButBetter.Instance.LocalPlayer.transform.position);
                 if (distance<=effectDistance)
                 {
                     if(!IngameEventsManager.Instance.IsAlertActive)

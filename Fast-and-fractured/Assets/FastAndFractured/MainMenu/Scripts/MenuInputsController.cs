@@ -1,7 +1,6 @@
 using FastAndFractured;
 using UnityEngine;
 using Enums;
-using Unity.VisualScripting;
 
 public class MenuInputsController : MonoBehaviour
 {

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
 using Enums;
+using Unity.Cinemachine;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -20,12 +20,15 @@ namespace FastAndFractured
         private float _cameraSpeedX;
         private float _cameraSpeedY;
 
-        void Start()
+        protected override void Initialize()
         {
-            TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
+            base.Initialize();
+            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+                () => TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
             {
-                _statsController = LevelControllerButBetter.Instance.playerReference.GetComponent<StatsController>();
-            });
+                _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
+            }));
+
         }
 
         void OnEnable()

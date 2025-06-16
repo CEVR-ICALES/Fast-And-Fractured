@@ -228,7 +228,7 @@ namespace FastAndFractured
         {
             if(_brakeSlowDownTimer == null)
             {
-                Vector3 initialSpeed = _physicsBehaviour.Rb.velocity;
+                Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
                 _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(brakeSlowDownTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
                     _brakeSlowDownTimer = null;
@@ -237,7 +237,7 @@ namespace FastAndFractured
                     if(IsGrounded())
                     {
                         float toApply = brakeSpeedCurve.Evaluate(progress);
-                        _physicsBehaviour.Rb.velocity = initialSpeed * toApply;
+                        _physicsBehaviour.Rb.linearVelocity = initialSpeed * toApply;
                     }
                 });
             }
@@ -247,14 +247,14 @@ namespace FastAndFractured
         {
             _isDrifting = true;
             _driftDirection = Mathf.Sign(steeringInput); //only determine direcition + or -
-            _physicsBehaviour.Rb.drag = 1f;
-            _initialSpeedWhenDrifting = _physicsBehaviour.Rb.velocity.magnitude;
+            _physicsBehaviour.Rb.linearDamping = 1f;
+            _initialSpeedWhenDrifting = _physicsBehaviour.Rb.linearVelocity.magnitude;
         }
 
         private void EndDrift()
         {
             _isDrifting = false;
-            _physicsBehaviour.Rb.drag = 0.08f;
+            _physicsBehaviour.Rb.linearDamping = 0.08f;
         }
 
         private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
@@ -311,7 +311,7 @@ namespace FastAndFractured
 
                 case SteeringMode.REAR_WHEEL:
                     float rearSteerAngle = _currentSteerAngle;
-                    if (_physicsBehaviour.Rb.velocity.magnitude < 10f)
+                    if (_physicsBehaviour.Rb.linearVelocity.magnitude < 10f)
                     {
                         rearSteerAngle = -_currentSteerAngle; //posite direciton wheen going at low speeds
                     }
@@ -349,9 +349,9 @@ namespace FastAndFractured
                 _canDash = false;
 
                 // Apply a small initial velocity to overcome static friction
-                if (_physicsBehaviour.Rb.velocity.magnitude < 1f)
+                if (_physicsBehaviour.Rb.linearVelocity.magnitude < 1f)
                 {
-                    _physicsBehaviour.Rb.velocity += dashDirection * 0.5f;
+                    _physicsBehaviour.Rb.linearVelocity += dashDirection * 0.5f;
                 }
 
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
@@ -439,7 +439,7 @@ namespace FastAndFractured
             float slopeAlignment = Vector3.Dot(averageNormal, carForwardFlat);
 
             // prevent change of speed liimtations when not moving enough
-            bool isMoving = _physicsBehaviour.Rb.velocity.magnitude > slopeSpeedThreshold;
+            bool isMoving = _physicsBehaviour.Rb.linearVelocity.magnitude > slopeSpeedThreshold;
 
             _isGoingUphill = isMoving && slopeAlignment < uphillForwardThreshold; // slope opposes movement
             _isGoingDownhill = isMoving && slopeAlignment > downhillForwardThreshold; // slope aligns with movement
@@ -614,7 +614,7 @@ namespace FastAndFractured
 
         private void UpdateSpeedOverlay()
         {
-            float speedZ = Mathf.Abs(_physicsBehaviour.Rb.velocity.magnitude);
+            float speedZ = Mathf.Abs(_physicsBehaviour.Rb.linearVelocity.magnitude);
             float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
             if (speedOverlay != null)
                 speedOverlay.text = speedKmh.ToString("F1");

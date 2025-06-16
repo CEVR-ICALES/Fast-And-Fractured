@@ -19,13 +19,15 @@ public class MenuSkipInitialCutscene : AbstractSingleton<MenuSkipInitialCutscene
     }
     private bool _alreadySkipped;
 
-    protected override void Awake()
+    protected override void Construct()
     {
-        base.Awake();
-
+        base.Construct();
         _alreadySkipped = false;
     }
-
+    protected override void Initialize()
+    {
+        
+    }
     private void Update()
     {
         if(Input.anyKeyDown && !AlreadySkipped)
