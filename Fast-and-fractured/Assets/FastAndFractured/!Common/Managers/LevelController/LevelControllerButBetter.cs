@@ -43,8 +43,8 @@ namespace FastAndFractured
         [SerializeField] private bool justSpawnAI = false;
 
 
-        public GameObject playerReference { get => _playerReferenceInternal; }
-        private GameObject _playerReferenceInternal;
+        public GameObject LocalPlayer { get => _localPlayer; }
+        private GameObject _localPlayer;
 
 
         [SerializeField] private float delayUntilGameStarts = 3.5f;
@@ -65,6 +65,7 @@ namespace FastAndFractured
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
         private bool _isStormActive = false;
 
+        [SerializeField] private List<string> _playersCharacterNameCodes;
         protected override void Construct()
         {
             base.Construct();
@@ -123,37 +124,45 @@ namespace FastAndFractured
         {
             Debug.Log("Starting level with pre-placed characters (debug mode).");
             List<GameObject> foundCharacters = new List<GameObject>();
-            PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
+            if (availablePlayer.Count == 0)
+            {
+                PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
 
-            if (playerCtrl != null)
-            {
-                StatsController playerStats = playerCtrl.GetComponentInChildren<StatsController>();
-                if (playerStats != null)
+                if (playerCtrl != null)
                 {
-                    _playerReferenceInternal = playerStats.gameObject;
-                    foundCharacters.Add(playerCtrl.gameObject);
+                    StatsController playerStats = playerCtrl.GetComponentInChildren<StatsController>();
+                    if (playerStats != null)
+                    {
+                        _localPlayer = playerStats.gameObject;
+                        foundCharacters.Add(playerCtrl.gameObject);
+                    }
+                    else Debug.LogError("PlayerInputController found, but no child StatsController.");
                 }
-                else Debug.LogError("PlayerInputController found, but no child StatsController.");
+                else if (!justSpawnAI)
+                {
+                    Debug.LogWarning("useMyCharacters is true, but no PlayerInputController found in scene.");
+                }
+
             }
-            else if (!justSpawnAI)
+            else
             {
-                Debug.LogWarning("useMyCharacters is true, but no PlayerInputController found in scene.");
+
+
             }
+
 
 
             EnemyAIBrain[] aiBrains = FindObjectsOfType<EnemyAIBrain>();
             foreach (var aiBrain in aiBrains)
             {
                 foundCharacters.Add(aiBrain.GetComponentInChildren<StatsController>().gameObject);
-                if (playerCtrl != null)
-                {
-                    aiBrain.Player = playerCtrl.gameObject;
-                }
+                aiBrain.Player = GetARandomPlayer();
+
             }
 
             _characterSpawner.InGameCharacters.Clear();
             _characterSpawner.InGameCharacters.AddRange(foundCharacters);
-            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _playerReferenceInternal, charactersCustomStart);
+            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _localPlayer, charactersCustomStart);
             _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
             _gameLoopManager.ActivateCharacterControls();
         }
@@ -161,12 +170,18 @@ namespace FastAndFractured
         private void StartLevelWithSpawnedCharacters()
         {
             Debug.Log("Starting level with spawned characters.");
-            string actualPlayerCharacter = justSpawnAI ? "" : PlayerPrefs.GetString("Selected_Player", playerCharacter);
-            int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num", 1);
+            if (_playersCharacterNameCodes.Count == 0)
+            {
+                string actualPlayerCharacter = justSpawnAI ? "" : PlayerPrefs.GetString("Selected_Player", playerCharacter);
+                _playersCharacterNameCodes.Add(actualPlayerCharacter);
+                availablePlayer.Add(new GameObject("symbolic player WIP"));
+             }
+            int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num", availablePlayer.Count);
+
 
             bool spawnSucceeded = _characterSpawner.TrySpawnCharacters(
                 maxCharactersInGame,
-                actualPlayerCharacter,
+                _playersCharacterNameCodes,
                 actualCurrentPlayers,
                 justSpawnAI,
                 out GameObject playerForAI
@@ -178,7 +193,7 @@ namespace FastAndFractured
                 return;
             }
 
-            _playerReferenceInternal = _characterSpawner.PlayerReference;
+            _localPlayer = _characterSpawner.PlayerReference;
 
             if (IngameEventsManager.Instance != null)
             {
@@ -186,7 +201,7 @@ namespace FastAndFractured
                 //todo replace by event callback or put on onLevelPreStart
             }
 
-            _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _playerReferenceInternal, charactersCustomStart);
+            _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _localPlayer, charactersCustomStart);
 
             bool shouldCallStorm = !debugMode || stormInDebugMode;
             _gameLoopManager.SetupStorm(shouldCallStorm, debugMode);
@@ -232,14 +247,14 @@ namespace FastAndFractured
         {
             // Called by GameLoopManager when player wins
             Debug.Log("Player has won!");
-            _gameEndHandler.ProcessGameEnd(true, _playerReferenceInternal, "Selected_Player");
+            _gameEndHandler.ProcessGameEnd(true, _localPlayer, "Selected_Player");
         }
 
         private void ProcessPlayerLoss()
         {
             // Called by GameLoopManager when player loses (player character died)
             Debug.Log("Player has lost!");
-            _gameEndHandler.ProcessGameEnd(false, _playerReferenceInternal, "Selected_Player");
+            _gameEndHandler.ProcessGameEnd(false, _localPlayer, "Selected_Player");
         }
 
         #region Public Accessors / Wrappers
@@ -294,6 +309,9 @@ namespace FastAndFractured
         public GameObject GetARandomPlayer()
         {
             return availablePlayer.GetRandomValueFromList();
+        }
+        public void AddCharacterToListOfSelectedCharacters(string character) {
+            _playersCharacterNameCodes.Add(character);
         }
 
     }
