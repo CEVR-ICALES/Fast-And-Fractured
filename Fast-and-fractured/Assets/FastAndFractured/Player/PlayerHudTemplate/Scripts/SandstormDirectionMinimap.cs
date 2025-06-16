@@ -31,7 +31,7 @@ namespace FastAndFractured
         }
         public void SetSandstormDirection(Vector3 direction)
         {
-            _player = LevelControllerButBetter.Instance.playerReference;
+            _player = LevelControllerButBetter.Instance.LocalPlayer;
             _sandstormDirection = direction;
             _isDataReceived = true;
             arrowIcon.SetActive(true);

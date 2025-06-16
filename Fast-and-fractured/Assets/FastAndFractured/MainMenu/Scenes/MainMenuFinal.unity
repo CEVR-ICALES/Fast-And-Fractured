@@ -819,7 +819,7 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0
-  m_AllowDynamicResolution: 0
+  m_AllowDynamicResolution: 1
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -884,7 +884,7 @@ MonoBehaviour:
   flipYMode: 0
   xrRendering: 1
   fullscreenPassthrough: 0
-  allowDynamicResolution: 0
+  allowDynamicResolution: 1
   customRenderingSettings: 0
   invertFaceCulling: 0
   probeLayerMask:
@@ -10318,6 +10318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4263659b2d9f8549aa7916fde302e0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoInitializeOnAwake: 1
 --- !u!114 &374102193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22680,6 +22681,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 511347328197fdb43988ebdc95d70c10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoInitializeOnAwake: 1
   allCharacters:
   - {fileID: 11400000, guid: 0830dc6928f66b84fac9a6f6e41ba949, type: 2}
   - {fileID: 11400000, guid: 5eff2256fb6970847ae3b2fa3d259803, type: 2}

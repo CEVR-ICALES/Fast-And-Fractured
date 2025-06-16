@@ -254,7 +254,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
-            _player = LevelControllerButBetter.Instance.playerReference;
+            _player = LevelControllerButBetter.Instance.LocalPlayer;
         }
         public void ReturnToStartPosition()
         {

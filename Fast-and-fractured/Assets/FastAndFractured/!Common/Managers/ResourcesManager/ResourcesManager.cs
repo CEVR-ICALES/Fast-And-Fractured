@@ -40,9 +40,9 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     private Dictionary<NormalShootIcons, Sprite> _normalShootIconsDictionary = new Dictionary<NormalShootIcons, Sprite>();
     private Dictionary<ScreenEffects, Sprite> _screenEffectsDictionary = new Dictionary<ScreenEffects, Sprite>();
 
-    protected override void Awake()
+    protected override void Construct()
     {
-        base.Awake();
+        base.Construct();
         _resourcesLoader = gameObject.GetComponent<ResourcesLoader>();
         _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits, ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _pushShootIcons, ref _normalShootIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
 

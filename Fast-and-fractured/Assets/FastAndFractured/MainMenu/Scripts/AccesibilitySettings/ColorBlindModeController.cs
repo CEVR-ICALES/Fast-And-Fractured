@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using Utilities;
 
-public class ColorBlindModeController : MonoBehaviour
+public class ColorBlindModeController : AbstractSingleton<ColorBlindModeController>
 {
     [Header("Volume Settings")] 
     private ChannelMixer _channelMixer;
@@ -11,8 +12,9 @@ public class ColorBlindModeController : MonoBehaviour
     private const string COLORBLIND_KEY = "ColorBlindMode";
     private const string COLORBLIND_INDEX_KEY = "ColorBlindModeIndex";
 
-    private void Start()
+    protected override void Initialize()
     {
+        base.Initialize();
         _colorblindModeIndex = PlayerPrefs.GetInt(COLORBLIND_INDEX_KEY);
         UpdateColorBlindMode(PlayerPrefs.GetInt(COLORBLIND_KEY, 0) == 1);
     }

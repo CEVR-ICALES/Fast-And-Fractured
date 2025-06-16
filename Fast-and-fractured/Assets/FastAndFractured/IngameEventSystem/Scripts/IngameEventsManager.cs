@@ -22,8 +22,9 @@ namespace FastAndFractured
 
         public const float EVENT_START_DELAY = 0.5f;
 
-        private void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
             foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
                 inGameCharactersTopIcons.Add(playerIcon);
             }

@@ -19,14 +19,13 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     private const float MIN_EXPOSURE_OFFSET = 1.5f;
     private const float EXPOSURE_MULTIPLIER = 2f;
     #endregion
-
-    protected override void Awake()
+    protected override void Construct()
     {
-        base.Awake();
+        base.Construct();
         _brightness = PlayerPrefs.GetFloat(PLAYER_PREF_BRIGHTNESS_STRING, DEFAULT_BRIGHTNESS);
     }
-
-    public void Start()
+   
+    protected override void Initialize()
     {
         boxVolume = VolumeManager.Instance.CurrentVolumeGameObject.transform.GetChild(2).GetComponent<Volume>();
         if (boxVolume == null)
@@ -74,5 +73,6 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     {
         exposure.fixedExposure.value = CalculateExposureFromBrightness(_brightness);
     }
+
 }
 

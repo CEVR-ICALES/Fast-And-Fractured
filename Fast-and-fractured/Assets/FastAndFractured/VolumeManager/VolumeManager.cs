@@ -17,9 +17,9 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
     public GameObject CurrentVolumeGameObject => currentVolumeObject;
     public Volume CurrentVolumeComponent => currentVolumeObject.GetComponentInChildren<Volume>();
 
-    protected override void Awake()
+    protected override void Construct()
     {
-        base.Awake();
+        base.Construct();
         if (volumeList.Count == 0) return;
 
         foreach (GameObject vol in volumeList)
@@ -28,6 +28,9 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
         }
 
         ChangeCurrentVolume(volumeList.First());
+    }
+    protected override void Initialize()
+    {
         if (randomStart)
         {
             int selected = Random.Range(0, volumeList.Count);

@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using Utilities;
 using Utilities.Managers.PauseSystem;
 using System.Net.NetworkInformation;
+using FastAndFractured.Core;
 namespace FastAndFractured
 {
-    public class SandstormController : MonoBehaviour, IKillCharacters, IPausable
+    public class SandstormController : AbstractAutoInitializableMonoBehaviour, IKillCharacters, IPausable
     {
         public GameObject fogParent;
         public LocalVolumetricFog primaryFog;
@@ -82,7 +83,8 @@ namespace FastAndFractured
 
         const float HALF_FRONT_ANGLE = 90;
         private const float MIN_VALUE_PER_SANDSTORM_DETECTION = 0.00000000001f;
-        private void Start()
+
+        protected override void Construct()
         {
             _stormCollider = GetComponent<BoxCollider>();
             _stormCollider.enabled = false;
