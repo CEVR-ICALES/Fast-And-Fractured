@@ -138,14 +138,16 @@ namespace FastAndFractured
         {
             UpdateCarCurrentDirection();
 
-            if(_previousSteeringYValue > 0 && _isMovingBackwards && !_isMovingForward) // moving backwards wants to go forward
+            if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
             {
                 Debug.Log("Wnats to change direction to forward");
+                ApplyModBrake(0.3f);
             }
 
-            if(_previousSteeringYValue < 0 && _isMovingForward && !_isMovingBackwards) // moving forward wants to go bakcwards
+            if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
             {
                 Debug.Log("Wnats to change direction to backward");
+                ApplyModBrake(0.3f);
 
             }
 
@@ -240,7 +242,7 @@ namespace FastAndFractured
             {
                 case BrakeMode.ALL_WHEELS:
                     ApplyBrakeTorque(statsController.BrakeTorque);
-                    ApplyModBrake();
+                    //ApplyModBrake(brakeSlowDownTime);
                     break;
 
                 case BrakeMode.FRONT_WHEELS_STRONGER:
@@ -248,17 +250,17 @@ namespace FastAndFractured
                     wheels[1].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[2].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
                     wheels[3].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
-                    ApplyModBrake();
+                    //ApplyModBrake(brakeSlowDownTime);
                     break;
             }
         }
 
-        private void ApplyModBrake()
+        private void ApplyModBrake(float slowDownTimer)
         {
             if(_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
-                _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(brakeSlowDownTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(slowDownTimer, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
                     _brakeSlowDownTimer = null;
                 }, onTimerIncreaseUpdate: (progress) =>
