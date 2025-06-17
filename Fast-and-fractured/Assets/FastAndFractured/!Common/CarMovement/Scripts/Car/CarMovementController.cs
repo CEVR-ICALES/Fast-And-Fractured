@@ -77,6 +77,10 @@ namespace FastAndFractured
         private float _currentRbMaxVelocity;
         private bool _isUsingController = false;
 
+        private bool _isMovingForward = false;
+        private bool _isMovingBackwards = false;
+        const float MOVING_DIRECTION_THRESHOLD = 0.4f;
+
         public bool IsAi
         {
             get => isAi; set =>  isAi = value;
@@ -132,8 +136,26 @@ namespace FastAndFractured
 
         private void SmoothAccelerationAndDeacceleration()
         {
-            //check direction of the car (comparing it to the cars forward), then compare to the users input direction to smooth stopping the car
+            UpdateCarCurrentDirection();
 
+            if(_previousSteeringYValue > 0 && _isMovingBackwards && !_isMovingForward) // moving backwards wants to go forward
+            {
+                Debug.Log("Wnats to change direction to forward");
+            }
+
+            if(_previousSteeringYValue < 0 && _isMovingForward && !_isMovingBackwards) // moving forward wants to go bakcwards
+            {
+                Debug.Log("Wnats to change direction to backward");
+
+            }
+
+        }
+
+        private void UpdateCarCurrentDirection()
+        {
+            float forwardVelocity = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward);
+            _isMovingForward = forwardVelocity > MOVING_DIRECTION_THRESHOLD;
+            _isMovingBackwards = forwardVelocity < MOVING_DIRECTION_THRESHOLD;
         }
 
         #region Refactorized Code
