@@ -9,6 +9,8 @@ namespace FastAndFractured.Core
         [SerializeField] protected bool _autoConstructOnAwake = true;
         [Tooltip("If true, Initialize() will be called in Start once if not already initialized in Construct (Awake).")]
         [SerializeField] protected bool _autoInitializeOnStart = true;
+        [Tooltip("If true, Initialize() will be called in Enable  once if not already initialized in Construct (Awake).")]
+        [SerializeField] protected bool _autoInitializeOnEnable = true;
 
         protected bool _isConstructed = false;
         protected bool _isInitialized = false;
@@ -25,10 +27,14 @@ namespace FastAndFractured.Core
         } 
         protected virtual void Start()
         {
-            HandleAutoInitializationStart();
+            HandleAutoInitialization();
         }
 
-        protected virtual void HandleAutoInitializationStart()
+        private void OnEnable()
+        {
+            HandleAutoInitialization();
+        }
+        protected virtual void HandleAutoInitialization()
         {
             if (!_isConstructed && _autoConstructOnAwake)
             {
@@ -42,8 +48,9 @@ namespace FastAndFractured.Core
         public void PerformConstruct()  
         {
             if (_isConstructed) return;
-            _isConstructed = true;
             Construct();
+            _isConstructed = true;
+
         }
 
         public void PerformInitialize() 
@@ -54,8 +61,9 @@ namespace FastAndFractured.Core
                 Debug.LogWarning($"Attempting to Initialize {gameObject.name} before it's Constructed. Forcing Construct.");
                 PerformConstruct(); 
             }
+            Initialize();
             _isInitialized = true;
-            Initialize(); 
+
         }
 
         /// <summary>
