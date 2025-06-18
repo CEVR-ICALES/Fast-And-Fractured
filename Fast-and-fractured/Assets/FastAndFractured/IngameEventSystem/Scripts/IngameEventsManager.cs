@@ -14,18 +14,18 @@ namespace FastAndFractured
         private List<CharacterIcon> inGameCharactersTopIcons = new();
         [SerializeField] private GameObject tomatoAlertUI;
         [SerializeField] private GameObject tomatoScreenEfect;
-        public bool IsAlertActive {get => _isAlertActive;}
+        public bool IsAlertActive { get => _isAlertActive; }
         private bool _isAlertActive = false;
         private ITimer _timerReference;
         private LocalizedText _localizedTextReference;
         private const string RELASE_SCENE_NAME = "Release";
 
         public const float EVENT_START_DELAY = 0.5f;
-
-        protected override void Initialize()
+        protected override void Construct()
         {
-            base.Initialize();
-            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true)){
+            base.Construct();
+            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true))
+            {
                 inGameCharactersTopIcons.Add(playerIcon);
             }
             eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
@@ -34,13 +34,17 @@ namespace FastAndFractured
             {
             }
         }
-
+        private void OnEnable()
+        {
+            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(SetCharactersTopElements);
+        }
         private void OnDisable()
         {
-         }
+            LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(SetCharactersTopElements);
+        }
 
-      
-        public void CreateEvent(string eventText, float timeInScreen,Action onEventComplete=null)
+
+        public void CreateEvent(string eventText, float timeInScreen, Action onEventComplete = null)
         {
             if (_localizedTextReference != null)
             {
@@ -81,8 +85,9 @@ namespace FastAndFractured
             _isAlertActive = false;
         }
 
-        public void UltEvent(){
-            
+        public void UltEvent()
+        {
+
         }
 
     }
