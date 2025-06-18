@@ -311,65 +311,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1479187988212335819}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &2532440339826449430
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3721158169456635401}
-  - component: {fileID: 4716481928139129519}
-  m_Layer: 0
-  m_Name: GameReadyCountdown
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3721158169456635401
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2532440339826449430}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4126099742579727068}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4716481928139129519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2532440339826449430}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 043f97f8ecdb4974da0b4a95831f1ad9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  evenText: {fileID: 0}
-  soundReference:
-    Guid:
-      Data1: 2104902708
-      Data2: 1130174527
-      Data3: -2122479171
-      Data4: 1424200078
-    Path: event:/OtherSFXs/HealingSFX
-  soundReady:
-    Guid:
-      Data1: 2104902708
-      Data2: 1130174527
-      Data3: -2122479171
-      Data4: 1424200078
-    Path: event:/OtherSFXs/HealingSFX
 --- !u!1 &2714485879095641187
 GameObject:
   m_ObjectHideFlags: 0
@@ -1429,8 +1370,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6264722375230805823}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15304494, y: 0.7562745, z: -0.19136655, w: 0.6066342}
-  m_LocalPosition: {x: -65.3, y: 41.4, z: 43.9}
+  m_LocalRotation: {x: 0.012356736, y: -0.000000030089666, z: 3.7183848e-10, w: 0.99992365}
+  m_LocalPosition: {x: 0, y: 7.66, z: -27.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1467,11 +1408,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60.000004
+  near clip plane: 0.1
+  far clip plane: 5000
+  field of view: 50
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1731,6 +1672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _autoConstructOnAwake: 1
   _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
 --- !u!1 &6603951989706105156
 GameObject:
   m_ObjectHideFlags: 0
@@ -2255,6 +2197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _autoConstructOnAwake: 1
   _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
 --- !u!1 &8283528732291796546
 GameObject:
   m_ObjectHideFlags: 0
@@ -2285,7 +2228,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4538961620721786082}
-  - {fileID: 3721158169456635401}
   - {fileID: 6113157612317209892}
   - {fileID: 8869245932256288871}
   - {fileID: 9172932133489541210}
@@ -3078,6 +3020,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _autoConstructOnAwake: 1
   _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
   usingController: 0
   onLevelPreStart:
     m_PersistentCalls:
@@ -3246,9 +3189,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7696048442876155962, guid: fd4b3b8ce90b8324a94266a142e9167c, type: 3}
       propertyPath: m_Name
-      value: IngameEventsManager
+      value: TOREMOVEngameEventsManager
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7696048442876155962, guid: fd4b3b8ce90b8324a94266a142e9167c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6807331818858120901, guid: fd4b3b8ce90b8324a94266a142e9167c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
