@@ -39,10 +39,17 @@ namespace FastAndFractured
         {
             base.Construct();
             RegisterUIElements();
+            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
+            RegisterSelectedPlayer();
         }
         protected override void Initialize()
         {
             base.Initialize();
+            
+        }
+
+        void RegisterSelectedPlayer()
+        {
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
             selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
             string splittedPlayer = selectedPlayer.Split('_')[0];
@@ -50,6 +57,7 @@ namespace FastAndFractured
             selectedPlayerPush = splittedPlayer + "_PUSH";
             selectedPlayerShoot = splittedPlayer + "_SHOOT";
             SetPlayerStartingSprites();
+
         }
 
         #endregion

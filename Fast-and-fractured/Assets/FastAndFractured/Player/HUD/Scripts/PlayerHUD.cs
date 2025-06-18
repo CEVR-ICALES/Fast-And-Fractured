@@ -1,18 +1,26 @@
 using Enums;
+using FastAndFractured.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace FastAndFractured
 {
-    public class PlayerHUD : MonoBehaviour
+    public class PlayerHUD : AbstractAutoInitializableMonoBehaviour
     {
         [SerializeField] NormalShootHandle normalShootHandle;
         [SerializeField] PushShootHandle pushShootHandle;
         [SerializeField] CarMovementController carMovementController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
-        private void Awake()
+        protected override void Construct()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
+            GetComponentsNeededInChildren();
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
+            GetComponentsNeededInChildren();
+            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
+            
         }
         private void GetComponentsNeededInChildren()
         {

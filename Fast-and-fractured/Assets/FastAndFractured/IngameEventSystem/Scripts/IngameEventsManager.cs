@@ -33,16 +33,21 @@ namespace FastAndFractured
             if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
             {
             }
+           
         }
-        private void OnEnable()
+        protected override void Initialize()
         {
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(SetCharactersTopElements);
+            base.Initialize();
+            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            SetCharactersTopElements);
         }
-        private void OnDisable()
-        {
-            LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(SetCharactersTopElements);
-        }
+      
 
+        [ContextMenu("Create debug event")]
+        public void DebugEvent()
+        {
+            CreateEvent("Debug event",5f);
+        }
 
         public void CreateEvent(string eventText, float timeInScreen, Action onEventComplete = null)
         {

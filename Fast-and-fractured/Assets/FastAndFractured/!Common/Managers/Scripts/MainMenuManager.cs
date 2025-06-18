@@ -44,18 +44,18 @@ namespace FastAndFractured
         public UnityEvent OnInitialized;
 
         #region Unity Methods
-
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             _eventSystem = EventSystem.current;
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
-        private void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
             // Register all Screens in scene
             RegisterScreens();
             if(_menuScreens.TryGetValue(defaultScreenType, out MenuScreen menuScreen))
