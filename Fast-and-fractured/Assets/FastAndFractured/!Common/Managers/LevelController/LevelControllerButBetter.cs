@@ -195,12 +195,6 @@ namespace FastAndFractured
 
             _localPlayer = _characterSpawner.PlayerReference;
 
-            if (IngameEventsManager.Instance != null)
-            {
-                IngameEventsManager.Instance.SetCharactersTopElements();
-                //todo replace by event callback or put on onLevelPreStart
-            }
-
             _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _localPlayer, charactersCustomStart);
 
             bool shouldCallStorm = !debugMode || stormInDebugMode;
