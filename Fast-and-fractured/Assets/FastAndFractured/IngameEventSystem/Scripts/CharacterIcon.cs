@@ -4,9 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 using Enums;
+using FastAndFractured.Core;
 namespace FastAndFractured
 {
-    public class CharacterIcon : MonoBehaviour
+    public class CharacterIcon : AbstractAutoInitializableMonoBehaviour
     {
         public GameObject Character { get=> _character; }
         private GameObject _character;
@@ -15,8 +16,8 @@ namespace FastAndFractured
         [SerializeField] private GameObject _characterIconDeadEffect;
         [SerializeField] private GameObject _characterIconUltEffect;
 
-        void Awake()
-        {
+        protected override void Construct()
+        { 
             _characterIconImg = GetComponent<Image>();
             _characterIconDeadEffect = transform.GetChild(0).gameObject;
         }
@@ -26,6 +27,11 @@ namespace FastAndFractured
             _character = characterReceived;
             if(_character != null)
             {
+                if (!_characterIconImg)
+                {
+                    _characterIconImg = GetComponent<Image>();
+                    //todo refactor this
+                }
                 _characterIconImg.sprite = ResourcesManager.Instance.GetResourcesSprite(characterIconName);
             }
         }

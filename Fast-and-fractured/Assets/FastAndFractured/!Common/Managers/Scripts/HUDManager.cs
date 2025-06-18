@@ -35,14 +35,14 @@ namespace FastAndFractured
 
         #region Unity Methods
 
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             RegisterUIElements();
         }
-
-        private void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
             selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
             string splittedPlayer = selectedPlayer.Split('_')[0];
