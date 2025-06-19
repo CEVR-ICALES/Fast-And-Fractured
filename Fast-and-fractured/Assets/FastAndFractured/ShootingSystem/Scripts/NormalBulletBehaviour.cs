@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
+using Utilities.Managers.PauseSystem;
 
 namespace FastAndFractured
 {
@@ -9,6 +11,8 @@ namespace FastAndFractured
         public Collider IgnoreCollider { set => _ignoreCollider = value; }
         private Collider _ignoreCollider;
         private bool _callForDestroy = true;
+        private const float SPEED_REDUCTION_MULTIPLIER = 0.8f;
+        private const float DISABLED_COLLIDER_DURATION = 0.1f;
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
@@ -30,7 +34,25 @@ namespace FastAndFractured
 
         protected override void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<StatsController>(out var statsController))
+            if (other.gameObject.layer == LayerMask.NameToLayer("Shield"))
+            {
+                if (_ignoreCollider != null && other.transform.IsChildOf(_ignoreCollider.gameObject.transform))
+                {
+                    return;
+                }
+                Vector3 contactPoint = other.ClosestPoint(transform.position);
+                Vector3 normal = (contactPoint - other.transform.position).normalized;
+                Vector3 incomingDirection = GetComponent<Rigidbody>().velocity.normalized;
+                Vector3 reflectedDirection = Vector3.Reflect(incomingDirection, normal);
+                float speed = GetComponent<Rigidbody>().velocity.magnitude;
+                GetComponent<Rigidbody>().velocity = reflectedDirection * speed * SPEED_REDUCTION_MULTIPLIER;
+                ownCollider.enabled = false;
+                TimerSystem.Instance.CreateTimer(DISABLED_COLLIDER_DURATION, onTimerDecreaseComplete: () =>
+                {
+                    ownCollider.enabled = true;
+                });
+            }
+            else if (other.TryGetComponent<StatsController>(out var statsController))
             {
                 statsController.TakeEndurance(damage, false, _ignoreCollider.gameObject);
                 if (_ignoreCollider != null && _ignoreCollider.TryGetComponent<StatsController>(out var ownerStatsController))
