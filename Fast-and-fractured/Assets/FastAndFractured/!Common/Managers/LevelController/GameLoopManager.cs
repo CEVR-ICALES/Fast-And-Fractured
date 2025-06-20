@@ -168,6 +168,9 @@ namespace FastAndFractured
                 }
 
                 AliveCharacterCount--;
+
+                Debug.Log("AliveCharacterCount " + AliveCharacterCount);
+                Debug.Log("_inGameCharacters Count" + _inGameCharacters.Count);
                 if (AliveCharacterCount <= 1 && _playerReference != null && _inGameCharacters.Contains(_playerReference))  
                 {
                     HasPlayerWon = true;
