@@ -304,8 +304,18 @@ namespace FastAndFractured
         {
             return availablePlayer.GetRandomValueFromList();
         }
-        public void AddCharacterToListOfSelectedCharacters(string character) {
+        public void AddCharacterToListOfSelectedCharacters(int id,string character) {
+            if (id == -1) {
+
+                id++;
+            }
+            
+            if(id>= _playersCharacterNameCodes.Count)
             _playersCharacterNameCodes.Add(character);
+            else
+            {
+                _playersCharacterNameCodes[id] = character;
+            }
         }
 
     }
