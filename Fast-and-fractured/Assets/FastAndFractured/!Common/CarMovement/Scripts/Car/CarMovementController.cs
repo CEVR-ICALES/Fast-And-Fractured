@@ -265,24 +265,25 @@ namespace FastAndFractured
                 return;
             }
 
-            if(_brakeSlowDownTimer != null)
+            if (_brakeSlowDownTimer != null)
             {
                 _brakeSlowDownTimer.StopTimer();
             }
             float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (statsController.DriftingFactorToSpeed / SPEED_TO_METERS_PER_SECOND));
 
-            Vector3 targetDriftDirection = transform.right * _driftDirection;
+            float forwardDot = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward);
+            float directionSign = Mathf.Sign(forwardDot);
 
-            //smoothly interpolate between the car's forward direction and the target drift direction
-            float driftProgress = Mathf.Clamp01(Time.deltaTime * statsController.DriftingSmoothFactor); //asdjust smoothing factor as needed
-            Vector3 currentDriftDirection = Vector3.Slerp(transform.forward, targetDriftDirection, driftProgress);
+            Vector3 targetDriftDirection = transform.right * _driftDirection * directionSign;
 
-            //aapply the drift force in the interpolated direction
+            Vector3 movementDirection = _physicsBehaviour.Rb.linearVelocity.normalized;
+            float driftProgress = Mathf.Clamp01(Time.deltaTime * statsController.DriftingSmoothFactor);
+            Vector3 currentDriftDirection = Vector3.Slerp(movementDirection, targetDriftDirection, driftProgress);
+
             Vector3 driftFinalForce = currentDriftDirection * statsController.DriftForce * speedFactor;
             _physicsBehaviour.AddForce(driftFinalForce, ForceMode.Acceleration);
 
-            //rotate the car while drifting
-            float driftTorque = _driftDirection * statsController.DriftForce * 0.8f * speedFactor;
+            float driftTorque = _driftDirection * statsController.DriftForce * 0.8f * speedFactor * directionSign;
             _physicsBehaviour.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
         }
 
