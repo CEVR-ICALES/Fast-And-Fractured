@@ -188,6 +188,7 @@ namespace FastAndFractured
 
         private void ApplyMotorTorque(float acceleration)
         {
+            if (_brakeSlowDownTimer != null) return;
             foreach (WheelController wheel in wheels)
             {
                 wheel.ApplyMotorTorque(acceleration);
@@ -275,6 +276,13 @@ namespace FastAndFractured
                     {
                         float toApply = brakeSpeedCurve.Evaluate(progress);
                         _physicsBehaviour.Rb.linearVelocity = initialSpeed * toApply;
+                        if(_physicsBehaviour.Rb.linearVelocity.magnitude < 0.5f)
+                        {
+                            _brakeSlowDownTimer.StopTimer();
+                            _brakeSlowDownTimer = null;
+                            _isMovingBackwards = false;
+                            _isMovingForward = false;
+                        }
                     }
                 });
             }
