@@ -126,7 +126,7 @@ namespace FastAndFractured
 
         private void Update()
         {
-            if(!isAi) UpdateSpeedOverlay();
+            //if(!isAi) UpdateSpeedOverlay();
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -257,6 +257,9 @@ namespace FastAndFractured
 
         private void ApplyModBrake(float slowDownTimer)
         {
+            if(_brakeSlowDownTimer != null)
+                return;
+            
             if(_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
@@ -643,13 +646,13 @@ namespace FastAndFractured
             }
         }
 
-        private void UpdateSpeedOverlay()
-        {
-            float speedZ = Mathf.Abs(_physicsBehaviour.Rb.linearVelocity.magnitude);
-            float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-            if (speedOverlay != null)
-                speedOverlay.text = speedKmh.ToString("F1");
-        }
+        //private void UpdateSpeedOverlay()
+        //{
+        //    float speedZ = Mathf.Abs(_physicsBehaviour.Rb.linearVelocity.magnitude);
+        //    float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
+        //    if (speedOverlay != null)
+        //        speedOverlay.text = speedKmh.ToString("F1");
+        //}
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
