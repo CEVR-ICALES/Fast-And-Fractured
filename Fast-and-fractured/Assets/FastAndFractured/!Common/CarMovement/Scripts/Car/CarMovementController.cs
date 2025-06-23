@@ -135,17 +135,21 @@ namespace FastAndFractured
         private void SmoothAccelerationAndDeacceleration()
         {
             UpdateCarCurrentDirection();
+            if (_brakeSlowDownTimer != null) return;
+
+            float currentSpeed = Mathf.Abs(Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward));
+            float dynamicBrakesSlowDownTime = Mathf.Clamp01(currentSpeed / _currentRbMaxVelocity) * 1f;
 
             if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
             {
                 Debug.Log("Wnats to change direction to forward");
-                ApplyModBrake(0.3f);
+                ApplyModBrake(dynamicBrakesSlowDownTime);
             }
 
             if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
             {
                 Debug.Log("Wnats to change direction to backward");
-                ApplyModBrake(0.3f);
+                ApplyModBrake(dynamicBrakesSlowDownTime);
 
             }
 
@@ -261,6 +265,7 @@ namespace FastAndFractured
             if(_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
+                Debug.Log(slowDownTimer);
                 _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(slowDownTimer, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
                     _brakeSlowDownTimer = null;
