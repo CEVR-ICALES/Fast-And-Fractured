@@ -157,7 +157,7 @@ namespace FastAndFractured
         {
             float forwardVelocity = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward);
             _isMovingForward = forwardVelocity > MOVING_DIRECTION_THRESHOLD;
-            _isMovingBackwards = forwardVelocity < MOVING_DIRECTION_THRESHOLD;
+            _isMovingBackwards = forwardVelocity < -MOVING_DIRECTION_THRESHOLD;
         }
 
         #region Refactorized Code
