@@ -12,7 +12,6 @@ namespace FastAndFractured
         public UnityEvent<float, float> onDashCooldownUpdate;
 
         public WheelController[] wheels;
-        private TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
 
         private PhysicsBehaviour _physicsBehaviour;
@@ -106,7 +105,6 @@ namespace FastAndFractured
             }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
-            speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
         }
 
         private void FixedUpdate()
@@ -645,14 +643,6 @@ namespace FastAndFractured
                 wheel.UpdateWheelVisuals();
             }
         }
-
-        //private void UpdateSpeedOverlay()
-        //{
-        //    float speedZ = Mathf.Abs(_physicsBehaviour.Rb.linearVelocity.magnitude);
-        //    float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-        //    if (speedOverlay != null)
-        //        speedOverlay.text = speedKmh.ToString("F1");
-        //}
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
