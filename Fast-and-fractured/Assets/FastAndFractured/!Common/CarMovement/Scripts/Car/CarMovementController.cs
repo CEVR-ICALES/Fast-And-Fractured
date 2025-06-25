@@ -135,21 +135,17 @@ namespace FastAndFractured
         private void SmoothAccelerationAndDeacceleration()
         {
             UpdateCarCurrentDirection();
-            if (_brakeSlowDownTimer != null) return;
-
-            float currentSpeed = Mathf.Abs(Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward));
-            float dynamicBrakesSlowDownTime = Mathf.Clamp01(currentSpeed / _currentRbMaxVelocity) * 1f;
 
             if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
             {
                 Debug.Log("Wnats to change direction to forward");
-                ApplyModBrake(dynamicBrakesSlowDownTime);
+                ApplyDirectionChange();
             }
 
             if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
             {
                 Debug.Log("Wnats to change direction to backward");
-                ApplyModBrake(dynamicBrakesSlowDownTime);
+                ApplyDirectionChange();
 
             }
 
@@ -245,7 +241,7 @@ namespace FastAndFractured
             {
                 case BrakeMode.ALL_WHEELS:
                     ApplyBrakeTorque(statsController.BrakeTorque);
-                    //ApplyModBrake(brakeSlowDownTime);
+                    ApplyModBrake();
                     break;
 
                 case BrakeMode.FRONT_WHEELS_STRONGER:
@@ -258,34 +254,34 @@ namespace FastAndFractured
             }
         }
 
-        private void ApplyModBrake(float slowDownTimer)
+        private void ApplyModBrake()
         {
             if(_brakeSlowDownTimer != null)
                 return;
-            
-            if(_brakeSlowDownTimer == null)
+
+            ApplyMotorTorque(0f);
+            ApplyBrakeTorque(statsController.BrakeTorque);
+            if (_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
-                Debug.Log(slowDownTimer);
-                _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(slowDownTimer, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(brakeSlowDownTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
                 {
                     _brakeSlowDownTimer = null;
                 }, onTimerIncreaseUpdate: (progress) =>
                 {
-                    if(IsGrounded())
+                    if (IsGrounded())
                     {
                         float toApply = brakeSpeedCurve.Evaluate(progress);
                         _physicsBehaviour.Rb.linearVelocity = initialSpeed * toApply;
-                        if(_physicsBehaviour.Rb.linearVelocity.magnitude < 0.5f)
-                        {
-                            _brakeSlowDownTimer.StopTimer();
-                            _brakeSlowDownTimer = null;
-                            _isMovingBackwards = false;
-                            _isMovingForward = false;
-                        }
                     }
                 });
             }
+        }
+
+        private void ApplyDirectionChange()
+        {
+            ApplyMotorTorque(0f);
+            ApplyBrakeTorque(statsController.BrakeTorque);
         }
 
         private void StartDrift(float steeringInput)
