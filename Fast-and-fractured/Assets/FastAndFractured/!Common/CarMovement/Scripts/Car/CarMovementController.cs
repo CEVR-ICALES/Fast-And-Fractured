@@ -29,6 +29,7 @@ namespace FastAndFractured
         private bool _isDrifting = false;
         private float _driftDirection = 1f;
         private float _initialSpeedWhenDrifting;
+        private bool _driftIsBackwards = false;
 
         [SerializeField] private AnimationCurve brakeSpeedCurve;
         [SerializeField] private float brakeSlowDownTime;
@@ -79,7 +80,7 @@ namespace FastAndFractured
 
         public bool IsAi
         {
-            get => isAi; set =>  isAi = value;
+            get => isAi; set => isAi = value;
         }
         [SerializeField] private bool isAi = false;
 
@@ -122,7 +123,7 @@ namespace FastAndFractured
 
         private void Update()
         {
-            if(!isAi) UpdateSpeedOverlay();
+            if (!isAi) UpdateSpeedOverlay();
         }
 
         private void SetMaxRbSpeedDelayed()
@@ -133,14 +134,14 @@ namespace FastAndFractured
         #region Refactorized Code
 
         public void HandleSteeringInput(Vector2 steeringInput)
-        { 
-            if ((IsAi && !_isBraking ) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
+        {
+            if ((IsAi && !_isBraking) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
             {
                 float acceleration = steeringInput.y * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
                 _previousSteeringYValue = steeringInput.y;
             }
-            
+
             _targetSteerAngle = statsController.Handling * steeringInput.x;
         }
 
@@ -226,7 +227,7 @@ namespace FastAndFractured
 
         private void ApplyModBrake()
         {
-            if(_brakeSlowDownTimer == null)
+            if (_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
                 _brakeSlowDownTimer = TimerSystem.Instance.CreateTimer(brakeSlowDownTime, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
@@ -234,7 +235,7 @@ namespace FastAndFractured
                     _brakeSlowDownTimer = null;
                 }, onTimerIncreaseUpdate: (progress) =>
                 {
-                    if(IsGrounded())
+                    if (IsGrounded())
                     {
                         float toApply = brakeSpeedCurve.Evaluate(progress);
                         _physicsBehaviour.Rb.linearVelocity = initialSpeed * toApply;
@@ -245,10 +246,13 @@ namespace FastAndFractured
 
         private void StartDrift(float steeringInput)
         {
-            _isDrifting = true;
             _driftDirection = Mathf.Sign(steeringInput); //only determine direcition + or -
             _physicsBehaviour.Rb.linearDamping = 1f;
             _initialSpeedWhenDrifting = _physicsBehaviour.Rb.linearVelocity.magnitude;
+
+            _driftIsBackwards = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward) < 0f;
+
+            _isDrifting = true;
         }
 
         private void EndDrift()
@@ -257,33 +261,37 @@ namespace FastAndFractured
             _physicsBehaviour.Rb.linearDamping = 0.08f;
         }
 
-        private void ApplyDrift() //to do consider current speed to determine how the drift is going to work
+        private void ApplyDrift()
         {
+
             if (!IsGrounded())
             {
                 EndDrift();
                 return;
             }
 
-            if (_brakeSlowDownTimer != null)
+            if(_brakeSlowDownTimer != null)
             {
                 _brakeSlowDownTimer.StopTimer();
             }
             float speedFactor = Mathf.Clamp01(_initialSpeedWhenDrifting / (statsController.DriftingFactorToSpeed / SPEED_TO_METERS_PER_SECOND));
 
-            float forwardDot = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward);
-            float directionSign = Mathf.Sign(forwardDot);
+            Vector3 targetDriftDirection = transform.right * _driftDirection;
 
-            Vector3 targetDriftDirection = transform.right * _driftDirection * directionSign;
+            //smoothly interpolate between the car's forward direction and the target drift direction
+            float driftProgress = Mathf.Clamp01(Time.deltaTime * statsController.DriftingSmoothFactor); //asdjust smoothing factor as needed
+            Vector3 currentDriftDirection = Vector3.Slerp(transform.forward, targetDriftDirection, driftProgress);
 
-            Vector3 movementDirection = _physicsBehaviour.Rb.linearVelocity.normalized;
-            float driftProgress = Mathf.Clamp01(Time.deltaTime * statsController.DriftingSmoothFactor);
-            Vector3 currentDriftDirection = Vector3.Slerp(movementDirection, targetDriftDirection, driftProgress);
+            if (_driftIsBackwards) { currentDriftDirection = -currentDriftDirection; }
 
+            //aapply the drift force in the interpolated direction
             Vector3 driftFinalForce = currentDriftDirection * statsController.DriftForce * speedFactor;
             _physicsBehaviour.AddForce(driftFinalForce, ForceMode.Acceleration);
 
-            float driftTorque = _driftDirection * statsController.DriftForce * 0.8f * speedFactor * directionSign;
+            //rotate the car while drifting
+            float driftTorque = _driftDirection * statsController.DriftForce * 0.8f * speedFactor;
+            if (_driftIsBackwards) { driftTorque = -driftTorque; }
+
             _physicsBehaviour.AddTorque(transform.up * driftTorque, ForceMode.Acceleration);
         }
 
@@ -335,7 +343,7 @@ namespace FastAndFractured
         ITimer _dashTimer;
         public void HandleDashWithPhysics()
         {
-            if (!_isDashing && _canDash )
+            if (!_isDashing && _canDash)
             {
                 if (!IsGrounded() && _currentNumberOfAirDashes >= airUseDashLimit)
                     return;
@@ -363,8 +371,8 @@ namespace FastAndFractured
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                 });
-                
-               
+
+
             }
         }
         ITimer _dashCooldown;
@@ -453,7 +461,7 @@ namespace FastAndFractured
         {
             foreach (var wheel in wheels)
             {
-                if(wheel.IsGrounded())
+                if (wheel.IsGrounded())
                 {
                     _currentNumberOfAirDashes = 0;
                     return true;
@@ -472,7 +480,7 @@ namespace FastAndFractured
             {
                 _physicsBehaviour = GetComponent<PhysicsBehaviour>();
             }
-            return IsInWall()||_physicsBehaviour.IsTouchingGround;
+            return IsInWall() || _physicsBehaviour.IsTouchingGround;
         }
 
         public bool IsInWall()
@@ -486,9 +494,10 @@ namespace FastAndFractured
         {
             if (_flipTimer == null)
             {
-                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime*decreseTimeFactor, onTimerDecreaseComplete : () => { 
+                _flipTimer = TimerSystem.Instance.CreateTimer(detectFlipTime * decreseTimeFactor, onTimerDecreaseComplete: () =>
+                {
                     _isFlipped = true;
-                    _flipTimer=null;
+                    _flipTimer = null;
                 });
             }
         }
@@ -575,7 +584,8 @@ namespace FastAndFractured
             if (steeringInput.x > 0)
             {
                 _physicsBehaviour.AddTorque(-transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
-            } else if(steeringInput.x < 0)
+            }
+            else if (steeringInput.x < 0)
             {
                 _physicsBehaviour.AddTorque(transform.forward * statsController.AirRotationForce, ForceMode.Acceleration);
             }
@@ -583,8 +593,9 @@ namespace FastAndFractured
             if (steeringInput.y > 0)
             {
                 _physicsBehaviour.AddTorque(transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
-                
-            } else if(steeringInput.y < 0)
+
+            }
+            else if (steeringInput.y < 0)
             {
                 _physicsBehaviour.AddTorque(-transform.right * statsController.AirRotationForce, ForceMode.Acceleration);
             }
@@ -623,9 +634,9 @@ namespace FastAndFractured
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
         {
-            if (_dashCooldown != null&& TimerSystem.Instance.HasTimer(_dashCooldown))
+            if (_dashCooldown != null && TimerSystem.Instance.HasTimer(_dashCooldown))
             {
-              TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
+                TimerSystem.Instance.ModifyTimer(_dashCooldown, speedMultiplier: newTimerSpeed);
             }
         }
     }
