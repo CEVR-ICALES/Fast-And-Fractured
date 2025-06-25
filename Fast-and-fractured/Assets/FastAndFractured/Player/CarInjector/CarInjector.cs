@@ -6,6 +6,7 @@ using UnityEngine.Animations;
 using FastAndFractured;
 using UnityEngine.UI;
 using TMPro;
+using Enums;
 
 public class CarInjector : MonoBehaviour
 {
@@ -57,12 +58,13 @@ public class CarInjector : MonoBehaviour
             enemyAIBrain.InstallAIParameters(injectedCar.GetComponent<StatsController>().CharacterData.AIParameters);
             injectedCar.GetComponent<CarMovementController>().IsAi = true;
         }
-        // else{
-        //     if (GameObject.Find("SpeedOverlay"))
-        //     {
-        //         injectedCar.GetComponent<CarMovementController>().speedOverlay = GameObject.Find("SpeedOverlay").GetComponentInChildren<TextMeshProUGUI>();
-        //     }
-        // } 
+        else
+        {
+            
+            injectedCar.AddComponent<CarSpeedOverlay>();
+            injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
+            
+        }
 
         return injectedCar;
     }
