@@ -11,6 +11,7 @@ namespace Utilities
     [DefaultExecutionOrder(-222)]
     public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour where T : Component
     {
+        [SerializeField] SingletonType singletonType = SingletonType.TRUE;
         static T s_Instance;
         /// <summary>
         /// static Singleton instance
@@ -47,9 +48,21 @@ namespace Utilities
             }
             else if (s_Instance != this)
             {
-                Destroy(gameObject);
+                if (singletonType == SingletonType.TRUE)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    enabled = false;
+                }
             }
         }
 
     }
+}
+enum SingletonType
+{
+    TRUE,
+    SOFT
 }
