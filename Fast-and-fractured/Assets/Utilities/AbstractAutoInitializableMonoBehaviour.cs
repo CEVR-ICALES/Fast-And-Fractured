@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace FastAndFractured.Core
+namespace Utilities
 {
     public abstract class AbstractAutoInitializableMonoBehaviour : MonoBehaviour
     {

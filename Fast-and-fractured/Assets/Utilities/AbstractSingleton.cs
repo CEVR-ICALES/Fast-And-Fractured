@@ -1,4 +1,3 @@
-using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,9 +8,9 @@ namespace Utilities
     /// </summary>
     /// <typeparam name="T">The type of singleton instance</typeparam>
     [DefaultExecutionOrder(-222)]
-    public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour where T : Component
+    public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour, IOverwritableSingleton where T : Component
     {
-        [SerializeField] SingletonType singletonType = SingletonType.TRUE;
+        [SerializeField] SingletonDuplicateResolution singletonDuplicateResolution = SingletonDuplicateResolution.DESTROY_GAMEOBJECT;
         static T s_Instance;
         /// <summary>
         /// static Singleton instance
@@ -34,6 +33,7 @@ namespace Utilities
                 }
 
                 return s_Instance;
+
             }
         }
         protected override void Construct()
@@ -48,21 +48,72 @@ namespace Utilities
             }
             else if (s_Instance != this)
             {
-                if (singletonType == SingletonType.TRUE)
-                {
+                HandleDuplicate();
+
+            }
+        }
+        private void HandleDuplicate()
+        {
+            Debug.LogWarning($"<color=red>Duplicate singleton '{typeof(T).Name}' on '{gameObject.name}'. " +
+                             $"Resolving via {singletonDuplicateResolution}.</color>", this);
+
+            switch (singletonDuplicateResolution)
+            {
+                case SingletonDuplicateResolution.DESTROY_GAMEOBJECT:
                     Destroy(gameObject);
-                }
-                else
-                {
-                    enabled = false;
-                }
+                    break;
+                case SingletonDuplicateResolution.DISABLE_COMPONENT:
+                    this.enabled = false;
+                    break;
             }
         }
 
+        public void ClaimSingletonOwnership()
+        {
+            bool wasInitialized = false;
+            bool wasConstructed = false;
+            if (s_Instance != null && s_Instance != this)
+            {
+                Debug.Log($"<color=orange>'{gameObject.name}' is claiming ownership of singleton '{typeof(T).Name}'. " +
+                          $"Destroying previous instance on '{s_Instance.gameObject.name}'.</color>");
+
+                var oldSingleton = s_Instance as AbstractSingleton<T>;
+                if (oldSingleton != null)
+                {
+                    wasConstructed = oldSingleton._isConstructed;
+                    wasInitialized = oldSingleton._isInitialized;
+                    oldSingleton.HandleDuplicate();
+                }
+                else
+                {
+                    Destroy(s_Instance.gameObject);
+                }
+            }
+            s_Instance = this as T;
+            if (wasConstructed)
+            { 
+                Construct();
+            }
+
+            if (wasInitialized)
+            {
+                Initialize();
+            }
+        }
     }
+
 }
-enum SingletonType
+
+enum SingletonDuplicateResolution
 {
-    TRUE,
-    SOFT
+    DESTROY_GAMEOBJECT,
+    DISABLE_COMPONENT
+}
+// Technically only needed for the multiplayer (at least for now)
+public interface IOverwritableSingleton
+{
+    /// <summary>
+    /// Forces this instance to become the primary singleton, destroying any existing one.
+    /// </summary>
+    void ClaimSingletonOwnership();
 }
