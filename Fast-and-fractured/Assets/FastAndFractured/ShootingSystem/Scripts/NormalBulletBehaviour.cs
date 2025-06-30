@@ -13,6 +13,7 @@ namespace FastAndFractured
         private bool _callForDestroy = true;
         private const float SPEED_REDUCTION_MULTIPLIER = 0.8f;
         private const float DISABLED_COLLIDER_DURATION = 0.1f;
+        private const string LAYER_SHIELD = "Shield";
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
@@ -34,7 +35,7 @@ namespace FastAndFractured
 
         protected override void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == LayerMask.NameToLayer("Shield"))
+            if (other.gameObject.layer == LayerMask.NameToLayer(LAYER_SHIELD))
             {
                 if (_ignoreCollider != null && other.transform.IsChildOf(_ignoreCollider.gameObject.transform))
                 {
@@ -42,10 +43,10 @@ namespace FastAndFractured
                 }
                 Vector3 contactPoint = other.ClosestPoint(transform.position);
                 Vector3 normal = (contactPoint - other.transform.position).normalized;
-                Vector3 incomingDirection = GetComponent<Rigidbody>().velocity.normalized;
+                Vector3 incomingDirection = rb.linearVelocity.normalized;
                 Vector3 reflectedDirection = Vector3.Reflect(incomingDirection, normal);
-                float speed = GetComponent<Rigidbody>().velocity.magnitude;
-                GetComponent<Rigidbody>().velocity = reflectedDirection * speed * SPEED_REDUCTION_MULTIPLIER;
+                float speed = rb.linearVelocity.magnitude;
+                rb.linearVelocity = reflectedDirection * speed * SPEED_REDUCTION_MULTIPLIER;
                 ownCollider.enabled = false;
                 TimerSystem.Instance.CreateTimer(DISABLED_COLLIDER_DURATION, onTimerDecreaseComplete: () =>
                 {
