@@ -12,7 +12,6 @@ namespace FastAndFractured
         public UnityEvent<float, float> onDashCooldownUpdate;
 
         public WheelController[] wheels;
-        private TextMeshProUGUI speedOverlay;
         public bool applyRollPrevention = true;
 
         private PhysicsBehaviour _physicsBehaviour;
@@ -78,6 +77,10 @@ namespace FastAndFractured
         private float _currentRbMaxVelocity;
         private bool _isUsingController = false;
 
+        private bool _isMovingForward = false;
+        private bool _isMovingBackwards = false;
+        const float MOVING_DIRECTION_THRESHOLD = 0.4f;
+
         public bool IsAi
         {
             get => isAi; set => isAi = value;
@@ -103,7 +106,6 @@ namespace FastAndFractured
             }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
-            speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
         }
 
         private void FixedUpdate()
@@ -118,17 +120,43 @@ namespace FastAndFractured
             }
             _physicsBehaviour.LimitRigidBodySpeed(_currentRbMaxVelocity);
             _physicsBehaviour.LimitRigidBodyRotation(2f);
-
+            SmoothAccelerationAndDeacceleration();
         }
 
         private void Update()
         {
-            if (!isAi) UpdateSpeedOverlay();
+
         }
 
         private void SetMaxRbSpeedDelayed()
         {
             _currentRbMaxVelocity = statsController.MaxSpeed;
+        }
+
+        private void SmoothAccelerationAndDeacceleration()
+        {
+            UpdateCarCurrentDirection();
+
+            if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
+            {
+                Debug.Log("Wnats to change direction to forward");
+                ApplyDirectionChange();
+            }
+
+            if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
+            {
+                Debug.Log("Wnats to change direction to backward");
+                ApplyDirectionChange();
+
+            }
+
+        }
+
+        private void UpdateCarCurrentDirection()
+        {
+            float forwardVelocity = Vector3.Dot(_physicsBehaviour.Rb.linearVelocity, transform.forward);
+            _isMovingForward = forwardVelocity > MOVING_DIRECTION_THRESHOLD;
+            _isMovingBackwards = forwardVelocity < -MOVING_DIRECTION_THRESHOLD;
         }
 
         #region Refactorized Code
@@ -149,6 +177,7 @@ namespace FastAndFractured
         {
             if (PlayerInputController.Instance.IsUsingController && !_isBraking)
             {
+                _previousSteeringYValue = rawAccelerationInput;
                 float acceleration = rawAccelerationInput * statsController.Acceleration;
                 ApplyMotorTorque(acceleration);
             }
@@ -156,6 +185,7 @@ namespace FastAndFractured
 
         private void ApplyMotorTorque(float acceleration)
         {
+            if (_brakeSlowDownTimer != null) return;
             foreach (WheelController wheel in wheels)
             {
                 wheel.ApplyMotorTorque(acceleration);
@@ -220,13 +250,18 @@ namespace FastAndFractured
                     wheels[1].ApplyBrakeTorque(statsController.BrakeTorque * statsController.FrontWheelsStrenghtFactor);
                     wheels[2].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
                     wheels[3].ApplyBrakeTorque(statsController.BrakeTorque * statsController.RearWheelsStrenghtFactor);
-                    ApplyModBrake();
+                    //ApplyModBrake(brakeSlowDownTime);
                     break;
             }
         }
 
         private void ApplyModBrake()
         {
+            if(_brakeSlowDownTimer != null)
+                return;
+
+            ApplyMotorTorque(0f);
+            ApplyBrakeTorque(statsController.BrakeTorque);
             if (_brakeSlowDownTimer == null)
             {
                 Vector3 initialSpeed = _physicsBehaviour.Rb.linearVelocity;
@@ -242,6 +277,12 @@ namespace FastAndFractured
                     }
                 });
             }
+        }
+
+        private void ApplyDirectionChange()
+        {
+            ApplyMotorTorque(0f);
+            ApplyBrakeTorque(statsController.BrakeTorque);
         }
 
         private void StartDrift(float steeringInput)
@@ -622,14 +663,6 @@ namespace FastAndFractured
             {
                 wheel.UpdateWheelVisuals();
             }
-        }
-
-        private void UpdateSpeedOverlay()
-        {
-            float speedZ = Mathf.Abs(_physicsBehaviour.Rb.linearVelocity.magnitude);
-            float speedKmh = speedZ * SPEED_TO_METERS_PER_SECOND;
-            if (speedOverlay != null)
-                speedOverlay.text = speedKmh.ToString("F1");
         }
 
         public void ModifySpeedOfExistingTimer(float newTimerSpeed)
