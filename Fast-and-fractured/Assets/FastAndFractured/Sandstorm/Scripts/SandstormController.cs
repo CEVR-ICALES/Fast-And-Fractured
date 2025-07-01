@@ -166,7 +166,6 @@ namespace FastAndFractured
                 primaryFog.parameters.size = new Vector3(stormSize, primaryFog.parameters.size.y, stormSize);
                 _initialVolumeSizeMain = primaryFog.parameters.size;
                 _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z - colliderVisualAdjustment);
-                _stormCollider.center = primaryFog.transform.localPosition;
             }
             sandstormDestinationPoint = new Vector3(sphereCenter.position.x, fogParent.transform.position.y, sphereCenter.position.z);
             float maxDistance = (sandstormDestinationPoint - fogParent.transform.position).magnitude;
