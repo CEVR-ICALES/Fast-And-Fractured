@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5435877752251663409
+--- !u!114 &-1192350847452906561
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -23,28 +23,35 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Foggy Orb Material
-  m_Shader: {fileID: -6465566751694194690, guid: f7be2a74e19f07d4c91a20d2d70ccc2b, type: 3}
+  m_Name: Water
+  m_Shader: {fileID: -6465566751694194690, guid: 3ee989c6a9fdda44b9362169a943e9a8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _DISABLE_SSR_TRANSPARENT
   m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
+  m_CustomRenderQueue: 2225
+  stringTagMap:
+    MotionVector: User
+  disabledShaderPasses:
+  - TransparentDepthPrepass
+  - TransparentDepthPostpass
+  - TransparentBackface
+  - RayTracingPrepass
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _3D_Noise:
-        m_Texture: {fileID: 11700000, guid: d1aae012f8a4f23478471851f17ff915, type: 3}
+    - _Main_Normal:
+        m_Texture: {fileID: 2800000, guid: c21511cdc86c86847bdae740c8b071da, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SampleTexture3D_d99f84f075244f149778bbe6b772212a_Texture_1:
-        m_Texture: {fileID: 11700000, guid: e0e09b21650effd4db3e109b22f9be7c, type: 3}
+    - _Second_Normal:
+        m_Texture: {fileID: 2800000, guid: 9f04018992f98ef4997b6883c48cc0f8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -66,41 +73,45 @@ Material:
     - _AlphaDstBlend: 0
     - _AlphaSrcBlend: 1
     - _BlendMode: 0
-    - _Center_Color_Fade: 0.789
-    - _Center_Color_Fade_Start: 0.937
-    - _Color_Intensity: 10
-    - _Color_Power: 0.68
     - _ConservativeDepthOffsetEnable: 0
     - _CullMode: 2
     - _CullModeForward: 2
     - _DepthOffsetEnable: 0
+    - _Depyh: 0.33
     - _DoubleSidedEnable: 0
     - _DoubleSidedGIMode: 0
     - _DoubleSidedNormalMode: 2
     - _DstBlend: 0
+    - _DstBlend2: 0
+    - _EnableBlendModePreserveSpecularLighting: 1
     - _EnableFogOnTransparent: 1
-    - _Float: 1
-    - _Float_1: 8.71
-    - _FogVolumeAlphaBlendOp: 0
-    - _FogVolumeBlendMode: 1
-    - _FogVolumeColorBlendOp: 0
-    - _FogVolumeDstAlphaBlend: 1
-    - _FogVolumeDstColorBlend: 1
-    - _FogVolumeFogDistanceProperty: 20
-    - _FogVolumeSrcAlphaBlend: 1
-    - _FogVolumeSrcColorBlend: 1
-    - _Intensity: 10
-    - _Noise_Contrast: 0.464
+    - _ExcludeFromTUAndAA: 0
+    - _MaterialID: 1
+    - _MaterialTypeMask: 2
+    - _Normal_Strenght: 0.488
     - _OpaqueCullMode: 2
-    - _Orb_Density: 0.5
-    - _Pulse_Intensity: 0.02
-    - _Pulse_Rhythm: 5
+    - _PerPixelSorting: 0
+    - _RayTracing: 0
+    - _ReceivesSSR: 1
+    - _ReceivesSSRTransparent: 0
+    - _RefractionModel: 0
     - _RenderQueueType: 1
-    - _Rotation_Speed: 0.75
-    - _Speed: 0.25
+    - _RequireSplitLighting: 0
     - _SrcBlend: 1
+    - _StencilRef: 0
+    - _StencilRefDepth: 8
+    - _StencilRefDistortionVec: 4
+    - _StencilRefGBuffer: 10
+    - _StencilRefMV: 40
+    - _StencilWriteMask: 6
+    - _StencilWriteMaskDepth: 9
+    - _StencilWriteMaskDistortionVec: 4
+    - _StencilWriteMaskGBuffer: 15
+    - _StencilWriteMaskMV: 41
+    - _Strenght: 0.6
+    - _SupportDecals: 1
     - _SurfaceType: 0
-    - _Tiling: 10
+    - _TransmissionEnable: 1
     - _TransparentBackfaceEnable: 0
     - _TransparentCullMode: 2
     - _TransparentDepthPostpassEnable: 0
@@ -108,20 +119,15 @@ Material:
     - _TransparentSortPriority: 0
     - _TransparentWritingMotionVec: 0
     - _TransparentZWrite: 0
-    - _Upward_Speed: 0.1
     - _UseShadowThreshold: 0
-    - _Use_Alpha_Channel: 0
-    - _ZTestDepthEqualForOpaque: 4
+    - _ZTestDepthEqualForOpaque: 3
+    - _ZTestGBuffer: 4
     - _ZTestTransparent: 4
     - _ZWrite: 1
-    - _contrast: -2.9
     m_Colors:
-    - _Center_Color: {r: 1, g: 1, b: 1, a: 0}
-    - _Color: {r: 0.2830189, g: 0.16030762, b: 0.044054832, a: 0}
+    - _DeepWaterColor: {r: 0.02745098, g: 0.082352914, b: 0.7843137, a: 0.8588235}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _FogVolumeSingleScatteringAlbedo: {r: 0.147, g: 0.09799999, b: 0.040833328, a: 1}
-    - _RotationAxis: {r: 0, g: 1, b: 0, a: 0}
-    - _Rotation_Axis: {r: 0, g: 0.5, b: 0, a: 0}
+    - _ShallowWaterColor: {r: 0, g: 0.50980395, b: 1, a: 0.7647059}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

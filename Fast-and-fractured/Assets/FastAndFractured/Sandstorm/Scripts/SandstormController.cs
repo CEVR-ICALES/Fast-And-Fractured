@@ -179,19 +179,19 @@ namespace FastAndFractured
         /// </summary>
         private void ExpandFogs()
         {
-            if (Vector3.Distance(sandstormDestinationPoint, fogParent.transform.position) > ARRIVE_CENTER_THRESHOLD)
-            {
-                fogParent.transform.position += _direction * _moveSpeed * Time.deltaTime;
-            }
-                if (_reduceKillTimeTimer==null)
-                {
-                 _reduceKillTimeTimer = TimerSystem.Instance.CreateTimer(_timeToReduceKillCharacterTime, Enums.TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
-                   {
-                       _currentCharacterKillTime -= _reductionKillTime;
+            //if (Vector3.Distance(sandstormDestinationPoint, fogParent.transform.position) > ARRIVE_CENTER_THRESHOLD)
+            //{
+            //    fogParent.transform.position += _direction * _moveSpeed * Time.deltaTime;
+            //}
+            //    if (_reduceKillTimeTimer==null)
+            //    {
+            //     _reduceKillTimeTimer = TimerSystem.Instance.CreateTimer(_timeToReduceKillCharacterTime, Enums.TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+            //       {
+            //           _currentCharacterKillTime -= _reductionKillTime;
 
-                       _reduceKillTimeTimer = null;
-                   });
-                }
+            //           _reduceKillTimeTimer = null;
+            //       });
+            //    }
         }
 
         public bool IsInsideStormCollider(GameObject target,float marginError)
@@ -227,58 +227,58 @@ namespace FastAndFractured
             }
         }
 
-        private void OnTriggerEnter(Collider other)
-        {   
-            if (other.TryGetComponent(out StatsController statsController))
-            {
-                if (!other.GetComponent<Rigidbody>().isKinematic)
-                {
-                    StartKillNotify(statsController);
-                    _charactersInsideSandstorm.Add(other.gameObject);
-                    if (statsController.IsPlayer)
-                    {
-                        ChangeSandstormVisuals(true);
-                    }
-                }
-            }
-            else
-            {
-                if (other.GetComponentInParent<StatsBoostInteractable>() != null)
-                {
-                    _itemsInsideSandstorm.Add(other.gameObject);
-                }
-                else
-                {
-                    _safeZonesInsideSandstorm.Add(other.gameObject);
-                }
-            }
-        }
+        //private void OnTriggerEnter(Collider other)
+        //{   
+        //    if (other.TryGetComponent(out StatsController statsController))
+        //    {
+        //        if (!other.GetComponent<Rigidbody>().isKinematic)
+        //        {
+        //            StartKillNotify(statsController);
+        //            _charactersInsideSandstorm.Add(other.gameObject);
+        //            if (statsController.IsPlayer)
+        //            {
+        //                ChangeSandstormVisuals(true);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (other.GetComponentInParent<StatsBoostInteractable>() != null)
+        //        {
+        //            _itemsInsideSandstorm.Add(other.gameObject);
+        //        }
+        //        else
+        //        {
+        //            _safeZonesInsideSandstorm.Add(other.gameObject);
+        //        }
+        //    }
+        //}
 
-        private void OnTriggerExit(Collider other)
-        {
-            if (other.TryGetComponent(out StatsController statsController))
-            {
-                if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
-                {
-                    if (other.GetComponentInParent<StatsBoostInteractable>() != null)
-                    {
-                        CharacterEscapedDead(statsController);
-                        _charactersInsideSandstorm.Remove(other.gameObject);
-                    }
-                }
-            }
-            else
-            {
-                if (other.GetComponentInParent<StatsBoostInteractable>()!=null)
-                {
-                    _itemsInsideSandstorm.Remove(other.gameObject);
-                }
-                else
-                {
-                    _safeZonesInsideSandstorm.Remove(other.gameObject);
-                }
-            }
-        }
+        //private void OnTriggerExit(Collider other)
+        //{
+        //    if (other.TryGetComponent(out StatsController statsController))
+        //    {
+        //        if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
+        //        {
+        //            if (other.GetComponentInParent<StatsBoostInteractable>() != null)
+        //            {
+        //                CharacterEscapedDead(statsController);
+        //                _charactersInsideSandstorm.Remove(other.gameObject);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (other.GetComponentInParent<StatsBoostInteractable>()!=null)
+        //        {
+        //            _itemsInsideSandstorm.Remove(other.gameObject);
+        //        }
+        //        else
+        //        {
+        //            _safeZonesInsideSandstorm.Remove(other.gameObject);
+        //        }
+        //    }
+        //}
 
         public void StartKillNotify(StatsController statsController)
        {
