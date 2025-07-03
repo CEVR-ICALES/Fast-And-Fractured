@@ -56,10 +56,10 @@ MonoBehaviour:
     positiveFade: {x: 0, y: 0, z: 0}
     negativeFade: {x: 0, y: 0, z: 0}
     m_EditorUniformFade: 0
-    m_EditorPositiveFade: {x: 0.000080971644, y: 0, z: 0}
-    m_EditorNegativeFade: {x: 0.000080971644, y: 0, z: 0}
+    m_EditorPositiveFade: {x: 0.000055340333, y: 0, z: 0}
+    m_EditorNegativeFade: {x: 0.000055340333, y: 0, z: 0}
     m_EditorAdvancedFade: 0
-    size: {x: 1235, y: 254.2, z: 48.2}
+    size: {x: 1807, y: 254.2, z: 48.2}
     invertFade: 0
     distanceFadeStart: 10000
     distanceFadeEnd: 10000
@@ -67,7 +67,7 @@ MonoBehaviour:
     falloffMode: 0
     maskMode: 1
     materialMask: {fileID: 2100000, guid: 0b8c2fad691fbad4cad0175ec71239f7, type: 2}
-  m_Version: 2
+  m_Version: 3
 --- !u!1 &8837894182934861129
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,20 +114,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2a846d43725d614b9a082538308dbe1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _autoConstructOnAwake: 1
+  _autoInitializeOnStart: 1
   fogParent: {fileID: 8837894182934861129}
   primaryFog: {fileID: 5812717557806696838}
-  maxGrowthTime: 300
+  arrivalTime: 30
+  colliderVisualAdjustment: 340
   gameObjectSpawnPoint: {fileID: 0}
   gameObjectMirroPoint: {fileID: 0}
   sphereCenter: {fileID: 0}
-  sphereRadius: 500
+  sphereRadius: 950
   maxAngleExcluded: 360
   numberOfPoints: 18
   fogDistancePlayerInsideSandstorm: 30
   fogDistancePlayerOutsideSandstorm: 15
   atenuationTime: 1
-  maxCharacterKillTime: 60
-  minCharacterKillTime: 25
+  maxCharacterKillTime: 10
+  minCharacterKillTime: 4
   killCharacterPriority: 1
   reduceQuantityPoints: 4
   minimapSandstormDirection: {fileID: 0}
@@ -150,5 +153,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 862.4, y: 113.25, z: 26.6}
-  m_Center: {x: 0, y: 0, z: -17}
+  m_Size: {x: 862.4, y: 113.25, z: 25.3}
+  m_Center: {x: 0, y: 0, z: -24.68}
