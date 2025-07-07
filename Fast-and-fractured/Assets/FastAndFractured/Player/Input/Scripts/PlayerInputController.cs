@@ -83,13 +83,13 @@ namespace FastAndFractured
 
         private InputDeviceType _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
 
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             LevelControllerButBetter.Instance.charactersCustomStart.AddListener(BindActions);
         }
 
-        private void BindActions()
+        public void BindActions()
         {
             _inputActions = new PlayerInputAction();
 
@@ -148,6 +148,14 @@ namespace FastAndFractured
 
         private void OnDisable()
         {
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+            }
+        }
+        protected override void Deconstruct()
+        {
+            base.Deconstruct();
             if (_inputActions != null)
             {
                 _inputActions.Disable();

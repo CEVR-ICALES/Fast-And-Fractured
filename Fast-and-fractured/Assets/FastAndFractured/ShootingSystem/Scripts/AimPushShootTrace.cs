@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using FastAndFractured;
-using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Events;

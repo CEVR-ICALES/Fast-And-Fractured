@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utilities;
 using Enums;
-using FastAndFractured.Core;
+using FastAndFractured;
 namespace FastAndFractured
 {
     public class CharacterIcon : AbstractAutoInitializableMonoBehaviour

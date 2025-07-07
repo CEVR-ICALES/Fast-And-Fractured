@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 namespace FastAndFractured
 {
-    public class CarMovementController : MonoBehaviour, ITimeSpeedModifiable
+    public class CarMovementController : AbstractAutoInitializableMonoBehaviour, ITimeSpeedModifiable
     {
         public UnityEvent<float, float> onDashCooldownUpdate;
 
@@ -92,9 +93,13 @@ namespace FastAndFractured
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
 
-
-        private void Start()
+        protected override void Construct()
         {
+            speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
             statsController.CustomStart();
             if (_physicsBehaviour == null)
             {
@@ -102,7 +107,6 @@ namespace FastAndFractured
             }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
-            speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
         }
 
         private void FixedUpdate()

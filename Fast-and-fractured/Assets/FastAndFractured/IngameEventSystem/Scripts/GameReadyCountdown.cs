@@ -35,6 +35,8 @@ public class GameReadyScript : MonoBehaviour
     }
     void StartEventCountdown()
     {
+        if (evenText == null) return;
+
         AnimateText();
         IngameEventsManager.Instance.CreateEvent("3", TRANSITION_DURATION, () =>
         {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Utilities;
 using Utilities.Managers.PauseSystem;
 using System.Net.NetworkInformation;
-using FastAndFractured.Core;
+using Utilities;
 namespace FastAndFractured
 {
     public class SandstormController : AbstractAutoInitializableMonoBehaviour, IKillCharacters, IPausable

@@ -1,7 +1,7 @@
 using Enums;
-using FastAndFractured.Core;
-using System.Collections.Generic;
+ using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured
 {
