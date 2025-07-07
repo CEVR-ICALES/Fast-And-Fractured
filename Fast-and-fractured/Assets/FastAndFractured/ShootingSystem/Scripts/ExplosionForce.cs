@@ -62,7 +62,7 @@ namespace FastAndFractured
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
 
-                forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                forceToApply = otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
@@ -84,18 +84,6 @@ namespace FastAndFractured
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
                 otherRigidbody.AddForceAtPosition(_pushForce/100 * direction, contactPoint, ForceMode.Impulse);
             }
-        }
-
-        private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
-        {
-            float weightFactor = 1 + ((oCarWeight - averageCarWeight) / averageCarWeight) * carWeightImportance; // is for example the car importance is 0.2 (20 %) and the car weights 1200 the final force will be multiplied by 1.05 or something close to that value since the car is heavier (number will be big so a 0.05 is enough for now)
-
-            float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
-            float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
-
-            float force = _pushForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
-
-            return force;
         }
     }
 }
