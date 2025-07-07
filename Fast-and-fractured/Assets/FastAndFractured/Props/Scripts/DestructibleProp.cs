@@ -5,15 +5,17 @@ public class DestructibleProp : MonoBehaviour
 {
     [Header("Destruction Settings")]
     [SerializeField] private float propHealth;
-    [SerializeField] private float vehicleMinForce;
+    //[SerializeField] private float vehicleMinForce;
     [SerializeField] private float damageMultiplier;
 
     [Header("Destruction State")]
-    [SerializeField] private bool hasDamagedState = false;
-    [SerializeField] private float damagedHealthThreshold; // Health in which will change state to damaged, for future shader with cracks
+    private bool _hasDamagedState = false;
+    private float _damagedHealthThreshold; // Health in which will change state to damaged, for future shader with cracks will be serialized
 
     //[SerializeField] private EventReference breakingSound;
     private bool _damagedStateShown = false;
+
+    private const string PLAYER_TAG_STRING = "Player";
 
     /// <summary>
     /// Takes Damage
@@ -25,7 +27,7 @@ public class DestructibleProp : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (IsVehicleCollision(collision, out float force) && force >= vehicleMinForce)
+        if (IsVehicleCollision(collision, out float force))/* && force >= vehicleMinForce)*/
         {
             float damage = force * damageMultiplier;
             ApplyDamage(force);
@@ -39,7 +41,7 @@ public class DestructibleProp : MonoBehaviour
     private bool IsVehicleCollision(Collision col, out float force)
     {
         force = 0f;
-        if (col.rigidbody != null && col.gameObject.CompareTag("Vehicle"))
+        if (col.rigidbody != null && col.gameObject.CompareTag(PLAYER_TAG_STRING))
         {
             force = col.relativeVelocity.magnitude * col.rigidbody.mass;
             return true;
@@ -52,9 +54,10 @@ public class DestructibleProp : MonoBehaviour
     {
         propHealth -= damage;
 
-        if (hasDamagedState && !_damagedStateShown && propHealth <= damagedHealthThreshold)
+        if (_hasDamagedState && !_damagedStateShown && propHealth <= _damagedHealthThreshold)
         {
-            this.gameObject.SetActive(false);
+            //this.gameObject.SetActive(false);
+            Debug.LogError("Damage done to prop");
             _damagedStateShown = true;
             return;
         }
@@ -62,6 +65,7 @@ public class DestructibleProp : MonoBehaviour
         if (propHealth <= 0f)
         {
             this.gameObject.SetActive(false);
+            Debug.LogError("Object destroyed");
         }
     }
 }
