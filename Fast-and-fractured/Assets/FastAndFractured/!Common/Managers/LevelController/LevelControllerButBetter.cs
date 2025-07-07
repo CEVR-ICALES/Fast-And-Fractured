@@ -66,6 +66,8 @@ namespace FastAndFractured
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
+
+        [SerializeField] private int defaultPlayerCount = 1;
         protected override void Construct()
         {
             base.Construct();
@@ -75,7 +77,7 @@ namespace FastAndFractured
             if (debugMode)
             {
                 PlayerPrefs.SetString("Selected_Player", playerCharacter);
-                PlayerPrefs.SetInt("Player_Num", 1);
+                PlayerPrefs.SetInt("Player_Num", defaultPlayerCount);
 
                 if (!useMyCharacters)
                 {
@@ -175,7 +177,10 @@ namespace FastAndFractured
                 string actualPlayerCharacter = justSpawnAI ? "" : PlayerPrefs.GetString("Selected_Player", playerCharacter);
                 _playersCharacterNameCodes.Add(actualPlayerCharacter);
                 availablePlayer.Add(new GameObject("symbolic player WIP"));
-             }
+                PlayerPrefs.SetInt("Player_Num", defaultPlayerCount);
+
+            }
+
             int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num", availablePlayer.Count);
 
 

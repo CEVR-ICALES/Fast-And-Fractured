@@ -99,8 +99,7 @@ namespace FastAndFractured
 
         protected override void Construct()
         {
-            speedOverlay = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
-        }
+         }
         protected override void Initialize()
         {
             base.Initialize();
