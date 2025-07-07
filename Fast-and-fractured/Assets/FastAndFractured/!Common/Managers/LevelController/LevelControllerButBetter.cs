@@ -226,7 +226,6 @@ namespace FastAndFractured
 
             foreach (var character in InGameCharacters)
             {
-
                 character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath);
             }
         }
