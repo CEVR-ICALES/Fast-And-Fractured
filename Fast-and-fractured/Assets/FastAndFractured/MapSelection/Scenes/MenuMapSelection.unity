@@ -8976,8 +8976,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 259789488}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 13.27}
-  m_LocalScale: {x: 0.012367083, y: 0.012367083, z: 0.012367083}
+  m_LocalPosition: {x: 0, y: 0, z: 62.501835}
+  m_LocalScale: {x: 0.0102743255, y: 0.011106383, z: 0.012367083}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 761618072}
@@ -8985,7 +8985,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 44.93, y: 5.89}
+  m_AnchoredPosition: {x: 77.0023, y: 5.09}
   m_SizeDelta: {x: 2034.7429, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &267037253
@@ -10653,12 +10653,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Priority:
-    Enabled: 0
-    m_Value: 0
+    Enabled: 1
+    m_Value: 10
   OutputChannel: 1
   StandbyUpdate: 2
-  m_StreamingVersion: 20170927
-  m_LegacyPriority: 10
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
@@ -10702,7 +10702,7 @@ Transform:
   m_GameObject: {fileID: 373871540}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.72011524, z: 0, w: 0.6938545}
-  m_LocalPosition: {x: 36.62, y: 4.48, z: 16.9}
+  m_LocalPosition: {x: 68.69229, y: 4.48, z: 62.951836}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13005,7 +13005,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 7, y: 18}
+  m_AnchoredPosition: {x: 7, y: -82}
   m_SizeDelta: {x: 173.23, y: 206.36}
   m_Pivot: {x: 0, y: 1}
 --- !u!1001 &505665491
@@ -17193,7 +17193,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788383721}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17206,7 +17206,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -323, y: 0}
+  m_AnchoredPosition: {x: -36, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &788383723
@@ -17230,6 +17230,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c18a8e3354659ce43ac4153f9c699d29, type: 3}
   panel: {fileID: 1579657503}
   returnButton: {fileID: 502348925}
+  min_animation_steps: 10
+  max_animation_steps: 15
 --- !u!1 &790649019
 GameObject:
   m_ObjectHideFlags: 0
@@ -34882,7 +34884,7 @@ RectTransform:
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1713471595
 GameObject:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -34901,7 +34903,7 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &1713471596
 Transform:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -34916,7 +34918,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1713471597
 MonoBehaviour:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -34938,7 +34940,7 @@ MonoBehaviour:
   m_AngularDamping: 0
 --- !u!114 &1713471598
 MonoBehaviour:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -34965,7 +34967,7 @@ MonoBehaviour:
   m_CenterOnActivate: 1
 --- !u!114 &1713471599
 MonoBehaviour:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -35272,7 +35274,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1761313051}
   m_LocalRotation: {x: 0.0759298, y: 0.004674941, z: 0.0005632154, w: 0.99710214}
-  m_LocalPosition: {x: 0, y: 0, z: 79}
+  m_LocalPosition: {x: 0, y: 0, z: 86}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -35280,8 +35282,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 8.709, y: 0.545, z: 0.106}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -1996, y: 122.4}
-  m_SizeDelta: {x: 550, y: 300}
+  m_AnchoredPosition: {x: -1897, y: 129}
+  m_SizeDelta: {x: 680, y: 365.1}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1761313053
 MonoBehaviour:
@@ -36142,7 +36144,7 @@ Transform:
   m_GameObject: {fileID: 1857163130}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.0046447786, z: -0, w: -0.9999892}
-  m_LocalPosition: {x: 47.277702, y: 0.84512615, z: 22.128166}
+  m_LocalPosition: {x: 79.35, y: 0.84512615, z: 68.18}
   m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -36275,7 +36277,7 @@ Transform:
   m_GameObject: {fileID: 1859613119}
   serializedVersion: 2
   m_LocalRotation: {x: -0.00032456237, y: 0.0046333666, z: -0.06987789, w: 0.99754477}
-  m_LocalPosition: {x: 46.666054, y: 2.425126, z: 21.951212}
+  m_LocalPosition: {x: 78.73835, y: 2.425126, z: 68.003044}
   m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -38345,7 +38347,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2033121080}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 83.99996}
+  m_LocalPosition: {x: 0, y: 0, z: 83.999985}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -38356,7 +38358,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -655, y: 443}
+  m_AnchoredPosition: {x: -367.99988, y: 443}
   m_SizeDelta: {x: 333.11, y: 191.3}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2033121082
