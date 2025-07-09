@@ -10,22 +10,20 @@ public class DestructibleProp : MonoBehaviour
 
     //private EventReference destroySound; FUTURE USE
 
-    private const string PLAYER_TAG_STRING = "Player";
     private const int MINIMUM_HP_TO_DESTROY = 0;
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag(PLAYER_TAG_STRING))
-        {
-            Rigidbody rb = collision.rigidbody;
+        Transform otherRoot = collision.collider.transform.root;
 
-            if (rb != null)
-            {
-                float impactVelocity = rb.linearVelocity.magnitude;
+        Rigidbody rb = otherRoot.GetComponentInChildren<Rigidbody>();
 
-                if (impactVelocity >= requiredSpeedToDamage)
-                    TakeDamage(_damageAmount);
-            }
-        }
+        if (rb == null)
+            return;
+
+        float impactSpeed = rb.linearVelocity.magnitude;
+
+        if (impactSpeed >= requiredSpeedToDamage)
+            TakeDamage(_damageAmount);
     }
 
     private void TakeDamage(float damage)
