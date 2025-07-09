@@ -3,69 +3,38 @@ using UnityEngine;
 
 public class DestructibleProp : MonoBehaviour
 {
-    [Header("Destruction Settings")]
     [SerializeField] private float propHealth;
-    //[SerializeField] private float vehicleMinForce;
-    [SerializeField] private float damageMultiplier;
+    [SerializeField] private float requiredSpeedToDamage;
 
-    [Header("Destruction State")]
-    private bool _hasDamagedState = false;
-    private float _damagedHealthThreshold; // Health in which will change state to damaged, for future shader with cracks will be serialized
+    private float _damageAmount = 1f;
 
-    //[SerializeField] private EventReference breakingSound;
-    private bool _damagedStateShown = false;
+    //private EventReference destroySound; FUTURE USE
 
     private const string PLAYER_TAG_STRING = "Player";
-
-    /// <summary>
-    /// Takes Damage
-    /// </summary>
-    public void TakeDamage(float damage)
-    {
-        ApplyDamage(damage);
-    }
-
+    private const int MINIMUM_HP_TO_DESTROY = 0;
     private void OnCollisionEnter(Collision collision)
     {
-        if (IsVehicleCollision(collision, out float force))/* && force >= vehicleMinForce)*/
+        if (collision.gameObject.CompareTag(PLAYER_TAG_STRING))
         {
-            float damage = force * damageMultiplier;
-            ApplyDamage(force);
+            Rigidbody rb = collision.rigidbody;
+
+            if (rb != null)
+            {
+                float impactVelocity = rb.linearVelocity.magnitude;
+
+                if (impactVelocity >= requiredSpeedToDamage)
+                    TakeDamage(_damageAmount);
+            }
         }
     }
 
-    /// <summary>
-    /// Checks if the collision was caused by a vehicle
-    /// </summary>
-    /// <returns></returns>
-    private bool IsVehicleCollision(Collision col, out float force)
-    {
-        force = 0f;
-        if (col.rigidbody != null && col.gameObject.CompareTag(PLAYER_TAG_STRING))
-        {
-            force = col.relativeVelocity.magnitude * col.rigidbody.mass;
-            return true;
-        }
-
-        return false;
-    }
-
-    private void ApplyDamage(float damage)
+    private void TakeDamage(float damage)
     {
         propHealth -= damage;
 
-        if (_hasDamagedState && !_damagedStateShown && propHealth <= _damagedHealthThreshold)
-        {
-            //this.gameObject.SetActive(false);
-            Debug.LogError("Damage done to prop");
-            _damagedStateShown = true;
-            return;
-        }
-
-        if (propHealth <= 0f)
+        if (propHealth <= MINIMUM_HP_TO_DESTROY)
         {
             this.gameObject.SetActive(false);
-            Debug.LogError("Object destroyed");
         }
     }
 }
