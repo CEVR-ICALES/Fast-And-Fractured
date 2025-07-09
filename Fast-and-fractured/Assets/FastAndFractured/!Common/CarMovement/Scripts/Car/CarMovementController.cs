@@ -58,6 +58,9 @@ namespace FastAndFractured
         [SerializeField] private float maxGroundCarAngleThreshold = 12f;
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
+
+        public IInputProvider InputProvider { get => _inputProvider; set => _inputProvider = value; }
+
         private bool _isFlipped = false;
 
         [SerializeField]
@@ -76,18 +79,13 @@ namespace FastAndFractured
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
-        private bool _isUsingController = false;
-
+ 
         private bool _isMovingForward = false;
         private bool _isMovingBackwards = false;
         const float MOVING_DIRECTION_THRESHOLD = 0.4f;
 
-        public bool IsAi
-        {
-            get => isAi; set => isAi = value;
-        }
-        [SerializeField] private bool isAi = false;
-
+         
+ 
         const float SPEED_TO_METERS_PER_SECOND = 3.6f;
 
         [Header("References")]
@@ -96,6 +94,7 @@ namespace FastAndFractured
         [SerializeField] private float slowingDownAngularMomentumTime;
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
+        private IInputProvider _inputProvider;
 
         protected override void Construct()
         {
@@ -110,6 +109,9 @@ namespace FastAndFractured
             }
             SetMaxRbSpeedDelayed();
             _combinedMask = groundLayer | staticLayer;
+            if(_inputProvider==null)
+            _inputProvider = GetComponentInParent<IInputProvider>();
+
         }
 
         private void FixedUpdate()
@@ -165,27 +167,7 @@ namespace FastAndFractured
 
         #region Refactorized Code
 
-        public void HandleSteeringInput(Vector2 steeringInput)
-        {
-            if ((IsAi && !_isBraking) || (!PlayerInputController.Instance.IsUsingController && !_isBraking))
-            {
-                float acceleration = steeringInput.y * statsController.Acceleration;
-                ApplyMotorTorque(acceleration);
-                _previousSteeringYValue = steeringInput.y;
-            }
-
-            _targetSteerAngle = statsController.Handling * steeringInput.x;
-        }
-
-        public void HandleAccelerateInput(float rawAccelerationInput)
-        {
-            if (PlayerInputController.Instance.IsUsingController && !_isBraking)
-            {
-                _previousSteeringYValue = rawAccelerationInput;
-                float acceleration = rawAccelerationInput * statsController.Acceleration;
-                ApplyMotorTorque(acceleration);
-            }
-        }
+         
 
         private void ApplyMotorTorque(float acceleration)
         {
@@ -234,7 +216,33 @@ namespace FastAndFractured
                 ApplyBrakeTorque(0f);
             }
         }
+        public void ProcessMovementInput()
+        {
+            if (_inputProvider == null) return;
 
+            Vector2 moveInput = _inputProvider.MoveInput;
+            bool isBraking = _inputProvider.IsBraking;
+
+            if (!isBraking)
+            {
+                _previousSteeringYValue = moveInput.y;
+                float acceleration = moveInput.y * statsController.Acceleration;
+                ApplyMotorTorque(acceleration);
+            }
+            _targetSteerAngle = statsController.Handling * moveInput.x;
+
+            HandleBrakingInput(isBraking, moveInput);
+
+            if (_inputProvider.IsDashing)
+            {
+                HandleDashWithPhysics();
+            }
+        }
+        public void ProcessAirRotationInput()
+        {
+            if (_inputProvider == null) return;
+            HandleInputOnAir(_inputProvider.MoveInput);
+        }
         #endregion
 
         #region Braking Functions
@@ -677,4 +685,10 @@ namespace FastAndFractured
             }
         }
     }
+}
+public interface IInputProvider
+{
+    Vector2 MoveInput { get;   }  
+    bool IsBraking { get; }
+    bool IsDashing { get; }
 }

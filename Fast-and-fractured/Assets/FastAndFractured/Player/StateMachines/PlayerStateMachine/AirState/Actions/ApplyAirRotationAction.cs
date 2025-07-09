@@ -18,7 +18,7 @@ namespace StateMachine
             
             if(_isAirRotationToggled)
             {
-                controller.GetBehaviour<CarMovementController>().HandleInputOnAir(_playerInputController.MoveInput);
+                 controller.GetBehaviour<CarMovementController>().ProcessAirRotationInput();
             }
            
         }

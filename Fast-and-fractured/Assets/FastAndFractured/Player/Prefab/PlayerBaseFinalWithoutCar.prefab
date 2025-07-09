@@ -372,6 +372,7 @@ GameObject:
   - component: {fileID: 383298123130983299}
   - component: {fileID: 3679666603489496442}
   - component: {fileID: 2405317262010205209}
+  - component: {fileID: 8117473461351857126}
   m_Layer: 6
   m_Name: PlayerBaseFinalWithoutCar
   m_TagString: Player
@@ -494,6 +495,18 @@ MonoBehaviour:
   prefab: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
   spawnPoint: {fileID: 8441757825497375975}
   autoInject: 0
+--- !u!114 &8117473461351857126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4417372150632784795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a6e55d5b126eb4798c5ef9a93c22f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5168219367193688341
 GameObject:
   m_ObjectHideFlags: 0
@@ -3126,6 +3139,21 @@ PrefabInstance:
     - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[8]'
       value: m_Lens
+      objectReference: {fileID: 0}
+      propertyPath: Priority.Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: Priority.m_Value
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_LegacyPriority
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_StreamingVersion
+      value: 20241001
       objectReference: {fileID: 0}
     - target: {fileID: 2506882354399734611, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_FollowOffset.y
