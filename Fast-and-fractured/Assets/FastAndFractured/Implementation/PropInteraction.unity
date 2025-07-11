@@ -2664,7 +2664,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   propHealth: 0
-  requiredSpeedToDamage: 0
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &510792009 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7541107958905435669, guid: 4c781aa325dd7154e8b96b2fa0fa0dc6, type: 3}
@@ -5196,6 +5198,54 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8085279933105020505, guid: b62f3b608cf8b1c438a0eb53445135c6, type: 3}
   m_PrefabInstance: {fileID: 839082227}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &840100368 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6623847331967563233, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+  m_PrefabInstance: {fileID: 1458278729}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &840100374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840100368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c80fb6c810d587f43a782621f7d4d0d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  propHealth: 0
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!54 &840100375
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840100368}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &844137675 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7686457290810785128, guid: 4c781aa325dd7154e8b96b2fa0fa0dc6, type: 3}
@@ -5419,7 +5469,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   propHealth: 0
-  requiredSpeedToDamage: 0
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1001 &876457295
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8452,8 +8504,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c80fb6c810d587f43a782621f7d4d0d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propHealth: 0
-  requiredSpeedToDamage: 0
+  propHealth: 1
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1101470794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3071354434998066732, guid: 4c781aa325dd7154e8b96b2fa0fa0dc6, type: 3}
@@ -11014,6 +11068,26 @@ PrefabInstance:
       propertyPath: m_Version
       value: 13
       objectReference: {fileID: 0}
+    - target: {fileID: 6247246040170292227, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      propertyPath: m_Size.z
+      value: 2.8745959
+      objectReference: {fileID: 0}
+    - target: {fileID: 6247246040170292227, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      propertyPath: m_Center.x
+      value: -0.41367146
+      objectReference: {fileID: 0}
+    - target: {fileID: 6247246040170292227, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      propertyPath: m_Center.y
+      value: 0.48821673
+      objectReference: {fileID: 0}
+    - target: {fileID: 6247246040170292227, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      propertyPath: m_Center.z
+      value: -0.013922836
+      objectReference: {fileID: 0}
+    - target: {fileID: 6247246040170292227, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      propertyPath: m_ProvidesContacts
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6941997690962110934, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -11203,6 +11277,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7214102557138550070, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1099485511}
+    - targetCorrespondingSourceObject: {fileID: 6623847331967563233, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 840100375}
+    - targetCorrespondingSourceObject: {fileID: 6623847331967563233, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 840100374}
     - targetCorrespondingSourceObject: {fileID: 8486739868838696768, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1120270800}
@@ -11517,7 +11597,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   propHealth: 0
-  requiredSpeedToDamage: 0
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1001 &1536335077
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12755,7 +12837,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   propHealth: 1
-  requiredSpeedToDamage: 50
+  damagingLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &1704526720 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5830980382968407914, guid: 4c781aa325dd7154e8b96b2fa0fa0dc6, type: 3}

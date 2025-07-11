@@ -4,26 +4,31 @@ using UnityEngine;
 public class DestructibleProp : MonoBehaviour
 {
     [SerializeField] private float propHealth;
-    [SerializeField] private float requiredSpeedToDamage;
+    //[SerializeField] private float requiredSpeedToDamage;
 
     private float _damageAmount = 1f;
+
+    [SerializeField] private LayerMask damagingLayer;
 
     //private EventReference destroySound; FUTURE USE
 
     private const int MINIMUM_HP_TO_DESTROY = 0;
     private void OnCollisionEnter(Collision collision)
     {
-        Transform otherRoot = collision.collider.transform.root;
+        Debug.Log("Entered Collision");
+        GameObject other = collision.gameObject;
 
-        Rigidbody rb = otherRoot.GetComponentInChildren<Rigidbody>();
+        if (((1 << other.layer) & damagingLayer) == 0)
+            return;
+
+        Rigidbody rb = other.GetComponentInChildren<Rigidbody>();
 
         if (rb == null)
             return;
 
-        float impactSpeed = rb.linearVelocity.magnitude;
+        //float impactSpeed = rb.linearVelocity.magnitude;
 
-        if (impactSpeed >= requiredSpeedToDamage)
-            TakeDamage(_damageAmount);
+        TakeDamage(_damageAmount);
     }
 
     private void TakeDamage(float damage)
@@ -33,6 +38,7 @@ public class DestructibleProp : MonoBehaviour
         if (propHealth <= MINIMUM_HP_TO_DESTROY)
         {
             this.gameObject.SetActive(false);
+            Debug.Log("Damage Done");
         }
     }
 }
