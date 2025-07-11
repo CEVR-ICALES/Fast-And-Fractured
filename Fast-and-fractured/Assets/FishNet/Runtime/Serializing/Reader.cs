@@ -1304,7 +1304,7 @@ namespace FishNet.Serializing
             int shift = 0;
             ulong value = 0;
             /* Maximum number of bytes for ulong.
-             * Prevents endless loop. Should not be neccessary but is a nice precaution. */
+             * Prevents endless loop. Should not be necessary but is a nice precaution. */
             int maximumIterations = 10;
             int iterations = 0;
             int bufferLength = GetBuffer().Length;

@@ -20,7 +20,25 @@ namespace FishNet.Transporting.Yak
             return _connectionState;
         }
 
-        
+        //PROSTART
+        /// <summary>
+        /// Sets a new connection state.
+        /// </summary>
+        /// <param name="connectionState"></param>
+        protected virtual void SetLocalConnectionState(LocalConnectionState connectionState, bool server)
+        {
+            //If state hasn't changed.
+            if (connectionState == _connectionState)
+                return;
+
+            _connectionState = connectionState;
+
+            if (server)
+                Transport.HandleServerConnectionState(new(connectionState, Transport.Index));
+            else
+                Transport.HandleClientConnectionState(new(connectionState, Transport.Index));
+        }
+        //PROEND
         #endregion
 
         #region Protected.
@@ -43,7 +61,13 @@ namespace FishNet.Transporting.Yak
         /// </summary>
         internal void ClearQueue(ref Queue<LocalPacket> queue)
         {
-            
+            //PROSTART
+            while (queue.Count > 0)
+            {
+                LocalPacket lp = queue.Dequeue();
+                lp.Dispose();
+            }
+            //PROEND
         }
     }
 

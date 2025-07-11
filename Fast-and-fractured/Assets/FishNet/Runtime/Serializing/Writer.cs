@@ -1124,7 +1124,7 @@ namespace FishNet.Serializing
         /// Writes a packed whole number.
         /// </summary>
         /// <param name="value"></param>
-        /// <summary>
+        /// <summary>fr
         /// Writes a packed whole number.
         /// </summary>
         /// <param name="value"> </param>

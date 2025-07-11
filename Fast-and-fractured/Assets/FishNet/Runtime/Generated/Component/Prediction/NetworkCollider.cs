@@ -302,7 +302,27 @@ namespace FishNet.Component.Prediction
                      * this trace. Invoke exit and remove from entered. */
                     OnExit?.Invoke(c);
 
-                    
+                    //NOTESSTART
+                    /* This is incredibly important.
+                     *
+                     * Do not remove from entered. This is done during a reconcile
+                     * so we can make sure the reconcile has passed the enter tick.
+                     *
+                     * Let's say an object entered at 90 then exited on 100 then a reconcile occurred later
+                     * for tick 99, which would then invoke Enter due to being originally entered at 90,
+                     * and exit again during the tick 100 replay.
+                     * If the next reconcile were for tick 100, which would be normal, then there would be no
+                     * enter state, since the object is reconciling to the position which invoked the exit. There
+                     * would also be no exit state, given the enter state is missing. This means an exit invoke goes
+                     * missing.
+                     *
+                     * Rather than remove from the entered collection here we set the exit tick. The next time a reconcile
+                     * occurs we check entries, and if the reconcile is beyond the exited tick (101 in this example) we can
+                     * clear the entry.
+                     *
+                     * The exception being if server then remove immediately, given server does not reconcile.
+                     * */
+                    //NOTESEND
 
                     if (base.IsServerStarted)
                         entered.Remove(c);

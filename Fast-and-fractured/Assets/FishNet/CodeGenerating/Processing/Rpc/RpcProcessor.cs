@@ -256,7 +256,19 @@ namespace FishNet.CodeGenerating.Processing.Rpc
         {
             intentionallyNull = false;
 
-            
+            //PROSTART
+            if (CodeStripping.StripBuild)
+            {
+                /* Clients don't need writers for client rpcs,
+                 * just as server doesnt need writers for server rpcs. */
+                bool isServerRpc = (cr.RpcType == RpcType.Server);
+                if ((isServerRpc && CodeStripping.ReleasingForServer) || (!isServerRpc && CodeStripping.ReleasingForClient))
+                {
+                    intentionallyNull = true;
+                    return null;
+                }
+            }
+            //PROEND
 
             string methodName = $"{WRITER_PREFIX}{GetRpcMethodName(cr)}";
             /* If method already exist then clear it. This
@@ -364,7 +376,9 @@ namespace FishNet.CodeGenerating.Processing.Rpc
             /* Creates basic ServerRpc and ClientRpc
              * conditions such as if requireOwnership ect..
              * or if (!base.isClient) */
-            
+            //PROSTART
+            if (!CodeStripping.StripBuild)
+                //PROEND
                 CreateClientRpcConditionsForServer(writerMd, cr.Attribute);
 
             VariableDefinition channelVariableDef = CreateAndPopulateChannelVariable(writerMd, channelParameterDef);
@@ -422,7 +436,9 @@ namespace FishNet.CodeGenerating.Processing.Rpc
             /* Creates basic ServerRpc
              * conditions such as if requireOwnership ect..
              * or if (!base.isClient) */
-            
+            //PROSTART
+            if (!CodeStripping.StripBuild)
+                //PROEND
                 CreateServerRpcConditionsForClient(writerMd, cr.Attribute);
 
             VariableDefinition channelVariableDef = CreateAndPopulateChannelVariable(writerMd, channelParameterDef);
@@ -487,7 +503,19 @@ namespace FishNet.CodeGenerating.Processing.Rpc
             MethodDefinition logicMd = cr.LogicMethodDef;
             CustomAttribute rpcAttribute = cr.Attribute;
 
-            
+            //PROSTART
+            if (CodeStripping.StripBuild)
+            {
+                /* Server doesnt need readers for client rpcs,
+                 * just as clients dont need reader for server rpcs. */
+                bool isServerRpc = (cr.RpcType == RpcType.Server);
+                if ((isServerRpc && CodeStripping.ReleasingForClient) || (!isServerRpc && CodeStripping.ReleasingForServer))
+                {
+                    intentionallyNull = true;
+                    return null;
+                }
+            }
+            //PROEND
 
             string methodName = $"{READER_PREFIX}{GetRpcMethodName(cr)}";
             /* If method already exist then just return it. This
@@ -859,7 +887,22 @@ namespace FishNet.CodeGenerating.Processing.Rpc
             TypeDefinition typeDef = cr.TypeDef;
             MethodDefinition originalMd = cr.OriginalMethodDef;
 
-            
+            //PROSTART
+            /* If running locally then logic must exist for both.
+             * Such the case, don't exclude logic. */
+            if (CodeStripping.StripBuild && !cr.RunLocally)
+            {
+                /* Client doesn't need logic of a serverRpc
+                 * and server doesn't need logic of client rpcs. */
+                bool isServerRpc = (cr.RpcType == RpcType.Server);
+                if ((isServerRpc && CodeStripping.ReleasingForClient) || (!isServerRpc && CodeStripping.ReleasingForServer))
+                {
+                    originalMd.ClearMethodWithRet(base.Session);
+                    intentionallyNull = true;
+                    return null;
+                }
+            }
+            //PROEND
 
             //Methodname for logic methods do not use prefixes because there can be only one.
             string methodName = $"{LOGIC_PREFIX}{GetMethodNameAsParameters(originalMd)}";
@@ -981,7 +1024,19 @@ namespace FishNet.CodeGenerating.Processing.Rpc
              * entry. */
             MethodDefinition originalMd = createdRpcs[0].OriginalMethodDef;
 
-            
+            //PROSTART
+            if (CodeStripping.StripBuild)
+            {
+                /* If there is no writer method then nothing
+                 * can be redirected. This could occur during code
+                 * stripping. */
+                if (createdRpcs[0].WriterMethodDef == null)
+                {
+                    originalMd.ClearMethodWithRet(base.Session);
+                    return;
+                }
+            }
+            //PROEND
 
             ILProcessor processor = originalMd.Body.GetILProcessor();
             originalMd.Body.Instructions.Clear();
