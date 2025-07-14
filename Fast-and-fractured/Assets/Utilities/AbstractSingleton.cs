@@ -46,7 +46,7 @@ namespace Utilities
             {
                 s_Instance = this as T;
             }
-            else if (s_Instance != this)
+            else if (s_Instance != this && s_Instance.gameObject != this.gameObject)
             {
                 HandleDuplicate();
 
@@ -66,13 +66,18 @@ namespace Utilities
                     this.enabled = false;
                     break;
             }
+            Deconstruct();
         }
 
         public void ClaimSingletonOwnership()
         {
+            if (s_Instance == this)
+            {
+                return;
+            }
             bool wasInitialized = false;
             bool wasConstructed = false;
-            if (s_Instance != null && s_Instance != this)
+            if (s_Instance != null  )
             {
                 Debug.Log($"<color=orange>'{gameObject.name}' is claiming ownership of singleton '{typeof(T).Name}'. " +
                           $"Destroying previous instance on '{s_Instance.gameObject.name}'.</color>");
@@ -90,6 +95,7 @@ namespace Utilities
                 }
             }
             s_Instance = this as T;
+            enabled = true;
             if (wasConstructed)
             { 
                 Construct();
