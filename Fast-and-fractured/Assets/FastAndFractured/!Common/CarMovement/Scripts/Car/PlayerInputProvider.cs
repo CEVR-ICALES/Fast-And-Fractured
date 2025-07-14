@@ -1,30 +1,38 @@
-using UnityEngine;
+    using UnityEngine;
 
-namespace FastAndFractured { 
+    namespace FastAndFractured { 
  
-    public class PlayerInputProvider : MonoBehaviour, IInputProvider
-    { 
-        private PlayerInputController _input => PlayerInputController.Instance;
+        public class PlayerInputProvider : MonoBehaviour, IInputProvider
+        { 
+            private PlayerInputController _input => PlayerInputController.Instance;
 
-        public Vector2 MoveInput
-        {
-            get
+            public Vector2 MoveInput
             {
-                if (_input == null) return Vector2.zero;
+                get
+                {
+                    if (_input == null) return Vector2.zero;
 
-                if (_input.IsUsingController)
-                {
-                    float moveY = _input.IsAccelerating - _input.IsReversing;
-                    return new Vector2(_input.MoveInput.x, moveY);
-                }
-                else
-                {
-                    return _input.MoveInput;
+                    if (_input.IsUsingController)
+                    {
+                        float moveY = _input.IsAccelerating - _input.IsReversing;
+                        return new Vector2(_input.MoveInput.x, moveY);
+                    }
+                    else
+                    {
+                        return _input.MoveInput;
+                    }
                 }
             }
-        }
 
-        public bool IsBraking => _input != null && _input.IsBraking;
-        public bool IsDashing => _input != null && _input.IsDashing;
+            public bool IsBraking => _input != null && _input.IsBraking;
+            public bool IsDashing => _input != null && _input.IsDashing;
+
+            public float IsAccelerating => _input != null ? _input.IsAccelerating : 0f;
+            public float IsReversing => _input != null ? _input.IsReversing : 0f;
+
+            public void Initialize()
+            {
+                _input.BindActions();
+            }
+        }
     }
-}

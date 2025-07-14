@@ -11,5 +11,9 @@ namespace FastAndFractured
         public Vector2 MoveInput => DesiredMoveInput;
         public bool IsBraking => DesiredBraking;
         public bool IsDashing => DesiredDashing;
+
+        public void Initialize()
+        {
+        }
     }
 }
