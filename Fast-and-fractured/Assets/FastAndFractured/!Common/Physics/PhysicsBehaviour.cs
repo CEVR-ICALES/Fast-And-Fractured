@@ -1,9 +1,9 @@
 using Enums;
+using FastAndFractured.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
@@ -45,8 +45,8 @@ namespace FastAndFractured
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public StatsController StatsController { get => statsController; }
-        public Rigidbody Rb { get => _rb; set => _rb = value; }
-        private Rigidbody _rb;
+        public ICustomRigidbody Rb { get => _rb; set => _rb = value; }
+        private ICustomRigidbody _rb;
         private CarMovementController _carMovementController;
         public CarImpactHandler CarImpactHandler { get => _carImpactHandler; }
         private CarImpactHandler _carImpactHandler;
@@ -60,9 +60,9 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            if (!_rb)
+            if (_rb==null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
 
             _carImpactHandler = GetComponent<CarImpactHandler>();
