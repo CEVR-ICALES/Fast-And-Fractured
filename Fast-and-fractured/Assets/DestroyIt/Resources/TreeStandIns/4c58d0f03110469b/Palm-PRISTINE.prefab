@@ -1,0 +1,296 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4560985199587132352
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6535435024246615021}
+  - component: {fileID: 2380487815083367532}
+  m_Layer: 0
+  m_Name: collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6535435024246615021
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4560985199587132352}
+  m_LocalRotation: {x: 0.014314528, y: 0.0001091063, z: 0.0061021913, w: 0.999879}
+  m_LocalPosition: {x: -0.018713145, y: 2.5009723, z: 0.048401624}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5359743506375041929}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &2380487815083367532
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4560985199587132352}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 5
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &6452125626224345303
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3650110503298718945}
+  - component: {fileID: 7601271794295298860}
+  m_Layer: 0
+  m_Name: Palm-PRISTINE
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3650110503298718945
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6452125626224345303}
+  m_LocalRotation: {x: 0, y: -0.75374633, z: 0, w: 0.6571655}
+  m_LocalPosition: {x: 1.88, y: -0.03, z: 0.13}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 5359743506375041929}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: -97.831894, z: 0}
+--- !u!114 &7601271794295298860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6452125626224345303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3dbf5a679affaa4f8cdc6a7adcd4e4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tags: 0f000000
+--- !u!1 &8710127726171758893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5359743506375041929}
+  - component: {fileID: 1482811466390535258}
+  - component: {fileID: 7215111130482619134}
+  m_Layer: 0
+  m_Name: Palm-LOD0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5359743506375041929
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8710127726171758893}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 6535435024246615021}
+  - {fileID: 4122552697516918624}
+  m_Father: {fileID: 3650110503298718945}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1482811466390535258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8710127726171758893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1bbb502083c41048a8fedc6a9693be7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalHitPoints: 200
+  currentHitPoints: 200
+  damageLevels:
+  - maxHitPoints: 200
+    minHitPoints: 161
+    healthPercent: 100
+    hasError: 0
+    visibleDamageLevel: 0
+  - maxHitPoints: 160
+    minHitPoints: 121
+    healthPercent: 80
+    hasError: 0
+    visibleDamageLevel: 2
+  - maxHitPoints: 120
+    minHitPoints: 81
+    healthPercent: 60
+    hasError: 0
+    visibleDamageLevel: 4
+  - maxHitPoints: 80
+    minHitPoints: 41
+    healthPercent: 40
+    hasError: 0
+    visibleDamageLevel: 6
+  - maxHitPoints: 40
+    minHitPoints: 0
+    healthPercent: 20
+    hasError: 0
+    visibleDamageLevel: 8
+  destroyedPrefab: {fileID: 100000, guid: e1dc3b47890f7b041ad5442524a2cfbe, type: 3}
+  destroyedPrefabParent: {fileID: 0}
+  fallbackParticle: {fileID: 0}
+  fallbackParticleMaterial: {fileID: 0}
+  damageEffects:
+  - TriggeredAt: 1
+    Offset: {x: 0, y: 13.5, z: 1}
+    Rotation: {x: 90, y: 0, z: 0}
+    Prefab: {fileID: 100006, guid: bf23812c5bdd1ee40bfc904fcb81c073, type: 3}
+    GameObject: {fileID: 0}
+    HasStarted: 0
+    HasTagDependency: 0
+    TagDependency: 0
+    UnparentOnDestroy: 1
+    StopEmittingOnDestroy: 0
+  - TriggeredAt: 5
+    Offset: {x: 0, y: 13.5, z: 1}
+    Rotation: {x: 90, y: 0, z: 0}
+    Prefab: {fileID: 100006, guid: bf23812c5bdd1ee40bfc904fcb81c073, type: 3}
+    GameObject: {fileID: 0}
+    HasStarted: 0
+    HasTagDependency: 0
+    TagDependency: 0
+    UnparentOnDestroy: 1
+    StopEmittingOnDestroy: 0
+  - TriggeredAt: 5
+    Offset: {x: -0.4, y: 2, z: 0}
+    Rotation: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 100002, guid: 7a27210e9b7d56942a6acf1af0210d33, type: 3}
+    GameObject: {fileID: 0}
+    HasStarted: 0
+    HasTagDependency: 0
+    TagDependency: 0
+    UnparentOnDestroy: 1
+    StopEmittingOnDestroy: 0
+  - TriggeredAt: 5
+    Offset: {x: 0.4, y: 2, z: 0}
+    Rotation: {x: 180, y: 0, z: 0}
+    Prefab: {fileID: 100002, guid: 7a27210e9b7d56942a6acf1af0210d33, type: 3}
+    GameObject: {fileID: 0}
+    HasStarted: 0
+    HasTagDependency: 0
+    TagDependency: 0
+    UnparentOnDestroy: 1
+    StopEmittingOnDestroy: 0
+  velocityReduction: 0.5
+  ignoreCollisionsUnder: 2
+  unparentOnDestroy: []
+  disableKinematicOnUparentedChildren: 1
+  replaceMaterials:
+  - SourceMaterial: {fileID: 2100000, guid: a0f221f129c4b8842a84ef6d533852fe, type: 2}
+    ReplacementMaterial: {fileID: 2100000, guid: a0f221f129c4b8842a84ef6d533852fe,
+      type: 2}
+  canBeDestroyed: 1
+  canBeRepaired: 1
+  canBeObliterated: 0
+  debrisToReParentByName: []
+  debrisToReParentIsKinematic: 0
+  childrenToReParentByName: []
+  destructibleGroupId: 0
+  isDebrisChipAway: 0
+  chipAwayDebrisMass: 1
+  chipAwayDebrisDrag: 0
+  chipAwayDebrisAngularDrag: 0.05
+  autoPoolDestroyedPrefab: 1
+  useFallbackParticle: 1
+  centerPointOverride: {x: 0, y: 0, z: 0}
+  sinkWhenDestroyed: 0
+  shouldDeactivate: 0
+  isTerrainTree: 0
+--- !u!114 &7215111130482619134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8710127726171758893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ae5a7a1942384f45a292ce82d781740, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effects:
+  - hitBy: -1
+    effect: {fileID: 100000, guid: 1b41b6695dc30774397dbd871dc82cfa, type: 3}
+--- !u!1 &9002883752432493986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4122552697516918624}
+  - component: {fileID: 8503523577379589172}
+  m_Layer: 0
+  m_Name: collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4122552697516918624
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002883752432493986}
+  m_LocalRotation: {x: 0.054686904, y: 0.0013606547, z: -0.0020790992, w: 0.99850047}
+  m_LocalPosition: {x: 0.02072138, y: 8.4267, z: 0.5096347}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5359743506375041929}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &8503523577379589172
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002883752432493986}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 9
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}

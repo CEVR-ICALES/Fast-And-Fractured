@@ -1,0 +1,15 @@
+Note:
+* Rigidbody code was simplified, using code that only works in Unity 2020 or above. So starting with DestroyIt version 1.16, the minimum supported Unity Editor is Unity 2020.
+
+Minor Updates:
+* Screen Space Ambient Occlusion (SSAO) and the Main Camera are now enabled by default in the demo scenes.
+* You can now set the minimum hit points to 0.1 for calculating damage levels of your destructible objects.
+* Removed the DefaultSmallParticle prefab, as it was no longer being used. (The scale of a particle effect can adjusted up or down on the Destructible script.)
+* Updated the DestroyIt User Guide footer link for the ModelShark website.
+
+Bug Fixes:
+* Fixed an error that was thrown when changing scenes to one that is not listed in the Build Settings. 
+* Fixed an issue when reloading a scene (R key) in the demos when the active scene was not in the Build Settings.
+* Fixed an issue with the PlayMaker integration package (under Extras folder) which was caused by a variable name change (CurrentHitPoints and TotalHitPoints variables were changed).
+* Fixed a warning message regarding the Tonemapping.cs script in the demos: "RenderTexture.MarkRestoreExpected() is obsolete: This function has no effect."
+* Removed the Particle Alpha Blend (No Fog) shader because it throws warnings in Unity 2021 and above. Also turned off fog on the demo scenes, since the fob obscures objects that previously ignored fog (with the custom shader).
