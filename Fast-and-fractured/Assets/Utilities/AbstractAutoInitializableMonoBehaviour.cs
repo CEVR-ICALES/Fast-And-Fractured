@@ -91,6 +91,7 @@ namespace Utilities
         
             _isInitialized = false;
             _isConstructed =false;
+            enabled = false;
         }
 
     }
