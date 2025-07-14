@@ -49,7 +49,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        #region Implementación de ICustomRigidbody
+        #region   ICustomRigidbody
 
         public Vector3 position { get => _rb.position; set => _rb.position = value; }
         public Quaternion rotation { get => _rb.rotation; set => _rb.rotation = value; }
