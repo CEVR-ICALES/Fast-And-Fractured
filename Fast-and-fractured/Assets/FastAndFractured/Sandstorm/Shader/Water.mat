@@ -76,8 +76,10 @@ Material:
     - _ConservativeDepthOffsetEnable: 0
     - _CullMode: 2
     - _CullModeForward: 2
+    - _Depth: 1.46
     - _DepthOffsetEnable: 0
     - _Depyh: 0.33
+    - _Displacement: 4.44
     - _DoubleSidedEnable: 0
     - _DoubleSidedGIMode: 0
     - _DoubleSidedNormalMode: 2
@@ -88,7 +90,7 @@ Material:
     - _ExcludeFromTUAndAA: 0
     - _MaterialID: 1
     - _MaterialTypeMask: 2
-    - _Normal_Strenght: 0.488
+    - _Normal_Strenght: 0.33
     - _OpaqueCullMode: 2
     - _PerPixelSorting: 0
     - _RayTracing: 0
@@ -97,6 +99,7 @@ Material:
     - _RefractionModel: 0
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
+    - _Smoothness: 0
     - _SrcBlend: 1
     - _StencilRef: 0
     - _StencilRefDepth: 8
@@ -108,7 +111,7 @@ Material:
     - _StencilWriteMaskDistortionVec: 4
     - _StencilWriteMaskGBuffer: 15
     - _StencilWriteMaskMV: 41
-    - _Strenght: 0.6
+    - _Strenght: 0.25
     - _SupportDecals: 1
     - _SurfaceType: 0
     - _TransmissionEnable: 1
@@ -125,9 +128,9 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _DeepWaterColor: {r: 0.02745098, g: 0.082352914, b: 0.7843137, a: 0.8588235}
+    - _DeepWaterColor: {r: 0, g: 0.07058859, b: 1, a: 0.8509804}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShallowWaterColor: {r: 0, g: 0.50980395, b: 1, a: 0.7647059}
+    - _ShallowWaterColor: {r: 0, g: 0.50980425, b: 1, a: 0.7647059}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
