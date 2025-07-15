@@ -101,7 +101,7 @@ namespace FastAndFractured
 
         private IAGroundState groundState = IAGroundState.NONE;
         private ITimer _flipForceTimer;
-
+        private AiInputProvider _aiInputProvider;
         //Training Values
         public bool PlayerNear { get => _playerNear; set => _playerNear = value; }
         private bool _playerNear = false;
@@ -119,6 +119,8 @@ namespace FastAndFractured
                 statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
                 statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             }
+            _aiInputProvider = GetComponentInParent<AiInputProvider>();
+
         }
 
 
@@ -287,9 +289,8 @@ namespace FastAndFractured
             }
 
             Vector2 input = new Vector2(inputX, inputY);
-
-
-            carMovementController.HandleSteeringInput(input* speedMultiplier);
+            _aiInputProvider.DesiredMoveInput = input * speedMultiplier;
+            carMovementController.ProcessMovementInput();
         }
 
 
