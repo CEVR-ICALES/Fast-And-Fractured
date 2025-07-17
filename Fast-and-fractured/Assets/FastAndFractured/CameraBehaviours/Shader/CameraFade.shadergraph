@@ -113,6 +113,9 @@
         },
         {
             "m_Id": "2867d6c83f014052935fdb42059f3a76"
+        },
+        {
+            "m_Id": "a14108055dd04e148813160e94a0ae79"
         }
     ],
     "m_GroupDatas": [],
@@ -205,20 +208,6 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
-                    "m_Id": "2867d6c83f014052935fdb42059f3a76"
-                },
-                "m_SlotId": 0
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "269ba5343e96487d8e92766b10d08e38"
-                },
-                "m_SlotId": 0
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
                     "m_Id": "2cbaed63fdfb4a22817cdbbc85609a21"
                 },
                 "m_SlotId": 0
@@ -270,6 +259,20 @@
                     "m_Id": "21e6dce697394870b7af98ae2eb5c2c9"
                 },
                 "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "a14108055dd04e148813160e94a0ae79"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "269ba5343e96487d8e92766b10d08e38"
+                },
+                "m_SlotId": 0
             }
         },
         {
@@ -926,10 +929,10 @@
             "m_Id": "96894376999c41d3894d52b57d476c50"
         },
         {
-            "m_Id": "c809fb7125da4436916b77bf67fe1c32"
+            "m_Id": "5d499ee91c084a839c327f0dc67b6765"
         },
         {
-            "m_Id": "5d499ee91c084a839c327f0dc67b6765"
+            "m_Id": "c809fb7125da4436916b77bf67fe1c32"
         },
         {
             "m_Id": "9122e4bc706247ecaf75cc15e97e6371"
@@ -1006,11 +1009,11 @@
     },
     "m_Name": "Object",
     "m_DrawState": {
-        "m_Expanded": false,
+        "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -753.0,
-            "y": 758.0,
+            "x": -691.0000610351563,
+            "y": 590.0000610351563,
             "width": 153.0,
             "height": 173.0
         }
@@ -1296,6 +1299,29 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
+    "m_ObjectId": "46444b585f554f438915e6feca4fbe89",
+    "m_Id": 0,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.PositionMaterialSlot",
     "m_ObjectId": "47a6ffcb6da14800b6478c37ca02641c",
     "m_Id": 0,
@@ -1457,7 +1483,7 @@
     "m_TessellationMaxDisplacement": 0.009999999776482582,
     "m_DebugSymbols": false,
     "m_Version": 2,
-    "inspectorFoldoutMask": 9
+    "inspectorFoldoutMask": 1
 }
 
 {
@@ -1583,10 +1609,10 @@
     "m_Guid": {
         "m_GuidSerialized": "1417eedc-4b6b-4175-8fc0-412f26faf67a"
     },
-    "m_Name": "Metalic",
+    "m_Name": "MaskMap",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Metalic",
-    "m_DefaultReferenceName": "_Metalic",
+    "m_RefNameGeneratedByDisplayName": "MaskMap",
+    "m_DefaultReferenceName": "_MaskMap",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -1789,7 +1815,7 @@
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
-    "m_Value": 0.0,
+    "m_Value": 8.0,
     "m_FloatType": 0,
     "m_RangeValues": {
         "x": 0.0,
@@ -1925,7 +1951,7 @@
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
-    "m_Value": 0.0,
+    "m_Value": 4.0,
     "m_FloatType": 0,
     "m_RangeValues": {
         "x": 0.0,
@@ -2208,7 +2234,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
     "m_ObjectId": "94490f3651f34e649bb6cc0487824b6b",
     "m_Id": 0,
-    "m_DisplayName": "Normal",
+    "m_DisplayName": "NormalMap",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2246,10 +2272,10 @@
     "m_Guid": {
         "m_GuidSerialized": "60509daa-ed34-4205-9a12-a5b44bdb57b3"
     },
-    "m_Name": "Albedo",
+    "m_Name": "BaseColorMap",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Albedo",
-    "m_DefaultReferenceName": "_Albedo",
+    "m_RefNameGeneratedByDisplayName": "BaseColorMap",
+    "m_DefaultReferenceName": "_BaseColorMap",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -2274,7 +2300,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
     "m_ObjectId": "9a5d4efed6fe4134af15c370f672ca48",
     "m_Id": 0,
-    "m_DisplayName": "Albedo",
+    "m_DisplayName": "BaseColorMap",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2325,6 +2351,43 @@
     "m_Value": 1.0,
     "m_DefaultValue": 1.0,
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.PositionNode",
+    "m_ObjectId": "a14108055dd04e148813160e94a0ae79",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Position",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -898.9999389648438,
+            "y": 757.9999389648438,
+            "width": 208.0,
+            "height": 281.99993896484377
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "46444b585f554f438915e6feca4fbe89"
+        }
+    ],
+    "synonyms": [
+        "location"
+    ],
+    "m_Precision": 1,
+    "m_PreviewExpanded": false,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 2,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Space": 4,
+    "m_PositionSource": 0
 }
 
 {
@@ -2485,7 +2548,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
     "m_ObjectId": "b4db21f56a2d49cca2cbf34f41021b35",
     "m_Id": 0,
-    "m_DisplayName": "Metalic",
+    "m_DisplayName": "MaskMap",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2673,10 +2736,10 @@
     "m_Guid": {
         "m_GuidSerialized": "c3e26938-4d4b-4cfc-be14-fbe0eea79eb2"
     },
-    "m_Name": "Normal",
+    "m_Name": "NormalMap",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Normal",
-    "m_DefaultReferenceName": "_Normal",
+    "m_RefNameGeneratedByDisplayName": "NormalMap",
+    "m_DefaultReferenceName": "_NormalMap",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
