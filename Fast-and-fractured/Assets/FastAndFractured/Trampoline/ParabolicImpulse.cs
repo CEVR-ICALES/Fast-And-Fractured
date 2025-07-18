@@ -7,7 +7,7 @@ namespace FastAndFractured {
         private bool fixedVY = false;
         [SerializeField]
         private float initialVy_impulse = 100f;
-        [Range(1.2f, 5f)]
+        [Range(1.2f, 15f)]
         [SerializeField]
         private float maxVelocityMultiplicatorFactor = 2.5f;
         [SerializeField]
@@ -44,12 +44,11 @@ namespace FastAndFractured {
             float startingVelocityX = startingVelocity.x;
             float startingVelocityZ = startingVelocity.z;
 
-            float forwardVelocityMagnitude = Mathf.Sqrt(Mathf.Pow(startingVelocityX, 2) + Mathf.Pow(startingVelocityZ, 2) + 2 * startingVelocityZ * startingVelocityX * Mathf.Cos(45));
-            forwardVelocityMagnitude *= maxVelocityMultiplicatorFactor - (1 - (car.Rb.mass/maxThrowableWeight));
-            float initialSpeedNeeded = forwardVelocityMagnitude / Mathf.Cos(angle * Mathf.Deg2Rad);
+            Vector3 forwardVelocity = new Vector3(startingVelocity.x,0, startingVelocity.z);
+            float initialSpeedNeeded = forwardVelocity.magnitude / Mathf.Cos(angle * Mathf.Deg2Rad);
             float startingVelocityUp = initialSpeedNeeded * Mathf.Sin(angle * Mathf.Deg2Rad);
             
-            car.Rb.linearVelocity = forwardVelocityMagnitude * car.transform.forward + (fixedVY ? initialVy_impulse : startingVelocityUp) * Vector3.up;
+            car.Rb.linearVelocity = forwardVelocity + (fixedVY ? initialVy_impulse : startingVelocityUp) * Vector3.up;
         }
     }
 }

@@ -9478,7 +9478,7 @@ GameObject:
   - component: {fileID: 1257361115}
   - component: {fileID: 1257361114}
   - component: {fileID: 1257361113}
-  m_Layer: 9
+  m_Layer: 17
   m_Name: Trampoline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9497,11 +9497,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29c9287e95b97cc4381a1b8bf3e0634b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fixedVY: 0
   initialVy_impulse: 100
+  maxVelocityMultiplicatorFactor: 7.07
   angle: 45
-  start_impulse_time: 0
   countdown: 0.5
-  launchPosition: {x: 0, y: 0, z: 0}
+  maxThrowableWeight: 20000
 --- !u!136 &1257361114
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -9587,7 +9588,7 @@ Transform:
   m_GameObject: {fileID: 1257361112}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -421.1424, y: -27.627348, z: 311.5307}
+  m_LocalPosition: {x: -421.1424, y: -25.627348, z: 311.5307}
   m_LocalScale: {x: 8.47, y: 1.9481001, z: 8.47}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -10159,15 +10160,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2568796523224492431, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.012356694
+      value: 0.01235845
       objectReference: {fileID: 0}
     - target: {fileID: 2568796523224492431, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -9.966226e-11
+      value: -9.966241e-11
       objectReference: {fileID: 0}
     - target: {fileID: 2568796523224492431, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 1.2315899e-12
+      value: 1.231767e-12
       objectReference: {fileID: 0}
     - target: {fileID: 2719743866116463922, guid: 85ae02768229604418a02f567a1b7dbc, type: 3}
       propertyPath: m_LocalPosition.y
@@ -15933,7 +15934,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2517803797502007672, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 2147530751
+      value: 2147661823
       objectReference: {fileID: 0}
     - target: {fileID: 2646167471375372210, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: m_Enabled
