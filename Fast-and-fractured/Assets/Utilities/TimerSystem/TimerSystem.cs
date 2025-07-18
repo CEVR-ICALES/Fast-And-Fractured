@@ -7,7 +7,7 @@ using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class TimerSystem : AbstractSingleton<TimerSystem>, IPausable
+    public class TimerSystem : AbstractSingleton<TimerSystem>
     {
         private Dictionary<string, ITimer> _timers = new Dictionary<string, ITimer>();
 
@@ -22,10 +22,7 @@ namespace Utilities
             base.Awake();
         }
 
-        private void Start()
-        {
-            PauseManager.Instance.RegisterPausable(this);
-        }
+        
 
         private void Update()
         {
@@ -35,7 +32,6 @@ namespace Utilities
         private void OnDestroy()
         {
             _timers.Clear();
-            PauseManager.Instance?.UnregisterPausable(this);
         }
         #endregion
 

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6113660984477760090}
   - component: {fileID: 67563940030294564}
+  - component: {fileID: 7469206426927393536}
   m_Layer: 0
   m_Name: TimerSystem
   m_TagString: Untagged
@@ -44,3 +45,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c8a01344f5720489a3454eff25eca5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _autoConstructOnAwake: 1
+  _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
+  singletonDuplicateResolution: 0
+  alsoDisableGameobjectOnDuplicateResolution: 0
+--- !u!114 &7469206426927393536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6172648251101017974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2956a19a993ff7349902e898c6b7a88a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerSystem: {fileID: 67563940030294564}
