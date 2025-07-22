@@ -69,7 +69,15 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         ThrowSimulatedProyectile();
     }
 
-    void Update()
+    private void FixedUpdate()
+    {
+        if (_calculateTracePoints) 
+        {
+            ThrowSimulatedProyectile();
+        }
+    }
+
+    void LateUpdate()
     {
         if (_calculateTracePoints)
         {
@@ -84,15 +92,15 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         if (Vector3.SqrMagnitude(_previousVelocity - _initialSpeed) > toleranceToVelocityMarginError)
         {
             previousPoints = new List<Vector3>(_points);
-            _currentVelocity = _initialSpeed;
             _currentPosition = _pushShootPoint.position;
             _points.Clear();
             _points.Add(_currentPosition);
+            float currentTimeStep = 0;
 
             for (int i = 0; i < maxCalculationSteps; i++)
             {
-                _currentVelocity += Physics.gravity * _currentCustomGravity * timeStep;
-                _currentPosition += _currentVelocity * timeStep;
+                currentTimeStep += timeStep;
+                _currentPosition = _pushShootPoint.position + _initialSpeed * currentTimeStep + 0.5f * Physics.gravity * _currentCustomGravity * currentTimeStep * currentTimeStep;
                 _points.Add(_currentPosition);
             }
             _previousVelocity = _initialSpeed;
@@ -106,8 +114,8 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
 
         for (int i = 0; i < _points.Count; i++)
         {
-            float yDiff = _points[i].y - targetPoint.y;
-            if (yDiff > 0 && yDiff < minYDifference)
+            float yDiff = Mathf.Abs(_points[i].y - targetPoint.y);
+            if (yDiff < minYDifference)
             {
                 minYDifference = yDiff;
                 closestIndex = i;
@@ -159,57 +167,15 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         {
             hitMark.transform.position = _points[_previousContactIndex];
         }
-        if (_showTraceTimer == null)
+        List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
+        List<Vector3> filteredPreviousPoints = new List<Vector3>();
+        bool noPreviousPoint = previousPoints.Count == 0;
+        if (!noPreviousPoint)
         {
-            ThrowSimulatedProyectile();
-            List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
-            List<Vector3> filteredPreviousPoints = new List<Vector3>();
-            bool noPreviousPoint = previousPoints.Count == 0;
-            if (!noPreviousPoint)
-            {
-               filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
-            }
-           
-            _showTraceTimer = TimerSystem.Instance.CreateTimer(
-                Time.deltaTime * frames,
-                onTimerDecreaseComplete: () =>
-                {
-                    _showTraceTimer = null;
-                    if (noPreviousPoint)
-                    {
-                        lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
-                        lineRenderer.Simplify(tolerance);
-                    }
-                },
-                onTimerDecreaseUpdate: (float timer) =>
-                {
-                    if (!noPreviousPoint)
-                    {
-                        float progress = 1f - (timer / (Time.deltaTime * frames));
-                        lineRenderer.positionCount = filteredCurrentPoints.Count;
-                        Vector3 hitMarkInitialPos = hitMark.transform.position;
-                        Vector3 newPositionForHitMark = hitMark.transform.position;
-                        for (int i = 0; i < filteredCurrentPoints.Count && i < filteredPreviousPoints.Count; i++)
-                        {
-                            Vector3 interpolatedPos = Vector3.Slerp(
-                                filteredPreviousPoints[i],
-                                filteredCurrentPoints[i],
-                                progress
-                            );
-                            if (indexToFollow == i)
-                            {
-                                newPositionForHitMark = interpolatedPos;
-                                Vector3 interpolationHitMarkPoint = Vector3.Slerp(hitMarkInitialPos, newPositionForHitMark, progress);
-                                hitMark.transform.position = interpolationHitMarkPoint;
-                            }
-                            lineRenderer.SetPosition(i, interpolatedPos);
-                        }
-                       
-                        lineRenderer.Simplify(tolerance);
-                    }
-                }
-            );
+          filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
         }
+        lineRenderer.positionCount = filteredPreviousPoints.Count;
+        lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
     }
 
     private void SetPointForHitMark(Vector3 point)

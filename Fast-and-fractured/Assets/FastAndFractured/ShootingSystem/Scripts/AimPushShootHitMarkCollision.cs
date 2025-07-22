@@ -11,6 +11,9 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
     private Rigidbody rb;
     private Vector3 _customGravity = new Vector3(0,-30,0);
     private bool simulating = false;
+    private Vector3 _initialPosition = Vector3.zero;
+    private Vector3 _initialSpeed;
+    private float _simulationTime = 0;
     private void Start()
     {
         if (rb == null)
@@ -20,26 +23,29 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (simulating)
-        {
-            rb.linearVelocity += _customGravity * Time.fixedDeltaTime;
-        }
+        if (!simulating)
+            return;
+            _simulationTime += Time.fixedDeltaTime;
+            rb.MovePosition(_initialPosition + _initialSpeed * _simulationTime + 0.5f * _customGravity * _simulationTime * _simulationTime);
+
     }
     public void SimulateThrow(Vector3 velocity,Vector3 initialPosition,Vector3 customGravity)
     {
         if (!simulating)
         {
-            transform.position = initialPosition;
+            if (rb == null)
+            {
+                rb = GetComponent<Rigidbody>();
+            }
+            rb.MovePosition(initialPosition);
+            _initialPosition = initialPosition;
             if (rb == null)
                 rb = GetComponent<Rigidbody>();
-            rb.linearVelocity = velocity;
+            _initialSpeed = velocity;
             _customGravity = customGravity;
             simulating = true;
+            _simulationTime = 0;
         }
-    }
-    public void ToogleCollider(bool enable)
-    {
-        GetComponent<Collider>().enabled = enable;
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -47,8 +53,8 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
         if (gameObject.activeSelf)
         {
             onCollision?.Invoke(contactPoint.point);
-            rb.linearVelocity = Vector3.zero;
             simulating = false;
+            rb.MovePosition(contactPoint.point);
         }
     }
 }

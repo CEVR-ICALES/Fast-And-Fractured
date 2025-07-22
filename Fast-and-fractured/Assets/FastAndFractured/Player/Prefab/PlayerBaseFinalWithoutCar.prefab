@@ -626,7 +626,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 2
@@ -737,7 +737,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 2
@@ -830,6 +830,34 @@ PrefabInstance:
       propertyPath: m_StreamingVersion
       value: 20241001
       objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_ExcludedPropertiesInInspector.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[3]'
+      value: Priority
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[4]'
+      value: OutputChannel
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[5]'
+      value: m_Transitions
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[6]'
+      value: m_Follow
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[7]'
+      value: m_StandbyUpdate
+      objectReference: {fileID: 0}
+    - target: {fileID: 954937221665432372, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[8]'
+      value: m_Lens
+      objectReference: {fileID: 0}
     - target: {fileID: 1990155140326921304, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -890,6 +918,34 @@ PrefabInstance:
       propertyPath: m_StreamingVersion
       value: 20241001
       objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_ExcludedPropertiesInInspector.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[3]'
+      value: Priority
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[4]'
+      value: OutputChannel
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[5]'
+      value: m_Transitions
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[6]'
+      value: m_Follow
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[7]'
+      value: m_StandbyUpdate
+      objectReference: {fileID: 0}
+    - target: {fileID: 2100080855448903813, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[8]'
+      value: m_Lens
+      objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -908,11 +964,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.y
@@ -928,15 +984,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.012354895
+      value: 0.012355015
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: Priority.Enabled
@@ -953,6 +1009,34 @@ PrefabInstance:
     - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_StreamingVersion
       value: 20241001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_ExcludedPropertiesInInspector.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[3]'
+      value: Priority
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[4]'
+      value: OutputChannel
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[5]'
+      value: m_Transitions
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[6]'
+      value: m_Follow
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[7]'
+      value: m_StandbyUpdate
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455644347547373247, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: 'm_ExcludedPropertiesInInspector.Array.data[8]'
+      value: m_Lens
       objectReference: {fileID: 0}
     - target: {fileID: 2506882354399734611, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_FollowOffset.y
@@ -980,11 +1064,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4742470576089822462, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_FollowOffset.y
