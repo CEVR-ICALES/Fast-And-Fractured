@@ -32,6 +32,53 @@ Transform:
   - {fileID: 2836339683432750999}
   m_Father: {fileID: 4990706162979569645}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7212093641365840944
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4584288268462516546}
+  - component: {fileID: 7886892704310751706}
+  m_Layer: 0
+  m_Name: SendSubtitleMessage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &4584288268462516546
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7212093641365840944}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -17.585047, y: 0, z: -3.0401306}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4990706162979569645}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7886892704310751706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7212093641365840944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1440ddad21112b45bd9224deffc1049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textLocalaizeCode: Game.PepeVictory
+  speakerName: Pepe
+  duration: 2
 --- !u!1001 &255446657031135816
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -436,15 +483,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 39.155357
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.03
+      value: -0.62705994
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -130.23547
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -524,7 +571,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 7b8afb7c9177a8047ba1565940627cbe, type: 2}
     - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_SceneBindings.Array.size
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].key
@@ -547,6 +594,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -4401142639553991129, guid: 7b8afb7c9177a8047ba1565940627cbe, type: 2}
     - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      propertyPath: m_SceneBindings.Array.data[7].key
+      value: 
+      objectReference: {fileID: -4733587405208398235, guid: 7b8afb7c9177a8047ba1565940627cbe, type: 2}
+    - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].value
       value: 
       objectReference: {fileID: 5157096961535860284}
@@ -566,6 +617,10 @@ PrefabInstance:
       propertyPath: m_SceneBindings.Array.data[6].value
       value: 
       objectReference: {fileID: 553672419939248906}
+    - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      propertyPath: m_SceneBindings.Array.data[7].value
+      value: 
+      objectReference: {fileID: 7212093641365840944}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -581,6 +636,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6199046284324607693}
+    - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4584288268462516546}
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9057203522094535141}
