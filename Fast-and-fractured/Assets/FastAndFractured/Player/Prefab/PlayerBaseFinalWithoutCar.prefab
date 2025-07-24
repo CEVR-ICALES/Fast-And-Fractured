@@ -446,6 +446,9 @@ MonoBehaviour:
   pushShootHandle: {fileID: 0}
   lineRenderer: {fileID: 8960978884606166482}
   toleranceToVelocityMarginError: 0.001
+  hitMarkMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!120 &8960978884606166482
 LineRenderer:
   serializedVersion: 2
@@ -984,7 +987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.012355015
+      value: 0.012356095
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y

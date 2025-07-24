@@ -33,7 +33,6 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
 
     private List<Vector3> _points = new List<Vector3>();
     private List<Vector3> previousPoints = new List<Vector3>();
-    private Vector3 _currentVelocity;
     private float _currentCustomGravity;
     private Vector3 _currentPosition;
     private Vector3 _previousVelocity;
@@ -43,8 +42,9 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     [SerializeField]
     private float toleranceToVelocityMarginError = 0.001f;
     private int _currentIndex = 0;
-    private ITimer _showTraceTimer;
     private bool _calculateTracePoints;
+    [SerializeField]
+    private LayerMask hitMarkMask;
 
     private void OnEnable()
     {
@@ -66,23 +66,62 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         _previousContactIndex = 0;
         _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
         _calculateTracePoints = false;
-        ThrowSimulatedProyectile();
+        RaycastToSetHitMark();
     }
 
     private void FixedUpdate()
     {
         if (_calculateTracePoints) 
         {
-            ThrowSimulatedProyectile();
+            CalculateTrayectory();
+            RaycastToSetHitMark();
         }
     }
 
-    void LateUpdate()
+    void Update()
     {
         if (_calculateTracePoints)
         {
-            CalculateTrayectory();
         }
+    }
+
+    private void RaycastToSetHitMark()
+    {
+        int highestPointIndex = ReturnCurrentHighestPointIndex();
+        Ray ray = new Ray(_points[highestPointIndex],Vector3.down);
+        if (Physics.Raycast(ray, out var hitInfo, Mathf.Infinity))
+        {
+            Debug.DrawRay(_points[highestPointIndex], Vector3.down*20, UnityEngine.Color.red);
+            int impactPoint = FindClosestPointAbove(hitInfo.point + 1.5f * Vector3.up);
+            ray = new Ray(_points[impactPoint],Vector3.down);
+            if (Physics.Raycast(ray, out var hitInfo1, Mathf.Infinity))
+            {
+                Debug.DrawRay(_points[impactPoint], Vector3.down * 20, UnityEngine.Color.red);
+                _currentContactPoint = hitInfo1.point;
+            }
+            else
+            {
+                ray = new Ray(_points[impactPoint], Vector3.up);
+                if (Physics.Raycast(ray, out var hitInfo2, Mathf.Infinity))
+                {
+                    _currentContactPoint = hitInfo2.point;
+                }
+            }
+        }
+    }
+
+    private int ReturnCurrentHighestPointIndex()
+    {
+        int highestPoint = 0;
+        float previousYPoint = float.MinValue;
+        for (int i = 0; i < _points.Count; i++)
+        {
+            if (previousYPoint > _points[i].y) 
+                return highestPoint;
+            highestPoint = i;
+            previousYPoint = _points[i].y;
+        }
+        return highestPoint;
     }
 
     private void CalculateTrayectory()
@@ -174,7 +213,7 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         {
           filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
         }
-        lineRenderer.positionCount = filteredPreviousPoints.Count;
+        lineRenderer.positionCount = filteredCurrentPoints.Count;
         lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
     }
 

@@ -23,11 +23,11 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (!simulating)
-            return;
+        if (simulating)
+        {
             _simulationTime += Time.fixedDeltaTime;
             rb.MovePosition(_initialPosition + _initialSpeed * _simulationTime + 0.5f * _customGravity * _simulationTime * _simulationTime);
-
+        }
     }
     public void SimulateThrow(Vector3 velocity,Vector3 initialPosition,Vector3 customGravity)
     {
@@ -39,8 +39,6 @@ public class AimPushShootHitMarkCollision : MonoBehaviour
             }
             rb.MovePosition(initialPosition);
             _initialPosition = initialPosition;
-            if (rb == null)
-                rb = GetComponent<Rigidbody>();
             _initialSpeed = velocity;
             _customGravity = customGravity;
             simulating = true;
