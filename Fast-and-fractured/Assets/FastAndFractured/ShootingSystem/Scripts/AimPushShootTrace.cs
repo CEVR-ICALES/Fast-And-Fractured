@@ -40,6 +40,9 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     private float toleranceToVelocityMarginError = 0.001f;
     private int _currentIndex = 0;
     private bool _calculateTracePoints;
+
+    private const float MRUA_DISTANCE_FORMULA_CONSTANT = 0.5f;
+    private const float MARGIN_TO_FIND_COLSEST_HIT_POINT = 1.5f;
     protected override void Construct()
     {
         
@@ -78,7 +81,7 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         Ray ray = new Ray(_points[highestPointIndex],Vector3.down);
         if (Physics.Raycast(ray, out var hitInfo, Mathf.Infinity, _hitMarkMask))
         {
-            int impactPoint = FindClosestPointAbove(hitInfo.point + 1.5f * Vector3.up);
+            int impactPoint = FindClosestPointAbove(hitInfo.point + MARGIN_TO_FIND_COLSEST_HIT_POINT * Vector3.up);
             Vector3 impactHigherPoint = new Vector3(_points[impactPoint].x, _points[highestPointIndex].y, _points[impactPoint].z);
             ray = new Ray(impactHigherPoint,Vector3.down);
             if (Physics.Raycast(ray, out var hitInfo1, Mathf.Infinity,_hitMarkMask))
@@ -116,7 +119,7 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
             for (int i = 0; i < maxCalculationSteps; i++)
             {
                 currentTimeStep += timeStep;
-                _currentPosition = _pushShootPoint.position + _initialVelocity * currentTimeStep + 0.5f * Physics.gravity * _currentCustomGravity * currentTimeStep * currentTimeStep;
+                _currentPosition = _pushShootPoint.position + _initialVelocity * currentTimeStep + MRUA_DISTANCE_FORMULA_CONSTANT * Physics.gravity * _currentCustomGravity * currentTimeStep * currentTimeStep;
                 _points.Add(_currentPosition);
             }
             _previousVelocity = _initialVelocity;
