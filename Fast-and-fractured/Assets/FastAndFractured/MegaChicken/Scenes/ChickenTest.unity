@@ -865,6 +865,37 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8196467257621105984, guid: 2b2dd19e9e7562c42be25f2e36f04bb9, type: 3}
   m_PrefabInstance: {fileID: 1458278729}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &190405695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 190405696}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &190405696
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190405695}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.514, y: -0.488, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 555240831}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &193936500
 GameObject:
   m_ObjectHideFlags: 0
@@ -2985,9 +3016,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minCooldownTime: 5
   maxCooldownTime: 10
-  minEggsInRow: 3
-  maxEggsInRow: 5
-  turnSpeed: 5
+  turnSpeed: 20
+  pooltypeMegaChickenEgg: 14
+  eggSpawnPoint: {fileID: 190405695}
 --- !u!65 &555240828
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3005,7 +3036,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -3071,10 +3102,11 @@ Transform:
   m_GameObject: {fileID: 555240825}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -431.60953, y: -5.13, z: -158.97615}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: -418.9, y: 38.9, z: -158.97615}
+  m_LocalScale: {x: 20, y: 20, z: 20}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 190405696}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &559898616 stripped
@@ -15627,7 +15659,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: poolSOList.Array.size
-      value: 10
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: 'poolSOList.Array.data[0]'
@@ -15672,7 +15704,7 @@ PrefabInstance:
     - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: 'poolSOList.Array.data[10]'
       value: 
-      objectReference: {fileID: 11400000, guid: 3e1cf9589c24baa47b01f3469ad82b14, type: 2}
+      objectReference: {fileID: 11400000, guid: 70aec39197a95cc42bbbc44f0a1ee527, type: 2}
     - target: {fileID: 108735193894141191, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: 'poolSOList.Array.data[11]'
       value: 

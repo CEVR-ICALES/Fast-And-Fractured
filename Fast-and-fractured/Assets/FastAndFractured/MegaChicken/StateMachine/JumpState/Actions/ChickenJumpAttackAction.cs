@@ -9,7 +9,7 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            // todo
+            controller.GetBehaviour<ChickenBrain>().Jump();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
-            controller.GetBehaviour<ChickenBrain>().StartThrowing();
+            controller.GetBehaviour<ChickenBrain>().ThrowEgg();
         }
     }
 }
