@@ -5,15 +5,17 @@ using TMPro;
 using UnityEngine;
 using Utilities;
 
-public class GameReadyScript : MonoBehaviour
+public class GameReadyScript : AbstractAutoInitializableMonoBehaviour
 {
     [SerializeField] TMP_Text evenText;
     [SerializeField] EventReference soundReference;
     [SerializeField] EventReference soundReady;
 
     private const float downTextDuration = 0.7f;
-    void Start()
+
+    protected override void Initialize()
     {
+        base.Initialize();
         if (evenText == null) return;
         Invoke(nameof(StartEventCountdown),IngameEventsManager.EVENT_START_DELAY);
     
@@ -62,4 +64,8 @@ public class GameReadyScript : MonoBehaviour
        
 
     }
+
+    protected override void Construct()
+    {
+     }
 }
