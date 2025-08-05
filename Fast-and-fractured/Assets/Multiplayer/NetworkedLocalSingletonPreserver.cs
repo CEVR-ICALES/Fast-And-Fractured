@@ -6,22 +6,36 @@ using Utilities;
 public class NetworkedLocalSingletonPreserver : NetworkBehaviour
 {
     [SerializeField] AbstractAutoInitializableMonoBehaviour singletonToPreserve;
+    [SerializeField] bool forceConstruct;
+    [SerializeField] bool forceInitialize;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
         if (!base.IsOwner) return;
 
+        singletonToPreserve.gameObject.SetActive(true);
         IOverwritableSingleton overwritableSingleton = singletonToPreserve.GetComponent<IOverwritableSingleton>();
+       
         if (overwritableSingleton != null)
         {
             overwritableSingleton.ClaimSingletonOwnership();
+            if (forceConstruct)
+            {
+                overwritableSingleton.ForceConstruct();
+            }
+            if (forceInitialize)
+            {
+                overwritableSingleton.ForceInitialize();
+            }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+        if (forceConstruct)
+        {
+            singletonToPreserve.PerformConstruct();
+        }
+        if (forceInitialize)
+        {
+            singletonToPreserve.PerformInitialize();
+        }
+    }    
 }
