@@ -58,6 +58,7 @@ namespace FastAndFractured
                 carMovementController.onDashCooldownUpdate?.RemoveListener(UpdateDashCooldownHUD);
                 uniqueAbility.onCooldownUpdate?.RemoveListener(UpdateUniqueAbilityCooldownHUD);
             }
+            Deconstruct();
         }
 
         private void UpdateOverheatHUD(float currentValue, float maxValue)
