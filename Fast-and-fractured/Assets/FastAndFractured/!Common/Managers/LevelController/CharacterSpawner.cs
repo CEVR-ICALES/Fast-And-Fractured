@@ -15,7 +15,7 @@ namespace FastAndFractured
         private List<string> _availableNameCodesForSpawning;
         private Dictionary<string, int> _characterSelectionCount;
 
-        public List<string> InGameCharactersNameCodes { get; private set; }
+        public List<string> InGameCharactersNameCodes { get;   set; }
         public List<GameObject> InGameCharacters { get; private set; }
         public GameObject PlayerReference { get; private set; }
 

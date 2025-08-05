@@ -18,7 +18,7 @@ namespace FastAndFractured
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField] private int maxCharactersInGame = 8;
 
-        public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); }
+        public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); set => _characterSpawner.InGameCharactersNameCodes = value; }
 
 
         [SerializeField] private GameObject[] spawnPoints;
@@ -47,6 +47,7 @@ namespace FastAndFractured
         private GameObject _localPlayer;
 
 
+        [SerializeField] private float delayPreStart = 0.1f;
         [SerializeField] private float delayUntilGameStarts = 3.5f;
         public List<CharacterIcon> characterIcons;
         [SerializeField] private float endGameDelayTime = 0.5f;
@@ -61,8 +62,29 @@ namespace FastAndFractured
         private GameEndHandler _gameEndHandler;
 
         [SerializeField] public List<GameObject> availablePlayer;
-        public List<GameObject> InGameCharacters => _characterSpawner?.InGameCharacters ?? new List<GameObject>();
-        public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
+        public List<GameObject> InGameCharacters
+        {
+            get
+            {
+                return _characterSpawner?.InGameCharacters ?? new List<GameObject>();
+            }
+
+            set
+            {
+                InGameCharacters = value;
+            }
+        }
+        public bool DebugMode { 
+            get { 
+                return debugMode;
+            }
+            set { 
+                debugMode = value;
+            }
+        }        public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
+
+        public GameLoopManager GameLoopManager { get => _gameLoopManager; set => _gameLoopManager = value; }
+
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -150,9 +172,7 @@ namespace FastAndFractured
             {
 
 
-            }
-
-
+            } 
 
             EnemyAIBrain[] aiBrains = FindObjectsOfType<EnemyAIBrain>();
             foreach (var aiBrain in aiBrains)
@@ -161,14 +181,50 @@ namespace FastAndFractured
                 aiBrain.Player = GetARandomPlayer();
 
             }
-
-            _characterSpawner.InGameCharacters.Clear();
-            _characterSpawner.InGameCharacters.AddRange(foundCharacters);
-            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _localPlayer, charactersCustomStart);
-            _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
-            _gameLoopManager.ActivateCharacterControls();
+            InitializeAfterSpawn(foundCharacters);
         }
 
+       public void InitializeAfterSpawn(List<GameObject> injectedCharacters=null)
+        {
+
+            Cursor.lockState = CursorLockMode.Locked;
+            _isStormActive = false;
+            PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
+        
+            _localPlayer = PlayerInputController.Instance.GetComponentInChildren<CarMovementController>().gameObject;
+            if(_localPlayer) PlayerInputController.Instance.GetComponent<CarInjector>().Install(null,true);
+            if (injectedCharacters != null)
+            {
+                _characterSpawner.InGameCharacters.Clear();
+                _characterSpawner.InGameCharacters.AddRange(injectedCharacters);
+            }
+            _gameLoopManager.InitializeSession(
+            _characterSpawner.InGameCharacters.Count,
+            _characterSpawner.InGameCharacters, _localPlayer, charactersCustomStart);
+            _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
+           // _gameLoopManager.ActivateCharacterControls();
+ 
+            StartPreGameInitializationDelay(delayPreStart,()=> onLevelPreStart?.Invoke());
+            _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
+        }
+        private ITimer preGameInitializationTimer;
+        public void StartPreGameInitializationDelay(float delay, System.Action onTimerComplete)
+        {
+            if (TimerSystem.Instance != null)
+            {
+                preGameInitializationTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete: () => {
+                    onTimerComplete?.Invoke();
+                    preGameInitializationTimer = null;
+
+
+                });
+            }
+            else
+            {
+                Debug.LogError("TimerSystem.Instance is null. Cannot start pre game delay timer.");
+                onTimerComplete?.Invoke();
+            }
+        }
         private void StartLevelWithSpawnedCharacters()
         {
             Debug.Log("Starting level with spawned characters.");
@@ -200,16 +256,11 @@ namespace FastAndFractured
 
             _localPlayer = _characterSpawner.PlayerReference;
 
-            _gameLoopManager.InitializeSession(maxCharactersInGame, InGameCharacters, _localPlayer, charactersCustomStart);
-
-            bool shouldCallStorm = !debugMode || stormInDebugMode;
-            _gameLoopManager.SetupStorm(shouldCallStorm, debugMode);
-
-            onLevelPreStart?.Invoke();
-            _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
+            InitializeAfterSpawn(); 
 
             if (!useMyCharacters && InGameCharacters.Count > 0)
             {
+                //todo improve
                 GameObject firstCharacter = InGameCharacters[0];
                 GameObject nearestToFirst = GetNearestCharacterToCharacter(firstCharacter);
                 if (nearestToFirst != null)
@@ -223,6 +274,10 @@ namespace FastAndFractured
                     }
                 }
             }
+        }
+        private void OnGamePreStartDelayComplete()
+        {
+
         }
 
         private void OnGameStartDelayComplete()
@@ -308,14 +363,15 @@ namespace FastAndFractured
         {
             return availablePlayer.GetRandomValueFromList();
         }
-        public void AddCharacterToListOfSelectedCharacters(int id,string character) {
-            if (id == -1) {
-
+        public void AddCharacterToListOfSelectedCharacters(int id, string character)
+        {
+            if (id == -1)
+            {
                 id++;
             }
-            
-            if(id>= _playersCharacterNameCodes.Count)
-            _playersCharacterNameCodes.Add(character);
+
+            if (id >= _playersCharacterNameCodes.Count)
+                _playersCharacterNameCodes.Add(character);
             else
             {
                 _playersCharacterNameCodes[id] = character;

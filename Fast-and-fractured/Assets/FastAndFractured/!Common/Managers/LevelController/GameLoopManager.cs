@@ -40,24 +40,24 @@ namespace FastAndFractured
 
         }
 
+   
         public void StartGameInitializationDelay(float delay, System.Action onTimerComplete)
         {
             if (TimerSystem.Instance != null)
             {
-                _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete:()=>{
+                _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete: () => {
                     onTimerComplete?.Invoke();
                     _delayUntilGameStartsTimer = null;
-                 
-                
+
+
                 });
             }
             else
             {
                 Debug.LogError("TimerSystem.Instance is null. Cannot start game delay timer.");
-                onTimerComplete?.Invoke(); 
+                onTimerComplete?.Invoke();
             }
         }
-        
         public void ActivateCharacterControls()
         {
             if (_playerReference != null)
