@@ -49,6 +49,8 @@ namespace FastAndFractured
         private ICustomRigidbody _rb;
         private CarMovementController _carMovementController;
         public CarImpactHandler CarImpactHandler { get => _carImpactHandler; }
+        public float CurrentSpeed { get => _currentSpeed; set => _currentSpeed = value; }
+
         private CarImpactHandler _carImpactHandler;
 
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
@@ -57,7 +59,7 @@ namespace FastAndFractured
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
 
         GameObject hudEffect;
-
+        float _currentSpeed;
         private void OnEnable()
         {
             if (_rb==null)
@@ -94,7 +96,13 @@ namespace FastAndFractured
         {
             ExitGroundCheck(collision);
         }
-
+        private void FixedUpdate()
+        {
+            if (!_rb.isKinematic)
+            {
+                _currentSpeed = _rb.linearVelocity.magnitude;
+            }
+        }
         private void RefactoredVehicleCollision(Collision collision)
         {
 
@@ -333,10 +341,13 @@ namespace FastAndFractured
         {
             return _rb.linearVelocity;
         }
-
+        public float GetCurrentSpeed()
+        {
+            return _currentSpeed;
+        }
         public bool IsVehicleMoving()
         {
-            if (_rb.linearVelocity.magnitude > isMovingThreshold)
+            if (_currentSpeed > isMovingThreshold)
             {
                 return true;
             }
