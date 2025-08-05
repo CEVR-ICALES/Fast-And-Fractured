@@ -11,6 +11,7 @@ namespace Utilities
     public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour, IOverwritableSingleton where T : Component
     {
         [SerializeField] SingletonDuplicateResolution singletonDuplicateResolution = SingletonDuplicateResolution.DESTROY_GAMEOBJECT;
+        [SerializeField] bool alsoDisableGameobjectOnDuplicateResolution = false;
         static T s_Instance;
         /// <summary>
         /// static Singleton instance
@@ -67,6 +68,10 @@ namespace Utilities
                     break;
             }
             Deconstruct();
+            if (alsoDisableGameobjectOnDuplicateResolution)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         public void ClaimSingletonOwnership()
@@ -77,7 +82,7 @@ namespace Utilities
             }
             bool wasInitialized = false;
             bool wasConstructed = false;
-            if (s_Instance != null  )
+            if (s_Instance != null)
             {
                 Debug.Log($"<color=orange>'{gameObject.name}' is claiming ownership of singleton '{typeof(T).Name}'. " +
                           $"Destroying previous instance on '{s_Instance.gameObject.name}'.</color>");
@@ -97,7 +102,7 @@ namespace Utilities
             s_Instance = this as T;
             enabled = true;
             if (wasConstructed)
-            { 
+            {
                 Construct();
             }
 
@@ -105,6 +110,16 @@ namespace Utilities
             {
                 Initialize();
             }
+        }
+
+        public void ForceConstruct()
+        {
+            PerformConstruct();
+        }
+
+        public void ForceInitialize()
+        {
+            PerformInitialize();
         }
     }
 
@@ -122,4 +137,8 @@ public interface IOverwritableSingleton
     /// Forces this instance to become the primary singleton, destroying any existing one.
     /// </summary>
     void ClaimSingletonOwnership();
+
+    void ForceConstruct();
+
+    void ForceInitialize();
 }

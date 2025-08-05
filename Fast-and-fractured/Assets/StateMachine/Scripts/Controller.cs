@@ -24,7 +24,7 @@ namespace StateMachine
         public void CustomStart()
         {
             LoadFirsState();
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.Instance?.RegisterPausable(this);
         }
         public void LoadFirsState()
         {
