@@ -91,7 +91,7 @@ public class PrefabMaterialShaderProcessor : EditorWindow
 
         EditorGUILayout.EndScrollView();
 
-        // Remove null entries if objects were deleted or removed from the list
+        //Remove null entries if objects were deleted or removed from the list
         targetObjects.RemoveAll(item => item == null);
     }
 
@@ -99,17 +99,17 @@ public class PrefabMaterialShaderProcessor : EditorWindow
     {
         EditorGUILayout.Space();
 
-        // --- Process Button ---
+        //Process Button
         GUI.enabled = targetObjects.Count > 0 && targetShader != null;
         if (GUILayout.Button("Process Listed Objects", GUILayout.Height(40)))
         {
             ProcessDroppedObjects();
-            // Clear the list after processing for the next batch
+            //Clear the list after processing for the next batch
             targetObjects.Clear();
         }
         GUI.enabled = true;
 
-        // --- Clear List Button ---
+        //Clear List Button
         if (targetObjects.Count > 0)
         {
             if (GUILayout.Button("Clear List"))
@@ -132,12 +132,12 @@ public class PrefabMaterialShaderProcessor : EditorWindow
                     $"Processing: {go.name}",
                     (float)(i + 1) / targetObjects.Count);
 
-                // Get renderers from the object AND all its children
+                //Get renderers from the object AND all its children
                 Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
 
                 foreach (Renderer renderer in renderers)
                 {
-                    // Filter: Skip if there are no materials assigned
+                    //Skip if there are no materials assigned
                     if (renderer.sharedMaterials == null || renderer.sharedMaterials.Length == 0)
                     {
                         continue;
@@ -148,16 +148,14 @@ public class PrefabMaterialShaderProcessor : EditorWindow
                     {
                         if (mat == null) continue;
 
-                        // Apply all modifications to the material asset
+                        //Apply all modifications to the material asset
                         mat.shader = targetShader;
                         mat.SetFloat("_MinDistance", minDistance);
                         mat.SetFloat("_MaxDistance", maxDistance);
 
-                        if (!string.IsNullOrEmpty(alphaClipKeyword))
-                            mat.EnableKeyword(alphaClipKeyword);
-
-                        if (!string.IsNullOrEmpty(alphaClipFloatProperty))
-                            mat.SetFloat(alphaClipFloatProperty, 1.0f);
+                        mat.SetFloat("_AlphaCutoffEnable", 1);     // 1 enables the "Alpha Clipping" checkbox
+                        //mat.SetFloat("_RenderQueueType", 2);       // 2 corresponds to the "AlphaTest" render queue
+                        //mat.SetFloat("_UseShadowThreshold", 1);    // Optional but recommended: ensures shadows use the cutout
 
                         EditorUtility.SetDirty(mat);
                         rendererModified = true;
