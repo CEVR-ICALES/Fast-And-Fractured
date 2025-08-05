@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
-{
+{ 
     public class NetworkInputProvider : MonoBehaviour, IInputProvider
     {
         public Vector2 MoveInput { get; private set; }

@@ -54,7 +54,7 @@ namespace FastAndFractured.Multiplayer
         public Vector3 position { get => _rb.position; set => _rb.position = value; }
         public Quaternion rotation { get => _rb.rotation; set => _rb.rotation = value; }
 
-        public Vector3 linearVelocity { get => PredictionRigidbody.Rigidbody.linearVelocity; set => PredictionRigidbody.Velocity(value); }
+        public Vector3 linearVelocity { get => _rb.linearVelocity; set => PredictionRigidbody.Velocity(value); }
         public Vector3 angularVelocity { get => PredictionRigidbody.Rigidbody.angularVelocity; set => PredictionRigidbody.AngularVelocity(value); }
 
         public float mass { get => _rb.mass; set => _rb.mass = value; }
