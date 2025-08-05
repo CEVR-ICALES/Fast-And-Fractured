@@ -13,7 +13,7 @@ public class CarInjector : MonoBehaviour
     [SerializeField] GameObject prefab;
     [SerializeField] GameObject spawnPoint;
     [SerializeField] bool autoInject = false;
-
+    
 
     private void Start()
     {
@@ -24,19 +24,30 @@ public class CarInjector : MonoBehaviour
     }
 
     const float MAX_WEIGHT = 1;
-    public virtual GameObject Install(GameObject prefabToInstall)
+    const string VISUALS_NAME = "Visuals";
+    public virtual GameObject Install(GameObject prefabToInstall,bool skipInstantiation=false)
     {
         if (prefabToInstall != null)
         {
             prefab = prefabToInstall;
         }
+        GameObject injectedCar;
+        CarMovementController carMovementController;
         //TODO optimize this if posible
-        var injectedCar = Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation, transform);
+        if (skipInstantiation)
+        {
+            carMovementController = GetComponentInChildren<CarMovementController>();
+            injectedCar = GetComponentInChildren<CarMovementController>().gameObject;
+        }
+        else
+        {
+            injectedCar = Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation, transform);
+            carMovementController = injectedCar.GetComponent<CarMovementController>();
+        }
         var controllers = GetComponentsInChildren<Controller>();
-        var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
-        var carMovementController = injectedCar.GetComponent<CarMovementController>();
+        var positionConstraints = transform.GetComponentsInChildren<IConstraint>(true);
         var constraintSource = new ConstraintSource();
-        constraintSource.sourceTransform = injectedCar.transform;
+        constraintSource.sourceTransform = injectedCar.transform.Find(VISUALS_NAME);
         constraintSource.weight = MAX_WEIGHT;
 
         foreach (var constraint in positionConstraints)
@@ -61,8 +72,9 @@ public class CarInjector : MonoBehaviour
         else
         {
             
-            injectedCar.AddComponent<CarSpeedOverlay>();
-            injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
+           var carSpeedOverlay = injectedCar.AddComponent<CarSpeedOverlay>();
+            //todo fix
+        //    carSpeedOverlay.speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
             carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
 
         }
