@@ -1,11 +1,17 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 public class PrefabMaterialShaderProcessor : EditorWindow
 {
-    private GameObject targetObject;
     private Shader targetShader;
+    private float minDistance = 0.0f;
+    private float maxDistance = 100.0f;
     private string alphaClipKeyword = "_ALPHATEST_ON";
+    private string alphaClipFloatProperty = "_AlphaClip";
+
+    private List<GameObject> targetObjects = new List<GameObject>();
+    private Vector2 scrollPosition;
 
     [MenuItem("Tools/Utilities/Prefab Material Shader Processor")]
     public static void ShowWindow()
@@ -15,98 +21,161 @@ public class PrefabMaterialShaderProcessor : EditorWindow
 
     private void OnGUI()
     {
-        EditorGUILayout.LabelField("Single Prefab Material Modifier", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox(
-            "Drag a prefab from your Project folder OR an instance of a prefab from the Scene Hierarchy into the 'Target Object' field.",
-            MessageType.Info);
+        EditorGUILayout.LabelField("Drag & Drop Material Modifier", EditorStyles.boldLabel);
 
-        EditorGUILayout.Space(10);
-
-        // --- UI Fields ---
-        targetObject = (GameObject)EditorGUILayout.ObjectField("Target Object", targetObject, typeof(GameObject), true); // Allow scene objects
         targetShader = (Shader)EditorGUILayout.ObjectField("Target Shader", targetShader, typeof(Shader), false);
-        alphaClipKeyword = EditorGUILayout.TextField(new GUIContent("Alpha Clip Keyword", "The shader keyword used to enable alpha clipping, e.g., _ALPHATEST_ON."), alphaClipKeyword);
+        EditorGUILayout.Space();
+        minDistance = EditorGUILayout.FloatField(new GUIContent("Min Distance", "Sets the _MinDistance float property."), minDistance);
+        maxDistance = EditorGUILayout.FloatField(new GUIContent("Max Distance", "Sets the _MaxDistance float property."), maxDistance);
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Alpha Clipping Settings", EditorStyles.miniBoldLabel);
+        alphaClipKeyword = EditorGUILayout.TextField(new GUIContent("Keyword", "E.g., _ALPHATEST_ON"), alphaClipKeyword);
+        alphaClipFloatProperty = EditorGUILayout.TextField(new GUIContent("Float Property Name", "E.g., _AlphaClip"), alphaClipFloatProperty);
 
         EditorGUILayout.Space(20);
 
-        // --- Process Button ---
-        GUI.enabled = targetObject != null && targetShader != null && !string.IsNullOrEmpty(alphaClipKeyword);
+        DrawDragAndDropArea();
 
-        if (GUILayout.Button("Process Prefab", GUILayout.Height(40)))
-        {
-            ProcessSinglePrefab();
-        }
-        GUI.enabled = true;
+        DrawObjectList();
+
+        DrawActionButtons();
     }
 
-  
-    
- 
-    private void ProcessSinglePrefab() // The core logic for modifying the materials on the target prefab.
+    private void DrawDragAndDropArea()
     {
-        // 1. Find the source prefab asset, regardless of what was dragged in.
-        GameObject prefabAsset = GetPrefabRoot(targetObject);
+        Event currentEvent = Event.current;
+        Rect dropArea = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
+        GUI.Box(dropArea, "Drag & Drop GameObjects Here");
 
-        if (prefabAsset == null)
+        switch (currentEvent.type)
         {
-            EditorUtility.DisplayDialog("Error: Not a Prefab", "The object you dragged is not a prefab or part of one. Please drag a prefab asset or an instance from the scene.", "OK");
-            return;
+            case EventType.DragUpdated:
+            case EventType.DragPerform:
+                if (!dropArea.Contains(currentEvent.mousePosition))
+                    break;
+
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (currentEvent.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+                    foreach (Object draggedObject in DragAndDrop.objectReferences)
+                    {
+                        if (draggedObject is GameObject go && !targetObjects.Contains(go))
+                        {
+                            targetObjects.Add(go);
+                        }
+                    }
+                }
+                Event.current.Use();
+                break;
+        }
+    }
+
+    private void DrawObjectList()
+    {
+        EditorGUILayout.LabelField("Objects to Process:", EditorStyles.boldLabel);
+        scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.MinHeight(100), GUILayout.MaxHeight(300));
+
+        if (targetObjects.Count == 0)
+        {
+            EditorGUILayout.LabelField("  List is empty.", EditorStyles.centeredGreyMiniLabel);
+        }
+        else
+        {
+            for (int i = 0; i < targetObjects.Count; i++)
+            {
+                targetObjects[i] = (GameObject)EditorGUILayout.ObjectField($"  Element {i}", targetObjects[i], typeof(GameObject), true);
+            }
         }
 
+        EditorGUILayout.EndScrollView();
+
+        // Remove null entries if objects were deleted or removed from the list
+        targetObjects.RemoveAll(item => item == null);
+    }
+
+    private void DrawActionButtons()
+    {
+        EditorGUILayout.Space();
+
+        // --- Process Button ---
+        GUI.enabled = targetObjects.Count > 0 && targetShader != null;
+        if (GUILayout.Button("Process Listed Objects", GUILayout.Height(40)))
+        {
+            ProcessDroppedObjects();
+            // Clear the list after processing for the next batch
+            targetObjects.Clear();
+        }
+        GUI.enabled = true;
+
+        // --- Clear List Button ---
+        if (targetObjects.Count > 0)
+        {
+            if (GUILayout.Button("Clear List"))
+            {
+                targetObjects.Clear();
+            }
+        }
+    }
+
+    private void ProcessDroppedObjects()
+    {
+        int modifiedRendererCount = 0;
         try
         {
-            EditorUtility.DisplayProgressBar("Processing Prefab", $"Modifying materials on: {prefabAsset.name}", 0.5f);
-
-            // 2. Find all renderers within the prefab asset
-            Renderer[] renderers = prefabAsset.GetComponentsInChildren<Renderer>(true);
-
-            foreach (Renderer renderer in renderers)
+            for (int i = 0; i < targetObjects.Count; i++)
             {
-                // Use .sharedMaterials to modify the material assets directly
-                foreach (Material mat in renderer.sharedMaterials)
+                GameObject go = targetObjects[i];
+                EditorUtility.DisplayProgressBar(
+                    "Processing Objects",
+                    $"Processing: {go.name}",
+                    (float)(i + 1) / targetObjects.Count);
+
+                // Get renderers from the object AND all its children
+                Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+
+                foreach (Renderer renderer in renderers)
                 {
-                    if (mat == null) continue;
+                    // Filter: Skip if there are no materials assigned
+                    if (renderer.sharedMaterials == null || renderer.sharedMaterials.Length == 0)
+                    {
+                        continue;
+                    }
 
-                    // 3. Apply the changes
-                    mat.shader = targetShader;
-                    mat.EnableKeyword(alphaClipKeyword);
+                    bool rendererModified = false;
+                    foreach (Material mat in renderer.sharedMaterials)
+                    {
+                        if (mat == null) continue;
 
-                    // Mark the material asset as "dirty" to ensure changes are saved
-                    EditorUtility.SetDirty(mat);
+                        // Apply all modifications to the material asset
+                        mat.shader = targetShader;
+                        mat.SetFloat("_MinDistance", minDistance);
+                        mat.SetFloat("_MaxDistance", maxDistance);
+
+                        if (!string.IsNullOrEmpty(alphaClipKeyword))
+                            mat.EnableKeyword(alphaClipKeyword);
+
+                        if (!string.IsNullOrEmpty(alphaClipFloatProperty))
+                            mat.SetFloat(alphaClipFloatProperty, 1.0f);
+
+                        EditorUtility.SetDirty(mat);
+                        rendererModified = true;
+                    }
+                    if (rendererModified) modifiedRendererCount++;
                 }
             }
-            // Mark the prefab asset itself as dirty as well
-            EditorUtility.SetDirty(prefabAsset);
         }
         finally
         {
-            // 4. Clean up and save all changes
             EditorUtility.ClearProgressBar();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
-            EditorUtility.DisplayDialog("Processing Complete", $"Successfully processed the prefab: {prefabAsset.name}", "OK");
+            EditorUtility.DisplayDialog(
+                "Processing Complete",
+                $"Finished processing {targetObjects.Count} object(s).\n" +
+                $"Modified materials on {modifiedRendererCount} renderers.",
+                "OK");
         }
-    }
-
-    private GameObject GetPrefabRoot(GameObject inputObject) // Gets the root prefab asset from either a scene instance or a project asset.
-    {
-        if (inputObject == null) return null;
-
-        // Case 1: The object is an asset in the Project view.
-        if (PrefabUtility.IsPartOfPrefabAsset(inputObject))
-        {
-            return inputObject;
-        }
-
-        // Case 2: The object is an instance in the Scene.
-        if (PrefabUtility.IsPartOfAnyPrefab(inputObject))
-        {
-            // GetCorrespondingObjectFromSource finds the asset this instance is from.
-            return PrefabUtility.GetCorrespondingObjectFromSource(inputObject);
-        }
-
-        // If neither, it's not a prefab.
-        return null;
     }
 }
