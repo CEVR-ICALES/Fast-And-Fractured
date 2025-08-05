@@ -66,7 +66,7 @@ namespace FastAndFractured
 
         void RegisterUIElements()
         {
-            foreach (UIDynamicElement element in FindObjectsOfType<UIDynamicElement>(true))
+            foreach (UIDynamicElement element in GetComponentsInChildren<UIDynamicElement>(true))
             {
                 _uiElements[element.elementType] = element;
             }
