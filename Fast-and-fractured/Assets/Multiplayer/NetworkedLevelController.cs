@@ -1,9 +1,11 @@
-
+﻿
 using FastAndFractured;  
 using FastAndFractured.Multiplayer;
 using FishNet.Connection;
+using FishNet.Demo.AdditiveScenes;
 using FishNet.Example.Scened;
 using FishNet.Object;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine;
@@ -12,6 +14,8 @@ namespace FastAndFractured.Multiplayer
 {
     public class NetworkedLevelControllerManager : NetworkBehaviour
     {
+        private Dictionary<NetworkConnection, GameObject> _playerVehicles = new Dictionary<NetworkConnection, GameObject>();
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -45,15 +49,29 @@ namespace FastAndFractured.Multiplayer
                 PlayerPrefs.SetInt("Player_Num", FishNetNetworkManagerWrapper.Instance.PlayerCount);
                 LevelControllerButBetter.Instance.PerformConstruct();
                 LevelControllerButBetter.Instance.PerformInitialize();
-            }
-            IngameEventsManager ingameEventsManager = FindFirstObjectByType<IngameEventsManager>(FindObjectsInactive.Exclude);
-            ingameEventsManager.PerformConstruct();
-            ingameEventsManager.PerformInitialize();
+            } 
             SpawnCharactersOnClients();
-
-
+            LevelControllerStartData levelControllerStartData = new LevelControllerStartData()
+            {
+                AllCharacters = LevelControllerButBetter.Instance.InGameCharacters,
+                DebugMode = LevelControllerButBetter.Instance.DebugMode,
+                InGameCharactersNameCodes = LevelControllerButBetter.Instance.InGameCharactersNameCodes
+            };
+            SentLevelControllerStartData(levelControllerStartData);
         }
+        [ObserversRpc]
+        void SentLevelControllerStartData(LevelControllerStartData levelControllerStartData)
+        {
+            if (!IsHostInitialized)
+            {//  levelControllerStartData.LocalPlayer = LocalConnection.FirstObject.gameObject;
+                LevelControllerButBetter levelControllerButBetter = LevelControllerButBetter.Instance;
+                levelControllerButBetter.PerformConstruct();
+                levelControllerButBetter.InGameCharactersNameCodes = levelControllerStartData.InGameCharactersNameCodes;
 
+                levelControllerButBetter.InitializeAfterSpawn(levelControllerStartData.AllCharacters);
+           
+            }
+        }
         void SpawnCharactersOnClients()
         {
             List<GameObject> charactersToSpawn = new List<GameObject>(LevelControllerButBetter.Instance.InGameCharacters);
@@ -105,4 +123,12 @@ namespace FastAndFractured.Multiplayer
             NetworkedVehicle vehicle = child.GetComponent<NetworkedVehicle>();
         }
     }
-} 
+}
+[Serializable]
+public struct LevelControllerStartData
+{
+    public List<GameObject> AllCharacters;
+    public bool DebugMode;
+    public GameObject LocalPlayer;
+    public List<string> InGameCharactersNameCodes;
+ }
