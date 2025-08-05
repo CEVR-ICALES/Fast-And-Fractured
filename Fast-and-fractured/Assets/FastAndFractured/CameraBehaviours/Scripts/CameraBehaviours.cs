@@ -36,7 +36,7 @@ namespace FastAndFractured
             _inputController = PlayerInputController.Instance;
             _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
             _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.Instance?.RegisterPausable(this);
         }
 
         void OnDisable()
