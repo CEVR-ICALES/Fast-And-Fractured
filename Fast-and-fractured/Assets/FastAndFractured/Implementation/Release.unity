@@ -1004,6 +1004,37 @@ MonoBehaviour:
   m_Center: {x: -77.15506, y: -33.9, z: 10.360279}
   m_Area: 3
   m_AffectedAgents: a98c17ec
+--- !u!1 &241334264
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 241334265}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &241334265
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 241334264}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -236.51721, y: 21.141666, z: 38.632153}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &255384618
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15544,6 +15575,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2138222189}
     - target: {fileID: 4562298912355327592, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: availablePlayer.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4562298912355327592, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: 'spawnPoints.Array.data[10]'
       value: 
       objectReference: {fileID: 1726465699}
@@ -15551,6 +15586,10 @@ PrefabInstance:
       propertyPath: 'spawnPoints.Array.data[11]'
       value: 
       objectReference: {fileID: 1696494582}
+    - target: {fileID: 4562298912355327592, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
+      propertyPath: 'availablePlayer.Array.data[0]'
+      value: 
+      objectReference: {fileID: 241334264}
     - target: {fileID: 4716481928139129519, guid: c5a1b54fa67c7e9479772df2d73ea440, type: 3}
       propertyPath: evenText
       value: 
@@ -19631,4 +19670,5 @@ SceneRoots:
   - {fileID: 876457295}
   - {fileID: 587371310}
   - {fileID: 1458278729}
+  - {fileID: 241334265}
   - {fileID: 1549718431}

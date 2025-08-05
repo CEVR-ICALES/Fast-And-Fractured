@@ -145,7 +145,7 @@ namespace FastAndFractured
         }
         private void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.Instance?.RegisterPausable(this);
         }
 
         private void OnDisable()
