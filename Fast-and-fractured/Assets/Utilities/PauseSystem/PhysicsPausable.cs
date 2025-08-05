@@ -15,7 +15,7 @@ public class PhysicsPausable : MonoBehaviour, IPausable
             rigidbodyToPause = GetComponentInChildren<Rigidbody>();
         }
 
-        PauseManager.Instance.RegisterPausable(this);
+        PauseManager.Instance?.RegisterPausable(this);
     }
 
     void OnDestroy()
