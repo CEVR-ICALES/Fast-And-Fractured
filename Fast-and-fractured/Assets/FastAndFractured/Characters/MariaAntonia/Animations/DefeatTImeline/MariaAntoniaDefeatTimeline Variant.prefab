@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -141,6 +144,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -224,6 +230,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -343,6 +352,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -426,6 +438,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -451,6 +466,53 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8318285037439170506
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4112692848194690409}
+  - component: {fileID: 1012948983263165911}
+  m_Layer: 0
+  m_Name: SendSubtitleMessage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &4112692848194690409
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8318285037439170506}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8558197843221365263}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1012948983263165911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8318285037439170506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1440ddad21112b45bd9224deffc1049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textLocalaizeCode: Game.MAntoniaDefeat
+  speakerName: 'Maria Antonia:'
+  duration: 4
 --- !u!1001 &733361554140383701
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -500,7 +562,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: a371e5fec47634c4483b5cb256112b49, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 329b68778addda44ba7348c1a045f352, type: 2}
     - target: {fileID: 919132149155446097, guid: a371e5fec47634c4483b5cb256112b49, type: 3}
@@ -651,7 +713,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &7094485223165747383
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -665,6 +727,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -737,7 +800,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &206077320997159994
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -751,6 +814,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -771,15 +835,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -58.927437
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.53
+      value: -0.62706566
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -22.1
+      value: -13.994385
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalRotation.w
@@ -859,7 +923,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: bfd1f0d2f97bc954ea3b4a0b8ab02e18, type: 2}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].key
@@ -874,6 +938,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -8473038378638017248, guid: bfd1f0d2f97bc954ea3b4a0b8ab02e18, type: 2}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+      propertyPath: m_SceneBindings.Array.data[5].key
+      value: 
+      objectReference: {fileID: -2476001926904094022, guid: bfd1f0d2f97bc954ea3b4a0b8ab02e18, type: 2}
+    - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].value
       value: 
       objectReference: {fileID: 7094485223165747383}
@@ -881,6 +949,10 @@ PrefabInstance:
       propertyPath: m_SceneBindings.Array.data[3].value
       value: 
       objectReference: {fileID: 206077320997159994}
+    - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+      propertyPath: m_SceneBindings.Array.data[5].value
+      value: 
+      objectReference: {fileID: 8318285037439170506}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -896,6 +968,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4360344057836567068}
+    - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4112692848194690409}
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4794648950234836458}
