@@ -45,7 +45,7 @@ public class PrefabMaterialShaderProcessor : EditorWindow
     {
         Event currentEvent = Event.current;
         Rect dropArea = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
-        GUI.Box(dropArea, "Drag & Drop GameObjects Here");
+        GUI.Box(dropArea, "Drag & Drop GameObjects Here (can be dropped directly from the scene, if u drop an object with cildren on it the children objects will be processed too)");
 
         switch (currentEvent.type)
         {
@@ -126,14 +126,14 @@ public class PrefabMaterialShaderProcessor : EditorWindow
         {
             for (int i = 0; i < targetObjects.Count; i++)
             {
-                GameObject go = targetObjects[i];
+                GameObject obj = targetObjects[i];
                 EditorUtility.DisplayProgressBar(
                     "Processing Objects",
-                    $"Processing: {go.name}",
+                    $"Processing: {obj.name}",
                     (float)(i + 1) / targetObjects.Count);
 
                 //Get renderers from the object AND all its children
-                Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+                Renderer[] renderers = obj.GetComponentsInChildren<Renderer>(true);
 
                 foreach (Renderer renderer in renderers)
                 {
@@ -146,7 +146,7 @@ public class PrefabMaterialShaderProcessor : EditorWindow
                     bool rendererModified = false;
                     foreach (Material mat in renderer.sharedMaterials)
                     {
-                        if (mat == null) continue;
+                        if (mat == null /*|| mat.GetFloat("_SurfaceType") == 1f*/) continue;
 
                         //Apply all modifications to the material asset
                         mat.shader = targetShader;
