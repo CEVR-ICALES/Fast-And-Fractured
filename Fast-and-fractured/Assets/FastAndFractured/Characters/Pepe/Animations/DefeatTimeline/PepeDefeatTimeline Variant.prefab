@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1909216743467613848
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8263550604850464881}
+  - component: {fileID: 6680028189394724494}
+  m_Layer: 0
+  m_Name: SendSubtitleMessage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &8263550604850464881
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909216743467613848}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5861308103150528042}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6680028189394724494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909216743467613848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1440ddad21112b45bd9224deffc1049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textLocalaizeCode: Game.PepeDefeat
+  speakerName: Pepe
+  duration: 3
 --- !u!1 &4413790205997554796
 GameObject:
   m_ObjectHideFlags: 0
@@ -134,15 +181,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 14.610668
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.62706757
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -111.897064
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_LocalRotation.w
@@ -218,7 +265,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 8305a88989b96e6449d81e94dbd82dc5, type: 2}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[0].key
@@ -235,7 +282,7 @@ PrefabInstance:
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[3].key
       value: 
-      objectReference: {fileID: 6720835062821858001, guid: 8305a88989b96e6449d81e94dbd82dc5, type: 2}
+      objectReference: {fileID: -2188497315265129737, guid: 8305a88989b96e6449d81e94dbd82dc5, type: 2}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[4].key
       value: 
@@ -255,7 +302,7 @@ PrefabInstance:
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[3].value
       value: 
-      objectReference: {fileID: 3669216782763416692}
+      objectReference: {fileID: 1909216743467613848}
     - target: {fileID: 7740489859930279391, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       propertyPath: m_SceneBindings.Array.data[4].value
       value: 
@@ -269,6 +316,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2375827287917822782}
+    - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8263550604850464881}
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8748140780223863156}
