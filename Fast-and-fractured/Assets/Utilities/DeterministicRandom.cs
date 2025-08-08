@@ -16,8 +16,7 @@ namespace Utilities
             {
                 if (!_isInitialized)
                 {
-                    Debug.LogWarning("DeterministicRandom.Instance fue accedido antes de ser inicializado por la red." +
-                                     "Se inicializará con una semilla del sistema. En multijugador, esto causará desincronización.");
+                    Debug.LogWarning("DeterministicRandom.Instance not initialized");
                     Initialize(System.Environment.TickCount);
                 }
                 return _randomInstance;
@@ -26,7 +25,7 @@ namespace Utilities
 
         public static void Initialize(int seed)
         {
-            Debug.Log($"<color=lime>DeterministicRandom: Inicializando con semilla {seed}</color>");
+            Debug.Log($"<color=lime>DeterministicRandom: Inicialized with seed {seed}</color>");
             _randomInstance.InitState((uint)seed);
             _isInitialized = true;
         }
