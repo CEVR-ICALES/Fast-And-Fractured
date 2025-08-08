@@ -5,6 +5,7 @@ using System.Threading;
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured.Utilities;
 
 namespace FastAndFractured {
     public class PushBulletBehaviour : BulletBehaviour, ICanBeImpulseByTrampoline
@@ -118,7 +119,7 @@ namespace FastAndFractured {
             base.OnBulletEndTrayectory();
         }
 
-        public Rigidbody GetRigidbody()
+        public ICustomRigidbody GetRigidbody()
         {
            return rb;
         }

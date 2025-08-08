@@ -1,6 +1,7 @@
+using FastAndFractured.Utilities;
 using UnityEngine;
 
 public interface ICanBeImpulseByTrampoline
 {
-    public Rigidbody GetRigidbody();
+    public ICustomRigidbody GetRigidbody();
 }

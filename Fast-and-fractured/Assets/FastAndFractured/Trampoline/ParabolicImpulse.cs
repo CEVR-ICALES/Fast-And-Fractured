@@ -1,3 +1,4 @@
+using FastAndFractured.Utilities;
 using UnityEngine;
 using Utilities;
 namespace FastAndFractured {
@@ -48,13 +49,13 @@ namespace FastAndFractured {
                 }
                 else if (other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline))
                 {
-                    Rigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
+                    ICustomRigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
                     ImpulseRigydbody(rb, rb.linearVelocity, GENERIC_MASS);
                 }
             }
         }
 
-        private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference)
+        private void ImpulseRigydbody(ICustomRigidbody rb, Vector3 startingVelocity, float maxWeightReference)
         {
             isOnCountdown = true;
             float startingVelocityX = startingVelocity.x;

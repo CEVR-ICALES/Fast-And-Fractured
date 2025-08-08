@@ -1,4 +1,5 @@
 using Enums;
+using FastAndFractured.Utilities;
 using UnityEngine;
 using Utilities;
 
@@ -20,7 +21,7 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         [SerializeField] private bool initValues = true;
         //References
-        protected Rigidbody rb;
+        protected ICustomRigidbody rb;
         protected Collider ownCollider;
         [SerializeField]
         private GameObject visuals;
@@ -31,7 +32,7 @@ namespace FastAndFractured
         protected abstract void FixedUpdate();
         public virtual void InitializeValues()
         {
-            rb = GetComponent<Rigidbody>();
+            rb = GetComponent<ICustomRigidbody>();
             ownCollider = GetComponent<Collider>();
            
         }
