@@ -1,3 +1,4 @@
+using NRandom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ public class VolumeManager : AbstractSingleton<VolumeManager>
     {
         if (randomStart)
         {
-            int selected = Random.Range(0, volumeList.Count);
+            int selected = DeterministicRandom.Instance.NextInt(0, volumeList.Count);
             ChangeCurrentVolume(volumeList[selected]);
         }
     }

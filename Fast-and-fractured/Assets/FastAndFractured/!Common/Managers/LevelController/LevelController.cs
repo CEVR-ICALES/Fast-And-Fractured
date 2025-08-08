@@ -9,7 +9,7 @@ using Utilities.Managers.PauseSystem;
 using Enums;
 using UnityEngine.Events;
 using UnityEngine.TextCore.Text;
-using Random = UnityEngine.Random;
+using  Random = UnityEngine.Random;
 using TMPro;
 using DG.Tweening;
 

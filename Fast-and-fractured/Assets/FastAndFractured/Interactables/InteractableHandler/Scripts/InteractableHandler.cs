@@ -1,4 +1,5 @@
 using Enums;
+using NRandom;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace FastAndFractured
 
         void MakeInitialPool()
         {
-            _shuffledActivePool = interactablesToToggle.OrderBy(_ => UnityEngine.Random.Range(0, interactablesToToggle.Length)).ToList();
+            _shuffledActivePool = interactablesToToggle.OrderBy(_ => DeterministicRandom.Instance.NextInt(0, interactablesToToggle.Length)).ToList();
             onPoolInitialize?.Invoke();
             UpdateVisibleInteractableList();
         }

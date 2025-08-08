@@ -93,8 +93,11 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
+            if (!DeterministicRandom._isInitialized)
+            {
+                DeterministicRandom.Initialize(UnityEngine.Random.Range(int.MinValue, int.MaxValue));
+            }
             InitializeHandlers();
-
             //Provisional For Debug 
             if (debugMode)
             {
@@ -361,7 +364,7 @@ namespace FastAndFractured
 
         public GameObject GetARandomPlayer()
         {
-            return availablePlayer.GetRandomValueFromList();
+            return availablePlayer.GetRandomValueFromList(DeterministicRandom.Instance);
         }
         public void AddCharacterToListOfSelectedCharacters(int id, string character)
         {

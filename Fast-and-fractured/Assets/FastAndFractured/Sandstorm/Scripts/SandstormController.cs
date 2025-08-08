@@ -125,7 +125,7 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            possibleAngels.ShuffleList();
+            possibleAngels.ShuffleList(DeterministicRandom.Instance);
 
             float spawnAngle = possibleAngels[0];
             Quaternion vectorRotation = Quaternion.AngleAxis(spawnAngle, Vector3.up);

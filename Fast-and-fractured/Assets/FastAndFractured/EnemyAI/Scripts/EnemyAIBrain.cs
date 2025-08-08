@@ -1,4 +1,5 @@
 using Enums;
+using NRandom;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -343,8 +344,7 @@ namespace FastAndFractured
             {
                 CalculateTotalDecisionPercentage();
                 //+1 because it's max is exclusive
-                int decision = Random.Range(0, _totalDecisionPercentage + 1);
-
+                int decision = DeterministicRandom.Instance.NextInt(0, _totalDecisionPercentage + 1);
                 int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
                 int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
                 int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
@@ -843,8 +843,8 @@ namespace FastAndFractured
             Vector3 shootingDirection = CalcNormalizedShootingDirection();
 
             //Add shooting error 
-            return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
-                UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
+            return shootingDirection + new Vector3(DeterministicRandom.Instance.NextFloat(-shootingMarginErrorAngle, shootingMarginErrorAngle),
+               DeterministicRandom.Instance.NextFloat(0, shootingMarginErrorAngle), 0);
         }
 
         public void StopMovement()

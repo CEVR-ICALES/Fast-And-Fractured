@@ -80,7 +80,7 @@ namespace FastAndFractured
                     Debug.LogWarning("Not enough unique character name codes available to fill all AI slots. Spawning fewer AIs.");
                     break;
                 }
-                string aiNameCode = (_availableNameCodesForSpawning.GetRandomValueFromList(LevelConstants.ERROR_STRING_MESSAGE_CHARACTER_LIST_EMPTY));
+                string aiNameCode = (_availableNameCodesForSpawning.GetRandomValueFromList(DeterministicRandom.Instance));
                 if (aiNameCode == LevelConstants.ERROR_STRING_MESSAGE_CHARACTER_LIST_EMPTY)
                 {
                     Debug.LogWarning("Error, all characters from _availableNameCodesForSpawning were depleted or list was empty. " +
@@ -162,7 +162,7 @@ namespace FastAndFractured
                 return false;
             }
 
-            _spawnPoints.ShuffleList();
+            _spawnPoints.ShuffleList(DeterministicRandom.Instance);
 
             int characterSpawnIndex = 0;
             GameObject playerCarInstance = null;

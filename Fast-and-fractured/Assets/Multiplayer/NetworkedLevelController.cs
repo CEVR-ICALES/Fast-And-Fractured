@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured.Multiplayer
 {
@@ -43,6 +44,8 @@ namespace FastAndFractured.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         public void StartGame()
         {
+            int gameSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            DeterministicRandom.Initialize(gameSeed);
 
             if (LevelControllerButBetter.Instance != null)
             {
@@ -55,7 +58,8 @@ namespace FastAndFractured.Multiplayer
             {
                 AllCharacters = LevelControllerButBetter.Instance.InGameCharacters,
                 DebugMode = LevelControllerButBetter.Instance.DebugMode,
-                InGameCharactersNameCodes = LevelControllerButBetter.Instance.InGameCharactersNameCodes
+                InGameCharactersNameCodes = LevelControllerButBetter.Instance.InGameCharactersNameCodes,
+                RandomSeed = gameSeed
             };
             SentLevelControllerStartData(levelControllerStartData);
         }
@@ -64,9 +68,11 @@ namespace FastAndFractured.Multiplayer
         {
             if (!IsHostInitialized)
             {//  levelControllerStartData.LocalPlayer = LocalConnection.FirstObject.gameObject;
+                DeterministicRandom.Initialize(levelControllerStartData.RandomSeed);
                 LevelControllerButBetter levelControllerButBetter = LevelControllerButBetter.Instance;
                 levelControllerButBetter.PerformConstruct();
                 levelControllerButBetter.InGameCharactersNameCodes = levelControllerStartData.InGameCharactersNameCodes;
+               
 
                 levelControllerButBetter.InitializeAfterSpawn(levelControllerStartData.AllCharacters);
            
@@ -131,4 +137,5 @@ public struct LevelControllerStartData
     public bool DebugMode;
     public GameObject LocalPlayer;
     public List<string> InGameCharactersNameCodes;
+    public int RandomSeed;
  }

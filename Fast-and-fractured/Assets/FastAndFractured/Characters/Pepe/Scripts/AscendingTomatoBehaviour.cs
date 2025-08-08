@@ -5,6 +5,7 @@ using Utilities;
 using StateMachine;
 using Enums;
 using Utilities.Managers.PauseSystem;
+using NRandom;
 namespace FastAndFractured
 {
     public class AscendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
@@ -26,7 +27,8 @@ namespace FastAndFractured
 
         private Vector3 _randomRotation;
         private bool _isPaused = false;
-
+        private const int MIN_ROTATION =0;
+        private const int MAX_ROTATION =360;
         public virtual void InitializeValues()
         {
             
@@ -45,7 +47,7 @@ namespace FastAndFractured
         public void StartTimer()
         {
             charactersList = LevelControllerButBetter.Instance.InGameCharacters;
-            _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+            _randomRotation = new Vector3(DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
                 if (!Caster)
@@ -111,7 +113,8 @@ namespace FastAndFractured
             descendingTomatoBehaviour.objective = obj;
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
             descendingTomatoBehaviour.effectTime = effectTime;
-            descendingTomatoBehaviour.randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+            descendingTomatoBehaviour.randomRotation = new Vector3(DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION));
+
         }
 
         public void OnPause()
