@@ -11,35 +11,38 @@ namespace FastandFractured
         [SerializeField] private Transform objectToRotate;
 
         private int currentPointIndex = 0;
-        private Quaternion startRotation;
-        private Quaternion targetRotation;
+        private float startY;
+        private float targetY;
 
         public int CurrentPointIndex => currentPointIndex;
 
         private void Start()
         {
-            RotateToPoint(2);
+            RotateToPoint(1);
         }
 
         public void RotateToPoint(int pointIndex)
         {
             if (pointIndex < 0 || pointIndex >= rotationPoints.Length || pointIndex == currentPointIndex) return;
 
-            startRotation = objectToRotate.rotation;
+            Quaternion startRotation = objectToRotate.rotation;
 
-            Vector3 targetPoint = rotationPoints[pointIndex].position;
-            targetRotation = Quaternion.LookRotation(targetPoint - objectToRotate.position);
+            Vector3 direction = rotationPoints[pointIndex].position - objectToRotate.position;
+            if (direction == Vector3.zero) return;
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
 
             TimerSystem.Instance.CreateTimer(
                 rotationDuration,
                 TimerDirection.INCREASE,
                 onTimerIncreaseComplete: () =>
                 {
+                    objectToRotate.rotation = targetRotation;
                     currentPointIndex = pointIndex;
                 },
                 onTimerIncreaseUpdate: (progress) =>
                 {
-                    objectToRotate.rotation = Quaternion.Slerp(startRotation, targetRotation, progress);
+                    objectToRotate.rotation = Quaternion.Lerp(startRotation, targetRotation, progress / 10);
                 }
             );
         }
