@@ -195,7 +195,12 @@ namespace FastAndFractured
             PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
         
             _localPlayer = PlayerInputController.Instance.GetComponentInChildren<CarMovementController>().gameObject;
-            if(_localPlayer) PlayerInputController.Instance.GetComponent<CarInjector>().Install(null,true);
+        //todo optimize
+            var foundInjectors = FindObjectsByType<CarInjector>(sortMode: FindObjectsSortMode.None);
+            foreach (var injector in foundInjectors)
+            {
+                injector.Install(null, true);
+            }//   if(_localPlayer) PlayerInputController.Instance.GetComponent<CarInjector>().Install(null,true);
             if (injectedCharacters != null)
             {
                 _characterSpawner.InGameCharacters.Clear();
@@ -263,8 +268,7 @@ namespace FastAndFractured
 
             if (!useMyCharacters && InGameCharacters.Count > 0)
             {
-                //todo improve
-                GameObject firstCharacter = InGameCharacters[0];
+                GameObject firstCharacter =  GetARandomPlayer();
                 GameObject nearestToFirst = GetNearestCharacterToCharacter(firstCharacter);
                 if (nearestToFirst != null)
                 {
