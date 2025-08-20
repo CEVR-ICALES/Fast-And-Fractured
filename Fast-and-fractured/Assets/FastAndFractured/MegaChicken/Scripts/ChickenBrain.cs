@@ -11,14 +11,8 @@ namespace FastAndFractured
         public bool IsJumping { get => isJumping; }
         private bool isThrowingEgg = false;
         public bool IsThrowingEgg { get => isThrowingEgg; }
-        private bool isRotating = false;
-        public bool IsRotating { get => isRotating; }
         private float currentIdleTime = 0f;
-        public float minCooldownTime = 8f;
-        public float maxCooldownTime = 15f;
-        private float currentCooldownTimeUntilNextAction = 0f;
-        public float turnSpeed = 20f;
-        private Quaternion targetRotation;
+        public float cooldownTime = 15f;
         public Pooltype pooltypeMegaChickenEgg;
         public GameObject eggSpawnPoint;
 
@@ -34,15 +28,7 @@ namespace FastAndFractured
                 GetRandomAction();
             }
         }
-        public void RotateChicken()
-        {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-            if (Quaternion.Angle(transform.rotation, targetRotation) < 1f)
-            {
-                isRotating = false;
-                isIdle = true;
-            }
-        }
+
         public void ThrowEgg()
         {
             GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg);
@@ -54,30 +40,15 @@ namespace FastAndFractured
         }
         public void GetRandomAction()
         {
-            if (currentCooldownTimeUntilNextAction == 0f)
-            {
-                currentCooldownTimeUntilNextAction = Random.Range(minCooldownTime, maxCooldownTime);
-            }
             currentIdleTime += Time.deltaTime;
-            if (currentIdleTime >= currentCooldownTimeUntilNextAction)
+            if (currentIdleTime >= cooldownTime)
             {
                 isIdle = false;
                 currentIdleTime = 0f;
-                currentCooldownTimeUntilNextAction = 0f;
                 float rand = Random.value;
-                if (rand < 0.5f)
+                if (rand < 0.7f)
                 {
                     isThrowingEgg = true;
-                }
-                else if (rand < 0.8f)
-                {
-                    Vector3 randomDirection = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
-                    if (randomDirection != Vector3.zero)
-                    {
-                        Quaternion lookRotation = Quaternion.LookRotation(randomDirection);
-                        targetRotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
-                        isRotating = true;
-                    }
                 }
                 else
                 {
