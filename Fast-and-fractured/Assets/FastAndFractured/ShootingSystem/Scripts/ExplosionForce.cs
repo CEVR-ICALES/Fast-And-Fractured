@@ -16,6 +16,10 @@ namespace FastAndFractured
         [SerializeField] private float averageCarWeight = 1150f;
         [SerializeField] private float carWeightImportance = 0.2f;
         [SerializeField] private float applyForceYOffset = 1f;
+        [SerializeField, Range(0f, 100f)] private float forceMultiplier = 10f;
+        [SerializeField] private ForceMode forceMode = ForceMode.Force;
+
+
         //Provisinal value to select the type force aplication 
         [SerializeField] private bool isGrounded = true;
         public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center)
@@ -29,7 +33,7 @@ namespace FastAndFractured
                 _explosionVFX.localScale = Vector3.one * radius;
             }
         }
-        public void DesactivateExplostionHitbox()
+        public void DeactivateExplosionHitbox()
         {
             gameObject.SetActive(false);
         }
@@ -62,15 +66,16 @@ namespace FastAndFractured
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
 
-                forceToApply = CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                forceToApply = forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * 1 - ((distanceToCenter / _explosionCollider.radius))); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * (1 - distanceToCenter / _explosionCollider.radius), forceMode); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                 }
             }
-            else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody)) {
+            else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))
+            {
                 Vector3 otherPosition = other.transform.position;
 
                 Vector3 contactPoint = _explosionCollider.ClosestPoint(otherPosition);
@@ -81,21 +86,8 @@ namespace FastAndFractured
 
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
 
-                float distanceToCenter = vectorCenterToContactPoint.magnitude;
-                otherRigidbody.AddForceAtPosition(_pushForce/100 * direction, contactPoint, ForceMode.Impulse);
+                otherRigidbody.AddForceAtPosition(_pushForce / 10 * direction, contactPoint, forceMode);
             }
-        }
-
-        private float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance)
-        {
-            float weightFactor = 1 + ((oCarWeight - averageCarWeight) / averageCarWeight) * carWeightImportance; // is for example the car importance is 0.2 (20 %) and the car weights 1200 the final force will be multiplied by 1.05 or something close to that value since the car is heavier (number will be big so a 0.05 is enough for now)
-
-            float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
-            float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
-
-            float force = _pushForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
-
-            return force;
         }
     }
 }

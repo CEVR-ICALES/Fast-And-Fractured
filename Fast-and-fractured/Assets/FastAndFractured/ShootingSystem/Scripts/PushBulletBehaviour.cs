@@ -7,7 +7,7 @@ using Utilities;
 using Enums;
 
 namespace FastAndFractured {
-    public class PushBulletBehaviour : BulletBehaviour
+    public class PushBulletBehaviour : BulletBehaviour, ICanBeImpulseByTrampoline
     {
         //Explosion Values
         public float PushForce {set=> _pushForce = value; }
@@ -58,7 +58,7 @@ namespace FastAndFractured {
             _currentBounceStrenght = _bounceStrenght;
             _currentBouncingNum = 0;
             _useCustomGravity = true;
-            _explosionHitbox.DesactivateExplostionHitbox();
+            _explosionHitbox.DeactivateExplosionHitbox();
         }
 
 
@@ -90,7 +90,6 @@ namespace FastAndFractured {
                 rb.linearVelocity += newDirection;
                 if (_firstTime)
                 {
-                    Debug.Log(Vector3.Distance(transform.position, initialPosition));
                     _firstTime = false;
                 }
             }
@@ -117,6 +116,11 @@ namespace FastAndFractured {
         {
             _useCustomGravity = false;
             base.OnBulletEndTrayectory();
+        }
+
+        public Rigidbody GetRigidbody()
+        {
+           return rb;
         }
     }
 }
