@@ -1,6 +1,7 @@
 using UnityEngine;
 using Utilities;
 using Enums;
+using FastAndFractured;
 namespace FastAndFractured
 {
     public class ChickenBrain : MonoBehaviour
@@ -15,10 +16,12 @@ namespace FastAndFractured
         public float cooldownTime = 15f;
         public Pooltype pooltypeMegaChickenEgg;
         public GameObject eggSpawnPoint;
+        private Animator animator;
+        private Collider jumpCollider;
 
         void Start()
         {
-
+            animator = GetComponent<Animator>();
         }
 
         void Update()
@@ -46,7 +49,7 @@ namespace FastAndFractured
                 isIdle = false;
                 currentIdleTime = 0f;
                 float rand = Random.value;
-                if (rand < 0.7f)
+                if (rand < 0.1f)
                 {
                     isThrowingEgg = true;
                 }
@@ -58,9 +61,37 @@ namespace FastAndFractured
         }
         public void Jump()
         {
-            //todo depends of the way we want the chicken to jump
-            isIdle = true;
+            animator.SetBool("IsJumping", true);
+        }
+        public void CheckIfJumpEnded()
+        {
+            // AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            // if (isJumping && stateInfo.IsName("Jump"))
+            // {
+            //     // Si la animación está por terminar (por ejemplo, normalizado > 0.95)
+            //     if (stateInfo.normalizedTime >= 0.95f)
+            //     {
             isJumping = false;
+            isIdle = true;
+            animator.SetBool("IsJumping", false);
+            //     }
+            // }
+        }
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (isJumping)
+            {
+                foreach (ContactPoint contact in collision.contacts)
+                {
+                    if (contact.normal.y > 0.5f)
+                    {
+                        if (contact.otherCollider.TryGetComponent<StatsController>(out StatsController statsController))
+                        {
+                            statsController.Dead();
+                        }
+                    }
+                }   
+            }
         }
     }
 }
