@@ -5,12 +5,12 @@ namespace FastAndFractured
 {
     public class ChickenPushZone : MonoBehaviour
     {
-        public float pushForce = 10f;
         private SphereCollider _selfCollider;
         [SerializeField] private bool isGrounded = true;
         [SerializeField] private float applyForceYOffset = 1f;
         [SerializeField] private ForceMode forceMode = ForceMode.Force;
         [SerializeField, Range(0f, 100f)] private float forceMultiplier = 10f;
+        private const float HITBOX_TIME = 0.4f;
         void Start()
         {
             _selfCollider = GetComponent<SphereCollider>();
@@ -33,7 +33,7 @@ namespace FastAndFractured
                 }
 
                 otherComponentPhysicsBehaviours.CancelDash();
-                float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
+                float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance;
                 float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
                 float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
                 float forceToApply;
@@ -44,17 +44,17 @@ namespace FastAndFractured
 
                 Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
 
-                Vector3 direction = vectorCenterToContactPoint.normalized;
-
+                Vector3 direction = (other.transform.position - transform.position).normalized;
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
+                direction += Vector3.up * applyForceYOffset;
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
 
-                forceToApply = forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                forceToApply = -forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply * (1 - distanceToCenter / _selfCollider.radius), forceMode); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyForce(direction, contactPoint, forceToApply * (1 - distanceToCenter / _selfCollider.radius), forceMode);
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                 }
             }
@@ -62,6 +62,10 @@ namespace FastAndFractured
         public void ActivatePushZone()
         {
             _selfCollider.enabled = true;
+            TimerSystem.Instance.CreateTimer(HITBOX_TIME, onTimerDecreaseComplete: () =>
+            {
+                _selfCollider.enabled = false;
+            });
         }
     }
 }
