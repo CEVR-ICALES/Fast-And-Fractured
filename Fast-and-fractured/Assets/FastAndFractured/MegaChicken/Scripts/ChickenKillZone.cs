@@ -6,6 +6,7 @@ namespace FastAndFractured
     public class ChickenKillZone : MonoBehaviour
     {
         public ChickenBrain brain;
+        private ChickenPushZone pushZone;
         public ParticleSystem groundImpactEffect;
         private bool avoidMultipleExecutions = false;
         private const string GROUND_LAYER_NAME = "Ground";
@@ -14,12 +15,12 @@ namespace FastAndFractured
         private const float TIME_TO_AVOID_MULTIPLE_EXECUTIONS = 2f;
         void Start()
         {
-            
+            pushZone = groundImpactEffect.GetComponent<ChickenPushZone>();
         }
 
         void Update()
         {
-            
+
         }
 
         private void OnTriggerEnter(Collider other)
@@ -29,6 +30,7 @@ namespace FastAndFractured
                 if (avoidMultipleExecutions) return;
                 groundImpactEffect.Play();
                 avoidMultipleExecutions = true;
+                pushZone.ActivatePushZone();
                 TimerSystem.Instance.CreateTimer(TIME_TO_AVOID_MULTIPLE_EXECUTIONS, onTimerDecreaseComplete: () =>
                 {
                     avoidMultipleExecutions = false;

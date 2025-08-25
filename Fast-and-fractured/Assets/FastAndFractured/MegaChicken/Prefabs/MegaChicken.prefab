@@ -190,6 +190,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.23309554, y: 0.8941018, z: 0.55435085}
   m_Center: {x: -0.016872004, y: 0.3152678, z: -0.0062103476}
+--- !u!1 &5145544651504902424
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6141262140855866517}
+  m_Layer: 0
+  m_Name: PushZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6141262140855866517
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5145544651504902424}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6774375569602841199}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7709796398346285265
 GameObject:
   m_ObjectHideFlags: 0
@@ -319,6 +350,42 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6049234203737281316}
     m_Modifications:
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startSpeed.scalar
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.6415094
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.6415094
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.6415094
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.minColor.b
+      value: 0.3490566
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.minColor.g
+      value: 0.3490566
+      objectReference: {fileID: 0}
+    - target: {fileID: 770606459823480541, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: InitialModule.startColor.minColor.r
+      value: 0.3490566
+      objectReference: {fileID: 0}
     - target: {fileID: 964420744895252593, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
       propertyPath: m_MaxParticleSize
       value: 10
@@ -363,6 +430,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1233171977875852527, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2740754332357448288, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3357667863079602117, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
       propertyPath: m_Name
       value: Particle System Crack
@@ -377,7 +452,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1205196540722870461, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6141262140855866517}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
 --- !u!4 &6774375569602841199 stripped
