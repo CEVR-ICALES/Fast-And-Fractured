@@ -210,6 +210,22 @@ namespace FastAndFractured
             }
         }
 
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime)
+        {
+            _rb.AddForce(force, forceMode);
+            if (!limitRbSpeed)
+            {
+                _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+                {
+                    if (!_carMovementController.IsDashing)
+                    {
+                        _carMovementController.SetMaxRbSpeedDelayed();
+                    }
+                });
+            }
+        }
+
         public void AddForce(Vector3 force, ForceMode forceMode)
         {
             if (_rb != null)
