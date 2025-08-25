@@ -63,7 +63,8 @@ namespace Enums
         EXIT_POPUP,
         PAUSE,
         WIN_LOSE,
-        HOW_TO_PLAY
+        HOW_TO_PLAY,
+        MAP_SELECTION
     }
 
     public enum Pooltype

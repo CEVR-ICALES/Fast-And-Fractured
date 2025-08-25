@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7530795860479139459
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4408392086775314884}
+  - component: {fileID: 8397409887561968793}
+  m_Layer: 0
+  m_Name: SendSubtitleMessage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &4408392086775314884
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7530795860479139459}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -20.8795, y: 0, z: -9.533951}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2372001007133563327}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8397409887561968793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7530795860479139459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1440ddad21112b45bd9224deffc1049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textLocalaizeCode: Game.JosefinoVictory
+  speakerName: Josefino
+  duration: 2
 --- !u!1001 &2768277932052234632
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10,15 +57,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 42.44981
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.62706375
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -123.74165
       objectReference: {fileID: 0}
     - target: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -53,6 +100,14 @@ PrefabInstance:
       value: JosefinoVictoryTimeline Variant
       objectReference: {fileID: 0}
     - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      propertyPath: m_SceneBindings.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      propertyPath: m_SceneBindings.Array.data[2].key
+      value: 
+      objectReference: {fileID: -352716198088376886, guid: 00801786cdab2ae46a2b9410c769ee44, type: 2}
+    - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       propertyPath: m_SceneBindings.Array.data[0].value
       value: 
       objectReference: {fileID: 722607272672390720}
@@ -60,12 +115,19 @@ PrefabInstance:
       propertyPath: m_SceneBindings.Array.data[1].value
       value: 
       objectReference: {fileID: 3037128304043527506}
+    - target: {fileID: 7740489859930279391, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      propertyPath: m_SceneBindings.Array.data[2].value
+      value: 
+      objectReference: {fileID: 7530795860479139459}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7843045045273419551}
+    - targetCorrespondingSourceObject: {fileID: 468915619578140727, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4408392086775314884}
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4252954872485549625}
@@ -160,7 +222,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &3037128304043527506
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -174,6 +236,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -233,7 +296,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7038116901097736087, guid: 354551c0d14ff0843a4ffe305788e623, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 592f201847583384f9198d63df0db94f, type: 2}
     - target: {fileID: 919132149155446097, guid: 354551c0d14ff0843a4ffe305788e623, type: 3}
@@ -255,7 +318,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &722607272672390720
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -269,6 +332,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
