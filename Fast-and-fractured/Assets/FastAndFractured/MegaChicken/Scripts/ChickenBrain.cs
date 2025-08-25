@@ -1,7 +1,6 @@
 using UnityEngine;
 using Utilities;
 using Enums;
-using FastAndFractured;
 namespace FastAndFractured
 {
     public class ChickenBrain : MonoBehaviour
@@ -16,8 +15,8 @@ namespace FastAndFractured
         public float cooldownTime = 15f;
         public Pooltype pooltypeMegaChickenEgg;
         public GameObject eggSpawnPoint;
+        public Animator Animator { get => animator; }
         private Animator animator;
-        private Collider jumpCollider;
 
         void Start()
         {
@@ -65,32 +64,15 @@ namespace FastAndFractured
         }
         public void CheckIfJumpEnded()
         {
-            // AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            // if (isJumping && stateInfo.IsName("Jump"))
-            // {
-            //     // Si la animación está por terminar (por ejemplo, normalizado > 0.95)
-            //     if (stateInfo.normalizedTime >= 0.95f)
-            //     {
-            isJumping = false;
-            isIdle = true;
-            animator.SetBool("IsJumping", false);
-            //     }
-            // }
-        }
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (isJumping)
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            if (isJumping && stateInfo.IsName("Jump"))
             {
-                foreach (ContactPoint contact in collision.contacts)
+                if (stateInfo.normalizedTime >= 0.95f)
                 {
-                    if (contact.normal.y > 0.5f)
-                    {
-                        if (contact.otherCollider.TryGetComponent<StatsController>(out StatsController statsController))
-                        {
-                            statsController.Dead();
-                        }
-                    }
-                }   
+                    isJumping = false;
+                    isIdle = true;
+                    animator.SetBool("IsJumping", false);
+                }
             }
         }
     }
