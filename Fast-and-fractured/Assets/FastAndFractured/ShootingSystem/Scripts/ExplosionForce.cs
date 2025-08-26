@@ -6,7 +6,9 @@ namespace FastAndFractured
 {
     public class ExplosionForce : MonoBehaviour
     {
-        private float _pushForce;
+        private float _pushForceAgaintsCars;
+        [SerializeField]
+        private float pushForceAgaintsOtherRB = 100f;
         public SphereCollider ExplosionCollider { set => _explosionCollider = value; }
         private SphereCollider _explosionCollider;
         [SerializeField] private Transform _explosionVFX;
@@ -27,7 +29,7 @@ namespace FastAndFractured
             if (_explosionCollider != null)
             {
                 gameObject.SetActive(true);
-                _pushForce = pushForce;
+                _pushForceAgaintsCars = pushForce;
                 _explosionCollider.center = center;
                 _explosionCollider.radius = radius;
                 _explosionVFX.localScale = Vector3.one * radius;
@@ -66,7 +68,7 @@ namespace FastAndFractured
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
 
-                forceToApply = forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                forceToApply = forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(_pushForceAgaintsCars,otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
@@ -86,7 +88,7 @@ namespace FastAndFractured
 
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
 
-                otherRigidbody.AddForceAtPosition(_pushForce / 10 * direction, contactPoint, forceMode);
+                otherRigidbody.AddForceAtPosition(pushForceAgaintsOtherRB * direction, contactPoint, forceMode);
             }
         }
     }
