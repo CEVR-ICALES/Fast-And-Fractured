@@ -22,6 +22,8 @@ namespace FastAndFractured
         public float MaxEndurance = 500;
         public float MinEndurance = 0;
         public bool Invulnerable = false;
+        public float TimeToRecoverHealthWithNoHit = 1.5f;
+        public float TimeToRecoverFullHealth = 3.5f;
 
 
         [Header("Movement")]

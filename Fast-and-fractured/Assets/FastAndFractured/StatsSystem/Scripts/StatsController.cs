@@ -27,6 +27,9 @@ namespace FastAndFractured
         public float MaxEndurance { get => charDataSO.MaxEndurance; }
         public bool IsInvulnerable { get => charDataSO.Invulnerable;  private set => charDataSO.Invulnerable = value; }
 
+        private ITimer _recoverFullHealthTimer = null;
+        private ITimer _startRecoverFullHealthTimer = null;
+
         [Header("Movement")]
         [SerializeField] private float currentMaxSpeed;
         [SerializeField] private float currentMaxSpeedDashing;
@@ -216,6 +219,26 @@ namespace FastAndFractured
                             {
                                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
                             }
+                        }
+                        if (_startRecoverFullHealthTimer == null)
+                        {
+                            if (_recoverFullHealthTimer != null)
+                            {
+                                _recoverFullHealthTimer.StopTimer();
+                                _recoverFullHealthTimer = null;
+                            }
+                            _startRecoverFullHealthTimer = TimerSystem.Instance.CreateTimer(charDataSO.TimeToRecoverHealthWithNoHit, onTimerDecreaseComplete: () =>
+                            {
+                                _startRecoverFullHealthTimer = null;
+                                _recoverFullHealthTimer = TimerSystem.Instance.CreateTimer(charDataSO.TimeToRecoverFullHealth, onTimerDecreaseUpdate: (float time) =>
+                                {
+
+                                });
+                            });
+                        }
+                        else
+                        {
+                            _startRecoverFullHealthTimer.StopTimer();
                         }
                     }
                     else
