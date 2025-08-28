@@ -6,6 +6,7 @@ namespace FastAndFractured
     public class ChickenPushZone : MonoBehaviour
     {
         private SphereCollider _selfCollider;
+        [Header("Push related")]
         [SerializeField] private bool isGrounded = true;
         [SerializeField] private float applyForceYOffset = 1f;
         [SerializeField] private ForceMode forceMode = ForceMode.Force;
@@ -44,9 +45,9 @@ namespace FastAndFractured
 
                 Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
 
-                Vector3 direction = (other.transform.position - transform.position).normalized;
+                Vector3 direction = vectorCenterToContactPoint.normalized;
+
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
-                direction += Vector3.up * applyForceYOffset;
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
 

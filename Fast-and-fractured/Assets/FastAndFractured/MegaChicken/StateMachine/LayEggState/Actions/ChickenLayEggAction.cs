@@ -4,8 +4,8 @@ using Utilities;
 
 namespace StateMachine
 {
-    [CreateAssetMenu(fileName = "ChickenThrowEggAction", menuName = "MegaChickenStateMachine/Actions/ChickenThrowEggAction")]
-    public class ChickenThrowEggAction : Action
+    [CreateAssetMenu(fileName = "ChickenLayEggAction", menuName = "MegaChickenStateMachine/Actions/ChickenLayEggAction")]
+    public class ChickenLayEggAction : Action
     {
         public override void Act(Controller controller)
         {

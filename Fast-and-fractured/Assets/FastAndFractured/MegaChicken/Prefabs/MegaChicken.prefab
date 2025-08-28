@@ -130,12 +130,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2327568385523770329}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.715, z: -2.897}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6049234203737281316}
+  m_Father: {fileID: 6774375569602841199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3856599656820990781
 GameObject:
@@ -421,7 +421,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1205196540722870461, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4417694055172086603}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3357667863079602117, guid: b13ac66df48be9a409bdb1ca3a00d228, type: 3}
       insertIndex: -1
@@ -549,9 +552,6 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0dd76a38c50ab15478f1d44401b376cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4417694055172086603}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0dd76a38c50ab15478f1d44401b376cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6774375569602841199}
@@ -724,6 +724,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cooldownTime: 20
+  chanceOfEgg: 0.6
   pooltypeMegaChickenEgg: 14
   eggSpawnPoint: {fileID: 2327568385523770329}
 --- !u!114 &-254438704354653617

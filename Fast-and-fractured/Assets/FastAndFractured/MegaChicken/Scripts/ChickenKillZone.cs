@@ -31,7 +31,7 @@ namespace FastAndFractured
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == LayerMask.NameToLayer(GROUND_LAYER_NAME))
+            if (other.gameObject.layer == LayerMask.NameToLayer(GROUND_LAYER_NAME) && brain.IsJumping)
             {
                 if (avoidMultipleExecutions) return;
                 groundImpactEffect.Play();
