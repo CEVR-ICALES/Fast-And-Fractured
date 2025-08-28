@@ -35,6 +35,10 @@ namespace FastAndFractured
         private const int GROUND_LAYER = 3;
         private const float TIME_UNTIL_REACTIVATE_FISICS = 1f;
         private const float EXPLOSION_TIME = 1.5f;
+        private const float NORMAL_RADIUS = 0.68f;
+        private const float MAX_RADIUS = 1.5f;
+        private const float AGENT_SPEED = 40f;
+        private const float POINT_RADIUS = 500f;
 
         public virtual void InitializeValues()
         {
@@ -69,8 +73,8 @@ namespace FastAndFractured
                 ownCollider.enabled = true;
                 ownRigidbody.isKinematic = false;
                 pushZoneCollider.enabled = true;
-                pushZoneCollider.radius = 0.68f;
-                agent.speed = 40f;
+                pushZoneCollider.radius = NORMAL_RADIUS;
+                agent.speed = AGENT_SPEED;
             });
         }
         void OnDisable()
@@ -108,10 +112,10 @@ namespace FastAndFractured
         }
         private void GetRandomPoint()
         {
-            Vector3 randomDirection = Random.insideUnitSphere * 500f;
+            Vector3 randomDirection = Random.insideUnitSphere * POINT_RADIUS;
             randomDirection += transform.position;
             NavMeshHit hit;
-            if (NavMesh.SamplePosition(randomDirection, out hit, 500f, 1))
+            if (NavMesh.SamplePosition(randomDirection, out hit, POINT_RADIUS, 1))
             {
                 agent.SetDestination(hit.position);
             }
@@ -159,7 +163,7 @@ namespace FastAndFractured
         }
         private void Explosion()
         {
-            pushZoneCollider.radius = 1.5f;
+            pushZoneCollider.radius = MAX_RADIUS;
             agent.speed = 0f;
             visualModel.gameObject.SetActive(false);
             explosionParticles.SetActive(true);
