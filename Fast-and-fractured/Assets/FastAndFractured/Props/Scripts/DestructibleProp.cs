@@ -4,11 +4,12 @@ using UnityEngine;
 public class DestructibleProp : MonoBehaviour
 {
     [SerializeField] private float propHealth;
-    //[SerializeField] private float requiredSpeedToDamage;
 
     private float _damageAmount = 1f;
 
     [SerializeField] private LayerMask damagingLayer;
+
+    [SerializeField] private ParticleSystem destroyedParticles;
 
     //private EventReference destroySound; FUTURE USE
 
@@ -26,8 +27,6 @@ public class DestructibleProp : MonoBehaviour
         if (rb == null)
             return;
 
-        //float impactSpeed = rb.linearVelocity.magnitude;
-
         TakeDamage(_damageAmount);
     }
 
@@ -37,6 +36,7 @@ public class DestructibleProp : MonoBehaviour
 
         if (propHealth <= MINIMUM_HP_TO_DESTROY)
         {
+            destroyedParticles.Play();
             this.gameObject.SetActive(false);
             Debug.Log("Damage Done");
         }
