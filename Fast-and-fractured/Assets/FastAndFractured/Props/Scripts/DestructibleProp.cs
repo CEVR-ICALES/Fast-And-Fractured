@@ -36,6 +36,7 @@ public class DestructibleProp : MonoBehaviour
 
         if (propHealth <= MINIMUM_HP_TO_DESTROY)
         {
+            destroyedParticles.transform.position = transform.position;
             destroyedParticles.Play();
             this.gameObject.SetActive(false);
             Debug.Log("Damage Done");
