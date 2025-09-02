@@ -59,7 +59,7 @@ namespace FastAndFractured {
             _currentBounceStrenght = _bounceStrenght;
             _currentBouncingNum = 0;
             _useCustomGravity = true;
-            _explosionHitbox.DesactivateExplostionHitbox();
+            _explosionHitbox.DeactivateExplosionHitbox();
         }
 
 
