@@ -11,5 +11,9 @@ namespace FastAndFractured
         public const string METERS_TEXT = " m";
         public const string KILOMETERS_TEXT = " km";
         public const int MAIN_MENU_SCENE_BUILD_INDEX = 1;
+        public const string SKINS_LOADER_PATH = "CharactersSkins";
+        public const string CHARACTER_MATERIALS = "Character";
+        public const string VEHICLE_MATERIALS = "Vehicle";
+        public const string WHEElS_MATERIALS = "Wheels";
     }
 }

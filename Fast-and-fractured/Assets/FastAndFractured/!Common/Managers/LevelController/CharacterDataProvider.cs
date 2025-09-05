@@ -20,16 +20,16 @@ namespace FastAndFractured
             {
                 if (character.CharacterName == name)
                 {
-                    if (skinNum == LevelConstants.DEFAULT_SKIN_ID)
-                    {
+                    //if (skinNum == LevelConstants.DEFAULT_SKIN_ID)
+                    //{
                         return character.CarDefaultPrefab;
-                    }
-                    if (skinNum > 0 && (skinNum - 1) < character.CarWithSkinsPrefabs.Count)
-                    {
-                        return character.CarWithSkinsPrefabs[skinNum - 1];
-                    }
-                    Debug.LogWarning($"Skin ID {skinNum} for character {name} not found. Check CharacterData.");
-                    return character.CarDefaultPrefab; // Fallback to default
+                    //}
+                    //if (skinNum > 0 && (skinNum - 1) < character.CarWithSkinsPrefabs.Count)
+                    //{
+                    //    return character.CarWithSkinsPrefabs[skinNum - 1];
+                    //}
+                    //Debug.LogWarning($"Skin ID {skinNum} for character {name} not found. Check CharacterData.");
+                    //return character.CarDefaultPrefab; // Fallback to default
                 }
             }
             Debug.LogWarning($"Character with name {name} (from code {nameCode}) not found in CharacterData.");

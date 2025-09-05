@@ -152,7 +152,7 @@ namespace FastAndFractured
 
 
 
-            EnemyAIBrain[] aiBrains = FindObjectsOfType<EnemyAIBrain>();
+            EnemyAIBrain[] aiBrains = FindObjectsByType<EnemyAIBrain>(FindObjectsSortMode.None);
             foreach (var aiBrain in aiBrains)
             {
                 foundCharacters.Add(aiBrain.GetComponentInChildren<StatsController>().gameObject);
