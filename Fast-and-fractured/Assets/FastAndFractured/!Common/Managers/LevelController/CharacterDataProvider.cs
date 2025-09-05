@@ -80,7 +80,7 @@ namespace FastAndFractured
                     }
                     else
                     {
-                        defaultSkinMaterials[materialIterator] = null;
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
                     }
                 }
                 renderPart.materials = defaultSkinMaterials;
