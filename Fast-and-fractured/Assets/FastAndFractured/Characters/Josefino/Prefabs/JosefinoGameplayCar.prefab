@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5367836486363312372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2532107649848091751}
+  m_Layer: 6
+  m_Name: JosefinoCharacter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2532107649848091751
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5367836486363312372}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5190605913777753818}
+  m_Father: {fileID: 3879333970209180405}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &129909745072651263
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -393,7 +425,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8147608935579704134, guid: 08a453101e10b4e4382adca95f08f4e7, type: 3}
       propertyPath: m_Name
-      value: JosefinoChasis
+      value: JosefinoChassis
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -541,7 +573,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 3879333970209180405}
+    m_TransformParent: {fileID: 2532107649848091751}
     m_Modifications:
     - target: {fileID: 2661874871034641686, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -561,15 +593,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2661874871034641686, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2661874871034641686, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2661874871034641686, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2661874871034641686, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -583,9 +615,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3471249280271600423, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
+      propertyPath: m_Name
+      value: CharacterModel
+      objectReference: {fileID: 0}
     - target: {fileID: 8763816056633816005, guid: e2a3345b0eef2cb47a06de5da9846b0f, type: 3}
       propertyPath: m_Name
-      value: JosefinoWithoutCar
+      value: Visuals
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1346,7 +1382,7 @@ PrefabInstance:
       addedObject: {fileID: 170822894284942591}
     - targetCorrespondingSourceObject: {fileID: 6626373658847031856, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5190605913777753818}
+      addedObject: {fileID: 2532107649848091751}
     - targetCorrespondingSourceObject: {fileID: 3450815660555630423, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: 0
       addedObject: {fileID: 635879948764630299}

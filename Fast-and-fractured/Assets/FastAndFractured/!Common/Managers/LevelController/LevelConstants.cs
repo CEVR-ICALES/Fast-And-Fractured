@@ -16,6 +16,7 @@ namespace FastAndFractured
         public const string CHASSIS_MATERIALS = "Chassis";
         public const string WHEElS_MATERIALS = "Wheels";
         public const string VISUAL_CHARACTER_PARTS = "Visuals";
-        public const string CHASSIS_PATH = "Chassis/Chasis/Visuals";
+        public const string CHARACTER_PATH = "Visuals/CharacterModel";
+        public const string CHASSIS_PATH = "Chassis";
     }
 }

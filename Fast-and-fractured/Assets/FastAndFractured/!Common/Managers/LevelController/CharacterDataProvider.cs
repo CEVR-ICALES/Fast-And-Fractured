@@ -43,15 +43,17 @@ namespace FastAndFractured
 
             string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
             Transform visuals = instantiatedCar.transform.Find(LevelConstants.VISUAL_CHARACTER_PARTS);
+            string characterPath = LevelConstants.CHARACTER_MATERIALS + "/" + name + LevelConstants.CHARACTER_MATERIALS + "/" + LevelConstants.CHARACTER_PATH + "/" + name;
            //Character Skin
-           Transform character = visuals.Find(LevelConstants.CHARACTER_MATERIALS).Find(name);
+           Transform character = visuals.Find(characterPath);
             if(character!=null)
-           SetSkinPart(character.gameObject, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS);
+           SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS);
 
-           //Chassis Skin
-           Transform chassis = instantiatedCar.transform.Find(LevelConstants.CHASSIS_PATH).GetChild(0);
+            //Chassis Skin
+            string chassisPath = LevelConstants.CHASSIS_PATH + "/" + name + LevelConstants.CHASSIS_PATH + "/" + LevelConstants.VISUAL_CHARACTER_PARTS;
+           Transform chassis = visuals.transform.Find(chassisPath)!.GetChild(0);
             if(chassis!=null)
-           SetSkinPart(chassis.gameObject, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS);
+           SetSkinPart(chassis, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS);
 
            //Wheels Skin
 
@@ -62,17 +64,26 @@ namespace FastAndFractured
             return Resources.LoadAll<Material>(path);
         }
 
-        private void SetSkinPart(GameObject instantiatedCarPart, string skinPartPath)
+        private void SetSkinPart(Transform instantiatedCarPart, string skinPartPath)
         {
 
             Material[] skinPart = LoadSkinMaterials(skinPartPath); 
             if (skinPart.Length != 0)
             {
-                Material[] defaultSkin = instantiatedCarPart.GetComponents<Material>();
-                for(int materialIterator = 0; materialIterator < defaultSkin.Length; materialIterator++)
+                Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                Material[] defaultSkinMaterials = renderPart.materials;
+                for(int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                 {
-                    defaultSkin[materialIterator] = skinPart[materialIterator];
+                    if (skinPart.Length > materialIterator)
+                    {
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
+                    }
+                    else
+                    {
+                        defaultSkinMaterials[materialIterator] = null;
+                    }
                 }
+                renderPart.materials = defaultSkinMaterials;
             }
         }
 
