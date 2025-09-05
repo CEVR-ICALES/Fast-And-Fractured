@@ -18,5 +18,10 @@ namespace FastAndFractured
         public const string VISUAL_CHARACTER_PARTS = "Visuals";
         public const string CHARACTER_PATH = "Visuals/CharacterModel";
         public const string CHASSIS_PATH = "Chassis";
+        public const string GENERIC_WHEEL_PATH = "WheelsVisuals";
+        public const string FRONT_LEFT_WHEEL_PATH = "FrontLeftWheel/WheelVisuals/Visuals";
+        public const string FRONT_RIGHT_WHEEL_PATH = "FrontRightWheel/WheelVisuals/Visuals";
+        public const string BACK_LEFT_WHEEL_PATH = "BackLeftWheel/WheelVisuals/Visuals";
+        public const string BACK_RiGHT_WHEEL_PATH = "BackRightWheel/WheelVisuals/Visuals";
     }
 }

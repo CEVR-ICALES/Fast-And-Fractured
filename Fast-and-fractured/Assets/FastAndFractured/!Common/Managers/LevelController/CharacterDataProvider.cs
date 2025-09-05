@@ -43,9 +43,10 @@ namespace FastAndFractured
 
             string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
             Transform visuals = instantiatedCar.transform.Find(LevelConstants.VISUAL_CHARACTER_PARTS);
+
+            //Character Skin
             string characterPath = LevelConstants.CHARACTER_MATERIALS + "/" + name + LevelConstants.CHARACTER_MATERIALS + "/" + LevelConstants.CHARACTER_PATH + "/" + name;
-           //Character Skin
-           Transform character = visuals.Find(characterPath);
+            Transform character = visuals.Find(characterPath);
             if(character!=null)
            SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS);
 
@@ -55,8 +56,16 @@ namespace FastAndFractured
             if(chassis!=null)
            SetSkinPart(chassis, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS);
 
-           //Wheels Skin
+            //Wheels Skin
+            Transform[] wheels = new Transform[]
+            {
+                visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.FRONT_RIGHT_WHEEL_PATH).GetChild(0),
+                visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.FRONT_LEFT_WHEEL_PATH).GetChild(0),
+                visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.BACK_LEFT_WHEEL_PATH).GetChild(0),
+                visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.BACK_RiGHT_WHEEL_PATH).GetChild(0),
+            };
 
+            SetSkinPart(wheels,skinPath + "/" + LevelConstants.WHEElS_MATERIALS);
         }
 
         private Material[] LoadSkinMaterials(string path)
@@ -84,6 +93,32 @@ namespace FastAndFractured
                     }
                 }
                 renderPart.materials = defaultSkinMaterials;
+            }
+        }
+
+        private void SetSkinPart(Transform[] instantiatedCarParts, string skinPartPath)
+        {
+
+            Material[] skinPart = LoadSkinMaterials(skinPartPath);
+            if (skinPart.Length != 0)
+            {
+                foreach (Transform instantiatedCarPart in instantiatedCarParts)
+                {
+                    Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                    Material[] defaultSkinMaterials = renderPart.materials;
+                    for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
+                    {
+                        if (skinPart.Length > materialIterator)
+                        {
+                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
+                        }
+                        else
+                        {
+                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
+                        }
+                    }
+                    renderPart.materials = defaultSkinMaterials;
+                }
             }
         }
 
