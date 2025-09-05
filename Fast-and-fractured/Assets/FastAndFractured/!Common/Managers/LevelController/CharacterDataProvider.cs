@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.WSA;
 
 namespace FastAndFractured
 {
@@ -34,6 +35,45 @@ namespace FastAndFractured
             }
             Debug.LogWarning($"Character with name {name} (from code {nameCode}) not found in CharacterData.");
             return null;
+        }
+
+        public void SetCharacterSkin(string nameCode, GameObject instantiatedCar)
+        {
+            LevelUtilities.ParseCharacterNameCode(nameCode, out string name, out int skinNum);
+
+            string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
+            Transform visuals = instantiatedCar.transform.Find(LevelConstants.VISUAL_CHARACTER_PARTS);
+           //Character Skin
+           Transform character = visuals.Find(LevelConstants.CHARACTER_MATERIALS).Find(name);
+            if(character!=null)
+           SetSkinPart(character.gameObject, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS);
+
+           //Chassis Skin
+           Transform chassis = instantiatedCar.transform.Find(LevelConstants.CHASSIS_PATH).GetChild(0);
+            if(chassis!=null)
+           SetSkinPart(chassis.gameObject, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS);
+
+           //Wheels Skin
+
+        }
+
+        private Material[] LoadSkinMaterials(string path)
+        {
+            return Resources.LoadAll<Material>(path);
+        }
+
+        private void SetSkinPart(GameObject instantiatedCarPart, string skinPartPath)
+        {
+
+            Material[] skinPart = LoadSkinMaterials(skinPartPath); 
+            if (skinPart.Length != 0)
+            {
+                Material[] defaultSkin = instantiatedCarPart.GetComponents<Material>();
+                for(int materialIterator = 0; materialIterator < defaultSkin.Length; materialIterator++)
+                {
+                    defaultSkin[materialIterator] = skinPart[materialIterator];
+                }
+            }
         }
 
         public List<string> CreateAllPossibleCharacterNameCodes(Dictionary<string, int> characterSelectedLimitTracker)

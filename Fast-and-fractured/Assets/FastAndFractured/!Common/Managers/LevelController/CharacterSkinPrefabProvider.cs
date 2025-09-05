@@ -16,11 +16,11 @@ namespace FastAndFractured
 
         }
 
-        public GameObject GetCharacterSkinGameObjet(string name, string skinNum,GameObject defaultPrefab)
-        {
-            string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
+        //public GameObject GetCharacterSkinGameObjet(string name, string skinNum,GameObject defaultPrefab)
+        //{
+        //    string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
             
-        }
+        //}
 
         private Material[] LoadResources(string folder)
         {

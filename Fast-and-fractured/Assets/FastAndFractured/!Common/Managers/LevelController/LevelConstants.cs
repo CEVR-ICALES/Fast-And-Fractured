@@ -13,7 +13,9 @@ namespace FastAndFractured
         public const int MAIN_MENU_SCENE_BUILD_INDEX = 1;
         public const string SKINS_LOADER_PATH = "CharactersSkins";
         public const string CHARACTER_MATERIALS = "Character";
-        public const string VEHICLE_MATERIALS = "Vehicle";
+        public const string CHASSIS_MATERIALS = "Chassis";
         public const string WHEElS_MATERIALS = "Wheels";
+        public const string VISUAL_CHARACTER_PARTS = "Visuals";
+        public const string CHASSIS_PATH = "Chassis/Chasis/Visuals";
     }
 }

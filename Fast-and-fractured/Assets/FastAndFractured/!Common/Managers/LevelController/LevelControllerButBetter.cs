@@ -126,7 +126,7 @@ namespace FastAndFractured
             List<GameObject> foundCharacters = new List<GameObject>();
             if (availablePlayer.Count == 0)
             {
-                PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
+                PlayerInputController playerCtrl = FindFirstObjectByType<PlayerInputController>();
 
                 if (playerCtrl != null)
                 {
