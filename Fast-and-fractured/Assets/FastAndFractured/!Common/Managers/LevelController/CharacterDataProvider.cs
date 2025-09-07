@@ -94,10 +94,12 @@ namespace FastAndFractured
             if (logError)
                 Debug.LogError($"Wheels models to change the skin not found.Make sure the hierarchy to get the models is /Visuals/WheelsVisuals/[Front / Back][Left / Right]Wheel/WheelVisuals/Visuals/[anyName]");
         }
+
         private Material[] LoadSkinMaterials(string path)
         {
             return Resources.LoadAll<Material>(path);
         }
+
         private bool SetSkinPart(Transform instantiatedCarPart, string skinPartPath)
         {
             Material[] skinPart = LoadSkinMaterials(skinPartPath); 
@@ -161,16 +163,20 @@ namespace FastAndFractured
             var allNameCodes = new List<string>();
             characterSelectedLimitTracker.Clear();
 
+            ListOfCharactersSkins characterSkinsList = Resources.Load<ListOfCharactersSkins>(LevelConstants.LIST_OF_CHARACTERS_SKINS_PATH);
+
             foreach (var character in _charactersData)
             {
                 allNameCodes.Add(character.CharacterName + LevelConstants.DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + LevelConstants.DEFAULT_SKIN_ID.ToString());
                 characterSelectedLimitTracker.Add(character.CharacterName, 0);
-                for (int i = 0; i < character.CarWithSkinsPrefabs.Count; i++)
+                int characterIndex = characterSkinsList.listOfCharacters.IndexOf(character.CharacterName);
+                int characterSkinCount = characterSkinsList.listOfCharactersSkinCount[characterIndex];
+                for (int i = 0; i < characterSkinCount; i++)
                 {
                     allNameCodes.Add(character.CharacterName + LevelConstants.DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + (i + 1).ToString());
                 }
 
-                int totalSkinsForCharacter = 1 + character.CarWithSkinsPrefabs.Count;
+                int totalSkinsForCharacter = 1 + characterSkinCount;
                 if (totalSkinsForCharacter < LevelConstants.DEFAULT_LIMIT_OF_SAME_CHARACTER_SPAWNED)
                 {
                     int difference = LevelConstants.DEFAULT_LIMIT_OF_SAME_CHARACTER_SPAWNED - totalSkinsForCharacter;

@@ -347,6 +347,7 @@ namespace FastAndFractured
             _allCharactersNameCode = new List<string>();
             _characterSelectedLimit = new Dictionary<string, int>();
             int characterSkinCount;
+            ListOfCharactersSkins characterSkins = Resources.Load<ListOfCharactersSkins>(LevelConstants.SKINS_LOADER_PATH);
 
             foreach (var character in charactersData)
             {
@@ -354,10 +355,13 @@ namespace FastAndFractured
                 _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + DEFAULT_SKIN.ToString());
                 _characterSelectedLimit.Add(character.CharacterName, 0);
 
-                foreach (var characterSkin in character.CarWithSkinsPrefabs)
+                if (characterSkins == null)
                 {
-                    _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
-                    characterSkinCount++;
+                    foreach (var characterSkin in character.CarWithSkinsPrefabs)
+                    {
+                        _allCharactersNameCode.Add(character.CharacterName + DELIMITER_CHAR_FOR_CHARACTER_NAMES_CODE + characterSkinCount.ToString());
+                        characterSkinCount++;
+                    }
                 }
 
                 if ((character.CarWithSkinsPrefabs.Count + 1) < LIMIT_OF_SAME_CHARACTER_SPAWNED)
