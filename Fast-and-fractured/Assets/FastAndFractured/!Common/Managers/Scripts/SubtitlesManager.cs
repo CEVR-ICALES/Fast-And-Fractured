@@ -28,7 +28,8 @@ namespace FastAndFractured
         protected override void Awake()
         {
             base.Awake();
-            ToggleSubtitles(PlayerPrefs.GetInt(SUBTITLES_KEY, 0) == 1);
+            //ToggleSubtitles(PlayerPrefs.GetInt(SUBTITLES_KEY, 0) == 1);
+            ToggleSubtitles(true);
             canvasGroup.alpha = 0f;
         }
 

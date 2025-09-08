@@ -34,7 +34,7 @@ public class CarInjector : MonoBehaviour
         var injectedCar = Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation, transform);
         var controllers = GetComponentsInChildren<Controller>();
         var positionConstraints = transform.GetComponentsInChildren<IConstraint>();
-
+        var carMovementController = injectedCar.GetComponent<CarMovementController>();
         var constraintSource = new ConstraintSource();
         constraintSource.sourceTransform = injectedCar.transform;
         constraintSource.weight = MAX_WEIGHT;
@@ -56,14 +56,15 @@ public class CarInjector : MonoBehaviour
         if(TryGetComponent<EnemyAIBrain>(out EnemyAIBrain enemyAIBrain))
         {
             enemyAIBrain.InstallAIParameters(injectedCar.GetComponent<StatsController>().CharacterData.AIParameters);
-            injectedCar.GetComponent<CarMovementController>().IsAi = true;
+            carMovementController.InputProvider = injectedCar.GetComponentInParent<AiInputProvider>();
         }
         else
         {
             
             injectedCar.AddComponent<CarSpeedOverlay>();
             injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
-            
+            carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
+
         }
 
         return injectedCar;

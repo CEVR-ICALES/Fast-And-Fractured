@@ -15,13 +15,13 @@ MonoBehaviour:
   active: 1
   lift:
     m_OverrideState: 1
-    m_Value: {x: 0.9844271, y: 0.97448915, z: 1, w: -0.037898738}
+    m_Value: {x: 0.98149997, y: 0.97, z: 1, w: -0.05583596}
   gamma:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0.9285, z: 0.87, w: -0.1565743}
+    m_Value: {x: 1, y: 0.9285, z: 0.87, w: -0.22832318}
   gain:
     m_OverrideState: 1
-    m_Value: {x: 0.91970414, y: 0.91981995, z: 1, w: -0.21396469}
+    m_Value: {x: 1, y: 0.9682673, z: 0.99214774, w: -0.2319019}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,8 +88,8 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 78.4
   enableVolumetricFog:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 1
   albedo:
     m_OverrideState: 0
     m_Value: {r: 1, g: 1, b: 1, a: 1}
@@ -97,8 +97,8 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 1
   depthExtent:
-    m_OverrideState: 0
-    m_Value: 64
+    m_OverrideState: 1
+    m_Value: 500
   denoisingMode:
     m_OverrideState: 0
     m_Value: 2
@@ -108,6 +108,9 @@ MonoBehaviour:
   sliceDistributionUniformity:
     m_OverrideState: 0
     m_Value: 0.75
+  multipleScatteringIntensity:
+    m_OverrideState: 0
+    m_Value: 0
   m_FogControlMode:
     m_OverrideState: 0
     m_Value: 0
@@ -150,7 +153,7 @@ MonoBehaviour:
     m_Value: 1
   fixedExposure:
     m_OverrideState: 1
-    m_Value: 16.01
+    m_Value: 15.28
   compensation:
     m_OverrideState: 0
     m_Value: 0
