@@ -41,10 +41,10 @@ namespace FastAndFractured
             //Character Skin
             //Hierarchy for the character model '/Visuals/Character/{name}Character/Visuals/CharacterModel/{name}' 
 
-            string characterPath = LevelConstants.CHARACTER_MATERIALS + "/" + name + LevelConstants.CHARACTER_MATERIALS + "/" + LevelConstants.CHARACTER_PATH + "/" + name;
+            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH + "/" + name;
             Transform character = visuals.Find(characterPath);
             
-            if(!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS))
+            if(!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS_FOLDER))
             {
                 Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterPath);
             }
@@ -52,7 +52,7 @@ namespace FastAndFractured
             //Chassis Skin
             //Hierarchy for the chassis model '/Visuals/Chassis/{name}Chassis/Visuals/{name}Vehicle'
 
-            string chassisPath = LevelConstants.CHASSIS_PATH + "/" + name + LevelConstants.CHASSIS_PATH + "/" + LevelConstants.VISUAL_CHARACTER_PARTS;
+            string chassisPath = LevelConstants.CHASSIS_PREFAB_PATH + "/" + name + LevelConstants.CHASSIS_PREFAB_PATH + "/" + LevelConstants.VISUAL_CHARACTER_PARTS;
             Transform chassis = visuals.transform.Find(chassisPath);
 
             bool logError = false;
@@ -60,7 +60,7 @@ namespace FastAndFractured
             if (chassis != null)
             {
                 Transform chassisModel = chassis.GetChild(0);
-               logError = !SetSkinPart(chassisModel, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS);
+               logError = !SetSkinPart(chassisModel, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS_FOLDER);
             }
             else
                 logError = true;
@@ -71,10 +71,10 @@ namespace FastAndFractured
             //Wheels Skin
             //Hierarchy for the wheels /Visuals/WheelsVisuals/[Front/Back][Left/Right]Wheel/WheelVisuals/Visuals/[anyName]
 
-            Transform frontRightWheel = visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.FRONT_RIGHT_WHEEL_PATH);
-            Transform backRightWheel = visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.BACK_RiGHT_WHEEL_PATH);
-            Transform frontLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.FRONT_LEFT_WHEEL_PATH);
-            Transform backLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_WHEEL_PATH + "/" + LevelConstants.BACK_LEFT_WHEEL_PATH);
+            Transform frontRightWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.FRONT_RIGHT_WHEEL_PATH);
+            Transform backRightWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.BACK_RiGHT_WHEEL_PATH);
+            Transform frontLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.FRONT_LEFT_WHEEL_PATH);
+            Transform backLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.BACK_LEFT_WHEEL_PATH);
 
              logError = false;
 
@@ -87,7 +87,7 @@ namespace FastAndFractured
                 frontLeftWheel.GetChild(0),
                 backLeftWheel.GetChild(0),
                 };
-               logError = !SetSkinPart(wheels, skinPath + "/" + LevelConstants.WHEElS_MATERIALS);
+               logError = !SetSkinPart(wheels, skinPath + "/" + LevelConstants.WHEElS_MATERIALS_FOLDER);
             }
             else
                 logError = true;
