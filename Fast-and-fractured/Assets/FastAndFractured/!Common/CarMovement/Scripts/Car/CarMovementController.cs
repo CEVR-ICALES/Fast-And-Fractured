@@ -139,9 +139,14 @@ namespace FastAndFractured
 
         }
 
-        private void SetMaxRbSpeedDelayed()
+        public void SetMaxRbSpeedDelayed()
         {
             _currentRbMaxVelocity = statsController.MaxSpeed;
+        }
+
+        public void SetMaxRbSpeed(float newMaxRbSpeed)
+        {
+            _currentRbMaxVelocity = newMaxRbSpeed;
         }
 
         private void SmoothAccelerationAndDeacceleration()
