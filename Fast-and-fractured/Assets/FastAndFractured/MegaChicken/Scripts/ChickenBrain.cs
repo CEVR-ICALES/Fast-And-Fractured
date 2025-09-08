@@ -6,21 +6,21 @@ namespace FastAndFractured
 {
     public class ChickenBrain : MonoBehaviour, IPausable
     {
-        private bool isIdle = true;
-        public bool IsIdle { get => isIdle; }
-        private bool isJumping = false;
-        public bool IsJumping { get => isJumping; }
-        private bool isLayingEgg = false;
-        public bool IsLayingEgg { get => isLayingEgg; }
-        private float currentIdleTime = 0f;
+        private bool _isIdle = true;
+        public bool IsIdle { get => _isIdle; }
+        private bool _isJumping = false;
+        public bool IsJumping { get => _isJumping; }
+        private bool _isLayingEgg = false;
+        public bool IsLayingEgg { get => _isLayingEgg; }
+        private float _currentIdleTime = 0f;
         public float cooldownTime = 15f;
         [SerializeField, Range(0f, 1f)] private float chanceOfEgg = 0.6f;
         public Pooltype pooltypeMegaChickenEgg;
         public GameObject eggSpawnPoint;
-        public Animator Animator { get => animator; }
-        private Animator animator;
+        public Animator Animator { get => _animator; }
+        private Animator _animator;
         private bool _isPaused = false;
-        private bool hasEggBeenLayed = false;
+        private bool _hasEggBeenLayed = false;
         private const float ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE = 0.95f;
         private const float ANIMATION_TIME_UNTIL_LAYING_EGG = 0.5f;
         private const string JUMP_ANIMATION_NAME = "Jump";
@@ -34,21 +34,16 @@ namespace FastAndFractured
         }
         void Start()
         {
-            animator = GetComponent<Animator>();
+            _animator = GetComponent<Animator>();
         }
 
         void Update()
         {
             if (_isPaused)
             {
-                animator.speed = 0;
                 return;
             }
-            else
-            {
-                animator.speed = 1;
-            }
-            if (isIdle)
+            if (_isIdle)
             {
                 GetRandomAction();
             }
@@ -57,72 +52,74 @@ namespace FastAndFractured
         
         public void GetRandomAction()
         {
-            currentIdleTime += Time.deltaTime;
-            if (currentIdleTime >= cooldownTime)
+            _currentIdleTime += Time.deltaTime;
+            if (_currentIdleTime >= cooldownTime)
             {
-                isIdle = false;
-                currentIdleTime = 0f;
+                _isIdle = false;
+                _currentIdleTime = 0f;
                 float rand = Random.value;
                 if (rand < chanceOfEgg)
                 {
-                    isLayingEgg = true;
-                    hasEggBeenLayed = false;
+                    _isLayingEgg = true;
+                    _hasEggBeenLayed = false;
                 }
                 else
                 {
-                    isJumping = true;
+                    _isJumping = true;
                 }
             }
         }
         public void ThrowEgg()
         {
-            animator.SetBool(BOOL_EGG_NAME, true);
+            _animator.SetBool(BOOL_EGG_NAME, true);
         }
         public void CheckIfLayingEggEnded()
         {
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            if (isLayingEgg && stateInfo.IsName(EGG_ANIMATION_NAME))
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            if (_isLayingEgg && stateInfo.IsName(EGG_ANIMATION_NAME))
             {
-                if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_LAYING_EGG && !hasEggBeenLayed)
+                if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_LAYING_EGG && !_hasEggBeenLayed)
                 {
-                    hasEggBeenLayed = true;
+                    _hasEggBeenLayed = true;
                     GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg);
                     egg.transform.position = eggSpawnPoint.transform.position;
                     egg.transform.rotation = Quaternion.Euler(0, 0, 0);
                 }
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE)
                 {
-                    isLayingEgg = false;
-                    isIdle = true;
-                    animator.SetBool(BOOL_EGG_NAME, false);
+                    _isLayingEgg = false;
+                    _isIdle = true;
+                    _animator.SetBool(BOOL_EGG_NAME, false);
                 }
             }
         }
         public void Jump()
         {
-            animator.SetBool(BOOL_JUMPING_NAME, true);
+            _animator.SetBool(BOOL_JUMPING_NAME, true);
         }
         public void CheckIfJumpEnded()
         {
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            if (isJumping && stateInfo.IsName(JUMP_ANIMATION_NAME))
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            if (_isJumping && stateInfo.IsName(JUMP_ANIMATION_NAME))
             {
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE)
                 {
-                    isJumping = false;
-                    isIdle = true;
-                    animator.SetBool(BOOL_JUMPING_NAME, false);
+                    _isJumping = false;
+                    _isIdle = true;
+                    _animator.SetBool(BOOL_JUMPING_NAME, false);
                 }
             }
         }
         public void OnPause()
         {
             _isPaused = true;
+            _animator.speed = 0;
         }
 
         public void OnResume()
         {
             _isPaused = false;
+            _animator.speed = 1;
         }
     }
 }

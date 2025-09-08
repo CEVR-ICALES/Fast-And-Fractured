@@ -10,20 +10,20 @@ namespace FastAndFractured
 {
     public class MegaChickenEgg : MonoBehaviour, IPooledObject, IPausable
     {
-        private bool initValues = true;
+        private bool _initValues = true;
         public Pooltype pooltype;
         public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
-        public bool InitValues => initValues;
-        private NavMeshAgent agent;
+        public bool InitValues => _initValues;
+        private NavMeshAgent _agent;
         public Transform visualModel;
-        private Vector3 lastPosition;
-        private float radius;
+        private Vector3 _lastPosition;
+        private float _radius;
         public Collider ownCollider;
         public SphereCollider pushZoneCollider;
-        private Rigidbody ownRigidbody;
+        private Rigidbody _ownRigidbody;
         public GameObject explosionParticles;
         private bool _isPaused = false;
-        private float timeEnabled = 0f;
+        private float _timeEnabled = 0f;
         public float maxTimeEnabled = 20f;
 
         [Header("Push related")]
@@ -48,33 +48,33 @@ namespace FastAndFractured
         void OnEnable()
         {
             PauseManager.Instance?.RegisterPausable(this);
-            if (agent == null)
+            if (_agent == null)
             {
-                ownRigidbody = GetComponent<Rigidbody>();
-                agent = GetComponent<NavMeshAgent>();
-                agent.updateRotation = false;
+                _ownRigidbody = GetComponent<Rigidbody>();
+                _agent = GetComponent<NavMeshAgent>();
+                _agent.updateRotation = false;
                 SphereCollider col = GetComponent<SphereCollider>();
                 if (col != null)
                 {
                     float maxScale = Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
-                    radius = col.radius * maxScale;
+                    _radius = col.radius * maxScale;
                 }
             }
             visualModel.gameObject.SetActive(true);
-            agent.speed = 0f;
+            _agent.speed = 0f;
             ownCollider.enabled = false;
-            ownRigidbody.isKinematic = true;
+            _ownRigidbody.isKinematic = true;
             pushZoneCollider.enabled = false;
             explosionParticles.SetActive(false);
-            timeEnabled = 0f;
+            _timeEnabled = 0f;
             GetRandomPoint();
             TimerSystem.Instance.CreateTimer(TIME_UNTIL_REACTIVATE_FISICS, onTimerDecreaseComplete: () =>
             {
                 ownCollider.enabled = true;
-                ownRigidbody.isKinematic = false;
+                _ownRigidbody.isKinematic = false;
                 pushZoneCollider.enabled = true;
                 pushZoneCollider.radius = NORMAL_RADIUS;
-                agent.speed = AGENT_SPEED;
+                _agent.speed = AGENT_SPEED;
             });
         }
         void OnDisable()
@@ -86,23 +86,22 @@ namespace FastAndFractured
         {
             if (_isPaused)
             {
-                agent.speed = 0;
                 return;
             }
-            if (!agent.pathPending && agent.remainingDistance < 1f || timeEnabled >= maxTimeEnabled)
+            if (!_agent.pathPending && _agent.remainingDistance < 1f || _timeEnabled >= maxTimeEnabled)
             {
                 Explosion();
             }
-            if (visualModel != null && agent.enabled && agent.velocity.sqrMagnitude > 0.01f)
+            if (visualModel != null && _agent.enabled && _agent.velocity.sqrMagnitude > 0.01f)
             {
-                timeEnabled += Time.deltaTime;
-                Vector3 movement = transform.position - lastPosition;
-                lastPosition = transform.position;
+                _timeEnabled += Time.deltaTime;
+                Vector3 movement = transform.position - _lastPosition;
+                _lastPosition = transform.position;
 
                 if (movement.magnitude > 0.0001f)
                 {
                     float distance = movement.magnitude;
-                    float rotation = (distance / radius) * Mathf.Rad2Deg;
+                    float rotation = (distance / _radius) * Mathf.Rad2Deg;
 
                     Vector3 ejeRotacion = Vector3.Cross(Vector3.up, movement.normalized);
 
@@ -117,7 +116,7 @@ namespace FastAndFractured
             NavMeshHit hit;
             if (NavMesh.SamplePosition(randomDirection, out hit, POINT_RADIUS, 1))
             {
-                agent.SetDestination(hit.position);
+                _agent.SetDestination(hit.position);
             }
         }
         void OnTriggerEnter(Collider other)
@@ -164,7 +163,7 @@ namespace FastAndFractured
         private void Explosion()
         {
             pushZoneCollider.radius = MAX_RADIUS;
-            agent.speed = 0f;
+            _agent.speed = 0f;
             visualModel.gameObject.SetActive(false);
             explosionParticles.SetActive(true);
             TimerSystem.Instance.CreateTimer(EXPLOSION_TIME, onTimerDecreaseComplete: () =>
@@ -175,11 +174,13 @@ namespace FastAndFractured
         public void OnPause()
         {
             _isPaused = true;
+            _agent.speed = 0;
         }
 
         public void OnResume()
         {
             _isPaused = false;
+            _agent.speed = AGENT_SPEED;
         }
     }
 }

@@ -18,10 +18,6 @@ namespace FastAndFractured
             _selfCollider.enabled = false;
         }
 
-        void Update()
-        {
-
-        }
 
         void OnTriggerEnter(Collider other)
         {
