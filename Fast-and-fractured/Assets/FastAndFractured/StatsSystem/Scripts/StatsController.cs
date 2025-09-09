@@ -104,7 +104,8 @@ namespace FastAndFractured
         public float NormalOverHeat { get => charDataSO.NormalShootOverHeat; }
 
         //SKINS
-        public int SkinCount { get => charDataSO.CarWithSkinsPrefabs.Count; }
+        public int SkinCount { get => _skinCount; }
+        private int _skinCount = 0;
         #endregion
         public bool IsPlayer => _isPlayer;
         private bool _isPlayer = false;
@@ -142,6 +143,9 @@ namespace FastAndFractured
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
+            ListOfCharactersSkins listOfCharactersSkins = Resources.Load<ListOfCharactersSkins>(LevelConstants.LIST_OF_CHARACTERS_SKINS_PATH);
+            int skinIndex = listOfCharactersSkins.listOfCharacters.IndexOf(charDataSO.CharacterName);
+            _skinCount = listOfCharactersSkins.listOfCharactersSkinCount[skinIndex];
         }
         private void OnEnable()
         {

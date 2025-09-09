@@ -180,7 +180,7 @@ namespace FastAndFractured
                     }
 
                     CarInjector carInjector = Object.Instantiate(_playerPrefab, _spawnPoints[characterSpawnIndex].transform.position, _spawnPoints[characterSpawnIndex].transform.rotation);
-                    GameObject instantiatedCar = carInjector.Install(characterModelPrefab);
+                    GameObject instantiatedCar = carInjector.Install(characterModelPrefab,charNameCodeToSpawn,_characterDataProvider);
 
                     InGameCharacters.Add(instantiatedCar);
                     PlayerReference = instantiatedCar;
@@ -210,7 +210,7 @@ namespace FastAndFractured
                 }
 
                 CarInjector carInjector = Object.Instantiate(_aiPrefab, _spawnPoints[characterSpawnIndex].transform.position, _spawnPoints[characterSpawnIndex].transform.rotation);
-                GameObject instantiatedCar = carInjector.Install(characterModelPrefab);
+                GameObject instantiatedCar = carInjector.Install(characterModelPrefab,charNameCodeToSpawn,_characterDataProvider);
 
                 InGameCharacters.Add(instantiatedCar);
 
