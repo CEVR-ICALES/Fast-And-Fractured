@@ -26,6 +26,10 @@ namespace FastAndFractured
             _character = characterReceived;
             if(_character != null)
             {
+                if (_characterIconImg == null)
+                {
+                    _characterIconImg = GetComponent<Image>();
+                }
                 _characterIconImg.sprite = ResourcesManager.Instance.GetResourcesSprite(characterIconName);
             }
         }
