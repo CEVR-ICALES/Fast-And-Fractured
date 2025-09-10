@@ -99,14 +99,14 @@ namespace FastAndFractured {
             rb.AddForce(velocity,ForceMode.VelocityChange);
         }
 
-        private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
+        private void ImpulseRigydbody(ICustomRigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
             physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime);
         }
 
 
-        private Vector3 ImpulseForce(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference)
+        private Vector3 ImpulseForce(ICustomRigidbody rb, Vector3 startingVelocity, float maxWeightReference)
         {
             Vector3 forwardVelocity = new Vector3(startingVelocity.x, 0, startingVelocity.z);
             forwardVelocity *= maxVelocityMultiplicatorFactor - (1 - (rb.mass / maxWeightReference));
@@ -116,19 +116,19 @@ namespace FastAndFractured {
             return (forwardVelocity.normalized * forwardVelocityMagnitude) +(fixedVY ? initialVy_impulse : startingVelocityUp) * Vector3.up;
         }
 
-        private void ParabolicRangeMovement(Rigidbody rb,PhysicsBehaviour physicsBehaviour)
+        private void ParabolicRangeMovement(ICustomRigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
             physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime);
         }
 
-        private void ParabolicRangeMovement(Rigidbody rb)
+        private void ParabolicRangeMovement(ICustomRigidbody rb)
         {
             Vector3 force = ParabolicForce(rb);
             rb.AddForce(force, ForceMode.VelocityChange);
         }
 
-        private Vector3 ParabolicForce(Rigidbody rb)
+        private Vector3 ParabolicForce(ICustomRigidbody rb)
         {
             float target_Velocity = Mathf.Sqrt((range * Mathf.Abs(Physics.gravity.y)) / Mathf.Sin(2 * angle * Mathf.Deg2Rad));
 

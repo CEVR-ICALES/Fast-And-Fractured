@@ -1,3 +1,4 @@
+using FastAndFractured.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
@@ -6,7 +7,7 @@ namespace FastAndFractured
     public class landingCheck : MonoBehaviour
     {
         public UnityEvent<float> onLanding;
-        private Rigidbody _rb;
+        private ICustomRigidbody _rb;
         private bool _startCheck = false;
         private ITimer _landingTimer;
         [SerializeField]
@@ -20,7 +21,7 @@ namespace FastAndFractured
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
             _landingTimer = TimerSystem.Instance.CreateTimer(Mathf.Infinity);
         }
@@ -38,18 +39,18 @@ namespace FastAndFractured
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
             _rb.AddForce(force,forceMode);
             _startCheck = true;
             applyForces = true;
         }
 
-        public Rigidbody GetRigidbody()
+        public ICustomRigidbody GetRigidbody()
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
             return _rb;
         }
@@ -57,7 +58,7 @@ namespace FastAndFractured
         private void OnTriggerEnter(Collider other)
         {
             _rb.linearVelocity = Vector3.zero;
-            _rb.useGravity = false;
+         //todo    _rb.useGravity = false;
             onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
             _landingTimer.StopTimer();
             applyForces = false;

@@ -8,14 +8,15 @@ namespace FastAndFractured
     public abstract class ShootingHandle : MonoBehaviour
     {
         public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
+        public Pooltype Pooltype { get => pooltype; set => pooltype=value; }
         public bool CanShoot { get => canShoot;   }
 
         protected Vector3 currentShootDirection;
-        [SerializeField] protected StatsController characterStatsController;
+        [SerializeField] public StatsController characterStatsController;
         [SerializeField]
         protected Transform shootPoint;
         [SerializeField]
-        protected Pooltype pooltype;
+        internal Pooltype pooltype;
         private Vector3 _velocity;
         private float _range;
         private float _damage;
@@ -25,6 +26,7 @@ namespace FastAndFractured
         [SerializeField] private EventReference bulletSound;
         [SerializeField]
         protected PhysicsBehaviour physicsBehaviour;
+        public bool SuppressInstantiation { get; set; } = false;
 
         protected virtual void Start()
         {
@@ -36,6 +38,10 @@ namespace FastAndFractured
 
         protected void ShootBullet(Vector3 velocity, float range)
         {
+            if (SuppressInstantiation)
+            {
+                return;
+            }
             _velocity = velocity;
             _range = range;
             _damage = characterStatsController.NormalShootDamage;
