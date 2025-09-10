@@ -212,6 +212,7 @@ namespace FastAndFractured
 
         public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime)
         {
+            _rb.linearVelocity = Vector3.zero;
             _rb.AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
