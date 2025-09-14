@@ -14,27 +14,17 @@ namespace Utilities
         private int _nextTimerId = 0;
 
         private bool _isPaused = false;
-
-        #region UNITY_LIFECYCLE
-
-        protected override void Awake()
+         
+        protected override void Deconstruct()
         {
-            base.Awake();
-        }
-
-        
-
-        private void Update()
-        {
-            UpdateAllTimers(Time.deltaTime);
-        }
-
-        private void OnDestroy()
-        {
+            base.Deconstruct();
             _timers.Clear();
-        }
-        #endregion
 
+        }
+        public void Tick(float tickTime)
+        {
+            UpdateAllTimers(tickTime);
+        }
         #region TIMER_MANAGEMENT
 
         private void UpdateAllTimers(float deltaTime)
@@ -345,6 +335,6 @@ namespace Utilities
             {
                 timer.Value.ResumeTimer();
             }
-        }
+        } 
     }
 }
