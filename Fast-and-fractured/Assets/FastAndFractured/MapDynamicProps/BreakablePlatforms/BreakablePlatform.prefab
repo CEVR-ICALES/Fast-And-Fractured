@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 2292492913591730210}
   - component: {fileID: 6518979596820264724}
   - component: {fileID: 2177162701748407097}
+  - component: {fileID: 743129491733260085}
+  - component: {fileID: 6057077060729657464}
   m_Layer: 10
   m_Name: BreakablePlatform
   m_TagString: Untagged
@@ -98,6 +100,133 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &743129491733260085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3090095180139771638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dab5c7d4c32e743048dfca98e2d5914f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Spline:
+    m_EditModeType: 1
+    m_Knots: []
+    m_MetaData: []
+    m_Closed: 0
+    m_IntData:
+      m_Data: []
+    m_FloatData:
+      m_Data: []
+    m_Float4Data:
+      m_Data: []
+    m_ObjectData:
+      m_Data: []
+  m_Splines:
+  - m_EditModeType: 1
+    m_Knots:
+    - Position:
+        x: 0
+        y: 0
+        z: 0
+      TangentIn:
+        x: 0
+        y: 0
+        z: -1
+      TangentOut:
+        x: 0
+        y: 0
+        z: 1
+      Rotation:
+        value:
+          x: 0
+          y: 0
+          z: 0
+          w: 1
+    - Position:
+        x: 0
+        y: 0
+        z: 49.77
+      TangentIn:
+        x: 0
+        y: 0
+        z: -1.6367958
+      TangentOut:
+        x: 0
+        y: 0
+        z: 1.6367958
+      Rotation:
+        value:
+          x: 0
+          y: 0
+          z: 0
+          w: 1
+    m_MetaData:
+    - Mode: 2
+      Tension: 0.5
+    - Mode: 2
+      Tension: 0.5
+    m_Closed: 0
+    m_IntData:
+      m_Data: []
+    m_FloatData:
+      m_Data: []
+    m_Float4Data:
+      m_Data: []
+    m_ObjectData:
+      m_Data: []
+  m_Knots:
+    m_KnotsLink: []
+--- !u!114 &6057077060729657464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3090095180139771638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d1f48914a3905a40a04f51628bbd1c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  splineContainer: {fileID: 743129491733260085}
+  startPrefab:
+    actualObject: {fileID: 0}
+    translation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    nextObjectOffset: 0
+  inBetweenPrefabs:
+  - actualObject: {fileID: 2914984969432911238, guid: 3ea462e3d69b13d42b34f6661af0cea1, type: 3}
+    translation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    nextObjectOffset: 0
+  endPrefab:
+    actualObject: {fileID: 0}
+    translation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    nextObjectOffset: 0
+  basePrefab: {fileID: 2914984969432911238, guid: 3ea462e3d69b13d42b34f6661af0cea1, type: 3}
+  parent: {fileID: 7062654862932057120}
+  layerForObject: Default
+  tagForObject: Untagged
+  makeObjectStatic: 1
+  addMeshCollider: 0
+  makeMeshColliderConvex: 0
+  makeMeshColliderTrigger: 0
+  disableMeshRenderer: 0
+  recalculateNormals: 1
+  combinationSplitLength: -1
+  evenlySplitsWhenMakingSubCurves: 1
+  axisForOffset: {x: 0, y: 0, z: 0}
+  rotationToApply: {x: 0, y: 0, z: 0, w: 1}
+  debugAcumulation: 0
+  lastMeshesObjs: []
 --- !u!1 &7324870742416087783
 GameObject:
   m_ObjectHideFlags: 0
