@@ -64,8 +64,60 @@ PrefabInstance:
       propertyPath: m_Name
       value: PinusPinaster
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6f93a1e02f4289646aebab3404def54b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6f93a1e02f4289646aebab3404def54b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1417585540279731066}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6f93a1e02f4289646aebab3404def54b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1227998824300098936}
   m_SourcePrefab: {fileID: 100100000, guid: 6f93a1e02f4289646aebab3404def54b, type: 3}
+--- !u!1 &4307531538675328825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6f93a1e02f4289646aebab3404def54b, type: 3}
+  m_PrefabInstance: {fileID: 3964861801828833896}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &1417585540279731066
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4307531538675328825}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 21.630838, z: 1}
+  m_Center: {x: -0.0000058896553, y: 10.315445, z: -0.000013228477}
+--- !u!208 &1227998824300098936
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4307531538675328825}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 10.815419, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.0000058896553, y: 10.315445, z: -0.000013228477}
+  m_TimeToStationary: 0.5
