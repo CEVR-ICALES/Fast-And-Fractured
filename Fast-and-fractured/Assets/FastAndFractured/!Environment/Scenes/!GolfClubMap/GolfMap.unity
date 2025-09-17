@@ -9776,13 +9776,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29c9287e95b97cc4381a1b8bf3e0634b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rangeDependent: 1
+  angle: 30
+  countdown: 0.5
+  range: 10
+  startSpeedMagnitudeToImpulse: 10
+  landindCheck: {fileID: 0}
   fixedVY: 0
   initialVy_impulse: 500
   maxVelocityMultiplicatorFactor: 13
-  angle: 30
-  countdown: 0.5
-  maxThrowableWeightForCars: 2000
   forwardSpeedLimit: 50
+  maxThrowableWeightForCars: 2000
 --- !u!65 &398493397
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -55186,13 +55190,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29c9287e95b97cc4381a1b8bf3e0634b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rangeDependent: 1
+  angle: 45
+  countdown: 0.5
+  range: 10
+  startSpeedMagnitudeToImpulse: 10
+  landindCheck: {fileID: 0}
   fixedVY: 0
   initialVy_impulse: 300
   maxVelocityMultiplicatorFactor: 13
-  angle: 45
-  countdown: 0.5
-  maxThrowableWeightForCars: 2000
   forwardSpeedLimit: 50
+  maxThrowableWeightForCars: 2000
 --- !u!65 &2134276533
 BoxCollider:
   m_ObjectHideFlags: 0
