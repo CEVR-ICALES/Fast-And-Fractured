@@ -457,7 +457,7 @@ namespace FastAndFractured
         private void LoadUpscalingOptions()
         {
             List<string> upscalingModes = new List<string>();
-            upscalingModes.Add("None");
+            upscalingModes.Add("NONE");
 
             if (SystemInfo.graphicsDeviceName.ToLower().Contains("nvidia"))
             {
@@ -471,7 +471,8 @@ namespace FastAndFractured
 
             upscalingDropdown.ClearOptions();
             upscalingDropdown.AddOptions(upscalingModes);
-            upscalingDropdown.value = upscalingDropdown.options.IndexOf(new TMP_Dropdown.OptionData(PlayerPrefs.GetString("UpscalingMode", "NONE")));
+
+            upscalingDropdown.value = upscalingModes.IndexOf(PlayerPrefs.GetString("UpscalingMode", "NONE"));
             SetUpscalingMode(upscalingDropdown.value);
             upscalingDropdown.RefreshShownValue();
         }
