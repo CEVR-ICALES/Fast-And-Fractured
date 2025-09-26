@@ -18,6 +18,8 @@ namespace FastAndFractured
         [SerializeField] private GameObject container;
         private GameObject _objectToSpawn;
         public GameObject spawnPoint;
+        public GameObject replayButton;
+        public LoadingManager LoadingManager;
         private PlayableDirector _playableDirector;
         [SerializeField] private GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
@@ -35,7 +37,9 @@ namespace FastAndFractured
                 _spawnedObject = Instantiate(_objectToSpawn, spawnPoint.transform.position, spawnPoint.transform.rotation);
                 _playableDirector = _spawnedObject.GetComponentInChildren<PlayableDirector>();
                 _playableDirector.stopped += OnPlayableDirectorStopped;
-            }else
+                replayButton.GetComponent<Button>().onClick.AddListener(() => { LoadingManager.LoadScene(gameEndData.sceneBuildIndex);});
+            }
+            else
             {
                 ShowMenu();
             }
