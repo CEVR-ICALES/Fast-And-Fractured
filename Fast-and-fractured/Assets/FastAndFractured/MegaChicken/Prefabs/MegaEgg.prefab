@@ -31,8 +31,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -427.8644, y: 4.051061, z: -170.00723}
-  m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4913651280625292445}
   - {fileID: 2585614719969280414}
@@ -68,7 +68,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 5742700373869050074}
   m_Enabled: 1
   m_AgentTypeID: -334000983
-  m_Radius: 0.5
+  m_Radius: 1.41
   m_Speed: 40
   m_Acceleration: 100
   avoidancePriority: 50
@@ -77,8 +77,8 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
   m_AutoRepath: 1
-  m_Height: 2
-  m_BaseOffset: 0
+  m_Height: 3.23
+  m_BaseOffset: 0.85
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &8983021319577600125
@@ -98,6 +98,7 @@ MonoBehaviour:
   ownCollider: {fileID: 331335285202537912}
   pushZoneCollider: {fileID: 2198751459445838797}
   explosionParticles: {fileID: 3205009758928708184}
+  maxTimeEnabled: 20
   isGrounded: 1
   applyForceYOffset: 1
   forceMode: 0
