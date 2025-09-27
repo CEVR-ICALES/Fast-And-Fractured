@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 using Utilities;
 using Enums;
 using Utilities.Managers.PauseSystem;
@@ -84,6 +85,11 @@ namespace FastAndFractured
                     GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg);
                     egg.transform.position = eggSpawnPoint.transform.position;
                     egg.transform.rotation = Quaternion.Euler(0, 0, 0);
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(egg.transform.position, out hit, 20f, NavMesh.AllAreas))
+                    {
+                        egg.transform.position = hit.position;
+                    }
                 }
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE)
                 {

@@ -10,17 +10,17 @@ GameObject:
   m_Component:
   - component: {fileID: 50195409977091113}
   - component: {fileID: 331335285202537912}
-  - component: {fileID: 5939603668383915650}
   - component: {fileID: 8983021319577600125}
   - component: {fileID: 7373766883034980481}
   - component: {fileID: 2198751459445838797}
+  - component: {fileID: 3707264109052858371}
   m_Layer: 0
   m_Name: MegaEgg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &50195409977091113
 Transform:
   m_ObjectHideFlags: 0
@@ -59,28 +59,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0.5, z: 0}
---- !u!195 &5939603668383915650
-NavMeshAgent:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5742700373869050074}
-  m_Enabled: 1
-  m_AgentTypeID: -334000983
-  m_Radius: 1.41
-  m_Speed: 40
-  m_Acceleration: 100
-  avoidancePriority: 50
-  m_AngularSpeed: 0
-  m_StoppingDistance: 0
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 0
-  m_AutoRepath: 1
-  m_Height: 3.23
-  m_BaseOffset: 0.85
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
 --- !u!114 &8983021319577600125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,6 +129,28 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.68
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!195 &3707264109052858371
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5742700373869050074}
+  m_Enabled: 0
+  m_AgentTypeID: -334000983
+  m_Radius: 0.5
+  m_Speed: 40
+  m_Acceleration: 100
+  avoidancePriority: 50
+  m_AngularSpeed: 0
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 0
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1001 &4880339259961979766
 PrefabInstance:
   m_ObjectHideFlags: 0
