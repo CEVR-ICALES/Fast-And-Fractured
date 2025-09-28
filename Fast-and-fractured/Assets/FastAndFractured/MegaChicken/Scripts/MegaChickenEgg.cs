@@ -67,10 +67,9 @@ namespace FastAndFractured
             pushZoneCollider.enabled = false;
             explosionParticles.SetActive(false);
             _timeEnabled = 0f;
+            GetRandomPoint();
             TimerSystem.Instance.CreateTimer(TIME_UNTIL_REACTIVATE_FISICS, onTimerDecreaseComplete: () =>
             {
-                _agent.enabled = true;
-                GetRandomPoint();
                 ownCollider.enabled = true;
                 _ownRigidbody.isKinematic = false;
                 pushZoneCollider.enabled = true;
@@ -81,7 +80,6 @@ namespace FastAndFractured
         }
         void OnDisable()
         {
-            transform.GetComponent<NavMeshAgent>().enabled = false;
             PauseManager.Instance?.UnregisterPausable(this);
         }
 
