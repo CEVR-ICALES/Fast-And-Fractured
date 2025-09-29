@@ -237,4 +237,10 @@ namespace Enums
         MERCADILLO,
         CONSTRUCTION_ZONE
     }
+
+    public enum PropType
+    {
+        GENERIC,
+        TREE
+    }
 }

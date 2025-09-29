@@ -1,19 +1,27 @@
+using Enums;
 using FMODUnity;
 using UnityEngine;
 
 public class DestructibleProp : MonoBehaviour
 {
+    #region Variables and Constants
+    [Header("Basic Variables")]
     [SerializeField] private float propHealth;
+    [SerializeField] private LayerMask damagingLayer;
+    [SerializeField] private ParticleSystem destroyedParticles;
+
+    [SerializeField] private PropType propType = PropType.GENERIC;
+
+    [Header("Tree Models")]
+    [SerializeField] private GameObject intactTreeModel;
+    [SerializeField] private GameObject trunkTreeModel;
 
     private float _damageAmount = 1f;
 
-    [SerializeField] private LayerMask damagingLayer;
-
-    [SerializeField] private ParticleSystem destroyedParticles;
+    private const int MINIMUM_HP_TO_DESTROY = 0;
 
     //private EventReference destroySound; FUTURE USE
-
-    private const int MINIMUM_HP_TO_DESTROY = 0;
+    #endregion
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Entered Collision");
@@ -38,8 +46,16 @@ public class DestructibleProp : MonoBehaviour
         {
             destroyedParticles.transform.position = transform.position;
             destroyedParticles.Play();
-            this.gameObject.SetActive(false);
-            Debug.Log("Damage Done");
+
+            if (propType == PropType.GENERIC)
+            {
+                this.gameObject.SetActive(false);
+            }
+            else if (propType == PropType.TREE)
+            {
+                if (intactTreeModel != null) intactTreeModel.SetActive(false);
+                if (trunkTreeModel != null) intactTreeModel.SetActive(true);
+            }
         }
     }
 }
