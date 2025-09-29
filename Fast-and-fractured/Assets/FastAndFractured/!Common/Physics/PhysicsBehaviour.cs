@@ -215,7 +215,10 @@ namespace FastAndFractured
             _rb.AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
-                _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                if (!_carMovementController.IsDashing)
+                {
+                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                }
                 TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
                 {
                     if (!_carMovementController.IsDashing)

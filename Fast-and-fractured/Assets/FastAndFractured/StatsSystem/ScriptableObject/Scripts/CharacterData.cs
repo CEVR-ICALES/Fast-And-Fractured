@@ -16,7 +16,6 @@ namespace FastAndFractured
  
         [Header("Prefabs")]
         public GameObject CarDefaultPrefab;
-        public List<GameObject> CarWithSkinsPrefabs;
 
         [Header("Health")]
         public float MaxEndurance = 500;

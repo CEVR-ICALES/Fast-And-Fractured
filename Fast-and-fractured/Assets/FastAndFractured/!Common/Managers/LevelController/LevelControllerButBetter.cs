@@ -126,7 +126,7 @@ namespace FastAndFractured
             List<GameObject> foundCharacters = new List<GameObject>();
             if (availablePlayer.Count == 0)
             {
-                PlayerInputController playerCtrl = FindObjectOfType<PlayerInputController>();
+                PlayerInputController playerCtrl = FindFirstObjectByType<PlayerInputController>();
 
                 if (playerCtrl != null)
                 {
@@ -152,7 +152,7 @@ namespace FastAndFractured
 
 
 
-            EnemyAIBrain[] aiBrains = FindObjectsOfType<EnemyAIBrain>();
+            EnemyAIBrain[] aiBrains = FindObjectsByType<EnemyAIBrain>(FindObjectsSortMode.None);
             foreach (var aiBrain in aiBrains)
             {
                 foundCharacters.Add(aiBrain.GetComponentInChildren<StatsController>().gameObject);
