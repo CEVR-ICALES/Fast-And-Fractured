@@ -23,7 +23,7 @@ namespace FastAndFractured
             {
                 _rb = GetComponent<Rigidbody>();
             }
-            _landingTimer = TimerSystem.Instance.CreateTimer(Mathf.Infinity);
+            _landingTimer = TimerSystem.Instance.CreateTimer(100,Enums.TimerDirection.INCREASE);
         }
 
         private void FixedUpdate()

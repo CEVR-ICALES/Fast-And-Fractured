@@ -101,7 +101,7 @@ namespace FastAndFractured {
         private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
-            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime);
+            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,false);
         }
 
 
@@ -118,7 +118,7 @@ namespace FastAndFractured {
         private void ParabolicRangeMovement(Rigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
-            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime);
+            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true);
         }
 
         private void ParabolicRangeMovement(Rigidbody rb)

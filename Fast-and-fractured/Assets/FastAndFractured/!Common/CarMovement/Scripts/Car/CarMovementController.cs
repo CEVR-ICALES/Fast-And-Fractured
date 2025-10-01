@@ -75,6 +75,8 @@ namespace FastAndFractured
 
         private bool _isGoingUphill;
         private bool _isGoingDownhill;
+        private bool _isInTrampolin = false;
+        public bool IsInTrampolin { set => _isInTrampolin = value; }
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
@@ -461,7 +463,7 @@ namespace FastAndFractured
 
         private void UpdateMaxRbSpeedOnSlopes()
         {
-            if (!IsDashing && !_isBraking)
+            if (!IsDashing && !_isBraking && !_isInTrampolin)
             {
                 if (_isGoingUphill)
                 {

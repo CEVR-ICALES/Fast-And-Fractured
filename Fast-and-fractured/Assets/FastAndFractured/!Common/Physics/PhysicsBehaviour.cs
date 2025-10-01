@@ -210,20 +210,24 @@ namespace FastAndFractured
             }
         }
 
-        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime)
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
         {
+            if (stopMomentum)
+                _rb.linearVelocity = Vector3.zero;
+            _carMovementController.IsInTrampolin = true;
             _rb.AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
                 if (!_carMovementController.IsDashing)
                 {
-                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                    _carMovementController.SetMaxRbSpeed(10000f);
                 }
                 TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
                 {
                     if (!_carMovementController.IsDashing)
                     {
                         _carMovementController.SetMaxRbSpeedDelayed();
+                        _carMovementController.IsInTrampolin = false;
                     }
                 });
             }
