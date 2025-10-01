@@ -15,9 +15,9 @@ namespace FastAndFractured
         [SerializeField] private AnimationCurve enduranceFactorEvaluate;
         [SerializeField] private float averageCarWeight = 1150f;
         [SerializeField] private float carWeightImportance = 0.2f;
-        [SerializeField] private float applyForceYOffset = 1f;
         [SerializeField, Range(0f, 100f)] private float forceMultiplier = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Force;
+        private const float APPLY_FORCE_YOFFSET = -10f;
 
 
         //Provisinal value to select the type force aplication 
@@ -55,22 +55,18 @@ namespace FastAndFractured
                 float forceToApply;
 
                 Vector3 otherPosition = other.transform.position;
+              
+                Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
 
-                Vector3 contactPoint = _explosionCollider.ClosestPoint(otherPosition);
-
-                Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
+                Vector3 vectorCenterToContactPoint = closestPoint - transform.position;
 
                 Vector3 direction = vectorCenterToContactPoint.normalized;
 
-                direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
-
-                float distanceToCenter = vectorCenterToContactPoint.magnitude;
-
-                forceToApply = forceMultiplier * otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance);
+                forceToApply = otherComponentPhysicsBehaviours.CalculateForceToApplyToOtherCar(otherCarEnduranceFactor, otherCarWeight, otherCarEnduranceImportance,_pushForce);
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction + Vector3.up * applyForceYOffset, contactPoint, forceToApply /** (1 - distanceToCenter / _explosionCollider.radius)*/, forceMode); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                 }
             }
