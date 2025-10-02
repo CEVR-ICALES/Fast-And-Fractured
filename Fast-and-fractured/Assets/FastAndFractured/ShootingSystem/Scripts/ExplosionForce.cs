@@ -15,9 +15,8 @@ namespace FastAndFractured
         [SerializeField] private AnimationCurve enduranceFactorEvaluate;
         [SerializeField] private float averageCarWeight = 1150f;
         [SerializeField] private float carWeightImportance = 0.2f;
-        [SerializeField, Range(0f, 100f)] private float forceMultiplier = 10f;
-        [SerializeField] private ForceMode forceMode = ForceMode.Force;
-        private const float APPLY_FORCE_YOFFSET = -10f;
+        [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
+        [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
 
 
         //Provisinal value to select the type force aplication 
@@ -53,9 +52,7 @@ namespace FastAndFractured
                 float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
                 float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
                 float forceToApply;
-
-                Vector3 otherPosition = other.transform.position;
-              
+                
                 Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
 
                 Vector3 vectorCenterToContactPoint = closestPoint - transform.position;
@@ -74,15 +71,13 @@ namespace FastAndFractured
             {
                 Vector3 otherPosition = other.transform.position;
 
-                Vector3 contactPoint = _explosionCollider.ClosestPoint(otherPosition);
+                Vector3 contactPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
 
                 Vector3 vectorCenterToContactPoint = contactPoint - transform.position;
 
                 Vector3 direction = vectorCenterToContactPoint.normalized;
 
-                direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
-
-                otherRigidbody.AddForceAtPosition(_pushForce / 10 * direction, contactPoint, forceMode);
+                otherRigidbody.AddForceAtPosition(forceToOtherObjects * direction, contactPoint, forceMode);
             }
         }
     }
