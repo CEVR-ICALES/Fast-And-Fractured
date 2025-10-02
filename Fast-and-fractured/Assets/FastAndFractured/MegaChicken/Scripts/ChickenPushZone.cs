@@ -43,6 +43,8 @@ namespace FastAndFractured
 
                 Vector3 direction = vectorCenterToContactPoint.normalized;
 
+                direction.y += 0.5f;
+
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
 
                 float distanceToCenter = vectorCenterToContactPoint.magnitude;
