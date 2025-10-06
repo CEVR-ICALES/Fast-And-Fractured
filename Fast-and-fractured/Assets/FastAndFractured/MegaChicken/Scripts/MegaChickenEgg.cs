@@ -73,6 +73,7 @@ namespace FastAndFractured
                 ownCollider.enabled = true;
                 _ownRigidbody.isKinematic = false;
                 pushZoneCollider.enabled = true;
+                _ownRigidbody.linearVelocity = Vector3.zero;
                 pushZoneCollider.radius = NORMAL_RADIUS;
                 _agent.speed = AGENT_SPEED;
             });
@@ -84,7 +85,7 @@ namespace FastAndFractured
 
         void Update()
         {
-            if (_isPaused)
+            if (_isPaused || !_agent.enabled)
             {
                 return;
             }

@@ -14,8 +14,9 @@ namespace FastAndFractured
         private float customGravity = 16.8f;
         [SerializeField]
         private float airFriction = 9.8f;
-        private bool applyForces = false;
-        
+        private bool applyForces;
+        [SerializeField]
+        private LayerMask ignoreLayer;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -23,14 +24,14 @@ namespace FastAndFractured
             {
                 _rb = GetComponent<ICustomRigidbody>();
             }
-            _landingTimer = TimerSystem.Instance.CreateTimer(Mathf.Infinity);
+            _landingTimer = TimerSystem.Instance.CreateTimer(100,Enums.TimerDirection.INCREASE);
         }
 
         private void FixedUpdate()
         {
             if (applyForces)
             {
-                _rb.AddForce(Vector3.down * customGravity, ForceMode.Acceleration);
+               _rb.AddForce(Vector3.down * customGravity, ForceMode.Acceleration);
                 _rb.AddForce(-_rb.linearVelocity.normalized * airFriction, ForceMode.Acceleration);
             }
         }
@@ -43,6 +44,7 @@ namespace FastAndFractured
             }
             _rb.AddForce(force,forceMode);
             _startCheck = true;
+            _rb.useGravity = true;
             applyForces = true;
         }
 
@@ -57,11 +59,13 @@ namespace FastAndFractured
 
         private void OnTriggerEnter(Collider other)
         {
-            _rb.linearVelocity = Vector3.zero;
-         //todo    _rb.useGravity = false;
-            onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
-            _landingTimer.StopTimer();
-            applyForces = false;
+            if (!((ignoreLayer & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)) {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.useGravity = false;
+                onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
+                _landingTimer.StopTimer();
+                applyForces = false;
+            } 
         }
     }
 }
