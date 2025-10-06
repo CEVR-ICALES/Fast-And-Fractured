@@ -18,18 +18,18 @@ namespace FishNet.CodeGenerating.Processing
             bool modified = false;
             List<MethodDefinition> methods = typeDef.Methods.ToList();
 
-            //PROSTART
+            // PROSTART
             if (moveStrippedCalls)
             {
                 MoveStrippedCalls(methods);
                 return true;
             }
-            //PROEND
+            // PROEND
 
             foreach (MethodDefinition md in methods)
             {
-                //Has RPC attribute, doesn't quality for a quality of life attribute.
-                if (base.GetClass<RpcProcessor>().Attributes.HasRpcAttributes(md))
+                // Has RPC attribute, doesn't quality for a quality of life attribute.
+                if (GetClass<RpcProcessor>().Attributes.HasRpcAttributes(md))
                     continue;
 
                 QolAttributeType qolType;
@@ -43,7 +43,7 @@ namespace FishNet.CodeGenerating.Processing
                  * single check is performed here. */
                 if (qolType != QolAttributeType.Server && qolType != QolAttributeType.Client)
                 {
-                    base.LogError($"QolAttributeType of {qolType.ToString()} is unhandled.");
+                    LogError($"QolAttributeType of {qolType.ToString()} is unhandled.");
                     continue;
                 }
 
@@ -57,44 +57,44 @@ namespace FishNet.CodeGenerating.Processing
         /// <summary>
         /// Returns the RPC attribute on a method, if one exist. Otherwise returns null.
         /// </summary>
-        /// <param name="methodDef"></param>
-        /// <param name="rpcType"></param>
+        /// <param name = "methodDef"></param>
+        /// <param name = "rpcType"></param>
         /// <returns></returns>
         private CustomAttribute GetQOLAttribute(MethodDefinition methodDef, out QolAttributeType qolType)
         {
             CustomAttribute foundAttribute = null;
             qolType = QolAttributeType.None;
-            //Becomes true if an error occurred during this process.
+            // Becomes true if an error occurred during this process.
             bool error = false;
-            //Nothing to check.
+            // Nothing to check.
             if (methodDef == null || methodDef.CustomAttributes == null)
                 return null;
 
             foreach (CustomAttribute customAttribute in methodDef.CustomAttributes)
             {
-                QolAttributeType thisQolType = base.GetClass<AttributeHelper>().GetQolAttributeType(customAttribute.AttributeType.FullName);
+                QolAttributeType thisQolType = GetClass<AttributeHelper>().GetQolAttributeType(customAttribute.AttributeType.FullName);
                 if (thisQolType != QolAttributeType.None)
                 {
-                    //A qol attribute already exist.
+                    // A qol attribute already exist.
                     if (foundAttribute != null)
                     {
-                        base.LogError($"{methodDef.Name} {thisQolType.ToString()} method cannot have multiple quality of life attributes.");
+                        LogError($"{methodDef.Name} {thisQolType.ToString()} method cannot have multiple quality of life attributes.");
                         error = true;
                     }
                     ////Static method.
-                    //if (methodDef.IsStatic)
-                    //{
+                    // if (methodDef.IsStatic)
+                    // {
                     //    CodegenSession.AddError($"{methodDef.Name} {thisQolType.ToString()} method cannot be static.");
                     //    error = true;
-                    //}
-                    //Abstract method.
+                    // }
+                    // Abstract method.
                     if (methodDef.IsAbstract)
                     {
-                        base.LogError($"{methodDef.Name} {thisQolType.ToString()} method cannot be abstract.");
+                        LogError($"{methodDef.Name} {thisQolType.ToString()} method cannot be abstract.");
                         error = true;
                     }
 
-                    //If all checks passed.
+                    // If all checks passed.
                     if (!error)
                     {
                         foundAttribute = customAttribute;
@@ -103,7 +103,7 @@ namespace FishNet.CodeGenerating.Processing
                 }
             }
 
-            //If an error occurred then reset results.
+            // If an error occurred then reset results.
             if (error)
             {
                 foundAttribute = null;
@@ -118,11 +118,11 @@ namespace FishNet.CodeGenerating.Processing
         /// </summary>
         private void CreateAttributeMethod(MethodDefinition methodDef, CustomAttribute qolAttribute, QolAttributeType qolType)
         {
-            bool inheritsNetworkBehaviour = methodDef.DeclaringType.InheritsNetworkBehaviour(base.Session);
+            bool inheritsNetworkBehaviour = methodDef.DeclaringType.InheritsNetworkBehaviour(Session);
 
-            //True to use InstanceFInder.
-            bool useStatic = (methodDef.IsStatic || !inheritsNetworkBehaviour);
-            //Check to force using static.
+            // True to use InstanceFInder.
+            bool useStatic = methodDef.IsStatic || !inheritsNetworkBehaviour;
+            // Check to force using static.
             if (!useStatic && qolAttribute.GetField("UseIsStarted", false))
                 useStatic = true;
 
@@ -138,15 +138,15 @@ namespace FishNet.CodeGenerating.Processing
                     bool requireOwnership = qolAttribute.GetField("RequireOwnership", false);
                     if (requireOwnership && useStatic)
                     {
-                        base.LogError($"Method {methodDef.Name} has a [Client] attribute which requires ownership but the method may not use this attribute. Either the method is static, or the script does not inherit from NetworkBehaviour.");
+                        LogError($"Method {methodDef.Name} has a [Client] attribute which requires ownership but the method may not use this attribute. Either the method is static, or the script does not inherit from NetworkBehaviour.");
                         return;
                     }
-                    //If (!base.IsOwner);
+                    // If (!base.IsOwner);
                     if (requireOwnership)
-                        base.GetClass<NetworkBehaviourHelper>().CreateLocalClientIsOwnerCheck(methodDef, logging, true, false, true);
-                    //Otherwise normal IsClient check.
+                        GetClass<NetworkBehaviourHelper>().CreateLocalClientIsOwnerCheck(methodDef, logging, true, false, true);
+                    // Otherwise normal IsClient check.
                     else
-                        base.GetClass<NetworkBehaviourHelper>().CreateIsClientCheck(methodDef, logging, useStatic, true, !useStatic);
+                        GetClass<NetworkBehaviourHelper>().CreateIsClientCheck(methodDef, logging, useStatic, true, !useStatic);
                 }
             }
             else if (qolType == QolAttributeType.Server)
@@ -154,56 +154,56 @@ namespace FishNet.CodeGenerating.Processing
                 if (!StripMethod(methodDef))
                 {
                     LoggingType logging = qolAttribute.GetField("Logging", LoggingType.Warning);
-                    base.GetClass<NetworkBehaviourHelper>().CreateIsServerCheck(methodDef, logging, useStatic, true, !useStatic);
+                    GetClass<NetworkBehaviourHelper>().CreateIsServerCheck(methodDef, logging, useStatic, true, !useStatic);
                 }
             }
 
             bool StripMethod(MethodDefinition md)
             {
-                //PROSTART
-                bool removeLogic = (qolType == QolAttributeType.Server) ? (CodeStripping.StripBuild && CodeStripping.ReleasingForClient) : (CodeStripping.StripBuild && CodeStripping.ReleasingForServer);
+                // PROSTART
+                bool removeLogic = qolType == QolAttributeType.Server ? CodeStripping.StripBuild && CodeStripping.ReleasingForClient : CodeStripping.StripBuild && CodeStripping.ReleasingForServer;
 
                 if (removeLogic)
                 {
                     if (CodeStripping.StrippingType == StrippingTypes.Redirect)
                         md.DeclaringType.Methods.Remove(md);
                     else if (CodeStripping.StrippingType == StrippingTypes.Empty_Experimental)
-                        md.ClearMethodWithRet(base.Session, md.Module);
+                        md.ClearMethodWithRet(Session, md.Module);
 
                     return true;
                 }
-                //PROEND
+                // PROEND
 
-                //Fall through.
+                // Fall through.
                 return false;
             }
         }
 
-        //PROSTART
+        // PROSTART
         /// <summary>
         /// Moves instructions when are calling a stripped method to a dummy method.
         /// </summary>
-        /// <param name="methods"></param>
+        /// <param name = "methods"></param>
         private void MoveStrippedCalls(List<MethodDefinition> methods)
         {
             if (!CodeStripping.StripBuild)
                 return;
-            //Methods were emptied rather than moved.
+            // Methods were emptied rather than moved.
             if (CodeStripping.StrippingType == StrippingTypes.Empty_Experimental)
                 return;
 
             foreach (MethodDefinition md in methods)
             {
-                //Went null at some point. It was likely stripped.
+                // Went null at some point. It was likely stripped.
                 if (md == null || md.Body == null || md.Body.Instructions == null)
                     continue;
 
                 foreach (Instruction inst in md.Body.Instructions)
                 {
-                    //Calls a method.
+                    // Calls a method.
                     if (inst.OpCode == OpCodes.Call || inst.OpCode == OpCodes.Callvirt || inst.Operand == null)
                     {
-                        //This shouldn't be possible but okay.
+                        // This shouldn't be possible but okay.
                         if (inst.Operand == null)
                             continue;
 
@@ -218,21 +218,21 @@ namespace FishNet.CodeGenerating.Processing
                             MethodReference mr = (MethodReference)inst.Operand;
                             targetMethod = mr.Resolve();
                         }
-                        //Type isn't found, unable to remove call.
+                        // Type isn't found, unable to remove call.
                         else
                         {
                             continue;
                         }
-                        //Target method couldn't be looked up.
+                        // Target method couldn't be looked up.
                         if (targetMethod == null)
                             continue;
                         GetQOLAttribute(targetMethod, out QolAttributeType qt);
 
                         bool redirectCall;
                         if (qt == QolAttributeType.Client)
-                            redirectCall = (CodeStripping.StripBuild && CodeStripping.ReleasingForServer);
+                            redirectCall = CodeStripping.StripBuild && CodeStripping.ReleasingForServer;
                         else if (qt == QolAttributeType.Server)
-                            redirectCall = (CodeStripping.StripBuild && CodeStripping.ReleasingForClient);
+                            redirectCall = CodeStripping.StripBuild && CodeStripping.ReleasingForClient;
                         else
                             redirectCall = false;
 
@@ -240,7 +240,7 @@ namespace FishNet.CodeGenerating.Processing
                         {
                             if (md.Module != targetMethod.Module)
                             {
-                                base.LogError($"{md.Name} in {md.DeclaringType.Name}/{md.Module.Name} calls method {targetMethod.Name} in {targetMethod.DeclaringType.Name}/{targetMethod.Module.Name}. Code stripping cannot work on client and server attributed methods when they are being called across assemblies. Use an accessor method within {targetMethod.DeclaringType.Name}/{targetMethod.Module.Name} to resolve this.");
+                                LogError($"{md.Name} in {md.DeclaringType.Name}/{md.Module.Name} calls method {targetMethod.Name} in {targetMethod.DeclaringType.Name}/{targetMethod.Module.Name}. Code stripping cannot work on client and server attributed methods when they are being called across assemblies. Use an accessor method within {targetMethod.DeclaringType.Name}/{targetMethod.Module.Name} to resolve this.");
                             }
                             else
                             {
@@ -254,7 +254,7 @@ namespace FishNet.CodeGenerating.Processing
                 }
             }
 
-            //Gets a dummy method in targetMd, or creates it should it not exist.
+            // Gets a dummy method in targetMd, or creates it should it not exist.
             MethodDefinition GetOrMakeDummyMethod(MethodDefinition callerMd, MethodDefinition targetMd)
             {
                 string mdName = $"CallDummyMethod___{RpcProcessor.GetMethodNameAsParameters(targetMd)}";
@@ -262,27 +262,27 @@ namespace FishNet.CodeGenerating.Processing
                 if (result == null)
                 {
                     TypeReference returnType;
-                    //Is generic.
+                    // Is generic.
                     if (targetMd.ReturnType.IsGenericInstance)
                     {
                         TypeReference tr = targetMd.ReturnType;
                         GenericInstanceType git = (GenericInstanceType)tr;
-                        returnType = base.ImportReference(git);
+                        returnType = ImportReference(git);
                     }
                     else
                     {
-                        returnType = base.ImportReference(targetMd.ReturnType);
+                        returnType = ImportReference(targetMd.ReturnType);
                     }
 
                     result = new(mdName, targetMd.Attributes, returnType);
                     foreach (ParameterDefinition item in targetMd.Parameters)
                     {
-                        base.ImportReference(item.ParameterType);
+                        ImportReference(item.ParameterType);
                         result.Parameters.Add(item);
                     }
 
                     targetMd.DeclaringType.Methods.Add(result);
-                    result.ClearMethodWithRet(base.Session, callerMd.Module);
+                    result.ClearMethodWithRet(Session, callerMd.Module);
                     result.Body.InitLocals = true;
                 }
 
@@ -292,6 +292,6 @@ namespace FishNet.CodeGenerating.Processing
                 return result;
             }
         }
-        //PROEND
+        // PROEND
     }
 }

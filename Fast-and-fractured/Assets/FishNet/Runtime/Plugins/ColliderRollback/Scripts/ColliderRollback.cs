@@ -9,36 +9,37 @@ namespace FishNet.Component.ColliderRollback
     public partial class ColliderRollback : NetworkBehaviour
     {
         #region Serialized.
-
 #pragma warning disable CS0414
         /// <summary>
         /// How to configure the bounding box check.
         /// </summary>
-        [Tooltip("How to configure the bounding box check.")] [SerializeField]
+        [Tooltip("How to configure the bounding box check.")]
+        [SerializeField]
         private BoundingBoxType _boundingBox = BoundingBoxType.Disabled;
         /// <summary>
         /// Physics type to generate a bounding box for.
         /// </summary>
-        [Tooltip("Physics type to generate a bounding box for.")] [SerializeField]
+        [Tooltip("Physics type to generate a bounding box for.")]
+        [SerializeField]
         private RollbackPhysicsType _physicsType = RollbackPhysicsType.Physics;
         /// <summary>
         /// Size for the bounding box. This is only used when BoundingBox is set to Manual.
         /// </summary>
-        [Tooltip("Size for the bounding box.. This is only used when BoundingBox is set to Manual.")] [SerializeField]
+        [Tooltip("Size for the bounding box.. This is only used when BoundingBox is set to Manual.")]
+        [SerializeField]
         private Vector3 _boundingBoxSize = new(3f, 3f, 3f);
         /// <summary>
         /// Objects holding colliders which can rollback.
         /// </summary>
-        [Tooltip("Objects holding colliders which can rollback.")] [SerializeField]
+        [Tooltip("Objects holding colliders which can rollback.")]
+        [SerializeField]
         private GameObject[] _colliderParents = new GameObject[0];
 #pragma warning restore CS0414
-
         #endregion
 
-        //PROSTART
+        // PROSTART
 
         #region Private.
-
         /// <summary>
         /// Rollback data about ColliderParents.
         /// </summary>
@@ -56,17 +57,16 @@ namespace FishNet.Component.ColliderRollback
         /// </summary>
         private bool _boundingBoxCreated;
         /// <summary>
-        /// Number of snapshots written. This value is used to determine if snapshots can be lerped. 
+        /// Number of snapshots written. This value is used to determine if snapshots can be lerped.
         /// </summary>
         private byte _lerpSnapshotCounter;
-
         #endregion
 
         public override void OnStartNetwork()
         {
-            if (base.IsServerStarted)
+            if (IsServerStarted)
             {
-                _maxSnapshots = Mathf.CeilToInt(base.RollbackManager.MaximumRollbackTime / (float)base.TimeManager.TickDelta);
+                _maxSnapshots = Mathf.CeilToInt(RollbackManager.MaximumRollbackTime / (float)TimeManager.TickDelta);
                 if (_maxSnapshots < 2)
                     _maxSnapshots = 2;
             }
@@ -94,17 +94,17 @@ namespace FishNet.Component.ColliderRollback
         {
             if (_boundingBoxCreated)
                 return;
-            //If here then mark created as true.
+            // If here then mark created as true.
             _boundingBoxCreated = true;
 
             if (_boundingBox == BoundingBoxType.Disabled)
                 return;
 
-            int? layer = base.RollbackManager.BoundingBoxLayerNumber;
+            int? layer = RollbackManager.BoundingBoxLayerNumber;
             if (layer == null)
                 return;
 
-            //Make go to add bounds to.
+            // Make go to add bounds to.
             GameObject go = new("Rollback Bounding Box");
             go.transform.SetParent(transform);
             go.transform.SetPositionAndRotation(transform.position, transform.rotation);
@@ -125,10 +125,10 @@ namespace FishNet.Component.ColliderRollback
         /// <summary>
         /// Subscribes or unsubscribes to events needed for rolling back.
         /// </summary>
-        /// <param name="subscribe"></param>
+        /// <param name = "subscribe"></param>
         private void ChangeEventSubscriptions(bool subscribe)
         {
-            RollbackManager rm = base.RollbackManager;
+            RollbackManager rm = RollbackManager;
             if (rm == null)
                 return;
 
@@ -143,7 +143,7 @@ namespace FishNet.Component.ColliderRollback
         /// </summary>
         internal void CreateSnapshot()
         {
-            //Can't generate a snapshot while rolled back.
+            // Can't generate a snapshot while rolled back.
             if (_rolledBack)
                 return;
 
@@ -155,20 +155,18 @@ namespace FishNet.Component.ColliderRollback
                 _rollingColliders[i].AddSnapshot();
         }
 
-
         /// <summary>
         /// Called when a rollback should occur.
         /// </summary>
-        /// 
         internal void Rollback(float time)
         {
-            //Already rolled back.
+            // Already rolled back.
             if (_rolledBack)
             {
-                base.NetworkManager.LogWarning("Colliders are already rolled back. Returning colliders forward first.");
+                NetworkManager.LogWarning("Colliders are already rolled back. Returning colliders forward first.");
                 Return();
             }
-            //None are written.
+            // None are written.
             else if (_lerpSnapshotCounter == 0)
             {
                 return;
@@ -181,21 +179,21 @@ namespace FishNet.Component.ColliderRollback
             /* If time were 0.3f and delta was 0.2f then the
              * result would be 1.5f. This indicates to lerp between
              * the first snapshot, and one after. */
-            float decimalFrame = (time / (float)base.TimeManager.TickDelta);
+            float decimalFrame = time / (float)TimeManager.TickDelta;
             /* Rollback is beyond written quantity.
              * Set to use the last snapshot. */
             if (decimalFrame > _lerpSnapshotCounter)
             {
                 rollbackType = FrameRollbackTypes.Exact;
-                //Be sure to subtract 1 to get last entry in snapshots.
-                endFrame = (_lerpSnapshotCounter - 1);
-                //Not needed for exact but must be set.
+                // Be sure to subtract 1 to get last entry in snapshots.
+                endFrame = _lerpSnapshotCounter - 1;
+                // Not needed for exact but must be set.
                 percent = 1f;
             }
-            //Within frames.
+            // Within frames.
             else
             {
-                percent = (decimalFrame % 1);
+                percent = decimalFrame % 1;
                 endFrame = Mathf.CeilToInt(decimalFrame);
 
                 /* If the end frame is larger than or equal to 1
@@ -206,7 +204,7 @@ namespace FishNet.Component.ColliderRollback
                     rollbackType = FrameRollbackTypes.LerpMiddle;
                     endFrame = Mathf.CeilToInt(decimalFrame);
                 }
-                //Rolling back only 1 frame.
+                // Rolling back only 1 frame.
                 else
                 {
                     endFrame = 0;
@@ -214,7 +212,7 @@ namespace FishNet.Component.ColliderRollback
                 }
             }
 
-            
+
             int count = _rollingColliders.Count;
             for (int i = 0; i < count; i++)
                 _rollingColliders[i].Rollback(rollbackType, endFrame, percent);
@@ -270,6 +268,6 @@ namespace FishNet.Component.ColliderRollback
             _lerpSnapshotCounter = 0;
             ResettableCollectionCaches<RollingCollider>.StoreAndDefault(ref _rollingColliders);
         }
-        //PROEND
+        // PROEND
     }
 }

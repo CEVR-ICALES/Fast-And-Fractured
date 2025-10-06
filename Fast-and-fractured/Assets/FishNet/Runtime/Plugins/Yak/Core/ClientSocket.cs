@@ -20,7 +20,7 @@ namespace FishNet.Transporting.Yak.Client
         private Queue<LocalPacket> _incoming = new();
         #endregion
 
-        //PROSTART
+        // PROSTART
         /// <summary>
         /// Initializes this for use.
         /// </summary>
@@ -29,16 +29,16 @@ namespace FishNet.Transporting.Yak.Client
             base.Initialize(t, socket);
             _server = (ServerSocket)socket;
         }
-        //PROEND
+        // PROEND
 
         /// <summary>
         /// Starts the client connection.
         /// </summary>
         internal bool StartConnection()
         {
-            //PROSTART
-            //Already starting/started, or stopping.
-            if (base.GetLocalConnectionState() != LocalConnectionState.Stopped)
+            // PROSTART
+            // Already starting/started, or stopping.
+            if (GetLocalConnectionState() != LocalConnectionState.Stopped)
                 return false;
 
             SetLocalConnectionState(LocalConnectionState.Starting, false);
@@ -72,10 +72,10 @@ namespace FishNet.Transporting.Yak.Client
         internal bool StopConnection()
         {
             //PROSTART
-            if (base.GetLocalConnectionState() == LocalConnectionState.Stopped || base.GetLocalConnectionState() == LocalConnectionState.Stopping)
+            if (GetLocalConnectionState() == LocalConnectionState.Stopped || GetLocalConnectionState() == LocalConnectionState.Stopping)
                 return false;
 
-            base.ClearQueue(ref _incoming);
+            ClearQueue(ref _incoming);
             //Immediately set stopped since no real connection exists.
             SetLocalConnectionState(LocalConnectionState.Stopping, false);
             SetLocalConnectionState(LocalConnectionState.Stopped, false);
@@ -89,15 +89,15 @@ namespace FishNet.Transporting.Yak.Client
         /// </summary>
         internal void IterateIncoming()
         {
-            if (base.GetLocalConnectionState() != LocalConnectionState.Started)
+            if (GetLocalConnectionState() != LocalConnectionState.Started)
                 return;
 
             while (_incoming.Count > 0)
             {
                 LocalPacket packet = _incoming.Dequeue();
                 ArraySegment<byte> segment = new(packet.Data, 0, packet.Length);
-                ClientReceivedDataArgs dataArgs = new(segment, (Channel)packet.Channel, base.Transport.Index);
-                base.Transport.HandleClientReceivedDataArgs(dataArgs);
+                ClientReceivedDataArgs dataArgs = new(segment, (Channel)packet.Channel, Transport.Index);
+                Transport.HandleClientReceivedDataArgs(dataArgs);
                 packet.Dispose();
             }
         }
@@ -119,7 +119,7 @@ namespace FishNet.Transporting.Yak.Client
         /// </summary>
         internal void SendToServer(byte channelId, ArraySegment<byte> segment)
         {
-            if (base.GetLocalConnectionState() != LocalConnectionState.Started)
+            if (GetLocalConnectionState() != LocalConnectionState.Started)
                 return;
             if (_server.GetLocalConnectionState() != LocalConnectionState.Started)
                 return;
@@ -137,8 +137,7 @@ namespace FishNet.Transporting.Yak.Client
         internal void OnLocalServerConnectionState(LocalConnectionState state)
         {
             //Server started.
-            if (state == LocalConnectionState.Started &&
-                base.GetLocalConnectionState() == LocalConnectionState.Starting)
+            if (state == LocalConnectionState.Started && GetLocalConnectionState() == LocalConnectionState.Starting)
             {
                 SetLocalConnectionState(LocalConnectionState.Started, false);
             }
@@ -146,19 +145,15 @@ namespace FishNet.Transporting.Yak.Client
             else
             {
                 //If stopped or stopping then disconnect client if also not stopped or stopping.
-                if ((state == LocalConnectionState.Stopping || state == LocalConnectionState.Stopped) &&
-                    (base.GetLocalConnectionState() == LocalConnectionState.Started ||
-                    base.GetLocalConnectionState() == LocalConnectionState.Starting)
-                    )
+                if ((state == LocalConnectionState.Stopping || state == LocalConnectionState.Stopped) && (GetLocalConnectionState() == LocalConnectionState.Started || GetLocalConnectionState() == LocalConnectionState.Starting))
                 {
                     SetLocalConnectionState(LocalConnectionState.Stopping, false);
                     SetLocalConnectionState(LocalConnectionState.Stopped, false);
                 }
             }
         }
+
         //PROEND
         #endregion
-
-
     }
 }

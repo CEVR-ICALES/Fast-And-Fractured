@@ -16,10 +16,10 @@ namespace FishNet.Component.ColliderRollback
             /// <summary>
             /// Manually specify the dimensions of a bounding box.
             /// </summary>
-            Manual,
+            Manual
         }
 
-        //PROSTART
+        // PROSTART
         internal enum FrameRollbackTypes
         {
             LerpFirst,
@@ -60,7 +60,6 @@ namespace FishNet.Component.ColliderRollback
         internal class RollingCollider : IResettable
         {
             #region Private.
-
             /// <summary>
             /// Current snapshots for this collider.
             /// </summary>
@@ -89,9 +88,7 @@ namespace FishNet.Component.ColliderRollback
             /// LocalRotation of transform at start.
             /// </summary>
             private Quaternion _localRotation;
-
             #endregion
-
 
             public RollingCollider() { }
 
@@ -107,27 +104,26 @@ namespace FishNet.Component.ColliderRollback
             /// <summary>
             /// Received when Rollback is called on ColliderRollback.
             /// </summary>
-            
             public void Rollback(FrameRollbackTypes rollbackType, int endFrame, float percent)
             {
-                //Exact frame.
+                // Exact frame.
                 if (rollbackType == FrameRollbackTypes.Exact)
                 {
                     int index = GetSnapshotIndex(endFrame);
                     _transform.SetPositionAndRotation(_snapshots[index].WorldPosition, _snapshots[index].WorldRotation);
                 }
-                //Start frame.
+                // Start frame.
                 else if (rollbackType == FrameRollbackTypes.LerpFirst)
                 {
-                    //Lerp between actual position and the most recent snapshot.
+                    // Lerp between actual position and the most recent snapshot.
                     int index = GetSnapshotIndex(endFrame);
                     _transform.position = Vector3.Lerp(_transform.position, _snapshots[index].WorldPosition, percent);
                     _transform.rotation = Quaternion.Lerp(_transform.rotation, _snapshots[index].WorldRotation, percent);
                 }
-                //Middle frame.
+                // Middle frame.
                 else if (rollbackType == FrameRollbackTypes.LerpMiddle)
                 {
-                    //Lerp between end frame and the one before it.
+                    // Lerp between end frame and the one before it.
                     int firstFrame = GetSnapshotIndex(endFrame - 1);
                     int secondFrame = GetSnapshotIndex(endFrame);
 
@@ -141,10 +137,10 @@ namespace FishNet.Component.ColliderRollback
             /// </summary>
             public void AddSnapshot()
             {
-                //Not yet recycling, make a new snapshot.
+                // Not yet recycling, make a new snapshot.
                 if (!_recycleSnapshots)
                     _snapshots[_writeIndex] = new(_transform);
-                //Snapshot array traversed already, start recycling.
+                // Snapshot array traversed already, start recycling.
                 else
                     _snapshots[_writeIndex].UpdateValues(_transform);
 
@@ -165,8 +161,8 @@ namespace FishNet.Component.ColliderRollback
                 /* Since write index is increased after a write
                  * we must reduce it by 1 to get to the last
                  * write index, before removing history count. */
-                int index = (_writeIndex - 1) - historyCount;
-                //If negative value start taking from the back.
+                int index = _writeIndex - 1 - historyCount;
+                // If negative value start taking from the back.
                 if (index < 0)
                 {
                     /* Cannot take from back, snapshots aren't filled yet.
@@ -174,11 +170,11 @@ namespace FishNet.Component.ColliderRollback
                      * would be index 0. */
                     if (!_recycleSnapshots)
                         return 0;
-                    //Snapshots filled, take from back.
+                    // Snapshots filled, take from back.
                     else
-                        return (_maxSnapshots + index);
+                        return _maxSnapshots + index;
                 }
-                //Not a negative value, return as is.
+                // Not a negative value, return as is.
                 else
                 {
                     return index;
@@ -191,7 +187,7 @@ namespace FishNet.Component.ColliderRollback
                 _localPosition = t.localPosition;
                 _localRotation = t.localRotation;
                 _maxSnapshots = maxSnapshots;
-                
+
                 _snapshots = CollectionCaches<ColliderSnapshot>.RetrieveArray();
                 if (_snapshots.Length < maxSnapshots)
                     Array.Resize(ref _snapshots, maxSnapshots);
@@ -210,6 +206,6 @@ namespace FishNet.Component.ColliderRollback
 
             public void InitializeState() { }
         }
-        //PROEND
+        // PROEND
     }
 }

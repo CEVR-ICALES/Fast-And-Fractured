@@ -2,15 +2,14 @@ using System.Collections.Generic;
 
 namespace FishNet.Transporting.Yak
 {
-
     public abstract class CommonSocket
     {
-
         #region Public.
         /// <summary>
         /// Current ConnectionState.
         /// </summary>
         private LocalConnectionState _connectionState = LocalConnectionState.Stopped;
+
         /// <summary>
         /// Returns the current ConnectionState.
         /// </summary>
@@ -20,14 +19,14 @@ namespace FishNet.Transporting.Yak
             return _connectionState;
         }
 
-        //PROSTART
+        // PROSTART
         /// <summary>
         /// Sets a new connection state.
         /// </summary>
-        /// <param name="connectionState"></param>
+        /// <param name = "connectionState"></param>
         protected virtual void SetLocalConnectionState(LocalConnectionState connectionState, bool server)
         {
-            //If state hasn't changed.
+            // If state hasn't changed.
             if (connectionState == _connectionState)
                 return;
 
@@ -38,7 +37,8 @@ namespace FishNet.Transporting.Yak
             else
                 Transport.HandleClientConnectionState(new(connectionState, Transport.Index));
         }
-        //PROEND
+
+        // PROEND
         #endregion
 
         #region Protected.
@@ -61,14 +61,13 @@ namespace FishNet.Transporting.Yak
         /// </summary>
         internal void ClearQueue(ref Queue<LocalPacket> queue)
         {
-            //PROSTART
+            // PROSTART
             while (queue.Count > 0)
             {
                 LocalPacket lp = queue.Dequeue();
                 lp.Dispose();
             }
-            //PROEND
+            // PROEND
         }
     }
-
 }

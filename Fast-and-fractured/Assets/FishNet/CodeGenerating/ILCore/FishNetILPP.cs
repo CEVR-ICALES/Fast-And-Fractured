@@ -7,7 +7,6 @@ using FishNet.CodeGenerating.Processing.Rpc;
 using FishNet.Configuring;
 using MonoFN.Cecil;
 using MonoFN.Cecil.Cil;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,12 +37,12 @@ namespace FishNet.CodeGenerating.ILCore
              * intentionally to stop codegen from running on the runtime
              * fishnet assembly, but the option below is for debugging. I would
              * comment out this check if I wanted to compile fishnet runtime. */
-            //if (CODEGEN_THIS_NAMESPACE.Length == 0)
-            //{
+            // if (CODEGEN_THIS_NAMESPACE.Length == 0)
+            // {
             //    if (compiledAssembly.Name == RUNTIME_ASSEMBLY_NAME)
             //        return false;
-            //}
-            bool referencesFishNet = FishNetILPP.IsFishNetAssembly(compiledAssembly) || compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RUNTIME_ASSEMBLY_NAME);
+            // }
+            bool referencesFishNet = IsFishNetAssembly(compiledAssembly) || compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RUNTIME_ASSEMBLY_NAME);
             return referencesFishNet;
         }
 
@@ -55,7 +54,7 @@ namespace FishNet.CodeGenerating.ILCore
             if (assemblyDef == null)
                 return null;
 
-            //Check WillProcess again; somehow certain editor scripts skip the WillProcess check.
+            // Check WillProcess again; somehow certain editor scripts skip the WillProcess check.
             if (!WillProcess(compiledAssembly))
                 return null;
 
@@ -63,10 +62,10 @@ namespace FishNet.CodeGenerating.ILCore
             if (!session.Initialize(assemblyDef.MainModule))
                 return null;
 
-            //PROSTART
+            // PROSTART
             if (CodeStripping.StripBuild)
                 session.LogWarning($"Fish-Networking Code stripping enabled on assembly {assemblyDef.MainModule.Name}");
-            //PROEND
+            // PROEND
 
             bool modified = false;
 
@@ -116,26 +115,21 @@ namespace FishNet.CodeGenerating.ILCore
                 session.DifferentAssemblySyncVars.Clear();
             }
 
-            //session.LogWarning($"Assembly {compiledAssembly.Name} took {stopwatch.ElapsedMilliseconds}.");
+            // session.LogWarning($"Assembly {compiledAssembly.Name} took {stopwatch.ElapsedMilliseconds}.");
             if (!modified)
-            {
                 return null;
-            }
-            else
+
+            MemoryStream pe = new();
+            MemoryStream pdb = new();
+            WriterParameters writerParameters = new()
             {
-                MemoryStream pe = new();
-                MemoryStream pdb = new();
-                WriterParameters writerParameters = new()
-                {
-                    SymbolWriterProvider = new PortablePdbWriterProvider(),
-                    SymbolStream = pdb,
-                    WriteSymbols = true
-                };
-                assemblyDef.Write(pe, writerParameters);
-                return new(new(pe.ToArray(), pdb.ToArray()), session.Diagnostics);
-            }
+                SymbolWriterProvider = new PortablePdbWriterProvider(),
+                SymbolStream = pdb,
+                WriteSymbols = true
+            };
+            assemblyDef.Write(pe, writerParameters);
+            return new(new(pe.ToArray(), pdb.ToArray()), session.Diagnostics);
         }
-        
 
         /// <summary>
         /// Makees methods public scope which use CodegenMakePublic attribute.
@@ -153,7 +147,7 @@ namespace FishNet.CodeGenerating.ILCore
                         td.Attributes &= ~TypeAttributes.NotPublic;
                         td.Attributes |= TypeAttributes.Public;
                     }
-                } 
+                }
                 foreach (MethodDefinition md in td.Methods)
                 {
                     foreach (CustomAttribute ca in md.CustomAttributes)
@@ -167,7 +161,7 @@ namespace FishNet.CodeGenerating.ILCore
                 }
             }
 
-            //There is always at least one modified.
+            // There is always at least one modified.
             return true;
         }
 
@@ -246,7 +240,9 @@ namespace FishNet.CodeGenerating.ILCore
                     continue;
 
                 TypeReference tr = session.ImportReference(td);
-                if (wp.CreateWriter(tr) != null && rp.CreateReader(tr) != null)
+                string traceText = session.TypeDefinitionTraceText(td);
+
+                if (wp.CreateWriter(tr, traceText) != null && rp.CreateReader(tr, traceText) != null)
                     modified = true;
                 else
                     session.LogError($"Failed to create serializers for {td.FullName}.");
@@ -269,8 +265,8 @@ namespace FishNet.CodeGenerating.ILCore
         /// <summary>
         /// Creaters serializers and calls for IBroadcast.
         /// </summary>
-        /// <param name="moduleDef"></param>
-        /// <param name="diagnostics"></param>
+        /// <param name = "moduleDef"></param>
+        /// <param name = "diagnostics"></param>
         private bool CreateIBroadcast(CodegenSession session)
         {
             bool modified = false;
@@ -282,7 +278,7 @@ namespace FishNet.CodeGenerating.ILCore
                 TypeDefinition climbTd = td;
                 do
                 {
-                    //Reached NetworkBehaviour class.
+                    // Reached NetworkBehaviour class.
                     if (climbTd.FullName == networkBehaviourFullName)
                         break;
 
@@ -290,23 +286,23 @@ namespace FishNet.CodeGenerating.ILCore
                     // * the class. Then check all of it's base classes. */
                     if (climbTd.ImplementsInterface<IBroadcast>())
                         typeDefs.Add(climbTd);
-                    //7ms
+                    // 7ms
 
-                    //Add nested. Only going to go a single layer deep.
+                    // Add nested. Only going to go a single layer deep.
                     foreach (TypeDefinition nestedTypeDef in td.NestedTypes)
                     {
                         if (nestedTypeDef.ImplementsInterface<IBroadcast>())
                             typeDefs.Add(nestedTypeDef);
                     }
-                    //0ms
+                    // 0ms
 
                     climbTd = climbTd.GetNextBaseTypeDefinition(session);
-                    //this + name check 40ms
+                    // this + name check 40ms
                 } while (climbTd != null);
             }
 
 
-            //Create reader/writers for found typeDefs.
+            // Create reader/writers for found typeDefs.
             foreach (TypeDefinition td in typeDefs)
             {
                 TypeReference typeRef = session.ImportReference(td);
@@ -329,9 +325,9 @@ namespace FishNet.CodeGenerating.ILCore
             bool modified = false;
 
             bool codeStripping = false;
-            //PROSTART
+            // PROSTART
             codeStripping = CodeStripping.StripBuild;
-            //PROEND
+            // PROEND
             List<TypeDefinition> allTypeDefs = session.Module.Types.ToList();
 
             /* First pass, potentially only pass.
@@ -345,7 +341,7 @@ namespace FishNet.CodeGenerating.ILCore
                 modified |= session.GetClass<QolAttributeProcessor>().Process(td, codeStripping);
             }
 
-            //PROSTART
+            // PROSTART
             /* If stripping then remove the remainder content */
             if (codeStripping)
             {
@@ -357,7 +353,7 @@ namespace FishNet.CodeGenerating.ILCore
                     modified |= session.GetClass<QolAttributeProcessor>().Process(td, false);
                 }
             }
-            //PROEND
+            // PROEND
 
             return modified;
         }
@@ -367,7 +363,7 @@ namespace FishNet.CodeGenerating.ILCore
         /// </summary>
         private bool CreateNetworkBehaviours(CodegenSession session)
         {
-            //Get all network behaviours to process.
+            // Get all network behaviours to process.
             List<TypeDefinition> networkBehaviourTypeDefs = session.Module.Types.Where(td => td.IsSubclassOf(session, session.GetClass<NetworkBehaviourHelper>().FullName)).ToList();
 
             /* Remove types which are inherited. This gets the child most networkbehaviours.
@@ -381,7 +377,7 @@ namespace FishNet.CodeGenerating.ILCore
                 session.GetClass<NetworkBehaviourProcessor>().ProcessLocal(typeDef);
             }
 
-            //Call base methods on RPCs.
+            // Call base methods on RPCs.
             foreach (TypeDefinition td in session.Module.Types)
                 session.GetClass<RpcProcessor>().RedirectBaseCalls();
 
@@ -403,7 +399,7 @@ namespace FishNet.CodeGenerating.ILCore
                     TypeDefinition copyTd = tds[i].GetNextBaseTypeDefinition(session);
                     while (copyTd != null)
                     {
-                        //Class is NB.
+                        // Class is NB.
                         if (copyTd.FullName == session.GetClass<NetworkBehaviourHelper>().FullName)
                             break;
 
@@ -412,21 +408,21 @@ namespace FishNet.CodeGenerating.ILCore
                     }
                 }
 
-                //Remove all inherited types.
+                // Remove all inherited types.
                 foreach (TypeDefinition item in inheritedTds)
                     tds.Remove(item);
             }
 
-            //Moment a NetworkBehaviour exist the assembly is considered modified.
-            bool modified = (networkBehaviourTypeDefs.Count > 0);
+            // Moment a NetworkBehaviour exist the assembly is considered modified.
+            bool modified = networkBehaviourTypeDefs.Count > 0;
             return modified;
         }
 
         /// <summary>
         /// Creates generic delegates for all read and write methods.
         /// </summary>
-        /// <param name="moduleDef"></param>
-        /// <param name="diagnostics"></param>
+        /// <param name = "moduleDef"></param>
+        /// <param name = "diagnostics"></param>
         private bool CreateSerializerInitializeDelegates(CodegenSession session)
         {
             session.GetClass<WriterProcessor>().CreateInitializeDelegates();
@@ -435,8 +431,8 @@ namespace FishNet.CodeGenerating.ILCore
             return true;
         }
 
-        internal static bool IsFishNetAssembly(ICompiledAssembly assembly) => (assembly.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
-        internal static bool IsFishNetAssembly(CodegenSession session) => (session.Module.Assembly.Name.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
-        internal static bool IsFishNetAssembly(ModuleDefinition moduleDef) => (moduleDef.Assembly.Name.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
+        internal static bool IsFishNetAssembly(ICompiledAssembly assembly) => assembly.Name == RUNTIME_ASSEMBLY_NAME;
+        internal static bool IsFishNetAssembly(CodegenSession session) => session.Module.Assembly.Name.Name == RUNTIME_ASSEMBLY_NAME;
+        internal static bool IsFishNetAssembly(ModuleDefinition moduleDef) => moduleDef.Assembly.Name.Name == RUNTIME_ASSEMBLY_NAME;
     }
 }

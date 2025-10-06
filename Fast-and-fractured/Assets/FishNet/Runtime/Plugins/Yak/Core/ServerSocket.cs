@@ -14,15 +14,14 @@ namespace FishNet.Transporting.Yak.Server
         /// <summary>
         /// Gets the current ConnectionState of a remote client on the server.
         /// </summary>
-        /// <param name="connectionId">ConnectionId to get ConnectionState for.</param>
+        /// <param name = "connectionId">ConnectionId to get ConnectionState for.</param>
         internal RemoteConnectionState GetConnectionState(int connectionId)
         {
             if (connectionId != NetworkConnection.SIMULATED_CLIENTID_VALUE)
                 return RemoteConnectionState.Stopped;
 
             LocalConnectionState state = _client.GetLocalConnectionState();
-            return (state == LocalConnectionState.Started) ? RemoteConnectionState.Started :
-                RemoteConnectionState.Stopped;
+            return state == LocalConnectionState.Started ? RemoteConnectionState.Started : RemoteConnectionState.Stopped;
         }
         #endregion
 
@@ -37,7 +36,7 @@ namespace FishNet.Transporting.Yak.Server
         private ClientSocket _client;
         #endregion
 
-        //PROSTART
+        // PROSTART
         /// <summary>
         /// Initializes this for use.
         /// </summary>
@@ -46,20 +45,19 @@ namespace FishNet.Transporting.Yak.Server
             base.Initialize(t, socket);
             _client = (ClientSocket)socket;
         }
-        //PROEND
+        // PROEND
 
         /// <summary>
         /// Starts the server.
         /// </summary>
         internal bool StartConnection()
         {
-            //PROSTART
+            // PROSTART
             SetLocalConnectionState(LocalConnectionState.Starting, true);
             SetLocalConnectionState(LocalConnectionState.Started, true);
             //PROEND
             return true;
         }
-
 
         //PROSTART
         /// <summary>
@@ -78,10 +76,10 @@ namespace FishNet.Transporting.Yak.Server
         internal bool StopConnection()
         {
             //PROSTART
-            if (base.GetLocalConnectionState() == LocalConnectionState.Stopped)
+            if (GetLocalConnectionState() == LocalConnectionState.Stopped)
                 return false;
 
-            base.ClearQueue(ref _incoming);
+            ClearQueue(ref _incoming);
             SetLocalConnectionState(LocalConnectionState.Stopping, true);
             SetLocalConnectionState(LocalConnectionState.Stopped, true);
             //PROEND
@@ -91,7 +89,7 @@ namespace FishNet.Transporting.Yak.Server
         /// <summary>
         /// Stops a remote client from the server, disconnecting the client.
         /// </summary>
-        /// <param name="connectionId">ConnectionId of the client to disconnect.</param>
+        /// <param name = "connectionId">ConnectionId of the client to disconnect.</param>
         internal bool StopConnection(int connectionId)
         {
             //PROSTART
@@ -107,10 +105,10 @@ namespace FishNet.Transporting.Yak.Server
         /// <summary>
         /// Iterates the Incoming queue.
         /// </summary>
-        /// <param name="transport"></param>
+        /// <param name = "transport"></param>
         internal void IterateIncoming()
         {
-            if (base.GetLocalConnectionState() != LocalConnectionState.Started)
+            if (GetLocalConnectionState() != LocalConnectionState.Started)
                 return;
 
             //Iterate local client packets first.
@@ -118,8 +116,8 @@ namespace FishNet.Transporting.Yak.Server
             {
                 LocalPacket packet = _incoming.Dequeue();
                 ArraySegment<byte> segment = new(packet.Data, 0, packet.Length);
-                ServerReceivedDataArgs args = new(segment, (Channel)packet.Channel, NetworkConnection.SIMULATED_CLIENTID_VALUE, base.Transport.Index);
-                base.Transport.HandleServerReceivedDataArgs(args);
+                ServerReceivedDataArgs args = new(segment, (Channel)packet.Channel, NetworkConnection.SIMULATED_CLIENTID_VALUE, Transport.Index);
+                Transport.HandleServerReceivedDataArgs(args);
             }
         }
         //PROEND
@@ -128,12 +126,12 @@ namespace FishNet.Transporting.Yak.Server
         /// <summary>
         /// Sends data to a client.
         /// </summary>
-        /// <param name="channelId"></param>
-        /// <param name="segment"></param>
-        /// <param name="connectionId"></param>
+        /// <param name = "channelId"></param>
+        /// <param name = "segment"></param>
+        /// <param name = "connectionId"></param>
         internal void SendToClient(byte channelId, ArraySegment<byte> segment, int connectionId)
         {
-            if (base.GetLocalConnectionState() != LocalConnectionState.Started)
+            if (GetLocalConnectionState() != LocalConnectionState.Started)
                 return;
             if (connectionId != NetworkConnection.SIMULATED_CLIENTID_VALUE)
                 return;
@@ -153,14 +151,14 @@ namespace FishNet.Transporting.Yak.Server
             //If not started flush incoming from local client.
             if (state != LocalConnectionState.Started)
             {
-                base.ClearQueue(ref _incoming);
+                ClearQueue(ref _incoming);
                 //If stopped then send stopped event as well.
                 if (state == LocalConnectionState.Stopped)
-                    base.Transport.HandleRemoteConnectionState(new(RemoteConnectionState.Stopped, NetworkConnection.SIMULATED_CLIENTID_VALUE, base.Transport.Index));
+                    Transport.HandleRemoteConnectionState(new(RemoteConnectionState.Stopped, NetworkConnection.SIMULATED_CLIENTID_VALUE, Transport.Index));
             }
             else
             {
-                base.Transport.HandleRemoteConnectionState(new(RemoteConnectionState.Started, NetworkConnection.SIMULATED_CLIENTID_VALUE, base.Transport.Index));
+                Transport.HandleRemoteConnectionState(new(RemoteConnectionState.Started, NetworkConnection.SIMULATED_CLIENTID_VALUE, Transport.Index));
             }
         }
         //PROEND
@@ -176,6 +174,7 @@ namespace FishNet.Transporting.Yak.Server
 
             _incoming.Enqueue(packet);
         }
+
         //PROEND
         #endregion
     }

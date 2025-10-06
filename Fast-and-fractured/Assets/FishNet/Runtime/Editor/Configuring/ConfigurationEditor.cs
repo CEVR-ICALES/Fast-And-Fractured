@@ -4,6 +4,7 @@ using FishNet.Object;
 using FishNet.Utility.Extension;
 using GameKit.Dependencies.Utilities;
 using System.Collections.Generic;
+using FishNet.Configuring.EditorCloning;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -53,7 +54,7 @@ namespace FishNet.Editing
             HashSet<string> definesHs = new();
             string[] currentArr = currentDefines.Split(';');
 
-            //Add any define which doesn't contain MIRROR.
+            // Add any define which doesn't contain MIRROR.
             foreach (string item in currentArr)
                 definesHs.Add(item);
 
@@ -64,7 +65,7 @@ namespace FishNet.Editing
             else
                 definesHs.Add(define);
 
-            bool modified = (definesHs.Count != startingCount);
+            bool modified = definesHs.Count != startingCount;
             if (modified)
             {
                 string changedDefines = string.Join(";", definesHs);
@@ -83,18 +84,15 @@ namespace FishNet.Editing
         [MenuItem("Tools/Fish-Networking/Utility/Refresh Default Prefabs", false, 300)]
         public static void RebuildDefaultPrefabs()
         {
-#if PARRELSYNC
-            if (ParrelSync.ClonesManager.IsClone() && ParrelSync.Preferences.AssetModPref.Value)
+            if (!CloneChecker.CanGenerateFiles())
             {
-                Debug.Log("Cannot perform this operation on a ParrelSync clone");
+                Debug.Log("Skipping prefab generation as clone settings does not allow it.");
                 return;
             }
-#endif
             Debug.Log("Refreshing default prefabs.");
             Generator.GenerateFull(null, true);
         }
     }
-
 }
 
 #endif
