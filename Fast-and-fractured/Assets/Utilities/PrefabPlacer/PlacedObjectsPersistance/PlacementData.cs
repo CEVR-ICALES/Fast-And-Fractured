@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using UnityEngine;
 
@@ -10,3 +11,4 @@ public class PlacementData
     public Quaternion rotation;
     public Vector3 scale;
 }
+#endif
