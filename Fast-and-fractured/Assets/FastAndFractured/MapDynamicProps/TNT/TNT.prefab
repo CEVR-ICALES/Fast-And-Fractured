@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.94, z: 0}
-  m_LocalScale: {x: 2.0785, y: 2.0785, z: 2.0785}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1105732272168088450}
@@ -47,11 +47,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec1c9d2c90db5914195e61387f506c8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  explosionRadius: 15
-  pushForce: 1500000
+  explosionRadius: 30
+  pushForce: 250000
   explosionCenterOffset: {x: 0, y: 0, z: 0}
   explosionHitbox: {fileID: 8587492930792698581}
-  damagePercentage: 0.5
+  damagePercentage: 0.3
   visuals: {fileID: 4810976380543654395}
 --- !u!65 &5570889588176834981
 BoxCollider:
@@ -274,9 +274,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   averageCarWeight: 1150
   carWeightImportance: 0.2
-  applyForceYOffset: 0.75
-  forceMultiplier: 71
-  forceMode: 0
+  forceToOtherObjects: 10
+  forceMode: 1
   isGrounded: 1
 --- !u!135 &3316070567144309248
 SphereCollider:
