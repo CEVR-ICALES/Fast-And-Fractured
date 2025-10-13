@@ -41,6 +41,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5576904458397829052}
+  - component: {fileID: 2189203852450848719}
+  - component: {fileID: 5349765798723881491}
+  - component: {fileID: -304313273272275156}
   m_Layer: 0
   m_Name: ElderNPCPancracio
   m_TagString: Untagged
@@ -64,6 +67,82 @@ Transform:
   - {fileID: 6388077936857422342}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2189203852450848719
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3585736269872763320}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 5.3462596, z: 1}
+  m_Center: {x: 0, y: 2.1731298, z: 0}
+--- !u!208 &5349765798723881491
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3585736269872763320}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 2.6731298, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 2.1731298, z: 0}
+  m_TimeToStationary: 0.5
+--- !u!205 &-304313273272275156
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3585736269872763320}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.014769793, y: 2.7421749, z: -0.117007315}
+  m_Size: 5.4531655
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.84616417
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: -2670830417949610866, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  - screenRelativeHeight: 0.64343673
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 6866021929699774202, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  - screenRelativeHeight: 0.5070878
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 956147036538404352, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  - screenRelativeHeight: 0.34096193
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: -6871868272387318278, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  - screenRelativeHeight: 0.015625
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 5578298406286186121, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  - screenRelativeHeight: 0.01
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 689514211730719632, guid: 85fb0c24831083a4b87fca71614b68b2, type: 3}
+  m_Enabled: 1
 --- !u!1001 &6313030739732687343
 PrefabInstance:
   m_ObjectHideFlags: 0
