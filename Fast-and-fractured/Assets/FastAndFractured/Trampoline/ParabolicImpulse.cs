@@ -37,6 +37,8 @@ namespace FastAndFractured {
         private float forwardSpeedLimit = 50f;
         [SerializeField]
         private float maxThrowableWeightForCars = 2000f;
+        [SerializeField]
+        private TrampolineAnimations trampolineAnimations;
 
 
 
@@ -85,6 +87,7 @@ namespace FastAndFractured {
                         ParabolicRangeMovement(rb);
                     }
                 }
+                trampolineAnimations.releaseAnimation.Invoke(countdown);
                 TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
                 {
                     isOnCountdown = false;
