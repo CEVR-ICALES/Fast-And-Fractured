@@ -84,7 +84,7 @@ namespace Utilities
             return gameObjectsPooled;
         }
 
-        public GameObject GivePooledObject(Pooltype pooltype)
+        public GameObject GivePooledObject(Pooltype pooltype, Vector3? position = null)
         {
             var objectPool = FindObjectPoolInList(pooltype);
             if (objectPool != null)
@@ -97,6 +97,10 @@ namespace Utilities
                     {
                         if (!objectPooled.activeSelf)
                         {
+                            if (position != null)
+                            {
+                                objectPooled.transform.position = (Vector3)position;
+                            }
                             objectPooled.SetActive(true);
                             return objectPooled;
                         }

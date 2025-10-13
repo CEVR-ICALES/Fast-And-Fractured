@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6008282678505637703}
   - component: {fileID: 6060296800020245345}
-  - component: {fileID: 3645899035061014341}
   - component: {fileID: 6063000727814428771}
+  - component: {fileID: 6581148177700758679}
   m_Layer: 10
   m_Name: Windmill_A
   m_TagString: Untagged
@@ -52,27 +52,6 @@ MonoBehaviour:
   speedIncreasePerSecond: 0.1
   transformVisual: {fileID: 7635372748562070647}
   rotationDirection: {x: 1, y: 0, z: 0}
---- !u!65 &3645899035061014341
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8374768032267020213}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 2.6255777, y: 3.7661223, z: 2.7080522}
-  m_Center: {x: 0.21883023, y: 0.4595945, z: 0.037695646}
 --- !u!208 &6063000727814428771
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -89,6 +68,29 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.21883023, y: 0.4595945, z: 0.037695646}
   m_TimeToStationary: 0.5
+--- !u!136 &6581148177700758679
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8374768032267020213}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.28
+  m_Height: 5.71
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8632012013030518642
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,7 +173,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: d180d12eae571bb43b57496faea2a21c, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2c73b47f4eff54f33b115d1f64c7248a, type: 2}
     - target: {fileID: 919132149155446097, guid: d180d12eae571bb43b57496faea2a21c, type: 3}
@@ -250,7 +252,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 8a45f7f701cad14458ab6b9df80fd135, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2c73b47f4eff54f33b115d1f64c7248a, type: 2}
     - target: {fileID: 919132149155446097, guid: 8a45f7f701cad14458ab6b9df80fd135, type: 3}

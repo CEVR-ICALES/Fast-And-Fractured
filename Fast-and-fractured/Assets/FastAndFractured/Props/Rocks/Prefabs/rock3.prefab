@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 4621441280171047988}
   - component: {fileID: 5260281454197705899}
   - component: {fileID: 2103890761219686478}
-  m_Layer: 0
+  - component: {fileID: 2033556719457454178}
+  m_Layer: 10
   m_Name: Models
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,6 +87,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &2033556719457454178
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2238603098902545730}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -8203819389299995764, guid: 2b22b7d9026cf8d48b40b4860dbbeb6a, type: 3}
 --- !u!1 &6762037726691016198
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4642341179966098272}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +150,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6190360416421500396}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: rock3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

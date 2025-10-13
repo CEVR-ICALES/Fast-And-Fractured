@@ -14,12 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CharacterName: Carme
   CarDefaultPrefab: {fileID: 8284357542529456002, guid: b4a2617189783d443805cc643d14c728, type: 3}
-  CarWithSkinsPrefabs:
-  - {fileID: 6067046011668277108, guid: 9a46dd806a6bbc44c8162ffabf2732cd, type: 3}
-  - {fileID: 6437773564382581286, guid: 3521337b8043aa5428b6f3969282de45, type: 3}
   MaxEndurance: 1000
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 180
   MaxSpeedDashing: 240
   MaxSpeedMultiplier: 1
@@ -48,7 +45,7 @@ MonoBehaviour:
   NormalShootDMG: 34
   MaxNormalShootDMG: 60
   MinNormalShootDMG: 30
-  PushShootFORCE: 800000
+  PushShootFORCE: 170000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 120

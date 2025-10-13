@@ -25,6 +25,8 @@ namespace FastAndFractured
         private GameObject gameObjectMirroPoint;
 
         private BoxCollider _stormCollider;
+        [SerializeField]
+        private BoxCollider boxVolumeCollider;
 
         private Vector3 _spawnPoint;
         private Vector3 _mirrorPoint;
@@ -164,10 +166,10 @@ namespace FastAndFractured
             _stormCollider.enabled = true;
             if (primaryFog != null)
             {
-                _initialVolumeSizeMain = primaryFog.parameters.size;
-                _stormCollider.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z);
+                _initialVolumeSizeMain = primaryFog.transform.position;
             }
             _initialColliderSize = _stormCollider.size;
+            boxVolumeCollider.size = _stormCollider.size;
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
             IngameEventsManager.Instance.CreateEvent("Events.Sandstorm", 5f);
 
@@ -186,15 +188,16 @@ namespace FastAndFractured
 
                 if (_currentGrowth > _maxGrowth)
                     _currentGrowth = _maxGrowth;
-                if (primaryFog != null)
-                {
-                    float newZSizeMain = _initialVolumeSizeMain.z + _currentGrowth;
 
-                    primaryFog.parameters.size = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, newZSizeMain);
-                }
-                float newZSizeCollider = _initialColliderSize.z + _currentGrowth * colliderLessGrowMultiplicator;
+                float newZSizeCollider = _initialColliderSize.z + _currentGrowth /** colliderLessGrowMultiplicator*/;
+
                 _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
+                Vector3 newPrimaryFogPositionZ = _direction * _currentGrowth;
+                primaryFog.transform.position = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z) + newPrimaryFogPositionZ;
+
+                boxVolumeCollider.size = _stormCollider.size;
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
+
 
                 if ((fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
                 {

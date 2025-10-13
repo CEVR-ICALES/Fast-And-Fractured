@@ -61,11 +61,11 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7919460373978064434, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: e8d641103d87240e383c86502c7ff09d, type: 2}
     - target: {fileID: 8284010323419258274, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: e8d641103d87240e383c86502c7ff09d, type: 2}
     - target: {fileID: 8374768032267020213, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
@@ -102,9 +102,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8374768032267020213, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1823903748412977520}
-    - targetCorrespondingSourceObject: {fileID: 8374768032267020213, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 223237032216783021}
   m_SourcePrefab: {fileID: 100100000, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
 --- !u!1 &5972366869271588857 stripped
@@ -112,27 +109,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8374768032267020213, guid: a753f42e8c568774e9c29a40f464bca6, type: 3}
   m_PrefabInstance: {fileID: 2799896606943217740}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &1823903748412977520
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5972366869271588857}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 2.6255777, y: 3.7661223, z: 2.7080522}
-  m_Center: {x: 0.21883023, y: 0.4595945, z: 0.037695646}
 --- !u!208 &223237032216783021
 NavMeshObstacle:
   m_ObjectHideFlags: 0

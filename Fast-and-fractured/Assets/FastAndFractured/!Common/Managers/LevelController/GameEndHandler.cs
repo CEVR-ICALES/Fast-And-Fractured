@@ -62,6 +62,7 @@ namespace FastAndFractured
                 _gameEndDataSO.totalDamageTaken = playerStats.totalDamageTaken.ToString();
                 _gameEndDataSO.totalDistanceTraveled = totalDistanceText;
                 _gameEndDataSO.finalAnimation = finalAnimationPrefab; 
+                _gameEndDataSO.sceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
             }
             else
             {

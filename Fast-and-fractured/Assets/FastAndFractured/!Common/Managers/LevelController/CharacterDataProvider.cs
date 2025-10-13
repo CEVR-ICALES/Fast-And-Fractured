@@ -1,10 +1,5 @@
-using System.Collections.Generic;
-using FMOD.Studio;
-using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.WSA;
-using static UnityEditor.Recorder.OutputPath;
-
+using System.Collections.Generic; 
+using UnityEngine; 
 namespace FastAndFractured
 {
     public class CharacterDataProvider

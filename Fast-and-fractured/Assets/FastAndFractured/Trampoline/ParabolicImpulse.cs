@@ -37,6 +37,8 @@ namespace FastAndFractured {
         private float forwardSpeedLimit = 50f;
         [SerializeField]
         private float maxThrowableWeightForCars = 2000f;
+        [SerializeField]
+        private TrampolineAnimations trampolineAnimations;
 
 
 
@@ -85,6 +87,7 @@ namespace FastAndFractured {
                         ParabolicRangeMovement(rb);
                     }
                 }
+                trampolineAnimations.releaseAnimation.Invoke(countdown);
                 TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
                 {
                     isOnCountdown = false;
@@ -101,7 +104,7 @@ namespace FastAndFractured {
         private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
-            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime);
+            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,false);
         }
 
 
@@ -118,7 +121,7 @@ namespace FastAndFractured {
         private void ParabolicRangeMovement(Rigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
-            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime);
+            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true);
         }
 
         private void ParabolicRangeMovement(Rigidbody rb)
