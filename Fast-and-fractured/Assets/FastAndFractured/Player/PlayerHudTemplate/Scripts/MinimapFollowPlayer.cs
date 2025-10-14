@@ -62,8 +62,11 @@ namespace FastAndFractured
                 _player = LevelControllerButBetter.Instance.LocalPlayer;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
-                characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
-                _cameraReference = _player.transform.parent.GetComponent<CameraHolder>().CameraToHold;
+                if (_player != null)
+                {
+                    characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
+                    _cameraReference = _player.transform.parent.GetComponent<CameraHolder>().CameraToHold;
+                }
             }
         }
     }
