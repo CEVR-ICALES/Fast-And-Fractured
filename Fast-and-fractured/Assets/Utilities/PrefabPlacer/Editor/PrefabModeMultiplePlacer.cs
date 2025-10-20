@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -178,3 +179,4 @@ public class PrefabModeMultiplePlacer : MonoBehaviour, IPrefabPlacerMode
         //StopPlacing();
     }
 }
+#endif

@@ -43,7 +43,7 @@ namespace FastAndFractured
 
                 Vector3 direction = vectorCenterToContactPoint.normalized;
 
-                direction.y += 0.5f;
+                direction.y += applyForceYOffset;
 
                 direction = isGrounded ? Vector3.ProjectOnPlane(direction, Vector3.up) : direction;
 

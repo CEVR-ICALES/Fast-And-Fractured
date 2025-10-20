@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -718,3 +719,5 @@ public class PrefabPlacerWindow : EditorWindow //handles UI and user inputs (on 
 
     #endregion
 }
+
+#endif

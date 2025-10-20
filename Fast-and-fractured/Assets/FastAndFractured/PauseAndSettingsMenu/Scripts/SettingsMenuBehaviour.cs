@@ -93,7 +93,7 @@ namespace FastAndFractured
 
             vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(vsyncToggle.isOn); });
 
-            if (SceneManager.GetActiveScene().buildIndex != 0)
+            if (SceneManager.GetActiveScene().buildIndex != 1)
             {
                 deleteButton.SetActive(false);
             }
