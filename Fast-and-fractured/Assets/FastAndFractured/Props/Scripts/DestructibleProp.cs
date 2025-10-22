@@ -12,9 +12,10 @@ public class DestructibleProp : MonoBehaviour
 
     [SerializeField] private PropType propType = PropType.GENERIC;
 
-    [Header("Tree Models")]
+    [Header("Only for Tree Models")]
     [SerializeField] private GameObject intactTreeModel;
     [SerializeField] private GameObject trunkTreeModel;
+    [SerializeField] private ParticleSystem collisionParticles;
 
     private float _damageAmount = 1f;
 
@@ -56,6 +57,11 @@ public class DestructibleProp : MonoBehaviour
                 if (intactTreeModel != null) intactTreeModel.SetActive(false);
                 if (trunkTreeModel != null) intactTreeModel.SetActive(true);
             }
+        }
+        else
+        {
+            if (propType == PropType.TREE)
+                collisionParticles.Play();
         }
     }
 }
