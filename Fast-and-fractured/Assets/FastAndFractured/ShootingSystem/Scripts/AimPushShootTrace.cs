@@ -22,9 +22,8 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
 
     [Header("HitMark")]
     [SerializeField] private GameObject hitMark;
-    [SerializeField] private AimPushShootHitMarkCollision hitMarkCollision;
-    [SerializeField] private AimPushShootHitMarkCollision hitMarkCollision2;
-    [SerializeField] private float delayTimeForSecondThrow = 0.2f;
+    private LayerMask _hitMarkMask;
+    [SerializeField] private LayerMask[] layerMasksForHitMark;
 
     [Header("Resources")]
      private Transform _pushShootPoint;
@@ -32,25 +31,18 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
 
     private List<Vector3> _points = new List<Vector3>();
-    private List<Vector3> previousPoints = new List<Vector3>();
-    private Vector3 _currentVelocity;
     private float _currentCustomGravity;
     private Vector3 _currentPosition;
     private Vector3 _previousVelocity;
-    private Vector3 _initialSpeed;
+    private Vector3 _initialVelocity;
     private Vector3 _currentContactPoint;
-    private int _previousContactIndex;
     [SerializeField]
     private float toleranceToVelocityMarginError = 0.001f;
     private int _currentIndex = 0;
-    private ITimer _showTraceTimer;
     private bool _calculateTracePoints;
 
-    private void OnEnable()
-    {
-        hitMarkCollision.onCollision.AddListener(SetPointForHitMark);
-        hitMarkCollision2.onCollision.AddListener(SetPointForHitMark);
-    }
+    private const float MRUA_DISTANCE_FORMULA_CONSTANT = 0.5f;
+    private const float MARGIN_TO_FIND_COLSEST_HIT_POINT = 1.5f;
     protected override void Construct()
     {
         
@@ -61,53 +53,88 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
         if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
         _pushShootPoint = pushShootHandle.PushShootPoint;
+        _hitMarkMask = layerMasksForHitMark[0];
+
+        for (int i = 1; i < layerMasksForHitMark.Length; i++)
+        {
+            _hitMarkMask |= layerMasksForHitMark[i];
+        }
         CalculateTrayectory();
         hitMark.SetActive(false);
-        _previousContactIndex = 0;
-        _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
+        _initialVelocity = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
         _calculateTracePoints = false;
-        ThrowSimulatedProyectile();
+        RaycastToSetHitMark();
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        if (_calculateTracePoints)
+        if (_calculateTracePoints) 
         {
             CalculateTrayectory();
+            RaycastToSetHitMark();
         }
+    }
+
+    private void RaycastToSetHitMark()
+    {
+        int highestPointIndex = ReturnCurrentHighestPointIndex();
+        Ray ray = new Ray(_points[highestPointIndex],Vector3.down);
+        if (Physics.Raycast(ray, out var hitInfo, Mathf.Infinity, _hitMarkMask))
+        {
+            int impactPoint = FindClosestPointAbove(hitInfo.point + MARGIN_TO_FIND_COLSEST_HIT_POINT * Vector3.up);
+            Vector3 impactHigherPoint = new Vector3(_points[impactPoint].x, _points[highestPointIndex].y, _points[impactPoint].z);
+            ray = new Ray(impactHigherPoint,Vector3.down);
+            if (Physics.Raycast(ray, out var hitInfo1, Mathf.Infinity,_hitMarkMask))
+            {
+                _currentContactPoint = hitInfo1.point;
+            }
+        }
+    }
+
+    private int ReturnCurrentHighestPointIndex()
+    {
+        int highestPoint = 0;
+        float previousYPoint = float.MinValue;
+        for (int i = 0; i < _points.Count; i++)
+        {
+            if (previousYPoint > _points[i].y) 
+                return highestPoint;
+            highestPoint = i;
+            previousYPoint = _points[i].y;
+        }
+        return highestPoint;
     }
 
     private void CalculateTrayectory()
     {
-        _initialSpeed = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
+        _initialVelocity = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
 
-        if (Vector3.SqrMagnitude(_previousVelocity - _initialSpeed) > toleranceToVelocityMarginError)
+        if (Vector3.SqrMagnitude(_previousVelocity - _initialVelocity) > toleranceToVelocityMarginError)
         {
-            previousPoints = new List<Vector3>(_points);
-            _currentVelocity = _initialSpeed;
             _currentPosition = _pushShootPoint.position;
             _points.Clear();
             _points.Add(_currentPosition);
+            float currentTimeStep = 0;
 
             for (int i = 0; i < maxCalculationSteps; i++)
             {
-                _currentVelocity += Physics.gravity * _currentCustomGravity * timeStep;
-                _currentPosition += _currentVelocity * timeStep;
+                currentTimeStep += timeStep;
+                _currentPosition = _pushShootPoint.position + _initialVelocity * currentTimeStep + MRUA_DISTANCE_FORMULA_CONSTANT * Physics.gravity * _currentCustomGravity * currentTimeStep * currentTimeStep;
                 _points.Add(_currentPosition);
             }
-            _previousVelocity = _initialSpeed;
+            _previousVelocity = _initialVelocity;
         }
     }
 
-    public int FindClosestPointAbove(Vector3 targetPoint)
+    public int FindClosestPointAbove(Vector3 targetPoint,float startLoopIndexPoint = 0)
     {
         int closestIndex = 0;
         float minYDifference = float.MaxValue;
 
         for (int i = 0; i < _points.Count; i++)
         {
-            float yDiff = _points[i].y - targetPoint.y;
-            if (yDiff > 0 && yDiff < minYDifference)
+            float yDiff = Mathf.Abs(_points[i].y - targetPoint.y);
+            if (yDiff < minYDifference&&i>=startLoopIndexPoint)
             {
                 minYDifference = yDiff;
                 closestIndex = i;
@@ -138,90 +165,11 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     {
         hitMark.SetActive(true);
         lineRenderer.enabled = true;
-        _currentIndex = FindClosestPointAbove(_currentContactPoint);
-        int indexToFollow = _previousContactIndex;
-        bool condition;
-        if (_previousContactIndex >= _points.Count)
-        {
-            condition = true;
-        }
-        else
-        {
-            condition = Mathf.Abs(_points[_previousContactIndex].y - _points[_currentIndex].y) > magnitudeDiferenceFactorBetweenColisionPoints;
-        }
-
-        if (condition)
-        {
-            _previousContactIndex = _currentIndex;
-            indexToFollow = _currentIndex;
-        }
-        else
-        {
-            hitMark.transform.position = _points[_previousContactIndex];
-        }
-        if (_showTraceTimer == null)
-        {
-            ThrowSimulatedProyectile();
-            List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
-            List<Vector3> filteredPreviousPoints = new List<Vector3>();
-            bool noPreviousPoint = previousPoints.Count == 0;
-            if (!noPreviousPoint)
-            {
-               filteredPreviousPoints = RemovePointsInLowerPos(new List<Vector3>(previousPoints), previousPoints[_currentIndex].y);
-            }
-           
-            _showTraceTimer = TimerSystem.Instance.CreateTimer(
-                Time.deltaTime * frames,
-                onTimerDecreaseComplete: () =>
-                {
-                    _showTraceTimer = null;
-                    if (noPreviousPoint)
-                    {
-                        lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
-                        lineRenderer.Simplify(tolerance);
-                    }
-                },
-                onTimerDecreaseUpdate: (float timer) =>
-                {
-                    if (!noPreviousPoint)
-                    {
-                        float progress = 1f - (timer / (Time.deltaTime * frames));
-                        lineRenderer.positionCount = filteredCurrentPoints.Count;
-                        Vector3 hitMarkInitialPos = hitMark.transform.position;
-                        Vector3 newPositionForHitMark = hitMark.transform.position;
-                        for (int i = 0; i < filteredCurrentPoints.Count && i < filteredPreviousPoints.Count; i++)
-                        {
-                            Vector3 interpolatedPos = Vector3.Slerp(
-                                filteredPreviousPoints[i],
-                                filteredCurrentPoints[i],
-                                progress
-                            );
-                            if (indexToFollow == i)
-                            {
-                                newPositionForHitMark = interpolatedPos;
-                                Vector3 interpolationHitMarkPoint = Vector3.Slerp(hitMarkInitialPos, newPositionForHitMark, progress);
-                                hitMark.transform.position = interpolationHitMarkPoint;
-                            }
-                            lineRenderer.SetPosition(i, interpolatedPos);
-                        }
-                       
-                        lineRenderer.Simplify(tolerance);
-                    }
-                }
-            );
-        }
-    }
-
-    private void SetPointForHitMark(Vector3 point)
-    {
-       _currentContactPoint = point;
-    }
-
-
-    private void ThrowSimulatedProyectile()
-    {
-        hitMarkCollision.SimulateThrow(_initialSpeed, _pushShootPoint.position, Physics.gravity * _currentCustomGravity);
-        TimerSystem.Instance.CreateTimer(delayTimeForSecondThrow, onTimerDecreaseComplete: () => { hitMarkCollision2.SimulateThrow(_initialSpeed, _pushShootPoint.position, Physics.gravity * _currentCustomGravity); });
+        _currentIndex = FindClosestPointAbove(_currentContactPoint,ReturnCurrentHighestPointIndex());
+        List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
+        hitMark.transform.position = _points[_currentIndex];
+        lineRenderer.positionCount = filteredCurrentPoints.Count;
+        lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
     }
 
     public void DrawTrayectory(bool draw)
@@ -240,7 +188,5 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     private void OnDisable() 
     { 
         UnsetHitMark(); 
-        hitMarkCollision.onCollision?.RemoveAllListeners();
-        hitMarkCollision2?.onCollision?.RemoveAllListeners();
     }
 }

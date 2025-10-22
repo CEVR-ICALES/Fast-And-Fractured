@@ -25,6 +25,7 @@ namespace FastAndFractured
         private const float SMOOTH_TIME = 0.5f;
         private const float OPERATION_PROGRESS_TARGET = 0.9f;
         private const string LOADING_TIP_TEXT = "Tips.Tip";
+        private const string PREVIOUS_GAME_SCENE = "Previous_Scene";
 
         void OnEnable()
         {
@@ -65,10 +66,16 @@ namespace FastAndFractured
 
         public void LoadScene(int sceneBuildIndex)
         {
+            PlayerPrefs.SetInt(PREVIOUS_GAME_SCENE, sceneBuildIndex);
             TimerSystem.Instance.CreateTimer(SCENE_LOAD_DELAY, onTimerDecreaseComplete: () =>
             {
                 StartSceneLoading(sceneBuildIndex);
             });
+        }
+
+        public void ReplayScene()
+        {
+            LoadScene(PlayerPrefs.GetInt(PREVIOUS_GAME_SCENE));
         }
 
         private void StartSceneLoading(int sceneBuildIndex)

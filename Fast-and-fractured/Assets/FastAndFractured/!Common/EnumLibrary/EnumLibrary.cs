@@ -63,7 +63,8 @@ namespace Enums
         EXIT_POPUP,
         PAUSE,
         WIN_LOSE,
-        HOW_TO_PLAY
+        HOW_TO_PLAY,
+        MAP_SELECTION
     }
 
     public enum Pooltype
@@ -81,7 +82,8 @@ namespace Enums
         NORMAL_BULLET_TOMATO,
         PUSH_BULLET_MELON,
         NORMAL_BULLET_CROQUETA,
-        PUSH_BULLET_SARTENAZO
+        PUSH_BULLET_SARTENAZO,
+        MEGA_CHICKEN_EGG
     }
 
     public enum PathMode

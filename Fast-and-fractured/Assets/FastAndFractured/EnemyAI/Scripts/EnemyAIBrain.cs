@@ -334,7 +334,10 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            ChangeTargetToShoot(_player);
+            if (_player != null)
+            {
+                ChangeTargetToShoot(_player);
+            }
         }
 
         public void ChooseItemFromType()

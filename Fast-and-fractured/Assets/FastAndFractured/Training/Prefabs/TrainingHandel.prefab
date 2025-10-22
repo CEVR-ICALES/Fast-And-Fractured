@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8062737124458048066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 59352839809742799}
+  - component: {fileID: 3327881800209257056}
+  - component: {fileID: 2114893491211217735}
+  m_Layer: 0
+  m_Name: TrainingHandel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &59352839809742799
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8062737124458048066}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -256.9601, y: 26.033337, z: 18.585312}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3327881800209257056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8062737124458048066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81af39a8f7f078942adb19a3e644ce16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyboardScreens:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  gamepadScreens:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  gamepadNextSprite: {fileID: 21300000, guid: 624d7f0ce8cefad4b9a99227919d048c, type: 3}
+  keyboardNextSprite: {fileID: 21300000, guid: 1f839f4a61d053a45b43008fae380873, type: 3}
+  nextScreenImagee: {fileID: 0}
+  nextScreenController:
+    m_Name: Next Screen Controller
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: b0ba48de-9a0e-480b-9d1c-3a0a643ed96d
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  showInOneScreen: 1
+--- !u!114 &2114893491211217735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8062737124458048066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caab3fdbab7aa2845887cd9bd0da8dfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trainingTextTime: {fileID: 0}
+  trainingMessageDuration: 4.5

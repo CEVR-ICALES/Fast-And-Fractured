@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-using Enums;
 
 namespace FastAndFractured
 {
@@ -101,7 +100,7 @@ namespace FastAndFractured
             PhysicsBehaviour otherComponentPhysicsBehaviours = collision.gameObject.GetComponentInChildren<PhysicsBehaviour>();
             if (otherComponentPhysicsBehaviours != null)
             {
-                CancelDash();
+                 CancelDash();
                 otherComponentPhysicsBehaviours.CancelDash();
                 if (otherComponentPhysicsBehaviours.HasBeenPushed)
                     return;
@@ -148,7 +147,7 @@ namespace FastAndFractured
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply); // for now we just apply an offset on the y axis provisional
+                otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse); // for now we just apply an offset on the y axis provisional
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
             }  
@@ -200,14 +199,37 @@ namespace FastAndFractured
         #endregion
 
         #region Force Applier
-        public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply)
+        public void ApplyForce(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode)
         {
 
-            _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, ForceMode.Impulse);
+            _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, forceMode);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
             if(StatsController.IsPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
+            }
+        }
+
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
+        {
+            if (stopMomentum)
+                _rb.linearVelocity = Vector3.zero;
+            _carMovementController.IsInTrampolin = true;
+            _rb.AddForce(force, forceMode);
+            if (!limitRbSpeed)
+            {
+                if (!_carMovementController.IsDashing)
+                {
+                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                }
+                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+                {
+                    if (!_carMovementController.IsDashing)
+                    {
+                        _carMovementController.SetMaxRbSpeedDelayed();
+                        _carMovementController.IsInTrampolin = false;
+                    }
+                });
             }
         }
 
@@ -253,6 +275,18 @@ namespace FastAndFractured
             float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
 
             float force = statsController.BaseForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
+
+            return force;
+        }
+
+        public float CalculateForceToApplyToOtherCar(float oCarEnduranceFactor, float oCarWeight, float oCarEnduranceImportance,float baseForce)
+        {
+            float weightFactor = 1 + ((oCarWeight - averageCarWeight) / averageCarWeight) * carWeightImportance; // is for example the car importance is 0.2 (20 %) and the car weights 1200 the final force will be multiplied by 1.05 or something close to that value since the car is heavier (number will be big so a 0.05 is enough for now)
+
+            float enduranceFactor = enduranceFactorEvaluate.Evaluate(oCarEnduranceFactor);
+            float enduranceContribution = enduranceFactor * oCarEnduranceImportance; // final endurance contribution considering how important is it for that car
+
+            float force = baseForce * weightFactor * enduranceContribution; // generate the force number from the BaseForce (base force should be the highest achiveable force)
 
             return force;
         }
