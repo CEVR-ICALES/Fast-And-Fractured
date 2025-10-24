@@ -22,6 +22,7 @@ public class DestructibleProp : MonoBehaviour
     private const int MINIMUM_HP_TO_DESTROY = 0;
 
     //private EventReference destroySound; FUTURE USE
+    //private EventReference collisionSound; FUTURE USE
     #endregion
     private void OnCollisionEnter(Collision collision)
     {

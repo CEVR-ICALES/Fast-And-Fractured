@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5496909473868922044}
   - component: {fileID: 7347123935778257395}
+  - component: {fileID: 2273461667366617322}
   m_Layer: 0
   m_Name: CarobTreeComplete
   m_TagString: Untagged
@@ -57,6 +58,33 @@ MonoBehaviour:
   intactTreeModel: {fileID: 7906159375591041425}
   trunkTreeModel: {fileID: 4130892362137251215}
   collisionParticles: {fileID: 5515569591041661115}
+--- !u!54 &2273461667366617322
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8389976806172852662}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &3860298903645425886
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -307,10 +335,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: a1542d8b7b5427d4886bbfa2873e518f, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a1542d8b7b5427d4886bbfa2873e518f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7915788089828013482}
   m_SourcePrefab: {fileID: 100100000, guid: a1542d8b7b5427d4886bbfa2873e518f, type: 3}
 --- !u!4 &7418416757943710507 stripped
 Transform:
@@ -322,6 +357,27 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: a1542d8b7b5427d4886bbfa2873e518f, type: 3}
   m_PrefabInstance: {fileID: 7023710797661951168}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &7915788089828013482
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7906159375591041425}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4.6163135, y: 8.206863, z: 4.3424463}
+  m_Center: {x: 0.19486007, y: 2.5261307, z: -0.25881952}
 --- !u!1001 &8849343924990794638
 PrefabInstance:
   m_ObjectHideFlags: 0

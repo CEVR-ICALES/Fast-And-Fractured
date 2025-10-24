@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4609738021974203495}
   - component: {fileID: 7278268048107296441}
+  - component: {fileID: 1967490413096501502}
   m_Layer: 0
   m_Name: OliveTreeComplete
   m_TagString: Untagged
@@ -57,6 +58,33 @@ MonoBehaviour:
   intactTreeModel: {fileID: 5415893055115546080}
   trunkTreeModel: {fileID: 488824822385666251}
   collisionParticles: {fileID: 8967194650821250412}
+--- !u!54 &1967490413096501502
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2494858257522968022}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &723336023328544154
 PrefabInstance:
   m_ObjectHideFlags: 0
