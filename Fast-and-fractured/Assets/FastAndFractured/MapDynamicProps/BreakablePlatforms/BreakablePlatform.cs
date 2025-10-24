@@ -1,17 +1,26 @@
 using System.Collections.Generic;
 using FastAndFractured;
 using UnityEngine;
+using Utilities;
 
 public class BreakablePlatform : MonoBehaviour
 {
     [SerializeField] private float breakTime = 15f;
-    [SerializeField] private int maxBulletHits = 3;
-    [SerializeField] private Animator animator;
+    [Range(0.1f, 0.7f)]
+    [SerializeField] private float semiBreakTimePercentage = 0.5f;
+    [SerializeField] private float bulletsSubtractTime = 0.2f;
+    [SerializeField] private float explosionSubtractTime = 0.5f;
+    [SerializeField] private MeshCollider meshCollider;
+    [SerializeField] private MeshRenderer platform;
+    [SerializeField] private MeshRenderer semiBreakePlatform;
+    [SerializeField] private MeshRenderer breakePlatform;
+    private int currentCharacters = 0;
+    private ITimer breakTimeTimer = null;
+    private ITimer semiBreakTimeTimer = null;
+
 
     private int bulletHits = 0;
-    private float accumulatedVehicleTime = 0f;
     private bool isBreaking = false;
-    private Dictionary<Collider, float> vehicleEntryTimes = new Dictionary<Collider, float>();
 
     private void OnTriggerEnter(Collider other)
     {
@@ -19,47 +28,69 @@ public class BreakablePlatform : MonoBehaviour
         if (other.GetComponent<StatsController>())
         {
             // Store entry time
-            vehicleEntryTimes[other] = Time.time;
+            if (breakTimeTimer == null)
+            {
+                    breakTimeTimer = TimerSystem.Instance.CreateTimer(breakTime, onTimerDecreaseComplete: () =>
+                    {
+                        BreakPlatform();
+                    });
+                    semiBreakTimeTimer = TimerSystem.Instance.CreateTimer(breakTime * semiBreakTimePercentage, onTimerDecreaseComplete: () =>
+                    {
+                        SemiBreakPlatform();
+                    });
+            }
+            else
+            {
+                if (breakTimeTimer.GetData().IsPaused)
+                {
+                    breakTimeTimer.ResumeTimer();
+                    semiBreakTimeTimer.ResumeTimer();
+                }
+            }
+            currentCharacters++;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (isBreaking) return;
-        if (other.GetComponent<StatsController>() && vehicleEntryTimes.ContainsKey(other))
-        {
-            // Calculate time spent and accumulate
-            float entryTime = vehicleEntryTimes[other];
-            float timeSpent = Time.time - entryTime;
-            accumulatedVehicleTime += timeSpent;
-            vehicleEntryTimes.Remove(other);
-
-            if (accumulatedVehicleTime >= breakTime)
+        if (other.GetComponent<StatsController>())
+        {   
+            currentCharacters--;
+            if(currentCharacters == 0)
             {
-                BreakPlatform();
+                breakTimeTimer.PauseTimer();
+                semiBreakTimeTimer.PauseTimer();
             }
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (isBreaking) return;
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if (isBreaking) return;
 
-        PushBulletBehaviour bullet = collision.gameObject.GetComponent<PushBulletBehaviour>();
-        if (bullet)
-        {
-            bulletHits++;
-            if (bulletHits >= maxBulletHits)
-            {
-                BreakPlatform();
-            }
-        }
-    }
+    //    PushBulletBehaviour bullet = collision.gameObject.GetComponent<PushBulletBehaviour>();
+    //    if (bullet)
+    //    {
+    //        bulletHits++;
+    //        if (bulletHits >= bulletsSubtractTime)
+    //        {
+    //            BreakPlatform();
+    //        }
+    //    }
+    //}
 
     private void BreakPlatform()
     {
         isBreaking = true;
-        // More stuff (anim, particles, etc.)
-        gameObject.SetActive(false);
+        semiBreakePlatform.enabled = false;
+        meshCollider.enabled = false;
+        breakePlatform.enabled = true;
+    }
+
+    private void SemiBreakPlatform()
+    {
+        platform.enabled = false;
+        semiBreakePlatform.enabled = true;
     }
 }
