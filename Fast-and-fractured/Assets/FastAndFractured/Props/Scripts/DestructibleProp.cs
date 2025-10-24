@@ -1,5 +1,6 @@
 using Enums;
 using FMODUnity;
+using Utilities;
 using UnityEngine;
 
 public class DestructibleProp : MonoBehaviour
@@ -18,12 +19,48 @@ public class DestructibleProp : MonoBehaviour
     [SerializeField] private ParticleSystem collisionParticles;
 
     private float _damageAmount = 1f;
-
     private const int MINIMUM_HP_TO_DESTROY = 0;
+
+    public float _damageCooldown = 1f;
+    public float _lastDamageTime = -999f;
+    private float trunkLifetime = 5f;
+
+    private bool _isColliding = false;
+    private bool _isDestroyed = false;
+
+    private Timer _trunkTimer;
 
     //private EventReference destroySound; FUTURE USE
     //private EventReference collisionSound; FUTURE USE
     #endregion
+
+    private void Start()
+    {
+        if (trunkTreeModel != null)
+        {
+            TimerData data = new TimerData(
+                id: "TrunkTimer",
+                duration: trunkLifetime,
+                direction: TimerDirection.INCREASE,
+                onTimerComplete: null,
+                onTimerUpdate: null
+            );
+
+            _trunkTimer = new Timer(data);
+            _trunkTimer.GetData().OnTimerIncreaseComplete = () =>
+            {
+                trunkTreeModel.SetActive(false);
+            };
+        }
+    }
+
+    private void Update()
+    {
+        if (_trunkTimer != null)
+        {
+            _trunkTimer.UpdateTimer(Time.deltaTime);
+        }
+    }
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Entered Collision");
@@ -37,7 +74,26 @@ public class DestructibleProp : MonoBehaviour
         if (rb == null)
             return;
 
-        TakeDamage(_damageAmount);
+        _isColliding = true;
+
+        TryApplyDamage(_damageAmount);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (((1 << collision.gameObject.layer) & damagingLayer) != 0)
+            _isColliding = false;
+    }
+
+    private void TryApplyDamage(float damage)
+    {
+        if (_isDestroyed) return;
+
+        if (_isColliding == true && Time.time < _lastDamageTime + _damageCooldown)
+            return;
+
+        _lastDamageTime = Time.time;
+        TakeDamage(damage);
     }
 
     private void TakeDamage(float damage)
@@ -46,18 +102,28 @@ public class DestructibleProp : MonoBehaviour
 
         if (propHealth <= MINIMUM_HP_TO_DESTROY)
         {
-            destroyedParticles.transform.position = transform.position;
-            destroyedParticles.Play();
+            _isDestroyed = true;
 
             if (propType == PropType.GENERIC)
             {
                 this.gameObject.SetActive(false);
+                destroyedParticles.transform.position = transform.position;
+
             }
             else if (propType == PropType.TREE)
             {
-                if (intactTreeModel != null) intactTreeModel.SetActive(false);
-                if (trunkTreeModel != null) intactTreeModel.SetActive(true);
+                if (intactTreeModel != null)
+                    intactTreeModel.SetActive(false);
+
+                if (trunkTreeModel != null)
+                {
+                    trunkTreeModel.SetActive(true);
+
+                    _trunkTimer?.StartTimer();
+                }
             }
+
+            destroyedParticles.Play();
         }
         else
         {
