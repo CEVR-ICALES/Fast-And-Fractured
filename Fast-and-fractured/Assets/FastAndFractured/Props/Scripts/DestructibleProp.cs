@@ -21,8 +21,8 @@ public class DestructibleProp : MonoBehaviour
     private float _damageAmount = 1f;
     private const int MINIMUM_HP_TO_DESTROY = 0;
 
-    public float _damageCooldown = 1f;
-    public float _lastDamageTime = -999f;
+    private float _damageCooldown = 1f;
+    private float _lastDamageTime = -999f;
     private float trunkLifetime = 5f;
 
     private bool _isColliding = false;
