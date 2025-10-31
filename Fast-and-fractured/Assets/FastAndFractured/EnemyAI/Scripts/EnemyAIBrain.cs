@@ -101,7 +101,7 @@ namespace FastAndFractured
 
         private IAGroundState groundState = IAGroundState.NONE;
         private ITimer _flipForceTimer;
-
+        private AiInputProvider _aiInputProvider;
         //Training Values
         public bool PlayerNear { get => _playerNear; set => _playerNear = value; }
         private bool _playerNear = false;
@@ -119,6 +119,8 @@ namespace FastAndFractured
                 statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
                 statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             }
+            _aiInputProvider = GetComponentInParent<AiInputProvider>();
+
         }
 
 
@@ -254,7 +256,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
-            _player = LevelControllerButBetter.Instance.playerReference;
+            _player = LevelControllerButBetter.Instance.LocalPlayer;
         }
         public void ReturnToStartPosition()
         {
@@ -287,9 +289,8 @@ namespace FastAndFractured
             }
 
             Vector2 input = new Vector2(inputX, inputY);
-
-
-            carMovementController.HandleSteeringInput(input* speedMultiplier);
+            _aiInputProvider.DesiredMoveInput = input * speedMultiplier;
+            carMovementController.ProcessMovementInput();
         }
 
 
@@ -333,7 +334,10 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            ChangeTargetToShoot(_player);
+            if (_player != null)
+            {
+                ChangeTargetToShoot(_player);
+            }
         }
 
         public void ChooseItemFromType()
@@ -849,7 +853,7 @@ namespace FastAndFractured
         public void StopMovement()
         {
             physicsBehaviour.Rb.angularVelocity = Vector3.zero;
-            physicsBehaviour.Rb.velocity = Vector3.zero;
+            physicsBehaviour.Rb.linearVelocity = Vector3.zero;
             carMovementController.StopAllCarMovement();
         }
 

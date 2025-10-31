@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a655d277951fcb4fa5d80c5d86b85bd, type: 3}
+  m_Name: ChickenIdle
+  m_EditorClassIdentifier: 
+  enterActions: []
+  actions: []
+  exitActions: []
+  transitions:
+  - decision: {fileID: 11400000, guid: 1acdc4c3267c14f419fbc040bdd7867e, type: 2}
+    trueState: {fileID: 11400000, guid: 92746040ae9d02a4aa604ca125bc2b1d, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0
+  - decision: {fileID: 11400000, guid: c2480a629f8528041b6c614ab495d942, type: 2}
+    trueState: {fileID: 11400000, guid: 7422bddaf60f90a40a9c96ba97792859, type: 2}
+    falseState: {fileID: 0}
+    hasExitTime: 0

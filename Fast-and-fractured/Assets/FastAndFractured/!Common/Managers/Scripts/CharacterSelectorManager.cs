@@ -47,14 +47,15 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     private const string  SELECTED_PLAYER_KEY = "Selected_Player";
 
 
-    private void OnEnable()
+    protected override void Initialize()
     {
         PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
         PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
-        
-        if(PlayerPrefs.HasKey(SELECTED_PLAYER_KEY)){
+
+        if (PlayerPrefs.HasKey(SELECTED_PLAYER_KEY))
+        {
             foreach (CharacterMenuData character in allCharacters)
             {
                 if (PlayerPrefs.GetString(SELECTED_PLAYER_KEY).Contains(character.CharacterName))
@@ -73,7 +74,6 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
         UpdateCharacterDisplay();
     }
-
     public void SelectNextCharacter()
     {
         if (_modelChangeTimer != null) return;

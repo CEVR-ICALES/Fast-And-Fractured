@@ -83,7 +83,7 @@ namespace FastAndFractured
 
         private void FixedUpdate()
         {
-            _currentSpeed = _physicsBehaviour.Rb.velocity.magnitude;
+            _currentSpeed = _physicsBehaviour.Rb.linearVelocity.magnitude;
             HandleTrailParticleSystem();
             HandleBrakeMarks();
         }

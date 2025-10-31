@@ -119,7 +119,7 @@ namespace FastAndFractured
                                     List<CharacterIcon> characterIcons,
                                     System.Action onPlayerWin, System.Action onPlayerLoss)
         {
-            if (isPlayer && _callStormTimer != null && TimerSystem.Instance != null && TimerSystem.Instance.HasTimer(_callStormTimer))
+            if (_callStormTimer != null && TimerSystem.Instance != null && TimerSystem.Instance.HasTimer(_callStormTimer))
             {
                 TimerData stormTimerData = _callStormTimer.GetData();
                 float newTime = Mathf.Max(0, stormTimerData.CurrentTime - _playerDeadReductionTime);
@@ -168,6 +168,9 @@ namespace FastAndFractured
                 }
 
                 AliveCharacterCount--;
+
+                Debug.Log("AliveCharacterCount " + AliveCharacterCount);
+                Debug.Log("_inGameCharacters Count" + _inGameCharacters.Count);
                 if (AliveCharacterCount <= 1 && _playerReference != null && _inGameCharacters.Contains(_playerReference))  
                 {
                     HasPlayerWon = true;

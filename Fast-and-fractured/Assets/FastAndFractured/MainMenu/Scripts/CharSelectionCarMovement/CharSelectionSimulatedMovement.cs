@@ -25,7 +25,7 @@ public class CharSelectionSimulatedMovement : MonoBehaviour
 
     private void Update()
     {
-        if(_rb.velocity.magnitude > rbSpeedThreshold)
+        if(_rb.linearVelocity.magnitude > rbSpeedThreshold)
         {
             foreach(GameObject wheel in wheelsMeshes)
             {

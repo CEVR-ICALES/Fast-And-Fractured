@@ -7,16 +7,19 @@ namespace Utilities
 {
     public class ObjectPoolManager : AbstractSingleton<ObjectPoolManager>
     {
-        //Function in custom start
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             _objectPools = new List<ObjectPool>();
             _parentGameObjectOfPools = new GameObject(parentGameObjectOfPoolsName).transform;
             foreach (var poolSO in poolSOList)
             {
                 CreateObjectPool(poolSO);
             }
+        }
+        protected override void Initialize()
+        {
+            
         }
 
         private List<ObjectPool> _objectPools;
@@ -81,7 +84,7 @@ namespace Utilities
             return gameObjectsPooled;
         }
 
-        public GameObject GivePooledObject(Pooltype pooltype)
+        public GameObject GivePooledObject(Pooltype pooltype, Vector3? position = null)
         {
             var objectPool = FindObjectPoolInList(pooltype);
             if (objectPool != null)
@@ -94,6 +97,10 @@ namespace Utilities
                     {
                         if (!objectPooled.activeSelf)
                         {
+                            if (position != null)
+                            {
+                                objectPooled.transform.position = (Vector3)position;
+                            }
                             objectPooled.SetActive(true);
                             return objectPooled;
                         }
