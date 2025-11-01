@@ -315,7 +315,7 @@ public class SplineMeshDeformer : MonoBehaviour
         if (addMeshCollider)
         {
             var meshCollider = meshGameObject.GetComponent<MeshCollider>() ?? meshGameObject.AddComponent<MeshCollider>();
-            meshCollider.sharedMesh = meshGameObject.GetComponent<MeshFilter>().mesh;
+            meshCollider.sharedMesh = meshGameObject.GetComponent<MeshFilter>().sharedMesh;
             meshCollider.convex = makeMeshColliderConvex;
             meshCollider.isTrigger = makeMeshColliderTrigger;
         }

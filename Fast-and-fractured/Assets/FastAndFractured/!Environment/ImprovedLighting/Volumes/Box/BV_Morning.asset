@@ -18,10 +18,38 @@ MonoBehaviour:
     m_Value: {x: 0.98149997, y: 0.97, z: 1, w: -0.05583596}
   gamma:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0.89430225, z: 0.9214819, w: -0.22832318}
+    m_Value: {x: 1, y: 0.89, z: 0.9175, w: -0.22832318}
   gain:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0.9682673, z: 0.99214774, w: -0.2319019}
+    m_Value: {x: 1, y: 0.97, z: 0.9925, w: -0.2319019}
+--- !u!114 &-2931059844676354503
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f034cba68ab55e046ae1445a42f18c0e, type: 3}
+  m_Name: IndirectLightingController
+  m_EditorClassIdentifier: 
+  active: 1
+  indirectDiffuseLightingMultiplier:
+    m_OverrideState: 1
+    m_Value: 1.95
+  indirectDiffuseLightingLayers:
+    m_OverrideState: 0
+    m_Value: 65535
+  reflectionLightingMultiplier:
+    m_OverrideState: 0
+    m_Value: 1
+  reflectionLightingLayers:
+    m_OverrideState: 0
+    m_Value: 65535
+  reflectionProbeIntensityMultiplier:
+    m_OverrideState: 0
+    m_Value: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38,6 +66,7 @@ MonoBehaviour:
   - {fileID: 970411909485419276}
   - {fileID: 7823347226514707306}
   - {fileID: -5777543924969562384}
+  - {fileID: -2931059844676354503}
 --- !u!114 &970411909485419276
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -65,7 +94,7 @@ MonoBehaviour:
     m_Value: {r: 1825.2128, g: 1825.2128, b: 1825.2128, a: 1}
   tint:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.8851265, b: 0.7877358, a: 1}
+    m_Value: {r: 1, g: 0.7238819, b: 0.48584908, a: 1}
   maxFogDistance:
     m_OverrideState: 0
     m_Value: 6
@@ -80,25 +109,25 @@ MonoBehaviour:
     m_Value: 1000
   baseHeight:
     m_OverrideState: 1
-    m_Value: -162.1
+    m_Value: -114.1
   maximumHeight:
     m_OverrideState: 1
-    m_Value: 542.6
+    m_Value: 308.3
   meanFreePath:
     m_OverrideState: 1
-    m_Value: 78.4
+    m_Value: 111.3
   enableVolumetricFog:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 1
   albedo:
     m_OverrideState: 0
     m_Value: {r: 1, g: 1, b: 1, a: 1}
   globalLightProbeDimmer:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 1
   depthExtent:
-    m_OverrideState: 0
-    m_Value: 64
+    m_OverrideState: 1
+    m_Value: 1000
   denoisingMode:
     m_OverrideState: 0
     m_Value: 2

@@ -256,10 +256,10 @@ namespace FastAndFractured
                 {
                     StartKillNotify(statsController);
                     _charactersInsideSandstorm.Add(other.gameObject);
-                    if (statsController.IsPlayer)
-                    {
-                        ChangeSandstormVisuals(true);
-                    }
+                    //if (statsController.IsPlayer)
+                    //{
+                    //    ChangeSandstormVisuals(true);
+                    //}
                 }
             }
             else
