@@ -36,6 +36,8 @@ namespace FastAndFractured {
         private bool _useCustomGravity;
 
         [SerializeField] private LayerMask characterLayers;
+        private GameObject _creator;
+        public GameObject Creator { get => _creator; set => _creator = value; }
 
         protected override void FixedUpdate()
         {

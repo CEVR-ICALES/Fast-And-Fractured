@@ -65,6 +65,14 @@ namespace FastAndFractured
                 {
                     otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
+                    if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
+                    {
+                        if(other.gameObject != pushBullet.Creator)
+                        {
+                            other.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = transform.parent.gameObject.GetComponent<PushBulletBehaviour>().Creator;
+                        }
+                    }
+                    
                 }
             }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))

@@ -111,6 +111,11 @@ namespace FastAndFractured
                     physicsBehaviour.StatsController.TakeEndurance(ENDURANCE_DAMAGE_ON_COLLISION, false, gameObject);
                     physicsBehaviour.CarImpactHandler.OnHasBeenPushed(physicsBehaviour);
                     physicsBehaviour.AddForce(finalForce, ForceMode.Impulse);
+                    if(collision.gameObject == this.gameObject.GetComponent<McChicken>().Creator)
+                    {
+                        return;
+                    }
+                    collision.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = this.gameObject.GetComponent<McChicken>().Creator;
                 }
                 
             }

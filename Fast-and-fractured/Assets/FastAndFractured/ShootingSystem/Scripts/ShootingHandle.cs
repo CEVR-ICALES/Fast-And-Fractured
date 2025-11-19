@@ -43,6 +43,10 @@ namespace FastAndFractured
             if (bullet != null)
             {
                 bullet.transform.position = shootPoint.position;
+                if(bullet.TryGetComponent<PushBulletBehaviour>(out var pushBullet))
+                {
+                   pushBullet.Creator = physicsBehaviour.gameObject;
+                }
                 if (bullet.TryGetComponent<BulletBehaviour>(out var bulletBehaivour))
                 {
                     SetBulletStats(bulletBehaivour);

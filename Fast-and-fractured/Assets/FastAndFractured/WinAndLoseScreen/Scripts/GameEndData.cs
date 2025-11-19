@@ -12,5 +12,6 @@ namespace FastAndFractured
         public string totalDistanceTraveled;
         public GameObject finalAnimation;
         public int sceneBuildIndex;
+        public string killCount;
     }
 }
