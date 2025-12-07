@@ -336,7 +336,7 @@
 //             /* Make sure data is not already added. This should not be possible. */
 //             if (!_profiledTickData.TryAdd(tick, tickData))
 //             {
-//                 NetworkManagerExtensions.LogError($"Tick [{tick}] has already been added to data.");
+//                 NetworkManager.LogError($"Tick [{tick}] has already been added to data.");
 //                 StoreProfiledTickData(tickData);
 //
 //                 return;

@@ -76,7 +76,7 @@ namespace FishNet.Serializing
         /// Value may not always be set.
         /// </summary>
         public NetworkConnection NetworkConnection { get; private set; }
-#if DEVELOPMENT
+        #if DEVELOPMENT
         /// <summary>
         /// Last NetworkObject parsed.
         /// </summary>
@@ -85,7 +85,7 @@ namespace FishNet.Serializing
         /// Last NetworkBehaviour parsed.
         /// </summary>
         public static NetworkBehaviour LastNetworkBehaviour { get; private set; }
-#endif
+        #endif
         #endregion
 
         #region Private.
@@ -624,6 +624,12 @@ namespace FishNet.Serializing
         }
 
         /// <summary>
+        /// Reads AutoPackType.
+        /// </summary>
+        [DefaultReader]
+        public AutoPackType ReadAutoPackType() => (AutoPackType)ReadUInt8Unpacked();
+
+        /// <summary>
         /// Reads a Vector2.
         /// </summary>
         /// <returns></returns>
@@ -754,7 +760,7 @@ namespace FishNet.Serializing
         /// Reads a Quaternion.
         /// </summary>
         /// <returns></returns>
-        internal Quaternion ReadQuaternion(AutoPackType autoPackType)
+        public Quaternion ReadQuaternion(AutoPackType autoPackType)
         {
             switch (autoPackType)
             {
@@ -970,9 +976,9 @@ namespace FishNet.Serializing
         /// <returns></returns>
         public NetworkObject ReadNetworkObject(out int objectOrPrefabId, HashSet<int> readSpawningObjects = null, bool logException = true)
         {
-#if DEVELOPMENT
+            #if DEVELOPMENT
             LastNetworkBehaviour = null;
-#endif
+            #endif
             objectOrPrefabId = ReadNetworkObjectId();
 
             bool isSpawned;
@@ -983,8 +989,8 @@ namespace FishNet.Serializing
              * never happen so long as nob isn't null. */
             if (objectOrPrefabId == NetworkObject.UNSET_OBJECTID_VALUE)
                 return null;
-            else
-                isSpawned = ReadBoolean();
+
+            isSpawned = ReadBoolean();
 
             bool isServer = NetworkManager.ServerManager.Started;
             bool isClient = NetworkManager.ClientManager.Started;
@@ -1023,9 +1029,9 @@ namespace FishNet.Serializing
                 result = NetworkManager.GetPrefab(objectOrPrefabId, asServer);
             }
 
-#if DEVELOPMENT
+            #if DEVELOPMENT
             LastNetworkObject = result;
-#endif
+            #endif
             return result;
         }
 
@@ -1100,9 +1106,9 @@ namespace FishNet.Serializing
                 }
             }
 
-#if DEVELOPMENT
+            #if DEVELOPMENT
             LastNetworkBehaviour = result;
-#endif
+            #endif
             return result;
         }
 

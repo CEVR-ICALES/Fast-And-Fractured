@@ -351,7 +351,7 @@ namespace FishNet.Serializing
             }
             else
             {
-                NetworkManagerExtensions.LogError($"Unhandled precision type of {dpt}.");
+                NetworkManager.LogError($"Unhandled precision type of {dpt}.");
             }
         }
 
@@ -470,7 +470,7 @@ namespace FishNet.Serializing
             }
             else
             {
-                NetworkManagerExtensions.LogError($"Unhandled precision type of {dpt}.");
+                NetworkManager.LogError($"Unhandled precision type of {dpt}.");
             }
         }
 

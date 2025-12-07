@@ -14,6 +14,7 @@ using GameKit.Dependencies.Utilities;
 using System;
 using System.Collections.Generic;
 using FishNet.Managing.Statistic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FishNet.Managing.Client
@@ -143,6 +144,10 @@ namespace FishNet.Managing.Client
         /// <summary>
         /// </summary>
         private NetworkTrafficStatistics _networkTrafficStatistics;
+        #endregion
+
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_OnPostTick = new("ClientManager.TimeManager_OnPostTick()");
         #endregion
 
         private void OnDestroy()
@@ -557,7 +562,7 @@ namespace FishNet.Managing.Client
             }
             catch (Exception e)
             {
-                NetworkManagerExtensions.LogError($"Client encountered an error while parsing data for packetId {packetId}. Message: {e.Message}.");
+                NetworkManager.LogError($"Client encountered an error while parsing data for packetId {packetId}. Message: {e.Message}.");
             }
             #endif
         }
@@ -671,7 +676,10 @@ namespace FishNet.Managing.Client
         /// </summary>
         private void TimeManager_OnPostTick()
         {
-            CheckServerTimeout();
+            using (_pm_OnPostTick.Auto())
+            {
+                CheckServerTimeout();
+            }
         }
 
         /// <summary>

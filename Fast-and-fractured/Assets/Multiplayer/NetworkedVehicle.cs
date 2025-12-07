@@ -24,7 +24,7 @@ namespace FastAndFractured.Multiplayer
             public void Dispose() { }
             public bool IsValid() => _tick > 0;
 
-            public uint GetTick() => _tick;
+            public uint GetTick() => _tick; 
             public void SetTick(uint value) => _tick = value;
         }
 

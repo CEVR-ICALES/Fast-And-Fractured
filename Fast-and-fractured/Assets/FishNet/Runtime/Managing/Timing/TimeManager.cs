@@ -8,6 +8,7 @@ using GameKit.Dependencies.Utilities;
 using System;
 using System.Runtime.CompilerServices;
 using FishNet.Managing.Statistic;
+using Unity.Profiling;
 using UnityEngine;
 using SystemStopwatch = System.Diagnostics.Stopwatch;
 
@@ -286,6 +287,20 @@ namespace FishNet.Managing.Timing
         private NetworkTrafficStatistics _networkTrafficStatistics;
         #endregion
 
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_OnFixedUpdate = new("TimeManager.OnFixedUpdate()");
+        private static readonly ProfilerMarker _pm_OnPostPhysicsSimulation = new("TimeManager.OnPostPhysicsSimulation(float)");
+        private static readonly ProfilerMarker _pm_OnPrePhysicsSimulation = new("TimeManager.OnPrePhysicsSimulation(float)");
+        private static readonly ProfilerMarker _pm_OnUpdate = new("TimeManager.OnUpdate()");
+        private static readonly ProfilerMarker _pm_OnLateUpdate = new("TimeManager.OnLateUpdate(float)");
+        private static readonly ProfilerMarker _pm_OnRoundTripTimeUpdated = new("TimeManager.OnRoundTripTimeUpdated(float)");
+        private static readonly ProfilerMarker _pm_OnPreTick = new("TimeManager.OnPreTick()");
+        private static readonly ProfilerMarker _pm_OnTick = new("TimeManager.OnTick()");
+        private static readonly ProfilerMarker _pm_OnPostTick = new("TimeManager.OnPostTick()");
+        private static readonly ProfilerMarker _pm_PhysicsSimulate = new("TimeManager.Physics.Simulate(float)");
+        private static readonly ProfilerMarker _pm_Physics2DSimulate = new("TimeManager.Physics2D.Simulate(float)");
+        #endregion
+
         #region Const.
         /// <summary>
         /// Value for a tick that is invalid.
@@ -297,7 +312,7 @@ namespace FishNet.Managing.Timing
         private const string SAVED_FIXED_TIME_TEXT = "SavedFixedTimeFN";
         #endregion
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private void OnDisable()
         {
             // If closing/stopping.
@@ -311,14 +326,16 @@ namespace FishNet.Managing.Timing
                 _manualPhysics = Math.Max(0, _manualPhysics - 1);
             }
         }
-#endif
+        #endif
 
         /// <summary>
         /// Called when FixedUpdate ticks. This is called before any other script.
         /// </summary>
         internal void TickFixedUpdate()
         {
-            OnFixedUpdate?.Invoke();
+            using (_pm_OnFixedUpdate.Auto())
+                OnFixedUpdate?.Invoke();
+
             /* Invoke onsimulation if using Unity time.
              * Otherwise let the tick cycling part invoke. */
             if (PhysicsMode == PhysicsMode.Unity)
@@ -329,10 +346,15 @@ namespace FishNet.Managing.Timing
                  * This can only happen if a FixedUpdate occurs
                  * multiple times per frame. */
                 if (_fixedUpdateTimeStep)
-                    OnPostPhysicsSimulation?.Invoke(Time.fixedDeltaTime);
+                {
+                    using (_pm_OnPostPhysicsSimulation.Auto())
+                        OnPostPhysicsSimulation?.Invoke(Time.fixedDeltaTime);
+                }
 
                 _fixedUpdateTimeStep = true;
-                OnPrePhysicsSimulation?.Invoke(Time.fixedDeltaTime);
+
+                using (_pm_OnPrePhysicsSimulation.Auto())
+                    OnPrePhysicsSimulation?.Invoke(Time.fixedDeltaTime);
             }
         }
 
@@ -349,13 +371,17 @@ namespace FishNet.Managing.Timing
             bool beforeTick = _updateOrder == UpdateOrder.BeforeTick;
             if (beforeTick)
             {
-                OnUpdate?.Invoke();
+                using (_pm_OnUpdate.Auto())
+                    OnUpdate?.Invoke();
+
                 MethodLogic();
             }
             else
             {
                 MethodLogic();
-                OnUpdate?.Invoke();
+
+                using (_pm_OnUpdate.Auto())
+                    OnUpdate?.Invoke();
             }
 
             void MethodLogic()
@@ -366,7 +392,9 @@ namespace FishNet.Managing.Timing
                 if (PhysicsMode == PhysicsMode.Unity && _fixedUpdateTimeStep)
                 {
                     _fixedUpdateTimeStep = false;
-                    OnPostPhysicsSimulation?.Invoke(Time.fixedDeltaTime);
+
+                    using (_pm_OnPostPhysicsSimulation.Auto())
+                        OnPostPhysicsSimulation?.Invoke(Time.fixedDeltaTime);
                 }
             }
         }
@@ -376,7 +404,8 @@ namespace FishNet.Managing.Timing
         /// </summary>
         internal void TickLateUpdate()
         {
-            OnLateUpdate?.Invoke();
+            using (_pm_OnLateUpdate.Auto())
+                OnLateUpdate?.Invoke();
         }
 
         /// <summary>
@@ -476,7 +505,7 @@ namespace FishNet.Managing.Timing
         /// <param name = "automatic"></param>
         private void SetAutomaticPhysicsSimulation(bool automatic)
         {
-#if UNITY_2022_1_OR_NEWER
+            #if UNITY_2022_1_OR_NEWER
             if (automatic)
             {
                 Physics.simulationMode = SimulationMode.FixedUpdate;
@@ -487,13 +516,13 @@ namespace FishNet.Managing.Timing
                 Physics.simulationMode = SimulationMode.Script;
                 Physics2D.simulationMode = SimulationMode2D.Script;
             }
-#else
+            #else
             Physics.autoSimulation = automatic;
             if (automatic)
                 Physics2D.simulationMode = SimulationMode2D.FixedUpdate;
             else
                 Physics2D.simulationMode = SimulationMode2D.Script;
-#endif
+            #endif
         }
 
         /// <summary>
@@ -510,13 +539,13 @@ namespace FishNet.Managing.Timing
             // Do not automatically simulate.
             else if (mode == PhysicsMode.TimeManager)
             {
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 // Preserve user tick rate.
                 PlayerPrefs.SetFloat(SAVED_FIXED_TIME_TEXT, Time.fixedDeltaTime);
                 // Let the player know.
                 // if (Time.fixedDeltaTime != (float)TickDelta)
                 //    Debug.LogWarning("Time.fixedDeltaTime is being overriden with TimeManager.TickDelta");
-#endif
+                #endif
                 Time.fixedDeltaTime = (float)TickDelta;
                 /* Only check this if network manager
                  * is not null. It would be null via
@@ -535,7 +564,7 @@ namespace FishNet.Managing.Timing
             // Automatically simulate.
             else
             {
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 float savedTime = PlayerPrefs.GetFloat(SAVED_FIXED_TIME_TEXT, float.MinValue);
                 if (savedTime != float.MinValue && Time.fixedDeltaTime != savedTime)
                 {
@@ -544,7 +573,7 @@ namespace FishNet.Managing.Timing
                 }
 
                 PlayerPrefs.DeleteKey(SAVED_FIXED_TIME_TEXT);
-#endif
+                #endif
                 SetPhysicsMode(mode);
             }
         }
@@ -578,7 +607,8 @@ namespace FishNet.Managing.Timing
             RoundTripTime = (long)Math.Round(averageInTime);
             _receivedPong = true;
 
-            OnRoundTripTimeUpdated?.Invoke(RoundTripTime);
+            using (_pm_OnRoundTripTimeUpdated.Auto())
+                OnRoundTripTimeUpdated?.Invoke(RoundTripTime);
         }
 
         /// <summary>
@@ -617,10 +647,10 @@ namespace FishNet.Managing.Timing
             writer.WritePacketIdUnpacked(PacketId.PingPong);
             writer.WriteTickUnpacked(tick);
 
-#if DEVELOPMENT && !UNITY_SERVER
+            #if DEVELOPMENT && !UNITY_SERVER
             if (_networkTrafficStatistics != null)
                 _networkTrafficStatistics.AddOutboundPacketIdData(PacketId.PingPong, string.Empty, writer.Length, gameObject: null, asServer: false);
-#endif
+            #endif
 
             NetworkManager.TransportManager.SendToServer((byte)Channel.Unreliable, writer.GetArraySegment());
             writer.Store();
@@ -638,10 +668,10 @@ namespace FishNet.Managing.Timing
             writer.WritePacketIdUnpacked(PacketId.PingPong);
             writer.WriteTickUnpacked(clientTick);
 
-#if DEVELOPMENT && !UNITY_SERVER
+            #if DEVELOPMENT && !UNITY_SERVER
             if (_networkTrafficStatistics != null)
                 _networkTrafficStatistics.AddOutboundPacketIdData(PacketId.PingPong, string.Empty, writer.Length, gameObject: null, asServer: true);
-#endif
+            #endif
 
             conn.SendToClient((byte)Channel.Unreliable, writer.GetArraySegment());
             writer.Store();
@@ -659,7 +689,7 @@ namespace FishNet.Managing.Timing
             double timePerSimulation = isServer ? TickDelta : _adjustedTickDelta;
             if (timePerSimulation == 0d)
             {
-                NetworkManagerExtensions.LogWarning($"Simulation delta cannot be 0. Network timing will not continue.");
+                NetworkManager.LogWarning($"Simulation delta cannot be 0. Network timing will not continue.");
                 return;
             }
 
@@ -687,7 +717,10 @@ namespace FishNet.Managing.Timing
             do
             {
                 if (frameTicked)
-                    OnPreTick?.Invoke();
+                {
+                    using (_pm_OnPreTick.Auto())
+                        OnPreTick?.Invoke();
+                }
 
                 /* This has to be called inside the loop because
                  * OnPreTick promises data hasn't been read yet.
@@ -700,17 +733,24 @@ namespace FishNet.Managing.Timing
                 {
                     // Tell predicted objecs to reconcile before OnTick.
                     NetworkManager.PredictionManager.ReconcileToStates();
-                    OnTick?.Invoke();
+
+                    using (_pm_OnTick.Auto())
+                        OnTick?.Invoke();
 
                     if (PhysicsMode == PhysicsMode.TimeManager && tickDelta > 0f)
                     {
-                        OnPrePhysicsSimulation?.Invoke(tickDelta);
-                        Physics.Simulate(tickDelta);
-                        Physics2D.Simulate(tickDelta);
-                        OnPostPhysicsSimulation?.Invoke(tickDelta);
+                        using (_pm_OnPrePhysicsSimulation.Auto())
+                            OnPrePhysicsSimulation?.Invoke(tickDelta);
+                        using (_pm_PhysicsSimulate.Auto())
+                            Physics.Simulate(tickDelta);
+                        using (_pm_Physics2DSimulate.Auto())
+                            Physics2D.Simulate(tickDelta);
+                        using (_pm_OnPostPhysicsSimulation.Auto())
+                            OnPostPhysicsSimulation?.Invoke(tickDelta);
                     }
 
-                    OnPostTick?.Invoke();
+                    using (_pm_OnPostTick.Auto())
+                        OnPostTick?.Invoke();
                     // After post tick send states.
                     NetworkManager.PredictionManager.SendStateUpdate();
 
@@ -1092,14 +1132,14 @@ namespace FishNet.Managing.Timing
 
                 writer.Store();
 
-#if DEVELOPMENT && !UNITY_SERVER
+                #if DEVELOPMENT && !UNITY_SERVER
                 if (_networkTrafficStatistics != null)
                 {
                     // Timing updates are always a flat amount of data.
                     int written = 6 * NetworkManager.ServerManager.Clients.Count;
                     _networkTrafficStatistics.AddOutboundPacketIdData(PacketId.TimingUpdate, string.Empty, written, gameObject: null, asServer: true);
                 }
-#endif
+                #endif
             }
         }
 
@@ -1109,14 +1149,14 @@ namespace FishNet.Managing.Timing
         /// <param name = "ta"></param>
         internal void ParseTimingUpdate(Reader reader)
         {
-#if DEVELOPMENT && !UNITY_SERVER
+            #if DEVELOPMENT && !UNITY_SERVER
             if (_networkTrafficStatistics != null)
             {
                 // Timing updates are always a flat amount of data.
                 int written = 6;
                 _networkTrafficStatistics.AddInboundPacketIdData(PacketId.TimingUpdate, string.Empty, written, gameObject: null, asServer: false);
             }
-#endif
+            #endif
             uint clientTick = reader.ReadTickUnpacked();
             // Don't adjust timing on server.
             if (NetworkManager.IsServerStarted)

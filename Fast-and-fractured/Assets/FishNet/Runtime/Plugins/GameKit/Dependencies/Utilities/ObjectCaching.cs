@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Concurrent;
 using GameKit.Dependencies.Utilities.Types;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+// ReSharper disable ThreadStaticFieldHasInitializesr
 namespace GameKit.Dependencies.Utilities
 {
     /// <summary>
@@ -153,12 +156,12 @@ namespace GameKit.Dependencies.Utilities
         /// <summary>
         /// Cache for ResettableRingBuffer.
         /// </summary>
-        private static readonly Stack<ResettableRingBuffer<T>> _resettableRingBufferCache = new();
+        private static readonly ConcurrentStack<ResettableRingBuffer<T>> _resettableRingBufferCache = new();
         /// <summary>
         /// Maximum number of entries allowed for the cache.
         /// </summary>
         private const int MAXIMUM_CACHE_COUNT = 50;
-
+        
         /// <summary>
         /// Retrieves a collection.
         /// </summary>
@@ -457,12 +460,12 @@ namespace GameKit.Dependencies.Utilities
         /// <summary>
         /// Cache for dictionaries.
         /// </summary>
-        private static readonly Stack<Dictionary<T1, T2>> _dictionaryCache = new();
+        private static readonly ConcurrentStack<Dictionary<T1, T2>> _dictionaryCache = new();
         /// <summary>
         /// Maximum number of entries allowed for the cache.
         /// </summary>
         private const int MAXIMUM_CACHE_COUNT = 50;
-        
+
         /// <summary>
         /// Retrieves a collection.
         /// </summary>
@@ -511,32 +514,41 @@ namespace GameKit.Dependencies.Utilities
         /// <summary>
         /// Cache for arrays.
         /// </summary>
-        private static readonly Stack<T[]> _arrayCache = new();
+        private static readonly ConcurrentStack<T[]> _arrayCache = new();
         /// <summary>
         /// Cache for lists.
         /// </summary>
-        private static readonly Stack<List<T>> _listCache = new();
+        private static readonly ConcurrentStack<List<T>> _listCache = new();
         /// <summary>
         /// Cache for sortedset.
         /// </summary>
-        private static readonly Stack<SortedSet<T>> _sortedSetCache = new();
+        private static readonly ConcurrentStack<SortedSet<T>> _sortedSetCache = new();
         /// <summary>
         /// Cache for queues.
         /// </summary>
-        private static readonly Stack<Queue<T>> _queueCache = new();
+        private static readonly ConcurrentStack<Queue<T>> _queueCache = new();
         /// <summary>
         /// Cache for queues.
         /// </summary>
-        private static readonly Stack<BasicQueue<T>> _basicQueueCache = new();
+        private static readonly ConcurrentStack<BasicQueue<T>> _basicQueueCache = new();
         /// <summary>
         /// Cache for hashset.
         /// </summary>
-        private static readonly Stack<HashSet<T>> _hashSetCache = new();
-        
+        private static readonly ConcurrentStack<HashSet<T>> _hashSetCache = new();
         /// <summary>
         /// Maximum number of entries allowed for the cache.
         /// </summary>
         private const int MAXIMUM_CACHE_COUNT = 50;
+
+        static CollectionCaches()
+        {
+            _arrayCache = new();
+            _listCache = new();
+            _sortedSetCache = new();
+            _queueCache = new();
+            _basicQueueCache = new();
+            _hashSetCache = new();
+        }
 
         /// <summary>
         /// Retrieves a collection.
@@ -832,12 +844,12 @@ namespace GameKit.Dependencies.Utilities
         /// <summary>
         /// Stack to use.
         /// </summary>
-        private static readonly Stack<T> _stack = new();
+        private static readonly ConcurrentStack<T> _stack = new();
         /// <summary>
         /// Maximum number of entries allowed for the cache.
         /// </summary>
         private const int MAXIMUM_CACHE_COUNT = 50;
-        
+
         /// <summary>
         /// Returns a value from the stack or creates an instance when the stack is empty.
         /// </summary>

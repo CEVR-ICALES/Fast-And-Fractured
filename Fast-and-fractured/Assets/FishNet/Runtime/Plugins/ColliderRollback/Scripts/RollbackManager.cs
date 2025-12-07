@@ -7,6 +7,7 @@ using GameKit.Dependencies.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -92,12 +93,17 @@ namespace FishNet.Component.ColliderRollback
         private RaycastHit2D[] _hitsCache2d = new RaycastHit2D[50];
         #endregion
 
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_OnPostTick = new("RollbackManager.TimeManager_OnPostTick()");
+        #endregion
+
         // PROEND		
 
         // PROSTART        
         private void TimeManager_OnPostTick()
         {
-            CreateSnapshots();
+            using (_pm_OnPostTick.Auto())
+                CreateSnapshots();
         }
         // PROEND
 
@@ -381,7 +387,7 @@ namespace FishNet.Component.ColliderRollback
         /// </summary>
         private void TryUnsetAsOwnerAndClientHost(ref bool asOwnerAndClientHost)
         {
-            if (asOwnerAndClientHost && _networkManager.IsHostStarted)
+            if (asOwnerAndClientHost && !_networkManager.IsHostStarted)
                 asOwnerAndClientHost = false;
         }
         //PROEND

@@ -121,8 +121,11 @@ namespace Utilities
         {
             PerformInitialize();
         }
+        protected override void Deconstruct()
+        {
+            base.Deconstruct();
+        }
     }
-
 }
 
 enum SingletonDuplicateResolution

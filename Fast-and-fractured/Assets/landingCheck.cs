@@ -44,7 +44,8 @@ namespace FastAndFractured
             }
             _rb.AddForce(force,forceMode);
             _startCheck = true;
-            _rb.useGravity = true;
+        //todo fix this
+            //    _rb.useGravity = true;
             applyForces = true;
         }
 
@@ -61,7 +62,8 @@ namespace FastAndFractured
         {
             if (!((ignoreLayer & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)) {
                 _rb.linearVelocity = Vector3.zero;
-                _rb.useGravity = false;
+            //todo fix
+            //    _rb.useGravity = false;
                 onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
                 _landingTimer.StopTimer();
                 applyForces = false;

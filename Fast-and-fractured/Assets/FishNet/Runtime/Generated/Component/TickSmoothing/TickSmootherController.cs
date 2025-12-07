@@ -2,6 +2,7 @@
 using FishNet.Managing.Timing;
 using FishNet.Object;
 using GameKit.Dependencies.Utilities;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FishNet.Component.Transforming.Beta
@@ -61,6 +62,9 @@ namespace FishNet.Component.Transforming.Beta
         /// True if initialized.
         /// </summary>
         private bool _isInitialized;
+        private static readonly ProfilerMarker _pm_OnUpdate = new("TickSmootherController.TimeManager_OnUpdate()");
+        private static readonly ProfilerMarker _pm_OnPreTick = new("TickSmootherController.TimeManager_OnPreTick()");
+        private static readonly ProfilerMarker _pm_OnPostTick = new("TickSmootherController.TimeManager_OnPostTick()");
         #endregion
 
         public void Initialize(InitializationSettings initializationSettings, MovementSettings ownerSettings, MovementSettings spectatorSettings)
@@ -140,12 +144,18 @@ namespace FishNet.Component.Transforming.Beta
 
         public void TimeManager_OnUpdate()
         {
-            UniversalSmoother.OnUpdate(Time.deltaTime);
+            using (_pm_OnUpdate.Auto())
+            {
+                UniversalSmoother.OnUpdate(Time.deltaTime);
+            }
         }
 
         public void TimeManager_OnPreTick()
         {
-            UniversalSmoother.OnPreTick();
+            using (_pm_OnPreTick.Auto())
+            {
+                UniversalSmoother.OnPreTick();
+            }
         }
 
         /// <summary>
@@ -153,8 +163,11 @@ namespace FishNet.Component.Transforming.Beta
         /// </summary>
         public void TimeManager_OnPostTick()
         {
-            if (_timeManager != null)
-                UniversalSmoother.OnPostTick(_timeManager.LocalTick);
+            using (_pm_OnPostTick.Auto())
+            {
+                if (_timeManager != null)
+                    UniversalSmoother.OnPostTick(_timeManager.LocalTick);
+            }
         }
 
         private void PredictionManager_OnPostReplicateReplay(uint clientTick, uint serverTick)
