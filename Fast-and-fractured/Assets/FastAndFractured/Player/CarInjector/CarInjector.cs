@@ -76,6 +76,11 @@ public class CarInjector : MonoBehaviour
             //todo fix
         //    carSpeedOverlay.speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
             carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
+            var aimPushShootTrace = GetComponentInChildren<AimPushShootTrace>();
+            if (aimPushShootTrace)
+            {
+                aimPushShootTrace.Setup();
+            }
 
         }
 
@@ -126,6 +131,11 @@ public class CarInjector : MonoBehaviour
             injectedCar.AddComponent<CarSpeedOverlay>();
             injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
             carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
+            var aimPushShootTrace = GetComponentInChildren<AimPushShootTrace>();
+            if (aimPushShootTrace)
+            {
+                aimPushShootTrace.Setup();
+            }
 
         }
 
