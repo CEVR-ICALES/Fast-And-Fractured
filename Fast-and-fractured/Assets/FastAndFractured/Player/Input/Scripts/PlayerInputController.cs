@@ -342,15 +342,23 @@ namespace FastAndFractured
             });
         }
 
+        Action onNormalShootEvent;
+
+        Action onPushShootEvent;
+        internal Action OnNormalShootEvent;
+        internal Action OnPushShootEvent;
+
         private void SetShootType()
         {
             if (_isPushShootMode)
             {
                 _isPushShooting = true;
+                onPushShootEvent?.Invoke();
             }
             else
             {
                 _isShooting = true;
+                onNormalShootEvent?.Invoke();
             }
         }
 
