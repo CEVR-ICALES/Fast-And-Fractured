@@ -1,68 +1,85 @@
+﻿ 
 using Enums;
 using FMODUnity;
+using System;
 using UnityEngine;
 using Utilities;
 
 namespace FastAndFractured
 {
+ 
     public abstract class ShootingHandle : MonoBehaviour
-    {
+    { 
+        public event Action<BulletSpawnParameters> OnShootRequest;
+
         public Vector3 CurrentShootDirection { get => currentShootDirection; set => currentShootDirection = value; }
-        public Pooltype Pooltype { get => pooltype; set => pooltype=value; }
-        public bool CanShoot { get => canShoot;   }
+        public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
+        public bool CanShoot { get => canShoot; }
 
         protected Vector3 currentShootDirection;
         [SerializeField] public StatsController characterStatsController;
-        [SerializeField]
-        protected Transform shootPoint;
-        [SerializeField]
-        internal Pooltype pooltype;
-        private Vector3 _velocity;
-        private float _range;
-        private float _damage;
-        [SerializeField]
-        protected Vector3 directionCenterOffSet;
+        [SerializeField] protected Transform shootPoint;
+        [SerializeField] internal Pooltype pooltype;
+        [SerializeField] protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
-        [SerializeField]
-        protected PhysicsBehaviour physicsBehaviour;
-        public bool SuppressInstantiation { get; set; } = false;
+        [SerializeField] protected PhysicsBehaviour physicsBehaviour;
 
         protected virtual void Start()
         {
             if (characterStatsController == null)
-                Debug.LogError("Character " + gameObject.name + " needs a StatsController for  " + name + " Script");
-            if(physicsBehaviour == null)
-                Debug.LogError("Character " + gameObject.name + " needs a PhysicsBehaivour for  " + name + " Script");
+                Debug.LogError($"Character {gameObject.name} needs a StatsController for {name} Script");
+            if (physicsBehaviour == null)
+                Debug.LogError($"Character {gameObject.name} needs a PhysicsBehaviour for {name} Script");
         }
 
+         
+        protected virtual BulletSpawnParameters PopulateBaseSpawnParameters(Vector3 velocity, float range)
+        {
+            return new BulletSpawnParameters
+            {
+                Pooltype = this.pooltype,
+                Velocity = velocity + physicsBehaviour.Rb.linearVelocity,
+                Range = range,
+                Damage = characterStatsController.NormalShootDamage,
+                ShootPoint = this.shootPoint,
+                IgnoredCollider = this.GetComponentInParent<Collider>()
+            };
+        }
+
+        
         protected void ShootBullet(Vector3 velocity, float range)
         {
-            if (SuppressInstantiation)
+             BulletSpawnParameters spawnParams = PopulateBaseSpawnParameters(velocity, range);
+
+             if (this is PushShootHandle pushHandle)
             {
-                return;
-            }
-            _velocity = velocity;
-            _range = range;
-            _damage = characterStatsController.NormalShootDamage;
-            GameObject bullet = ObjectPoolManager.Instance.GivePooledObject(pooltype);
-            if (bullet != null)
-            {
-                bullet.transform.position = shootPoint.position;
-                if (bullet.TryGetComponent<BulletBehaviour>(out var bulletBehaivour))
+                spawnParams.PushForce = characterStatsController.PushShootForce;
+                spawnParams.ExplosionRadius = characterStatsController.ExplosionRadius;
+                spawnParams.ExplosionCenterOffset = characterStatsController.ExplosionCenterOffset;
+                spawnParams.CustomGravity = Physics.gravity * characterStatsController.PushShootGravityMultiplier;
+                spawnParams.IsMine = pushHandle.ShootingMine;
+
+                if (spawnParams.IsMine)
                 {
-                    SetBulletStats(bulletBehaivour);
-                    bulletBehaivour.InitBulletTrayectory();
-                    SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
+                    spawnParams.TimeToExplode = characterStatsController.MineExplosionTime;
+                    spawnParams.BouncingNum = 0;
+                    spawnParams.BouncingStrenght = 0;
+                }
+                else
+                {
+                    spawnParams.TimeToExplode = 0;
+                    spawnParams.BouncingNum = characterStatsController.PushShootBounceNum;
+                    spawnParams.BouncingStrenght = characterStatsController.PushShootBounceForce;
                 }
             }
-        }
 
-        protected virtual void SetBulletStats(BulletBehaviour bulletBehaivour)
-        {
-            bulletBehaivour.Velocity = _velocity + physicsBehaviour.Rb.linearVelocity;
-            bulletBehaivour.Range = _range;
-            bulletBehaivour.Damage = _damage;
+             OnShootRequest?.Invoke(spawnParams);
+
+            if (!bulletSound.IsNull)
+            {
+                SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
+            }
         }
     }
 }

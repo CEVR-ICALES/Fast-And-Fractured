@@ -38,11 +38,12 @@ namespace FastAndFractured {
 
         [SerializeField] private LayerMask characterLayers;
 
-        protected override void FixedUpdate()
+        public override void OnSimulateTick(float deltaTime)
         {
+            base.OnSimulateTick(deltaTime);
             if (_useCustomGravity)
             {
-                rb.linearVelocity += _customGravity * Time.fixedDeltaTime;
+                rb.linearVelocity += _customGravity * deltaTime;
             }
         }
 
@@ -62,9 +63,9 @@ namespace FastAndFractured {
             _explosionHitbox.DeactivateExplosionHitbox();
         }
 
-
-        protected override void OnCollisionEnter(Collision collision)
+        public override void OnSimulateCollisionEnter(Collision collision)
         {
+            base.OnSimulateCollisionEnter(collision);
             if (!((characterLayers & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer))
             {
                 BouncingHandle(collision);

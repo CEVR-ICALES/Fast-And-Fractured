@@ -17,24 +17,26 @@ namespace FastAndFractured
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
+
+            if (!_ignoreCollider) _ignoreCollider = GetComponentInParent<Collider>();
             if (_ignoreCollider != null)
             {
                 Physics.IgnoreCollision(_ignoreCollider, ownCollider, true);
             }
             _callForDestroy = true;
         }
-
-        protected override void FixedUpdate()
+        public override void OnSimulateTick(float deltaTime)
         {
-            if ((transform.position - initPosition).magnitude >= range&&_callForDestroy)
+            if ((transform.position - initPosition).magnitude >= range && _callForDestroy)
             {
+                Debug.Log("END BY RANGE" + gameObject.name);
                 OnBulletEndTrayectory();
-                _callForDestroy=false;
+                _callForDestroy = false;
             }
         }
-
-        protected override void OnTriggerEnter(Collider other)
+        public override void OnSimulateTriggerEnter(Collider other)
         {
+            base.OnSimulateTriggerEnter(other);
             if (other.gameObject.layer == LayerMask.NameToLayer(LAYER_SHIELD))
             {
                 if (_ignoreCollider != null && other.transform.IsChildOf(_ignoreCollider.gameObject.transform))
@@ -60,11 +62,13 @@ namespace FastAndFractured
                 {
                     ownerStatsController.AddDealtDamage(damage);
                 }
-
                 OnBulletEndTrayectory();
             }
             else
                 OnBulletEndTrayectory();
+
+
+            Debug.Log("END BY COLLISION" + gameObject.name);
         }
         protected override void OnBulletEndTrayectory()
         {
