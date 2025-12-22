@@ -58,6 +58,7 @@ namespace FastAndFractured
                 if (CreateNewCharacter())
                 {
                     Debug.Log("Character " +  _characterName + " Created Successfully");
+                    CharacterSkinsCountFileGenerator.CreateNewCharacterInCharacterSkinsFolder(_characterName);
                 }
                 else
                 {
@@ -69,7 +70,7 @@ namespace FastAndFractured
 
         bool CreateNewCharacter()
         {
-            if (_characterModel != null && _characterName != string.Empty && _chasisModel != null && _wheelModel != null)
+            if (_characterModel != null && _chasisModel != null && _wheelModel != null && _characterName != string.Empty && _characterName != null)
             {
                 _characterModel.name = _characterName + CHARACTER_MODEL_NAME;
                 _characterModel.name = _characterName + CHASIS_MODEL_NAME;
@@ -148,11 +149,13 @@ namespace FastAndFractured
                 }
                 catch (Exception e)
                 {
+                    AssetDatabase.StopAssetEditing();
                     Debug.LogException(e);
                     return false;
                 }
                 return true;
             }
+            Debug.LogError("No empty labelfields");
             return false;
         }
        private void CheckAndCreateDirectory(string folderPath)
