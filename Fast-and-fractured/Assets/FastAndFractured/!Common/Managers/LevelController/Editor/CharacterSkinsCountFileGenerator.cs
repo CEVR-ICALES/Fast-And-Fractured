@@ -88,7 +88,7 @@ namespace FastAndFractured {
         public static Material[] ReturnMaterialsOfCharacterPrefabPart(string name, int skinNum, CharacterPrefabParts characterPrefabParts)
         {
             string skinCountInFolder = SKIN_PREFIX + (skinNum + 1).ToString();
-            string characterSkinPath = Path.Combine(characterFolderPath, name,skinCountInFolder);
+            string characterSkinPath = Path.Combine(LevelConstants.SKINS_LOADER_PATH, name, skinCountInFolder);
             switch (characterPrefabParts)
             {
                 case CharacterPrefabParts.Character:
@@ -101,13 +101,10 @@ namespace FastAndFractured {
             return default;
         }
 
-            private static Material[] ReturnAllMaterialsFromFolder(string folderPath)
+        private static Material[] ReturnAllMaterialsFromFolder(string folderPath)
         {
-            if (!DirectoryExist(folderPath))
-            {
-                return null;
-            }
-           return AssetDatabase.LoadAllAssetsAtPath(folderPath) as Material[];
+            string normalizedFolderPath = NormalizePath(folderPath);
+           return Resources.LoadAll<Material>(normalizedFolderPath);
         }
 
         private static bool DirectoryExist(string directoryPath)
@@ -120,7 +117,10 @@ namespace FastAndFractured {
             return true;
         }
 
-
+        public static string NormalizePath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+            return path.Replace('\\', '/');
         }
     }
-}
+    }
