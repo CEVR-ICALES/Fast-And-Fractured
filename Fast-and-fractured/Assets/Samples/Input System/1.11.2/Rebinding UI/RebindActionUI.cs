@@ -365,7 +365,6 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         private void PerformInteractiveRebind(InputAction action, int bindingIndex, bool allCompositeParts = false)
         {
             m_RebindOverlay.SetActive(true);
-            //m_RebindAlertsOverlayText.text = "";
             m_RebindOperation?.Cancel();
 
             void CleanUp()
@@ -412,8 +411,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         if (keyPath.StartsWith("<Keyboard>/") && !inputsList.Contains(keyPath) ||
                             keyPath.StartsWith("<Mouse>/"))
                         {
-                            m_RebindOverlay.GetComponentInChildren<Text>().text = " " + keyPath + "Key not allowed. Please choose another.";
-                            //m_RebindAlertsOverlayText.text = "Key not allowed. Please choose another";
+                            m_RebindOverlay.GetComponentInChildren<Text>().text = "Key not allowed. Please choose another.";
                             Debug.Log("Key not allowed. Please choose another.");
                             action.RemoveBindingOverride(bindingIndex);
                             PerformInteractiveRebind(action, bindingIndex, allCompositeParts);
@@ -466,7 +464,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         if (binding.effectivePath == newBinding.effectivePath)
                         {
                             Debug.Log("Duplicate binding found in composite: " + newBinding.effectivePath);
-                            m_RebindOverlay.GetComponentInChildren<Text>().text = " " + newBinding + "Key Duplicated. Please choose another.";
+                            m_RebindOverlay.GetComponentInChildren<Text>().text = "Key Duplicated. Please choose another.";
                             return true;
                         }
                     }
@@ -480,8 +478,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 if (binding.effectivePath == newBinding.effectivePath)
                 {
                     Debug.Log("Duplicate binding found: " + newBinding.effectivePath);
-                    m_RebindOverlay.GetComponentInChildren<Text>().text = " " + newBinding + "Key Duplicated. Please choose another.";
-                    //m_RebindAlertsOverlayText.text = newBinding + "Key Duplicated. Please choose another";
+                    m_RebindOverlay.GetComponentInChildren<Text>().text = "Key Duplicated. Please choose another.";
                     return true;
                 }
 
@@ -575,9 +572,6 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         [Tooltip("Optional UI that will be shown while a rebind is in progress.")]
         [SerializeField]
         private GameObject m_RebindOverlay;
-
-        [SerializeField]
-        private Text m_RebindAlertsOverlayText;
 
         [Tooltip("Optional text label that will be updated with prompt for user input.")]
         [SerializeField]
