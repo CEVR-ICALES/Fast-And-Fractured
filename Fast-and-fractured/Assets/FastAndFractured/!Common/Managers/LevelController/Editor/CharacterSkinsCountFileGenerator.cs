@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Enums;
+using System;
 namespace FastAndFractured {
 
     public class CharacterSkinsCountFileGenerator
@@ -96,7 +97,8 @@ namespace FastAndFractured {
 
         public static Material[] ReturnMaterialsOfCharacterPrefabPart(string name, int skinNum, CharacterPrefabParts characterPrefabParts)
         {
-            string skinCountInFolder = SKIN_PREFIX + (skinNum + 1).ToString();
+            int skinRealNum = skinNum + 1;
+            string skinCountInFolder = SKIN_PREFIX + skinRealNum.ToString();
             string characterSkinPath = Path.Combine(LevelConstants.SKINS_LOADER_PATH, name, skinCountInFolder);
             switch (characterPrefabParts)
             {
@@ -112,53 +114,62 @@ namespace FastAndFractured {
 
         public static void SaveNewSkinsInCharacterSkinDirectory(CharacterSkin[] characterSkins, string name)
         {
-            string characterPath = Path.Combine(LevelConstants.SKINS_LOADER_PATH, name);
-            if (!DirectoryExist(characterPath))
-            {
-                return;
-            }
+            string characterPath = Path.Combine(characterFolderPath, name);
+            //if (!DirectoryExist(characterPath))
+            //{
+            //    return;
+            //}
             for(int i = 0; i < characterSkins.Length; i++)
             {
-                string skinFolder = Path.Combine(characterFolderPath,SKIN_PREFIX + (i + SKIN_STARTING_INT));
+                string skinFolder = Path.Combine(characterPath,SKIN_PREFIX + (i + SKIN_STARTING_INT));
                 string characterSkinFolder = NormalizePath(Path.Combine(skinFolder,SKIN_CHARACTER_PREFAB_FOLDER));
                 string chassisSkinFolder = NormalizePath(Path.Combine(skinFolder, SKIN_CHASSIS_PREFAB_FOLDER));
                 string wheelSkinFolder = NormalizePath(Path.Combine(skinFolder, SKIN_WHEELS_PREFAB_FOLDER));
+                if(!DirectoryExist(skinFolder))
+                {
+                    Directory.CreateDirectory(skinFolder);
+                    Directory.CreateDirectory(characterSkinFolder);
+                    Directory.CreateDirectory(chassisSkinFolder);
+                    Directory.CreateDirectory(wheelSkinFolder);
+                }
                 SetAllMaterialsFromFolder(characterSkinFolder, characterSkins[i].CharacterMaterials);
                 SetAllMaterialsFromFolder(chassisSkinFolder, characterSkins[i].ChasisMaterials);
                 SetAllMaterialsFromFolder(wheelSkinFolder, characterSkins[i].WheelMaterials);
             }
+            GenerateCharacterSkinsCountFile();
         }
 
-        private static void SetAllMaterialsFromFolder(string folderPath,Material[] newMaterials)
+        private static void SetAllMaterialsFromFolder(string folderPath,Material[] materialsGiven)
         {
-            Material[] materialsFromFolder = GetAllMaterialsFromFolder(folderPath);
-            List<int> materialsIndexToChange = new List<int>();
+            string resourcesPath = Path.GetRelativePath(RESOURCES_FOLDER_PATH, folderPath);
+            Material[] materialsFromFolder = GetAllMaterialsFromFolder(resourcesPath);
+            Material[] newMaterials = (Material[])materialsGiven.Clone(); ;
+            
+            bool noNewMaterials = true;
+            if (materialsFromFolder.Length != newMaterials.Length)
+                noNewMaterials = false;
             for(int i = 0; i < materialsFromFolder.Length && i<newMaterials.Length; i++)
             {
-                if (materialsFromFolder[i] != newMaterials[i])
+                if (materialsFromFolder[i] == newMaterials[i])
                 {
-                    materialsIndexToChange.Add(i);
+                    newMaterials[i] = null;
+                }
+                else
+                {
+                    noNewMaterials = false;
+                    string assetPath = Path.Combine(resourcesPath, materialsFromFolder[i].name + ".mat");
+                    DeleteAsset(assetPath);
                 }
             }
-            if (materialsIndexToChange.Count > 0)
-            {
-                string[] assetsPath = new string[materialsIndexToChange.Count];
-                Material[] adbNewMaterials = newMaterials;
-                newMaterials = new Material[materialsIndexToChange.Count];
-                for (int i = 0; i < materialsIndexToChange.Count; i++)
-                {
-                    Material material = materialsFromFolder[materialsIndexToChange[i]];
-                    assetsPath[i] = NormalizePath(Path.Combine(folderPath, material.name + ".mat"));
-                    newMaterials[i] = adbNewMaterials[materialsIndexToChange[i]];
-                }
-                bool deleted = DeleteAsset(assetsPath);
+            if (!noNewMaterials) {
+                SaveAssets(newMaterials, folderPath, ".mat");
             }
-            SaveAssets(newMaterials, folderPath, ".mat");
         }
 
         private static bool DeleteAsset(string assetPath)
         {
-            bool deleted = AssetDatabase.DeleteAsset(assetPath);
+            string normalizedAssetPath = NormalizePath(assetPath);
+            bool deleted = AssetDatabase.DeleteAsset(normalizedAssetPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             return deleted;
@@ -176,14 +187,17 @@ namespace FastAndFractured {
             return deleted;
         }
 
-        private static void SaveAssets<T>(T[] objectsUnity,string folderPath,string extension) where T : Object
-        {
+        private static void SaveAssets<T>(T[] objectsUnity,string folderPath,string extension) where T : UnityEngine.Object
+        { 
             foreach (T objectUnity in objectsUnity)
             {
-
-                string assetPath = Path.Combine(folderPath, objectUnity.name + extension);
-                string normalizedAssetPath = NormalizePath(assetPath);
-                AssetDatabase.CreateAsset(objectUnity,normalizedAssetPath);
+                if (objectUnity != null)
+                {
+                    string assetPath = Path.Combine(folderPath, objectUnity.name + extension);
+                    string normalizedAssetPath = NormalizePath(assetPath);
+                    T objectToSave = UnityEngine.Object.Instantiate(objectUnity);
+                    AssetDatabase.CreateAsset(objectToSave, normalizedAssetPath);
+                }
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

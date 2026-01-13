@@ -86,7 +86,7 @@ public class CharacterSkinCreation : EditorWindow
                 }
                 if (GUILayout.Button("Create", GUILayout.Height(35)))
                 {
-                   
+                CharacterSkinsCountFileGenerator.SaveNewSkinsInCharacterSkinDirectory(_characterSkin,_characterName);
                 }
 
             }
