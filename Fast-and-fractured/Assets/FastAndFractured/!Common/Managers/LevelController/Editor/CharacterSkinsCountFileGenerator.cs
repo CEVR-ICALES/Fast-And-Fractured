@@ -157,7 +157,7 @@ namespace FastAndFractured {
                 else
                 {
                     noNewMaterials = false;
-                    string assetPath = Path.Combine(resourcesPath, materialsFromFolder[i].name + ".mat");
+                    string assetPath = Path.Combine(folderPath, materialsFromFolder[i].name + ".mat");
                     DeleteAsset(assetPath);
                 }
             }
@@ -188,16 +188,19 @@ namespace FastAndFractured {
         }
 
         private static void SaveAssets<T>(T[] objectsUnity,string folderPath,string extension) where T : UnityEngine.Object
-        { 
+        {
+            int skinNum = 0;
             foreach (T objectUnity in objectsUnity)
             {
                 if (objectUnity != null)
                 {
+                    objectUnity.name = skinNum + "_" + objectUnity.name;
                     string assetPath = Path.Combine(folderPath, objectUnity.name + extension);
                     string normalizedAssetPath = NormalizePath(assetPath);
                     T objectToSave = UnityEngine.Object.Instantiate(objectUnity);
                     AssetDatabase.CreateAsset(objectToSave, normalizedAssetPath);
                 }
+                skinNum++;
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
