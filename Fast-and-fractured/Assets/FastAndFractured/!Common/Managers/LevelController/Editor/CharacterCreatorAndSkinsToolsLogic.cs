@@ -177,6 +177,7 @@ namespace FastAndFractured {
                 return;
             }
             AssetDatabase.CreateFolder(characterFolderPath,CharacterName);
+            GenerateCharacterSkinCountFile();
         }
 
         public static string[] ReturnCharactersInCharacterSkinsFolder()
