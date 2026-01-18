@@ -15,9 +15,16 @@ public class CharacterSkinCreation : EditorWindow
     private string _characterName;
     private string _currentCharacterName;
     private int _selectedCharacter;
+    private int _previousCharacter = DEFAULT_PREVIOUS_CHARACTER_VALUE;
     private int _toalSkinCount;
     private float _skinGroupValue = 0;
 
+    private List<bool> _foldoutSkinsToogle = new List<bool>();
+    private string[] _charactersWithSkins;
+
+    private const int DEFAULT_PREVIOUS_CHARACTER_VALUE = -1;
+    private const bool DEFAULT_FOLDOUT_SKIN_TOGGLE = false;
+    private const int SKIN_NUM_MOD_TO_SHOW = 1;
     private CharacterCreatorAndSkinsToolsLogic.CharacterSkin[] _characterSkin = new CharacterCreatorAndSkinsToolsLogic.CharacterSkin[0];
     [MenuItem("Tools/CharacterRelated/CharacterSkinCreation", false, 50)]
     public static void ShowWindow()
@@ -31,42 +38,32 @@ public class CharacterSkinCreation : EditorWindow
         CharacterCreatorAndSkinsToolsLogic.GenerateCharacterSkinCountFile();
     }
 
+    private void CreateGUI()
+    {
+        _charactersWithSkins = CharacterCreatorAndSkinsToolsLogic.ReturnCharactersInCharacterSkinsFolder();
+        foreach (var character in _charactersWithSkins) {
+            _foldoutSkinsToogle.Add(DEFAULT_FOLDOUT_SKIN_TOGGLE);
+        }
+    }
+
     private void OnGUI()
     {
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
         EditorGUILayout.LabelField("CharacterSkinCreation",
         EditorStyles.boldLabel);
         EditorGUILayout.LabelField("Select the character you want an skin for ");
-        EditorGUILayoutArrays.ArrayFieldSettings arrayFieldSettings = new EditorGUILayoutArrays.ArrayFieldSettings("Characters in folder");
-        string[] charactersWithSkins = CharacterCreatorAndSkinsToolsLogic.ReturnCharactersInCharacterSkinsFolder();
+        _selectedCharacter = EditorGUILayout.Popup("Character", _selectedCharacter, _charactersWithSkins);
+        _currentCharacterName = _charactersWithSkins[_selectedCharacter];
         
-        EditorGUILayoutArrays.LabelArrayField(arrayFieldSettings, charactersWithSkins);
-
-        EditorGUILayout.LabelField("");
-        _selectedCharacter = EditorGUILayout.Popup("Character you want an skin for", _selectedCharacter, charactersWithSkins);
-        _currentCharacterName = charactersWithSkins[_selectedCharacter];
-        
-        if (GUILayout.Button("Select and continue", GUILayout.Height(35)))
+        if (_previousCharacter!=_selectedCharacter)
         {
-            _skinGroupValue = 0;
-            if (_currentCharacterName == null)
-            {
-                EditorGUILayout.LabelField("No name set on the text field.");
-            }
-            else if (!CharacterCreatorAndSkinsToolsLogic.CharacterFolderExist(_currentCharacterName))
-            {
-                EditorGUILayout.LabelField("Character folder doesn't exist. Pls use the character creation tool or" +
-                   "create the folder on Assets/FastAndFractured/Resources/CharacterSkins");
-            }
-            else
-            {
-                _skinGroupValue = 1;
-                if (_characterName != _currentCharacterName)
-                {
-                    _characterSkin = Array.Empty<CharacterCreatorAndSkinsToolsLogic.CharacterSkin>();
-                    _characterName = _currentCharacterName;
-                }
-            }
+            _previousCharacter = _selectedCharacter;
+           _skinGroupValue = 1;
+           if (_characterName != _currentCharacterName)
+              {
+                _characterSkin = Array.Empty<CharacterCreatorAndSkinsToolsLogic.CharacterSkin>();
+                _characterName = _currentCharacterName;
+              }
         }
 
         EditorGUILayout.BeginFadeGroup(_skinGroupValue);
@@ -74,7 +71,7 @@ public class CharacterSkinCreation : EditorWindow
         {
                 _toalSkinCount = CharacterCreatorAndSkinsToolsLogic.ReturnSkinCountOfACharacter(_characterName);
                 int characterSkinSize = _characterSkin.Length;
-                characterSkinSize = EditorGUILayout.IntField("Size", characterSkinSize);
+                characterSkinSize = EditorGUILayout.IntField("Skin Size", characterSkinSize);
                 characterSkinSize = characterSkinSize < _toalSkinCount ? _toalSkinCount : characterSkinSize;
                 _characterSkin = ResizeArray(_characterSkin, characterSkinSize);
                 if (_characterSkin[0] == null)
@@ -86,9 +83,9 @@ public class CharacterSkinCreation : EditorWindow
                 }
                 for (int i = 0; i < characterSkinSize; i++)
                 {
-                    bool open = true;
-                    open = EditorGUILayout.Foldout(open, "Skin num _" + i + 1);
-                    if (open)
+                    int skinNumToShow = i + SKIN_NUM_MOD_TO_SHOW;
+                    _foldoutSkinsToogle[i] = EditorGUILayout.Foldout(_foldoutSkinsToogle[i], "Skin num " + skinNumToShow);
+                    if (_foldoutSkinsToogle[i])
                     {
                         _characterSkin[i] = CharacterSkinLabels(_characterSkin[i]);
                     }

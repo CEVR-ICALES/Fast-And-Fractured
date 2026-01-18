@@ -306,12 +306,12 @@ namespace Utilities
 
         public static Material[] MaterialArrayField(string label, ref bool open, Material[] array)
         {
-            open = EditorGUILayout.Foldout(open, label);
+            EditorGUILayout.LabelField(label);
             int newSize = array.Length;
 
             if (open)
             {
-                newSize = EditorGUILayout.IntField("Size", newSize);
+                newSize = EditorGUILayout.IntField("Material num", newSize);
                 newSize = newSize < 0 ? 0 : newSize;
 
                 if (newSize != array.Length)
@@ -321,7 +321,7 @@ namespace Utilities
 
                 for (var i = 0; i < newSize; i++)
                 {
-                    array[i] = EditorGUILayout.ObjectField("Value " + i, array[i], typeof(Material), false) as Material;
+                    array[i] = EditorGUILayout.ObjectField("Material " + i, array[i], typeof(Material), false) as Material;
                 }
             }
             return array;
