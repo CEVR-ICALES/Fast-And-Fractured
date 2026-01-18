@@ -74,6 +74,8 @@ public class CharacterSkinCreation : EditorWindow
                 characterSkinSize = EditorGUILayout.IntField("Skin Size", characterSkinSize);
                 characterSkinSize = characterSkinSize < _toalSkinCount ? _toalSkinCount : characterSkinSize;
                 _characterSkin = ResizeArray(_characterSkin, characterSkinSize);
+            if (_characterSkin.Length > 0)
+            {
                 if (_characterSkin[0] == null)
                 {
                     for (int i = 0; i < _toalSkinCount; i++)
@@ -92,8 +94,9 @@ public class CharacterSkinCreation : EditorWindow
                 }
                 if (GUILayout.Button("Create", GUILayout.Height(35)))
                 {
-                CharacterCreatorAndSkinsToolsLogic.SaveNewSkinsInCharacterSkinDirectory(_characterSkin,_characterName);
+                    CharacterCreatorAndSkinsToolsLogic.SaveNewSkinsInCharacterSkinDirectory(_characterSkin, _characterName);
                 }
+            }
 
             }
             
