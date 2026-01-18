@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Enums;
 using FastAndFractured;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using Utilities;
-using Enums;
 
 public class CharacterSkinCreation : EditorWindow
 {
@@ -13,14 +14,21 @@ public class CharacterSkinCreation : EditorWindow
     private Vector2 _scrollPosition;
     private string _characterName;
     private string _currentCharacterName;
+    private int _selectedCharacter;
     private int _toalSkinCount;
     private float _skinGroupValue = 0;
 
-    private CharacterSkinsCountFileGenerator.CharacterSkin[] _characterSkin = new CharacterSkinsCountFileGenerator.CharacterSkin[0];
+    private CharacterCreatorAndSkinsToolsLogic.CharacterSkin[] _characterSkin = new CharacterCreatorAndSkinsToolsLogic.CharacterSkin[0];
     [MenuItem("Tools/CharacterRelated/CharacterSkinCreation", false, 50)]
     public static void ShowWindow()
     {
         GetWindow<CharacterSkinCreation>("CharacterSkinCreation");
+    }
+
+    [MenuItem("Tools/GenerateCharacterSkinCountFile")]
+    public static void ShowWindowGenerateCharacterSkinCountFile()
+    {
+        CharacterCreatorAndSkinsToolsLogic.GenerateCharacterSkinCountFile();
     }
 
     private void OnGUI()
@@ -30,12 +38,13 @@ public class CharacterSkinCreation : EditorWindow
         EditorStyles.boldLabel);
         EditorGUILayout.LabelField("Select the character you want an skin for ");
         EditorGUILayoutArrays.ArrayFieldSettings arrayFieldSettings = new EditorGUILayoutArrays.ArrayFieldSettings("Characters in folder");
-        string[] charactersWithSkins = CharacterSkinsCountFileGenerator.ReturnCharactersInCharacterSkinsFolder();
+        string[] charactersWithSkins = CharacterCreatorAndSkinsToolsLogic.ReturnCharactersInCharacterSkinsFolder();
         
         EditorGUILayoutArrays.LabelArrayField(arrayFieldSettings, charactersWithSkins);
 
-        EditorGUILayout.LabelField("Character you want an skin for");
-        _currentCharacterName = EditorGUILayout.TextField("Character Name", _currentCharacterName);
+        EditorGUILayout.LabelField("");
+        _selectedCharacter = EditorGUILayout.Popup("Character you want an skin for", _selectedCharacter, charactersWithSkins);
+        _currentCharacterName = charactersWithSkins[_selectedCharacter];
         
         if (GUILayout.Button("Select and continue", GUILayout.Height(35)))
         {
@@ -44,7 +53,7 @@ public class CharacterSkinCreation : EditorWindow
             {
                 EditorGUILayout.LabelField("No name set on the text field.");
             }
-            else if (!CharacterSkinsCountFileGenerator.CharacterFolderExist(_currentCharacterName))
+            else if (!CharacterCreatorAndSkinsToolsLogic.CharacterFolderExist(_currentCharacterName))
             {
                 EditorGUILayout.LabelField("Character folder doesn't exist. Pls use the character creation tool or" +
                    "create the folder on Assets/FastAndFractured/Resources/CharacterSkins");
@@ -54,7 +63,7 @@ public class CharacterSkinCreation : EditorWindow
                 _skinGroupValue = 1;
                 if (_characterName != _currentCharacterName)
                 {
-                    _characterSkin = Array.Empty<CharacterSkinsCountFileGenerator.CharacterSkin>();
+                    _characterSkin = Array.Empty<CharacterCreatorAndSkinsToolsLogic.CharacterSkin>();
                     _characterName = _currentCharacterName;
                 }
             }
@@ -63,7 +72,7 @@ public class CharacterSkinCreation : EditorWindow
         EditorGUILayout.BeginFadeGroup(_skinGroupValue);
         if (_skinGroupValue==1)
         {
-                _toalSkinCount = CharacterSkinsCountFileGenerator.ReturnSkinCountOfACharacter(_characterName);
+                _toalSkinCount = CharacterCreatorAndSkinsToolsLogic.ReturnSkinCountOfACharacter(_characterName);
                 int characterSkinSize = _characterSkin.Length;
                 characterSkinSize = EditorGUILayout.IntField("Size", characterSkinSize);
                 characterSkinSize = characterSkinSize < _toalSkinCount ? _toalSkinCount : characterSkinSize;
@@ -86,7 +95,7 @@ public class CharacterSkinCreation : EditorWindow
                 }
                 if (GUILayout.Button("Create", GUILayout.Height(35)))
                 {
-                CharacterSkinsCountFileGenerator.SaveNewSkinsInCharacterSkinDirectory(_characterSkin,_characterName);
+                CharacterCreatorAndSkinsToolsLogic.SaveNewSkinsInCharacterSkinDirectory(_characterSkin,_characterName);
                 }
 
             }
@@ -96,11 +105,11 @@ public class CharacterSkinCreation : EditorWindow
         EditorGUILayout.EndScrollView();
     }
 
-    private CharacterSkinsCountFileGenerator.CharacterSkin CharacterSkinLabels(CharacterSkinsCountFileGenerator.CharacterSkin characterSkin)
+    private CharacterCreatorAndSkinsToolsLogic.CharacterSkin CharacterSkinLabels(CharacterCreatorAndSkinsToolsLogic.CharacterSkin characterSkin)
     {
         if (characterSkin==null)
         {
-            characterSkin = new CharacterSkinsCountFileGenerator.CharacterSkin();
+            characterSkin = new CharacterCreatorAndSkinsToolsLogic.CharacterSkin();
         }
         EditorGUILayoutArrays.ArrayFieldSettings characterMaterialSettings = new EditorGUILayoutArrays.ArrayFieldSettings("Character Materials [in order]");
         characterSkin.CharacterMaterials = EditorGUILayoutArrays.MaterialArrayField(characterMaterialSettings, characterSkin.CharacterMaterials);
@@ -111,12 +120,12 @@ public class CharacterSkinCreation : EditorWindow
         return characterSkin;
     }
 
-    private CharacterSkinsCountFileGenerator.CharacterSkin CreateACharacterSkinFromAlreadyExistingSkin(CharacterSkinsCountFileGenerator.CharacterSkin characterSkin,string name,int skinCount)
+    private CharacterCreatorAndSkinsToolsLogic.CharacterSkin CreateACharacterSkinFromAlreadyExistingSkin(CharacterCreatorAndSkinsToolsLogic.CharacterSkin characterSkin,string name,int skinCount)
     {
-        characterSkin = new CharacterSkinsCountFileGenerator.CharacterSkin();
-        characterSkin.CharacterMaterials = CharacterSkinsCountFileGenerator.ReturnMaterialsOfCharacterPrefabPart(name,skinCount,CharacterPrefabParts.Character);
-        characterSkin.ChasisMaterials = CharacterSkinsCountFileGenerator.ReturnMaterialsOfCharacterPrefabPart(name, skinCount, CharacterPrefabParts.Chassis);
-        characterSkin.WheelMaterials = CharacterSkinsCountFileGenerator.ReturnMaterialsOfCharacterPrefabPart(name, skinCount, CharacterPrefabParts.Wheel);
+        characterSkin = new CharacterCreatorAndSkinsToolsLogic.CharacterSkin();
+        characterSkin.CharacterMaterials = CharacterCreatorAndSkinsToolsLogic.ReturnMaterialsOfCharacterPrefabPart(name,skinCount,CharacterPrefabParts.Character);
+        characterSkin.ChasisMaterials = CharacterCreatorAndSkinsToolsLogic.ReturnMaterialsOfCharacterPrefabPart(name, skinCount, CharacterPrefabParts.Chassis);
+        characterSkin.WheelMaterials = CharacterCreatorAndSkinsToolsLogic.ReturnMaterialsOfCharacterPrefabPart(name, skinCount, CharacterPrefabParts.Wheel);
         return characterSkin;
     }
 
