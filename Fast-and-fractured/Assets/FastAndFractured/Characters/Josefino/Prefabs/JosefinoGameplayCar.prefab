@@ -5144,6 +5144,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6569174849314156201}
+    - targetCorrespondingSourceObject: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7101715092052998050}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
 --- !u!4 &36688299621213290 stripped
 Transform:
@@ -5230,6 +5233,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5357aaeebc7666a46b767523910fb4d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7101715092052998050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2552904999676308011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfd30088f84ca6e4081b159a302725ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SpineTarget: {fileID: 2892842701259646422}
+  RightArmTarget: {fileID: 547261567047781078}
+  LeftArmTarget: {fileID: 4477731051270064052}
+  HeadTarget: {fileID: 1627879976777976356}
+  maxReactionDuration: 1.2
+  maxAngleOffset: 35
 --- !u!4 &3720275510104103767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6738124810828555154, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
