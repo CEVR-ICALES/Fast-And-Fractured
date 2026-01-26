@@ -84,8 +84,18 @@ namespace Enums
         NORMAL_BULLET_CROQUETA,
         PUSH_BULLET_SARTENAZO,
         MEGA_CHICKEN_EGG,
+		
+		
+		
+		
+		
+		
+		
+		
         COSMETIC_NORMAL_BULLET_GOLF,
-        COSMETIC_PUSH_BULLET_GOLF
+        COSMETIC_PUSH_BULLET_GOLF,
+        COSMETIC_NORMAL_BULLET_TOMATO,
+        COSMETIC_PUSH_BULLET_TOMATO
     }
 
     public enum PathMode
