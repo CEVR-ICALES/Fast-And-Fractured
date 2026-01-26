@@ -11,9 +11,9 @@ namespace FastAndFractured
 {
     public class StatsController : MonoBehaviour, IPausable
     {
+
         [SerializeField]
         private CharacterData charDataSO;
-
         [SerializeField]
         private VehicleVfxController vehicleVfxController;
 
@@ -35,7 +35,7 @@ namespace FastAndFractured
         [SerializeField] private float currentAcceleration;
         private float _currentMaxSpeedMultiplier;
 
-        public CharacterData CharacterData { get => charDataSO;}   
+        public CharacterData CharacterData { get => charDataSO; set => charDataSO = value; }   
         public float MaxSpeed { get => currentMaxSpeed; }
         public float MaxSpeedDashing { get => currentMaxSpeedDashing; }
         public float MaxSpeedAscend { get => currentMaxSpeedAscend; }

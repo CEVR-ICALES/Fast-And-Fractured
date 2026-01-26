@@ -73,6 +73,7 @@ namespace FastAndFractured
 
 
             int totalAICharacters = maxCharactersInGame - currentPlayers;
+            RemovePlayersCharactersFromAvailableList(totalAICharacters, ignoreRepeatedCharactersLimit);
             for (int aiCharacterCount = 0; aiCharacterCount < totalAICharacters; aiCharacterCount++)
             {
                 if (_availableNameCodesForSpawning.Count == 0)
@@ -119,28 +120,59 @@ namespace FastAndFractured
                 return false;
             }
 
-            if (!ignoreLimit)
-            {
-                if (!_characterSelectionCount.ContainsKey(baseName))
-                {
-                    _characterSelectionCount[baseName] = 0;
-                }
-
-                _characterSelectionCount[baseName]++;
-                _availableNameCodesForSpawning.Remove(nameCode);
-
-                if (_characterSelectionCount[baseName] >= LevelConstants.DEFAULT_LIMIT_OF_SAME_CHARACTER_SPAWNED)
-                {
-                    _availableNameCodesForSpawning.RemoveAll(s => LevelUtilities.ParseCharacterNameFromCode(s) == baseName);
-                }
-            }
-            else
-            {
-                _availableNameCodesForSpawning.Remove(nameCode);
-            }
+            RemoveSkinOrCharacterFromAvailableList(nameCode, baseName, ignoreLimit, isPlayer);
 
             InGameCharactersNameCodes.Add(nameCode);
             return true;
+        }
+
+        private void RemovePlayersCharactersFromAvailableList(int totalAiCharacters,bool ignoreLimit)
+        {
+            if (totalAiCharacters <= 0)
+            {
+                _availableNameCodesForSpawning.Clear();
+                return;
+            }
+
+            foreach(string nameCode in InGameCharactersNameCodes)
+            {
+                string baseName = LevelUtilities.ParseCharacterNameFromCode(nameCode);
+                if (baseName == " ")
+                {
+                    Debug.LogError($"Invalid name code format: {nameCode}");
+                    return;
+                }
+                if (_availableNameCodesForSpawning.Contains(nameCode))
+                {
+                    RemoveSkinOrCharacterFromAvailableList(nameCode, baseName, ignoreLimit, false);
+                }
+            }
+        }
+
+        private void RemoveSkinOrCharacterFromAvailableList(string nameCode, string baseName,bool ignoreLimit,bool isPlayer)
+        {
+            if (!isPlayer)
+            {
+                if (!ignoreLimit)
+                {
+                    if (!_characterSelectionCount.ContainsKey(baseName))
+                    {
+                        _characterSelectionCount[baseName] = 0;
+                    }
+
+                    _characterSelectionCount[baseName]++;
+                    _availableNameCodesForSpawning.Remove(nameCode);
+
+                    if (_characterSelectionCount[baseName] >= LevelConstants.DEFAULT_LIMIT_OF_SAME_CHARACTER_SPAWNED)
+                    {
+                        _availableNameCodesForSpawning.RemoveAll(s => LevelUtilities.ParseCharacterNameFromCode(s) == baseName);
+                    }
+                }
+                else
+                {
+                    _availableNameCodesForSpawning.Remove(nameCode);
+                }
+            }
         }
 
 
