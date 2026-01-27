@@ -6,8 +6,8 @@ public class CharacterMenuData : ScriptableObject
 {
     public CharacterData CharacterStats => characterStats;
     public string CharacterName => characterName;
-    public string CharacterDescription => characterDescription;
-    public GameObject[] Models => models;
+    public string CharacterDescription { get => characterDescription; set => characterDescription = value; }
+    public GameObject[] Models { get => models; set => models = value; }
 
 
 

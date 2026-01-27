@@ -13,6 +13,7 @@ namespace FastAndFractured {
         private const string RESOURCES_FOLDER_PATH = "Assets/FastAndFractured/Resources";
         private const string LIST_OF_CHARACTER_SKINS = "/ListOfCharacterSkins.asset";
         private const string SKIN_PREFIX = "_";
+        private const string BASE_SKIN = "0";
         private const int SKIN_STARTING_INT = 1;
         private const string SKIN_CHARACTER_PREFAB_FOLDER = "Character";
         private const string SKIN_CHASSIS_PREFAB_FOLDER = "Chassis";
@@ -20,10 +21,13 @@ namespace FastAndFractured {
         private static string characterFolderPath = RESOURCES_FOLDER_PATH + "/" + LevelConstants.SKINS_LOADER_PATH;
         private const string GAMEPLAY_CAR_NAME = "GameplayCar";
         private const string PATH_TO_CHARACTERS = "Assets/FastAndFractured/Characters";
+        private const string PATH_TO_MENU_CHARACTERS = "Assets/FastAndFractured/MainMenu/Prefabs/MenuCarsPrefabs";
+        private const string PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS = "\"Assets/FastAndFractured/MainMenu/ScriptableObjects";
         private const string PATH_TO_BASE_CAR_FROM_CHARACTERS = "!Common/BaseCar.prefab";
         private const string SCRIPTABLE_OBJECT_FOlDER = "ScriptableObjects";
         private const string PREFABS_FOLDER = "Prefabs";
         private const string CAR_DATA_SO_NAME = "CarData.asset";
+        private const string MENU_DATA_SO_Name = "MenuData.asset";
         private const string UNIQUE_ABILITY_SO_NAME = "UniqueAbilityData.asset";        
 
         //Prefab Hierarchy
@@ -33,6 +37,7 @@ namespace FastAndFractured {
         private const string FRONT_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/FrontRightWheel";
         private const string BACK_LEFT_WHEEL_PATH = "Visuals/WheelsVisuals/BackLeftWheel";
         private const string BACK_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/BackRightWheel";
+        private const string WHEELS_COLLIDER_PATH = "WheelCollider";
         private const string CHARACTER_MODEL_NAME = "Character";
         private const string CHASIS_MODEL_NAME = "Chassis";
         private const string WHEEL_MODEL_NAME = "WheelVisuals";
@@ -78,14 +83,16 @@ namespace FastAndFractured {
                     Transform frontRightWheelHolder = newBaseCar.transform.Find(FRONT_RIGHT_WHEEL_PATH);
                     Transform backLeftWheelHolder = newBaseCar.transform.Find(BACK_LEFT_WHEEL_PATH);
                     Transform backRightWheelHolder = newBaseCar.transform.Find(BACK_RIGHT_WHEEL_PATH);
+                    GameObject[] wheelsMesh = new GameObject[4];
                     try
                     {
                         PrefabUtility.InstantiatePrefab(characterModel, characterHolder);
                         PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder);
                         PrefabUtility.InstantiatePrefab(chasisModel, frontLeftWheelHolder);
-                        PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder);
-                        PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder);
-                        PrefabUtility.InstantiatePrefab(wheelModel, backRightWheelHolder);
+                        wheelsMesh[0] = PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder) as GameObject;
+                        wheelsMesh[1] =  PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder) as GameObject;
+                        wheelsMesh[2] =  PrefabUtility.InstantiatePrefab(wheelModel, backRightWheelHolder) as GameObject;
+                        wheelsMesh[3] = PrefabUtility.InstantiatePrefab(wheelModel,frontLeftWheelHolder) as GameObject;
                         PrefabUtility.SaveAsPrefabAsset(newBaseCar, pathToCreateNewCharacter);
                     }
                     catch (Exception e)
@@ -99,10 +106,9 @@ namespace FastAndFractured {
                     CheckAndCreateDirectory(scriptableObjectDirectory);
 
                     string carDataSOPath = Path.Combine(scriptableObjectDirectory, CAR_DATA_SO_NAME);
-
+                    CharacterData characterData = new CharacterData();
                     if (!File.Exists(scriptableObjectDirectory))
                     {
-                        CharacterData characterData = new CharacterData();
                         characterData.name = characterName + CAR_DATA_SO_NAME;
                         characterData.CharacterName = characterName;
                         AssetDatabase.CreateAsset(characterData, carDataSOPath);
@@ -120,6 +126,11 @@ namespace FastAndFractured {
                         Debug.Log("File " + abilityData + " created");
                     }
 
+                    if (!CreateMenuVariant(newBaseCar, characterName, wheelsMesh,characterData))
+                    {
+                        Debug.LogError("Menu Variant of the character was not created");
+                    }
+
                     AssetDatabase.StopAssetEditing();
                 }
                 catch (Exception e)
@@ -132,6 +143,59 @@ namespace FastAndFractured {
             }
             Debug.LogError("No empty labelfields");
             return false;
+        }
+
+        private static bool CreateMenuVariant(GameObject gameplayCarParent, string characterName, GameObject[] wheelsMesh,CharacterData characterData)
+        {
+            if (!DirectoryExist(PATH_TO_MENU_CHARACTERS))
+            {
+               return false;
+            }
+            try
+            {
+                GameObject menuVariant = PrefabUtility.InstantiatePrefab(gameplayCarParent) as GameObject;
+                menuVariant.name = characterName + SKIN_PREFIX + BASE_SKIN;
+                MonoBehaviour[] monoBehavioursScripts = menuVariant.GetComponents<MonoBehaviour>();
+                foreach (MonoBehaviour monoBehaviour in monoBehavioursScripts)
+                {
+                    UnityEngine.Object.Destroy(monoBehaviour);
+                }
+                Transform wheelsColliderParent = menuVariant.transform.Find(WHEELS_COLLIDER_PATH);
+                MonoBehaviour[] monoBehavioursInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<MonoBehaviour>();
+                Collider[] collidersInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<Collider>();
+                foreach(MonoBehaviour monoBehaviour1 in monoBehavioursInWheelsCollider)
+                {
+                    UnityEngine.Object.Destroy(monoBehaviour1);
+                }
+                foreach(Collider collider in collidersInWheelsCollider)
+                {
+                    collider.gameObject.AddComponent<SphereCollider>().radius = 1f;
+                    UnityEngine.Object.Destroy(collider);
+                }
+
+                CharSelectionSimulatedMovement charSelectionSimulatedMovement = menuVariant.AddComponent<CharSelectionSimulatedMovement>();
+               charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
+                string pathToCreateMenuCharacter = Path.Combine(PATH_TO_MENU_CHARACTERS, menuVariant.name + ".prefab");
+                PrefabUtility.SaveAsPrefabAsset(menuVariant, pathToCreateMenuCharacter);
+
+
+                string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
+
+                if (!File.Exists(carDataSOPath))
+                {
+                    CharacterMenuData characterMenuData = new CharacterMenuData();
+                    characterMenuData.name = characterName + CAR_DATA_SO_NAME;
+                    characterMenuData.CharacterDescription = "Menu." + characterName;
+                    characterMenuData.Models = new GameObject[] {menuVariant}; 
+                    AssetDatabase.CreateAsset(characterData, carDataSOPath);
+                    Debug.Log("File " + carDataSOPath + " created");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            return true;
         }
         #endregion
 
@@ -200,7 +264,7 @@ namespace FastAndFractured {
         {
             string characterDirectory = Path.Combine(characterFolderPath, name);
             if (!DirectoryExist(characterDirectory))
-                return 0;
+                return -1;
             string[] characterSkins = Directory.GetDirectories(characterDirectory, "*", SearchOption.TopDirectoryOnly);
             return characterSkins.Length;
         }
@@ -243,6 +307,70 @@ namespace FastAndFractured {
                 SetAllMaterialsFromFolder(wheelSkinFolder, characterSkins[i].WheelMaterials);
             }
             GenerateCharacterSkinCountFile();
+            UpdateCharacterMenuModel(name);
+        }
+
+        public static void UpdateAllCharactersMenuModels()
+        {
+          string[] allCharactersInSkinsFolder = ReturnCharactersInCharacterSkinsFolder();
+            foreach (string character in allCharactersInSkinsFolder)
+            {
+                UpdateCharacterMenuModel(character);
+            }
+        }
+
+        private static void UpdateCharacterMenuModel(string characterName)
+        {
+            int skinCount = ReturnSkinCountOfACharacter(characterName);
+            GameObject[] newMenuList = new GameObject[skinCount + SKIN_STARTING_INT];
+            if (skinCount < 0)
+            {
+                Debug.LogError("Character " + characterName + " provided doesn't exist. Maybe an error ocurred during the chaarcter creation tool or this tool wasn't use. " +
+                    "Go to '" + characterFolderPath + "' to check if the directory " + characterName + " exist, if not, create it");
+                return;
+            }
+            else if (skinCount==0)
+            {
+                Debug.LogWarning("Character skin count is 0. Check if this statement is true on '" + Path.Combine(characterFolderPath,characterName) + "'. If is empty, the character doesn't have any skin. If you want to add one, use the character skin tool.");
+                return;
+            }
+            string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
+            string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
+            string characterMenuVariantBaseSkinPath = characterMenuVariantPath + BASE_SKIN + ".prefab";
+            if (!File.Exists(characterMenuVariantBaseSkinPath))
+            {
+                
+                return;
+            }
+            GameObject menuCharacterVariant = AssetDatabase.LoadAssetAtPath(characterMenuVariantPath, typeof(GameObject)) as GameObject;
+            newMenuList[0] = menuCharacterVariant;
+            for (int i = SKIN_STARTING_INT; i < skinCount; i++)
+            {
+                string characterSkinVariantPath = characterMenuVariantPath + i + ".prefab";
+                GameObject menuCharacterSkinVariant = new GameObject();
+                if (!File.Exists(characterSkinVariantPath))
+                {
+                    menuCharacterSkinVariant = PrefabUtility.InstantiatePrefab(menuCharacterVariant) as GameObject;
+                    menuCharacterSkinVariant.name = characterName + SKIN_PREFIX + i;
+                    SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
+                    PrefabUtility.SaveAsPrefabAsset(menuCharacterVariant, characterSkinVariantPath);
+                }
+                else
+                {
+                    menuCharacterSkinVariant = AssetDatabase.LoadAssetAtPath(characterSkinVariantPath, typeof(GameObject)) as GameObject;
+                    SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
+                }
+                newMenuList[i] = menuCharacterVariant;
+                string characterMenuDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
+                if (!File.Exists(characterMenuDataSOPath))
+                {
+                    //Error Log
+                    return;
+                }
+                CharacterMenuData characterMenuData = AssetDatabase.LoadAssetAtPath(characterMenuDataSOPath, typeof(CharacterMenuData)) as CharacterMenuData;
+                characterMenuData.Models = newMenuList;
+            }
+            Debug.Log("Characters Skins in menu updated");
         }
 
         private static void SetAllMaterialsFromFolder(string folderPath,Material[] materialsGiven)
@@ -270,6 +398,133 @@ namespace FastAndFractured {
             if (!noNewMaterials) {
                 SaveAssets(newMaterials, folderPath, ".mat");
             }
+        }
+
+        public static void SetCharacterSkin(string nameCode, GameObject instantiatedCar)
+        {
+            LevelUtilities.ParseCharacterNameCode(nameCode, out string name, out int skinNum);
+
+            string skinPath = LevelConstants.SKINS_LOADER_PATH + "/" + name + "/" + "_" + skinNum;
+            Transform visuals = instantiatedCar.transform.Find(LevelConstants.VISUAL_CHARACTER_PARTS);
+
+            //Character Skin
+            //Hierarchy for the character model '/Visuals/Character/{characterName}Character/Visuals/CharacterModel/{characterName}' 
+
+            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH + "/" + name;
+            Transform character = visuals.Find(characterPath);
+
+            if (!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS_FOLDER))
+            {
+                Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterPath);
+            }
+
+            //Chassis Skin
+            //Hierarchy for the chassis model '/Visuals/Chassis/{characterName}Chassis/Visuals/{characterName}Vehicle'
+
+            string chassisPath = LevelConstants.CHASSIS_PREFAB_PATH + "/" + name + LevelConstants.CHASSIS_PREFAB_PATH + "/" + LevelConstants.VISUAL_CHARACTER_PARTS;
+            Transform chassis = visuals.transform.Find(chassisPath);
+
+            bool logError = false;
+
+            if (chassis != null)
+            {
+                Transform chassisModel = chassis.GetChild(0);
+                logError = !SetSkinPart(chassisModel, skinPath + "/" + LevelConstants.CHASSIS_MATERIALS_FOLDER);
+            }
+            else
+                logError = true;
+            if (logError)
+                Debug.LogError($"Vehicle model to change the skin not found.Make sure the hierarchy to get the model is " + chassisPath);
+
+
+            //Wheels Skin
+            //Hierarchy for the wheels /Visuals/WheelsVisuals/[Front/Back][Left/Right]Wheel/WheelVisuals/Visuals/[anyName]
+
+            Transform frontRightWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.FRONT_RIGHT_WHEEL_PATH);
+            Transform backRightWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.BACK_RiGHT_WHEEL_PATH);
+            Transform frontLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.FRONT_LEFT_WHEEL_PATH);
+            Transform backLeftWheel = visuals.transform.Find(LevelConstants.GENERIC_PREFAB_WHEEL_PATH + "/" + LevelConstants.BACK_LEFT_WHEEL_PATH);
+
+            logError = false;
+
+            if (frontRightWheel != null && backRightWheel != null && frontLeftWheel != null && backLeftWheel != null)
+            {
+                Transform[] wheels = new Transform[]
+                {
+                frontRightWheel.GetChild(0),
+                backRightWheel.GetChild(0),
+                frontLeftWheel.GetChild(0),
+                backLeftWheel.GetChild(0),
+                };
+                logError = !SetSkinPart(wheels, skinPath + "/" + LevelConstants.WHEElS_MATERIALS_FOLDER);
+            }
+            else
+                logError = true;
+            if (logError)
+                Debug.LogError($"Wheels models to change the skin not found.Make sure the hierarchy to get the models is /Visuals/WheelsVisuals/[Front / Back][Left / Right]Wheel/WheelVisuals/Visuals/[anyName]");
+        }
+
+        private static Material[] LoadSkinMaterials(string path)
+        {
+            return Resources.LoadAll<Material>(path);
+        }
+
+        private static bool SetSkinPart(Transform instantiatedCarPart, string skinPartPath)
+        {
+            Material[] skinPart = LoadSkinMaterials(skinPartPath);
+            if (skinPart.Length != 0)
+            {
+                if (instantiatedCarPart == null)
+                {
+                    return false;
+                }
+                Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                Material[] defaultSkinMaterials = renderPart.materials;
+                for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
+                {
+                    if (skinPart.Length > materialIterator)
+                    {
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
+                    }
+                    else
+                    {
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
+                    }
+                }
+                renderPart.materials = defaultSkinMaterials;
+            }
+            return true;
+        }
+
+        private static bool SetSkinPart(Transform[] instantiatedCarParts, string skinPartPath)
+        {
+
+            Material[] skinPart = LoadSkinMaterials(skinPartPath);
+            if (skinPart.Length != 0)
+            {
+                foreach (Transform instantiatedCarPart in instantiatedCarParts)
+                {
+                    if (instantiatedCarPart == null)
+                    {
+                        return false;
+                    }
+                    Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                    Material[] defaultSkinMaterials = renderPart.materials;
+                    for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
+                    {
+                        if (skinPart.Length > materialIterator)
+                        {
+                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
+                        }
+                        else
+                        {
+                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
+                        }
+                    }
+                    renderPart.materials = defaultSkinMaterials;
+                }
+            }
+            return true;
         }
 
 

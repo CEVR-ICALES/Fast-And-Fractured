@@ -32,10 +32,16 @@ public class CharacterSkinCreation : EditorWindow
         GetWindow<CharacterSkinCreation>("CharacterSkinCreation");
     }
 
-    [MenuItem("Tools/GenerateCharacterSkinCountFile")]
+    [MenuItem("Tools/CharacterRelated/GenerateCharacterSkinCountFile")]
     public static void ShowWindowGenerateCharacterSkinCountFile()
     {
         CharacterCreatorAndSkinsToolsLogic.GenerateCharacterSkinCountFile();
+    }
+
+    [MenuItem("Tools/CharacterRelated/UpdateAllCharactersMenuModels")]
+    public static void ShowWindowUpdate()
+    {
+        CharacterCreatorAndSkinsToolsLogic.UpdateAllCharactersMenuModels();
     }
 
     private void CreateGUI()
