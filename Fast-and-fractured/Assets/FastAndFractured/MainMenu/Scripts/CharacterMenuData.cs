@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewMenuCharacterData", menuName = "MainMenu/MenuCharacterData")]
 public class CharacterMenuData : ScriptableObject
 {
-    public CharacterData CharacterStats => characterStats;
+    public CharacterData CharacterStats { get => characterStats; set => characterStats = value; }
     public string CharacterName => characterName;
     public string CharacterDescription { get => characterDescription; set => characterDescription = value; }
     public GameObject[] Models { get => models; set => models = value; }
