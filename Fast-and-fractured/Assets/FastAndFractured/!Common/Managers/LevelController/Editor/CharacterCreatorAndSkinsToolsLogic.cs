@@ -53,9 +53,6 @@ namespace FastAndFractured
         {
             if (characterModel != null && chasisModel != null && wheelModel != null && characterName != string.Empty && characterName != null)
             {
-                chasisModel.name = characterName + CHARACTER_MODEL_NAME;
-                chasisModel.name = characterName + CHASIS_MODEL_NAME;
-                wheelModel.name = WHEEL_MODEL_NAME;
                 try
                 {
                     AssetDatabase.StartAssetEditing();
@@ -76,7 +73,7 @@ namespace FastAndFractured
 
                     GameObject baseCar = AssetDatabase.LoadAssetAtPath(pathToBaseCar, typeof(GameObject)) as GameObject;
                     GameObject newBaseCar = PrefabUtility.InstantiatePrefab(baseCar) as GameObject;
-                    GameObject assetNewBaseCar = new GameObject();
+                    GameObject newBaseCarFromSource;
                     newBaseCar.name = characterName + GAMEPLAY_CAR_NAME;
                     Transform characterHolder = newBaseCar.transform.Find(CHARACTER_PATH);
                     Transform chassisHolder = newBaseCar.transform.Find(CHASSIS_PATH);
@@ -85,19 +82,29 @@ namespace FastAndFractured
                     Transform backLeftWheelHolder = newBaseCar.transform.Find(BACK_LEFT_WHEEL_PATH);
                     Transform backRightWheelHolder = newBaseCar.transform.Find(BACK_RIGHT_WHEEL_PATH);
                     GameObject[] wheelsMesh = new GameObject[4];
+                    string pathToCreateNewCharacter = Path.Combine(prefabsDirectory, newBaseCar.name + ".prefab");
                     try
                     {
-                        PrefabUtility.InstantiatePrefab(characterModel, characterHolder);
-                        PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder);
+                        characterModel = PrefabUtility.InstantiatePrefab(characterModel, characterHolder) as GameObject;
+                        chasisModel = PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder) as GameObject;
+                        chasisModel.name = characterName + CHARACTER_MODEL_NAME;
+                        chasisModel.name = characterName + CHASIS_MODEL_NAME;
                         wheelsMesh[0] = PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder) as GameObject;
                         wheelsMesh[1] = PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder) as GameObject;
                         wheelsMesh[2] = PrefabUtility.InstantiatePrefab(wheelModel, backRightWheelHolder) as GameObject;
                         wheelsMesh[3] = PrefabUtility.InstantiatePrefab(wheelModel, frontLeftWheelHolder) as GameObject;
-                        string pathToCreateNewCharacter = Path.Combine(prefabsDirectory, newBaseCar.name + ".prefab");
+                        foreach (var wheelMesh in wheelsMesh)
+                        {
+                            wheelMesh.name = WHEEL_MODEL_NAME;
+                        }
                         PrefabUtility.SaveAsPrefabAsset(newBaseCar, pathToCreateNewCharacter);
-                        assetNewBaseCar = AssetDatabase.LoadAssetAtPath(pathToCreateNewCharacter, typeof(GameObject)) as GameObject;
-                        //UnityEngine.Object.DestroyImmediate(newBaseCar);
-                    }
+                        UnityEngine.Object.DestroyImmediate(newBaseCar);
+                        AssetDatabase.StopAssetEditing();
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        AssetDatabase.StartAssetEditing();
+                        newBaseCarFromSource = AssetDatabase.LoadAssetAtPath(pathToCreateNewCharacter, typeof(GameObject)) as GameObject;
+                     }
                     catch (Exception e)
                     {
                         Debug.LogException(e);
@@ -112,7 +119,7 @@ namespace FastAndFractured
                     {
                         characterData.name = characterName + CAR_DATA_SO_NAME;
                         characterData.CharacterName = characterName;
-                        characterData.CarDefaultPrefab = assetNewBaseCar;
+                        characterData.CarDefaultPrefab = newBaseCarFromSource;
                         string carDataSOPath = Path.Combine(scriptableObjectDirectory, characterData.name);
                         AssetDatabase.CreateAsset(characterData, carDataSOPath);
                         Debug.Log("File " + carDataSOPath + " created");
@@ -128,11 +135,10 @@ namespace FastAndFractured
                         Debug.Log("File " + abilityData + " created");
                     }
 
-                    if (!CreateMenuVariant(assetNewBaseCar, characterName, wheelsMesh, characterData))
+                    if (!CreateMenuVariant(newBaseCarFromSource, characterName, wheelsMesh, characterData))
                     {
                         Debug.LogError("Menu Variant of the character was not created");
                     }
-
                     AssetDatabase.StopAssetEditing();
                 }
                 catch (Exception e)
@@ -179,6 +185,11 @@ namespace FastAndFractured
                 charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
                 string pathToCreateMenuCharacter = Path.Combine(PATH_TO_MENU_CHARACTERS, menuVariant.name + ".prefab");
                 PrefabUtility.SaveAsPrefabAsset(menuVariant, pathToCreateMenuCharacter);
+                UnityEngine.Object.DestroyImmediate(menuVariant);
+                AssetDatabase.StopAssetEditing();
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                AssetDatabase.StartAssetEditing();
                 GameObject assetMenuVariant = AssetDatabase.LoadAssetAtPath(pathToCreateMenuCharacter, typeof(GameObject)) as GameObject;
 
 
@@ -198,6 +209,7 @@ namespace FastAndFractured
             catch (Exception e)
             {
                 Debug.LogException(e);
+                return false;
             }
             return true;
         }
