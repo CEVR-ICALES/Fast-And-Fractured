@@ -151,8 +151,8 @@ namespace FastAndFractured
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
                 otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse); // for now we just apply an offset on the y axis provisional
-                otherComponentPhysicsBehaviours.CharacterKinematicReactionsController.ApplyImpactReaction(-collisionNormal, forceToApply, statsController.BaseForce);
-                _characterKinematicReactionsController.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
+                otherComponentPhysicsBehaviours.CharacterKinematicReactionsController?.ApplyImpactReaction(-collisionNormal, forceToApply, statsController.BaseForce);
+                _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
             }  
@@ -198,7 +198,7 @@ namespace FastAndFractured
                 _carMovementController.CancelDash();
                 Vector3 bounceDirection = Vector3.Reflect(transform.forward, contact.normal);
                 AddForce(bounceDirection * wallBounceForce, ForceMode.Impulse);
-                _characterKinematicReactionsController.ApplyImpactReaction(transform.forward, 100000, statsController.BaseForce);
+                _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, 1, 1);
             }
         }
 

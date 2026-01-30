@@ -4874,6 +4874,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: JosefinoGameplayCar
       objectReference: {fileID: 0}
+    - target: {fileID: 5570406966506803950, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5672472646167121783, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: groundLayer.m_Bits
       value: 8
@@ -5245,11 +5249,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd30088f84ca6e4081b159a302725ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpineTarget: {fileID: 2892842701259646422}
+  SpineTarget: {fileID: 6280768040291123017}
   RightArmTarget: {fileID: 547261567047781078}
   LeftArmTarget: {fileID: 4477731051270064052}
   HeadTarget: {fileID: 1627879976777976356}
-  maxReactionDuration: 1.2
+  firstReactionDuration: 0.35
+  returnReactionDuration: 0.45
   maxAngleOffset: 35
 --- !u!4 &3720275510104103767 stripped
 Transform:

@@ -11,7 +11,8 @@ namespace FastAndFractured
         public Transform LeftArmTarget;
         public Transform HeadTarget;
 
-        [SerializeField] private float maxReactionDuration;
+        [SerializeField] private float firstReactionDuration = 0.35f;
+        [SerializeField] private float returnReactionDuration = 0.45f;
         [SerializeField] private float maxAngleOffset;
 
         private Quaternion _originalSpineRotation;
@@ -38,7 +39,6 @@ namespace FastAndFractured
             float tiltX = localDirection.z * maxAngleOffset * intensity;
             float tiltZ = -localDirection.x * maxAngleOffset * intensity;
             Quaternion targetImpactRotation = Quaternion.Euler(tiltX, 0, tiltZ);
-            float currentDuration = maxReactionDuration * intensity;
 
             if(_impactTimer != null)
             {
@@ -46,11 +46,18 @@ namespace FastAndFractured
                 _impactTimer = null;
             }
 
-            _impactTimer = TimerSystem.Instance.CreateTimer(currentDuration, onTimerDecreaseComplete: () =>
+            _impactTimer = TimerSystem.Instance.CreateTimer(firstReactionDuration, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
             {
-                SpineTarget.localRotation = Quaternion.identity;
                 _impactTimer = null;
-            }, onTimerDecreaseUpdate: (progress) =>
+                _impactTimer = TimerSystem.Instance.CreateTimer(returnReactionDuration, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
+                {
+                    SpineTarget.localRotation = Quaternion.identity;
+                    _impactTimer = null;
+                }, onTimerIncreaseUpdate: (progress) =>
+                {
+                    SpineTarget.localRotation = Quaternion.Slerp(targetImpactRotation, Quaternion.identity, progress);
+                });
+            }, onTimerIncreaseUpdate: (progress) =>
             {
                 SpineTarget.localRotation = Quaternion.Slerp(Quaternion.identity, targetImpactRotation, progress);
             });
