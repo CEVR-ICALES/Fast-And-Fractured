@@ -104,7 +104,7 @@ namespace FastAndFractured
                         AssetDatabase.Refresh();
                         AssetDatabase.StartAssetEditing();
                         newBaseCarFromSource = AssetDatabase.LoadAssetAtPath(pathToCreateNewCharacter, typeof(GameObject)) as GameObject;
-                     }
+                    }
                     catch (Exception e)
                     {
                         Debug.LogException(e);
@@ -212,6 +212,31 @@ namespace FastAndFractured
                 return false;
             }
             return true;
+        }
+
+        public static void DeleteACharacter(string characterName)
+        {
+          string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
+          string pathToDeleteCharacterSkinParentFolder = Path.Combine(characterFolderPath, characterName);
+          string[] pathsToDeleteCharacterFromGame = new string[] { pathToDeleteCharacterParentFolder, pathToDeleteCharacterSkinParentFolder};
+          foreach(string pathToDeleteCharacterFromGame in pathsToDeleteCharacterFromGame)
+          {
+                if (!DeleteFolder(pathToDeleteCharacterFromGame))
+                {
+                    Debug.LogError("Folder " + pathToDeleteCharacterFromGame + "wasn't able to be deleted. Check if the folder already exist.");
+                    return;
+                }
+          }
+          string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
+          string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
+
+          DeleteAsset(carDataSOPath);
+          int skinNum = ReturnSkinCountOfACharacter(characterName);
+          for(int i = 0; i <= skinNum; i++)
+          {
+                string characterMenuVariantSkinPath = characterMenuVariantPath + i;
+                DeleteAsset(characterMenuVariantSkinPath);
+          }
         }
         #endregion
 
@@ -555,6 +580,14 @@ namespace FastAndFractured
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             return deleted;
+        }
+        private static bool DeleteFolder(string folderPath)
+        {
+            if (AssetDatabase.IsValidFolder(folderPath))
+            {
+                return DeleteAsset(folderPath);
+            }
+            return false;
         }
         private static bool DeleteAsset(string[] assetsPath)
         {
