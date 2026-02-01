@@ -362,7 +362,12 @@ namespace FastAndFractured
             if (lastEnemyThatPushedMe != null)
             {
                 lastEnemyThatPushedMe.GetComponent<StatsController>().totalKills += 1;
+                lastEnemyThatPushedMe.GetComponent<StatsController>().CelebrateKill();
             }
+        }
+        public void CelebrateKill()
+        {
+            //Kill celebration audio or particles can be triggered here when we decide what to do
         }
 
         public float GetEndurancePercentage()

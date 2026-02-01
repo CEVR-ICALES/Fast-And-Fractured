@@ -5,11 +5,13 @@ using Utilities;
 using StateMachine;
 using Enums;
 using Utilities.Managers.PauseSystem;
+using UnityEngine.Rendering.HighDefinition;
 namespace FastAndFractured
 {
     public class AscendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
     {
         private bool initValues = true;
+        public DecalProjector decal;
         public Pooltype pooltype;
         public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
         public bool InitValues => initValues;
@@ -44,6 +46,8 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
+            decal.GetComponent<TomatoDecal>().maxDuration = ascendingTime;
+            decal.GetComponent<TomatoDecal>().maxRadius = effectDistance;
             charactersList = LevelControllerButBetter.Instance.InGameCharacters;
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
@@ -100,7 +104,12 @@ namespace FastAndFractured
                 }
             }
             transform.position += Vector3.up * speed * Time.deltaTime;
-            transform.Rotate(_randomRotation * Time.deltaTime);
+            Vector3 rotationAmount = _randomRotation * Time.deltaTime;
+            transform.Rotate(rotationAmount);
+            foreach (Transform child in transform)
+            {
+                child.Rotate(-rotationAmount);
+            }
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
