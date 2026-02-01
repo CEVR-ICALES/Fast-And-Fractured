@@ -216,7 +216,17 @@ namespace FastAndFractured
 
         public static void DeleteACharacter(string characterName)
         {
-          string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
+            string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
+            string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
+
+            DeleteAsset(carDataSOPath);
+            int skinNum = ReturnSkinCountOfACharacter(characterName);
+            for (int i = skinNum; i >= 0; i--)
+            {
+                string characterMenuVariantSkinPath = characterMenuVariantPath + i;
+                DeleteAsset(characterMenuVariantSkinPath);
+            }
+            string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
           string pathToDeleteCharacterSkinParentFolder = Path.Combine(characterFolderPath, characterName);
           string[] pathsToDeleteCharacterFromGame = new string[] { pathToDeleteCharacterParentFolder, pathToDeleteCharacterSkinParentFolder};
           foreach(string pathToDeleteCharacterFromGame in pathsToDeleteCharacterFromGame)
@@ -227,16 +237,7 @@ namespace FastAndFractured
                     return;
                 }
           }
-          string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
-          string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
-
-          DeleteAsset(carDataSOPath);
-          int skinNum = ReturnSkinCountOfACharacter(characterName);
-          for(int i = 0; i <= skinNum; i++)
-          {
-                string characterMenuVariantSkinPath = characterMenuVariantPath + i;
-                DeleteAsset(characterMenuVariantSkinPath);
-          }
+            GenerateCharacterSkinCountFile();
         }
         #endregion
 
