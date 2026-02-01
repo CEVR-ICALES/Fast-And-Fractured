@@ -31,11 +31,13 @@ public class CharacterDelete : EditorWindow
          EditorStyles.boldLabel);
         EditorGUILayout.LabelField("Select the character you want an skin for ");
         _selectedCharacter = EditorGUILayout.Popup("Character", _selectedCharacter, _charactersWithSkins);
+        _selectedCharacter = _selectedCharacter < _charactersWithSkins.Length ? _selectedCharacter : 0;
         _currentCharacterName = _charactersWithSkins[_selectedCharacter];
         if (GUILayout.Button("Delete Character", GUILayout.Height(35)))
         {
             CharacterCreatorAndSkinsToolsLogic.DeleteACharacter(_currentCharacterName);
             _charactersWithSkins = CharacterCreatorAndSkinsToolsLogic.ReturnCharactersInCharacterSkinsFolder();
+            Close();
         }
         EditorGUILayout.EndScrollView();
     }
