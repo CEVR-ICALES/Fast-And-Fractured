@@ -13,6 +13,7 @@ namespace FastAndFractured
         //Folder Hierarchy
         private const string RESOURCES_FOLDER_PATH = "Assets/FastAndFractured/Resources";
         private const string LIST_OF_CHARACTER_SKINS = "/ListOfCharacterSkins.asset";
+        private const string LIST_OF_PROTECTED_CHARACTERS = "CharactersSkins/ListOfProtectedCharacters";
         private const string SKIN_PREFIX = "_";
         private const string BASE_SKIN = "0";
         private const int SKIN_STARTING_INT = 1;
@@ -216,6 +217,22 @@ namespace FastAndFractured
 
         public static void DeleteACharacter(string characterName)
         {
+            ListOfProtectedCharacters listOfProtectedCharacters = Resources.Load<ListOfProtectedCharacters>(LIST_OF_PROTECTED_CHARACTERS);
+            if (listOfProtectedCharacters == null)
+            {
+                Debug.LogError("List of protected characters doesn't exist. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
+                return;
+            }
+            //if(listOfProtectedCharacters.ProtectedCharacters == Array.Empty<string>())
+            //{
+            //    Debug.LogError("List of protected characters is empty. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
+            //    return;
+            //}
+            if (listOfProtectedCharacters.ProtectedCharacters.Contains(characterName))
+            {
+                Debug.LogError("The character " + characterName + " is protected on the " + LIST_OF_PROTECTED_CHARACTERS + " from the Resources Folder. The function will not procced.");
+                return;
+            }
             string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
 
@@ -227,8 +244,8 @@ namespace FastAndFractured
                 DeleteAsset(characterMenuVariantSkinPath);
             }
             string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
-          string pathToDeleteCharacterSkinParentFolder = Path.Combine(characterFolderPath, characterName);
-          string[] pathsToDeleteCharacterFromGame = new string[] { pathToDeleteCharacterParentFolder, pathToDeleteCharacterSkinParentFolder};
+            string pathToDeleteCharacterSkinParentFolder = Path.Combine(characterFolderPath, characterName);
+            string[] pathsToDeleteCharacterFromGame = new string[] { pathToDeleteCharacterParentFolder, pathToDeleteCharacterSkinParentFolder};
           foreach(string pathToDeleteCharacterFromGame in pathsToDeleteCharacterFromGame)
           {
                 if (!DeleteFolder(pathToDeleteCharacterFromGame))
@@ -237,6 +254,7 @@ namespace FastAndFractured
                     return;
                 }
           }
+            Debug.Log("Character " + characterName + " deleted Succesfully");
             GenerateCharacterSkinCountFile();
         }
         #endregion
