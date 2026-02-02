@@ -57,10 +57,13 @@ public class CharacterSkinCreation : EditorWindow
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
         EditorGUILayout.LabelField("CharacterSkinCreation",
         EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox("Welcome to the character skin creation tool. Here you can modify or create new skins for already existing characters", MessageType.Info);
         EditorGUILayout.LabelField("Select the character you want an skin for ");
         _selectedCharacter = EditorGUILayout.Popup("Character", _selectedCharacter, _charactersWithSkins);
         _currentCharacterName = _charactersWithSkins[_selectedCharacter];
-        
+        EditorGUILayout.HelpBox("All character skins will be numerated starting from the skin num 1. To add new skins, modify the int label 'Skin size'.", MessageType.Info);
+        EditorGUILayout.HelpBox("Is not posible to delete an already existing skin using this tool to prevent compilation errors or common mistakes. You have to do it manually on the Resources folder " +
+            "'Assets/FastAndFractured/Resources/CharactersSkins/"+_currentCharacterName+"'", MessageType.Warning);
         if (_previousCharacter!=_selectedCharacter)
         {
             _previousCharacter = _selectedCharacter;
@@ -80,6 +83,7 @@ public class CharacterSkinCreation : EditorWindow
                 characterSkinSize = EditorGUILayout.IntField("Skin Size", characterSkinSize);
                 characterSkinSize = characterSkinSize < _toalSkinCount ? _toalSkinCount : characterSkinSize;
                 _characterSkin = ResizeArray(_characterSkin, characterSkinSize);
+            EditorGUILayout.HelpBox("Each skin, will have a material label for a prefab part. Some parts could have more than one material, so you can modify the 'Material num' to allow it.", MessageType.Info);
             if (_characterSkin.Length > 0)
             {
                 if (_characterSkin[0] == null)

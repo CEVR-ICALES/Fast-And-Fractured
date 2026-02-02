@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Enums;
+using Utilities;
 using UnityEditor;
 using UnityEngine;
 namespace FastAndFractured
@@ -66,11 +67,11 @@ namespace FastAndFractured
                         return false;
                     }
 
-                    CheckAndCreateDirectory(pathToNewCharacterParentFolder);
+                    FileUtils.CheckAndCreateDirectory(pathToNewCharacterParentFolder);
 
                     string prefabsDirectory = Path.Combine(pathToNewCharacterParentFolder, PREFABS_FOLDER);
 
-                    CheckAndCreateDirectory(prefabsDirectory);
+                    FileUtils.CheckAndCreateDirectory(prefabsDirectory);
 
                     GameObject baseCar = AssetDatabase.LoadAssetAtPath(pathToBaseCar, typeof(GameObject)) as GameObject;
                     GameObject newBaseCar = PrefabUtility.InstantiatePrefab(baseCar) as GameObject;
@@ -114,7 +115,7 @@ namespace FastAndFractured
 
                     string scriptableObjectDirectory = Path.Combine(pathToNewCharacterParentFolder, SCRIPTABLE_OBJECT_FOlDER);
 
-                    CheckAndCreateDirectory(scriptableObjectDirectory);
+                    FileUtils.CheckAndCreateDirectory(scriptableObjectDirectory);
                     CharacterData characterData = new CharacterData();
                     if (!File.Exists(scriptableObjectDirectory))
                     {
@@ -156,7 +157,7 @@ namespace FastAndFractured
 
         private static bool CreateMenuVariant(GameObject gameplayCarParent, string characterName, GameObject[] wheelsMesh, CharacterData characterData)
         {
-            if (!DirectoryExist(PATH_TO_MENU_CHARACTERS))
+            if (!FileUtils.DirectoryExist(PATH_TO_MENU_CHARACTERS))
             {
                 return false;
             }
@@ -194,7 +195,7 @@ namespace FastAndFractured
                 GameObject assetMenuVariant = AssetDatabase.LoadAssetAtPath(pathToCreateMenuCharacter, typeof(GameObject)) as GameObject;
 
 
-                string carDataSOPath = NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
+                string carDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
 
                 if (!File.Exists(carDataSOPath))
                 {
@@ -236,19 +237,19 @@ namespace FastAndFractured
             string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
 
-            DeleteAsset(carDataSOPath);
+            FileUtils.DeleteAsset(carDataSOPath);
             int skinNum = ReturnSkinCountOfACharacter(characterName);
             for (int i = skinNum; i >= 0; i--)
             {
                 string characterMenuVariantSkinPath = characterMenuVariantPath + i;
-                DeleteAsset(characterMenuVariantSkinPath);
+                FileUtils.DeleteAsset(characterMenuVariantSkinPath);
             }
             string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
             string pathToDeleteCharacterSkinParentFolder = Path.Combine(characterFolderPath, characterName);
             string[] pathsToDeleteCharacterFromGame = new string[] { pathToDeleteCharacterParentFolder, pathToDeleteCharacterSkinParentFolder};
           foreach(string pathToDeleteCharacterFromGame in pathsToDeleteCharacterFromGame)
           {
-                if (!DeleteFolder(pathToDeleteCharacterFromGame))
+                if (!FileUtils.DeleteFolder(pathToDeleteCharacterFromGame))
                 {
                     Debug.LogError("Folder " + pathToDeleteCharacterFromGame + "wasn't able to be deleted. Check if the folder already exist.");
                     return;
@@ -323,7 +324,7 @@ namespace FastAndFractured
         public static int ReturnSkinCountOfACharacter(string name)
         {
             string characterDirectory = Path.Combine(characterFolderPath, name);
-            if (!DirectoryExist(characterDirectory))
+            if (!FileUtils.DirectoryExist(characterDirectory))
                 return -1;
             string[] characterSkins = Directory.GetDirectories(characterDirectory, "*", SearchOption.TopDirectoryOnly);
             return characterSkins.Length;
@@ -337,11 +338,11 @@ namespace FastAndFractured
             switch (characterPrefabParts)
             {
                 case CharacterPrefabParts.Character:
-                    return GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_CHARACTER_PREFAB_FOLDER));
+                    return FileUtils.GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_CHARACTER_PREFAB_FOLDER));
                 case CharacterPrefabParts.Chassis:
-                    return GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_CHASSIS_PREFAB_FOLDER));
+                    return FileUtils.GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_CHASSIS_PREFAB_FOLDER));
                 case CharacterPrefabParts.Wheel:
-                    return GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_WHEELS_PREFAB_FOLDER));
+                    return FileUtils.GetAllMaterialsFromFolder(Path.Combine(characterSkinPath, SKIN_WHEELS_PREFAB_FOLDER));
             }
             return default;
         }
@@ -352,10 +353,10 @@ namespace FastAndFractured
             for (int i = 0; i < characterSkins.Length; i++)
             {
                 string skinFolder = Path.Combine(characterPath, SKIN_PREFIX + (i + SKIN_STARTING_INT));
-                string characterSkinFolder = NormalizePath(Path.Combine(skinFolder, SKIN_CHARACTER_PREFAB_FOLDER));
-                string chassisSkinFolder = NormalizePath(Path.Combine(skinFolder, SKIN_CHASSIS_PREFAB_FOLDER));
-                string wheelSkinFolder = NormalizePath(Path.Combine(skinFolder, SKIN_WHEELS_PREFAB_FOLDER));
-                if (!DirectoryExist(skinFolder))
+                string characterSkinFolder = FileUtils.NormalizePath(Path.Combine(skinFolder, SKIN_CHARACTER_PREFAB_FOLDER));
+                string chassisSkinFolder = FileUtils.NormalizePath(Path.Combine(skinFolder, SKIN_CHASSIS_PREFAB_FOLDER));
+                string wheelSkinFolder = FileUtils.NormalizePath(Path.Combine(skinFolder, SKIN_WHEELS_PREFAB_FOLDER));
+                if (!FileUtils.DirectoryExist(skinFolder))
                 {
                     Directory.CreateDirectory(skinFolder);
                     Directory.CreateDirectory(characterSkinFolder);
@@ -396,7 +397,7 @@ namespace FastAndFractured
             }
             string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
-            string characterMenuVariantBaseSkinPath = NormalizePath(characterMenuVariantPath + BASE_SKIN + ".prefab");
+            string characterMenuVariantBaseSkinPath = FileUtils.NormalizePath(characterMenuVariantPath + BASE_SKIN + ".prefab");
             if (!File.Exists(characterMenuVariantBaseSkinPath))
             {
 
@@ -406,7 +407,7 @@ namespace FastAndFractured
             newMenuList[0] = menuCharacterVariant;
             for (int i = SKIN_STARTING_INT; i <= skinCount; i++)
             {
-                string characterSkinVariantPath = NormalizePath(characterMenuVariantPath + i + ".prefab");
+                string characterSkinVariantPath = FileUtils.NormalizePath(characterMenuVariantPath + i + ".prefab");
                 GameObject menuCharacterSkinVariant = new GameObject();
                 if (!File.Exists(characterSkinVariantPath))
                 {
@@ -422,7 +423,7 @@ namespace FastAndFractured
                 }
                 newMenuList[i] = menuCharacterSkinVariant;
             }
-            string characterMenuDataSOPath = NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
+            string characterMenuDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
             if (!File.Exists(characterMenuDataSOPath))
             {
                 //Error Log
@@ -436,7 +437,7 @@ namespace FastAndFractured
         private static void SetAllMaterialsFromFolder(string folderPath, Material[] materialsGiven)
         {
             string resourcesPath = Path.GetRelativePath(RESOURCES_FOLDER_PATH, folderPath);
-            Material[] materialsFromFolder = GetAllMaterialsFromFolder(resourcesPath);
+            Material[] materialsFromFolder = FileUtils.GetAllMaterialsFromFolder(resourcesPath);
             Material[] newMaterials = (Material[])materialsGiven.Clone(); ;
 
             bool noNewMaterials = true;
@@ -452,12 +453,12 @@ namespace FastAndFractured
                 {
                     noNewMaterials = false;
                     string assetPath = Path.Combine(folderPath, materialsFromFolder[i].name + ".mat");
-                    DeleteAsset(assetPath);
+                    FileUtils.DeleteAsset(assetPath);
                 }
             }
             if (!noNewMaterials)
             {
-                SaveAssets(newMaterials, folderPath, ".mat");
+                FileUtils.SaveAssets(newMaterials, folderPath, ".mat");
             }
         }
 
@@ -592,90 +593,7 @@ namespace FastAndFractured
         #endregion
 
         #region directory_related
-        private static bool DeleteAsset(string assetPath)
-        {
-            string normalizedAssetPath = NormalizePath(assetPath);
-            bool deleted = AssetDatabase.DeleteAsset(normalizedAssetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            return deleted;
-        }
-        private static bool DeleteFolder(string folderPath)
-        {
-            if (AssetDatabase.IsValidFolder(folderPath))
-            {
-                return DeleteAsset(folderPath);
-            }
-            return false;
-        }
-        private static bool DeleteAsset(string[] assetsPath)
-        {
-            List<string> outFailedPaths = new List<string>();
-            bool deleted = AssetDatabase.DeleteAssets(assetsPath, outFailedPaths);
-            foreach (string outFailedPath in outFailedPaths)
-            {
-                Debug.Log("File " + outFailedPath + " couldn't been deleted due to path not existing.");
-            }
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            return deleted;
-        }
 
-        private static void SaveAssets<T>(T[] objectsUnity, string folderPath, string extension) where T : UnityEngine.Object
-        {
-            int skinNum = 0;
-            foreach (T objectUnity in objectsUnity)
-            {
-                if (objectUnity != null)
-                {
-                    objectUnity.name = skinNum + "_" + objectUnity.name;
-                    string assetPath = Path.Combine(folderPath, objectUnity.name + extension);
-                    string normalizedAssetPath = NormalizePath(assetPath);
-                    T objectToSave = UnityEngine.Object.Instantiate(objectUnity);
-                    AssetDatabase.CreateAsset(objectToSave, normalizedAssetPath);
-                }
-                skinNum++;
-            }
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
-
-        private static Material[] GetAllMaterialsFromFolder(string folderPath)
-        {
-            string normalizedFolderPath = NormalizePath(folderPath);
-            return Resources.LoadAll<Material>(normalizedFolderPath);
-        }
-
-        private static bool DirectoryExist(string directoryPath)
-        {
-            if (!Directory.Exists(directoryPath))
-            {
-                Debug.LogError("Folder " + directoryPath + " doesn't exist");
-                return false;
-            }
-            return true;
-        }
-        private static void CheckAndCreateDirectory(string folderPath)
-        {
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-                Debug.Log("Folder " + folderPath + " created");
-            }
-        }
-        public static bool CharacterFolderExist(string name)
-        {
-            string characterPath = Path.Combine(characterFolderPath, name);
-            return DirectoryExist(characterPath);
-        }
-
-
-
-        public static string NormalizePath(string path)
-        {
-            if (string.IsNullOrEmpty(path)) return path;
-            return path.Replace('\\', '/');
-        }
         #endregion
     }
 
