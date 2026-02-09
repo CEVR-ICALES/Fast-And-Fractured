@@ -25,10 +25,7 @@ namespace FastAndFractured
 
         private void Start()
         {
-            _originalSpineRotation = SpineTarget.localRotation;
-            _originalRightArmRotation = RightArmTarget.localRotation;
-            _originalLeftArmRotation = LeftArmTarget.localRotation;
-            _originalHeadArmRotation = HeadTarget.localRotation;
+
         }
 
         public void ApplyImpactReaction(Vector3 impactDirection, float force, float baseForce) //force is the force being applied, baseForce is the maxForce that can be applioed
@@ -62,6 +59,11 @@ namespace FastAndFractured
                 SpineTarget.localRotation = Quaternion.Slerp(Quaternion.identity, targetImpactRotation, progress);
             });
 
+        }
+
+        private void OnDestroy()
+        {
+            _impactTimer?.StopTimer();
         }
     }
 }
