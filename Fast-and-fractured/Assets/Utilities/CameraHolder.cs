@@ -16,5 +16,10 @@ namespace Utilities
                 cameraToHold = Camera.main;
             }
         }
+
+        public Vector3 ReturnCurrentLookAtFromCamera()
+        {
+            return cameraToHold.transform.forward;
+        } 
     }
 }

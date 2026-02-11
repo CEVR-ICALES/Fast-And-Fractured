@@ -841,7 +841,7 @@ namespace FastAndFractured
             _previousPath = _currentPath.corners;
         }
 
-        private Vector3 GetShootingDirectionWithError()
+        public Vector3 GetShootingDirectionWithError()
         {
             Vector3 shootingDirection = CalcNormalizedShootingDirection();
 
