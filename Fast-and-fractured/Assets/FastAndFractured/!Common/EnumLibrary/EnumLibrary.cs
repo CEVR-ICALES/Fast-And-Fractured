@@ -238,4 +238,10 @@ namespace Enums
         MERCADILLO,
         CONSTRUCTION_ZONE
     }
+    public enum CharacterPrefabParts
+    {
+        Character,
+        Chassis,
+        Wheel
+    }
 }
