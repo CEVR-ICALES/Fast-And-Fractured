@@ -6,6 +6,7 @@ namespace Utilities
     public class CameraHolder : MonoBehaviour
     {
         [SerializeField] Camera cameraToHold;
+        [SerializeField] TurretRotationMovement TurretRotationMovement;
 
         public Camera CameraToHold { get => cameraToHold; set => cameraToHold = value; }
 
@@ -14,6 +15,22 @@ namespace Utilities
             if (!cameraToHold)
             {
                 cameraToHold = Camera.main;
+            }
+        }
+        private void Start()
+        {
+            if (TurretRotationMovement == null)
+            {
+                TurretRotationMovement = GetComponentInChildren<TurretRotationMovement>();
+                TurretRotationMovement.TargetDirection = ReturnCurrentLookAtFromCamera();
+            }
+        }
+
+        private void Update()
+        {
+            if (TurretRotationMovement != null)
+            {
+                TurretRotationMovement.TargetDirection = ReturnCurrentLookAtFromCamera();
             }
         }
 
