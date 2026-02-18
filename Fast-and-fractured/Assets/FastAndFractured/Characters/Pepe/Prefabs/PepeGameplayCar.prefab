@@ -2007,12 +2007,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpineTarget: {fileID: 6686791686126139056}
-  RightArmTarget: {fileID: 0}
-  LeftArmTarget: {fileID: 0}
-  HeadTarget: {fileID: 0}
+  maxLateralLean: 20
+  maxForwardLean: 8
+  leanSmoothing: 7
+  maxExpectedLateralAcceleration: 25
+  maxImpactAngleOffset: 35
   firstReactionDuration: 0.7
   returnReactionDuration: 0.8
-  maxAngleOffset: 35
+  impactReturnSmoothing: 8
 --- !u!1 &5404290905123533514 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4098650610201051261, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

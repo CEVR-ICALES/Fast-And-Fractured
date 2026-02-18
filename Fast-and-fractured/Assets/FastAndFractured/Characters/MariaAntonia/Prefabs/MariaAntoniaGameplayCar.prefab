@@ -4983,12 +4983,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpineTarget: {fileID: 2319469874116136233}
-  RightArmTarget: {fileID: 0}
-  LeftArmTarget: {fileID: 0}
-  HeadTarget: {fileID: 0}
+  maxLateralLean: 20
+  maxForwardLean: 8
+  leanSmoothing: 7
+  maxExpectedLateralAcceleration: 25
+  maxImpactAngleOffset: 35
   firstReactionDuration: 0.7
   returnReactionDuration: 0.8
-  maxAngleOffset: 35
+  impactReturnSmoothing: 8
 --- !u!4 &2766236455326356409 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

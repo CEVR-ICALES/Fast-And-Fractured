@@ -10159,12 +10159,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpineTarget: {fileID: 7921836675423416561}
-  RightArmTarget: {fileID: 0}
-  LeftArmTarget: {fileID: 0}
-  HeadTarget: {fileID: 0}
+  maxLateralLean: 20
+  maxForwardLean: 8
+  leanSmoothing: 7
+  maxExpectedLateralAcceleration: 25
+  maxImpactAngleOffset: 35
   firstReactionDuration: 0.7
   returnReactionDuration: 0.8
-  maxAngleOffset: 35
+  impactReturnSmoothing: 8
 --- !u!1001 &5012614545239056218
 PrefabInstance:
   m_ObjectHideFlags: 0
