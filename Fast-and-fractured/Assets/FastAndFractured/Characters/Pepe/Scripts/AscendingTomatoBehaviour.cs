@@ -12,6 +12,7 @@ namespace FastAndFractured
     {
         private bool initValues = true;
         public DecalProjector decal;
+        public GameObject tomatoModel;
         public Pooltype pooltype;
         public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
         public bool InitValues => initValues;
@@ -46,8 +47,7 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
-            decal.GetComponent<TomatoDecal>().maxDuration = ascendingTime;
-            decal.GetComponent<TomatoDecal>().maxRadius = effectDistance;
+            decal.GetComponent<TomatoDecal>().SetRadius(effectDistance);
             charactersList = LevelControllerButBetter.Instance.InGameCharacters;
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
@@ -103,12 +103,11 @@ namespace FastAndFractured
                     }
                 }
             }
-            transform.position += Vector3.up * speed * Time.deltaTime;
-            Vector3 rotationAmount = _randomRotation * Time.deltaTime;
-            transform.Rotate(rotationAmount);
-            foreach (Transform child in transform)
+            if (tomatoModel != null)
             {
-                child.Rotate(-rotationAmount);
+                tomatoModel.transform.position += Vector3.up * speed * Time.deltaTime;
+                Vector3 rotationAmount = _randomRotation * Time.deltaTime;
+                tomatoModel.transform.Rotate(rotationAmount);
             }
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
