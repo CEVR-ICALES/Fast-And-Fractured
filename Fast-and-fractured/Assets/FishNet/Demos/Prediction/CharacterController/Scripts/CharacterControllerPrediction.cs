@@ -1,5 +1,4 @@
-﻿#if !FISHNET_STABLE_REPLICATESTATES
-using System;
+﻿using System;
 using FishNet.Component.Prediction;
 using FishNet.Connection;
 using FishNet.Object.Prediction;
@@ -401,7 +400,15 @@ namespace FishNet.Demo.Prediction.CharacterControllers
              * in the reconcile data. */
             _verticalVelocity = rd.VerticalVelocity;
             Stamina = rd.Stamina;
-
+            
+            /* It is VERY important to disable the CharacterController
+             * component before updating its position. If you do not
+             * use the disable/enable work-around below, the Transform
+             * will show the correct position but the physics for
+             * the CharacterController will remain at it's prior position
+             * until the next simulate. */
+            _characterController.enabled = false;
+            
             /* Even though the platform is traced for in replicate we must also
              * pass the current platform into the reconcile, and set our local value
              * to whatever is provided in the reconcile.
@@ -413,18 +420,11 @@ namespace FishNet.Demo.Prediction.CharacterControllers
             _currentPlatform = rd.CurrentPlatform;
             //Set transform parent after assigning current.
             SetParent();
-
             /* Update position AFTER setting the parent, otherwise
              * you would face a potentially huge positional de-sync
              * as mentioned above. */
-            /* It is VERY important to disable the CharacterController
-             * component before updating its position. If you do not
-             * use the disable/enable work-around below, the Transform
-             * will show the correct position but the physics for
-             * the CharacterController will remain at it's prior position
-             * until the next simulate. */
-            _characterController.enabled = false;
             transform.localPosition = rd.Position;
+            
             _characterController.enabled = true;
         }
 
@@ -446,6 +446,8 @@ namespace FishNet.Demo.Prediction.CharacterControllers
         /// </summary>
         private void CharacterTrigger_OnExit(Collider c)
         {
+            if (c == null)
+                return;
             if (!c.TryGetComponent(out MovingPlatform mp))
                 return;
 
@@ -495,4 +497,3 @@ namespace FishNet.Demo.Prediction.CharacterControllers
         }
     }
 }
-#endif

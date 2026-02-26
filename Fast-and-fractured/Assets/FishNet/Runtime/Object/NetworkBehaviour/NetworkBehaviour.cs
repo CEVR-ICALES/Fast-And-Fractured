@@ -120,7 +120,6 @@ namespace FishNet.Object
                 _typeName = GetType().Name;
             #endif
 
-            _fiveSecondsToTicks = nob.TimeManager.TimeToTicks(5d);
             _transportManagerCache = nob.TransportManager;
             SyncTypes_Preinitialize(asServer);
 

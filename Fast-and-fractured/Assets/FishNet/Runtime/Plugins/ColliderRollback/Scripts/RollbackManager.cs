@@ -1,4 +1,5 @@
-﻿using FishNet.Connection;
+﻿#if !FISHNET_THREADED_COLLIDER_ROLLBACK
+using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
 using FishNet.Managing.Timing;
@@ -471,3 +472,4 @@ namespace FishNet.Component.ColliderRollback
         //PROEND
     }
 }
+#endif

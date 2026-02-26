@@ -742,9 +742,9 @@ namespace FishNet.Managing.Timing
 
                     if (PhysicsMode == PhysicsMode.TimeManager && tickDelta > 0f)
                     {
-                        InvokeOnSimulation(preSimulation: true, tickDelta);
+                        InvokeOnPhysicsSimulation(preSimulation: true, tickDelta);
                         SimulatePhysics(tickDelta);
-                        InvokeOnSimulation(preSimulation: false, tickDelta);
+                        InvokeOnPhysicsSimulation(preSimulation: false, tickDelta);
                     }
 
                     using (_pm_OnPostTick.Auto())
@@ -1065,7 +1065,7 @@ namespace FishNet.Managing.Timing
         /// <summary>
         /// Invokes OnPreSimulation or OnPostSimulation.
         /// </summary>
-        internal void InvokeOnSimulation(bool preSimulation, float delta)
+        internal void InvokeOnPhysicsSimulation(bool preSimulation, float delta)
         {
             if (preSimulation)
             {
@@ -1084,7 +1084,7 @@ namespace FishNet.Managing.Timing
             using (_pm_PhysicsSimulate.Auto())
                 Physics.Simulate(delta);
             using (_pm_Physics2DSimulate.Auto())
-                Physics2D.SyncTransforms();
+                Physics2D.Simulate(delta);
         }
 
         /// <summary>

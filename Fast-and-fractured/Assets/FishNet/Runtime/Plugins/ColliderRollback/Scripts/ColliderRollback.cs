@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if !FISHNET_THREADED_COLLIDER_ROLLBACK
+using System.Collections.Generic;
 using FishNet.Managing;
 using FishNet.Object;
 using GameKit.Dependencies.Utilities;
@@ -271,3 +272,4 @@ namespace FishNet.Component.ColliderRollback
         // PROEND
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !FISHNET_THREADED_TICKSMOOTHERS
+using System;
 using FishNet.Managing;
 using FishNet.Managing.Timing;
 using FishNet.Object;
@@ -141,11 +142,6 @@ namespace FishNet.Component.Transforming.Beta
         /// </summary>
         private BasicQueue<TickTransformProperties> _transformProperties;
         /// <summary>
-        /// True if to smooth using owner settings, false for spectator settings.
-        /// This is only used for performance gains.
-        /// </summary>
-        private bool _useOwnerSettings;
-        /// <summary>
         /// Last tick this was teleported on.
         /// </summary>
         private uint _teleportedTick = TimeManager.UNSET_TICK;
@@ -165,6 +161,10 @@ namespace FishNet.Component.Transforming.Beta
         /// True if moving has started and has not been stopped.
         /// </summary>
         private bool _isMoving;
+        /// <summary>
+        /// NetworkTransform used when prediction type is set to other.
+        /// </summary>
+        private NetworkTransform _predictionNetworkTransform;
         #endregion
 
         #region Private Profiler Markers
@@ -252,11 +252,11 @@ namespace FishNet.Component.Transforming.Beta
         /// Updates the smoothedProperties value.
         /// </summary>
         /// <param name = "value">New value.</param>
-        /// <param name = "forOwnerOrOfflineSmoother">True if updating owner smoothing settings, or updating settings on an offline smoother. False to update spectator settings</param>
-        public void SetSmoothedProperties(TransformPropertiesFlag value, bool forOwnerOrOfflineSmoother)
+        /// <param name = "forController">True if updating owner smoothing settings, or updating settings on an offline smoother. False to update spectator settings</param>
+        public void SetSmoothedProperties(TransformPropertiesFlag value, bool forController)
         {
             _controllerMovementSettings.SmoothedProperties = value;
-            SetCaches(forOwnerOrOfflineSmoother);
+            SetCaches(forController);
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace FishNet.Component.Transforming.Beta
             UpdateRealtimeInterpolation();
         }
 
-        public void Initialize(InitializationSettings initializationSettings, MovementSettings ownerSettings, MovementSettings spectatorSettings)
+        public void Initialize(InitializationSettings initializationSettings, MovementSettings controllerSettings, MovementSettings spectatorSettings)
         {
             ResetState();
 
@@ -307,7 +307,7 @@ namespace FishNet.Component.Transforming.Beta
                 return;
 
             _transformProperties = CollectionCaches<TickTransformProperties>.RetrieveBasicQueue();
-            _controllerMovementSettings = ownerSettings;
+            _controllerMovementSettings = controllerSettings;
             _spectatorMovementSettings = spectatorSettings;
 
             /* Unset scale smoothing if not detaching. This is to prevent
@@ -328,7 +328,20 @@ namespace FishNet.Component.Transforming.Beta
             _detachOnStart = initializationSettings.DetachOnStart;
             _attachOnStop = initializationSettings.AttachOnStop;
             _moveImmediately = initializationSettings.MoveImmediately;
-
+ 
+            if (initializationSettings.FavorPredictionNetworkTransform && _initializingNetworkBehaviour != null)
+            {
+                NetworkObject networkObject = _initializingNetworkBehaviour.NetworkObject;
+                if (!networkObject.IsRigidbodyPredictionType)
+                    _predictionNetworkTransform = networkObject.PredictionNetworkTransform;
+                else
+                    _predictionNetworkTransform = null;
+            }
+            else
+            {
+                _predictionNetworkTransform = null;
+            }
+            
             SetCaches(GetUseOwnerSettings());
 
             //Use set method as it has sanity checks.
@@ -406,19 +419,18 @@ namespace FishNet.Component.Transforming.Beta
         /// </summary>
         /// <remarks>OwnerSettings can be used to read determine this as both owner and spectator settings will have the name InitializingNetworkBehaviour.</remarks>
         /// <returns></returns>
-        private bool GetUseOwnerSettings() => _initializingNetworkBehaviour == null || _initializingNetworkBehaviour.IsOwner || !_initializingNetworkBehaviour.Owner.IsValid;
-
-        /// <summary>
-        /// Updates OwnerDuringPreTick value and caches if needed.
-        /// </summary>
-        private void SetUseOwnerSettings(bool value, bool force = false)
+        private bool GetUseOwnerSettings()
         {
-            if (value == _useOwnerSettings && !force)
-                return;
+            /* No networkBehaviour indicates an offline smoother.
+             * The offline smoothers use owner settings. */
+            if (_initializingNetworkBehaviour == null)
+                return true;
 
-            _useOwnerSettings = value;
+            if (_initializingNetworkBehaviour.IsController)
+                return true;
 
-            SetCaches(value);
+            return false;
+            //            return _initializingNetworkBehaviour.IsOwner || !_initializingNetworkBehaviour.Owner.IsValid;
         }
 
         /// <summary>
@@ -538,7 +550,7 @@ namespace FishNet.Component.Transforming.Beta
                 if (!CanSmooth())
                     return;
 
-                SetUseOwnerSettings(GetUseOwnerSettings());
+                SetCaches(GetUseOwnerSettings());
 
                 _preTicked = true;
                 DiscardExcessiveTransformPropertiesQueue();
@@ -791,6 +803,11 @@ namespace FishNet.Component.Transforming.Beta
             if (_graphicalTransform == null)
                 return false;
 
+            /* When this is the case the prediction networkTransform exist and is
+             * configured in a way to smooth the object, therefor this component should not be smoothing. */
+            if (_predictionNetworkTransform != null && _predictionNetworkTransform.DoSettingsAllowSmoothing())
+                return false;
+
             return _initializingTimeManager.NetworkManager.IsClientStarted;
         }
 
@@ -928,7 +945,7 @@ namespace FishNet.Component.Transforming.Beta
         }
 
         /// <summary>
-        /// Attachs to Target transform is possible.
+        /// Attaches to Target transform if possible.
         /// </summary>
         private void AttachOnStop()
         {
@@ -940,7 +957,7 @@ namespace FishNet.Component.Transforming.Beta
                 return;
             if (ApplicationState.IsQuitting())
                 return;
-
+            
             /* If not to re-attach or if there's no target to reference
              * then the graphical must be destroyed. */
             bool destroy = !_attachOnStop || _targetTransform == null;
@@ -951,7 +968,14 @@ namespace FishNet.Component.Transforming.Beta
                 return;
             }
 
-            _graphicalTransform.SetParent(_targetTransform.parent);
+            /* This can occasionally cause an error:
+             * Cannot set the parent of the GameObject 'XYZ' while its new parent 'ABC' is being destroyed
+             *
+             * There is nothing which can be done about this error because Unity does not report
+             * the object as being null, as it's still being deconstructed, and there is no way to check
+             * if an object is being destroyed.
+             * */
+            _graphicalTransform.SetParent(_targetTransform);
             _graphicalTransform.SetLocalProperties(_trackerTransform.GetLocalProperties());
         }
 
@@ -977,7 +1001,8 @@ namespace FishNet.Component.Transforming.Beta
             _graphicsPreTickWorldValues = default;
             _realtimeInterpolation = default;
             _isMoving = default;
-
+            _predictionNetworkTransform = null;
+            
             if (_trackerTransform != null)
                 UnityEngine.Object.Destroy(_trackerTransform.gameObject);
         }
@@ -985,3 +1010,4 @@ namespace FishNet.Component.Transforming.Beta
         public void InitializeState() { }
     }
 }
+#endif

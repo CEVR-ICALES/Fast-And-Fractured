@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using FishNet.Managing.Statistic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Profiling;
 
 namespace FishNet.Managing.Object
 {
@@ -26,10 +27,32 @@ namespace FishNet.Managing.Object
         /// <summary>
         /// NetworkObjects which are currently active.
         /// </summary>
-        public Dictionary<int, NetworkObject> Spawned = new();
+        public IReadOnlyDictionary<int, NetworkObject> Spawned => _spawned;
+        private Dictionary<int, NetworkObject> _spawned = new();
+        /// <summary>
+        /// Invoked when an object is added to Spawned.
+        /// </summary>
+        public event OnSpawnedChanged OnSpawnedAdd;
+        /// <summary>
+        /// Invoked when an object is removed from Spawned.
+        /// </summary>
+        public event OnSpawnedChanged OnSpawnedRemove;
+        /// <summary>
+        /// Invoked when Spawned is cleared.
+        /// </summary>
+        public event Action OnSpawnedClear;
+        /// <summary>
+        /// Delegate for when there is change to Spawned.
+        /// </summary>
+        public delegate void OnSpawnedChanged(int objectId, NetworkObject networkObject);
         #endregion
 
-        #region Protected.
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_ParseReplicateRpc =
+            new("ManagedObjects.ParseReplicateRpc(PooledReader, NetworkConnection, Channel)");
+        #endregion
+
+        #region Protected. 
         /// <summary>
         /// Returns the next ObjectId to use.
         /// </summary>
@@ -55,7 +78,36 @@ namespace FishNet.Managing.Object
         public IReadOnlyDictionary<ulong, NetworkObject> SceneObjects => SceneObjects_Internal;
         /// <summary>
         /// </summary>
-        protected NetworkTrafficStatistics NetworkTrafficStatistics;
+        [NonSerialized] protected NetworkTrafficStatistics NetworkTrafficStatistics;
+
+
+        /// <summary>
+        /// Called to add an object to Spawned.
+        /// </summary>
+        protected void AddtoSpawnedCollectionAndInvoke(NetworkObject nob)
+        {
+            _spawned[nob.ObjectId] = nob;
+            OnSpawnedAdd?.Invoke(nob.ObjectId, nob);
+        }
+
+        /// <summary>
+        /// Called to remove an object from Spawned.
+        /// </summary>
+        protected void RemoveFromSpawnedCollectionAndInvoke(NetworkObject nob)
+        {
+            if (_spawned.Remove(nob.ObjectId))
+                OnSpawnedRemove?.Invoke(nob.ObjectId, nob);
+        }
+
+        /// <summary>
+        /// Called to clear Spawned.
+        /// </summary>
+        protected void ClearSpawnedCollectionAndInvoke()
+        {
+            _spawned.Clear();
+            OnSpawnedClear?.Invoke();
+        }
+
         #endregion
 
         #region Private.
@@ -109,7 +161,8 @@ namespace FishNet.Managing.Object
         /// </summary>
         protected virtual void RemoveFromSpawned(NetworkObject nob, bool fromOnDestroy, bool asServer)
         {
-            Spawned.Remove(nob.ObjectId);
+            RemoveFromSpawnedCollectionAndInvoke(nob);
+            
             // Do the same with SceneObjects.
             if (fromOnDestroy && nob.IsSceneObject)
                 RemoveFromSceneObjects(nob);
@@ -316,7 +369,7 @@ namespace FishNet.Managing.Object
                 DespawnWithoutSynchronization(nob, recursive, asServer, nob.GetDefaultDespawnType(), removeFromSpawned: false);
             }
 
-            Spawned.Clear();
+            ClearSpawnedCollectionAndInvoke();
         }
 
         /// <summary>
@@ -371,7 +424,7 @@ namespace FishNet.Managing.Object
         /// </summary>
         internal virtual void AddToSpawned(NetworkObject nob, bool asServer)
         {
-            Spawned[nob.ObjectId] = nob;
+            AddtoSpawnedCollectionAndInvoke(nob);
         }
 
         /// <summary>
@@ -408,7 +461,7 @@ namespace FishNet.Managing.Object
         protected internal NetworkObject GetSpawnedNetworkObject(int objectId)
         {
             NetworkObject r;
-            if (!Spawned.TryGetValueIL2CPP(objectId, out r))
+            if (!_spawned.TryGetValueIL2CPP(objectId, out r))
                 NetworkManager.LogError($"Spawned NetworkObject not found for ObjectId {objectId}.");
 
             return r;
@@ -468,21 +521,26 @@ namespace FishNet.Managing.Object
         /// </summary>
         internal void ParseReplicateRpc(PooledReader reader, NetworkConnection conn, Channel channel)
         {
-#if DEVELOPMENT
-            NetworkBehaviour.ReadDebugForValidatedRpc(NetworkManager, reader, out int startReaderRemaining, out string rpcInformation, out uint expectedReadAmount);
-#endif
-            int readerStartAfterDebug = reader.Position;
+            using (_pm_ParseReplicateRpc.Auto())
+            {
+                #if DEVELOPMENT
+                NetworkBehaviour.ReadDebugForValidatedRpc(NetworkManager, reader, out int startReaderRemaining,
+                    out string rpcInformation, out uint expectedReadAmount);
+                #endif
+                int readerStartAfterDebug = reader.Position;
 
-            NetworkBehaviour nb = reader.ReadNetworkBehaviour();
-            int dataLength = Packets.GetPacketLength((ushort)PacketId.ServerRpc, reader, channel);
-            if (nb != null && nb.IsSpawned)
-                nb.OnReplicateRpc(readerStartAfterDebug, hash: null, reader, conn, channel);
-            else
-                SkipDataLength((ushort)PacketId.ServerRpc, reader, dataLength);
+                NetworkBehaviour nb = reader.ReadNetworkBehaviour();
+                int dataLength = Packets.GetPacketLength((ushort)PacketId.ServerRpc, reader, channel);
+                if (nb != null && nb.IsSpawned)
+                    nb.OnReplicateRpc(readerStartAfterDebug, hash: null, reader, conn, channel);
+                else
+                    SkipDataLength((ushort)PacketId.ServerRpc, reader, dataLength);
 
-#if DEVELOPMENT
-            NetworkBehaviour.TryPrintDebugForValidatedRpc(fromRpcLink: false, NetworkManager, reader, startReaderRemaining, rpcInformation, expectedReadAmount, channel);
-#endif
+                #if DEVELOPMENT
+                NetworkBehaviour.TryPrintDebugForValidatedRpc(fromRpcLink: false, NetworkManager, reader,
+                    startReaderRemaining, rpcInformation, expectedReadAmount, channel);
+                #endif
+            }
         }
 
 #if DEVELOPMENT
