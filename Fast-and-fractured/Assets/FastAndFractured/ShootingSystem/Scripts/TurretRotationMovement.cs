@@ -17,10 +17,11 @@ public class TurretRotationMovement : MonoBehaviour
     private Quaternion initialRotationPitch;
     private Quaternion finalRotationYaw;
     private Quaternion finalRotationPitch;
+    private float currentTime = 0;
     [SerializeField]
     private float rotationTime = 0.5f;
     private ITimer _rotateCanon;
-
+    private Vector3 _previoustargetDirection = new Vector3(0,0,-1);
     private const float SLERP_MAX_VALUE = 1.0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -32,32 +33,36 @@ public class TurretRotationMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       Quaternion worldRotationFromCanonToDirection = Quaternion.FromToRotation(_canon.transform.position, _targetDirection);
-       Quaternion localRotationFromCanonToDirection = Quaternion.Inverse(_canon.transform.rotation) * worldRotationFromCanonToDirection;
-        if (_rotateCanon == null)
+        Vector3 directionToTarget = (_targetDirection - _canon.transform.position).normalized;
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+        if (_rotateCanon == null&&_previoustargetDirection!=_targetDirection)
         {
+            _previoustargetDirection = _targetDirection;
             initialRotationYaw = _yawRotation.rotation;
             initialRotationPitch = _pitchRotation.rotation;
-            Vector3 initialRotationYawEulers = initialRotationYaw.eulerAngles;
-            Vector3 initialRotationPitchEulers = initialRotationPitch.eulerAngles;
-
-            Vector3 finalRotationYawEulers = new Vector3(localRotationFromCanonToDirection.x, initialRotationYawEulers.y, initialRotationYaw.z);
-            Vector3 finalRotationPitchEulers = new Vector3(initialRotationPitchEulers.x, localRotationFromCanonToDirection.y, initialRotationPitchEulers.z);
-            finalRotationYaw = Quaternion.Euler(finalRotationYawEulers);
-            finalRotationPitch = Quaternion.Euler(initialRotationPitchEulers);
+           
+            finalRotationYaw = Quaternion.Euler(targetRotation.x,0,0);
+            finalRotationPitch = Quaternion.Euler(0,targetRotation.y,0);
             _rotateCanon = TimerSystem.Instance.CreateTimer(rotationTime, onTimerDecreaseUpdate:(float time) =>
             {
+
                 //Yaw rotation
-                Rotate(_yawRotation, initialRotationYaw, finalRotationYaw, time);
+                Rotate(_yawRotation, initialRotationYaw, finalRotationYaw, currentTime);
                 //Pitch rotation 
-                Rotate(_pitchRotation, initialRotationPitch, finalRotationPitch, time);
-            });
+                Rotate(_pitchRotation, initialRotationPitch, finalRotationPitch, currentTime);
+                currentTime += Time.deltaTime;
+            }, onTimerDecreaseComplete: () =>
+            {
+                currentTime = 0;
+                _rotateCanon = null;
+            }
+            );
         }
     }
 
     void Rotate(Transform rotator,Quaternion initialRotation, Quaternion newRotation,float currentTime)
     {
-        float slerpValue = currentTime * (SLERP_MAX_VALUE / rotationTime);
-       rotator.rotation = Quaternion.Slerp(initialRotation,newRotation,slerpValue);
+        float slerpValue = currentTime/rotationTime;
+       rotator.localRotation = Quaternion.Slerp(initialRotation,newRotation,slerpValue);
     }
 }
