@@ -70,6 +70,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
+            
             var multiplyaerRigidbody = _customRigidbody as MultiplayerRigidbodyAdapter;
             multiplyaerRigidbody.InitializeAdapter();
 
@@ -79,7 +80,8 @@ namespace FastAndFractured.Multiplayer
                 base.TimeManager.OnPostTick += TimeManager_OnPostTick;
                 _subscribedToTimeManager = true;
             }
-      
+            
+            InjectInputProvider();
         }
         public override void OnStartClient()
         {
@@ -113,21 +115,53 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         public void InjectInputProvider()
         {
+            ApplyInputProviderLocally();
+        }
+
+        /// <summary>
+        /// Applies the correct InputProvider locally. Can be called directly (e.g., after CarInjector overwrites).
+        /// </summary>
+        public void ApplyInputProviderLocally()
+        {
             var parentPlayerInputProvider = GetComponentInParent<PlayerInputProvider>();
             var parentNetworkInputProvider = GetComponentInParent<NetworkInputProvider>();
+            
+            // Create NetworkInputProvider if it doesn't exist
+            if (parentNetworkInputProvider == null)
+            {
+                var parent = transform.parent;
+                if (parent != null)
+                {
+                    parentNetworkInputProvider = parent.gameObject.AddComponent<NetworkInputProvider>();
+                }
+            }
 
             if (!base.IsOwner)
             {
+                // Non-owner: Use NetworkInputProvider (reads replicated input)
                 _coreMovementController.InputProvider = parentNetworkInputProvider;
+                
+                if (parentPlayerInputProvider != null)
+                {
+                    (parentPlayerInputProvider as MonoBehaviour).enabled = false;
+                }
             }
-            else // Cliente
+            else // Owner
             {
-                _coreMovementController.InputProvider = parentPlayerInputProvider;
-            }
-
-            if (parentPlayerInputProvider != null)
-            {
-                (parentPlayerInputProvider as MonoBehaviour).enabled = base.IsOwner;
+                // Owner: Initialize NetworkInputProvider with the local PlayerInputProvider
+                if (parentNetworkInputProvider != null && parentPlayerInputProvider != null)
+                {
+                    parentNetworkInputProvider.Initialize(parentPlayerInputProvider);
+                }
+                
+                // ALWAYS set InputProvider to NetworkInputProvider for consistency
+                // BuildMoveData knows how to read from NetworkInputProvider
+                _coreMovementController.InputProvider = parentNetworkInputProvider ?? (IInputProvider)parentPlayerInputProvider;
+                
+                if (parentPlayerInputProvider != null)
+                {
+                    (parentPlayerInputProvider as MonoBehaviour).enabled = true;
+                }
             }
         }
         #endregion
@@ -140,7 +174,7 @@ namespace FastAndFractured.Multiplayer
                 BuildMoveData(out MoveData md);
                 Replicate(md);
             }
-            if (base.IsServerInitialized)
+            else if (base.IsServerInitialized)
             { 
                 Replicate(default);
             }
@@ -166,28 +200,33 @@ namespace FastAndFractured.Multiplayer
 
         private void BuildMoveData(out MoveData md)
         {
-         
-            
             md = default;
             if (_coreMovementController?.InputProvider == null) return;
-            var provider = _coreMovementController.InputProvider as PlayerInputProvider;
-            if (provider == null) return;
-
-            md.MoveInput = provider.MoveInput;
-            md.HandbrakeInput = provider.IsBraking;
-            md.DashInput = provider.IsDashing;
-            md.AccelerateInput = provider.IsAccelerating - provider.IsReversing;
-            if (md.MoveInput != Vector2.zero || md.AccelerateInput != 0f || md.DashInput)
+            
+            // Try NetworkInputProvider first (set by InjectInputProvider), fallback to PlayerInputProvider
+            var netProvider = _coreMovementController.InputProvider as NetworkInputProvider;
+            if (netProvider != null)
             {
-                string context = base.IsServer ? "SERVER" : (base.IsOwner ? "OWNER_CLIENT" : "SPECTATOR");
-                Debug.Log($"<color=yellow>[{context} - Tick {base.TimeManager.Tick}] Replicating Input: Move={md.MoveInput}, Accel={md.AccelerateInput}</color>");
+                md.MoveInput = netProvider.MoveInput;
+                md.HandbrakeInput = netProvider.IsBraking;
+                md.DashInput = netProvider.IsDashing;
+                md.AccelerateInput = netProvider.IsAccelerating - netProvider.IsReversing;
+            }
+            else
+            {
+                var provider = _coreMovementController.InputProvider as PlayerInputProvider;
+                if (provider == null) return;
+                md.MoveInput = provider.MoveInput;
+                md.HandbrakeInput = provider.IsBraking;
+                md.DashInput = provider.IsDashing;
+                md.AccelerateInput = provider.IsAccelerating - provider.IsReversing;
             }
         }
 
          [Replicate]
         private void Replicate(MoveData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
         {
-            bool isReplaying = (state == ReplicateState.Replayed);
+            bool isReplaying = state.ContainsReplayed();
 
 
             MoveData inputToProcess;
