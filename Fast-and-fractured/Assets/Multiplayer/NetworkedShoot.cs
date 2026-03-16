@@ -6,6 +6,7 @@ using FastAndFractured.Abstractions;
 using FishNet.Object.Prediction;
 using FishNet.Transporting;
 using FishNet.Connection;
+using FastAndFractured;
 namespace FastAndFractured.Multiplayer
 {
     public struct NetworkShootParams
@@ -55,7 +56,7 @@ namespace FastAndFractured.Multiplayer
         #region REFERENCES & FIELDS
         private NormalShootHandle _normalShootHandle;
         private PushShootHandle _pushShootHandle;
-        private PlayerInputProvider _inputProvider; 
+        private NetworkInputProvider _networkInputProvider; 
 
         [Header("Cosmetic Projectile Types")]
         [Tooltip("Tipo de Pool para el proyectil cosmético (no-red) de disparo normal.")]
@@ -65,9 +66,12 @@ namespace FastAndFractured.Multiplayer
         [Tooltip("Tipo de Pool para el proyectil cosmético (no-red) de la mina.")]
         [SerializeField] private Pooltype _cosmeticMineType;
 
-        [Header("Networked Projectile Prefabs")]
+        [Header("Networked Projectile Prefabs (server instantiates these directly, NOT from ObjectPoolManager)")]
+        [Tooltip("Prefab del proyectil de red para disparo normal. Debe tener NetworkObject + NetworkedProjectile.")]
         [SerializeField] private GameObject _networkedNormalBulletPrefab;
+        [Tooltip("Prefab del proyectil de red para disparo de empuje. Debe tener NetworkObject + NetworkedProjectile.")]
         [SerializeField] private GameObject _networkedPushBulletPrefab;
+        [Tooltip("Prefab del proyectil de red para la mina. Debe tener NetworkObject + NetworkedProjectile.")]
         [SerializeField] private GameObject _networkedMinePrefab;
         #endregion
 
@@ -76,18 +80,31 @@ namespace FastAndFractured.Multiplayer
         {
             _normalShootHandle = GetComponentInChildren<NormalShootHandle>();
             _pushShootHandle = GetComponentInChildren<PushShootHandle>();
-            _inputProvider = GetComponentInParent<PlayerInputProvider>();  
+
+            // Disable LocalShootController if present (it's on BaseCar.prefab).
+            // NetworkedShoot handles both server-auth spawning and local cosmetic prediction.
+            var localShoot = GetComponentInChildren<LocalShootController>();
+            if (localShoot != null)
+            {
+                localShoot.enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Resolve NetworkInputProvider lazily (it may not exist at Awake time).
+        /// </summary>
+        private NetworkInputProvider GetNetworkInputProvider()
+        {
+            if (_networkInputProvider == null)
+                _networkInputProvider = GetComponentInParent<NetworkInputProvider>();
+            return _networkInputProvider;
         }
         public override void OnOwnershipClient(NetworkConnection prevOwner)
         {
             base.OnOwnershipClient(prevOwner);
             base.TimeManager.OnTick += TimeManager_OnTick;
-
-            if (base.IsOwner)
-            {
-                _normalShootHandle.OnShootRequest += HandleLocalShootPrediction;
-                _pushShootHandle.OnShootRequest += HandleLocalShootPrediction;
-            }
+            // No cosmetic prediction  Eserver-auth bullets arrive fast enough.
+            // Cosmetic bullets caused double-rendering on client (pool bullet + networked bullet).
         }
         public override void OnStartServer()
         {
@@ -103,12 +120,10 @@ namespace FastAndFractured.Multiplayer
 
             if (_normalShootHandle != null)
             {
-                _normalShootHandle.OnShootRequest -= HandleLocalShootPrediction;
                 _normalShootHandle.OnShootRequest -= HandleServerAuthSpawn;
             }
             if (_pushShootHandle != null)
             {
-                _pushShootHandle.OnShootRequest -= HandleLocalShootPrediction;
                 _pushShootHandle.OnShootRequest -= HandleServerAuthSpawn;
             }
         }
@@ -120,7 +135,7 @@ namespace FastAndFractured.Multiplayer
                 BuildShootData(out ShootData sd);
                 Replicate(sd, ReplicateState.Ticked);
             }
-            if (base.IsServer)
+            else if (base.IsServer)
             {
                 Replicate(default, ReplicateState.Ticked);
             }
@@ -136,15 +151,17 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SIMULATION
+        
         private void BuildShootData(out ShootData sd)
         {
             sd = default;
-            if (_inputProvider == null) return;
+            var provider = GetNetworkInputProvider();
+            if (provider == null) return;
 
-            sd.NormalShoot = _inputProvider.IsNormalShooting;
-            sd.PushShoot = _inputProvider.IsPushShooting;
-            sd.MineShoot = _inputProvider.IsThrowingMine;
-            sd.AimDirection = _inputProvider.AimDirection;
+            sd.NormalShoot = provider.IsNormalShooting;
+            sd.PushShoot = provider.FirePushAction;
+            sd.MineShoot = provider.IsThrowingMine;
+            sd.AimDirection = provider.AimDirection;
         }
 
         [Replicate]
@@ -192,25 +209,34 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServer) return;
 
-            GameObject prefabToSpawn = GetNetworkedPrefabFromSpawnParams(spawnParams);
-            if (prefabToSpawn == null)
+            GameObject prefab = GetNetworkedPrefabFromSpawnParams(spawnParams);
+            if (prefab == null)
             {
-                Debug.LogError($"[Server] No se encontró un Prefab de red para el tipo: {spawnParams.Pooltype}");
+                Debug.LogError($"[Server] No networked prefab assigned for this bullet type. Check NetworkedShoot inspector.");
                 return;
             }
 
-            GameObject spawnedBulletGO = Instantiate(prefabToSpawn, spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation,transform);
+            // Instantiate fresh (don't use ObjectPoolManager  EFishNet Despawn destroys pool objects)
+            GameObject spawnedBulletGO = Instantiate(prefab, spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
+            spawnedBulletGO.transform.SetParent(null);
+
+            var networkObject = spawnedBulletGO.GetComponent<NetworkObject>();
+            if (networkObject == null)
+            {
+                Debug.LogError($"[Server] Networked bullet prefab missing NetworkObject.", spawnedBulletGO);
+                Destroy(spawnedBulletGO);
+                return;
+            }
+
             base.ServerManager.Spawn(spawnedBulletGO, base.Owner);
 
             var networkedProjectile = spawnedBulletGO.GetComponent<NetworkedProjectile>();
             if (networkedProjectile != null)
             {
-                // ##### LA CORRECCIÓN ESTÁ AQUÍ #####
-                // Convertimos los datos del servidor a un formato de red seguro antes de enviar el RPC.
                 NetworkShootParams netParams = new NetworkShootParams
                 {
                     Pooltype = spawnParams.Pooltype,
-                    InitialVelocity = spawnParams.Velocity, // La velocidad ya incluye la del vehículo.
+                    InitialVelocity = spawnParams.Velocity,
                     Range = spawnParams.Range,
                     Damage = spawnParams.Damage,
                     PushForce = spawnParams.PushForce,
@@ -223,20 +249,21 @@ namespace FastAndFractured.Multiplayer
                     IsMine = spawnParams.IsMine
                 };
 
-                networkedProjectile.RpcInitialize(netParams, base.Owner.FirstObject);
+                networkedProjectile.RpcInitialize(netParams, base.NetworkObject, 
+                    spawnedBulletGO.transform.position, spawnedBulletGO.transform.rotation);
             }
             else
             {
-                Debug.LogError($"El prefab de red '{prefabToSpawn.name}' no tiene el script NetworkedProjectile.", prefabToSpawn);
-                spawnedBulletGO.GetComponent<NetworkObject>().Despawn();
+                Debug.LogError($"[Server] Networked bullet prefab missing NetworkedProjectile.", spawnedBulletGO);
+                networkObject.Despawn();
             }
         }
 
         private GameObject GetNetworkedPrefabFromSpawnParams(BulletSpawnParameters spawnParams)
         {
-            if (spawnParams.Pooltype == _normalShootHandle.Pooltype) return _networkedNormalBulletPrefab;
             if (spawnParams.IsMine) return _networkedMinePrefab;
-            return _networkedPushBulletPrefab; // Asumimos PushShoot normal si no es mina
+            if (spawnParams.Pooltype == _normalShootHandle.Pooltype) return _networkedNormalBulletPrefab;
+            return _networkedPushBulletPrefab;
         }
 
         private void SpawnCosmeticProjectile(BulletSpawnParameters spawnParams)
