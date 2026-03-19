@@ -26,12 +26,12 @@ public class TurretRotationMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(_targetDirection!=Vector3.zero){
         Quaternion lookAtTargetDirection = Quaternion.LookRotation(_targetDirection);
-        Vector3 eulersLookAtTargetDirection = lookAtTargetDirection.eulerAngles;
-        float yawAngle = eulersLookAtTargetDirection.y;
-        Debug.Log(yawAngle);
-        float clampYawAngle = Mathf.Clamp(yawAngle, (-statsController.NormalShootAngle), statsController.NormalShootAngle);
-        Quaternion lookAtTargetDirectionYawClamped = Quaternion.Euler(eulersLookAtTargetDirection.x, clampYawAngle, 0);
-        _canon.transform.rotation = Quaternion.Slerp(_canon.transform.rotation, lookAtTargetDirectionYawClamped, Time.deltaTime*canonRotationSpeed);
+        Vector3 carForward = statsController.transform.forward;
+        float angle = Vector3.Angle(_targetDirection,carForward);
+        if(angle<statsController.NormalShootAngle&&angle>-statsController.NormalShootAngle)
+        _canon.transform.rotation = Quaternion.Slerp(_canon.transform.rotation, lookAtTargetDirection, Time.deltaTime*canonRotationSpeed);
+        }
     }
 }
