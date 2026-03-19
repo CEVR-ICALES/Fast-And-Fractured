@@ -6,63 +6,32 @@ using Utilities;
 public class TurretRotationMovement : MonoBehaviour
 {
     [SerializeField]
-    private Transform _yawRotation;
-    [SerializeField] 
-    private Transform _pitchRotation;
-    [SerializeField]
     private GameObject _canon;
     public Vector3 TargetDirection { get=> _targetDirection;  set=> _targetDirection = value; }
     private Vector3 _targetDirection;
-    private Quaternion initialRotationYaw;
-    private Quaternion initialRotationPitch;
-    private Quaternion finalRotationYaw;
-    private Quaternion finalRotationPitch;
-    private float currentTime = 0;
     [SerializeField]
-    private float rotationTime = 0.5f;
-    private ITimer _rotateCanon;
-    private Vector3 _previoustargetDirection = new Vector3(0,0,-1);
-    private const float SLERP_MAX_VALUE = 1.0f;
+    private float canonRotationSpeed = 5f;
+    [SerializeField]
+    private StatsController statsController;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        if (statsController == null)
+        {
+            statsController = GetComponentInParent<StatsController>();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 directionToTarget = (_targetDirection - _canon.transform.position).normalized;
-        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-        if (_rotateCanon == null&&_previoustargetDirection!=_targetDirection)
-        {
-            _previoustargetDirection = _targetDirection;
-            initialRotationYaw = _yawRotation.rotation;
-            initialRotationPitch = _pitchRotation.rotation;
-           
-            finalRotationYaw = Quaternion.Euler(targetRotation.x,0,0);
-            finalRotationPitch = Quaternion.Euler(0,targetRotation.y,0);
-            _rotateCanon = TimerSystem.Instance.CreateTimer(rotationTime, onTimerDecreaseUpdate:(float time) =>
-            {
-
-                //Yaw rotation
-                Rotate(_yawRotation, initialRotationYaw, finalRotationYaw, currentTime);
-                //Pitch rotation 
-                Rotate(_pitchRotation, initialRotationPitch, finalRotationPitch, currentTime);
-                currentTime += Time.deltaTime;
-            }, onTimerDecreaseComplete: () =>
-            {
-                currentTime = 0;
-                _rotateCanon = null;
-            }
-            );
-        }
-    }
-
-    void Rotate(Transform rotator,Quaternion initialRotation, Quaternion newRotation,float currentTime)
-    {
-        float slerpValue = currentTime/rotationTime;
-       rotator.localRotation = Quaternion.Slerp(initialRotation,newRotation,slerpValue);
+        Quaternion lookAtTargetDirection = Quaternion.LookRotation(_targetDirection);
+        Vector3 eulersLookAtTargetDirection = lookAtTargetDirection.eulerAngles;
+        float yawAngle = eulersLookAtTargetDirection.y;
+        Debug.Log(yawAngle);
+        float clampYawAngle = Mathf.Clamp(yawAngle, (-statsController.NormalShootAngle), statsController.NormalShootAngle);
+        Quaternion lookAtTargetDirectionYawClamped = Quaternion.Euler(eulersLookAtTargetDirection.x, clampYawAngle, 0);
+        _canon.transform.rotation = Quaternion.Slerp(_canon.transform.rotation, lookAtTargetDirectionYawClamped, Time.deltaTime*canonRotationSpeed);
     }
 }

@@ -43,6 +43,7 @@ namespace FastAndFractured
         {
             base.Start();
             _countOverHeat = 0;
+
         }
 
         #endregion

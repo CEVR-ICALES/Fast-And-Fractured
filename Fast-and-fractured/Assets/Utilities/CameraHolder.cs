@@ -29,7 +29,7 @@ namespace Utilities
 
         private void Update()
         {
-            if (TurretRotationMovement != null&&(PlayerInputController.Instance.CameraInput!=Vector2.zero||PlayerInputController.Instance.CameraMouseInput!=Vector2.zero))
+            if (TurretRotationMovement != null)
             {
                 TurretRotationMovement.TargetDirection = ReturnCurrentLookAtFromCamera();
             }
