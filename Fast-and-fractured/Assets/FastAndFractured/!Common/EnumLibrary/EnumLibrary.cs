@@ -64,7 +64,13 @@ namespace Enums
         PAUSE,
         WIN_LOSE,
         HOW_TO_PLAY,
-        MAP_SELECTION
+        MAP_SELECTION,
+        MULTIPLAYER_HUB,
+        MULTIPLAYER_HOST_SETUP,
+        MULTIPLAYER_BROWSER,
+        MULTIPLAYER_DIRECT_JOIN,
+        LOBBY_ROOM,
+        LOBBY_MAP_VOTE
     }
 
     public enum Pooltype

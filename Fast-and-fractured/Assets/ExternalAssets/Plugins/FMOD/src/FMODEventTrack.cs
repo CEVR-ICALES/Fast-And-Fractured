@@ -1,4 +1,4 @@
-﻿#if UNITY_TIMELINE_EXIST
+#if UNITY_TIMELINE_EXIST
 
 using System;
 using System.ComponentModel;
