@@ -47,6 +47,7 @@ namespace FastAndFractured
         [SerializeField] StatsController statsController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] ApplyForceByState applyForceByState;
+        [SerializeField] TurretRotationMovement turretRotationMovement;
         [SerializeField] LayerMask ignoreLayerMask;
 
         PathMode pathMode = PathMode.ADVANCED;
@@ -841,13 +842,16 @@ namespace FastAndFractured
             _previousPath = _currentPath.corners;
         }
 
-        private Vector3 GetShootingDirectionWithError()
+        public Vector3 GetShootingDirectionWithError()
         {
             Vector3 shootingDirection = CalcNormalizedShootingDirection();
-
+            if (turretRotationMovement != null)
+            {
+                turretRotationMovement.TargetDirection = shootingDirection;
+            }
             //Add shooting error 
-            return shootingDirection + new Vector3(DeterministicRandom.Instance.NextFloat(-shootingMarginErrorAngle, shootingMarginErrorAngle),
-               DeterministicRandom.Instance.NextFloat(0, shootingMarginErrorAngle), 0);
+            return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
+                UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
         }
 
         public void StopMovement()

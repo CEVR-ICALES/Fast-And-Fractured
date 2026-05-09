@@ -30,6 +30,7 @@ namespace FastAndFractured
         {
             base.Start();
             _countOverHeat = 0;
+
         }
 
         public void NormalShooting()
@@ -39,7 +40,7 @@ namespace FastAndFractured
             Vector3 shootingDirection = currentShootDirection + directionCenterOffSet;
             float angle = Vector3.Angle(transform.forward, shootingDirection);
 
-            if (angle > characterStatsController.NormalShootAngle / 2) return;
+            if (angle > characterStatsController.NormalShootAngle) return;
 
             Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 

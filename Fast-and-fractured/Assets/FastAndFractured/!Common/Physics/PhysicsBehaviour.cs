@@ -52,6 +52,8 @@ namespace FastAndFractured
         public float CurrentSpeed { get => _currentSpeed; set => _currentSpeed = value; }
 
         private CarImpactHandler _carImpactHandler;
+        public CharacterKinematicReactionsController CharacterKinematicReactionsController { get => _characterKinematicReactionsController; } 
+        private CharacterKinematicReactionsController _characterKinematicReactionsController;
 
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         const float TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED = 0.3f;
@@ -69,6 +71,7 @@ namespace FastAndFractured
 
             _carImpactHandler = GetComponent<CarImpactHandler>();
             _carMovementController = GetComponent<CarMovementController>();
+            _characterKinematicReactionsController = GetComponent<CharacterKinematicReactionsController>();
             _rb.mass = StatsController.Weight;
         }
 
@@ -157,7 +160,9 @@ namespace FastAndFractured
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
                 otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse); // for now we just apply an offset on the y axis provisional
+                otherComponentPhysicsBehaviours.CharacterKinematicReactionsController?.ApplyImpactReaction(-collisionNormal, 1, 1);
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
+                if(isTheOneToPush) _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
             }  
             
@@ -202,6 +207,7 @@ namespace FastAndFractured
                 _carMovementController.CancelDash();
                 Vector3 bounceDirection = Vector3.Reflect(transform.forward, contact.normal);
                 AddForce(bounceDirection * wallBounceForce, ForceMode.Impulse);
+                _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, 1, 1);
             }
         }
 

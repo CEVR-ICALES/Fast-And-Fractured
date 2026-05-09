@@ -10,7 +10,7 @@ namespace FastAndFractured
     public class SandstormController : AbstractAutoInitializableMonoBehaviour, IKillCharacters, IPausable
     {
         public GameObject fogParent;
-        public LocalVolumetricFog primaryFog;
+        public Transform primaryFog;
 
         public float maxGrowthTime = 1.0f;
         [SerializeField]
@@ -94,7 +94,6 @@ namespace FastAndFractured
             _itemsInsideSandstorm = new List<GameObject>();
             _charactersInsideSandstorm = new List<GameObject>();
             _safeZonesInsideSandstorm = new List<GameObject>();
-            primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
         }
 
         private void OnEnable()
@@ -193,7 +192,7 @@ namespace FastAndFractured
 
                 _stormCollider.size = new Vector3(_initialColliderSize.x, _initialColliderSize.y, newZSizeCollider);
                 Vector3 newPrimaryFogPositionZ = _direction * _currentGrowth;
-                primaryFog.transform.position = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z) + newPrimaryFogPositionZ;
+                primaryFog.position = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z) + newPrimaryFogPositionZ;
 
                 boxVolumeCollider.size = _stormCollider.size;
                 Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
@@ -228,23 +227,6 @@ namespace FastAndFractured
             else
             {
                 return _charactersInsideSandstorm.Contains(target)||_itemsInsideSandstorm.Contains(target)||_safeZonesInsideSandstorm.Contains(target);
-            }
-        }
-
-        private void ChangeSandstormVisuals(bool playerInside)
-        {
-            if (playerInside)
-            {
-                float progress = 1/(atenuationTime / Time.deltaTime);
-                float actualFogDistance = primaryFog.parameters.meanFreePath;
-                TimerSystem.Instance.CreateTimer(atenuationTime,onTimerDecreaseUpdate : (float time) => {
-                    primaryFog.parameters.meanFreePath = Mathf.Lerp(actualFogDistance, fogDistancePlayerInsideSandstorm,progress);
-                    progress += progress;
-                });
-            }
-            else
-            {
-                primaryFog.parameters.meanFreePath = fogDistancePlayerOutsideSandstorm;
             }
         }
 

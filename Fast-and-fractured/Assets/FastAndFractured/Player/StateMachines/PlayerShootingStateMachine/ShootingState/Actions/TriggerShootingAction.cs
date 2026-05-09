@@ -14,9 +14,9 @@ namespace StateMachine
 
             if (shootController != null && controller.GetBehaviour<PlayerInputController>().IsShooting)
             {
-                var normalShootHandle = controller.GetBehaviour<NormalShootHandle>();
-                normalShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
-                shootController.TryNormalShoot();
+                NormalShootHandle normalShootHandle = controller.GetBehaviour<NormalShootHandle>();
+                normalShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().ReturnCurrentLookAtFromCamera();
+                normalShootHandle.NormalShooting();
             }
         }
     }
