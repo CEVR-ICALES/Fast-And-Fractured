@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ using Unity.EditorCoroutines.Editor;
 
 namespace Assets.SimpleLocalization.Scripts
 {
-    [CreateAssetMenu(fileName = "LocalizationSettings", menuName = "‚óÜ Simple Localization/Settings")]
+    [CreateAssetMenu(fileName = "LocalizationSettings", menuName = "Åü Simple Localization/Settings")]
     public class LocalizationSettings : ScriptableObject
     {
         /// <summary>
@@ -278,27 +278,27 @@ namespace Assets.SimpleLocalization.Scripts
         {
             var buttonStyle = new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold, fixedHeight = 30 };
 
-            if (GUILayout.Button("‚Ü∫ Resolve Sheets", buttonStyle))
+            if (GUILayout.Button("? Resolve Sheets", buttonStyle))
             {
                 ResolveGoogleSheets();
             }
 
-            if (GUILayout.Button("‚ñº Download Sheets", buttonStyle))
+            if (GUILayout.Button("Å• Download Sheets", buttonStyle))
             {
                 DownloadGoogleSheets();
             }
 
-            if (GUILayout.Button("‚ùñ Open Google Sheets", buttonStyle))
+            if (GUILayout.Button("? Open Google Sheets", buttonStyle))
             {
                 OpenGoogleSheets();
             }
 
-            if (GUILayout.Button("‚ùñ Open Editor", buttonStyle))
+            if (GUILayout.Button("? Open Editor", buttonStyle))
             {
                 OnRunEditor();
             }
 
-            if (GUILayout.Button("‚òÖ Leave Review", buttonStyle))
+            if (GUILayout.Button("Åö Leave Review", buttonStyle))
             {
                 LeaveReview();
             }

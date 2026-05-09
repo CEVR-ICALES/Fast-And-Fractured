@@ -1,4 +1,4 @@
-﻿namespace ParrelSync
+namespace ParrelSync
 {
     public class ExternalLinks 
     {

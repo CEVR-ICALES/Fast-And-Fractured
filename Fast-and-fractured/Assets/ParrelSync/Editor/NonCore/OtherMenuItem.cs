@@ -1,4 +1,4 @@
-﻿namespace ParrelSync.NonCore
+namespace ParrelSync.NonCore
 {
     using UnityEditor;
     using UnityEngine;
