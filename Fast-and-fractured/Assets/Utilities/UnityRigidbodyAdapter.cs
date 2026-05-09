@@ -1,4 +1,4 @@
-﻿using FastAndFractured.Utilities;
+using FastAndFractured.Utilities;
 using FishNet.Object.Prediction;
 using GameKit.Dependencies.Utilities;
 using UnityEngine;
@@ -23,6 +23,7 @@ public class UnityRigidbodyAdapter : MonoBehaviour, ICustomRigidbody
     public float linearDamping { get => _rb.linearDamping; set => _rb.linearDamping = value; }
     public float angularDamping { get => _rb.angularDamping; set => _rb.angularDamping = value; }
     public bool isKinematic { get => _rb.isKinematic; set => _rb.isKinematic = value; }
+    public bool useGravity { get => _rb.useGravity; set => _rb.useGravity = value; }
     public RigidbodyConstraints constraints { get => _rb.constraints; set => _rb.constraints = value; }
     public new Transform transform => _rb.transform;  
      
@@ -50,6 +51,7 @@ namespace FastAndFractured.Utilities
         float linearDamping { get; set; }
         float angularDamping { get; set; }
         bool isKinematic { get; set; }
+        bool useGravity { get; set; }
         RigidbodyConstraints constraints { get; set; }
         Transform transform { get; } 
         void AddForce(Vector3 force, ForceMode mode = ForceMode.Force);
