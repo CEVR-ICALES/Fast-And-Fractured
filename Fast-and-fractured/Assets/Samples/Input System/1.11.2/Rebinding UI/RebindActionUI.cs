@@ -364,6 +364,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
 
         private void PerformInteractiveRebind(InputAction action, int bindingIndex, bool allCompositeParts = false)
         {
+            m_RebindOverlay.SetActive(true);
             m_RebindOperation?.Cancel();
 
             void CleanUp()
@@ -410,7 +411,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         if (keyPath.StartsWith("<Keyboard>/") && !inputsList.Contains(keyPath) ||
                             keyPath.StartsWith("<Mouse>/"))
                         {
-                            //m_RebindOverlay.GetComponentInChildren<Text>().text = " " + keyPath + "Key not allowed. Please choose another.";
+                            m_RebindOverlay.GetComponentInChildren<Text>().text = "Key not allowed. Please choose another.";
                             Debug.Log("Key not allowed. Please choose another.");
                             action.RemoveBindingOverride(bindingIndex);
                             PerformInteractiveRebind(action, bindingIndex, allCompositeParts);
@@ -463,6 +464,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         if (binding.effectivePath == newBinding.effectivePath)
                         {
                             Debug.Log("Duplicate binding found in composite: " + newBinding.effectivePath);
+                            m_RebindOverlay.GetComponentInChildren<Text>().text = "Key Duplicated. Please choose another.";
                             return true;
                         }
                     }
@@ -476,7 +478,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 if (binding.effectivePath == newBinding.effectivePath)
                 {
                     Debug.Log("Duplicate binding found: " + newBinding.effectivePath);
-                    //m_RebindOverlay.GetComponentInChildren<TextMeshProUGUI>().text = " " + newBinding + "Key Duplicated. Please choose another.";
+                    m_RebindOverlay.GetComponentInChildren<Text>().text = "Key Duplicated. Please choose another.";
                     return true;
                 }
 
@@ -489,6 +491,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                     if (action.bindings[i].effectivePath == newBinding.overridePath)
                     {
                         //Debug.Log("Duplicate binding found: " + newBinding.effectivePath);
+                        //SubtitlesMana
                         return true;
                     }
                 }

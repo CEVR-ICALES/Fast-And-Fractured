@@ -4,13 +4,14 @@ using Utilities;
 public class CharSelectionSimulatedMovement : MonoBehaviour
 {
     private Rigidbody _rb;
-    [SerializeField] private float forceToApply;
+    [SerializeField] private float forceToApply = 250;
     [SerializeField] private float forceDuration;
 
     [Header("WheelMeshes")]
+    public GameObject[] WheelsMesh { set => wheelsMeshes=value; }
     [SerializeField] private GameObject[] wheelsMeshes;
-    [SerializeField] private float rbSpeedThreshold;
-    [SerializeField] private float rotationSpeed;
+    [SerializeField] private float rbSpeedThreshold = 2;
+    [SerializeField] private float rotationSpeed = 180;
 
 
     private void OnEnable()
