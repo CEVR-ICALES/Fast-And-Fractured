@@ -4,6 +4,8 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Utilities;
 using Enums;
+using UnityEngine.UIElements;
+using Unity.Cinemachine;
 
 namespace FastAndFractured
 {
@@ -20,7 +22,7 @@ namespace FastAndFractured
         private float _countOverHeat;
         public float previousCountOverHeat;
         [SerializeField] private Collider ignoredCollider;
-
+        private Vector3 _lastShootingDirection;
         public Transform ShootPoint => shootPoint;
         public bool IsOverHeat
         {
@@ -73,12 +75,15 @@ namespace FastAndFractured
 
             if (canShoot)
             {
-                Vector3 shootingDirection = currentShootDirection + directionCenterOffSet;
-
+                Vector3 shootingDirection =  currentShootDirection + directionCenterOffSet;
                 float angle = Vector3.Angle(shootingDirection, transform.forward);
                 if (angle > characterStatsController.NormalShootAngle)
                 {
-                    return;
+                  float signedAngle = Vector3.SignedAngle(shootingDirection,transform.forward,Vector3.up);
+                  float signedLimitAngle = characterStatsController.NormalShootAngle * Mathf.Sign(-signedAngle);
+                  Vector3 forwardVectorToLimitAngle = Quaternion.AngleAxis(signedLimitAngle,Vector3.up)*transform.forward;
+                  Vector3 limitedShootingDirection = forwardVectorToLimitAngle + (Vector3.up*shootingDirection.y);
+                  shootingDirection = limitedShootingDirection;
                 }
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
