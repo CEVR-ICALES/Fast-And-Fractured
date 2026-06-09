@@ -36,6 +36,7 @@ namespace FastAndFractured
         [SerializeField] private Toggle vsyncToggle;
         [SerializeField] private Slider sharpeningSlider;
         [SerializeField] private Slider brightnessSlider;
+        [SerializeField] private Slider minimapSlider;
         [SerializeField] private TMP_Dropdown fpsDropdown;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
         [SerializeField] private TMP_Dropdown displayModeDropdown;
@@ -59,10 +60,12 @@ namespace FastAndFractured
         private const string DISPLAY_MODE_STRING = "DisplayMode";
         private const string ANTI_ALIASING_STRING = "Anti-Aliasing";
         private const string TAA_SHARPENING_STRING = "TAA_Sharpening";
+        private const string MINIMAP_SCALE_STRING = "Minimap_Scale";
         private const float MASTER_VOLUME_DEFAULT = 0.5f;
         private const int VSYNC_DEFAULT_STATE = 0;
         private const float SHARPENING_DEFAULT = 0.5f;
         private const float BRIGHTNESS_DEFAULT = 0.5f;
+        private const float MINIMAP_SCALE_DEFAULT = 0.5f;
         private const int FPS_DEFAULT = 60;
         private const string RESOLUTION_DEFAULT = "1920x1080";
         #endregion
@@ -90,6 +93,7 @@ namespace FastAndFractured
             upscalingResolutionDropdown.onValueChanged.AddListener(delegate { SetUpscalingResolutionMode(DictionaryLibrary.TranslationDynamicResolution[upscalingResolutionDropdown.value]); });
 
             brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
+            minimapSlider.onValueChanged.AddListener(delegate { SetMinimapScale(); });
 
             vsyncToggle.onValueChanged.AddListener(delegate { ToggleVsync(vsyncToggle.isOn); });
 
@@ -170,6 +174,10 @@ namespace FastAndFractured
             //Brightness
             float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, BRIGHTNESS_DEFAULT);
             RefreshValue(brightnessSlider, brightness);
+
+            //Minimap
+            float minimapScale = PlayerPrefs.GetFloat(MINIMAP_SCALE_STRING, MINIMAP_SCALE_DEFAULT);
+            RefreshValue(minimapSlider, minimapScale);
         }
 
         private void RefreshValue(TMP_Dropdown dropdown, string value)
@@ -206,8 +214,9 @@ namespace FastAndFractured
             gamepadRemappingWindow.SetActive(false);
             keyboardRemappingWindow.SetActive(false);
 
-            float brightness = PlayerPrefs.GetFloat("Brightness", BRIGHTNESS_DEFAULT);
+            float brightness = PlayerPrefs.GetFloat(BRIGHTNESS_STRING, BRIGHTNESS_DEFAULT);
             brightnessSlider.SetValueWithoutNotify(brightness);
+
         }
 
         public void OpenAccesibilitySettings()
@@ -264,6 +273,11 @@ namespace FastAndFractured
         public void SetBrightness()
         {
             BrightnessManager.Instance?.SetBrightness(brightnessSlider.value);
+        }
+        public void SetMinimapScale()
+        {
+            PlayerPrefs.SetFloat(MINIMAP_SCALE_STRING, minimapSlider.value);
+            PlayerPrefs.Save();
         }
 
         private void UpdateVSync(bool isActive)
