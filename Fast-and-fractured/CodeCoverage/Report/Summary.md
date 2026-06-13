@@ -1,4 +1,4 @@
-﻿# Summary
+# Summary
 |||
 |:---|:---|
 | Generated on: | 14/07/2025 - 17:10:50 |
@@ -99,7 +99,7 @@
 |FastAndFractured.JosefinoCarImpactHandler|0|29|29|59|0%|0|0||0|5|0%|
 |FastAndFractured.JosefinoUniqueAbility|0|20|20|43|0%|0|0||0|6|0%|
 |FastAndFractured.LevelController|0|438|438|635|0%|0|0||0|38|0%|
-|FastAndFractured.LevelControllerButBetter|0|191|191|326|0%|0|0||0|24|0%|
+|FastAndFractured.LevelController|0|191|191|326|0%|0|0||0|24|0%|
 |FastAndFractured.LevelUtilities|0|34|34|57|0%|0|0||0|3|0%|
 |FastAndFractured.LoadingManager|0|56|56|97|0%|0|0||0|7|0%|
 |FastAndFractured.MainMenuManager|0|117|117|232|0%|0|0||0|15|0%|
@@ -1175,3 +1175,4 @@
 |UnityEngine.InputSystem.Samples.RebindUI.RebindActionUIEditor|0|114|114|188|0%|0|0||0|5|0%|
 |**Unity.Recorder.Samples.Editor**|**0**|**9**|**9**|**27**|**0%**|**0**|**0**|****|**0**|**3**|**0%**|
 |UnityEditor.Recorder.Examples.RecorderEditorExample|0|9|9|27|0%|0|0||0|3|0%|
+
