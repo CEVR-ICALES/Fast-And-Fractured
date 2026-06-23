@@ -544,6 +544,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7861354206915016599}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4245321437345898508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3309139747000767015}
+  m_Layer: 6
+  m_Name: TurretVFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3309139747000767015
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4245321437345898508}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5044397309671564091}
+  m_Father: {fileID: 9114169394882485433}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4595895438567080035
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,6 +726,7 @@ MonoBehaviour:
   isInState: 0
   previousCountOverHeat: 0
   ignoredCollider: {fileID: 8639848427772867770}
+  shootingTurretVFX: {fileID: 2148836694677302853}
 --- !u!1 &5570406966506803950
 GameObject:
   m_ObjectHideFlags: 0
@@ -1245,6 +1278,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2607063736163652628}
+  - {fileID: 3309139747000767015}
   m_Father: {fileID: 805735519231293406}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7470228529578144535
@@ -1740,6 +1774,73 @@ Transform:
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 5210942165818591452, guid: 7f6de05ccde28ea43b137dd369a0b579, type: 3}
   m_PrefabInstance: {fileID: 783677284636647512}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1639075076309177994
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3309139747000767015}
+    m_Modifications:
+    - target: {fileID: 2489603042514872764, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_Name
+      value: TurretShootingSparks
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+--- !u!198 &2148836694677302853 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 823342411954157775, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+  m_PrefabInstance: {fileID: 1639075076309177994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5044397309671564091 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5818200715368215985, guid: 2ea97dad1c06c591388122252f8773d3, type: 3}
+  m_PrefabInstance: {fileID: 1639075076309177994}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2090185880089518336
 PrefabInstance:

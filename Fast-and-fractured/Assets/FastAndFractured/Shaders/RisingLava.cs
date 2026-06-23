@@ -31,7 +31,5 @@ public class RisingLava : MonoBehaviour
     {
         float progressPercent = progress / _riseDuration;
         transform.position = _startPosition + _riseDistance * progressPercent * Vector3.up;
-        Debug.Log(progressPercent);
-        Debug.Log(_riseDistance * progressPercent * Vector3.up);
     }
 }

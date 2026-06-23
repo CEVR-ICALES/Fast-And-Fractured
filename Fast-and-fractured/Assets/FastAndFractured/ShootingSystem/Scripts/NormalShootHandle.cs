@@ -36,6 +36,8 @@ namespace FastAndFractured
 
         private ITimer _overheatTimer;
         private string _delayUntilStartDecreaseTimerId;
+        [SerializeField]
+        private ParticleSystem shootingTurretVFX;
 
         #endregion
 
@@ -45,7 +47,7 @@ namespace FastAndFractured
         {
             base.Start();
             _countOverHeat = 0;
-
+            DesactivateShootingVFX(shootingTurretVFX);
         }
 
         #endregion
@@ -75,6 +77,7 @@ namespace FastAndFractured
 
             if (canShoot)
             {
+                ActiveShootingVFX(shootingTurretVFX);
                 Vector3 shootingDirection =  currentShootDirection + directionCenterOffSet;
                 float angle = Vector3.Angle(shootingDirection, transform.forward);
                 if (angle > characterStatsController.NormalShootAngle)
@@ -200,6 +203,20 @@ namespace FastAndFractured
             }
 
             isInState = true;
+        }
+
+        private void ActiveShootingVFX(ParticleSystem particleSystem)
+        {
+            if(particleSystem!=null){
+            particleSystem.Play();
+            }
+        }
+        private void DesactivateShootingVFX(ParticleSystem particleSystem)
+        {
+            if (particleSystem != null)
+            {
+                particleSystem.Stop();
+            }
         }
     }
 }
