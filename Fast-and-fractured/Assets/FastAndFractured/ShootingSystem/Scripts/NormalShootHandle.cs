@@ -38,7 +38,13 @@ namespace FastAndFractured
         private string _delayUntilStartDecreaseTimerId;
         [SerializeField]
         private ParticleSystem shootingTurretVFX;
-
+        [SerializeField]
+        private ParticleSystem overHeatSmokeVFX;
+        [SerializeField]
+        private float _overHeathMaxEmissionRate = 50;
+        [SerializeField]
+        private float _overHeathMinEmissionRate = 0;
+        private float _overHeathEmissionRateXTime;
         #endregion
 
         #region UNITY_EVENTS
@@ -48,6 +54,8 @@ namespace FastAndFractured
             base.Start();
             _countOverHeat = 0;
             DesactivateShootingVFX(shootingTurretVFX);
+            DesactivateShootingVFX(overHeatSmokeVFX);
+            _overHeathEmissionRateXTime = (_overHeathMaxEmissionRate - _overHeathMinEmissionRate)/characterStatsController.NormalOverHeat;
         }
 
         #endregion
@@ -122,12 +130,14 @@ namespace FastAndFractured
         {
             previousCountOverHeat = _countOverHeat;
             _countOverHeat = currentTimerValue;
+            ChangeCurrentOverHeathVFX();
             onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
         private void OnOverHeatUpdateDecrease(float currentTimerValue)
         {
             _countOverHeat = currentTimerValue;
+            ChangeCurrentOverHeathVFX(-1);
             onOverheatUpdate?.Invoke(currentTimerValue, characterStatsController.NormalOverHeat);
         }
 
@@ -207,16 +217,31 @@ namespace FastAndFractured
 
         private void ActiveShootingVFX(ParticleSystem particleSystem)
         {
-            if(particleSystem!=null){
+            if(particleSystem!=null&&particleSystem.isStopped){
             particleSystem.Play();
             }
         }
         private void DesactivateShootingVFX(ParticleSystem particleSystem)
         {
-            if (particleSystem != null)
+            if (particleSystem != null&&particleSystem.isPlaying)
             {
                 particleSystem.Stop();
             }
+        }
+
+        private void ChangeCurrentOverHeathVFX(float timeDirection = 1)
+        {
+            ActiveShootingVFX(overHeatSmokeVFX);
+            var overHeatEmission = overHeatSmokeVFX.emission;
+            var overHeatRateOverTime = overHeatEmission.rateOverTime;
+            overHeatRateOverTime.constant+= timeDirection*_overHeathEmissionRateXTime*Time.deltaTime;
+            overHeatRateOverTime.constant = Mathf.Clamp(overHeatRateOverTime.constant,_overHeathMinEmissionRate,_overHeathMaxEmissionRate);
+            overHeatEmission.rateOverTime = overHeatRateOverTime;
+            if (overHeatRateOverTime.constant == _overHeathMinEmissionRate)
+            {
+                DesactivateShootingVFX(overHeatSmokeVFX);
+            }
+            
         }
     }
 }
