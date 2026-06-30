@@ -65,7 +65,7 @@ namespace FastAndFractured
         private const int VSYNC_DEFAULT_STATE = 0;
         private const float SHARPENING_DEFAULT = 0.5f;
         private const float BRIGHTNESS_DEFAULT = 0.5f;
-        private const float MINIMAP_SCALE_DEFAULT = 0.5f;
+        private const float MINIMAP_SCALE_DEFAULT = 1f;
         private const int FPS_DEFAULT = 60;
         private const string RESOLUTION_DEFAULT = "1920x1080";
         #endregion
@@ -278,6 +278,11 @@ namespace FastAndFractured
         {
             PlayerPrefs.SetFloat(MINIMAP_SCALE_STRING, minimapSlider.value);
             PlayerPrefs.Save();
+            MinimapScaler scaler = FindFirstObjectByType<MinimapScaler>();
+            if (scaler != null)
+            {
+                scaler.setCurrentScale();
+            }
         }
 
         private void UpdateVSync(bool isActive)
