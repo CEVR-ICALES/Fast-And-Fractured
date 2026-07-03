@@ -47,7 +47,7 @@ namespace FastAndFractured
                 {
                     SetBulletStats(bulletBehaivour);
                     bulletBehaivour.InitBulletTrayectory();
-                    SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
+                    SoundManager.Instance?.PlayOneShot(bulletSound, shootPoint.position);
                 }
             }
         }
