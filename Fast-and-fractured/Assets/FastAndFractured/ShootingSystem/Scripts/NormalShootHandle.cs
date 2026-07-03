@@ -231,6 +231,8 @@ namespace FastAndFractured
 
         private void ChangeCurrentOverHeathVFX(float timeDirection = 1)
         {
+            if(overHeatSmokeVFX==null)
+                return;
             ActiveShootingVFX(overHeatSmokeVFX);
             var overHeatEmission = overHeatSmokeVFX.emission;
             var overHeatRateOverTime = overHeatEmission.rateOverTime;
