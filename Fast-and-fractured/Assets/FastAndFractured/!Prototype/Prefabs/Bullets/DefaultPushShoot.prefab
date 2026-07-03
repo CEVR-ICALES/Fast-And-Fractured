@@ -82,7 +82,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   averageCarWeight: 1150
   carWeightImportance: 0.2
-  applyForceYOffset: 0.2
+  forceToOtherObjects: 10
+  forceMode: 1
   isGrounded: 1
 --- !u!135 &5384367818190901466
 SphereCollider:
@@ -210,8 +211,10 @@ MonoBehaviour:
   initValues: 1
   visuals: {fileID: 0}
   particles: {fileID: 7271843766761087530}
-  delayProyectileEnd: 0.5
+  delayProyectileEnd: 1.5
   _explosionHitbox: {fileID: 7493075962908273155}
+  startHitBoxTime: 0.1
+  endHitBoxTime: 0.7
   characterLayers:
     serializedVersion: 2
     m_Bits: 64

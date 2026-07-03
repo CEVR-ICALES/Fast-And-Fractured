@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Enums;
+using Utilities;
 namespace FastAndFractured
 {
     public class ExplosionForce : MonoBehaviour
@@ -17,11 +18,12 @@ namespace FastAndFractured
         [SerializeField] private float carWeightImportance = 0.2f;
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
+        private ITimer _explosionTimer;
 
 
         //Provisinal value to select the type force aplication 
         [SerializeField] private bool isGrounded = true;
-        public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center)
+        public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center, float startHitTime,float endHitTime)
         {
             if (_explosionCollider != null)
             {
@@ -29,7 +31,20 @@ namespace FastAndFractured
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
                 _explosionCollider.radius = radius;
+                _explosionCollider.enabled = false;
                 _explosionVFX.localScale = Vector3.one * radius;
+                _explosionTimer = TimerSystem.Instance.CreateTimer(startHitTime, onTimerDecreaseComplete: () =>
+                {
+                  _explosionCollider.enabled = true; 
+                  float realExplosionTime = endHitTime - startHitTime; 
+                 _explosionTimer =  TimerSystem.Instance.CreateTimer(realExplosionTime,
+                  onTimerDecreaseComplete: () =>
+                  {
+                      _explosionTimer = null;
+                      _explosionCollider.enabled = false;
+                  });
+                 
+                });
             }
         }
         public void DeactivateExplosionHitbox()
