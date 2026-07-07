@@ -62,10 +62,17 @@ namespace FastAndFractured
 
         #region OVERRIDE_METHODS
 
-        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
+        // Merge adaptation (dev turrets + MP ShootingSystem rewrite): dev's original
+        // SetBulletStats override targeted the old bullet API which our rewrite removed. Our
+        // ShootingHandle injects IgnoredCollider through BulletSpawnParameters instead, so we
+        // override that hook to use dev's serialized turret collider when present (otherwise the
+        // base already falls back to GetComponentInParent<Collider>()).
+        protected override BulletSpawnParameters PopulateBaseSpawnParameters(Vector3 velocity, float range)
         {
-            base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaviour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+            var spawnParams = base.PopulateBaseSpawnParameters(velocity, range);
+            if (ignoredCollider != null)
+                spawnParams.IgnoredCollider = ignoredCollider;
+            return spawnParams;
         }
 
         #endregion

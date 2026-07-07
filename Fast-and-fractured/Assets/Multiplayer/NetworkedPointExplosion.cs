@@ -43,6 +43,12 @@ namespace FastAndFractured.Multiplayer
             typeof(PointExplosion).GetField("damagePercentage",     BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo _visualsField =
             typeof(PointExplosion).GetField("visuals",              BindingFlags.NonPublic | BindingFlags.Instance);
+        // Added by dev (turret/explosion timing): ExplosionForce.ActivateExplosionHitbox now
+        // takes startHitTime + endHitTime. Mirror those serialized PointExplosion fields.
+        private static readonly FieldInfo _startHitTimeField =
+            typeof(PointExplosion).GetField("startHitTime",        BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo _endHitTimeField =
+            typeof(PointExplosion).GetField("endHitTime",          BindingFlags.NonPublic | BindingFlags.Instance);
 
         private void Awake()
         {
@@ -73,7 +79,9 @@ namespace FastAndFractured.Multiplayer
                 float radius  = _explosionRadiusField  != null ? (float)_explosionRadiusField.GetValue(_wrapped)  : 10f;
                 float force   = _pushForceField        != null ? (float)_pushForceField.GetValue(_wrapped)        : 1_000_000f;
                 Vector3 center = _explosionCenterField != null ? (Vector3)_explosionCenterField.GetValue(_wrapped) : Vector3.zero;
-                hitbox.ActivateExplosionHitbox(radius, force, center);
+                float startHitTime = _startHitTimeField != null ? (float)_startHitTimeField.GetValue(_wrapped) : 0.2f;
+                float endHitTime   = _endHitTimeField   != null ? (float)_endHitTimeField.GetValue(_wrapped)   : 1f;
+                hitbox.ActivateExplosionHitbox(radius, force, center, startHitTime, endHitTime);
             }
 
             // Route damage through the networked pipeline (0.5 s delay matches original).
