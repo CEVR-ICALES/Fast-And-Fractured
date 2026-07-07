@@ -184,14 +184,14 @@ namespace FastAndFractured
 
         public void StartDashVfx()
         {
-            dashSpeedVfx.Play();
-            dashTurboVfx.Play();
+            dashSpeedVfx?.Play();
+            dashTurboVfx?.Play();
         }
 
         public void StopDashVfx()
         {
-            dashSpeedVfx.Stop();
-            dashTurboVfx.Stop();
+            dashSpeedVfx?.Stop();
+            dashTurboVfx?.Stop();
         }
 
         #endregion
@@ -205,7 +205,7 @@ namespace FastAndFractured
                 if(_carEnduracenParticlesActive)
                 {
                     StopParticles(smokeVfx, ref _carEnduracenParticlesActive);
-                    lowEnduranceExclusiveSmokeVfx.Stop();
+                    lowEnduranceExclusiveSmokeVfx?.Stop();
                 }
             } else 
             {
@@ -229,11 +229,11 @@ namespace FastAndFractured
                 if(_canPlayExlusiveSmokeVfx)
                 {
                     if (!lowEnduranceExclusiveSmokeVfx.isPlaying)
-                        lowEnduranceExclusiveSmokeVfx.Play();
+                        lowEnduranceExclusiveSmokeVfx?.Play();
                 }   else
                 {
                     if(lowEnduranceExclusiveSmokeVfx.isPlaying)
-                        lowEnduranceExclusiveSmokeVfx.Stop();
+                        lowEnduranceExclusiveSmokeVfx?.Stop();
                 }
             } 
         }
@@ -260,23 +260,23 @@ namespace FastAndFractured
             switch(boosterType)
             {
                 case Stats.MAX_SPEED:
-                    maxSpeedVfx.Play();
+                    maxSpeedVfx?.Play();
                     break;
 
                 case Stats.COOLDOWN_SPEED:                     
-                    cooldownsVfx.Play();
+                    cooldownsVfx?.Play();
                     break;
 
                 case Stats.NORMAL_DAMAGE: 
-                    moreDamageVfx.Play();
+                    moreDamageVfx?.Play();
                     break;
 
                 case Stats.PUSH_FORCE: 
-                    morePushVfx.Play();
+                    morePushVfx?.Play();
                     break;
 
                 case Stats.ENDURANCE:
-                    recoverHealthVfx.Play();    
+                    recoverHealthVfx?.Play();    
                     break;
             }
         }
@@ -300,7 +300,7 @@ namespace FastAndFractured
             if (!boolToChange) return;
             foreach (ParticleSystem particle in particleSystems)
             {
-                particle.Stop();
+                particle?.Stop();
             }
             boolToChange = false;
         }
@@ -310,7 +310,7 @@ namespace FastAndFractured
             if (boolToChange) return;
             foreach (ParticleSystem particle in particleSystems)
             {
-                particle.Play();
+                particle?.Play();
             }
 
             boolToChange = true;
