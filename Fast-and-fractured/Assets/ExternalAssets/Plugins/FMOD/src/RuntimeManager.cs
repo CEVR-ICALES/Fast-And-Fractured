@@ -107,7 +107,7 @@ namespace FMODUnity
             {
                 RuntimeUtils.DebugLogWarning(string.Format(("[FMOD] {0} : {1}"), (string)func, (string)message));
             }
-            else if (flags == FMOD.DEBUG_FLAGS.LOG)
+            else if (flags == FMOD.DEBUG_FLAGS.LOG || flags == FMOD.DEBUG_FLAGS.TYPE_VIRTUAL)
             {
                 RuntimeUtils.DebugLog(string.Format(("[FMOD] {0} : {1}"), (string)func, (string)message));
             }
@@ -121,7 +121,7 @@ namespace FMODUnity
 
             // Filter out benign expected errors.
             if ((callbackInfo.instancetype == FMOD.ERRORCALLBACK_INSTANCETYPE.CHANNEL || callbackInfo.instancetype == FMOD.ERRORCALLBACK_INSTANCETYPE.CHANNELCONTROL)
-                && callbackInfo.result == FMOD.RESULT.ERR_INVALID_HANDLE)
+                && (callbackInfo.result == FMOD.RESULT.ERR_INVALID_HANDLE || callbackInfo.result == FMOD.RESULT.ERR_CHANNEL_STOLEN))
             {
                 return FMOD.RESULT.OK;
             }
@@ -182,6 +182,11 @@ namespace FMODUnity
                     try
                     {
                         RuntimeUtils.EnforceLibraryOrder();
+
+                        #if UNITY_OPENHARMONY && !UNITY_EDITOR
+                        OpenHarmonyJSObject openHarmonyJSObject = new OpenHarmonyJSObject("ClassFMOD" + FMOD.VERSION.suffix);
+                        openHarmonyJSObject.Call("init");
+                        #endif
 
                         #if UNITY_ANDROID && !UNITY_EDITOR
                         // First, obtain the current activity context
@@ -590,6 +595,7 @@ retry:
             }
         }
 
+        [Obsolete("This overload has been deprecated in favor of passing a GameObject instead of a Transform.", false)]
         public static void AttachInstanceToGameObject(FMOD.Studio.EventInstance instance, Transform transform, bool nonRigidbodyVelocity = false)
         {
             AttachedInstance attachedInstance = FindOrAddAttachedInstance(instance, transform, RuntimeUtils.To3DAttributes(transform));
@@ -609,6 +615,7 @@ retry:
             attachedInstance.rigidBody = rigidBody;
         }
 
+        [Obsolete("This overload has been deprecated in favor of passing a GameObject instead of a Transform.", false)]
         public static void AttachInstanceToGameObject(FMOD.Studio.EventInstance instance, Transform transform, Rigidbody rigidBody)
         {
             AttachedInstance attachedInstance = FindOrAddAttachedInstance(instance, transform, RuntimeUtils.To3DAttributes(transform, rigidBody));
@@ -625,6 +632,7 @@ retry:
             attachedInstance.rigidBody2D = rigidBody2D;
         }
 
+        [Obsolete("This overload has been deprecated in favor of passing a GameObject instead of a Transform.", false)]
         public static void AttachInstanceToGameObject(FMOD.Studio.EventInstance instance, Transform transform, Rigidbody2D rigidBody2D)
         {
             AttachedInstance attachedInstance = FindOrAddAttachedInstance(instance, transform, RuntimeUtils.To3DAttributes(transform, rigidBody2D));
@@ -972,7 +980,7 @@ retry:
             LoadBank(asset, loadSamples, asset.name);
         }
 
-        private static void LoadBank(TextAsset asset, bool loadSamples, string bankId)
+        private static unsafe void LoadBank(TextAsset asset, bool loadSamples, string bankId)
         {
             if (Instance.loadedBanks.ContainsKey(bankId))
             {
@@ -990,7 +998,12 @@ retry:
 #endif
 
                 LoadedBank loadedBank = new LoadedBank();
-                FMOD.RESULT loadResult = Instance.studioSystem.loadBankMemory(asset.bytes, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out loadedBank.Bank);
+                FMOD.RESULT loadResult = FMOD.RESULT.ERR_BADCOMMAND;
+                using (var nativeArray = asset.GetData<byte>())
+                {
+                    IntPtr pointer = (IntPtr)Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(nativeArray);
+                    loadResult = Instance.studioSystem.loadBankMemory(pointer, nativeArray.Length, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out loadedBank.Bank);
+                }
                 Instance.RegisterLoadedBank(loadedBank, bankId, bankId, loadSamples, loadResult);
             }
         }
@@ -1005,7 +1018,7 @@ retry:
             else
             {
                 Instance.loadingBanksRef++;
-                assetReference.LoadAssetAsync<TextAsset>().Completed += (obj) =>
+                Addressables.LoadAssetAsync<TextAsset>(assetReference).Completed += (obj) =>
                 {
                     if (!obj.IsValid())
                     {
@@ -1023,7 +1036,7 @@ retry:
                         completionCallback();
                     }
 
-                    assetReference.ReleaseAsset();
+                    Addressables.Release(obj);
                 };
 
             }
@@ -1254,10 +1267,12 @@ retry:
 
         public static void PlayOneShot(FMOD.GUID guid, Vector3 position = new Vector3())
         {
-            var instance = CreateInstance(guid);
-            instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
-            instance.start();
-            instance.release();
+            if (CreateInstanceWithinMaxDistance(guid, position, out FMOD.Studio.EventInstance instance))
+            {
+                instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+                instance.start();
+                instance.release();
+            }
         }
 
         public static void PlayOneShotAttached(EventReference eventReference, GameObject gameObject)
@@ -1286,16 +1301,39 @@ retry:
 
         public static void PlayOneShotAttached(FMOD.GUID guid, GameObject gameObject)
         {
-            var instance = CreateInstance(guid);
-            #if UNITY_PHYSICS_EXIST
-            AttachInstanceToGameObject(instance, gameObject, gameObject.GetComponent<Rigidbody>());
-            #elif UNITY_PHYSICS2D_EXIST
-            AttachInstanceToGameObject(instance, gameObject, gameObject.GetComponent<Rigidbody2D>());
-            #else
-            AttachInstanceToGameObject(instance, gameObject);
-            #endif
-            instance.start();
-            instance.release();
+            if (CreateInstanceWithinMaxDistance(guid, gameObject.transform.position, out FMOD.Studio.EventInstance instance))
+            {
+                #if UNITY_PHYSICS_EXIST
+                AttachInstanceToGameObject(instance, gameObject, gameObject.GetComponent<Rigidbody>());
+                #elif UNITY_PHYSICS2D_EXIST
+                AttachInstanceToGameObject(instance, gameObject, gameObject.GetComponent<Rigidbody2D>());
+                #else
+                AttachInstanceToGameObject(instance, gameObject);
+                #endif
+                instance.start();
+                instance.release();
+            }
+        }
+
+        private static bool CreateInstanceWithinMaxDistance(FMOD.GUID guid, Vector3 position, out FMOD.Studio.EventInstance instance)
+        {
+            FMOD.Studio.EventDescription description = GetEventDescription(guid);
+            if (Settings.Instance.StopEventsOutsideMaxDistance)
+            {
+                description.is3D(out bool is3D);
+                if (is3D)
+                {
+                    description.getMinMaxDistance(out float min, out float max);
+                    if (StudioListener.DistanceSquaredToNearestListener(position) > (max * max))
+                    {
+                        instance = new FMOD.Studio.EventInstance();
+                        return false;
+                    }
+                }
+            }
+
+            description.createInstance(out instance);
+            return true;
         }
 
         public static FMOD.Studio.EventDescription GetEventDescription(EventReference eventReference)

@@ -249,6 +249,11 @@ namespace FastAndFractured
                 applyForceByState = GetComponentInChildren<ApplyForceByState>();
             }
 
+            if (!turretRotationMovement)
+            {
+                turretRotationMovement = GetComponentInChildren<TurretRotationMovement>();
+            }
+
             _currentPath = new NavMeshPath();
             _previousPath = new Vector3[0];
             startPosition = carMovementController.transform.position;

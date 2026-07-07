@@ -14,6 +14,9 @@ namespace FastAndFractured
         [SerializeField] private ExplosionForce explosionHitbox;
         [SerializeField] private float damagePercentage = 0.5f;
         [SerializeField] private GameObject visuals;
+        [SerializeField] private float endingTime = 1.5f;
+        [SerializeField] private float startHitTime = 0.2f;
+        [SerializeField] private float endHitTime = 1f;
 
         private void Start()
         {
@@ -26,9 +29,9 @@ namespace FastAndFractured
             {
                 if (explosionHitbox != null)
                 {
-                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, explosionCenterOffset);
+                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, explosionCenterOffset,startHitTime,endHitTime);
                     visuals.SetActive(false);
-                    TimerSystem.Instance.CreateTimer(0.5f, onTimerDecreaseComplete: () =>
+                    TimerSystem.Instance.CreateTimer(endingTime, onTimerDecreaseComplete: () =>
                     {
                         physicsBehaviour.StatsController.TakeEndurance(physicsBehaviour.StatsController.MaxEndurance * damagePercentage, false, gameObject);
                         gameObject.SetActive(false);
