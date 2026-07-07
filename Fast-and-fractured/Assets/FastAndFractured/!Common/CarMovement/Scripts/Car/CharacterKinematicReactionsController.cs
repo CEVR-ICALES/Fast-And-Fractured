@@ -12,8 +12,8 @@ namespace FastAndFractured
         //public Transform HeadTarget;
 
         [Header("Continuous Lean Settings")]
-        [SerializeField] private float maxLateralLean = 20f;
-        [SerializeField] private float maxForwardLean = 8f;
+        [SerializeField] private float maxLateralLean = 35f;
+        [SerializeField] private float maxForwardLean = 40f;
         [SerializeField] private float leanSmoothing = 8f; // bigger value snappier reactions
         [SerializeField] private float maxExpectedLateralAcceleration = 25f; //we normalize the accel considering this value the maxPossibble accel
 

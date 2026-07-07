@@ -44,6 +44,9 @@ namespace FMODUnity
         internal override IEnumerable<BuildTarget> GetBuildTargets()
         {
             yield return BuildTarget.WebGL;
+#if UNITY_WEIXINMINIGAME
+            yield return BuildTarget.WeixinMiniGame;
+#endif
         }
 
         internal override Legacy.Platform LegacyIdentifier { get { return Legacy.Platform.WebGL; } }
@@ -55,7 +58,6 @@ namespace FMODUnity
 
         protected override IEnumerable<FileRecord> GetBinaryFiles(BuildTarget buildTarget, bool allVariants, string suffix)
         {
-            bool emVer_1_38_11 = false;
             bool emVer_2_0_19 = false;
             bool emVer_3_1_8 = false;
             bool emVer_3_1_39 = false;
@@ -64,10 +66,8 @@ namespace FMODUnity
             emVer_3_1_39 = true;
 #elif UNITY_2022_3_OR_NEWER
             emVer_3_1_8 = true;
-#elif UNITY_2021_2_OR_NEWER
-            emVer_2_0_19 = true;
 #else
-            emVer_1_38_11 = true;
+            emVer_2_0_19 = true;
 #endif
 
             if (allVariants || emVer_3_1_39)
@@ -84,11 +84,6 @@ namespace FMODUnity
             {
                 yield return new FileRecord(string.Format("2.0.19/libfmodstudio{0}.a", suffix));
             }
-
-            if (allVariants || emVer_1_38_11)
-            {
-                yield return new FileRecord(string.Format("libfmodstudiounityplugin{0}.bc", suffix));
-            }
         }
 
         internal override bool IsFMODStaticallyLinked { get { return true; } }
@@ -96,11 +91,7 @@ namespace FMODUnity
 
         internal override string GetPluginPath(string pluginName)
         {
-            #if UNITY_2021_2_OR_NEWER
             return string.Format("{0}/{1}.a", GetPluginBasePath(), pluginName);
-            #else
-            return string.Format("{0}/{1}.bc", GetPluginBasePath(), pluginName);
-            #endif
         }
 #if UNITY_EDITOR
         internal override OutputType[] ValidOutputTypes
