@@ -30,6 +30,16 @@ public class MenuInputsController : MonoBehaviour
             _inputActions?.Disable();
         }
 
+        private void OnDestroy()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
+        }
+
         private bool CompareCurrentScreenType(ScreensType screenType)
         {
             return MainMenuManager.Instance.CurrentScreen.screenType == screenType;

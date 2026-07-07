@@ -35,7 +35,10 @@ namespace FastAndFractured {
         public Vector3 CustomGravity { set => _customGravity = value; }
         private Vector3 _customGravity;
         private bool _useCustomGravity;
-
+        [SerializeField]
+        private float startHitBoxTime = 0f;
+        [SerializeField]
+        private float endHitBoxTime = 1f;
         [SerializeField] private LayerMask characterLayers;
 
         public override void OnSimulateTick(float deltaTime)
@@ -78,7 +81,7 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
-            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset);
+            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset,startHitBoxTime,endHitBoxTime);
             OnBulletEndTrayectory();
         }
 
