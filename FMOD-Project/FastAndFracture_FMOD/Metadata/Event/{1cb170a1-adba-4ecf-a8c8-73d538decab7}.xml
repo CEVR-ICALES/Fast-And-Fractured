@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{1cb170a1-adba-4ecf-a8c8-73d538decab7}">
 		<property name="name">
 			<value>GiantChickenSoundSFX</value>
@@ -65,8 +65,8 @@
 	<object class="GroupTrack" id="{9a3fa76a-909f-47fe-9492-ff210b8cd466}">
 		<relationship name="modules">
 			<destination>{a9507401-52cf-4e9e-be58-e18742c00b01}</destination>
-			<destination>{28a823d5-4a01-4a96-948c-418dd53c527e}</destination>
 			<destination>{f1b0c908-a51a-47c1-8580-03d595ff0ab6}</destination>
+			<destination>{28a823d5-4a01-4a96-948c-418dd53c527e}</destination>
 		</relationship>
 		<relationship name="mixerGroup">
 			<destination>{ab826129-1c58-41bb-a3ab-0f7155698493}</destination>
@@ -107,23 +107,6 @@
 			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
 		</relationship>
 	</object>
-	<object class="SingleSound" id="{28a823d5-4a01-4a96-948c-418dd53c527e}">
-		<property name="start">
-			<value>1.25</value>
-		</property>
-		<property name="length">
-			<value>1.3000000000000003</value>
-		</property>
-		<property name="timelockedOffset">
-			<value>1.9445449359070168</value>
-		</property>
-		<property name="pitch">
-			<value>-2</value>
-		</property>
-		<relationship name="audioFile">
-			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
-		</relationship>
-	</object>
 	<object class="SingleSound" id="{f1b0c908-a51a-47c1-8580-03d595ff0ab6}">
 		<property name="start">
 			<value>2.5500000000000003</value>
@@ -133,6 +116,23 @@
 		</property>
 		<property name="timelockedOffset">
 			<value>3.6999999999999997</value>
+		</property>
+		<property name="pitch">
+			<value>-2</value>
+		</property>
+		<relationship name="audioFile">
+			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
+		</relationship>
+	</object>
+	<object class="SingleSound" id="{28a823d5-4a01-4a96-948c-418dd53c527e}">
+		<property name="start">
+			<value>1.25</value>
+		</property>
+		<property name="length">
+			<value>1.3000000000000003</value>
+		</property>
+		<property name="timelockedOffset">
+			<value>1.9445449359070168</value>
 		</property>
 		<property name="pitch">
 			<value>-2</value>
