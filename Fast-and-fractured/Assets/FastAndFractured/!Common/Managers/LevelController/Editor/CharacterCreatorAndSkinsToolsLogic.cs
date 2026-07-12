@@ -24,8 +24,9 @@ namespace FastAndFractured
         private static string characterFolderPath = RESOURCES_FOLDER_PATH + "/" + LevelConstants.SKINS_LOADER_PATH;
         private const string GAMEPLAY_CAR_NAME = "GameplayCar";
         private const string PATH_TO_CHARACTERS = "Assets/FastAndFractured/Characters";
-        private const string PATH_TO_MENU_CHARACTERS = "Assets/FastAndFractured/MainMenu/Prefabs/MenuCarsPrefabs";
-        private const string PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS = "Assets/FastAndFractured/MainMenu/ScriptableObjects";
+        private const string PATH_TO_MENU = "Assets/FastAndFractured/!Environment/Scenes/!MainMenuPostRelease/MainMenuAssets";
+        private const string PATH_TO_MENU_CHARACTERS = PATH_TO_MENU + "/Prefabs/MenuCarsPrefabs";
+        private const string PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS = PATH_TO_MENU + "/ScriptableObjects";
         private const string PATH_TO_BASE_CAR_FROM_CHARACTERS = "!Common/BaseCar.prefab";
         private const string SCRIPTABLE_OBJECT_FOlDER = "ScriptableObjects";
         private const string PREFABS_FOLDER = "Prefabs";
@@ -34,6 +35,7 @@ namespace FastAndFractured
         private const string UNIQUE_ABILITY_SO_NAME = "UniqueAbilityData.asset";
 
         //Prefab Hierarchy
+        private const string VISUAL_PATH = "Visuals";
         private const string CHARACTER_PATH = "Visuals/Character";
         private const string CHASSIS_PATH = "Visuals/Chassis";
         private const string FRONT_LEFT_WHEEL_PATH = "Visuals/WheelsVisuals/FrontLeftWheel";
@@ -55,6 +57,14 @@ namespace FastAndFractured
         {
             if (characterModel != null && chasisModel != null && wheelModel != null && characterName != string.Empty && characterName != null)
             {
+                foreach (GameObject model in new GameObject[] { characterModel, chasisModel, wheelModel })
+                {
+                    if (!CheckIfModelHaveVisuals(model))
+                    {
+                        Debug.LogError("The model " + model.name + " doesn't have a child called 'Visuals'. Use the FBX To Prefab tool to create the character prefab part.");
+                        return false;
+                    }
+                }
                 try
                 {
                     AssetDatabase.StartAssetEditing();
@@ -88,8 +98,8 @@ namespace FastAndFractured
                     try
                     {
                         characterModel = PrefabUtility.InstantiatePrefab(characterModel, characterHolder) as GameObject;
+                        characterModel.name = characterName + CHARACTER_MODEL_NAME;
                         chasisModel = PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder) as GameObject;
-                        chasisModel.name = characterName + CHARACTER_MODEL_NAME;
                         chasisModel.name = characterName + CHASIS_MODEL_NAME;
                         wheelsMesh[0] = PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder) as GameObject;
                         wheelsMesh[1] = PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder) as GameObject;
@@ -116,7 +126,7 @@ namespace FastAndFractured
                     string scriptableObjectDirectory = Path.Combine(pathToNewCharacterParentFolder, SCRIPTABLE_OBJECT_FOlDER);
 
                     FileUtils.CheckAndCreateDirectory(scriptableObjectDirectory);
-                    CharacterData characterData = new CharacterData();
+                    CharacterData characterData = ScriptableObject.CreateInstance<CharacterData>();
                     if (!File.Exists(scriptableObjectDirectory))
                     {
                         characterData.name = characterName + CAR_DATA_SO_NAME;
@@ -130,7 +140,7 @@ namespace FastAndFractured
 
                     if (!File.Exists(scriptableObjectDirectory))
                     {
-                        AbilityData abilityData = new AbilityData();
+                        AbilityData abilityData = ScriptableObject.CreateInstance<AbilityData>();
                         abilityData.name = characterName + UNIQUE_ABILITY_SO_NAME;
                         string uniqueAbilitySOPath = Path.Combine(scriptableObjectDirectory, abilityData.name);
                         AssetDatabase.CreateAsset(abilityData, uniqueAbilitySOPath);
@@ -153,6 +163,12 @@ namespace FastAndFractured
             }
             Debug.LogError("No empty labelfields");
             return false;
+        }
+
+        private static bool CheckIfModelHaveVisuals(GameObject model)
+        {
+            Transform modelVisual = model.transform.Find(VISUAL_PATH);
+            return modelVisual != null;
         }
 
         private static bool CreateMenuVariant(GameObject gameplayCarParent, string characterName, GameObject[] wheelsMesh, CharacterData characterData)
@@ -199,7 +215,7 @@ namespace FastAndFractured
 
                 if (!File.Exists(carDataSOPath))
                 {
-                    CharacterMenuData characterMenuData = new CharacterMenuData();
+                    CharacterMenuData characterMenuData = ScriptableObject.CreateInstance<CharacterMenuData>();
                     characterMenuData.name = characterName + CAR_DATA_SO_NAME;
                     characterMenuData.CharacterDescription = "Menu." + characterName;
                     characterMenuData.Models = new GameObject[] { assetMenuVariant };
@@ -589,10 +605,6 @@ namespace FastAndFractured
             return true;
         }
 
-
-        #endregion
-
-        #region directory_related
 
         #endregion
     }
