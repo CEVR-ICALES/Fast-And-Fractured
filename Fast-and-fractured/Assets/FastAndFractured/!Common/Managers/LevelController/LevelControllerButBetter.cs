@@ -70,9 +70,8 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
-            InitializeHandlers();
             _charactersData = charactersDataScriptableObject.listOfCharactersData;
-            
+            InitializeHandlers();
             //Provisional For Debug 
             if (debugMode)
             {
