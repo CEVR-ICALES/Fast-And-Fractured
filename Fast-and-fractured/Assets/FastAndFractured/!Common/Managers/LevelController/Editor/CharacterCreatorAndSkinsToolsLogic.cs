@@ -35,7 +35,7 @@ namespace FastAndFractured
         private const string UNIQUE_ABILITY_SO_NAME = "UniqueAbilityData.asset";
 
         private const string LIST_OF_CHARACTERS_DATA_SO_PATH = "CharactersSkins/ListOfCharactersData";
-        private const string LIST_OF_MENU_CHARACTERS_DATA_SO_PATH = "CharactersSkins/ListOfMenuCharactersData";
+        private const string LIST_OF_MENU_CHARACTERS_DATA_SO_PATH = "CharactersSkins/MainMenuSelectionScreenCharacters";
 
         //Prefab Hierarchy
         private const string VISUAL_PATH = "Visuals";
@@ -286,7 +286,7 @@ namespace FastAndFractured
                 return;
             }
             listOfCharactersData.listOfCharactersData.Add(characterData);
-            AssetDatabase.CreateAsset(listOfCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_CHARACTERS_DATA_SO_PATH + ".asset"));
+            EditorUtility.SetDirty(listOfCharactersData);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
@@ -303,7 +303,7 @@ namespace FastAndFractured
             if(characterDataToRemove != null)
             {
                 listOfCharactersData.listOfCharactersData.Remove(characterDataToRemove);
-                AssetDatabase.CreateAsset(listOfCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_CHARACTERS_DATA_SO_PATH + ".asset"));
+                EditorUtility.SetDirty(listOfCharactersData);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
@@ -318,7 +318,7 @@ namespace FastAndFractured
                 return;
             }
             listOfMenuCharactersData.allMainMenuCharactersData.Add(characterMenuData);
-            AssetDatabase.CreateAsset(listOfMenuCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_MENU_CHARACTERS_DATA_SO_PATH + ".asset"));
+            EditorUtility.SetDirty(listOfMenuCharactersData);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
@@ -335,7 +335,7 @@ namespace FastAndFractured
             if (characterMenuDataToRemove != null)
             {
                 listOfMenuCharactersData.allMainMenuCharactersData.Remove(characterMenuDataToRemove);
-                AssetDatabase.CreateAsset(listOfMenuCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_MENU_CHARACTERS_DATA_SO_PATH + ".asset"));
+                EditorUtility.SetDirty(listOfMenuCharactersData);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
