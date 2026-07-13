@@ -240,11 +240,6 @@ namespace FastAndFractured
                 Debug.LogError("List of protected characters doesn't exist. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
                 return;
             }
-            //if(listOfProtectedCharacters.ProtectedCharacters == Array.Empty<string>())
-            //{
-            //    Debug.LogError("List of protected characters is empty. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
-            //    return;
-            //}
             if (listOfProtectedCharacters.ProtectedCharacters.Contains(characterName))
             {
                 Debug.LogError("The character " + characterName + " is protected on the " + LIST_OF_PROTECTED_CHARACTERS + " from the Resources Folder. The function will not procced.");
@@ -257,7 +252,7 @@ namespace FastAndFractured
             int skinNum = ReturnSkinCountOfACharacter(characterName);
             for (int i = skinNum; i >= 0; i--)
             {
-                string characterMenuVariantSkinPath = characterMenuVariantPath + i;
+                string characterMenuVariantSkinPath = characterMenuVariantPath + i + ".prefab";
                 FileUtils.DeleteAsset(characterMenuVariantSkinPath);
             }
             string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
