@@ -25,6 +25,7 @@ namespace FastAndFractured
         public float ascendingTime = 3f;
 
         public float effectTime = 5f;
+        public const float TIME_BEFORE_START_FADE = 0.5f;
         private List<GameObject> charactersList;
 
         private Vector3 _randomRotation;
@@ -75,6 +76,10 @@ namespace FastAndFractured
                     }
                 }
                 ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+            });
+            TimerSystem.Instance.CreateTimer(ascendingTime - TIME_BEFORE_START_FADE, onTimerDecreaseComplete: () =>
+            {
+                decal.GetComponent<TomatoDecal>().DecalFadeOut(TIME_BEFORE_START_FADE);
             });
         }
 
