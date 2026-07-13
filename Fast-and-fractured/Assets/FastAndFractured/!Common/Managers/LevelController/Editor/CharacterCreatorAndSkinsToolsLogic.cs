@@ -34,6 +34,9 @@ namespace FastAndFractured
         private const string MENU_DATA_SO_Name = "MenuData.asset";
         private const string UNIQUE_ABILITY_SO_NAME = "UniqueAbilityData.asset";
 
+        private const string LIST_OF_CHARACTERS_DATA_SO_PATH = "CharactersSkins/ListOfCharactersData";
+        private const string LIST_OF_MENU_CHARACTERS_DATA_SO_PATH = "CharactersSkins/ListOfMenuCharactersData";
+
         //Prefab Hierarchy
         private const string VISUAL_PATH = "Visuals";
         private const string CHARACTER_PATH = "Visuals/Character";
@@ -134,6 +137,7 @@ namespace FastAndFractured
                         characterData.CarDefaultPrefab = newBaseCarFromSource;
                         string carDataSOPath = Path.Combine(scriptableObjectDirectory, characterData.name);
                         AssetDatabase.CreateAsset(characterData, carDataSOPath);
+                        AddCharacterToListOfCharactersData(characterData);
                         Debug.Log("File " + carDataSOPath + " created");
                     }
 
@@ -221,6 +225,7 @@ namespace FastAndFractured
                     characterMenuData.Models = new GameObject[] { assetMenuVariant };
                     characterMenuData.CharacterStats = characterData;
                     AssetDatabase.CreateAsset(characterMenuData, carDataSOPath);
+                    AddCharacterToListOfMenuCharactersData(characterMenuData);
                     Debug.Log("File " + carDataSOPath + " created");
                 }
             }
@@ -245,6 +250,8 @@ namespace FastAndFractured
                 Debug.LogError("The character " + characterName + " is protected on the " + LIST_OF_PROTECTED_CHARACTERS + " from the Resources Folder. The function will not procced.");
                 return;
             }
+            RemoveCharacterFromListOfCharactersData(characterName);
+            RemoveCharacterFromListOfMenuCharactersData(characterName);
             string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
 
@@ -268,6 +275,70 @@ namespace FastAndFractured
           }
             Debug.Log("Character " + characterName + " deleted Succesfully");
             GenerateCharacterSkinCountFile();
+        }
+
+        private static void AddCharacterToListOfCharactersData(CharacterData characterData)
+        {
+            ListOfCharactersData listOfCharactersData = Resources.Load<ListOfCharactersData>(LIST_OF_CHARACTERS_DATA_SO_PATH);
+            if(listOfCharactersData == null)
+            {
+                Debug.LogWarning("List of characters data doesn't exist. If this file doesn't exist, there will be no data available for the characters. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            listOfCharactersData.listOfCharactersData.Add(characterData);
+            AssetDatabase.CreateAsset(listOfCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_CHARACTERS_DATA_SO_PATH + ".asset"));
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void RemoveCharacterFromListOfCharactersData(string characterName)
+        {
+            ListOfCharactersData listOfCharactersData = Resources.Load<ListOfCharactersData>(LIST_OF_CHARACTERS_DATA_SO_PATH);
+            if (listOfCharactersData == null)
+            {
+                Debug.LogWarning("List of characters data doesn't exist. If this file doesn't exist, there will be no data available for the characters. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            CharacterData characterDataToRemove = listOfCharactersData.listOfCharactersData.Find(characterData => characterData.CharacterName == characterName);
+            if(characterDataToRemove != null)
+            {
+                listOfCharactersData.listOfCharactersData.Remove(characterDataToRemove);
+                AssetDatabase.CreateAsset(listOfCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_CHARACTERS_DATA_SO_PATH + ".asset"));
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+        }
+
+        private static void AddCharacterToListOfMenuCharactersData(CharacterMenuData characterMenuData)
+        {
+            MainMenuSelectionScreenCharacters listOfMenuCharactersData = Resources.Load<MainMenuSelectionScreenCharacters>(LIST_OF_MENU_CHARACTERS_DATA_SO_PATH);
+            if (listOfMenuCharactersData == null)
+            {
+                Debug.LogWarning("List of menu characters data doesn't exist. If this file doesn't exist, there will be no data available for the character selection screen. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            listOfMenuCharactersData.allMainMenuCharactersData.Add(characterMenuData);
+            AssetDatabase.CreateAsset(listOfMenuCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_MENU_CHARACTERS_DATA_SO_PATH + ".asset"));
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void RemoveCharacterFromListOfMenuCharactersData(string characterName)
+        {
+            MainMenuSelectionScreenCharacters listOfMenuCharactersData = Resources.Load<MainMenuSelectionScreenCharacters>(LIST_OF_MENU_CHARACTERS_DATA_SO_PATH);
+            if (listOfMenuCharactersData == null)
+            {
+                Debug.LogWarning("List of menu characters data doesn't exist. If this file doesn't exist, there will be no data available for the character selection screen. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            CharacterMenuData characterMenuDataToRemove = listOfMenuCharactersData.allMainMenuCharactersData.Find(characterMenuData => characterMenuData.CharacterDescription == "Menu." + characterName);
+            if (characterMenuDataToRemove != null)
+            {
+                listOfMenuCharactersData.allMainMenuCharactersData.Remove(characterMenuDataToRemove);
+                AssetDatabase.CreateAsset(listOfMenuCharactersData, Path.Combine(RESOURCES_FOLDER_PATH, LIST_OF_MENU_CHARACTERS_DATA_SO_PATH + ".asset"));
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
         }
         #endregion
 
