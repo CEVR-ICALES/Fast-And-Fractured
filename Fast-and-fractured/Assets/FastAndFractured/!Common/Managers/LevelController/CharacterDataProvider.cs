@@ -36,7 +36,7 @@ namespace FastAndFractured
             //Character Skin
             //Hierarchy for the character model '/Visuals/Character/{name}Character/Visuals/CharacterModel/{name}' 
 
-            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH + "/" + name;
+            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH;
             Transform character = visuals.Find(characterPath);
             
             if(!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS_FOLDER))
