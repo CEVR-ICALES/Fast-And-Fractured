@@ -492,26 +492,38 @@ namespace FastAndFractured
 
                 return;
             }
+            AssetDatabase.StartAssetEditing();
             GameObject menuCharacterVariant = AssetDatabase.LoadAssetAtPath(characterMenuVariantBaseSkinPath, typeof(GameObject)) as GameObject;
             newMenuList[0] = menuCharacterVariant;
+
             for (int i = SKIN_STARTING_INT; i <= skinCount; i++)
             {
                 string characterSkinVariantPath = FileUtils.NormalizePath(characterMenuVariantPath + i + ".prefab");
-                GameObject menuCharacterSkinVariant = new GameObject();
+                GameObject menuCharacterSkinVariant;
                 if (!File.Exists(characterSkinVariantPath))
                 {
                     menuCharacterSkinVariant = PrefabUtility.InstantiatePrefab(menuCharacterVariant) as GameObject;
                     menuCharacterSkinVariant.name = characterName + SKIN_PREFIX + i;
                     SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
                     PrefabUtility.SaveAsPrefabAsset(menuCharacterSkinVariant, characterSkinVariantPath);
+                    UnityEngine.Object.DestroyImmediate(menuCharacterSkinVariant);
                 }
-                else
-                {
-                    menuCharacterSkinVariant = AssetDatabase.LoadAssetAtPath(characterSkinVariantPath, typeof(GameObject)) as GameObject;
-                    SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
-                }
-                newMenuList[i] = menuCharacterSkinVariant;
             }
+              AssetDatabase.StopAssetEditing();
+              AssetDatabase.SaveAssets();
+              AssetDatabase.Refresh();
+              AssetDatabase.StartAssetEditing();
+
+            for (int i = SKIN_STARTING_INT; i <= skinCount; i++)
+            {
+                string characterSkinVariantPath = FileUtils.NormalizePath(characterMenuVariantPath + i + ".prefab");
+                GameObject menuCharacterSkinVariantSource;
+                menuCharacterSkinVariantSource = AssetDatabase.LoadAssetAtPath(characterSkinVariantPath, typeof(GameObject)) as GameObject;
+                SetCharacterSkin(menuCharacterSkinVariantSource.name, menuCharacterSkinVariantSource);
+                
+                newMenuList[i] = menuCharacterSkinVariantSource;
+            }
+
             string characterMenuDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
             if (!File.Exists(characterMenuDataSOPath))
             {
@@ -520,6 +532,10 @@ namespace FastAndFractured
             }
             CharacterMenuData characterMenuData = AssetDatabase.LoadAssetAtPath(characterMenuDataSOPath, typeof(CharacterMenuData)) as CharacterMenuData;
             characterMenuData.Models = newMenuList;
+            EditorUtility.SetDirty(characterMenuData);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.StopAssetEditing();
+            AssetDatabase.Refresh();
             Debug.Log("Characters Skins in menu updated");
         }
 
