@@ -38,7 +38,7 @@ class DSPCaptureAndWrite : MonoBehaviour
         Marshal.Copy(inbuffer, data, 0, lengthElements);
 
         // Get instance of DSPCaptureAndWrite from user data assigned to DSP
-        FMOD.DSP_STATE_FUNCTIONS functions = (FMOD.DSP_STATE_FUNCTIONS)Marshal.PtrToStructure(dsp_state.functions, typeof(FMOD.DSP_STATE_FUNCTIONS));
+        FMOD.DSP_STATE_FUNCTIONS functions = dsp_state.functions;
         IntPtr userData;
         functions.getuserdata(ref dsp_state, out userData);
         if (userData != IntPtr.Zero)
