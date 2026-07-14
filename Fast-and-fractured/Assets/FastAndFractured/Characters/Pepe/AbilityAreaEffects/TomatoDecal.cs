@@ -18,28 +18,34 @@ namespace FastAndFractured
         private float _growDuration = 1f;
         private float _startSize = 0f;
         private float _targetSize = 0f;
-        private Color _originalColor;
+        private Material _originalMaterial;
+        private float _waveTime = 0f;
+        private float _originalAlpha;
+        
 
         void OnEnable()
         {
             PauseManager.Instance?.RegisterPausable(this);
             if (_firstTime)
             {
-                _originalColor = decalProyector.material.GetColor("_BaseColor");
-                decalProyector.material = new Material(decalProyector.material);
+                _originalMaterial = new Material(decalProyector.material);
+                _originalAlpha = _originalMaterial.GetFloat("_Alpha");
+                decalProyector.material = _originalMaterial;
                 _firstTime = false;
             }
+            
             decalProyector.size = new Vector3(0f, 0f, 800f);
             _isFading = false;
             _fadeElapsed = 0f;
-            decalProyector.material.SetColor("_BaseColor", _originalColor);
+            decalProyector.material = _originalMaterial;
+            decalProyector.material.SetFloat("_Alpha", _originalAlpha);
         }
 
         void OnDisable()
         {
             PauseManager.Instance?.UnregisterPausable(this);
             decalProyector.size = new Vector3(0f, 0f, 800f);
-            decalProyector.material.SetColor("_BaseColor", _originalColor);
+            decalProyector.material = _originalMaterial;
         }
 
         void Update()
@@ -60,14 +66,16 @@ namespace FastAndFractured
             {
                 _fadeElapsed += Time.deltaTime;
                 float tFade = Mathf.Clamp01(_fadeElapsed / _fadeDuration);
-                float alpha = Mathf.Lerp(_originalColor.a, 0f, tFade);
-                Color newColor = new Color(_originalColor.r, _originalColor.g, _originalColor.b, alpha);
-                decalProyector.material.SetColor("_BaseColor", newColor);
+                float alpha = Mathf.Lerp(_originalMaterial.GetFloat("_Alpha"), 0f, tFade);
+                decalProyector.material.SetFloat("_Alpha", alpha);
                 if (tFade >= 1f)
                 {
                     _isFading = false;
                 }
             }
+            _waveTime += Time.deltaTime;
+
+            decalProyector.material.SetFloat("_WaveTime", _waveTime);
         }
         public void SetRadius(float newRadius)
         {
