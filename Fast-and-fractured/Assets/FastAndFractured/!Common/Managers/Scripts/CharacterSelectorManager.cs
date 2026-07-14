@@ -52,10 +52,17 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     protected override void Initialize()
     {
-        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+        foreach (CharacterMenuData character in AllCharacters)
+        {
+            if (!PlayerPrefs.HasKey(character.CharacterName + "_0"))
+            {
+                PlayerPrefs.SetInt(character.CharacterName + "_0", FULLY_UNLOCKED_VALUE);
+            }
+        }
+        // PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
 
         if (PlayerPrefs.HasKey(SELECTED_PLAYER_KEY))
         {

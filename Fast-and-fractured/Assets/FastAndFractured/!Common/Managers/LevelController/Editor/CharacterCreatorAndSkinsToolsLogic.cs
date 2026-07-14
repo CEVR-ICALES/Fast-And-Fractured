@@ -221,6 +221,7 @@ namespace FastAndFractured
                 {
                     CharacterMenuData characterMenuData = ScriptableObject.CreateInstance<CharacterMenuData>();
                     characterMenuData.name = characterName + CAR_DATA_SO_NAME;
+                    characterMenuData.CharacterName = characterName;
                     characterMenuData.CharacterDescription = "Menu." + characterName;
                     characterMenuData.Models = new GameObject[] { assetMenuVariant };
                     characterMenuData.CharacterStats = characterData;

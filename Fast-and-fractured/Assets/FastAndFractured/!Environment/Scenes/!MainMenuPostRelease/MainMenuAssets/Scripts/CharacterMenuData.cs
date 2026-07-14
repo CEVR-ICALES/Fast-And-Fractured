@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterMenuData : ScriptableObject
 {
     public CharacterData CharacterStats { get => characterStats; set => characterStats = value; }
-    public string CharacterName => characterName;
+    public string CharacterName { get => characterName; set => characterName = value; }
     public string CharacterDescription { get => characterDescription; set => characterDescription = value; }
     public GameObject[] Models { get => models; set => models = value; }
 
