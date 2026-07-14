@@ -45,6 +45,7 @@ namespace FastAndFractured
         private const string FRONT_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/FrontRightWheel";
         private const string BACK_LEFT_WHEEL_PATH = "Visuals/WheelsVisuals/BackLeftWheel";
         private const string BACK_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/BackRightWheel";
+        private const string TURRET_PATH = "Turret/Visuals/CanonVisuals";
         private const string WHEELS_COLLIDER_PATH = "WheelColliders";
         private const string CHARACTER_MODEL_NAME = "Character";
         private const string CHASIS_MODEL_NAME = "Chassis";
@@ -56,11 +57,11 @@ namespace FastAndFractured
 
 
         #region character_creator_related
-        public static bool CreateNewCharacter(GameObject characterModel, GameObject chasisModel, GameObject wheelModel, string characterName)
+        public static bool CreateNewCharacter(GameObject characterModel, GameObject chasisModel, GameObject wheelModel, GameObject turretModel, string characterName)
         {
-            if (characterModel != null && chasisModel != null && wheelModel != null && characterName != string.Empty && characterName != null)
+            if (characterModel != null && chasisModel != null && wheelModel != null && turretModel != null && characterName != string.Empty && characterName != null)
             {
-                foreach (GameObject model in new GameObject[] { characterModel, chasisModel, wheelModel })
+                foreach (GameObject model in new GameObject[] { characterModel, chasisModel, wheelModel, turretModel })
                 {
                     if (!CheckIfModelHaveVisuals(model))
                     {
@@ -96,6 +97,7 @@ namespace FastAndFractured
                     Transform frontRightWheelHolder = newBaseCar.transform.Find(FRONT_RIGHT_WHEEL_PATH);
                     Transform backLeftWheelHolder = newBaseCar.transform.Find(BACK_LEFT_WHEEL_PATH);
                     Transform backRightWheelHolder = newBaseCar.transform.Find(BACK_RIGHT_WHEEL_PATH);
+                    Transform turretHolder = newBaseCar.transform.Find(TURRET_PATH);
                     GameObject[] wheelsMesh = new GameObject[4];
                     string pathToCreateNewCharacter = Path.Combine(prefabsDirectory, newBaseCar.name + ".prefab");
                     try
@@ -108,6 +110,7 @@ namespace FastAndFractured
                         wheelsMesh[1] = PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder) as GameObject;
                         wheelsMesh[2] = PrefabUtility.InstantiatePrefab(wheelModel, backRightWheelHolder) as GameObject;
                         wheelsMesh[3] = PrefabUtility.InstantiatePrefab(wheelModel, frontLeftWheelHolder) as GameObject;
+                        turretModel = PrefabUtility.InstantiatePrefab(turretModel, turretHolder) as GameObject;
                         foreach (var wheelMesh in wheelsMesh)
                         {
                             wheelMesh.name = WHEEL_MODEL_NAME;
