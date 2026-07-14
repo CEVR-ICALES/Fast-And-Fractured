@@ -66,6 +66,7 @@ namespace FastAndFractured
                         {
                             Debug.Log("Character creation failed");
                         }
+                        _correctName = false;
                     }
                 }
                 else
