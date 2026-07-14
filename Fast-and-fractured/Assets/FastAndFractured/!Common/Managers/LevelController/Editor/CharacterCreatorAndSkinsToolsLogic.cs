@@ -47,7 +47,8 @@ namespace FastAndFractured
         private const string BACK_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/BackRightWheel";
         private const string TURRET_PATH = "Turret/Visuals/CanonVisuals";
         private const string WHEELS_COLLIDER_PATH = "WheelColliders";
-        private const string CHARACTER_MODEL_NAME = "Character";
+        private const string CHARACTER_HOLDER_NAME = "Character";
+        private const string CHARACTER_MODEL_NAME = "CharacterModel";
         private const string CHASIS_MODEL_NAME = "Chassis";
         private const string WHEEL_MODEL_NAME = "WheelVisuals";
 
@@ -103,7 +104,9 @@ namespace FastAndFractured
                     try
                     {
                         characterModel = PrefabUtility.InstantiatePrefab(characterModel, characterHolder) as GameObject;
-                        characterModel.name = characterName + CHARACTER_MODEL_NAME;
+                        characterModel.name = characterName + CHARACTER_HOLDER_NAME;
+                        Transform model = characterModel.transform.Find(VISUAL_PATH).GetChild(0);
+                        model.name = CHARACTER_MODEL_NAME;
                         chasisModel = PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder) as GameObject;
                         chasisModel.name = characterName + CHASIS_MODEL_NAME;
                         wheelsMesh[0] = PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder) as GameObject;
@@ -558,12 +561,12 @@ namespace FastAndFractured
             //Character Skin
             //Hierarchy for the character model '/Visuals/Character/{characterName}Character/Visuals/CharacterModel/{characterName}' 
 
-            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH + "/" + name;
-            Transform character = visuals.Find(characterPath);
+            string characterModelPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH;
+            Transform character = visuals.Find(characterModelPath);
 
             if (!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS_FOLDER))
             {
-                Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterPath);
+                Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterModelPath);
             }
 
             //Chassis Skin
@@ -627,6 +630,18 @@ namespace FastAndFractured
                     return false;
                 }
                 Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                if (renderPart == null)
+                {
+                    if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
+                    {
+                        Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
+                    }
+                    else
+                    {
+                    Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                    return false;
+                    }
+                }
                 Material[] defaultSkinMaterials = renderPart.sharedMaterials;
                 for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                 {
@@ -657,6 +672,18 @@ namespace FastAndFractured
                         return false;
                     }
                     Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                    if (renderPart == null)
+                    {
+                        if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
+                        {
+                            Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
+                        }
+                        else
+                        {
+                            Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                            return false;
+                        }
+                    }
                     Material[] defaultSkinMaterials = renderPart.sharedMaterials;
                     for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                     {
