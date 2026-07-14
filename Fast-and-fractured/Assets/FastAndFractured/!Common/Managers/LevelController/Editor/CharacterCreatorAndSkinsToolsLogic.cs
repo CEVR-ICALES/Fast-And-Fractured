@@ -52,9 +52,7 @@ namespace FastAndFractured
         private const string CHASIS_MODEL_NAME = "Chassis";
         private const string WHEEL_MODEL_NAME = "WheelVisuals";
 
-        //CharacterCreatorRelated
-
-        //Skins related
+        private const int RIGYDBODY_MENU_VARIANT_MASS = 10;
 
 
         #region character_creator_related
@@ -197,7 +195,7 @@ namespace FastAndFractured
                     UnityEngine.Object.DestroyImmediate(monoBehaviour);
                 }
                 Transform wheelsColliderParent = menuVariant.transform.Find(WHEELS_COLLIDER_PATH);
-                MonoBehaviour[] monoBehavioursInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<MonoBehaviour>();
+                MonoBehaviour[] monoBehavioursInWheelsCollider = menuVariant.GetComponentsInChildren<MonoBehaviour>();
                 Collider[] collidersInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<Collider>();
                 foreach (MonoBehaviour monoBehaviour1 in monoBehavioursInWheelsCollider)
                 {
@@ -209,8 +207,7 @@ namespace FastAndFractured
                     UnityEngine.Object.DestroyImmediate(collider);
                 }
 
-                CharSelectionSimulatedMovement charSelectionSimulatedMovement = menuVariant.AddComponent<CharSelectionSimulatedMovement>();
-                charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
+                menuVariant.AddComponent<CharSelectionSimulatedMovement>();
                 string pathToCreateMenuCharacter = Path.Combine(PATH_TO_MENU_CHARACTERS, menuVariant.name + ".prefab");
                 PrefabUtility.SaveAsPrefabAsset(menuVariant, pathToCreateMenuCharacter);
                 UnityEngine.Object.DestroyImmediate(menuVariant);
@@ -219,8 +216,10 @@ namespace FastAndFractured
                 AssetDatabase.Refresh();
                 AssetDatabase.StartAssetEditing();
                 GameObject assetMenuVariant = AssetDatabase.LoadAssetAtPath(pathToCreateMenuCharacter, typeof(GameObject)) as GameObject;
-
-
+                Rigidbody rigidbody = assetMenuVariant.GetComponent<Rigidbody>();
+                rigidbody.mass = RIGYDBODY_MENU_VARIANT_MASS;
+                CharSelectionSimulatedMovement charSelectionSimulatedMovement = assetMenuVariant.GetComponent<CharSelectionSimulatedMovement>();
+                charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
                 string carDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
 
                 if (!File.Exists(carDataSOPath))
@@ -484,7 +483,6 @@ namespace FastAndFractured
                 Debug.LogWarning("Character skin count is 0. Check if this statement is true on '" + Path.Combine(characterFolderPath, characterName) + "'. If is empty, the character doesn't have any skin. If you want to add one, use the character skin tool.");
                 return;
             }
-            string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
             string characterMenuVariantBaseSkinPath = FileUtils.NormalizePath(characterMenuVariantPath + BASE_SKIN + ".prefab");
             if (!File.Exists(characterMenuVariantBaseSkinPath))
@@ -527,7 +525,7 @@ namespace FastAndFractured
             string characterMenuDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
             if (!File.Exists(characterMenuDataSOPath))
             {
-                //Error Log
+                Debug.LogError("Character menu data scriptable object doesn't exist. Check if the file " + characterMenuDataSOPath + " exist. If not, create it.");
                 return;
             }
             CharacterMenuData characterMenuData = AssetDatabase.LoadAssetAtPath(characterMenuDataSOPath, typeof(CharacterMenuData)) as CharacterMenuData;

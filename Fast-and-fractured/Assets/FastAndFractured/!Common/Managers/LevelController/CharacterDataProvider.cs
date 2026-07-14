@@ -95,29 +95,41 @@ namespace FastAndFractured
             return Resources.LoadAll<Material>(path);
         }
 
-        private bool SetSkinPart(Transform instantiatedCarPart, string skinPartPath)
+       private bool SetSkinPart(Transform instantiatedCarPart, string skinPartPath)
         {
-            Material[] skinPart = LoadSkinMaterials(skinPartPath); 
+            Material[] skinPart = LoadSkinMaterials(skinPartPath);
             if (skinPart.Length != 0)
             {
                 if (instantiatedCarPart == null)
                 {
                     return false;
                 }
-                    Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
-                    Material[] defaultSkinMaterials = renderPart.materials;
-                    for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
+                Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                if (renderPart == null)
+                {
+                    if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
                     {
-                        if (skinPart.Length > materialIterator)
-                        {
-                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
-                        }
-                        else
-                        {
-                            defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
-                        }
+                        Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
                     }
-                    renderPart.materials = defaultSkinMaterials;
+                    else
+                    {
+                    Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                    return false;
+                    }
+                }
+                Material[] defaultSkinMaterials = renderPart.sharedMaterials;
+                for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
+                {
+                    if (skinPart.Length > materialIterator)
+                    {
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator];
+                    }
+                    else
+                    {
+                        defaultSkinMaterials[materialIterator] = skinPart[materialIterator - 1];
+                    }
+                }
+                renderPart.materials = defaultSkinMaterials;
             }
             return true;
         }
@@ -130,11 +142,23 @@ namespace FastAndFractured
             {
                 foreach (Transform instantiatedCarPart in instantiatedCarParts)
                 {
-                    if (instantiatedCarPart == null)
-                    {
-                        return false;
-                    }
-                    Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                        if (instantiatedCarPart == null)
+                        {
+                            return false;
+                        }
+                        Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                        if (renderPart == null)
+                        {
+                            if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
+                            {
+                                Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
+                            }
+                            else
+                            {
+                            Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                            return false;
+                            }
+                        }
                         Material[] defaultSkinMaterials = renderPart.materials;
                         for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                         {
