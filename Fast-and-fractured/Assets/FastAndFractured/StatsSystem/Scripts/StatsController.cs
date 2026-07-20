@@ -124,6 +124,8 @@ namespace FastAndFractured
         public float totalDamageTaken = 0f;
         public float totalDamageDealt = 0f;
         public float totalDistanceDriven = 0f;
+        public int totalKills = 0;
+        public GameObject lastEnemyThatPushedMe;
         private Vector3 _lastPosition;
 
         public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
@@ -357,6 +359,15 @@ namespace FastAndFractured
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
+            if (lastEnemyThatPushedMe != null)
+            {
+                lastEnemyThatPushedMe.GetComponent<StatsController>().totalKills += 1;
+                lastEnemyThatPushedMe.GetComponent<StatsController>().CelebrateKill();
+            }
+        }
+        public void CelebrateKill()
+        {
+            //Kill celebration audio or particles can be triggered here when we decide what to do
         }
 
         public float GetEndurancePercentage()

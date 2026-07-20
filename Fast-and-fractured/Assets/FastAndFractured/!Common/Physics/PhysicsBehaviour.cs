@@ -155,6 +155,7 @@ namespace FastAndFractured
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 if(isTheOneToPush) _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
+                collision.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = this.gameObject;
             }  
             
         }
