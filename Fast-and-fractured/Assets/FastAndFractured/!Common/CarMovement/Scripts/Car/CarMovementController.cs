@@ -451,7 +451,7 @@ namespace FastAndFractured
                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
             });
             ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
-            screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.EndDash);
+            // screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.EndDash);
         }
         public void CancelDash()
         {
