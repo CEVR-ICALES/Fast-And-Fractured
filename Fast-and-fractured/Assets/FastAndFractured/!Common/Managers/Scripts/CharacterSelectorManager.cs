@@ -1,4 +1,5 @@
 using Assets.SimpleLocalization.Scripts;
+using FastAndFractured;
 using System;
 using TMPro;
 using UnityEngine;
@@ -7,7 +8,9 @@ using Utilities;
 
 public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManager>
 {
-    public CharacterMenuData[] allCharacters;
+
+    public MainMenuSelectionScreenCharacters mainMenuSelectionScreenCharacters;
+    public CharacterMenuData[] AllCharacters {get=>mainMenuSelectionScreenCharacters.allMainMenuCharactersData.ToArray();}
 
     // all information we want to show...
     [Header("Canvas")]
@@ -49,18 +52,25 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     protected override void Initialize()
     {
-        PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
-        PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
+        foreach (CharacterMenuData character in AllCharacters)
+        {
+            if (!PlayerPrefs.HasKey(character.CharacterName + "_0"))
+            {
+                PlayerPrefs.SetInt(character.CharacterName + "_0", FULLY_UNLOCKED_VALUE);
+            }
+        }
+        // PlayerPrefs.SetInt("Josefino_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("Carme_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("Pepe_0", FULLY_UNLOCKED_VALUE);
+        // PlayerPrefs.SetInt("MariaAntonia_0", FULLY_UNLOCKED_VALUE);
 
         if (PlayerPrefs.HasKey(SELECTED_PLAYER_KEY))
         {
-            foreach (CharacterMenuData character in allCharacters)
+            foreach (CharacterMenuData character in AllCharacters)
             {
                 if (PlayerPrefs.GetString(SELECTED_PLAYER_KEY).Contains(character.CharacterName))
                 {
-                    _currentCharacterIndex = System.Array.IndexOf(allCharacters, character);
+                    _currentCharacterIndex = System.Array.IndexOf(AllCharacters, character);
                     _currentSkinIndex = int.Parse(PlayerPrefs.GetString(SELECTED_PLAYER_KEY).Split('_')[1]);
                     break;
                 }
@@ -78,7 +88,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     {
         if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex + 1;
-        if (newIndex >= allCharacters.Length) newIndex = 0;
+        if (newIndex >= AllCharacters.Length) newIndex = 0;
         ChangeCharacter(newIndex);
     }
 
@@ -86,14 +96,14 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     {
         if (_modelChangeTimer != null) return;
         int newIndex = _currentCharacterIndex - 1;
-        if (newIndex < 0) newIndex = allCharacters.Length - 1;
+        if (newIndex < 0) newIndex = AllCharacters.Length - 1;
         ChangeCharacter(newIndex);
     }
 
     public void SelectNextSkin()
     {
         if (_modelChangeTimer != null) return;
-        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        CharacterMenuData character = AllCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex + 1;
         if (_currentSkinIndex >= character.Models.Length) _currentSkinIndex = 0;
         ChangeCurrentDisplayedModel(character);
@@ -103,7 +113,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public void SelectPreviousSkin()
     {
         if (_modelChangeTimer != null) return;
-        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        CharacterMenuData character = AllCharacters[_currentCharacterIndex];
         _currentSkinIndex = _currentSkinIndex  - 1;
         if (_currentSkinIndex < 0) _currentSkinIndex = character.Models.Length -1;
         ChangeCurrentDisplayedModel(character);
@@ -119,7 +129,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     private void UpdateCharacterDisplay()
     {
-        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        CharacterMenuData character = AllCharacters[_currentCharacterIndex];
 
         ChangeCurrentDisplayedModel(character);
 
@@ -158,7 +168,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     private void ChangePlayerIcon()
     {
-        Sprite icon = ResourcesManager.Instance.GetResourcesSprite(allCharacters[_currentCharacterIndex].Models[_currentSkinIndex].name);
+        Sprite icon = ResourcesManager.Instance.GetResourcesSprite(AllCharacters[_currentCharacterIndex].Models[_currentSkinIndex].name);
 
         if(icon != null)
         {
@@ -199,7 +209,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
 
     public void SaveCurrentSelected()
     {
-        CharacterMenuData character = allCharacters[_currentCharacterIndex];
+        CharacterMenuData character = AllCharacters[_currentCharacterIndex];
         PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
     }
 
