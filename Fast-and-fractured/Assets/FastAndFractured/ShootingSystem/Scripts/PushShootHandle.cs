@@ -18,6 +18,8 @@ namespace FastAndFractured {
         public Transform PushShootPoint=>shootPoint;
 
         ITimer _pushShootCooldown;
+        [SerializeField]
+        private ScreenShakeSourceController screenShakeSourceController;
         protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
         {
             base.SetBulletStats(bulletBehaivour);
@@ -44,6 +46,7 @@ namespace FastAndFractured {
         {
             if (canShoot)
             {
+                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.PushShoot);
                 canShoot = false;
                 _isPushShooting = true;
                float range = characterStatsController.PushShootRange;

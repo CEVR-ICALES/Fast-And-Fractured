@@ -151,13 +151,13 @@ namespace FastAndFractured
 
             if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
             {
-                Debug.Log("Wnats to change direction to forward");
+                Debug.Log("Wants to change direction to forward");
                 ApplyDirectionChange();
             }
 
             if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
             {
-                Debug.Log("Wnats to change direction to backward");
+                Debug.Log("Wants to change direction to backward");
                 ApplyDirectionChange();
 
             }
@@ -421,7 +421,6 @@ namespace FastAndFractured
                 {
                     _physicsBehaviour.Rb.linearVelocity += dashDirection * 0.5f;
                 }
-                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.StartDash);
 
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
@@ -454,7 +453,6 @@ namespace FastAndFractured
                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
             });
             ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
-            // screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.EndDash);
         }
         public void CancelDash()
         {

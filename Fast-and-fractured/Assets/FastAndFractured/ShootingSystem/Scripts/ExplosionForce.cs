@@ -19,6 +19,8 @@ namespace FastAndFractured
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
         private ITimer _explosionTimer;
+        [SerializeField]
+        private ScreenShakeSourceController screenShakeSourceController;
 
 
         //Provisinal value to select the type force aplication 
@@ -27,6 +29,7 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
+                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.Explosion);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
