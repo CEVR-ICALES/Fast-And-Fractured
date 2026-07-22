@@ -97,6 +97,9 @@ namespace FastAndFractured
         private ITimer _slowDownAngularMomentumTimer;
         private IInputProvider _inputProvider;
 
+        [SerializeField]
+        private ScreenShakeSourceController screenShakeSourceController;
+
 
         private void Start()
         {
@@ -148,13 +151,13 @@ namespace FastAndFractured
 
             if(_previousSteeringYValue > 0 && _isMovingBackwards) // moving backwards wants to go forward
             {
-                Debug.Log("Wnats to change direction to forward");
+                Debug.Log("Wants to change direction to forward");
                 ApplyDirectionChange();
             }
 
             if(_previousSteeringYValue < 0 && _isMovingForward) // moving forward wants to go bakcwards
             {
-                Debug.Log("Wnats to change direction to backward");
+                Debug.Log("Wants to change direction to backward");
                 ApplyDirectionChange();
 
             }
@@ -425,7 +428,10 @@ namespace FastAndFractured
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
+                    if(_physicsBehaviour.Rb.linearVelocity.magnitude < _currentRbMaxVelocity)
+                    {
                     _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
+                    }
                 });
 
 

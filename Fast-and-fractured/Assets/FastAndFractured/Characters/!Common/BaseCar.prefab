@@ -707,6 +707,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8000000246295497700}
   - component: {fileID: 572485126669709941}
+  - component: {fileID: 2528784976006607813}
+  - component: {fileID: 1951575020319086006}
   m_Layer: 6
   m_Name: NormalShoot
   m_TagString: Untagged
@@ -763,6 +765,75 @@ MonoBehaviour:
   overHeatSmokeVFX: {fileID: 5312757882941449910}
   _overHeathMaxEmissionRate: 50
   _overHeathMinEmissionRate: 0
+  screenShakeSourceController: {fileID: 1951575020319086006}
+--- !u!114 &2528784976006607813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5439707828498182411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 1
+    DissipationRate: 0.25
+    RawSignal: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.2
+      DecayTime: 0.7
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 0, y: -1, z: 0}
+--- !u!114 &1951575020319086006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5439707828498182411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b22866361cfc86b58021bc015f54ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenShakeProfiles:
+  - {fileID: 11400000, guid: 6b30a9b63dedebb7c9934ace54c7e50a, type: 2}
+  cinemachineImpulseSource: {fileID: 2528784976006607813}
 --- !u!1 &5570406966506803950
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,6 +855,8 @@ GameObject:
   - component: {fileID: 3418725416974131902}
   - component: {fileID: 3354677737533228885}
   - component: {fileID: 9016514513498141912}
+  - component: {fileID: 475735137831720905}
+  - component: {fileID: 2584534482645837430}
   m_Layer: 6
   m_Name: BaseCar
   m_TagString: Untagged
@@ -942,6 +1015,7 @@ MonoBehaviour:
   statsController: {fileID: 2898550601115800401}
   vehicleVfxController: {fileID: 856863917156540184}
   slowingDownAngularMomentumTime: 0.75
+  screenShakeSourceController: {fileID: 2584534482645837430}
 --- !u!114 &5672472646167121783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1045,6 +1119,8 @@ MonoBehaviour:
   totalDamageTaken: 0
   totalDamageDealt: 0
   totalDistanceDriven: 0
+  totalKills: 0
+  lastEnemyThatPushedMe: {fileID: 0}
 --- !u!114 &3352713489937622652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1193,6 +1269,74 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &475735137831720905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 0
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 1
+    DissipationRate: 0.25
+    RawSignal: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.2
+      DecayTime: 0.7
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 0, y: -1, z: 0}
+--- !u!114 &2584534482645837430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b22866361cfc86b58021bc015f54ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenShakeProfiles:
+  - {fileID: 11400000, guid: 3af190bf65350adb1b7c10ed742a7f0a, type: 2}
+  cinemachineImpulseSource: {fileID: 475735137831720905}
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234,6 +1378,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7462744821836269739}
   - component: {fileID: 7923571590346614690}
+  - component: {fileID: 3585806361709097652}
+  - component: {fileID: 1588971909988638001}
   m_Layer: 6
   m_Name: PushShoot
   m_TagString: Untagged
@@ -1284,6 +1430,75 @@ MonoBehaviour:
   onCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
+  screenShakeSourceController: {fileID: 3585806361709097652}
+--- !u!114 &3585806361709097652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6623070916710796705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b22866361cfc86b58021bc015f54ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenShakeProfiles:
+  - {fileID: 11400000, guid: 41f0143ec655e8ac7a3aa234ebd3bacf, type: 2}
+  cinemachineImpulseSource: {fileID: 1588971909988638001}
+--- !u!114 &1588971909988638001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6623070916710796705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 1
+    DissipationRate: 0.25
+    RawSignal: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.2
+      DecayTime: 0.7
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 0, y: -1, z: 0}
 --- !u!1 &7047964052186922638
 GameObject:
   m_ObjectHideFlags: 0

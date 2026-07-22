@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Unity.Cinemachine;
+using Unity.Cinemachine.Editor;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -20,6 +21,16 @@ namespace FastAndFractured
         private float _cameraSpeedX;
         private float _cameraSpeedY;
 
+        [Header("Camera Shake")]
+        [SerializeField] 
+        private CinemachineImpulseListener commonCinemachineImpulseListener;
+        [SerializeField]
+        private CinemachineImpulseListener localCinemachineImpulseListener;
+        [SerializeField]
+        private ScreenShakeProfile defaultProfile;
+        private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
+        [SerializeField]
+        private CinemachineImpulseChannels _cinemachineImpulseChanels;
         protected override void Initialize()
         {
             base.Initialize();
@@ -28,7 +39,9 @@ namespace FastAndFractured
             {
                 _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
             }));
-
+            if(commonCinemachineImpulseListener==null){
+            commonCinemachineImpulseListener = GetComponent<CinemachineImpulseListener>();
+            }
         }
 
         void OnEnable()
@@ -113,5 +126,51 @@ namespace FastAndFractured
             freeLookCamera.m_YAxis.m_MaxSpeed = _cameraSpeedY;
             _paused = false;
         }
+
+        #region Camera Effects
+        public void ShakeCamera(CinemachineImpulseSource impulseSource)
+        {
+            SetupDefaultScreenShakeListenerSettings(commonCinemachineImpulseListener);
+            impulseSource.GenerateImpulseWithForce(defaultProfile.impactForce);
+        }
+
+        public void ShakeCameraFromProfile(ScreenShakeProfile screenShakeProfile, CinemachineImpulseSource impulseSource)
+        {
+            SetupScreenShakeSettings(screenShakeProfile, impulseSource,commonCinemachineImpulseListener);
+            impulseSource.GenerateImpulseWithForce(screenShakeProfile.impactForce);
+        }
+
+        public void ShakeLocalCamera(CinemachineImpulseSource impulseSource)
+        {
+            SetupDefaultScreenShakeListenerSettings(localCinemachineImpulseListener);
+            impulseSource.GenerateImpulseWithForce(defaultProfile.impactForce);
+        }
+
+        public void ShakeLocalCameraFromProfile(ScreenShakeProfile screenShakeProfile, CinemachineImpulseSource impulseSource)
+        {
+            SetupScreenShakeSettings(screenShakeProfile, impulseSource,localCinemachineImpulseListener);
+            impulseSource.GenerateImpulseWithForce(screenShakeProfile.impactForce);
+        }
+
+        private void SetupScreenShakeSettings(ScreenShakeProfile screenShakeProfile, CinemachineImpulseSource impulseSource, CinemachineImpulseListener cinemachineImpulseListener)
+        {
+            //Source 
+           _cinemachineImpulseDefinition = impulseSource.ImpulseDefinition;
+           _cinemachineImpulseDefinition.ImpulseDuration = screenShakeProfile.impactTime;
+           impulseSource.DefaultVelocity = screenShakeProfile.defaultVelocity;
+           _cinemachineImpulseDefinition.CustomImpulseShape = screenShakeProfile.customImpulseShape;
+            //Listener
+            cinemachineImpulseListener.ReactionSettings.AmplitudeGain = screenShakeProfile.listenerAmplitude;
+            cinemachineImpulseListener.ReactionSettings.FrequencyGain = screenShakeProfile.listenerFrequency;
+            cinemachineImpulseListener.ReactionSettings.Duration = screenShakeProfile.listenerDuration;
+        }
+
+        private void SetupDefaultScreenShakeListenerSettings(CinemachineImpulseListener cinemachineImpulseListener)
+        {
+            cinemachineImpulseListener.ReactionSettings.AmplitudeGain = defaultProfile.listenerAmplitude;
+            cinemachineImpulseListener.ReactionSettings.FrequencyGain = defaultProfile.listenerFrequency;
+            cinemachineImpulseListener.ReactionSettings.Duration = defaultProfile.listenerDuration;
+        }
+        #endregion
     }
 }
