@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Unity.Cinemachine;
-using Unity.Cinemachine.Editor;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -29,8 +28,8 @@ namespace FastAndFractured
         [SerializeField]
         private ScreenShakeProfile defaultProfile;
         private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
-        [SerializeField]
-        private CinemachineImpulseChannels _cinemachineImpulseChanels;
+        // [SerializeField]
+        // private CinemachineImpulseChannels _cinemachineImpulseChanels;
         protected override void Initialize()
         {
             base.Initialize();
