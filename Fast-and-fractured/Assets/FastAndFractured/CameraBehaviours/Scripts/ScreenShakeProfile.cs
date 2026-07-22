@@ -1,9 +1,17 @@
 using UnityEngine;
 
-
-[CreateAssetMenu(menuName = "ScreenSHake/New profile")]
+public enum ScreenShakeProfileType
+{
+    None,
+    NormalShoot,
+    PushShoot,
+    StartDash,
+    EndDash
+}
+[CreateAssetMenu(menuName = "ScreenShake/New profile")]
 public class ScreenShakeProfile : ScriptableObject
 {
+    public ScreenShakeProfileType profileType;
     [Header("Impulse Source Settings")]
     public float impactTime = 0.2f;
     public float impactForce = 1f;

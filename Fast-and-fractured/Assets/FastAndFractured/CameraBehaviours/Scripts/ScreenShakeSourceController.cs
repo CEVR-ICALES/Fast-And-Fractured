@@ -4,7 +4,7 @@ using Unity.Cinemachine;
 public class ScreenShakeSourceController : MonoBehaviour
 {
     [SerializeField]
-    private ScreenShakeProfile screenShakeProfile;
+    private ScreenShakeProfile[] screenShakeProfiles;
     [SerializeField]
     private CinemachineImpulseSource cinemachineImpulseSource;
 
@@ -24,8 +24,9 @@ public class ScreenShakeSourceController : MonoBehaviour
         CameraBehaviours.Instance?.ShakeCamera(cinemachineImpulseSource);
     }
 
-    public void PlayGlobalShakeFromProfile()
+    public void PlayGlobalShakeFromProfile(ScreenShakeProfileType profileType)
     {
+        ScreenShakeProfile screenShakeProfile = GetScreenShakeProfileByType(profileType);
         if (screenShakeProfile == null)
         {
             return;
@@ -38,12 +39,23 @@ public class ScreenShakeSourceController : MonoBehaviour
         CameraBehaviours.Instance?.ShakeLocalCamera(cinemachineImpulseSource);
     }
 
-    public void PlayLocalShakeFromProfile()
+    public void PlayLocalShakeFromProfile(ScreenShakeProfileType profileType)
     {
-         if (screenShakeProfile == null)
+        ScreenShakeProfile screenShakeProfile = GetScreenShakeProfileByType(profileType);
+        if(screenShakeProfile == null)
         {
             return;
         }
         CameraBehaviours.Instance?.ShakeLocalCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
+    }
+
+    private ScreenShakeProfile GetScreenShakeProfileByType(ScreenShakeProfileType profileType)
+    {
+        foreach(ScreenShakeProfile screenShakeProfile in screenShakeProfiles)
+        {
+            if(screenShakeProfile.profileType == profileType)
+                return screenShakeProfile;
+        }
+        return null;
     }
 }
