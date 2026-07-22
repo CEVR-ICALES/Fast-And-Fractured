@@ -13,7 +13,8 @@ namespace FastAndFractured
         [Header("Character Spawn")]
         public UnityEvent onLevelPreStart;
         public UnityEvent charactersCustomStart;
-        [SerializeField] private List<CharacterData> charactersData;
+        [SerializeField] private ListOfCharactersData charactersDataScriptableObject;
+        private List<CharacterData> _charactersData;
         [SerializeField] private string playerCharacter = "Pepe_0";
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField] private int maxCharactersInGame = 8;
@@ -69,8 +70,8 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
+            _charactersData = charactersDataScriptableObject.listOfCharactersData;
             InitializeHandlers();
-
             //Provisional For Debug 
             if (debugMode)
             {
@@ -95,7 +96,7 @@ namespace FastAndFractured
 
         private void InitializeHandlers()
         {
-            _characterDataProvider = new CharacterDataProvider(charactersData);
+            _characterDataProvider = new CharacterDataProvider(_charactersData);
             _characterSpawner = new CharacterSpawner(_characterDataProvider, PlayerPrefab, AIPrefab, spawnPoints);
             _gameLoopManager = new GameLoopManager(_timeToCallTheStorm, _playerDeadReductionTime, _sandStormController);
             _sandstormInteractionManager = new SandstormInteractionManager(_sandStormController, safeZones, false);

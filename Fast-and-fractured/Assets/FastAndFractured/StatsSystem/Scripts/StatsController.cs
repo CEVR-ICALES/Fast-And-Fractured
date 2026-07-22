@@ -180,6 +180,8 @@ namespace FastAndFractured
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
             currentAcceleration = charDataSO.Acceleration;
+            currentMaxSpeedAscend = charDataSO.MaxSpeedAscend;
+            currentMaxSpeedDescend = charDataSO.MaxSpeedDescend;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootForce = charDataSO.PushShootFORCE;
@@ -431,6 +433,8 @@ namespace FastAndFractured
                 case Stats.MAX_SPEED:
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedAscend = ModCharStat(currentMaxSpeedAscend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedAscend * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedDescend = ModCharStat(currentMaxSpeedDescend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDescend * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     return true;
                 case Stats.MAX_SPEED_MULTIPLIER:
                     _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);
