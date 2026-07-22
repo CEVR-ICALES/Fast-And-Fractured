@@ -421,7 +421,6 @@ namespace FastAndFractured
                 {
                     _physicsBehaviour.Rb.linearVelocity += dashDirection * 0.5f;
                 }
-                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.StartDash);
 
                 _dashTimer = TimerSystem.Instance.CreateTimer(statsController.DashTime, onTimerDecreaseComplete: () =>
                 {
@@ -454,7 +453,6 @@ namespace FastAndFractured
                 onDashCooldownUpdate?.Invoke(progress, statsController.DashCooldown);
             });
             ModifySpeedOfExistingTimer(statsController.CooldownSpeed);
-            // screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.EndDash);
         }
         public void CancelDash()
         {

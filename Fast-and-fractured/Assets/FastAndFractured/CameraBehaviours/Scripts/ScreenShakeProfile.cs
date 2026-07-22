@@ -6,7 +6,8 @@ public enum ScreenShakeProfileType
     NormalShoot,
     PushShoot,
     StartDash,
-    EndDash
+    EndDash,
+    Explosion
 }
 [CreateAssetMenu(menuName = "ScreenShake/New profile")]
 public class ScreenShakeProfile : ScriptableObject

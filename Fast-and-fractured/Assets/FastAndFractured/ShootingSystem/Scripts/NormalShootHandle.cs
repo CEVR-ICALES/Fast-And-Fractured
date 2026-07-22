@@ -45,6 +45,8 @@ namespace FastAndFractured
         [SerializeField]
         private float _overHeathMinEmissionRate = 0;
         private float _overHeathEmissionRateXTime;
+        [SerializeField]
+        private ScreenShakeSourceController screenShakeSourceController;
         #endregion
 
         #region UNITY_EVENTS
@@ -85,6 +87,7 @@ namespace FastAndFractured
 
             if (canShoot)
             {
+                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);
                 ActiveShootingVFX(shootingTurretVFX);
                 Vector3 shootingDirection =  currentShootDirection + directionCenterOffSet;
                 float angle = Vector3.Angle(shootingDirection, transform.forward);
