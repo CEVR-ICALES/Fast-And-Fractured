@@ -54,6 +54,7 @@ namespace FastAndFractured
             landPoint.y = landPoint.y + landPointYOffset;
             GameObject uniqueAbility = Instantiate(chickenPrefab, uniqueAbilityShootPoint.position, Quaternion.LookRotation(_aimDirection));
             uniqueAbility.GetComponent<McChicken>().InitializeChicken(landPoint, _aimDirection);
+            uniqueAbility.GetComponent<McChicken>().Creator = physicsBehaviour.gameObject;
             _durationTimer = TimerSystem.Instance.CreateTimer(abilityData.Duration, TimerDirection.INCREASE, () =>
             {
                 DestroyUniqueAbility(uniqueAbility);

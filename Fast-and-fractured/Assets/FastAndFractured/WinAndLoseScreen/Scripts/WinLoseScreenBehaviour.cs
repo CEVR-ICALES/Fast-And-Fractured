@@ -15,6 +15,7 @@ namespace FastAndFractured
         [SerializeField] private GameObject totalDamageDealtText;
         [SerializeField] private GameObject totalDamageTakenText;
         [SerializeField] private GameObject totalDistanceText;
+        [SerializeField] private GameObject killCountText;
         [SerializeField] private GameObject container;
         private GameObject _objectToSpawn;
         public GameObject spawnPoint;
@@ -71,6 +72,7 @@ namespace FastAndFractured
             totalDamageDealtText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDamageDealt;
             totalDamageTakenText.GetComponent<TextMeshProUGUI>().text = totalDamageTaken;
             totalDistanceText.GetComponent<TextMeshProUGUI>().text = gameEndData.totalDistanceTraveled;
+            killCountText.GetComponent<TextMeshProUGUI>().text = gameEndData.killCount.ToString();
         }
         private void ResetGameEndData()
         {
@@ -79,6 +81,8 @@ namespace FastAndFractured
             gameEndData.totalDamageTaken = gameEndDataDefault.totalDamageTaken;
             gameEndData.totalDistanceTraveled = gameEndDataDefault.totalDistanceTraveled;
             gameEndData.finalAnimation = gameEndDataDefault.finalAnimation;
+            gameEndData.sceneBuildIndex = gameEndDataDefault.sceneBuildIndex;
+            gameEndData.killCount = gameEndDataDefault.killCount;
         }
         public void GoToMainMenu()
         {

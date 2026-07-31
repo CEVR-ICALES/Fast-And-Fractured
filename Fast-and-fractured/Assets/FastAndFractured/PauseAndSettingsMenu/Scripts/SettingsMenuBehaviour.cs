@@ -78,7 +78,9 @@ namespace FastAndFractured
         void Start()
         {
             SetStartValues();
+            if(_menuScreen==null){
             _menuScreen = GetComponent<MenuScreen>();
+            }
             SetDefaultSelectedButton();
 
             fpsDropdown.onValueChanged.AddListener(delegate { CapFPS(fpsDropdown.value); });
@@ -110,6 +112,10 @@ namespace FastAndFractured
 
         void OnEnable()
         {
+            if (_menuScreen == null)
+            {
+                _menuScreen = GetComponent<MenuScreen>();
+            }
             SetDefaultSelectedButton();
         }
 

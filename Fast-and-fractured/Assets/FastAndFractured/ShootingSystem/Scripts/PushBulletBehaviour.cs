@@ -40,6 +40,8 @@ namespace FastAndFractured {
         [SerializeField]
         private float endHitBoxTime = 1f;
         [SerializeField] private LayerMask characterLayers;
+        private GameObject _creator;
+        public GameObject Creator { get => _creator; set => _creator = value; }
 
         public override void OnSimulateTick(float deltaTime)
         {

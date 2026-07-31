@@ -16,6 +16,7 @@ namespace FastAndFractured
         private GameObject _characterModel;
         private GameObject _chasisModel;
         private GameObject _wheelModel;
+        private GameObject _turretModel;
         private string _characterName;
         private GUILayoutOption _layoutOption;
         private bool _correctName = false;
@@ -49,13 +50,14 @@ namespace FastAndFractured
             _characterModel = EditorGUILayout.ObjectField("Character Model",_characterModel, typeof(GameObject), false) as GameObject;
             _chasisModel = EditorGUILayout.ObjectField("Chasis Model", _chasisModel, typeof(GameObject), false) as GameObject;
             _wheelModel = EditorGUILayout.ObjectField("Wheel Model", _wheelModel, typeof(GameObject), false) as GameObject;
+            _turretModel = EditorGUILayout.ObjectField("Turret Model", _turretModel, typeof(GameObject), false) as GameObject;
             if (GUILayout.Button("Create", GUILayout.Height(35)))
             {
-                if (_characterModel != null && _chasisModel != null && _wheelModel != null)
+                if (_characterModel != null && _chasisModel != null && _wheelModel != null && _turretModel != null)
                 {
                     if (_correctName)
                     {
-                        if (CharacterCreatorAndSkinsToolsLogic.CreateNewCharacter(_characterModel, _chasisModel, _wheelModel, _characterName))
+                        if (CharacterCreatorAndSkinsToolsLogic.CreateNewCharacter(_characterModel, _chasisModel, _wheelModel, _turretModel, _characterName))
                         {
                             Debug.Log("Character " + _characterName + " Created Successfully");
                             CharacterCreatorAndSkinsToolsLogic.CreateNewCharacterInCharacterSkinsFolder(_characterName);
@@ -64,6 +66,7 @@ namespace FastAndFractured
                         {
                             Debug.Log("Character creation failed");
                         }
+                        _correctName = false;
                     }
                 }
                 else

@@ -19,6 +19,8 @@ namespace FastAndFractured
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
         private ITimer _explosionTimer;
+        [SerializeField]
+        private ScreenShakeSourceController screenShakeSourceController;
 
 
         //Provisinal value to select the type force aplication 
@@ -27,6 +29,7 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
+                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.Explosion);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
@@ -80,6 +83,14 @@ namespace FastAndFractured
                 {
                     otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
+                    if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
+                    {
+                        if(other.gameObject != pushBullet.Creator)
+                        {
+                            other.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = transform.parent.gameObject.GetComponent<PushBulletBehaviour>().Creator;
+                        }
+                    }
+                    
                 }
             }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))

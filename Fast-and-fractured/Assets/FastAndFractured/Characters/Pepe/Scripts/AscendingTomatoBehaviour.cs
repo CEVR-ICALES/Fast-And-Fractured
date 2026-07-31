@@ -5,12 +5,14 @@ using Utilities;
 using StateMachine;
 using Enums;
 using Utilities.Managers.PauseSystem;
-using NRandom;
+using UnityEngine.Rendering.HighDefinition;
 namespace FastAndFractured
 {
     public class AscendingTomatoBehaviour : MonoBehaviour, IPooledObject, IPausable
     {
         private bool initValues = true;
+        public DecalProjector decal;
+        public GameObject tomatoModel;
         public Pooltype pooltype;
         public Pooltype Pooltype { get => pooltype; set => pooltype = value; }
         public bool InitValues => initValues;
@@ -23,12 +25,12 @@ namespace FastAndFractured
         public float ascendingTime = 3f;
 
         public float effectTime = 5f;
+        public const float TIME_BEFORE_START_FADE = 0.5f;
         private List<GameObject> charactersList;
 
         private Vector3 _randomRotation;
         private bool _isPaused = false;
-        private const int MIN_ROTATION =0;
-        private const int MAX_ROTATION =360;
+
         public virtual void InitializeValues()
         {
             
@@ -46,8 +48,9 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
+            decal.GetComponent<TomatoDecal>().SetRadius(effectDistance);
             charactersList = LevelControllerButBetter.Instance.InGameCharacters;
-            _randomRotation = new Vector3(DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION));
+            _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
                 if (!Caster)
@@ -73,6 +76,10 @@ namespace FastAndFractured
                     }
                 }
                 ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+            });
+            TimerSystem.Instance.CreateTimer(ascendingTime - TIME_BEFORE_START_FADE, onTimerDecreaseComplete: () =>
+            {
+                decal.GetComponent<TomatoDecal>().DecalFadeOut(TIME_BEFORE_START_FADE);
             });
         }
 
@@ -101,8 +108,12 @@ namespace FastAndFractured
                     }
                 }
             }
-            transform.position += Vector3.up * speed * Time.deltaTime;
-            transform.Rotate(_randomRotation * Time.deltaTime);
+            if (tomatoModel != null)
+            {
+                tomatoModel.transform.position += Vector3.up * speed * Time.deltaTime;
+                Vector3 rotationAmount = _randomRotation * Time.deltaTime;
+                tomatoModel.transform.Rotate(rotationAmount);
+            }
         }
         private void SetTomatoVariables(GameObject tomato, GameObject obj)
         {
@@ -113,8 +124,7 @@ namespace FastAndFractured
             descendingTomatoBehaviour.objective = obj;
             descendingTomatoBehaviour.pooltype = pooltypeDescendingTomato;
             descendingTomatoBehaviour.effectTime = effectTime;
-            descendingTomatoBehaviour.randomRotation = new Vector3(DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION));
-
+            descendingTomatoBehaviour.randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         }
 
         public void OnPause()

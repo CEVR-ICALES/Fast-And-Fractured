@@ -14,6 +14,8 @@ namespace FastAndFractured
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
         const float SPEED_TO_METER_PER_SECOND = 3.6f;
+        private const float RIGYDBODY_MAX_SPEED_LIMIT = 600f;
+
 
         [Header("Provisional Values for Calculate Force")]
         [SerializeField] private AnimationCurve enduranceFactorEvaluate;
@@ -164,6 +166,7 @@ namespace FastAndFractured
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 if(isTheOneToPush) _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
                 otherComponentPhysicsBehaviours.CarImpactHandler.HandleOnCarImpact(false, otherComponentPhysicsBehaviours);
+                collision.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = this.gameObject;
             }  
             
         }
@@ -339,6 +342,7 @@ namespace FastAndFractured
 
         public void LimitRigidBodySpeed(float maxSpeed)
         {
+            maxSpeed = Mathf.Clamp(maxSpeed, 0, RIGYDBODY_MAX_SPEED_LIMIT);
             Vector3 clampedVelocity = _rb.linearVelocity;
 
             if (clampedVelocity.magnitude > (maxSpeed / SPEED_TO_METER_PER_SECOND))
