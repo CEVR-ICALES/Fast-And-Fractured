@@ -7,7 +7,7 @@ using Enums;
 
 namespace FastAndFractured
 {
-    public class LevelControllerButBetter : AbstractSingleton<LevelControllerButBetter>
+    public class LevelController : AbstractSingleton<LevelController>
     {
         #region Original Variables 
         [Header("Character Spawn")]
@@ -19,7 +19,9 @@ namespace FastAndFractured
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField] private int maxCharactersInGame = 8;
 
-        public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); }
+        // The setter exists for the multiplayer client path: the wrapper assigns the
+        // server-authoritative name-code list before initializing the client level state.
+        public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); set { if (_characterSpawner != null) _characterSpawner.InGameCharactersNameCodes = value; } }
 
 
         [SerializeField] private GameObject[] spawnPoints;
@@ -64,6 +66,8 @@ namespace FastAndFractured
         [SerializeField] public List<GameObject> availablePlayer;
         public List<GameObject> InGameCharacters => _characterSpawner?.InGameCharacters ?? new List<GameObject>();
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
+        // Exposed for the multiplayer wrapper, which reads the debug flag off the real controller.
+        public bool DebugMode { get => debugMode; set => debugMode = value; }
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -161,11 +165,39 @@ namespace FastAndFractured
 
             }
 
-            _characterSpawner.InGameCharacters.Clear();
-            _characterSpawner.InGameCharacters.AddRange(foundCharacters);
-            _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _localPlayer, charactersCustomStart);
+            InitializeAfterSpawn(foundCharacters);
+        }
+
+        // Extracted so the multiplayer wrapper can initialize the level with server-spawned
+        // characters. Order matters: onLevelPreStart fires immediately, then
+        // StartGameInitializationDelay -> OnGameStartDelayComplete activates the controls.
+        public void InitializeAfterSpawn(List<GameObject> injectedCharacters = null)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            _isStormActive = false;
+
+            // Null-safe: In multiplayer, remote clients may not have PlayerInputController yet
+            if (PlayerInputController.Instance != null && PlayerInputController.Instance.GetComponentInChildren<CarMovementController>() != null)
+            {
+                _localPlayer = PlayerInputController.Instance.GetComponentInChildren<CarMovementController>().gameObject;
+            }
+
+            var foundInjectors = FindObjectsByType<CarInjector>(sortMode: FindObjectsSortMode.None);
+            foreach (var injector in foundInjectors)
+            {
+                injector.Install(null, true);
+            }
+            if (injectedCharacters != null)
+            {
+                _characterSpawner.InGameCharacters.Clear();
+                _characterSpawner.InGameCharacters.AddRange(injectedCharacters);
+            }
+            _gameLoopManager.InitializeSession(
+                _characterSpawner.InGameCharacters.Count,
+                _characterSpawner.InGameCharacters, _localPlayer, charactersCustomStart);
             _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
-            _gameLoopManager.ActivateCharacterControls();
+            onLevelPreStart?.Invoke();
+            _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
         }
 
         private void StartLevelWithSpawnedCharacters()
@@ -308,10 +340,55 @@ namespace FastAndFractured
 
         public GameObject GetARandomPlayer()
         {
-            return availablePlayer.GetRandomValueFromList();
+            // GetRandomValueFromList has both an (IRandom) and a (T defaultValue) overload, so a
+            // no-arg call is ambiguous. The deterministic generator is also what the rest of the
+            // spawning uses, so every peer picks the same character.
+            return availablePlayer.GetRandomValueFromList(DeterministicRandom.Instance);
         }
-        public void AddCharacterToListOfSelectedCharacters(string character) {
-            _playersCharacterNameCodes.Add(character);
+        public void AddCharacterToListOfSelectedCharacters(int id, string character)
+        {
+            if (id == -1)
+            {
+                id++;
+            }
+
+            if (id < 0)
+            {
+                Debug.LogWarning($"Invalid player id {id} while adding character '{character}'.");
+                return;
+            }
+
+            // Keep list indexed by clientId even if selections arrive out of order.
+            while (_playersCharacterNameCodes.Count <= id)
+            {
+                _playersCharacterNameCodes.Add(string.Empty);
+            }
+
+            _playersCharacterNameCodes[id] = character;
+        }
+
+        /// <summary>
+        /// Clears stale character selections for disconnected clientIds while preserving
+        /// index-by-clientId semantics for active players.
+        /// </summary>
+        public void PruneSelectedCharactersToActiveClientIds(IReadOnlyCollection<int> activeClientIds)
+        {
+            if (_playersCharacterNameCodes == null || _playersCharacterNameCodes.Count == 0)
+                return;
+
+            if (activeClientIds == null || activeClientIds.Count == 0)
+            {
+                for (int i = 0; i < _playersCharacterNameCodes.Count; i++)
+                    _playersCharacterNameCodes[i] = string.Empty;
+                return;
+            }
+
+            var activeSet = new HashSet<int>(activeClientIds);
+            for (int i = 0; i < _playersCharacterNameCodes.Count; i++)
+            {
+                if (!activeSet.Contains(i))
+                    _playersCharacterNameCodes[i] = string.Empty;
+            }
         }
 
     }
