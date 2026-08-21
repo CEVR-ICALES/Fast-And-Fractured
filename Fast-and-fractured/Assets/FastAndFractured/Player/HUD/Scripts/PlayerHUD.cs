@@ -19,7 +19,7 @@ namespace FastAndFractured
         {
             base.Initialize();
             GetComponentsNeededInChildren();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
+            LevelController.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
             
         }
         private void GetComponentsNeededInChildren()
