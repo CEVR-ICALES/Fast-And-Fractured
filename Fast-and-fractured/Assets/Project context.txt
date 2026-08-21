@@ -1,514 +1,514 @@
 === DIRECTORY TREE ===
 📁 Assets/
 ├── 📁 Editor/
-│   └── 🔷 ExportTerrain.cs
+━E  └── 🔷 ExportTerrain.cs
 ├── 📁 FastAndFractured/
-│   ├── 📁 !Common/
-│   │   ├── 📁 CarMovement/
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 📁 Car/
-│   │   │       │   ├── 🔷 AiInputProvider.cs
-│   │   │       │   ├── 🔷 CarMovementController.cs
-│   │   │       │   ├── 🔷 CarSpeedOverlay.cs
-│   │   │       │   ├── 🔷 PlayerInputProvider.cs
-│   │   │       │   └── 🔷 WheelController.cs
-│   │   │       └── 📁 Testing/
-│   │   │           ├── 🔷 ApplyDamageTest.cs
-│   │   │           └── 🔷 CarTestingHelper.cs
-│   │   ├── 📁 EnumLibrary/
-│   │   │   └── 🔷 EnumLibrary.cs
-│   │   ├── 📁 Managers/
-│   │   │   ├── 📁 LevelController/
-│   │   │   │   ├── 📁 Editor/
-│   │   │   │   │   └── 🔷 CharacterSkinsCountFileGenerator.cs
-│   │   │   │   ├── 📁 ScriptableObject/
-│   │   │   │   │   └── 📁 Script/
-│   │   │   │   │       └── 🔷 ListOfCharactersSkins.cs
-│   │   │   │   ├── 🔷 CharacterDataProvider.cs
-│   │   │   │   ├── 🔷 CharacterSpawner.cs
-│   │   │   │   ├── 🔷 GameEndHandler.cs
-│   │   │   │   ├── 🔷 GameLoopManager.cs
-│   │   │   │   ├── 🔷 LevelConstants.cs
-│   │   │   │   ├── 🔷 LevelControllerButBetter.cs
-│   │   │   │   ├── 🔷 LevelUtilities.cs
-│   │   │   │   └── 🔷 SandstormInteractionManager.cs
-│   │   │   ├── 📁 ResourcesManager/
-│   │   │   │   ├── 🔷 ResourcesLoader.cs
-│   │   │   │   └── 🔷 ResourcesManager.cs
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 BrightnessManager.cs
-│   │   │       ├── 🔷 CharacterSelectorManager.cs
-│   │   │       ├── 🔷 CustomStudioEventEmitter.cs
-│   │   │       ├── 🔷 HUDManager.cs
-│   │   │       ├── 🔷 MainMenuManager.cs
-│   │   │       ├── 🔷 ObjectPoolManager.cs
-│   │   │       ├── 🔷 SoundManager.cs
-│   │   │       ├── 🔷 SubtitlesManager.cs
-│   │   │       ├── 🔷 TimelineSubtitleBase.cs
-│   │   │       └── 🔷 TriggerAudioController.cs
-│   │   ├── 📁 ObjectPooling/
-│   │   │   ├── 📁 Interfaces/
-│   │   │   │   └── 🔷 IPooledObject.cs
-│   │   │   ├── 📁 ScriptableObject/
-│   │   │   │   └── 📁 Scripts/
-│   │   │   │       └── 🔷 ObjectPoolSO.cs
-│   │   │   └── 🔷 ObjectPool.cs
-│   │   ├── 📁 Physics/
-│   │   │   ├── 🔷 ApplyForceByState.cs
-│   │   │   └── 🔷 PhysicsBehaviour.cs
-│   │   └── 📁 Scripts/
-│   │       ├── 📁 Interfaces/
-│   │       │   └── 🔷 IKillCharacters.cs
-│   │       └── 🔷 DeadWallsBehaivour.cs
-│   ├── 📁 !Prototype/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 KillCharacterNotify.cs
-│   ├── 📁 CameraBehaviours/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 CameraBehaviours.cs
-│   ├── 📁 Characters/
-│   │   ├── 📁 !Common/
-│   │   │   └── 📁 UniqueAbility/
-│   │   │       ├── 📁 AbilityData/
-│   │   │       │   └── 📁 Scripts/
-│   │   │       │       └── 🔷 AbilityData.cs
-│   │   │       ├── 📁 Actions/
-│   │   │       │   └── 🔷 TriggerUniqueAbilityAction.cs
-│   │   │       ├── 📁 Decisions/
-│   │   │       │   ├── 🔷 IsUniqueAbilityActive.cs
-│   │   │       │   └── 🔷 IsUniqueAbilityOnCooldownDecision.cs
-│   │   │       └── 📁 Scripts/
-│   │   │           ├── 🔷 BaseUniqueAbility.cs
-│   │   │           └── 🔷 CarImpactHandler.cs
-│   │   ├── 📁 Carme/
-│   │   │   ├── 📁 McChicken/
-│   │   │   │   └── 📁 Scripts/
-│   │   │   │       ├── 📁 Climbeable/
-│   │   │   │       │   ├── 🔷 ChickenClimbeable.cs
-│   │   │   │       │   └── 🔷 ClimbeableColliderAutomaticator.cs
-│   │   │   │       ├── 🔷 McChicken.cs
-│   │   │   │       ├── 🔷 McChickenLegsMovement.cs
-│   │   │   │       ├── 🔷 McChickenMovement.cs
-│   │   │   │       ├── 🔷 McChickenPhysicsHandler.cs
-│   │   │   │       └── 🔷 McChickenVisuals.cs
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 CarmeCarImpactHandler.cs
-│   │   │       └── 🔷 CarmeUniqueAbility.cs
-│   │   ├── 📁 Josefino/
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 JosefinoCarImpactHandler.cs
-│   │   │       └── 🔷 JosefinoUniqueAbility.cs
-│   │   ├── 📁 MariaAntonia/
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 MariaAntoniaCarImpactHandler.cs
-│   │   │       └── 🔷 MariaAntoniaUniqueAbility.cs
-│   │   └── 📁 Pepe/
-│   │       └── 📁 Scripts/
-│   │           ├── 🔷 AscendingTomatoBehaviour.cs
-│   │           ├── 🔷 DescendingTomatoBehaviour.cs
-│   │           ├── 🔷 PepeCarImpactHandler.cs
-│   │           └── 🔷 PepeUniqueAbility.cs
-│   ├── 📁 Credits/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 CreditsBehaviour.cs
-│   │       └── 🔷 CreditsListData.cs
-│   ├── 📁 EnemyAI/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 AIDebugStateChanger.cs
-│   │       └── 🔷 EnemyAIBrain.cs
-│   ├── 📁 IngameEventSystem/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 CharacterIcon.cs
-│   │       ├── 🔷 GameReadyCountdown.cs
-│   │       └── 🔷 IngameEventsManager.cs
-│   ├── 📁 InputRemapping/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 ResetDeviceBindings.cs
-│   ├── 📁 Interactables/
-│   │   ├── 📁 !Common/
-│   │   │   ├── 📁 GenericInterable/
-│   │   │   │   └── 📁 Scripts/
-│   │   │   │       └── 🔷 GenericInteractable.cs
-│   │   │   ├── 🔷 IInteractable.cs
-│   │   │   └── 🔷 TriggerInteractableOnCollisionEnter.cs
-│   │   ├── 📁 InteractableHandler/
-│   │   │   └── 📁 Scripts/
-│   │   │       └── 🔷 InteractableHandler.cs
-│   │   ├── 📁 SkinUnlockInteractable/
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 SkinUnlockHandler.cs
-│   │   │       └── 🔷 SkinUnlockerInteractable.cs
-│   │   └── 📁 StatsBoosterInteractable/
-│   │       └── 📁 Scripts/
-│   │           └── 🔷 StatsBoostInteractable.cs
-│   ├── 📁 LoadingScreen/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 LoadingBehaviour.cs
-│   ├── 📁 MainMenu/
-│   │   └── 📁 Scripts/
-│   │       ├── 📁 AccesibilitySettings/
-│   │       │   ├── 🔷 AccesibilitySettings.cs
-│   │       │   ├── 🔷 ColorBlindModeController.cs
-│   │       │   ├── 🔷 LoadLenguageSettings.cs
-│   │       │   └── 🔷 SubtitleTest.cs
-│   │       ├── 📁 CharSelectionCarMovement/
-│   │       │   └── 🔷 CharSelectionSimulatedMovement.cs
-│   │       ├── 🔷 CharacterMenuData.cs
-│   │       ├── 🔷 MenuInputsController.cs
-│   │       ├── 🔷 MenuScreen.cs
-│   │       ├── 🔷 MenuSkipInitialCutscene.cs
-│   │       ├── 🔷 MenuTransitionButton.cs
-│   │       └── 🔷 ScreenTransitionsManager.cs
-│   ├── 📁 MapDynamicProps/
-│   │   ├── 📁 BreakablePlatforms/
-│   │   │   └── 🔷 BreakablePlatform.cs
-│   │   ├── 📁 Grua/
-│   │   │   └── 🔷 ControlledAngleRotator.cs
-│   │   └── 📁 TNT/
-│   │       └── 🔷 PointExplosion.cs
-│   ├── 📁 MapSelection/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 MapSelection.cs
-│   ├── 📁 MegaChicken/
-│   │   ├── 📁 Scripts/
-│   │   │   ├── 🔷 ChickenBrain.cs
-│   │   │   ├── 🔷 ChickenKillZone.cs
-│   │   │   ├── 🔷 ChickenPushZone.cs
-│   │   │   └── 🔷 MegaChickenEgg.cs
-│   │   └── 📁 StateMachine/
-│   │       ├── 📁 IdleState/
-│   │       │   └── 📁 Decisions/
-│   │       │       ├── 🔷 IsChickenGoingToJumpDecision.cs
-│   │       │       └── 🔷 IsChickenLayingEggDecision.cs
-│   │       ├── 📁 JumpState/
-│   │       │   ├── 📁 Actions/
-│   │       │   │   ├── 🔷 CheckIfJumpEndedAction.cs
-│   │       │   │   └── 🔷 ChickenJumpAttackAction.cs
-│   │       │   └── 📁 Decisions/
-│   │       │       └── 🔷 IsChickenJumpFinishedDecision.cs
-│   │       └── 📁 LayEggState/
-│   │           ├── 📁 Actions/
-│   │           │   ├── 🔷 CheckIfLayingEggEnded.cs
-│   │           │   └── 🔷 ChickenLayEggAction.cs
-│   │           └── 📁 Decisions/
-│   │               └── 🔷 IsChickenAttackFinishedDecision.cs
-│   ├── 📁 PauseAndSettingsMenu/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 EnsureGraphicsSettings.cs
-│   │       ├── 🔷 OpenPauseMenu.cs
-│   │       └── 🔷 SettingsMenuBehaviour.cs
-│   ├── 📁 Player/
-│   │   ├── 📁 CarInjector/
-│   │   │   └── 🔷 CarInjector.cs
-│   │   ├── 📁 HUD/
-│   │   │   └── 📁 Scripts/
-│   │   │       └── 🔷 PlayerHUD.cs
-│   │   ├── 📁 Input/
-│   │   │   ├── 📁 Scripts/
-│   │   │   │   └── 🔷 PlayerInputController.cs
-│   │   │   └── 🔷 PlayerInputMap.cs
-│   │   ├── 📁 ParticleSystems/
-│   │   │   └── 📁 Scripts/
-│   │   │       └── 🔷 VehicleVfxController.cs
-│   │   ├── 📁 PlayerHudTemplate/
-│   │   │   └── 📁 Scripts/
-│   │   │       ├── 🔷 CallTests.cs
-│   │   │       ├── 🔷 MinimapFollowPlayer.cs
-│   │   │       ├── 🔷 SandstormDirectionMinimap.cs
-│   │   │       └── 🔷 UIDynamicElement.cs
-│   │   └── 📁 StateMachines/
-│   │       ├── 📁 PlayerShootingStateMachine/
-│   │       │   ├── 📁 DashState/
-│   │       │   │   ├── 📁 Actions/
-│   │       │   │   │   ├── 🔷 ApplyDashAction.cs
-│   │       │   │   │   ├── 🔷 CancelDashAction.cs
-│   │       │   │   │   └── 🔷 ChangeHUDEffectAction.cs
-│   │       │   │   └── 📁 Decisions/
-│   │       │   │       └── 🔷 DashEndedDecision.cs
-│   │       │   ├── 📁 IdleState/
-│   │       │   │   └── 📁 Decisions/
-│   │       │   │       ├── 🔷 IsDashingDecision.cs
-│   │       │   │       ├── 🔷 IsPushShootModeDecision.cs
-│   │       │   │       ├── 🔷 IsShootInputDecision.cs
-│   │       │   │       └── 🔷 IsUniqueAbilityInputDecision.cs
-│   │       │   ├── 📁 MineShootState/
-│   │       │   │   ├── 📁 Actions/
-│   │       │   │   │   └── 🔷 TriggerThrowMineAction.cs
-│   │       │   │   └── 📁 Decisions/
-│   │       │   │       └── 🔷 IsMineShootInputDecision.cs
-│   │       │   ├── 📁 PushShootingState/
-│   │       │   │   ├── 📁 Actions/
-│   │       │   │   │   ├── 🔷 HandlePushShootingAimingAction.cs
-│   │       │   │   │   ├── 🔷 ToggleHUDEffectsAction.cs
-│   │       │   │   │   ├── 🔷 ToggleUIElementsAction.cs
-│   │       │   │   │   └── 🔷 TriggerPushShootAction.cs
-│   │       │   │   └── 📁 Decisions/
-│   │       │   │       ├── 🔷 IsOtherInputClickedDecision.cs
-│   │       │   │       └── 🔷 IsPushShootingFinishedDecision.cs
-│   │       │   ├── 📁 ShootingState/
-│   │       │   │   ├── 📁 Actions/
-│   │       │   │   │   ├── 🔷 NormalShootDecreaseOverheatTimeAction.cs
-│   │       │   │   │   └── 🔷 TriggerShootingAction.cs
-│   │       │   │   └── 📁 Decisions/
-│   │       │   │       └── 🔷 IsOverheatDecision.cs
-│   │       │   └── 📁 UniqueAbilityState/
-│   │       │       └── 📁 Decisions/
-│   │       │           └── 🔷 IsUniqueAbilityBlockFinishedDecision.cs
-│   │       └── 📁 PlayerStateMachine/
-│   │           ├── 📁 AirRotationState/
-│   │           │   ├── 📁 Actions/
-│   │           │   │   └── 🔷 RotateInAirAction.cs
-│   │           │   └── 📁 Decisions/
-│   │           │       ├── 🔷 BlockInputDecision.cs
-│   │           │       ├── 🔷 BrakeOnAirDecision.cs
-│   │           │       └── 🔷 IsGroundedDecision.cs
-│   │           ├── 📁 AirState/
-│   │           │   └── 📁 Actions/
-│   │           │       ├── 🔷 ApplyAirRotationAction.cs
-│   │           │       ├── 🔷 ApplyCustomAirForcesAction.cs
-│   │           │       ├── 🔷 DesactivateCustomAirForceActions.cs
-│   │           │       └── 🔷 DesactivateRollPreventionAction.cs
-│   │           ├── 📁 BlockInputRelated/
-│   │           │   └── 📁 Actions/
-│   │           │       ├── 🔷 BlockInputsAction.cs
-│   │           │       └── 🔷 UnblockInputAction.cs
-│   │           ├── 📁 FlippedState/
-│   │           │   ├── 📁 Actions/
-│   │           │   │   └── 🔷 GetCarToNormalAction.cs
-│   │           │   └── 📁 Decisions/
-│   │           │       └── 🔷 IsBackToNormalFinishedDecision.cs
-│   │           ├── 📁 GroundedState/
-│   │           │   └── 📁 Actions/
-│   │           │       ├── 🔷 ApplyBrakeAction.cs
-│   │           │       ├── 🔷 ApplyMovementAction.cs
-│   │           │       └── 🔷 ApplyRollPreventionAction.cs
-│   │           └── 📁 IdleState/
-│   │               ├── 📁 Actions/
-│   │               │   ├── 🔷 IdleAnimationAction.cs
-│   │               │   ├── 🔷 StartFlipTransitionTimerAction.cs
-│   │               │   └── 🔷 StopFlipStateTransitionTimerAction.cs
-│   │               └── 📁 Decisions/
-│   │                   ├── 🔷 IsFlippedDecision.cs
-│   │                   └── 🔷 IsMovingDecision.cs
-│   ├── 📁 Props/
-│   │   ├── 📁 TrafficLights/
-│   │   │   └── 📁 Traffic Lights/
-│   │   │       └── 📁 Scripts/
-│   │   │           ├── 📁 Editor/
-│   │   │           │   ├── 🔷 TrafficLightPoleEditor.cs
-│   │   │           │   └── 🔷 TrafficLightUnitEditor.cs
-│   │   │           ├── 🔷 TrafficLightLamp.cs
-│   │   │           ├── 🔷 TrafficLightPole.cs
-│   │   │           └── 🔷 TrafficLightUnit.cs
-│   │   └── 📁 Windmill/
-│   │       └── 🔷 Windmill.cs
-│   ├── 📁 Sandstorm/
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 SandstormController.cs
-│   ├── 📁 Shaders/
-│   │   └── 🔷 RisingLava.cs
-│   ├── 📁 ShootingSystem/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 AimPushShootTrace.cs
-│   │       ├── 🔷 BulletBehaviour.cs
-│   │       ├── 🔷 ExplosionForce.cs
-│   │       ├── 🔷 NormalBulletBehaviour.cs
-│   │       ├── 🔷 NormalShootHandle.cs
-│   │       ├── 🔷 PushBulletBehaviour.cs
-│   │       ├── 🔷 PushShootHandle.cs
-│   │       └── 🔷 ShootingHandle.cs
-│   ├── 📁 StatsSystem/
-│   │   ├── 📁 ScriptableObject/
-│   │   │   └── 📁 Scripts/
-│   │   │       └── 🔷 CharacterData.cs
-│   │   └── 📁 Scripts/
-│   │       └── 🔷 StatsController.cs
-│   ├── 📁 SuckingBuildings/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 BuildingDeadZone.cs
-│   │       └── 🔷 SuckingBuilding.cs
-│   ├── 📁 Training/
-│   │   └── 📁 Scripts/
-│   │       ├── 🔷 ReadBinding.cs
-│   │       ├── 🔷 TrainingHandle.cs
-│   │       ├── 🔷 TrainingInputSucceded.cs
-│   │       ├── 🔷 TrainingResetPlayer.cs
-│   │       ├── 🔷 TrainingScreensHandler.cs
-│   │       └── 🔷 TrainingTestInputZones.cs
-│   ├── 📁 Trampoline/
-│   │   ├── 🔷 ICanBeipullseByTrampoline.cs
-│   │   └── 🔷 ParabolicImpulse.cs
-│   ├── 📁 VolumeManager/
-│   │   ├── 📁 Editor/
-│   │   │   └── 🔷 VolumeManagerEditor.cs
-│   │   └── 🔷 VolumeManager.cs
-│   └── 📁 WinAndLoseScreen/
-│       └── 📁 Scripts/
-│           ├── 🔷 GameEndData.cs
-│           ├── 🔷 StartMode.cs
-│           └── 🔷 WinLoseScreenBehaviour.cs
+━E  ├── 📁 !Common/
+━E  ━E  ├── 📁 CarMovement/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 📁 Car/
+━E  ━E  ━E      ━E  ├── 🔷 AiInputProvider.cs
+━E  ━E  ━E      ━E  ├── 🔷 CarMovementController.cs
+━E  ━E  ━E      ━E  ├── 🔷 CarSpeedOverlay.cs
+━E  ━E  ━E      ━E  ├── 🔷 PlayerInputProvider.cs
+━E  ━E  ━E      ━E  └── 🔷 WheelController.cs
+━E  ━E  ━E      └── 📁 Testing/
+━E  ━E  ━E          ├── 🔷 ApplyDamageTest.cs
+━E  ━E  ━E          └── 🔷 CarTestingHelper.cs
+━E  ━E  ├── 📁 EnumLibrary/
+━E  ━E  ━E  └── 🔷 EnumLibrary.cs
+━E  ━E  ├── 📁 Managers/
+━E  ━E  ━E  ├── 📁 LevelController/
+━E  ━E  ━E  ━E  ├── 📁 Editor/
+━E  ━E  ━E  ━E  ━E  └── 🔷 CharacterSkinsCountFileGenerator.cs
+━E  ━E  ━E  ━E  ├── 📁 ScriptableObject/
+━E  ━E  ━E  ━E  ━E  └── 📁 Script/
+━E  ━E  ━E  ━E  ━E      └── 🔷 ListOfCharactersSkins.cs
+━E  ━E  ━E  ━E  ├── 🔷 CharacterDataProvider.cs
+━E  ━E  ━E  ━E  ├── 🔷 CharacterSpawner.cs
+━E  ━E  ━E  ━E  ├── 🔷 GameEndHandler.cs
+━E  ━E  ━E  ━E  ├── 🔷 GameLoopManager.cs
+━E  ━E  ━E  ━E  ├── 🔷 LevelConstants.cs
+━E  ━E  ━E  ━E  ├── 🔷 LevelController.cs
+━E  ━E  ━E  ━E  ├── 🔷 LevelUtilities.cs
+━E  ━E  ━E  ━E  └── 🔷 SandstormInteractionManager.cs
+━E  ━E  ━E  ├── 📁 ResourcesManager/
+━E  ━E  ━E  ━E  ├── 🔷 ResourcesLoader.cs
+━E  ━E  ━E  ━E  └── 🔷 ResourcesManager.cs
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 BrightnessManager.cs
+━E  ━E  ━E      ├── 🔷 CharacterSelectorManager.cs
+━E  ━E  ━E      ├── 🔷 CustomStudioEventEmitter.cs
+━E  ━E  ━E      ├── 🔷 HUDManager.cs
+━E  ━E  ━E      ├── 🔷 MainMenuManager.cs
+━E  ━E  ━E      ├── 🔷 ObjectPoolManager.cs
+━E  ━E  ━E      ├── 🔷 SoundManager.cs
+━E  ━E  ━E      ├── 🔷 SubtitlesManager.cs
+━E  ━E  ━E      ├── 🔷 TimelineSubtitleBase.cs
+━E  ━E  ━E      └── 🔷 TriggerAudioController.cs
+━E  ━E  ├── 📁 ObjectPooling/
+━E  ━E  ━E  ├── 📁 Interfaces/
+━E  ━E  ━E  ━E  └── 🔷 IPooledObject.cs
+━E  ━E  ━E  ├── 📁 ScriptableObject/
+━E  ━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E  ━E      └── 🔷 ObjectPoolSO.cs
+━E  ━E  ━E  └── 🔷 ObjectPool.cs
+━E  ━E  ├── 📁 Physics/
+━E  ━E  ━E  ├── 🔷 ApplyForceByState.cs
+━E  ━E  ━E  └── 🔷 PhysicsBehaviour.cs
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 📁 Interfaces/
+━E  ━E      ━E  └── 🔷 IKillCharacters.cs
+━E  ━E      └── 🔷 DeadWallsBehaivour.cs
+━E  ├── 📁 !Prototype/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 KillCharacterNotify.cs
+━E  ├── 📁 CameraBehaviours/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 CameraBehaviours.cs
+━E  ├── 📁 Characters/
+━E  ━E  ├── 📁 !Common/
+━E  ━E  ━E  └── 📁 UniqueAbility/
+━E  ━E  ━E      ├── 📁 AbilityData/
+━E  ━E  ━E      ━E  └── 📁 Scripts/
+━E  ━E  ━E      ━E      └── 🔷 AbilityData.cs
+━E  ━E  ━E      ├── 📁 Actions/
+━E  ━E  ━E      ━E  └── 🔷 TriggerUniqueAbilityAction.cs
+━E  ━E  ━E      ├── 📁 Decisions/
+━E  ━E  ━E      ━E  ├── 🔷 IsUniqueAbilityActive.cs
+━E  ━E  ━E      ━E  └── 🔷 IsUniqueAbilityOnCooldownDecision.cs
+━E  ━E  ━E      └── 📁 Scripts/
+━E  ━E  ━E          ├── 🔷 BaseUniqueAbility.cs
+━E  ━E  ━E          └── 🔷 CarImpactHandler.cs
+━E  ━E  ├── 📁 Carme/
+━E  ━E  ━E  ├── 📁 McChicken/
+━E  ━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E  ━E      ├── 📁 Climbeable/
+━E  ━E  ━E  ━E      ━E  ├── 🔷 ChickenClimbeable.cs
+━E  ━E  ━E  ━E      ━E  └── 🔷 ClimbeableColliderAutomaticator.cs
+━E  ━E  ━E  ━E      ├── 🔷 McChicken.cs
+━E  ━E  ━E  ━E      ├── 🔷 McChickenLegsMovement.cs
+━E  ━E  ━E  ━E      ├── 🔷 McChickenMovement.cs
+━E  ━E  ━E  ━E      ├── 🔷 McChickenPhysicsHandler.cs
+━E  ━E  ━E  ━E      └── 🔷 McChickenVisuals.cs
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 CarmeCarImpactHandler.cs
+━E  ━E  ━E      └── 🔷 CarmeUniqueAbility.cs
+━E  ━E  ├── 📁 Josefino/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 JosefinoCarImpactHandler.cs
+━E  ━E  ━E      └── 🔷 JosefinoUniqueAbility.cs
+━E  ━E  ├── 📁 MariaAntonia/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 MariaAntoniaCarImpactHandler.cs
+━E  ━E  ━E      └── 🔷 MariaAntoniaUniqueAbility.cs
+━E  ━E  └── 📁 Pepe/
+━E  ━E      └── 📁 Scripts/
+━E  ━E          ├── 🔷 AscendingTomatoBehaviour.cs
+━E  ━E          ├── 🔷 DescendingTomatoBehaviour.cs
+━E  ━E          ├── 🔷 PepeCarImpactHandler.cs
+━E  ━E          └── 🔷 PepeUniqueAbility.cs
+━E  ├── 📁 Credits/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 CreditsBehaviour.cs
+━E  ━E      └── 🔷 CreditsListData.cs
+━E  ├── 📁 EnemyAI/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 AIDebugStateChanger.cs
+━E  ━E      └── 🔷 EnemyAIBrain.cs
+━E  ├── 📁 IngameEventSystem/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 CharacterIcon.cs
+━E  ━E      ├── 🔷 GameReadyCountdown.cs
+━E  ━E      └── 🔷 IngameEventsManager.cs
+━E  ├── 📁 InputRemapping/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 ResetDeviceBindings.cs
+━E  ├── 📁 Interactables/
+━E  ━E  ├── 📁 !Common/
+━E  ━E  ━E  ├── 📁 GenericInterable/
+━E  ━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E  ━E      └── 🔷 GenericInteractable.cs
+━E  ━E  ━E  ├── 🔷 IInteractable.cs
+━E  ━E  ━E  └── 🔷 TriggerInteractableOnCollisionEnter.cs
+━E  ━E  ├── 📁 InteractableHandler/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      └── 🔷 InteractableHandler.cs
+━E  ━E  ├── 📁 SkinUnlockInteractable/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 SkinUnlockHandler.cs
+━E  ━E  ━E      └── 🔷 SkinUnlockerInteractable.cs
+━E  ━E  └── 📁 StatsBoosterInteractable/
+━E  ━E      └── 📁 Scripts/
+━E  ━E          └── 🔷 StatsBoostInteractable.cs
+━E  ├── 📁 LoadingScreen/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 LoadingBehaviour.cs
+━E  ├── 📁 MainMenu/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 📁 AccesibilitySettings/
+━E  ━E      ━E  ├── 🔷 AccesibilitySettings.cs
+━E  ━E      ━E  ├── 🔷 ColorBlindModeController.cs
+━E  ━E      ━E  ├── 🔷 LoadLenguageSettings.cs
+━E  ━E      ━E  └── 🔷 SubtitleTest.cs
+━E  ━E      ├── 📁 CharSelectionCarMovement/
+━E  ━E      ━E  └── 🔷 CharSelectionSimulatedMovement.cs
+━E  ━E      ├── 🔷 CharacterMenuData.cs
+━E  ━E      ├── 🔷 MenuInputsController.cs
+━E  ━E      ├── 🔷 MenuScreen.cs
+━E  ━E      ├── 🔷 MenuSkipInitialCutscene.cs
+━E  ━E      ├── 🔷 MenuTransitionButton.cs
+━E  ━E      └── 🔷 ScreenTransitionsManager.cs
+━E  ├── 📁 MapDynamicProps/
+━E  ━E  ├── 📁 BreakablePlatforms/
+━E  ━E  ━E  └── 🔷 BreakablePlatform.cs
+━E  ━E  ├── 📁 Grua/
+━E  ━E  ━E  └── 🔷 ControlledAngleRotator.cs
+━E  ━E  └── 📁 TNT/
+━E  ━E      └── 🔷 PointExplosion.cs
+━E  ├── 📁 MapSelection/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 MapSelection.cs
+━E  ├── 📁 MegaChicken/
+━E  ━E  ├── 📁 Scripts/
+━E  ━E  ━E  ├── 🔷 ChickenBrain.cs
+━E  ━E  ━E  ├── 🔷 ChickenKillZone.cs
+━E  ━E  ━E  ├── 🔷 ChickenPushZone.cs
+━E  ━E  ━E  └── 🔷 MegaChickenEgg.cs
+━E  ━E  └── 📁 StateMachine/
+━E  ━E      ├── 📁 IdleState/
+━E  ━E      ━E  └── 📁 Decisions/
+━E  ━E      ━E      ├── 🔷 IsChickenGoingToJumpDecision.cs
+━E  ━E      ━E      └── 🔷 IsChickenLayingEggDecision.cs
+━E  ━E      ├── 📁 JumpState/
+━E  ━E      ━E  ├── 📁 Actions/
+━E  ━E      ━E  ━E  ├── 🔷 CheckIfJumpEndedAction.cs
+━E  ━E      ━E  ━E  └── 🔷 ChickenJumpAttackAction.cs
+━E  ━E      ━E  └── 📁 Decisions/
+━E  ━E      ━E      └── 🔷 IsChickenJumpFinishedDecision.cs
+━E  ━E      └── 📁 LayEggState/
+━E  ━E          ├── 📁 Actions/
+━E  ━E          ━E  ├── 🔷 CheckIfLayingEggEnded.cs
+━E  ━E          ━E  └── 🔷 ChickenLayEggAction.cs
+━E  ━E          └── 📁 Decisions/
+━E  ━E              └── 🔷 IsChickenAttackFinishedDecision.cs
+━E  ├── 📁 PauseAndSettingsMenu/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 EnsureGraphicsSettings.cs
+━E  ━E      ├── 🔷 OpenPauseMenu.cs
+━E  ━E      └── 🔷 SettingsMenuBehaviour.cs
+━E  ├── 📁 Player/
+━E  ━E  ├── 📁 CarInjector/
+━E  ━E  ━E  └── 🔷 CarInjector.cs
+━E  ━E  ├── 📁 HUD/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      └── 🔷 PlayerHUD.cs
+━E  ━E  ├── 📁 Input/
+━E  ━E  ━E  ├── 📁 Scripts/
+━E  ━E  ━E  ━E  └── 🔷 PlayerInputController.cs
+━E  ━E  ━E  └── 🔷 PlayerInputMap.cs
+━E  ━E  ├── 📁 ParticleSystems/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      └── 🔷 VehicleVfxController.cs
+━E  ━E  ├── 📁 PlayerHudTemplate/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      ├── 🔷 CallTests.cs
+━E  ━E  ━E      ├── 🔷 MinimapFollowPlayer.cs
+━E  ━E  ━E      ├── 🔷 SandstormDirectionMinimap.cs
+━E  ━E  ━E      └── 🔷 UIDynamicElement.cs
+━E  ━E  └── 📁 StateMachines/
+━E  ━E      ├── 📁 PlayerShootingStateMachine/
+━E  ━E      ━E  ├── 📁 DashState/
+━E  ━E      ━E  ━E  ├── 📁 Actions/
+━E  ━E      ━E  ━E  ━E  ├── 🔷 ApplyDashAction.cs
+━E  ━E      ━E  ━E  ━E  ├── 🔷 CancelDashAction.cs
+━E  ━E      ━E  ━E  ━E  └── 🔷 ChangeHUDEffectAction.cs
+━E  ━E      ━E  ━E  └── 📁 Decisions/
+━E  ━E      ━E  ━E      └── 🔷 DashEndedDecision.cs
+━E  ━E      ━E  ├── 📁 IdleState/
+━E  ━E      ━E  ━E  └── 📁 Decisions/
+━E  ━E      ━E  ━E      ├── 🔷 IsDashingDecision.cs
+━E  ━E      ━E  ━E      ├── 🔷 IsPushShootModeDecision.cs
+━E  ━E      ━E  ━E      ├── 🔷 IsShootInputDecision.cs
+━E  ━E      ━E  ━E      └── 🔷 IsUniqueAbilityInputDecision.cs
+━E  ━E      ━E  ├── 📁 MineShootState/
+━E  ━E      ━E  ━E  ├── 📁 Actions/
+━E  ━E      ━E  ━E  ━E  └── 🔷 TriggerThrowMineAction.cs
+━E  ━E      ━E  ━E  └── 📁 Decisions/
+━E  ━E      ━E  ━E      └── 🔷 IsMineShootInputDecision.cs
+━E  ━E      ━E  ├── 📁 PushShootingState/
+━E  ━E      ━E  ━E  ├── 📁 Actions/
+━E  ━E      ━E  ━E  ━E  ├── 🔷 HandlePushShootingAimingAction.cs
+━E  ━E      ━E  ━E  ━E  ├── 🔷 ToggleHUDEffectsAction.cs
+━E  ━E      ━E  ━E  ━E  ├── 🔷 ToggleUIElementsAction.cs
+━E  ━E      ━E  ━E  ━E  └── 🔷 TriggerPushShootAction.cs
+━E  ━E      ━E  ━E  └── 📁 Decisions/
+━E  ━E      ━E  ━E      ├── 🔷 IsOtherInputClickedDecision.cs
+━E  ━E      ━E  ━E      └── 🔷 IsPushShootingFinishedDecision.cs
+━E  ━E      ━E  ├── 📁 ShootingState/
+━E  ━E      ━E  ━E  ├── 📁 Actions/
+━E  ━E      ━E  ━E  ━E  ├── 🔷 NormalShootDecreaseOverheatTimeAction.cs
+━E  ━E      ━E  ━E  ━E  └── 🔷 TriggerShootingAction.cs
+━E  ━E      ━E  ━E  └── 📁 Decisions/
+━E  ━E      ━E  ━E      └── 🔷 IsOverheatDecision.cs
+━E  ━E      ━E  └── 📁 UniqueAbilityState/
+━E  ━E      ━E      └── 📁 Decisions/
+━E  ━E      ━E          └── 🔷 IsUniqueAbilityBlockFinishedDecision.cs
+━E  ━E      └── 📁 PlayerStateMachine/
+━E  ━E          ├── 📁 AirRotationState/
+━E  ━E          ━E  ├── 📁 Actions/
+━E  ━E          ━E  ━E  └── 🔷 RotateInAirAction.cs
+━E  ━E          ━E  └── 📁 Decisions/
+━E  ━E          ━E      ├── 🔷 BlockInputDecision.cs
+━E  ━E          ━E      ├── 🔷 BrakeOnAirDecision.cs
+━E  ━E          ━E      └── 🔷 IsGroundedDecision.cs
+━E  ━E          ├── 📁 AirState/
+━E  ━E          ━E  └── 📁 Actions/
+━E  ━E          ━E      ├── 🔷 ApplyAirRotationAction.cs
+━E  ━E          ━E      ├── 🔷 ApplyCustomAirForcesAction.cs
+━E  ━E          ━E      ├── 🔷 DesactivateCustomAirForceActions.cs
+━E  ━E          ━E      └── 🔷 DesactivateRollPreventionAction.cs
+━E  ━E          ├── 📁 BlockInputRelated/
+━E  ━E          ━E  └── 📁 Actions/
+━E  ━E          ━E      ├── 🔷 BlockInputsAction.cs
+━E  ━E          ━E      └── 🔷 UnblockInputAction.cs
+━E  ━E          ├── 📁 FlippedState/
+━E  ━E          ━E  ├── 📁 Actions/
+━E  ━E          ━E  ━E  └── 🔷 GetCarToNormalAction.cs
+━E  ━E          ━E  └── 📁 Decisions/
+━E  ━E          ━E      └── 🔷 IsBackToNormalFinishedDecision.cs
+━E  ━E          ├── 📁 GroundedState/
+━E  ━E          ━E  └── 📁 Actions/
+━E  ━E          ━E      ├── 🔷 ApplyBrakeAction.cs
+━E  ━E          ━E      ├── 🔷 ApplyMovementAction.cs
+━E  ━E          ━E      └── 🔷 ApplyRollPreventionAction.cs
+━E  ━E          └── 📁 IdleState/
+━E  ━E              ├── 📁 Actions/
+━E  ━E              ━E  ├── 🔷 IdleAnimationAction.cs
+━E  ━E              ━E  ├── 🔷 StartFlipTransitionTimerAction.cs
+━E  ━E              ━E  └── 🔷 StopFlipStateTransitionTimerAction.cs
+━E  ━E              └── 📁 Decisions/
+━E  ━E                  ├── 🔷 IsFlippedDecision.cs
+━E  ━E                  └── 🔷 IsMovingDecision.cs
+━E  ├── 📁 Props/
+━E  ━E  ├── 📁 TrafficLights/
+━E  ━E  ━E  └── 📁 Traffic Lights/
+━E  ━E  ━E      └── 📁 Scripts/
+━E  ━E  ━E          ├── 📁 Editor/
+━E  ━E  ━E          ━E  ├── 🔷 TrafficLightPoleEditor.cs
+━E  ━E  ━E          ━E  └── 🔷 TrafficLightUnitEditor.cs
+━E  ━E  ━E          ├── 🔷 TrafficLightLamp.cs
+━E  ━E  ━E          ├── 🔷 TrafficLightPole.cs
+━E  ━E  ━E          └── 🔷 TrafficLightUnit.cs
+━E  ━E  └── 📁 Windmill/
+━E  ━E      └── 🔷 Windmill.cs
+━E  ├── 📁 Sandstorm/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 SandstormController.cs
+━E  ├── 📁 Shaders/
+━E  ━E  └── 🔷 RisingLava.cs
+━E  ├── 📁 ShootingSystem/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 AimPushShootTrace.cs
+━E  ━E      ├── 🔷 BulletBehaviour.cs
+━E  ━E      ├── 🔷 ExplosionForce.cs
+━E  ━E      ├── 🔷 NormalBulletBehaviour.cs
+━E  ━E      ├── 🔷 NormalShootHandle.cs
+━E  ━E      ├── 🔷 PushBulletBehaviour.cs
+━E  ━E      ├── 🔷 PushShootHandle.cs
+━E  ━E      └── 🔷 ShootingHandle.cs
+━E  ├── 📁 StatsSystem/
+━E  ━E  ├── 📁 ScriptableObject/
+━E  ━E  ━E  └── 📁 Scripts/
+━E  ━E  ━E      └── 🔷 CharacterData.cs
+━E  ━E  └── 📁 Scripts/
+━E  ━E      └── 🔷 StatsController.cs
+━E  ├── 📁 SuckingBuildings/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 BuildingDeadZone.cs
+━E  ━E      └── 🔷 SuckingBuilding.cs
+━E  ├── 📁 Training/
+━E  ━E  └── 📁 Scripts/
+━E  ━E      ├── 🔷 ReadBinding.cs
+━E  ━E      ├── 🔷 TrainingHandle.cs
+━E  ━E      ├── 🔷 TrainingInputSucceded.cs
+━E  ━E      ├── 🔷 TrainingResetPlayer.cs
+━E  ━E      ├── 🔷 TrainingScreensHandler.cs
+━E  ━E      └── 🔷 TrainingTestInputZones.cs
+━E  ├── 📁 Trampoline/
+━E  ━E  ├── 🔷 ICanBeipullseByTrampoline.cs
+━E  ━E  └── 🔷 ParabolicImpulse.cs
+━E  ├── 📁 VolumeManager/
+━E  ━E  ├── 📁 Editor/
+━E  ━E  ━E  └── 🔷 VolumeManagerEditor.cs
+━E  ━E  └── 🔷 VolumeManager.cs
+━E  └── 📁 WinAndLoseScreen/
+━E      └── 📁 Scripts/
+━E          ├── 🔷 GameEndData.cs
+━E          ├── 🔷 StartMode.cs
+━E          └── 🔷 WinLoseScreenBehaviour.cs
 ├── 📁 Multiplayer/
-│   ├── 🔷 CustomObjectPoolBridge.cs
-│   ├── 🔷 DebugCharacterSelector.cs
-│   ├── 🔷 IMyNetworkManager.cs
-│   ├── 🔷 IMyNetworkObject.cs
-│   ├── 🔷 LobbyControllerAbstracted.cs
-│   ├── 🔷 MultiplayerRigidbodyAdapter.cs
-│   ├── 🔷 MyNetworkBehaviour.cs
-│   ├── 🔷 NetworkedInputProvider.cs
-│   ├── 🔷 NetworkedLevelController.cs
-│   ├── 🔷 NetworkedLocalSingletonPreserver.cs
-│   ├── 🔷 NetworkedObjectPoolManager.cs
-│   ├── 🔷 NetworkedPlayer.cs
-│   ├── 🔷 NetworkedShoot.cs
-│   ├── 🔷 NetworkedShootingController.cs
-│   ├── 🔷 NetworkedVehicle.cs
-│   ├── 🔷 PlatformNetworkBehaviourBase.cs
-│   ├── 🔷 PoolObjectInfo.cs
-│   ├── 🔷 PredictedObjectRunner.cs
-│   └── 🔷 PredictedProjectile.cs
+━E  ├── 🔷 CustomObjectPoolBridge.cs
+━E  ├── 🔷 DebugCharacterSelector.cs
+━E  ├── 🔷 IMyNetworkManager.cs
+━E  ├── 🔷 IMyNetworkObject.cs
+━E  ├── 🔷 LobbyControllerAbstracted.cs
+━E  ├── 🔷 MultiplayerRigidbodyAdapter.cs
+━E  ├── 🔷 MyNetworkBehaviour.cs
+━E  ├── 🔷 NetworkedInputProvider.cs
+━E  ├── 🔷 NetworkedLevelController.cs
+━E  ├── 🔷 NetworkedLocalSingletonPreserver.cs
+━E  ├── 🔷 NetworkedObjectPoolManager.cs
+━E  ├── 🔷 NetworkedPlayer.cs
+━E  ├── 🔷 NetworkedShoot.cs
+━E  ├── 🔷 NetworkedShootingController.cs
+━E  ├── 🔷 NetworkedVehicle.cs
+━E  ├── 🔷 PlatformNetworkBehaviourBase.cs
+━E  ├── 🔷 PoolObjectInfo.cs
+━E  ├── 🔷 PredictedObjectRunner.cs
+━E  └── 🔷 PredictedProjectile.cs
 ├── 📁 StateMachine/
-│   ├── 📁 CombatState/
-│   │   ├── 📁 Actions/
-│   │   │   ├── 🔷 BaseShootAction.cs
-│   │   │   ├── 🔷 ChangeShootingTargetToTheOneThatMadeMoreDamageAction.cs
-│   │   │   ├── 🔷 ChangeSpeedAction.cs
-│   │   │   ├── 🔷 ChooseCharacterThatIsNotThePlayer.cs
-│   │   │   ├── 🔷 DashAction.cs
-│   │   │   ├── 🔷 DecreaseOverheatTimeAction.cs
-│   │   │   ├── 🔷 EmergencyTargetAction.cs
-│   │   │   ├── 🔷 PushShootAction.cs
-│   │   │   └── 🔷 UniqueAbilityAction.cs
-│   │   ├── 📁 Decisions/
-│   │   │   ├── 🔷 IsOnEndGame.cs
-│   │   │   ├── 🔷 IsPushShootOnCooldownDecision.cs
-│   │   │   └── 🔷 IsShootOverheatedDecision.cs
-│   │   ├── 📁 NormalShootState/
-│   │   │   └── 📁 Actions/
-│   │   │       └── 🔷 StopDelayDecreaseOveheatAction.cs
-│   │   └── 📁 UseUniqueAbilityState/
-│   │       ├── 📁 Actions/
-│   │       │   └── 🔷 CheckUniqueAbilityProgressAction.cs
-│   │       └── 📁 Decisions/
-│   │           └── 🔷 IsUniqueAbilityFinishedDecision.cs
-│   ├── 📁 DashState/
-│   │   └── 📁 Decisions/
-│   │       ├── 🔷 IsDashFinishedDecision.cs
-│   │       ├── 🔷 IsDashReadyDecision.cs
-│   │       └── 🔷 IsSomeoneNearbyDecision.cs
-│   ├── 📁 Decisions/
-│   │   ├── 🔷 ANDDecision.cs
-│   │   ├── 🔷 AboveRecoveryHealthPercentageDecision.cs
-│   │   ├── 🔷 AllInteractablesAreNotInsideSandstormDecision.cs
-│   │   ├── 🔷 AllSafeZonesAreInsideSandstorm.cs
-│   │   ├── 🔷 HasSomeoneThatIsNotTheTargetMadeEnoughDamageDecision.cs
-│   │   ├── 🔷 HasTargetToShootDecision.cs
-│   │   ├── 🔷 HasXSecondsPassedDecision.cs
-│   │   ├── 🔷 IsBelowEnduranceThresholdDecision.cs
-│   │   ├── 🔷 IsInFrontDecision.cs
-│   │   ├── 🔷 IsInValidRangeDecision.cs
-│   │   ├── 🔷 IsInsideSandstormDecision.cs
-│   │   ├── 🔷 NOTDecision.cs
-│   │   ├── 🔷 ORDecision.cs
-│   │   └── 🔷 SkewedRandomDecision.cs
-│   ├── 📁 FleeState/
-│   │   ├── 📁 Actions/
-│   │   │   ├── 🔷 ChooseNearestSafeZoneAwayFromTarget.cs
-│   │   │   └── 🔷 FleeFromTargetAction.cs
-│   │   └── 📁 Decisions/
-│   │       └── 🔷 MakeDashDecision.cs
-│   ├── 📁 Scripts/
-│   │   ├── 🔷 Action.cs
-│   │   ├── 🔷 ActionDebug.cs
-│   │   ├── 🔷 ActionUpdateTargetPosition.cs
-│   │   ├── 🔷 ActionWait.cs
-│   │   ├── 🔷 Controller.cs
-│   │   ├── 🔷 Decision.cs
-│   │   ├── 🔷 DecisionActionFinished.cs
-│   │   ├── 🔷 DecisionAllActionsAreFinished.cs
-│   │   ├── 🔷 DecisionAlwaysTrue.cs
-│   │   ├── 🔷 RandomDecision.cs
-│   │   ├── 🔷 State.cs
-│   │   └── 🔷 Transition.cs
-│   ├── 📁 SearchState/
-│   │   ├── 📁 Actions/
-│   │   │   ├── 🔷 ChooseItemFromTypeAction.cs
-│   │   │   ├── 🔷 ChooseNearestCharacterAction.cs
-│   │   │   ├── 🔷 ChooseNearestDangerZoneAction.cs
-│   │   │   ├── 🔷 ChooseNearestItemAction.cs
-│   │   │   ├── 🔷 ChooseNearestSafeZoneAction.cs
-│   │   │   ├── 🔷 ChoosePlayer.cs
-│   │   │   ├── 🔷 DriveToPointAction.cs
-│   │   │   └── 🔷 GetClosestItemAwayFromTargetAction.cs
-│   │   └── 📁 Decisions/
-│   │       └── 🔷 HasItemBeenTakenDecision.cs
-│   └── 📁 TrainingState/
-│       ├── 📁 Actions/
-│       │   └── 🔷 ExitTrainingAction.cs
-│       ├── 📁 Decision/
-│       │   └── 🔷 CanPerformeTrainingAction.cs
-│       ├── 🔷 WantsToChangeToCombatStateDecision.cs
-│       └── 🔷 WantsToChangeToFleeState.cs
+━E  ├── 📁 CombatState/
+━E  ━E  ├── 📁 Actions/
+━E  ━E  ━E  ├── 🔷 BaseShootAction.cs
+━E  ━E  ━E  ├── 🔷 ChangeShootingTargetToTheOneThatMadeMoreDamageAction.cs
+━E  ━E  ━E  ├── 🔷 ChangeSpeedAction.cs
+━E  ━E  ━E  ├── 🔷 ChooseCharacterThatIsNotThePlayer.cs
+━E  ━E  ━E  ├── 🔷 DashAction.cs
+━E  ━E  ━E  ├── 🔷 DecreaseOverheatTimeAction.cs
+━E  ━E  ━E  ├── 🔷 EmergencyTargetAction.cs
+━E  ━E  ━E  ├── 🔷 PushShootAction.cs
+━E  ━E  ━E  └── 🔷 UniqueAbilityAction.cs
+━E  ━E  ├── 📁 Decisions/
+━E  ━E  ━E  ├── 🔷 IsOnEndGame.cs
+━E  ━E  ━E  ├── 🔷 IsPushShootOnCooldownDecision.cs
+━E  ━E  ━E  └── 🔷 IsShootOverheatedDecision.cs
+━E  ━E  ├── 📁 NormalShootState/
+━E  ━E  ━E  └── 📁 Actions/
+━E  ━E  ━E      └── 🔷 StopDelayDecreaseOveheatAction.cs
+━E  ━E  └── 📁 UseUniqueAbilityState/
+━E  ━E      ├── 📁 Actions/
+━E  ━E      ━E  └── 🔷 CheckUniqueAbilityProgressAction.cs
+━E  ━E      └── 📁 Decisions/
+━E  ━E          └── 🔷 IsUniqueAbilityFinishedDecision.cs
+━E  ├── 📁 DashState/
+━E  ━E  └── 📁 Decisions/
+━E  ━E      ├── 🔷 IsDashFinishedDecision.cs
+━E  ━E      ├── 🔷 IsDashReadyDecision.cs
+━E  ━E      └── 🔷 IsSomeoneNearbyDecision.cs
+━E  ├── 📁 Decisions/
+━E  ━E  ├── 🔷 ANDDecision.cs
+━E  ━E  ├── 🔷 AboveRecoveryHealthPercentageDecision.cs
+━E  ━E  ├── 🔷 AllInteractablesAreNotInsideSandstormDecision.cs
+━E  ━E  ├── 🔷 AllSafeZonesAreInsideSandstorm.cs
+━E  ━E  ├── 🔷 HasSomeoneThatIsNotTheTargetMadeEnoughDamageDecision.cs
+━E  ━E  ├── 🔷 HasTargetToShootDecision.cs
+━E  ━E  ├── 🔷 HasXSecondsPassedDecision.cs
+━E  ━E  ├── 🔷 IsBelowEnduranceThresholdDecision.cs
+━E  ━E  ├── 🔷 IsInFrontDecision.cs
+━E  ━E  ├── 🔷 IsInValidRangeDecision.cs
+━E  ━E  ├── 🔷 IsInsideSandstormDecision.cs
+━E  ━E  ├── 🔷 NOTDecision.cs
+━E  ━E  ├── 🔷 ORDecision.cs
+━E  ━E  └── 🔷 SkewedRandomDecision.cs
+━E  ├── 📁 FleeState/
+━E  ━E  ├── 📁 Actions/
+━E  ━E  ━E  ├── 🔷 ChooseNearestSafeZoneAwayFromTarget.cs
+━E  ━E  ━E  └── 🔷 FleeFromTargetAction.cs
+━E  ━E  └── 📁 Decisions/
+━E  ━E      └── 🔷 MakeDashDecision.cs
+━E  ├── 📁 Scripts/
+━E  ━E  ├── 🔷 Action.cs
+━E  ━E  ├── 🔷 ActionDebug.cs
+━E  ━E  ├── 🔷 ActionUpdateTargetPosition.cs
+━E  ━E  ├── 🔷 ActionWait.cs
+━E  ━E  ├── 🔷 Controller.cs
+━E  ━E  ├── 🔷 Decision.cs
+━E  ━E  ├── 🔷 DecisionActionFinished.cs
+━E  ━E  ├── 🔷 DecisionAllActionsAreFinished.cs
+━E  ━E  ├── 🔷 DecisionAlwaysTrue.cs
+━E  ━E  ├── 🔷 RandomDecision.cs
+━E  ━E  ├── 🔷 State.cs
+━E  ━E  └── 🔷 Transition.cs
+━E  ├── 📁 SearchState/
+━E  ━E  ├── 📁 Actions/
+━E  ━E  ━E  ├── 🔷 ChooseItemFromTypeAction.cs
+━E  ━E  ━E  ├── 🔷 ChooseNearestCharacterAction.cs
+━E  ━E  ━E  ├── 🔷 ChooseNearestDangerZoneAction.cs
+━E  ━E  ━E  ├── 🔷 ChooseNearestItemAction.cs
+━E  ━E  ━E  ├── 🔷 ChooseNearestSafeZoneAction.cs
+━E  ━E  ━E  ├── 🔷 ChoosePlayer.cs
+━E  ━E  ━E  ├── 🔷 DriveToPointAction.cs
+━E  ━E  ━E  └── 🔷 GetClosestItemAwayFromTargetAction.cs
+━E  ━E  └── 📁 Decisions/
+━E  ━E      └── 🔷 HasItemBeenTakenDecision.cs
+━E  └── 📁 TrainingState/
+━E      ├── 📁 Actions/
+━E      ━E  └── 🔷 ExitTrainingAction.cs
+━E      ├── 📁 Decision/
+━E      ━E  └── 🔷 CanPerformeTrainingAction.cs
+━E      ├── 🔷 WantsToChangeToCombatStateDecision.cs
+━E      └── 🔷 WantsToChangeToFleeState.cs
 ├── 📁 TutorialInfo/
-│   └── 📁 Scripts/
-│       ├── 📁 Editor/
-│       │   └── 🔷 ReadmeEditor.cs
-│       └── 🔷 Readme.cs
+━E  └── 📁 Scripts/
+━E      ├── 📁 Editor/
+━E      ━E  └── 🔷 ReadmeEditor.cs
+━E      └── 🔷 Readme.cs
 ├── 📁 Utilities/
-│   ├── 📁 Editor/
-│   │   ├── 🔷 BoxColliderToNavMeshObstacleTool.cs
-│   │   ├── 🔷 FBXToPrefabWindow.cs
-│   │   ├── 🔷 GPUInstancingEditorWindow.cs
-│   │   └── 🔷 PrefabMaterialShaderProcessor.cs
-│   ├── 📁 PauseSystem/
-│   │   ├── 🔷 AnimationPausable.cs
-│   │   ├── 🔷 CineMachineCameraPausable.cs
-│   │   ├── 🔷 IPausable.cs
-│   │   ├── 🔷 InputPausable.cs
-│   │   ├── 🔷 ParticleSystemPausable.cs
-│   │   ├── 🔷 PauseManager.cs
-│   │   └── 🔷 PhysicsPausable.cs
-│   ├── 📁 Perfomance/
-│   │   └── 📁 Script/
-│   │       ├── 🔷 Perfomance.cs
-│   │       └── 🔷 SetTargetFPS.cs
-│   ├── 📁 PrefabPlacer/
-│   │   ├── 📁 Editor/
-│   │   │   ├── 🔷 PrefabModeEraser.cs
-│   │   │   ├── 🔷 PrefabModeMultiplePlacer.cs
-│   │   │   ├── 🔷 PrefabModeSinglePlacer.cs
-│   │   │   ├── 🔷 PrefabPlacerWindow.cs
-│   │   │   ├── 🔷 PrefabProfileManager.cs
-│   │   │   └── 🔷 RenameProfileWindow.cs
-│   │   ├── 📁 Interfaces/
-│   │   │   └── 🔷 IPrefabPlacerMode.cs
-│   │   ├── 📁 PlacedObjectsPersistance/
-│   │   │   ├── 🔷 PlacementData.cs
-│   │   │   ├── 🔷 PrefabPlacerObjectMarker.cs
-│   │   │   └── 🔷 ProfilePlacedObjectsTrackerSO.cs
-│   │   └── 🔷 PrefabProfile.cs
-│   ├── 📁 TimerSystem/
-│   │   ├── 📁 Editor/
-│   │   │   └── 🔷 TimerSystemEditor.cs
-│   │   ├── 🔷 DebugTimerDecorator.cs
-│   │   ├── 🔷 DeterministicTimerSystemRunner.cs
-│   │   ├── 🔷 ITimeSpeedModifiable.cs
-│   │   ├── 🔷 ITimer.cs
-│   │   ├── 🔷 PausableTimerSystem.cs
-│   │   ├── 🔷 Timer.cs
-│   │   ├── 🔷 TimerData.cs
-│   │   ├── 🔷 TimerSystem.cs
-│   │   └── 🔷 TimerSystemSinglePlayerRunner.cs
-│   ├── 🔷 AbstractAutoInitializableMonoBehaviour.cs
-│   ├── 🔷 AbstractSingleton.cs
-│   ├── 🔷 CameraHolder.cs
-│   ├── 🔷 DSPCaptureAndWrite.cs
-│   ├── 🔷 DeterministicRandom.cs
-│   ├── 🔷 GenericInputEvent.cs
-│   ├── 🔷 IEventSimulable.cs
-│   ├── 🔷 ListUtilities.cs
-│   ├── 🔷 LocalEventRunner.cs
-│   └── 🔷 UnityRigidbodyAdapter.cs
+━E  ├── 📁 Editor/
+━E  ━E  ├── 🔷 BoxColliderToNavMeshObstacleTool.cs
+━E  ━E  ├── 🔷 FBXToPrefabWindow.cs
+━E  ━E  ├── 🔷 GPUInstancingEditorWindow.cs
+━E  ━E  └── 🔷 PrefabMaterialShaderProcessor.cs
+━E  ├── 📁 PauseSystem/
+━E  ━E  ├── 🔷 AnimationPausable.cs
+━E  ━E  ├── 🔷 CineMachineCameraPausable.cs
+━E  ━E  ├── 🔷 IPausable.cs
+━E  ━E  ├── 🔷 InputPausable.cs
+━E  ━E  ├── 🔷 ParticleSystemPausable.cs
+━E  ━E  ├── 🔷 PauseManager.cs
+━E  ━E  └── 🔷 PhysicsPausable.cs
+━E  ├── 📁 Perfomance/
+━E  ━E  └── 📁 Script/
+━E  ━E      ├── 🔷 Perfomance.cs
+━E  ━E      └── 🔷 SetTargetFPS.cs
+━E  ├── 📁 PrefabPlacer/
+━E  ━E  ├── 📁 Editor/
+━E  ━E  ━E  ├── 🔷 PrefabModeEraser.cs
+━E  ━E  ━E  ├── 🔷 PrefabModeMultiplePlacer.cs
+━E  ━E  ━E  ├── 🔷 PrefabModeSinglePlacer.cs
+━E  ━E  ━E  ├── 🔷 PrefabPlacerWindow.cs
+━E  ━E  ━E  ├── 🔷 PrefabProfileManager.cs
+━E  ━E  ━E  └── 🔷 RenameProfileWindow.cs
+━E  ━E  ├── 📁 Interfaces/
+━E  ━E  ━E  └── 🔷 IPrefabPlacerMode.cs
+━E  ━E  ├── 📁 PlacedObjectsPersistance/
+━E  ━E  ━E  ├── 🔷 PlacementData.cs
+━E  ━E  ━E  ├── 🔷 PrefabPlacerObjectMarker.cs
+━E  ━E  ━E  └── 🔷 ProfilePlacedObjectsTrackerSO.cs
+━E  ━E  └── 🔷 PrefabProfile.cs
+━E  ├── 📁 TimerSystem/
+━E  ━E  ├── 📁 Editor/
+━E  ━E  ━E  └── 🔷 TimerSystemEditor.cs
+━E  ━E  ├── 🔷 DebugTimerDecorator.cs
+━E  ━E  ├── 🔷 DeterministicTimerSystemRunner.cs
+━E  ━E  ├── 🔷 ITimeSpeedModifiable.cs
+━E  ━E  ├── 🔷 ITimer.cs
+━E  ━E  ├── 🔷 PausableTimerSystem.cs
+━E  ━E  ├── 🔷 Timer.cs
+━E  ━E  ├── 🔷 TimerData.cs
+━E  ━E  ├── 🔷 TimerSystem.cs
+━E  ━E  └── 🔷 TimerSystemSinglePlayerRunner.cs
+━E  ├── 🔷 AbstractAutoInitializableMonoBehaviour.cs
+━E  ├── 🔷 AbstractSingleton.cs
+━E  ├── 🔷 CameraHolder.cs
+━E  ├── 🔷 DSPCaptureAndWrite.cs
+━E  ├── 🔷 DeterministicRandom.cs
+━E  ├── 🔷 GenericInputEvent.cs
+━E  ├── 🔷 IEventSimulable.cs
+━E  ├── 🔷 ListUtilities.cs
+━E  ├── 🔷 LocalEventRunner.cs
+━E  └── 🔷 UnityRigidbodyAdapter.cs
 ├── 🔷 PlayerCubeCreator.cs
 ├── 🔷 Target.cs
 └── 🔷 landingCheck.cs
@@ -2959,7 +2959,7 @@ namespace FastAndFractured
 }
 
 
-=== FILE: FastAndFractured\!Common\Managers\LevelController\LevelControllerButBetter.cs ===
+=== FILE: FastAndFractured\!Common\Managers\LevelController\LevelController.cs ===
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -2969,7 +2969,7 @@ using Enums;
 
 namespace FastAndFractured
 {
-    public class LevelControllerButBetter : AbstractSingleton<LevelControllerButBetter>
+    public class LevelController : AbstractSingleton<LevelController>
     {
         #region Original Variables 
         [Header("Character Spawn")]
@@ -4126,7 +4126,7 @@ namespace FastAndFractured
         {
             base.Construct();
             RegisterUIElements();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
+            LevelController.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
             RegisterSelectedPlayer();
         }
         protected override void Initialize()
@@ -5927,7 +5927,7 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
             if (!other.GetComponent<Rigidbody>().isKinematic)
             {
                 StartKillNotify(statsController);
-                if (LevelControllerButBetter.Instance.LocalPlayer == statsController.gameObject)
+                if (LevelController.Instance.LocalPlayer == statsController.gameObject)
                 {
                     IngameEventsManager.Instance.CreateEvent("Events.OutsideMap", 2f);
                 }
@@ -6059,10 +6059,10 @@ namespace FastAndFractured
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            LevelController.Instance.onLevelPreStart.AddListener(
                 () => TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
             {
-                _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
+                _statsController = LevelController.Instance.LocalPlayer.GetComponent<StatsController>();
             }));
 
         }
@@ -6207,7 +6207,7 @@ public class TriggerUniqueAbilityAction : Action
 
 
 === FILE: FastAndFractured\Characters\!Common\UniqueAbility\Decisions\IsUniqueAbilityActive.cs ===
-﻿using FastAndFractured;
+�E�using FastAndFractured;
 using StateMachine;
 using UnityEngine;
 
@@ -6291,9 +6291,9 @@ namespace FastAndFractured
 
             _isAbilityActive = true;
             isAbilityActive = _isAbilityActive;
-            // if (LevelControllerButBetter.Instance.characterIcons != null && LevelControllerButBetter.Instance.characterIcons.Count > 0)
+            // if (LevelController.Instance.characterIcons != null && LevelController.Instance.characterIcons.Count > 0)
             // {
-            //     foreach (CharacterIcon characterIcon in LevelControllerButBetter.Instance.characterIcons)
+            //     foreach (CharacterIcon characterIcon in LevelController.Instance.characterIcons)
             //     {
             //         if (characterIcon.Character.name == statsController.)
             //         {
@@ -7861,7 +7861,7 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
-            charactersList = LevelControllerButBetter.Instance.InGameCharacters;
+            charactersList = LevelController.Instance.InGameCharacters;
             _randomRotation = new Vector3(DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION), DeterministicRandom.Instance.NextInt(MIN_ROTATION, MAX_ROTATION));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
@@ -7895,12 +7895,12 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-            GameObject player= LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player= LevelController.Instance.LocalPlayer;
 
             if (Caster == null) return;
             if (player&&!player.transform.IsChildOf(Caster.transform))
             {
-                float distance = Vector3.Distance(OriginPosition, LevelControllerButBetter.Instance.LocalPlayer.transform.position);
+                float distance = Vector3.Distance(OriginPosition, LevelController.Instance.LocalPlayer.transform.position);
                 if (distance<=effectDistance)
                 {
                     if(!IngameEventsManager.Instance.IsAlertActive)
@@ -8004,7 +8004,7 @@ namespace FastAndFractured
         void OnTriggerEnter(Collider other)
         {
             //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
-            if(objective == LevelControllerButBetter.Instance.LocalPlayer)
+            if(objective == LevelController.Instance.LocalPlayer)
             {
                 IngameEventsManager.Instance.RemoveAlert();
             }
@@ -8027,7 +8027,7 @@ namespace FastAndFractured
         }
         private void EffectOnCharacter(Collider other)
         {
-            if (other.gameObject == LevelControllerButBetter.Instance.LocalPlayer)
+            if (other.gameObject == LevelController.Instance.LocalPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }
@@ -8444,7 +8444,7 @@ namespace FastAndFractured
         }
         private void Awake()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+            LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
         }
 
         private void Update()
@@ -8566,7 +8566,7 @@ namespace FastAndFractured
             statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
             statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
             _currentPosition = carMovementController.transform.position;
-            _player = LevelControllerButBetter.Instance.LocalPlayer;
+            _player = LevelController.Instance.LocalPlayer;
         }
         public void ReturnToStartPosition()
         {
@@ -8725,7 +8725,7 @@ namespace FastAndFractured
 
         public GameObject CalcNearestCharacter()
         {
-            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
             if (inGameCharacters.Count > 1)
             {
@@ -8755,7 +8755,7 @@ namespace FastAndFractured
 
         private GameObject ReturnCharacterThatIsNotPlayer()
         {
-            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             foreach (GameObject character in inGameCharacters)
             {
                 if(character!=_player)
@@ -8779,7 +8779,7 @@ namespace FastAndFractured
         {
             float angle = GetAngleDirection(Vector3.up);
             float nearestOne = float.MaxValue;
-            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
@@ -8795,7 +8795,7 @@ namespace FastAndFractured
 
         public GameObject CalcNearestSafeZone()
         {
-            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             float nearestOne = float.MaxValue;
 
@@ -8958,7 +8958,7 @@ namespace FastAndFractured
 
         public bool HasTargetToShoot()
         {
-            return LevelControllerButBetter.Instance.InGameCharacters.Contains(TargetToShoot);
+            return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
         }
 
         public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
@@ -9202,7 +9202,7 @@ namespace FastAndFractured
             List<T> gameElementsNotInsideSandstorm = new List<T>();
             foreach (T gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement.gameObject))
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -9215,7 +9215,7 @@ namespace FastAndFractured
             List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
             foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement))
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -9227,22 +9227,22 @@ namespace FastAndFractured
         {
             float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM;
             float marginWithEnduranceToFleeTheSandstorm = marginToFleeFromSandstorm + marginToFleeFromSandstorm * enduranceFactor;
-            return LevelControllerButBetter.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
+            return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
 
         public bool AreAllInteractablesInsideSandstorm()
         {
-            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public bool AreAllSafeZonesInsideSandstorm()
         {
-            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
         }
 
         public bool IsOnEndGame()
         {
-            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelControllerButBetter.Instance.InGameCharacters.Count;
+            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelController.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)
@@ -9422,9 +9422,9 @@ public class GameReadyScript : AbstractAutoInitializableMonoBehaviour
     {
         evenText.rectTransform.DOLocalMoveY(300, downTextDuration).From();
         evenText.DOFade(0, TRANSITION_DURATION).From();
-        var playerReference = LevelControllerButBetter.Instance.LocalPlayer;
+        var playerReference = LevelController.Instance.LocalPlayer;
         if(playerReference){
-            SoundManager.Instance.PlayOneShot(soundReference,LevelControllerButBetter.Instance.LocalPlayer.transform.position);
+            SoundManager.Instance.PlayOneShot(soundReference,LevelController.Instance.LocalPlayer.transform.position);
         }
     }
     void StartEventCountdown()
@@ -9505,7 +9505,7 @@ namespace FastAndFractured
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            LevelController.Instance.onLevelPreStart.AddListener(
             SetCharactersTopElements);
         }
       
@@ -9538,13 +9538,13 @@ namespace FastAndFractured
         public void SetCharactersTopElements()
         {
             int i = 0;
-            foreach (GameObject character in LevelControllerButBetter.Instance.InGameCharacters)
+            foreach (GameObject character in LevelController.Instance.InGameCharacters)
             {
-                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelControllerButBetter.Instance.InGameCharactersNameCodes[i]);
+                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelController.Instance.InGameCharactersNameCodes[i]);
                 inGameCharactersTopIcons[i].gameObject.SetActive(true);
                 i++;
             }
-            LevelControllerButBetter.Instance.characterIcons = inGameCharactersTopIcons;
+            LevelController.Instance.characterIcons = inGameCharactersTopIcons;
         }
         public void SetAlert()
         {
@@ -9709,12 +9709,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(MakeInitialPool);
+            LevelController.Instance.charactersCustomStart.AddListener(MakeInitialPool);
         }
 
         private void OnDisable()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
+            LevelController.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
             
         }
         protected override void Construct()
@@ -9863,7 +9863,7 @@ namespace FastAndFractured
             DisableAllVisuals();
             _skinToUnlock = skinToUnlock;
   
-            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player = LevelController.Instance.LocalPlayer;
             if (player != null)
             {
                 switch (player.name)
@@ -9918,7 +9918,7 @@ namespace FastAndFractured
 
 
 === FILE: FastAndFractured\Interactables\SkinUnlockInteractable\Scripts\SkinUnlockHandler.cs ===
-﻿using FastAndFractured;
+�E�using FastAndFractured;
 using NRandom;
 using System.Collections;
 using System.Collections.Generic;
@@ -9951,7 +9951,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     {
         List<string> unlockableSkins = new List<string>();
 
-        int numOfSkins = LevelControllerButBetter.Instance.LocalPlayer!=null ? LevelControllerButBetter.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
+        int numOfSkins = LevelController.Instance.LocalPlayer!=null ? LevelController.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
 
         if (_playerSelected == "")
         {
@@ -10064,7 +10064,7 @@ namespace FastAndFractured
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
             VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
-            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player = LevelController.Instance.LocalPlayer;
             if (interactionFrom == player)
             {
                 IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
@@ -10722,7 +10722,7 @@ namespace FastAndFractured
 
 
 === FILE: FastAndFractured\MainMenu\Scripts\AccesibilitySettings\ColorBlindModeController.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using Utilities;
@@ -12592,7 +12592,7 @@ namespace FastAndFractured
         {
             base.Initialize();
             GetComponentsNeededInChildren();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
+            LevelController.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
             
         }
         private void GetComponentsNeededInChildren()
@@ -13911,7 +13911,7 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(BindActions);
+            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
         }
 
         public void BindActions()
@@ -14604,17 +14604,17 @@ namespace FastAndFractured
         }
         void OnEnable()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
             }
         }
 
         void OnDestroy()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
             }
         }
         
@@ -14640,7 +14640,7 @@ namespace FastAndFractured
         {
             if (!_isPlayerReceived)
             {
-                _player = LevelControllerButBetter.Instance.LocalPlayer;
+                _player = LevelController.Instance.LocalPlayer;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
@@ -14685,7 +14685,7 @@ namespace FastAndFractured
         }
         public void SetSandstormDirection(Vector3 direction)
         {
-            _player = LevelControllerButBetter.Instance.LocalPlayer;
+            _player = LevelController.Instance.LocalPlayer;
             _sandstormDirection = direction;
             _isDataReceived = true;
             arrowIcon.SetActive(true);
@@ -15706,7 +15706,7 @@ public enum LampType
 
 
 === FILE: FastAndFractured\Props\TrafficLights\Traffic Lights\Scripts\TrafficLightPole.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15935,7 +15935,7 @@ public class TrafficLightPole : MonoBehaviour
 
 
 === FILE: FastAndFractured\Props\TrafficLights\Traffic Lights\Scripts\TrafficLightUnit.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Utilities;
@@ -17789,7 +17789,7 @@ namespace FastAndFractured
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime = 0.3f;
         public float NormalShootMaxRange = 150f;
         public float NormalShootAngle = 180f;
-        [Tooltip("The angle include from 10� to 89�. 90� will return infinity.")]
+        [Tooltip("The angle include from 10�E� to 89�E�. 90�E� will return infinity.")]
         public float PushShootAngle = 40f;
         [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")]
         public float PushShootRange = 15f;
@@ -20163,7 +20163,7 @@ public class LobbyControllerAbstracted : MonoBehaviour
 
 
 === FILE: Multiplayer\MultiplayerRigidbodyAdapter.cs ===
-﻿using FastAndFractured.Utilities;
+�E�using FastAndFractured.Utilities;
 using FishNet.Object.Prediction;
 using GameKit.Dependencies.Utilities;
 using UnityEngine;
@@ -20331,7 +20331,7 @@ namespace FastAndFractured.Multiplayer
 
 
 === FILE: Multiplayer\NetworkedLevelController.cs ===
-﻿
+�E�
 using FastAndFractured;  
 using FastAndFractured.Multiplayer;
 using FishNet.Connection;
@@ -20369,7 +20369,7 @@ namespace FastAndFractured.Multiplayer
         }
         public void AddCharacterSkin(NetworkConnection connection, string name)
         {
-            LevelControllerButBetter.Instance.AddCharacterToListOfSelectedCharacters(connection.ClientId, name);
+            LevelController.Instance.AddCharacterToListOfSelectedCharacters(connection.ClientId, name);
             Debug.Log($"<color=cyan>Client {connection.ClientId} selected {name} </color>");
 
         }
@@ -20380,18 +20380,18 @@ namespace FastAndFractured.Multiplayer
             int gameSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             DeterministicRandom.Initialize(gameSeed);
 
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
                 PlayerPrefs.SetInt("Player_Num", FishNetNetworkManagerWrapper.Instance.PlayerCount);
-                LevelControllerButBetter.Instance.PerformConstruct();
-                LevelControllerButBetter.Instance.PerformInitialize();
+                LevelController.Instance.PerformConstruct();
+                LevelController.Instance.PerformInitialize();
             } 
             SpawnCharactersOnClients();
             LevelControllerStartData levelControllerStartData = new LevelControllerStartData()
             {
-                AllCharacters = LevelControllerButBetter.Instance.InGameCharacters,
-                DebugMode = LevelControllerButBetter.Instance.DebugMode,
-                InGameCharactersNameCodes = LevelControllerButBetter.Instance.InGameCharactersNameCodes,
+                AllCharacters = LevelController.Instance.InGameCharacters,
+                DebugMode = LevelController.Instance.DebugMode,
+                InGameCharactersNameCodes = LevelController.Instance.InGameCharactersNameCodes,
                 RandomSeed = gameSeed
             };
             SentLevelControllerStartData(levelControllerStartData);
@@ -20402,18 +20402,18 @@ namespace FastAndFractured.Multiplayer
             if (!IsHostInitialized)
             {//  levelControllerStartData.LocalPlayer = LocalConnection.FirstObject.gameObject;
                 DeterministicRandom.Initialize(levelControllerStartData.RandomSeed);
-                LevelControllerButBetter levelControllerButBetter = LevelControllerButBetter.Instance;
-                levelControllerButBetter.PerformConstruct();
-                levelControllerButBetter.InGameCharactersNameCodes = levelControllerStartData.InGameCharactersNameCodes;
+                LevelController LevelController = LevelController.Instance;
+                LevelController.PerformConstruct();
+                LevelController.InGameCharactersNameCodes = levelControllerStartData.InGameCharactersNameCodes;
                
 
-                levelControllerButBetter.InitializeAfterSpawn(levelControllerStartData.AllCharacters);
+                LevelController.InitializeAfterSpawn(levelControllerStartData.AllCharacters);
            
             }
         }
         void SpawnCharactersOnClients()
         {
-            List<GameObject> charactersToSpawn = new List<GameObject>(LevelControllerButBetter.Instance.InGameCharacters);
+            List<GameObject> charactersToSpawn = new List<GameObject>(LevelController.Instance.InGameCharacters);
             int playerIndex = 0;
             foreach (var conn in base.ServerManager.Clients.Values)
             {
@@ -20662,8 +20662,8 @@ namespace FastAndFractured.Multiplayer
             _networkedLevelManager = FindFirstObjectByType<NetworkedLevelControllerManager>();
             if (_networkedLevelManager == null)
             {
-                if (FastAndFractured.LevelControllerButBetter.Instance == null)
-                    Debug.LogError("NetworkedLevelControllerManager AND LevelControllerButBetter not found on server. Cannot spawn vehicle correctly.");
+                if (FastAndFractured.LevelController.Instance == null)
+                    Debug.LogError("NetworkedLevelControllerManager AND LevelController not found on server. Cannot spawn vehicle correctly.");
             }
 
         }
@@ -20839,7 +20839,7 @@ namespace FastAndFractured.Multiplayer
 
 
 === FILE: Multiplayer\NetworkedShootingController.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using FishNet.Object;
 using FishNet.Connection;
 using Utilities; // Para ObjectPoolManager
@@ -21044,7 +21044,7 @@ namespace FastAndFractured.Multiplayer
 
 
 === FILE: Multiplayer\NetworkedVehicle.cs ===
-﻿using FishNet;
+�E�using FishNet;
 using FishNet.Object;
 using FishNet.Object.Prediction;
 using FishNet.Transporting;
@@ -21151,9 +21151,9 @@ namespace FastAndFractured.Multiplayer
             base.OnOwnershipClient(prevOwner);
 
  
-            if (base.IsOwner && LevelControllerButBetter.Instance != null && transform.parent != null)
+            if (base.IsOwner && LevelController.Instance != null && transform.parent != null)
             {
-                // LevelControllerButBetter.Instance.SetLocalPlayer(transform.parent.gameObject);
+                // LevelController.Instance.SetLocalPlayer(transform.parent.gameObject);
             }
         }
         [ObserversRpc]
@@ -22274,7 +22274,7 @@ namespace StateMachine
 
 
 === FILE: StateMachine\Decisions\NOTDecision.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 
 namespace StateMachine
 {
@@ -22512,7 +22512,7 @@ namespace StateMachine
         // Start is called before the first frame update
         private void Awake()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(CustomStart);
+            LevelController.Instance.charactersCustomStart.AddListener(CustomStart);
         }
         public void CustomStart()
         {
@@ -23112,7 +23112,7 @@ namespace StateMachine
 
 
 === FILE: TutorialInfo\Scripts\Readme.cs ===
-﻿using System;
+�E�using System;
 using UnityEngine;
 
 public class Readme : ScriptableObject
@@ -23132,7 +23132,7 @@ public class Readme : ScriptableObject
 
 
 === FILE: TutorialInfo\Scripts\Editor\ReadmeEditor.cs ===
-﻿using System.Collections;
+�E�using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -23652,7 +23652,7 @@ namespace Utilities
 
 
 === FILE: Utilities\DeterministicRandom.cs ===
-﻿using NRandom;
+�E�using NRandom;
 using UnityEngine;
 
 namespace Utilities
@@ -24024,7 +24024,7 @@ public static class ListUtilities
 
 
 === FILE: Utilities\LocalEventRunner.cs ===
-﻿using System.Collections.Generic;
+�E�using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Utilities;
@@ -24104,7 +24104,7 @@ namespace FastAndFractured.Utilities
 
 
 === FILE: Utilities\UnityRigidbodyAdapter.cs ===
-﻿using FastAndFractured.Utilities;
+�E�using FastAndFractured.Utilities;
 using FishNet.Object.Prediction;
 using GameKit.Dependencies.Utilities;
 using UnityEngine;
@@ -24172,7 +24172,7 @@ namespace FastAndFractured.Utilities
 
 
 === FILE: Utilities\Editor\BoxColliderToNavMeshObstacleTool.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using UnityEditor;
 using UnityEngine.AI;  
 
@@ -25508,7 +25508,7 @@ public class PrefabMaterialShaderProcessor : EditorWindow
 
 
 === FILE: Utilities\PauseSystem\AnimationPausable.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using Utilities.Managers.PauseSystem;
 
 public class AnimationPausable : MonoBehaviour, IPausable
@@ -25651,7 +25651,7 @@ namespace Utilities.Managers.PauseSystem
 
 
 === FILE: Utilities\PauseSystem\ParticleSystemPausable.cs ===
-﻿using UnityEngine;
+�E�using UnityEngine;
 using UnityEngine.Serialization;
 using Utilities.Managers.PauseSystem;
 
@@ -25693,7 +25693,7 @@ public class ParticleSystemPausable : MonoBehaviour, IPausable
 
 
 === FILE: Utilities\PauseSystem\PauseManager.cs ===
-﻿using System;
+�E�using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -27441,7 +27441,7 @@ public class ProfilePlacedObjectsTrackerSO : ScriptableObject
 
 
 === FILE: Utilities\TimerSystem\DebugTimerDecorator.cs ===
-﻿using Enums;
+�E�using Enums;
  using System;
  using UnityEngine;
 
@@ -27557,7 +27557,7 @@ public class DeterministicTimerSystemRunner : NetworkBehaviour
 
 
 === FILE: Utilities\TimerSystem\ITimer.cs ===
-﻿using System;
+�E�using System;
 using Enums;
 
 namespace Utilities
@@ -27632,7 +27632,7 @@ public class PausableTimerSystem : MonoBehaviour, IPausable
 
 
 === FILE: Utilities\TimerSystem\Timer.cs ===
-﻿using System;
+�E�using System;
 using UnityEngine;
 using Enums;
 
@@ -27737,7 +27737,7 @@ namespace Utilities
 
 
 === FILE: Utilities\TimerSystem\TimerData.cs ===
-﻿using System;
+�E�using System;
 using UnityEngine;
 using Enums;
 
@@ -28262,4 +28262,5 @@ namespace Utilities
     }
 }
 #endif
+
 
