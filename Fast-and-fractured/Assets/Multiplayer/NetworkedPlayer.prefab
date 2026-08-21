@@ -229,6 +229,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -777,7 +778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 4
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 6989979493502073994}
@@ -795,7 +796,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 8
+  _componentIndexCache: 2
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 1176046626976001688}
@@ -813,7 +814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 6
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 5197161463857979176}
@@ -831,9 +832,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 5386894792522378641}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 6753778889211814184}
   forceConstruct: 1
   forceInitialize: 1
@@ -849,7 +850,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 2
+  _componentIndexCache: 5
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 4537432449659261715}
@@ -867,7 +868,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc43665ed42f20744a92630ac7301190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 1
+  _componentIndexCache: 6
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
   singletonToPreserve: {fileID: 8832934760809476860}
@@ -1270,6 +1271,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2307,7 +2309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_Name
-      value: NetworkedPlayer Variant
+      value: NetworkedPlayer
       objectReference: {fileID: 0}
     - target: {fileID: 4460313824750707560, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_AnchorMax.y
@@ -3065,9 +3067,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2355938903064280616}
-    - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -2982706052004035251}
   m_SourcePrefab: {fileID: 100100000, guid: 894d66a72a5753242b8adf852622d607, type: 3}
 --- !u!114 &1176046626976001688 stripped
 MonoBehaviour:
@@ -3132,14 +3131,13 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: -2355938903064280616}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1684147260850289039}
+  - {fileID: 6817672403571990665}
+  - {fileID: 588369211927331189}
+  - {fileID: 5931791629501013527}
+  - {fileID: 322889612377877140}
+  - {fileID: 3653709284683339280}
   - {fileID: 1232887939157844719}
-  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -3150,9 +3148,14 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
+  _initializedTimestamp: -8584223811751996961
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
   NetworkObserver: {fileID: 0}
   _enablePrediction: 1
   _predictionType: 0
+  _localReconcileCorrectionType: 2
   _graphicalObject: {fileID: 0}
   _detachGraphicalObject: 0
   _enableStateForwarding: 1
@@ -3164,10 +3167,10 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 10
+  <PrefabId>k__BackingField: 3
   <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 16997256464988537136
-  <SceneId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 2275478779396045732
+  SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -3188,18 +3191,6 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
---- !u!114 &-2982706052004035251
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6605284544878791150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e001a1c6e8493a4faa06f3a5fcefc03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &6753778889211814184 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4277638721388137309, guid: 894d66a72a5753242b8adf852622d607, type: 3}
