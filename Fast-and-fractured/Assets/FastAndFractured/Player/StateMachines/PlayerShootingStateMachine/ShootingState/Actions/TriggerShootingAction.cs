@@ -1,4 +1,4 @@
-﻿using FastAndFractured;
+using FastAndFractured;
 using FastAndFractured.Abstractions;
 using UnityEngine;
 using Utilities;

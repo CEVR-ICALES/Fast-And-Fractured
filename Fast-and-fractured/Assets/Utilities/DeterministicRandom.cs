@@ -1,4 +1,4 @@
-﻿using NRandom;
+using NRandom;
 using UnityEngine;
 
 namespace Utilities

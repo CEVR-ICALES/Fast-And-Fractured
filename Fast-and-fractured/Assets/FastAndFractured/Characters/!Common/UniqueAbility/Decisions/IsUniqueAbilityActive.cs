@@ -1,4 +1,4 @@
-﻿using FastAndFractured;
+using FastAndFractured;
 using StateMachine;
 using UnityEngine;
 
