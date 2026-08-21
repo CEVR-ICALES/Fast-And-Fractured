@@ -1,21 +1,20 @@
-// RUTA: Assets/FastAndFractured/Multiplayer/NetworkedProjectile.cs
-
 using FishNet.Object;
 using FishNet.Object.Prediction;
 using FishNet.Transporting;
+using FishNet.Connection;
 using UnityEngine;
 using FastAndFractured.Utilities;
 using FishNet;
 using FastAndFractured;
 using System.Reflection;
 using Enums;
+using FishNet.Component.Transforming.Beta;
 
 namespace FastAndFractured.Multiplayer
 {
     [RequireComponent(typeof(ICustomRigidbody), typeof(Collider))]
     public class NetworkedProjectile : NetworkBehaviour
     {
-        // ----------------- DATOS DE PREDICCIÓN -----------------
         #region PREDICTION_DATA_STRUCTS
         public struct MoveData : IReplicateData
         {
@@ -59,11 +58,13 @@ namespace FastAndFractured.Multiplayer
         private Collider _ownCollider;
         private FastAndFractured.Utilities.LocalEventRunner _localEventRunner;
 
-        /// <summary>
-        /// Cached reflection field for StatsController._isPlayer.
-        /// Used to suppress HUD updates when applying damage to non-owner vehicles.
-        /// </summary>
-        private static FieldInfo _isPlayerField;
+        // FishNet-internal reflection (not centralized in SingleplayerReflectionCache because
+        // these are FishNet types, not singleplayer types).
+        private static FieldInfo _tickSmootherInitSettingsField;
+        private static FieldInfo _networkObjectGraphicalObjectField;
+        private static FieldInfo _networkObjectPredictionTypeField;
+        private static FieldInfo _networkObjectLocalReconcileCorrectionTypeField;
+        private static FieldInfo _networkObjectEnableStateForwardingField;
 
         [Header("Efectos")]
         [SerializeField] private GameObject _visuals;
@@ -77,6 +78,7 @@ namespace FastAndFractured.Multiplayer
         private float _damage;
         private LayerMask _collisionMask;
         private Collider[] _ignoredColliders;
+        private NetworkConnection _attackerConnection;
 
         private float _pushForce;
         private float _explosionRadius;
@@ -88,13 +90,58 @@ namespace FastAndFractured.Multiplayer
         private bool _useCustomGravity;
         private float _timeToExplode;
         private bool _isMine;
+        private Transform _runtimeSmoothingTarget;
+
+        private const int PositionHistoryCapacity = 10;
+        private readonly Vector3[] _positionHistory = new Vector3[PositionHistoryCapacity];
+        private int _positionHistoryCount;
+        private int _positionHistoryNextIndex;
+
+        // Tunables previously hard-coded inline
+        private const float DEFAULT_LIFETIME_SECONDS = 5f;
+        private const float SPHERE_CAST_RADIUS = 0.15f;
+        private const float BOUNCE_OFFSET_FROM_SURFACE = 0.15f;
+        private const float MIN_VELOCITY_FOR_RAYCAST = 0.01f;
+        private const float MIN_BOUNCE_DECAY = 0.1f;
+        private const float DEFAULT_BOUNCE_LOSS_FACTOR = 0.8f;
+        private const float NON_VEHICLE_PUSH_FORCE_MULTIPLIER = 0.5f;
+        private const float MIN_DIRECTION_SQR_MAG = 0.001f;
+        private const float MIN_VELOCITY_FOR_DIRECTION = 0.0001f;
+        private const float LATE_UPDATE_RESYNC_THRESHOLD_SQR = 0.0001f;
+
+        // Collision mask is the same for all projectile instances; compute once per session.
+        private static LayerMask _cachedCollisionMask;
+        private static bool _collisionMaskCached;
+        private static int _cachedCharactersLayer = -1;
+        private static int _cachedDefaultLayer = -1;
+
+        private static int CharactersLayer
+        {
+            get
+            {
+                if (_cachedCharactersLayer < 0) _cachedCharactersLayer = LayerMask.NameToLayer("Characters");
+                return _cachedCharactersLayer;
+            }
+        }
+
+        private static int DefaultLayer
+        {
+            get
+            {
+                if (_cachedDefaultLayer < 0) _cachedDefaultLayer = LayerMask.NameToLayer("Default");
+                return _cachedDefaultLayer;
+            }
+        }
 
         // Mine frozen state: bullet sits on ground waiting to explode
         private bool _isFrozenMine;
         private uint _mineExplodeTick;
+        private uint _lastSimulatedTick;
+        private Vector3 _simulatedPosition;
+        private Vector3 _simulatedVelocity;
+        private bool _simulationStateValid;
         #endregion
 
-        // ... (El Awake, OnStartNetwork y OnStopNetwork no cambian) ...
         #region FISHNET_LIFECYCLE
         private void Awake()
         {
@@ -107,7 +154,7 @@ namespace FastAndFractured.Multiplayer
                 adapter.InitializeAdapter();
             }
             
-            // DestroyImmediate LocalEventRunner — NetworkedProjectile handles all physics.
+            // DestroyImmediate LocalEventRunner  ENetworkedProjectile handles all physics.
             // Must be Immediate because FishNet's Physics.Simulate() can fire OnTriggerEnter
             // within the SAME FRAME before deferred Destroy() takes effect.
             if (_localEventRunner != null)
@@ -137,58 +184,90 @@ namespace FastAndFractured.Multiplayer
                 DestroyImmediate(ef);
             }
 
-            // Disable NetworkTickSmoother — its TargetTransform is null on projectile prefabs.
+            NormalizeRuntimePredictionSettings();
+
+            // Keep NetworkTickSmoother active for better remote projectile visibility.
             // We keep the component alive (don't DestroyImmediate) because removing it from
             // FishNet's NetworkBehaviours list shifts RPC link indices, causing
             // ArgumentOutOfRangeException in ParseRpcLink on the client side.
             var tickSmoother = GetComponent<FishNet.Component.Transforming.Beta.NetworkTickSmoother>();
             if (tickSmoother != null)
             {
+                EnsureTickSmootherTargetTransform(tickSmoother);
                 tickSmoother.enabled = false;
             }
+
+            EnsureNetworkObjectGraphicalBinding();
         }
+
+        private bool _subscribedToTimeManager = false;
 
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
-            base.TimeManager.OnTick += TimeManager_OnTick;
-            base.TimeManager.OnPostTick += TimeManager_OnPostTick;
+            EnsureNetworkObjectGraphicalBinding();
+            if (!_subscribedToTimeManager)
+            {
+                base.TimeManager.OnTick += TimeManager_OnTick;
+                base.TimeManager.OnPostTick += TimeManager_OnPostTick;
+                _subscribedToTimeManager = true;
+            }
         }
 
         public override void OnStopNetwork()
         {
             base.OnStopNetwork();
-            if (base.TimeManager != null)
+            if (base.TimeManager != null && _subscribedToTimeManager)
             {
                 base.TimeManager.OnTick -= TimeManager_OnTick;
                 base.TimeManager.OnPostTick -= TimeManager_OnPostTick;
+                _subscribedToTimeManager = false;
             }
         }
 
-        // ---------- LA CORRECCIÓN ESTÁ AQUÍ ----------
-
-        [ObserversRpc]
+        // RunLocally is required so the server initializes authoritative projectile simulation too.
+        [ObserversRpc(RunLocally = true)]
         public void RpcInitialize(NetworkShootParams data, NetworkObject ignorer, Vector3 spawnPosition, Quaternion spawnRotation)
+        {
+            InitializeProjectile(data, ignorer, spawnPosition, spawnRotation);
+        }
+
+        internal void InitializeProjectile(NetworkShootParams data, NetworkObject ignorer, Vector3 spawnPosition, Quaternion spawnRotation)
         {
             if (_isInitialized) return;
             _isInitialized = true;
             _shooter = ignorer;
+            _attackerConnection = ignorer != null ? ignorer.Owner : null;
+            _lastSimulatedTick = uint.MaxValue;
 
             // Set spawn position/rotation FIRST (critical for client-side)
             transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             if (_customRigidbody != null)
             {
+                // Zero velocities BEFORE marking kinematic. Setting linear/angular velocity on
+                // an already-kinematic body logs a Unity warning and is silently dropped.
+                _customRigidbody.linearVelocity = Vector3.zero;
+                _customRigidbody.angularVelocity = Vector3.zero;
                 _customRigidbody.position = spawnPosition;
                 _customRigidbody.rotation = spawnRotation;
+                _customRigidbody.isKinematic = true;
+                _customRigidbody.useGravity = false;
             }
 
-            gameObject.name = $"{gameObject.name}_Owner({(ignorer != null ? ignorer.OwnerId : -1)})_Tick({base.TimeManager.Tick})";
+            gameObject.name = $"{gameObject.name}_Owner({(_attackerConnection != null ? _attackerConnection.ClientId : -1)})_Tick({base.TimeManager.Tick})";
 
-            _customRigidbody.linearVelocity = data.InitialVelocity;
+            _simulatedPosition = spawnPosition;
+            _simulatedVelocity = data.InitialVelocity;
+            _simulationStateValid = true;
             _damage = data.Damage;
-            float lifetime = (data.InitialVelocity.magnitude > 0.1f) ? data.Range / data.InitialVelocity.magnitude : 5f;
+            float lifetime = (data.InitialVelocity.magnitude > 0.1f) ? data.Range / data.InitialVelocity.magnitude : DEFAULT_LIFETIME_SECONDS;
 
-            _collisionMask = LayerMask.GetMask("Default", "Characters", "Ground", "Obstacles");
+            if (!_collisionMaskCached)
+            {
+                _cachedCollisionMask = LayerMask.GetMask("Default", "Characters", "Ground", "Obstacles");
+                _collisionMaskCached = true;
+            }
+            _collisionMask = _cachedCollisionMask;
             _customGravity = data.CustomGravity;
             _useCustomGravity = (data.BouncingNum > 0 || data.IsMine);
 
@@ -215,10 +294,13 @@ namespace FastAndFractured.Multiplayer
             _isMine = data.IsMine;
             _isFrozenMine = false;
 
+            EnsureNetworkObjectGraphicalBinding();
             _despawnTick = base.TimeManager.Tick + base.TimeManager.TimeToTicks(lifetime);
-        }
+            _positionHistoryCount = 0;
+            _positionHistoryNextIndex = 0;
+            RecordPositionSample(GetSimulationPosition());
 
-        // ---------- FIN DE LA CORRECCIÓN PRINCIPAL ----------
+        }
 
         private void TimeManager_OnTick()
         {
@@ -226,13 +308,13 @@ namespace FastAndFractured.Multiplayer
             {
                 Replicate(default, ReplicateState.Ticked, Channel.Unreliable);
             }
-            else if (base.IsServer)
+            else if (base.IsServerInitialized)
             {
                 Replicate(default, ReplicateState.Ticked, Channel.Unreliable);
             }
             else
             {
-                // Observers simulate locally
+                // Observers (non-owner, non-server) simulate locally for smooth visuals
                 SimulateProjectile((float)base.TimeManager.TickDelta, false);
             }
         }
@@ -250,10 +332,10 @@ namespace FastAndFractured.Multiplayer
             if (!base.IsServer) return;
 
             var rd = new ReconcileData(
-                _customRigidbody.position,
-                _customRigidbody.rotation,
-                _customRigidbody.linearVelocity,
-                _customRigidbody.angularVelocity,
+                GetSimulationPosition(),
+                _customRigidbody != null ? _customRigidbody.rotation : transform.rotation,
+                _simulatedVelocity,
+                Vector3.zero,
                 _currentBounces,
                 gameObject.activeSelf,
                 _isFrozenMine
@@ -266,11 +348,141 @@ namespace FastAndFractured.Multiplayer
         }
         #endregion
 
+        /// <summary>
+        /// FishNet NetworkTickSmoother requires InitializationSettings.TargetTransform.
+        /// Some converted projectile prefabs have this unset, which causes runtime errors on clients.
+        /// </summary>
+        private void EnsureTickSmootherTargetTransform(NetworkTickSmoother tickSmoother)
+        {
+            if (tickSmoother == null) return;
+
+            if (_tickSmootherInitSettingsField == null)
+            {
+                _tickSmootherInitSettingsField = typeof(NetworkTickSmoother).GetField("_initializationSettings",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            if (_tickSmootherInitSettingsField == null) return;
+
+            object boxedSettings = _tickSmootherInitSettingsField.GetValue(tickSmoother);
+            if (!(boxedSettings is InitializationSettings))
+                return;
+
+            InitializationSettings settings = (InitializationSettings)boxedSettings;
+
+            Transform targetTransform = ResolveSmootherTargetTransform();
+            if (settings.TargetTransform == null)
+            {
+                settings.TargetTransform = targetTransform;
+                _tickSmootherInitSettingsField.SetValue(tickSmoother, settings);
+            }
+            else if (settings.TargetTransform == transform && targetTransform != transform)
+            {
+                settings.TargetTransform = targetTransform;
+                _tickSmootherInitSettingsField.SetValue(tickSmoother, settings);
+            }
+        }
+
+        private Transform ResolveSmootherTargetTransform()
+        {
+            if (_visuals != null && _visuals.transform != transform)
+            {
+                return _visuals.transform;
+            }
+
+            foreach (Transform child in transform)
+            {
+                if (child != null)
+                {
+                    return child;
+                }
+            }
+
+            if (_runtimeSmoothingTarget == null)
+            {
+                var go = new GameObject("SmoothingTarget");
+                _runtimeSmoothingTarget = go.transform;
+                _runtimeSmoothingTarget.SetParent(transform, false);
+                _runtimeSmoothingTarget.localPosition = Vector3.zero;
+                _runtimeSmoothingTarget.localRotation = Quaternion.identity;
+                _runtimeSmoothingTarget.localScale = Vector3.one;
+            }
+
+            return _runtimeSmoothingTarget;
+        }
+
+        private void EnsureNetworkObjectGraphicalBinding()
+        {
+            NetworkObject nob = GetComponent<NetworkObject>();
+            if (nob == null) return;
+
+            if (_networkObjectGraphicalObjectField == null)
+            {
+                _networkObjectGraphicalObjectField = typeof(NetworkObject).GetField("_graphicalObject",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            if (_networkObjectGraphicalObjectField == null) return;
+
+            Transform current = _networkObjectGraphicalObjectField.GetValue(nob) as Transform;
+            if (current != null) return;
+
+            Transform target = ResolveSmootherTargetTransform();
+            if (target != null && target != transform)
+            {
+                _networkObjectGraphicalObjectField.SetValue(nob, target);
+            }
+        }
+
+        private void NormalizeRuntimePredictionSettings()
+        {
+            NetworkObject nob = GetComponent<NetworkObject>();
+            if (nob == null) return;
+
+            if (_networkObjectPredictionTypeField == null)
+            {
+                _networkObjectPredictionTypeField = typeof(NetworkObject).GetField("_predictionType",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+            if (_networkObjectLocalReconcileCorrectionTypeField == null)
+            {
+                _networkObjectLocalReconcileCorrectionTypeField = typeof(NetworkObject).GetField("_localReconcileCorrectionType",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+            if (_networkObjectEnableStateForwardingField == null)
+            {
+                _networkObjectEnableStateForwardingField = typeof(NetworkObject).GetField("_enableStateForwarding",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            // Force "Other" prediction type for projectile wrappers to avoid host-side rigidbody correction warping.
+            if (_networkObjectPredictionTypeField != null)
+            {
+                object enumValue = System.Enum.ToObject(_networkObjectPredictionTypeField.FieldType, 0);
+                _networkObjectPredictionTypeField.SetValue(nob, enumValue);
+            }
+
+            // Disable local rigidbody correction for projectiles; server authority decides lifecycle.
+            if (_networkObjectLocalReconcileCorrectionTypeField != null)
+            {
+                object enumValue = System.Enum.ToObject(_networkObjectLocalReconcileCorrectionTypeField.FieldType, 0);
+                _networkObjectLocalReconcileCorrectionTypeField.SetValue(nob, enumValue);
+            }
+
+            // Do not forward prediction states for projectile wrappers; non-server peers rely on local simulation visuals.
+            if (_networkObjectEnableStateForwardingField != null)
+            {
+                _networkObjectEnableStateForwardingField.SetValue(nob, false);
+            }
+        }
+
         #region SIMULATION_LOGIC
         [Replicate]
         private void Replicate(MoveData md, ReplicateState state, Channel channel)
         {
             if (!_isInitialized) return;
+            if (base.IsServerInitialized && state.ContainsReplayed()) return;
+            if (!TryBeginTickSimulation()) return;
 
             bool replaying = state.ContainsReplayed();
             SimulateProjectile((float)base.TimeManager.TickDelta, replaying);
@@ -279,57 +491,64 @@ namespace FastAndFractured.Multiplayer
         private void SimulateProjectile(float delta, bool replaying)
         {
             if (!_isInitialized) return;
+            Vector3 simulationPosition = GetSimulationPosition();
+            RecordPositionSample(simulationPosition);
 
             // Frozen mine: waiting to explode, skip physics
             if (_isFrozenMine)
             {
-                if ((base.IsServer || base.IsOwner) && base.TimeManager.Tick >= _mineExplodeTick)
+                if (base.IsServer && base.TimeManager.Tick >= _mineExplodeTick)
                 {
                     _isFrozenMine = false;
-                    HandleImpact(transform.position, Vector3.up, null, replaying);
+                    HandleImpact(simulationPosition, Vector3.up, null, replaying);
                 }
                 return;
             }
 
             if (_useCustomGravity)
             {
-                _customRigidbody.linearVelocity += _customGravity * delta;
+                _simulatedVelocity += _customGravity * delta;
             }
 
-            _customRigidbody.Simulate();
-
-            if (!HandleCollisions(replaying))
+            if (!HandleCollisions(replaying, simulationPosition, delta))
             {
-                if ((base.IsServer || base.IsOwner) && base.TimeManager.Tick >= _despawnTick)
+                _simulatedPosition = simulationPosition + (_simulatedVelocity * delta);
+                ApplySimulationPose();
+
+                if (base.IsServer && base.TimeManager.Tick >= _despawnTick)
                 {
-                    HandleImpact(transform.position, Vector3.up, null, replaying);
+                    HandleImpact(_simulatedPosition, Vector3.up, null, replaying);
                 }
             }
+
+            simulationPosition = GetSimulationPosition();
+            RecordPositionSample(simulationPosition);
         }
 
         [Reconcile]
         private void Reconcile(ReconcileData rd, Channel channel)
         {
+            if (base.IsServerInitialized) return;
             if (!rd.IsActive) return;
 
-            _customRigidbody.position = rd.Position;
-            _customRigidbody.rotation = rd.Rotation;
-            if (!_customRigidbody.isKinematic)
+            _simulatedPosition = rd.Position;
+            _simulatedVelocity = rd.Velocity;
+            _simulationStateValid = true;
+            if (_customRigidbody != null)
             {
-                _customRigidbody.linearVelocity = rd.Velocity;
-                _customRigidbody.angularVelocity = rd.AngularVelocity;
+                _customRigidbody.rotation = rd.Rotation;
             }
+            ApplySimulationPose();
             _currentBounces = rd.Bounces;
             _isFrozenMine = rd.IsFrozenMine;
         }
 
-        private bool HandleCollisions(bool replaying)
+        private bool HandleCollisions(bool replaying, Vector3 simulationPosition, float delta)
         {
-            float tickDelta = (float)base.TimeManager.TickDelta;
-            float distance = _customRigidbody.linearVelocity.magnitude * tickDelta;
-            if (distance < 0.01f) return false;
+            float distance = _simulatedVelocity.magnitude * delta;
+            if (distance < MIN_VELOCITY_FOR_RAYCAST) return false;
 
-            if (Physics.SphereCast(transform.position, 0.15f, _customRigidbody.linearVelocity.normalized, out RaycastHit hit, distance, _collisionMask))
+            if (Physics.SphereCast(simulationPosition, SPHERE_CAST_RADIUS, _simulatedVelocity.normalized, out RaycastHit hit, distance, _collisionMask))
             {
                 // Ignore self-collider
                 if (_ownCollider != null && (hit.collider == _ownCollider || hit.collider.transform == transform))
@@ -348,32 +567,33 @@ namespace FastAndFractured.Multiplayer
                     }
                 }
 
-                Debug.Log($"[NetworkedProjectile] Hit: {hit.collider.name} on Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
-
-                // Hit a character → explode immediately (mirrors singleplayer PushBulletBehaviour)
-                bool hitCharacter = hit.collider.gameObject.layer == LayerMask.NameToLayer("Characters");
+                // Hit a character ->explode immediately (mirrors singleplayer PushBulletBehaviour)
+                bool hitCharacter = hit.collider.gameObject.layer == CharactersLayer;
 
                 if (!hitCharacter && _currentBounces < _maxBounces)
                 {
                     _currentBounces++;
-                    Vector3 reflection = Vector3.Reflect(_customRigidbody.linearVelocity, hit.normal);
+                    Vector3 reflection = Vector3.Reflect(_simulatedVelocity, hit.normal);
                     // Decay bounce strength per bounce (mirrors singleplayer formula)
                     float decay = 1f - ((float)_currentBounces / _maxBounces);
-                    float loss = _bounceStrength > 0 ? _bounceStrength * Mathf.Max(decay, 0.1f) : 0.8f;
-                    _customRigidbody.linearVelocity = reflection * loss;
-                    _customRigidbody.position = hit.point + hit.normal * 0.15f;
+                    float loss = _bounceStrength > 0 ? _bounceStrength * Mathf.Max(decay, MIN_BOUNCE_DECAY) : DEFAULT_BOUNCE_LOSS_FACTOR;
+                    _simulatedVelocity = reflection * loss;
+                    _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
+                    ApplySimulationPose();
                 }
                 else if (!hitCharacter && _currentBounces >= _maxBounces && _timeToExplode > 0f && base.IsServer)
                 {
                     // Mine: freeze in place, wait _timeToExplode ticks, then explode
-                    _customRigidbody.linearVelocity = Vector3.zero;
-                    _customRigidbody.isKinematic = true;
+                    _simulatedVelocity = Vector3.zero;
                     _useCustomGravity = false;
                     _isFrozenMine = true;
                     _mineExplodeTick = base.TimeManager.Tick + base.TimeManager.TimeToTicks(_timeToExplode);
+                    ApplySimulationPose();
                 }
                 else
                 {
+                    _simulatedPosition = hit.point;
+                    ApplySimulationPose();
                     HandleImpact(hit.point, hit.normal, hit.collider.gameObject, replaying);
                 }
                 return true;
@@ -387,11 +607,8 @@ namespace FastAndFractured.Multiplayer
             {
                 if (_visuals != null) _visuals.SetActive(false);
                 _ownCollider.enabled = false;
-                if (_customRigidbody != null)
-                {
-                    _customRigidbody.linearVelocity = Vector3.zero;
-                    _customRigidbody.isKinematic = true;
-                }
+                _simulatedVelocity = Vector3.zero;
+                ApplySimulationPose();
             }
 
             if (base.IsServer)
@@ -422,9 +639,7 @@ namespace FastAndFractured.Multiplayer
         private void ApplyExplosionForce(Vector3 center)
         {
             Vector3 explosionCenter = center + _explosionCenterOffset;
-            int vehicleLayer = LayerMask.NameToLayer("Characters");
-            int defaultLayer = LayerMask.NameToLayer("Default");
-            LayerMask explosionMask = (1 << vehicleLayer) | (1 << defaultLayer);
+            LayerMask explosionMask = (1 << CharactersLayer) | (1 << DefaultLayer);
 
             Collider[] hits = Physics.OverlapSphere(explosionCenter, _explosionRadius, explosionMask);
             var pushedSet = new System.Collections.Generic.HashSet<PhysicsBehaviour>();
@@ -462,7 +677,7 @@ namespace FastAndFractured.Multiplayer
 
                     Vector3 closestPoint = hit.ClosestPointOnBounds(explosionCenter);
                     Vector3 direction = (closestPoint - explosionCenter).normalized;
-                    if (direction.sqrMagnitude < 0.001f) direction = Vector3.up;
+                    if (direction.sqrMagnitude < MIN_DIRECTION_SQR_MAG) direction = Vector3.up;
 
                     float forceToApply = physicsBehaviour.CalculateForceToApplyToOtherCar(
                         enduranceFactor, weight, enduranceImportance, _pushForce);
@@ -481,8 +696,8 @@ namespace FastAndFractured.Multiplayer
                     {
                         Vector3 closestPoint = hit.ClosestPointOnBounds(explosionCenter);
                         Vector3 direction = (closestPoint - explosionCenter).normalized;
-                        if (direction.sqrMagnitude < 0.001f) direction = Vector3.up;
-                        rb.AddForceAtPosition(direction * _pushForce * 0.5f, closestPoint, ForceMode.Impulse);
+                        if (direction.sqrMagnitude < MIN_DIRECTION_SQR_MAG) direction = Vector3.up;
+                        rb.AddForceAtPosition(direction * _pushForce * NON_VEHICLE_PUSH_FORCE_MULTIPLIER, closestPoint, ForceMode.Impulse);
                     }
                 }
             }
@@ -494,44 +709,52 @@ namespace FastAndFractured.Multiplayer
         private void ApplyPointDamage(GameObject hitObject)
         {
             var networkedStats = hitObject.GetComponentInParent<NetworkedStatsController>();
-            if (networkedStats != null && base.Owner.IsValid)
+            if (networkedStats != null && _attackerConnection != null && _attackerConnection.IsValid)
             {
-                networkedStats.DealDamageServerRpc(_damage, base.Owner);
+                networkedStats.DealDamageServerRpc(_damage, _attackerConnection);
             }
             else
             {
                 var stats = hitObject.GetComponentInParent<StatsController>();
                 if (stats != null)
                 {
-                    GameObject attackerObject = base.Owner.IsValid && base.Owner.FirstObject != null
-                        ? base.Owner.FirstObject.gameObject
+                    GameObject attackerObject = _attackerConnection != null && _attackerConnection.IsValid && _attackerConnection.FirstObject != null
+                        ? _attackerConnection.FirstObject.gameObject
                         : gameObject;
 
                     var hitNob = hitObject.GetComponentInParent<FishNet.Object.NetworkObject>(true);
                     bool isOwnerVehicle = hitNob != null && hitNob.IsOwner;
 
-                    if (_isPlayerField == null)
-                        _isPlayerField = typeof(StatsController).GetField("_isPlayer", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    bool needsSuppress = !isOwnerVehicle && _isPlayerField != null;
-                    if (needsSuppress) _isPlayerField.SetValue(stats, false);
-
-                    stats.TakeEndurance(_damage, false, attackerObject);
-
-                    if (needsSuppress) _isPlayerField.SetValue(stats, true);
+                    if (!isOwnerVehicle)
+                    {
+                        SingleplayerReflectionCache.RunWithoutPlayerFlag(stats,
+                            () => stats.TakeEndurance(_damage, false, attackerObject));
+                    }
+                    else
+                    {
+                        stats.TakeEndurance(_damage, false, attackerObject);
+                    }
                 }
             }
         }
         #endregion
 
         #region VFX_RPCS
+        private const float VFX_AUTO_DESTROY_TIME = 5f;
+
         [ObserversRpc]
         private void RpcSpawnExplosionVFX(Vector3 point, Vector3 normal)
         {
+            // Screen shake for everyone near the blast. The singleplayer ExplosionForce (which is
+            // what normally triggers the Explosion profile) is stripped from networked projectiles,
+            // so without this no peer — not even the shooter — feels an explosion.
+            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.Explosion, point);
+
             if (_explosionPrefab != null)
             {
                 var vfx = Instantiate(_explosionPrefab, point, Quaternion.LookRotation(normal));
                 vfx.transform.localScale = Vector3.one * _explosionRadius;
+                Destroy(vfx, VFX_AUTO_DESTROY_TIME);
             }
         }
 
@@ -539,8 +762,85 @@ namespace FastAndFractured.Multiplayer
         private void RpcSpawnImpactVFX(Vector3 point, Vector3 normal)
         {
             if (_impactParticlesPrefab != null)
-                Instantiate(_impactParticlesPrefab, point, Quaternion.LookRotation(normal));
+            {
+                var vfx = Instantiate(_impactParticlesPrefab, point, Quaternion.LookRotation(normal));
+                Destroy(vfx, VFX_AUTO_DESTROY_TIME);
+            }
         }
         #endregion
+
+        private void RecordPositionSample(Vector3 position)
+        {
+            _positionHistory[_positionHistoryNextIndex] = position;
+            _positionHistoryNextIndex = (_positionHistoryNextIndex + 1) % PositionHistoryCapacity;
+            if (_positionHistoryCount < PositionHistoryCapacity)
+            {
+                _positionHistoryCount++;
+            }
+        }
+
+        private Vector3 GetMovementDirection()
+        {
+            Vector3 velocity = _simulatedVelocity;
+            return velocity.sqrMagnitude > MIN_VELOCITY_FOR_DIRECTION ? velocity.normalized : Vector3.zero;
+        }
+
+        private Vector3 GetSimulationPosition()
+        {
+            if (_simulationStateValid)
+            {
+                return _simulatedPosition;
+            }
+            return _customRigidbody != null ? _customRigidbody.position : transform.position;
+        }
+
+        private void ApplySimulationPose()
+        {
+            if (!_simulationStateValid)
+            {
+                return;
+            }
+
+            if (_customRigidbody != null)
+            {
+                _customRigidbody.position = _simulatedPosition;
+            }
+
+            if (transform.position != _simulatedPosition)
+            {
+                transform.SetPositionAndRotation(_simulatedPosition, transform.rotation);
+            }
+        }
+
+        private void LateUpdate()
+        {
+            if (!_isInitialized || !_simulationStateValid)
+            {
+                return;
+            }
+
+            if (Vector3.SqrMagnitude(transform.position - _simulatedPosition) > LATE_UPDATE_RESYNC_THRESHOLD_SQR)
+            {
+                transform.SetPositionAndRotation(_simulatedPosition, transform.rotation);
+            }
+        }
+
+        private bool TryBeginTickSimulation()
+        {
+            if (!_isInitialized || base.TimeManager == null)
+            {
+                return false;
+            }
+
+            uint tick = base.TimeManager.Tick;
+            if (_lastSimulatedTick == tick)
+            {
+                return false;
+            }
+
+            _lastSimulatedTick = tick;
+            return true;
+        }
+
     }
 }
