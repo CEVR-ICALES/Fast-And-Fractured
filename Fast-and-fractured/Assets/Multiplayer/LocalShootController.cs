@@ -1,4 +1,3 @@
-// RUTA: Assets/FastAndFractured/ShootingSystem/Scripts/LocalShootController.cs
 using FastAndFractured.Abstractions;
 using UnityEngine;
 using Utilities;  
@@ -9,47 +8,114 @@ namespace FastAndFractured
     {
         private NormalShootHandle _normalShootHandle;
         private PushShootHandle _pushShootHandle;
+        private bool _eventsSubscribed;
+        private bool _loggedMissingShootHandles;
 
         private void Awake()
         {
-            _normalShootHandle = GetComponentInChildren<NormalShootHandle>();
-            _pushShootHandle = GetComponentInChildren<PushShootHandle>();
+            EnsureHandles();
+        }
+
+        private void EnsureHandles()
+        {
+            if (_normalShootHandle == null)
+            {
+                _normalShootHandle = GetComponentInChildren<NormalShootHandle>();
+            }
+
+            if (_pushShootHandle == null)
+            {
+                _pushShootHandle = GetComponentInChildren<PushShootHandle>();
+            }
         }
 
         private void OnEnable()
-        { 
-            _normalShootHandle.OnShootRequest += HandleLocalSpawn;
-            _pushShootHandle.OnShootRequest += HandleLocalSpawn;
+        {
+            EnsureHandles();
+            if (_eventsSubscribed) return;
+
+            if (_normalShootHandle == null && _pushShootHandle == null)
+            {
+                if (!_loggedMissingShootHandles)
+                {
+                    _loggedMissingShootHandles = true;
+                    Debug.LogWarning($"[LocalShootController] Missing shoot handles on {name}.");
+                }
+                return;
+            }
+
+            if (_normalShootHandle != null)
+            {
+                _normalShootHandle.OnShootRequest += HandleLocalSpawn;
+            }
+
+            if (_pushShootHandle != null)
+            {
+                _pushShootHandle.OnShootRequest += HandleLocalSpawn;
+            }
+
+            _eventsSubscribed = true;
         }
 
         private void OnDisable()
         {
-            _normalShootHandle.OnShootRequest -= HandleLocalSpawn;
-            _pushShootHandle.OnShootRequest -= HandleLocalSpawn;
+            if (!_eventsSubscribed) return;
+
+            if (_normalShootHandle != null)
+            {
+                _normalShootHandle.OnShootRequest -= HandleLocalSpawn;
+            }
+
+            if (_pushShootHandle != null)
+            {
+                _pushShootHandle.OnShootRequest -= HandleLocalSpawn;
+            }
+
+            _eventsSubscribed = false;
         }
 
         public void TryNormalShoot()
         {
+            if (!isActiveAndEnabled) return;
+            EnsureHandles();
+            if (_normalShootHandle == null) return;
             _normalShootHandle.NormalShooting();
         }
 
         public void TryPushShoot()
         {
+            if (!isActiveAndEnabled) return;
+            EnsureHandles();
+            if (_pushShootHandle == null) return;
             _pushShootHandle.PushShooting();
         }
 
         public void TryMineShoot()
         {
+            if (!isActiveAndEnabled) return;
+            EnsureHandles();
+            if (_pushShootHandle == null) return;
             _pushShootHandle.MineShoot();
         }
 
         private void HandleLocalSpawn(BulletSpawnParameters spawnParams)
         {
+            if (!isActiveAndEnabled) return;
+            if (ObjectPoolManager.Instance == null) return;
+
             GameObject bulletGO = ObjectPoolManager.Instance.GivePooledObject(spawnParams.Pooltype);
-            bulletGO.transform.parent = this.transform;
             if (bulletGO == null) return;
 
-            bulletGO.transform.SetPositionAndRotation(spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
+            bulletGO.transform.parent = this.transform;
+
+            if (spawnParams.ShootPoint != null)
+            {
+                bulletGO.transform.SetPositionAndRotation(spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
+            }
+            else
+            {
+                bulletGO.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            }
             
             var bulletBehaviour = bulletGO.GetComponent<BulletBehaviour>();
             if(bulletBehaviour != null)
