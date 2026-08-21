@@ -264,3 +264,11 @@ UserSettings/
 
 /ExternalAssets/Plugins/FMOD/Cache/*
 !/Editor Default Resources/FMOD/*
+
+# Metas belonging to the local-only files ignored from the repo root .gitignore.
+# They need to be listed here because line 186 un-ignores every meta under Assets/.
+/Assets/_Recovery.meta
+/Assets/ff.bat.meta
+/Assets/test.txt.meta
+/Assets/Multiplayer/Testing/test_results.json.meta
+/Assets/Multiplayer/FastAndFractured.Multiplayer.asmdef.backup.meta
