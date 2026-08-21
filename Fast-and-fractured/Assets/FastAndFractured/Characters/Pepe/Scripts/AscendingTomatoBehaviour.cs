@@ -49,7 +49,7 @@ namespace FastAndFractured
         public void StartTimer()
         {
             decal.GetComponent<TomatoDecal>().SetRadius(effectDistance);
-            charactersList = LevelControllerButBetter.Instance.InGameCharacters;
+            charactersList = LevelController.Instance.InGameCharacters;
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             TimerSystem.Instance.CreateTimer(ascendingTime, onTimerDecreaseComplete: () =>
             {
@@ -75,7 +75,7 @@ namespace FastAndFractured
                         }  
                     }
                 }
-                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                ObjectPoolManager.Instance.DeactivatePooledObject(this, gameObject);
             });
             TimerSystem.Instance.CreateTimer(ascendingTime - TIME_BEFORE_START_FADE, onTimerDecreaseComplete: () =>
             {
@@ -87,12 +87,12 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-            GameObject player= LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player= LevelController.Instance.LocalPlayer;
 
             if (Caster == null) return;
             if (player&&!player.transform.IsChildOf(Caster.transform))
             {
-                float distance = Vector3.Distance(OriginPosition, LevelControllerButBetter.Instance.LocalPlayer.transform.position);
+                float distance = Vector3.Distance(OriginPosition, LevelController.Instance.LocalPlayer.transform.position);
                 if (distance<=effectDistance)
                 {
                     if(!IngameEventsManager.Instance.IsAlertActive)
