@@ -1,0 +1,193 @@
+# Fast And Fractured - Multiplayer System
+
+## Overview
+
+This folder contains the multiplayer implementation for Fast And Fractured, built on **FishNet Pro 4.x**. The architecture follows a **wrapper pattern** where networked components wrap existing singleplayer functionality without modifying the original code.
+
+## Architecture Principles
+
+### 1. Wrapper Pattern
+- All multiplayer code is isolated in `FastAndFractured.Multiplayer` namespace
+- Singleplayer code has **zero references** to networking code
+- Multiplayer components wrap and extend singleplayer functionality
+
+### 2. Server-Authoritative with Client Prediction
+- **Movement**: Client-side prediction with server reconciliation (`NetworkedVehicle`)
+- **Shooting**: Server-authoritative with local cosmetic projectiles (`NetworkedShoot`)
+- **Damage**: Server-authoritative health sync (`NetworkedStatsController`)
+
+### 3. FishNet 4.x Patterns
+- Uses `SyncVar<T>` with `new()` syntax (no attributes)
+- `[Replicate]` / `[Reconcile]` for prediction
+- `[ServerRpc]` / `[ObserversRpc]` for state synchronization
+
+## Core Components
+
+| Component | Purpose |
+|-----------|---------|
+| `NetworkedVehicle` | Vehicle movement prediction/reconciliation |
+| `NetworkedShoot` | Server-authoritative shooting |
+| `NetworkedProjectile` | Networked projectile physics |
+| `NetworkedStatsController` | Health, damage, invulnerability sync |
+| `NetworkedUniqueAbility` | Ability activation broadcasting |
+| `NetworkedAIShoot` | Server-only AI shooting |
+| `NetworkedLevelControllerManager` | Game state management |
+| `NetworkedInteractableHandler` | Pickup/interactable sync |
+
+## Editor Tools
+
+Primary entrypoint:
+- **MultiplayerToolsHub** (`Tools > Fast And Fractured > Multiplayer Tools Hub`)
+
+This hub centralizes setup, validation, test launchers, and network stress simulation controls.
+
+Other tools:
+
+| Tool | Menu Path | Purpose |
+|------|-----------|---------|
+| **NetworkedVehicleSetupTool** | Tools > Fast And Fractured > Networked Vehicle Setup | Convert singleplayer car to multiplayer variant, update existing, or batch-generate from CharacterData |
+| **NetworkedAISetupTool** | Tools > Fast And Fractured > Networked AI Setup | Add multiplayer components to AI |
+| **MultiplayerSceneValidator** | Tools > Fast And Fractured > Validate Multiplayer Scene | Validate scene configuration |
+| **SetupMultiplayerWrappers** | Tools > Fast And Fractured > Setup Wrappers in Scene | Auto-configure scene wrappers |
+| **NetworkedBulletConverter** | Tools > Fast And Fractured > Networked Bullet Converter | Convert bullet prefabs |
+
+## Testing
+
+### Distributed Tests (Real Host + Client with ParrelSync)
+
+The **DistributedTestSystem** runs real multiplayer tests between two Unity instances using ParrelSync.
+
+**How to Run:**
+1. Open `Fast And Fractured > Multiplayer > Distributed Test Setup`
+2. Click "Setup Current Scene for Distributed Tests"
+3. Open the ParrelSync clone project
+4. Enter Play Mode in ORIGINAL (starts as Host)
+5. Enter Play Mode in CLONE (connects as Client)
+6. Tests run automatically and sync results
+
+**Test Phases:**
+- **Connectivity**: Server status, client connections, NetworkObjects
+- **Vehicle Sync**: Vehicle spawning, ownership, cross-client visibility
+- **Shooting**: NetworkedShoot components, projectile spawning
+- **Damage**: NetworkedStatsController, health synchronization
+- **Abilities**: NetworkedUniqueAbility validation
+
+**Results Location:** `Assets/Multiplayer/Testing/test_results.json`
+
+### Runtime Tests (MultiplayerTestCoordinator)
+Automated tests that run when the game starts in multiplayer mode:
+
+**Phase 1 - Connectivity:**
+- Network connection validation
+- DummyPlayer spawn verification
+
+**Phase 2 - Gameplay:**
+- Singleton isolation
+- HUD visibility
+- Player spawning
+- Projectile synchronization
+- Input isolation
+- Damage sync
+- Vehicle components
+
+**Phase 3 - Advanced:**
+- Unique ability sync
+- AI shooting components
+- Interactable handler
+- Level controller
+
+### Edit Mode Tests (NUnit)
+Located in `Assets/Multiplayer/Tests/Editor/`:
+- Component structure validation
+- Public API verification
+- Prefab configuration checks
+
+## Setup Instructions
+
+### 1. Scene Setup
+1. Open `MultiplayerRoomTest.unity`
+2. Open **Tools > Fast And Fractured > Multiplayer Tools Hub**
+3. Run **Setup Scene Wrappers**
+4. Run **Validate Multiplayer Scene**
+
+### 2. Vehicle Setup
+1. Select a singleplayer car prefab (e.g., `JosefinoGameplayCar`)
+2. Run **Tools > Fast And Fractured > Networked Vehicle Setup**
+3. Choose "Create New Variant" or "Update Existing"
+4. Assign bullet prefabs if needed
+
+For many characters at once, use **Batch From CharacterData** mode in the same tool.
+
+### 3. Testing with ParrelSync (Distributed Tests)
+1. Open **Fast And Fractured > Multiplayer > Distributed Test Setup**
+2. Click "Setup Current Scene for Distributed Tests"
+3. Save the scene
+4. Open the ParrelSync clone (ParrelSync > Clones Manager > Open Project)
+5. In ORIGINAL editor: Enter Play Mode FIRST (starts as Host automatically)
+6. In CLONE editor: Enter Play Mode (connects as Client automatically)
+7. Tests run automatically and results appear in both consoles
+8. Full results saved to: `Assets/Multiplayer/Testing/test_results.json`
+
+## Prefabs
+
+### Networked Vehicles
+- `NetworkedPepeGameplayCar Variant.prefab`
+- `NetworkedJosefinoGameplayCar Variant.prefab`
+
+### Networked Projectiles (in Pool/)
+- `NetworkedNormalShootGolfBall Variant.prefab`
+- `NetworkedNormalShootTomato Variant.prefab`
+- `NetworkedPushShootGolBat Variant.prefab`
+- `NetworkedpushShoot_watermelon Variant.prefab`
+- `NetworkedAscendingTomato Variant.prefab`
+- `NetworkedMegaChicken Variant.prefab`
+
+## Key Files
+
+```
+Assets/Multiplayer/
+├── NetworkedVehicle.cs           # Vehicle prediction
+├── NetworkedShoot.cs             # Shooting system
+├── NetworkedProjectile.cs        # Projectile physics
+├── NetworkedStatsController.cs   # Health/damage
+├── NetworkedUniqueAbility.cs     # Ability sync
+├── NetworkedAIShoot.cs           # AI shooting
+├── NetworkedLevelControllerManager.cs
+├── NetworkedLevelControllerWrapper.cs
+├── NetworkedInteractableHandler.cs
+├── MultiplayerRigidbodyAdapter.cs
+├── NetworkInputProvider.cs
+├── Editor/
+│   ├── NetworkedVehicleSetupTool.cs
+│   ├── NetworkedAISetupTool.cs
+│   └── MultiplayerSceneValidator.cs
+├── Testing/
+│   ├── MultiplayerTestCoordinator.cs
+│   ├── NetworkedProjectileTestRunner.cs
+│   └── ProjectileDestructionTestValidator.cs
+├── Tests/
+│   ├── Editor/
+│   │   └── MultiplayerComponentTests.cs
+│   └── Runtime/
+└── Pool/
+    └── (networked prefabs and pools)
+```
+
+## Known Limitations
+
+1. **Host Migration**: Not implemented (FishNet limitation + project complexity)
+2. **Deterministic Physics**: Unity physics are non-deterministic; prediction handles discrepancies
+3. **Assembly Definition**: Disabled (`.asmdef.backup`) to avoid circular reference with Assembly-CSharp
+
+## Debugging
+
+Enable verbose logging by:
+1. Setting `verboseLogging = true` on `NetworkedStatsController`
+2. Checking `MultiplayerTestCoordinator` test results in Console
+3. Using `PlayerSpawnDebugger` component for spawn diagnostics
+
+## Version Compatibility
+
+- **Unity**: 2022.3+ (newer version in this branch)
+- **FishNet**: Pro 4.x (SyncVar<T> syntax required)
+- **Input System**: New Input System package
