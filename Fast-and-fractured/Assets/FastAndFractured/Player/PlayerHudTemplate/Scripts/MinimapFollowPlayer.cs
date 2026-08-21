@@ -23,17 +23,17 @@ namespace FastAndFractured
         }
         void OnEnable()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
             }
         }
 
         void OnDestroy()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
             }
         }
         
@@ -59,7 +59,7 @@ namespace FastAndFractured
         {
             if (!_isPlayerReceived)
             {
-                _player = LevelControllerButBetter.Instance.LocalPlayer;
+                _player = LevelController.Instance.LocalPlayer;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 if (_player != null)
