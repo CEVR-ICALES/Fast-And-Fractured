@@ -86,7 +86,7 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(BindActions);
+            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
         }
 
         public void BindActions()
@@ -153,12 +153,23 @@ namespace FastAndFractured
                 _inputActions.Disable();
             }
         }
+        private void OnDestroy()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
+        }
         protected override void Deconstruct()
         {
             base.Deconstruct();
             if (_inputActions != null)
             {
                 _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
             }
         }
          
