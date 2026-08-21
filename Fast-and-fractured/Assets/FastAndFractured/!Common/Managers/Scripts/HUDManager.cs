@@ -39,7 +39,10 @@ namespace FastAndFractured
         {
             base.Construct();
             RegisterUIElements();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
+            if (LevelController.HasInstance)
+            {
+                LevelController.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
+            }
             RegisterSelectedPlayer();
         }
         protected override void Initialize()
@@ -51,6 +54,10 @@ namespace FastAndFractured
         void RegisterSelectedPlayer()
         {
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+            if (string.IsNullOrEmpty(selectedPlayer))
+            {
+                return;
+            }
             selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
             string splittedPlayer = selectedPlayer.Split('_')[0];
             selectedPlayerUA = splittedPlayer + "_UA";
@@ -70,15 +77,26 @@ namespace FastAndFractured
             {
                 _uiElements[element.elementType] = element;
             }
-            _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
-            _bulletEffects = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+            
+            var goodEffectsElement = GetUIElement(UIDynamicElementType.GOOD_EFFECTS);
+            _goodEffects = goodEffectsElement != null ? goodEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var normalEffectsElement = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS);
+            _normalEffects = normalEffectsElement != null ? normalEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var badEffectsElement = GetUIElement(UIDynamicElementType.BAD_EFFECTS);
+            _badEffects = badEffectsElement != null ? badEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var effectIconsElement = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER);
+            _effectIcons = effectIconsElement != null ? effectIconsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var bulletEffectElement = GetUIElement(UIDynamicElementType.BULLET_EFFECT);
+            _bulletEffects = bulletEffectElement != null ? bulletEffectElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
 		}
 
         void SetPlayerStartingSprites()
         {
+            if (!ResourcesManager.HasInstance) return;
             UpdateUIElement(UIDynamicElementType.SHOOT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerShoot));
             UpdateUIElement(UIDynamicElementType.PUSH_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerPush));
             UpdateUIElement(UIDynamicElementType.ULT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerUA));
@@ -153,7 +171,8 @@ namespace FastAndFractured
                     break;
                 case UIDynamicElementType.BULLET_EFFECT:
                     effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
-                    GameObject bulletContainer = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject;
+                    var bulletElement = GetUIElement(UIDynamicElementType.BULLET_EFFECT);
+                    GameObject bulletContainer = bulletElement != null ? bulletElement.gameObject : null;
                     if (bulletContainer != null && effectGameObj != null)
                     {
                         RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
@@ -177,6 +196,10 @@ namespace FastAndFractured
             if(timeInscreen > 0f)
             {
                 GameObject newSpriteGameObject = effectGameObj;
+                if (newSpriteGameObject == null || !TimerSystem.HasInstance)
+                {
+                    return;
+                }
                 newSpriteGameObject.SetActive(true);
                 TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
                 {
