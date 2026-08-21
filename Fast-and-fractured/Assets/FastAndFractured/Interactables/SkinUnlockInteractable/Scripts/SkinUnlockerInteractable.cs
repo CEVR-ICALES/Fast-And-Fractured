@@ -21,7 +21,7 @@ namespace FastAndFractured
             DisableAllVisuals();
             _skinToUnlock = skinToUnlock;
   
-            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player = LevelController.Instance.LocalPlayer;
             if (player != null)
             {
                 switch (player.name)

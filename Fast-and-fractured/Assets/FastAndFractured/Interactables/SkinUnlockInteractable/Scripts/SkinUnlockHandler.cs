@@ -1,4 +1,4 @@
-﻿using FastAndFractured;
+using FastAndFractured;
 using NRandom;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     {
         List<string> unlockableSkins = new List<string>();
 
-        int numOfSkins = LevelControllerButBetter.Instance.LocalPlayer!=null ? LevelControllerButBetter.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
+        int numOfSkins = LevelController.Instance.LocalPlayer!=null ? LevelController.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
 
         if (_playerSelected == "")
         {
