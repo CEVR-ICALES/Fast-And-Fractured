@@ -857,6 +857,8 @@ GameObject:
   - component: {fileID: 9016514513498141912}
   - component: {fileID: 475735137831720905}
   - component: {fileID: 2584534482645837430}
+  - component: {fileID: 3905943107346621012}
+  - component: {fileID: 6851438649454549477}
   m_Layer: 6
   m_Name: BaseCar
   m_TagString: Untagged
@@ -959,6 +961,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65fc8bfb1d92dad46ac749e745cfe6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _autoConstructOnAwake: 1
+  _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
   onDashCooldownUpdate:
     m_PersistentCalls:
       m_Calls: []
@@ -1016,6 +1021,7 @@ MonoBehaviour:
   vehicleVfxController: {fileID: 856863917156540184}
   slowingDownAngularMomentumTime: 0.75
   screenShakeSourceController: {fileID: 2584534482645837430}
+  currentProviderName: 
 --- !u!114 &5672472646167121783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1337,6 +1343,30 @@ MonoBehaviour:
   screenShakeProfiles:
   - {fileID: 11400000, guid: 3af190bf65350adb1b7c10ed742a7f0a, type: 2}
   cinemachineImpulseSource: {fileID: 475735137831720905}
+--- !u!114 &3905943107346621012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7eaa71b452aa6d47a5ee1b985761e97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6851438649454549477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8ab7c89268df6348b1d31dab98b96a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0
