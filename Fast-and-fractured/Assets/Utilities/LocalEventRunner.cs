@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Utilities;
@@ -64,7 +64,7 @@ namespace FastAndFractured.Utilities
         {
             if (obj.TryGetComponent<IPooledObject>(out var pooledObject))
             {
-                ObjectPoolManager.Instance.DesactivatePooledObject(pooledObject, obj);
+                ObjectPoolManager.Instance.DeactivatePooledObject(pooledObject, obj);
             }
             else
             {
