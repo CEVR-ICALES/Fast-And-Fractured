@@ -22,7 +22,7 @@ namespace FastAndFractured
         public GameObject replayButton;
         public LoadingManager LoadingManager;
         private PlayableDirector _playableDirector;
-        [SerializeField] private GameEndData gameEndData;
+        [SerializeField] public GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
         private const string WIN_TEXT = "Menu.Win";
