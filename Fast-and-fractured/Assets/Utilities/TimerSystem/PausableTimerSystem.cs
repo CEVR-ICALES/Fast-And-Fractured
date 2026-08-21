@@ -12,13 +12,16 @@ public class PausableTimerSystem : MonoBehaviour, IPausable
         {
             timerSystem = GetComponent<TimerSystem>();
         }
-        PauseManager.Instance.RegisterPausable(this);
+        PauseManager.TryRegisterPausable(this);
 
     }
 
     private void OnDestroy()
     {
-        PauseManager.Instance?.UnregisterPausable(this);
+        if (PauseManager.HasInstance)
+        {
+            PauseManager.TryUnregisterPausable(this);
+        }
     }
     public void OnPause()
     {

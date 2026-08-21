@@ -14,7 +14,7 @@ public class InputPausable : MonoBehaviour, IPausable
             playerInputController = GetComponentInChildren<PlayerInputController>();
         }
 
-        PauseManager.Instance?.RegisterPausable(this);
+        PauseManager.TryRegisterPausable(this);
     }
     public void OnPause()
     {
@@ -34,6 +34,9 @@ public class InputPausable : MonoBehaviour, IPausable
 
     void OnDestroy()
     {
-        PauseManager.Instance?.UnregisterPausable(this);
+        if (PauseManager.HasInstance)
+        {
+            PauseManager.TryUnregisterPausable(this);
+        }
     }
 }
