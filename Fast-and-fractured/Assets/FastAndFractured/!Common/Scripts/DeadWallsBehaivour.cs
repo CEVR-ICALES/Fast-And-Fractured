@@ -23,12 +23,15 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
 
     private void OnEnable()
     {
-        PauseManager.Instance?.RegisterPausable(this);
+        PauseManager.TryRegisterPausable(this);
     }
 
     private void OnDisable()
     {
-        PauseManager.Instance?.UnregisterPausable(this);
+        if (PauseManager.HasInstance)
+        {
+            PauseManager.TryUnregisterPausable(this);
+        }
     }
 
     private void Start()
@@ -41,7 +44,7 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
             if (!other.GetComponent<Rigidbody>().isKinematic)
             {
                 StartKillNotify(statsController);
-                if (LevelControllerButBetter.Instance.LocalPlayer == statsController.gameObject)
+                if (LevelController.Instance.LocalPlayer == statsController.gameObject)
                 {
                     IngameEventsManager.Instance.CreateEvent("Events.OutsideMap", 2f);
                 }
