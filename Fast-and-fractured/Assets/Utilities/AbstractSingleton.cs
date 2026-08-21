@@ -10,9 +10,37 @@ namespace Utilities
     [DefaultExecutionOrder(-222)]
     public abstract class AbstractSingleton<T> : AbstractAutoInitializableMonoBehaviour, IOverwritableSingleton where T : Component
     {
-        [SerializeField] SingletonDuplicateResolution singletonDuplicateResolution = SingletonDuplicateResolution.DESTROY_GAMEOBJECT;
+        [SerializeField] SingletonDuplicateResolution singletonDuplicateResolution = SingletonDuplicateResolution.DISABLE_COMPONENT;
         [SerializeField] bool alsoDisableGameobjectOnDuplicateResolution = false;
         static T s_Instance;
+        /// <summary>
+        /// Check if instance exists without creating it
+        /// </summary>
+        public static bool HasInstance
+        {
+            get
+            {
+                if (s_Instance != null) return true;
+                var objects = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                return objects != null && objects.Length > 0;
+            }
+        }
+        /// <summary>
+        /// Returns an existing instance without creating a new one.
+        /// </summary>
+        public static T ExistingInstance
+        {
+            get
+            {
+                if (s_Instance != null) return s_Instance;
+                var objects = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                if (objects != null && objects.Length > 0)
+                {
+                    s_Instance = objects[0];
+                }
+                return s_Instance;
+            }
+        }
         /// <summary>
         /// static Singleton instance
         /// </summary>
@@ -22,8 +50,13 @@ namespace Utilities
             {
                 if (s_Instance == null)
                 {
-                    s_Instance = FindFirstObjectByType<T>();
-                    return s_Instance;
+                    // Use FindObjectsByType to exclude inactive components
+                    var allInstances = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                    if (allInstances != null && allInstances.Length > 0)
+                    {
+                        s_Instance = allInstances[0];
+                    }
+                    
                     if (s_Instance == null)
                     {
                         GameObject obj = new GameObject();
