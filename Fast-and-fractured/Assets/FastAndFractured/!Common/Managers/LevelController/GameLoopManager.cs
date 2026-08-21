@@ -64,12 +64,20 @@ namespace FastAndFractured
             {
                 var playerInputCtrl = _playerReference.GetComponentInParent<PlayerInputController>();
                 if (playerInputCtrl) playerInputCtrl.enabled = true;
+
                 var playerBaseCtrl = _playerReference.GetComponentInParent<Controller>();
-                if(playerBaseCtrl) playerBaseCtrl.enabled = true;
+                if (playerBaseCtrl) playerBaseCtrl.enabled = true;
+            }
+
+            if (_inGameCharacters == null)
+            {
+                _charactersCustomStartEvent?.Invoke();
+                return;
             }
 
             foreach (var character in _inGameCharacters)
             {
+                if (character == null) continue;
                 if (character == _playerReference) continue;  
                 var aiBaseCtrl = character.GetComponentInParent<Controller>();
                 if (aiBaseCtrl) aiBaseCtrl.enabled = true;
