@@ -74,9 +74,21 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2121636977261876883}
+    - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5477310892630592138}
+    - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1354967797559464243}
+    - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8918977521268068090}
     - targetCorrespondingSourceObject: {fileID: 8878639141361372079, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2406575225774861939}
+    - targetCorrespondingSourceObject: {fileID: 2070056097290367404, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2314163124427475796}
   m_SourcePrefab: {fileID: 100100000, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
 --- !u!1 &1785575773281659211 stripped
 GameObject:
@@ -95,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 1
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 3437050017870222519}
   _networkObjectCache: {fileID: 3437050017870222519}
   _initializationSettings:
@@ -109,6 +121,7 @@ MonoBehaviour:
     InterpolationValue: 15
     SmoothedProperties: 4294967295
     SnapNonSmoothedProperties: 0
+  _favorPredictionNetworkTransform: 1
   _spectatorMovementSettings:
     EnableTeleport: 1
     TeleportThreshold: 16686
@@ -141,7 +154,10 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: -4034043566627122006}
-  - {fileID: 0}
+  - {fileID: -5477310892630592138}
+  - {fileID: 1354967797559464243}
+  - {fileID: 8918977521268068090}
+  - {fileID: 2406575225774861939}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -152,9 +168,14 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
+  _initializedTimestamp: -8584223811751996961
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
   NetworkObserver: {fileID: 0}
   _enablePrediction: 1
   _predictionType: 1
+  _localReconcileCorrectionType: 2
   _graphicalObject: {fileID: 0}
   _detachGraphicalObject: 0
   _enableStateForwarding: 1
@@ -166,10 +187,10 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 5
+  <PrefabId>k__BackingField: 28
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 15845064518912578970
-  <SceneId>k__BackingField: 0
+  SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -190,6 +211,9 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 3437050017870222519}
   _networkObjectCache: {fileID: 3437050017870222519}
+  suppressFalseFlipImpulse: 1
+  uprightDotThreshold: 0.8
+  stationarySpeedThreshold: 1.5
 --- !u!114 &2121636977261876883
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,8 +226,102 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00caa36ab74b81e4cbdf8b5af5c5e3e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-5477310892630592138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4655980277527480527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f4627544a51214ca6bfd81ab2505da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedShoot
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  _cosmeticNormalBulletType: 15
+  _cosmeticPushBulletType: 16
+  _cosmeticMineType: 16
+  _networkedNormalBulletPrefab: {fileID: 4357404450186838095, guid: 9c5d6fe6ec048c6458ba247ed56ff3b5, type: 3}
+  _networkedPushBulletPrefab: {fileID: 3255548183534676021, guid: 6810b977cb1ca04448849d7991bd0bde, type: 3}
+  _networkedMinePrefab: {fileID: 3255548183534676021, guid: 6810b977cb1ca04448849d7991bd0bde, type: 3}
+  _showPushAimOnRemoteClients: 1
+--- !u!114 &1354967797559464243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4655980277527480527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cffb46e8668c82e45901342775d24427, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedStatsController
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  verboseLogging: 1
+  dieExplosionVfx: {fileID: 4988223250978857504, guid: 4b88e94e2c2bfd34086bd29f4bc5a147, type: 3}
+--- !u!114 &8918977521268068090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4655980277527480527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8e47ab8465d0df4c8bdec1092d3b1a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedUniqueAbility
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  _networkedAbilityPrefab: {fileID: 0}
 --- !u!4 &6974511236189711798 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 232658802875862866, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   m_PrefabInstance: {fileID: 7201503153886749412}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &9172339282962666312 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2070056097290367404, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+  m_PrefabInstance: {fileID: 7201503153886749412}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2314163124427475796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9172339282962666312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  _initializationSettings:
+    TargetTransform: {fileID: 6974511236189711798}
+    DetachOnStart: 0
+    AttachOnStop: 0
+  _controllerMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 5078
+    AdaptiveInterpolationValue: 3
+    InterpolationValue: 15
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
+  _favorPredictionNetworkTransform: 1
+  _spectatorMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 16686
+    AdaptiveInterpolationValue: 4
+    InterpolationValue: 2
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
