@@ -45,8 +45,6 @@ namespace FastAndFractured
         [SerializeField]
         private float _overHeathMinEmissionRate = 0;
         private float _overHeathEmissionRateXTime;
-        [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
         #endregion
 
         #region UNITY_EVENTS
@@ -85,6 +83,8 @@ namespace FastAndFractured
             ignoredCollider = collider;
         }
 
+        [SerializeField] private ScreenShakeSourceController screenShakeSourceController;
+
         public void NormalShooting()
         {
             if (_isOverHeat)
@@ -94,7 +94,6 @@ namespace FastAndFractured
 
             if (canShoot)
             {
-                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);
                 ActiveShootingVFX(shootingTurretVFX);
                 Vector3 shootingDirection =  currentShootDirection + directionCenterOffSet;
                 float angle = Vector3.Angle(shootingDirection, transform.forward);
@@ -117,6 +116,7 @@ namespace FastAndFractured
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
+                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
 
                 canShoot = false;
