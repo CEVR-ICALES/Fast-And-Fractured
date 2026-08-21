@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
@@ -13,22 +14,32 @@ namespace FastAndFractured.Multiplayer
     /// networked damage pipeline) and activates ExplosionForce (applying AddForce to all
     /// rigidbodies in range). In multiplayer this produces double-damage and force desync.
     ///
-    /// This wrapper disables PointExplosion on non-server clients. The server-only
+    /// This wrapper snapshots PointExplosion's serialized configuration, removes the legacy
+    /// component on every peer, and owns the collision path. The server-only
     /// OnCollisionEnter:
     ///   1. Activates ExplosionForce on the server — FishNet Rigidbody prediction reconcile
     ///      propagates the resulting velocities to all clients automatically.
-    ///   2. Routes damage through DealDamageServerRpc (same 0.5 s delay as the original).
+    ///   2. Routes damage through DealDamageServerRpc after the original endingTime delay.
     ///   3. Broadcasts RpcExplosionTriggered to hide the mesh and deactivate the object on
     ///      all peers simultaneously.
     ///
     /// Setup: add this component and a NetworkObject to each TNT/explosive GameObject.
     /// </summary>
-    [RequireComponent(typeof(PointExplosion))]
     [RequireComponent(typeof(NetworkObject))]
     public class NetworkedPointExplosion : NetworkBehaviour
     {
         private PointExplosion _wrapped;
         private bool _exploded;
+
+        private ExplosionForce _explosionHitbox;
+        private float _explosionRadius = 10f;
+        private float _pushForce = 1_000_000f;
+        private Vector3 _explosionCenter;
+        private float _damagePercentage = 0.5f;
+        private GameObject _visuals;
+        private float _endingTime = 1.5f;
+        private float _startHitTime = 0.2f;
+        private float _endHitTime = 1f;
 
         // Reflection handles — PointExplosion fields are [SerializeField] private.
         private static readonly FieldInfo _explosionHitboxField =
@@ -43,6 +54,8 @@ namespace FastAndFractured.Multiplayer
             typeof(PointExplosion).GetField("damagePercentage",     BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo _visualsField =
             typeof(PointExplosion).GetField("visuals",              BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo _endingTimeField =
+            typeof(PointExplosion).GetField("endingTime",          BindingFlags.NonPublic | BindingFlags.Instance);
         // Added by dev (turret/explosion timing): ExplosionForce.ActivateExplosionHitbox now
         // takes startHitTime + endHitTime. Mirror those serialized PointExplosion fields.
         private static readonly FieldInfo _startHitTimeField =
@@ -53,14 +66,55 @@ namespace FastAndFractured.Multiplayer
         private void Awake()
         {
             _wrapped = GetComponent<PointExplosion>();
+            if (_wrapped == null)
+                return;
+
+            _explosionHitbox = _explosionHitboxField?.GetValue(_wrapped) as ExplosionForce;
+            _explosionRadius = ReadFloat(_explosionRadiusField, _explosionRadius);
+            _pushForce = ReadFloat(_pushForceField, _pushForce);
+            _explosionCenter = _explosionCenterField != null
+                ? (Vector3)_explosionCenterField.GetValue(_wrapped)
+                : Vector3.zero;
+            _damagePercentage = ReadFloat(_damagePercentageField, _damagePercentage);
+            _visuals = _visualsField?.GetValue(_wrapped) as GameObject;
+            _endingTime = ReadFloat(_endingTimeField, _endingTime);
+            _startHitTime = ReadFloat(_startHitTimeField, _startHitTime);
+            _endHitTime = ReadFloat(_endHitTimeField, _endHitTime);
+
+            // PointExplosion.Start used to perform this initialization. Preserve it before
+            // removing the component so the network wrapper is self-contained.
+            if (_explosionHitbox != null)
+                _explosionHitbox.ExplosionCollider = _explosionHitbox.GetComponent<SphereCollider>();
+
+            StartCoroutine(RemoveLegacyAfterColliderQuarantine());
         }
 
-        public override void OnStartNetwork()
+        private float ReadFloat(FieldInfo field, float fallback)
         {
-            base.OnStartNetwork();
-            // Non-server clients must not run the singleplayer explosion logic.
-            if (_wrapped != null && !base.IsServerInitialized)
-                _wrapped.enabled = false;
+            return field != null ? (float)field.GetValue(_wrapped) : fallback;
+        }
+
+        private IEnumerator RemoveLegacyAfterColliderQuarantine()
+        {
+            var collidersToRestore = new List<Collider>();
+            foreach (var collider in GetComponentsInChildren<Collider>(true))
+            {
+                if (collider == null || !collider.enabled)
+                    continue;
+
+                collider.enabled = false;
+                collidersToRestore.Add(collider);
+            }
+
+            Destroy(_wrapped);
+            _wrapped = null;
+            yield return null;
+
+            foreach (var collider in collidersToRestore)
+            {
+                if (collider != null)
+                    collider.enabled = true;
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -73,24 +127,18 @@ namespace FastAndFractured.Multiplayer
 
             // Activate the explosion hitbox on the server.
             // The resulting impulse forces propagate to clients via FishNet rigidbody reconcile.
-            var hitbox = _explosionHitboxField?.GetValue(_wrapped) as ExplosionForce;
-            if (hitbox != null)
+            if (_explosionHitbox != null)
             {
-                float radius  = _explosionRadiusField  != null ? (float)_explosionRadiusField.GetValue(_wrapped)  : 10f;
-                float force   = _pushForceField        != null ? (float)_pushForceField.GetValue(_wrapped)        : 1_000_000f;
-                Vector3 center = _explosionCenterField != null ? (Vector3)_explosionCenterField.GetValue(_wrapped) : Vector3.zero;
-                float startHitTime = _startHitTimeField != null ? (float)_startHitTimeField.GetValue(_wrapped) : 0.2f;
-                float endHitTime   = _endHitTimeField   != null ? (float)_endHitTimeField.GetValue(_wrapped)   : 1f;
-                hitbox.ActivateExplosionHitbox(radius, force, center, startHitTime, endHitTime);
+                _explosionHitbox.ActivateExplosionHitbox(
+                    _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime);
             }
 
-            // Route damage through the networked pipeline (0.5 s delay matches original).
+            // Route damage through the networked pipeline using the original endingTime.
             var networkedStats = physics.GetComponentInParent<NetworkedStatsController>();
             if (networkedStats == null) networkedStats = physics.GetComponentInChildren<NetworkedStatsController>();
             if (networkedStats != null)
             {
-                float pct    = _damagePercentageField != null ? (float)_damagePercentageField.GetValue(_wrapped) : 0.5f;
-                float damage = physics.StatsController.MaxEndurance * pct;
+                float damage = physics.StatsController.MaxEndurance * _damagePercentage;
                 StartCoroutine(DelayedDamage(networkedStats, damage));
             }
 
@@ -100,7 +148,7 @@ namespace FastAndFractured.Multiplayer
 
         private IEnumerator DelayedDamage(NetworkedStatsController stats, float damage)
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(_endingTime);
             if (stats != null)
                 stats.DealDamageServerRpc(damage, null);
         }
@@ -108,10 +156,14 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc(RunLocally = true)]
         private void RpcExplosionTriggered()
         {
-            var visuals = _visualsField?.GetValue(_wrapped) as GameObject;
-            if (visuals != null) visuals.SetActive(false);
+            // The TNT's ExplosionForce (which raises the Explosion shake profile) is only activated
+            // on the server, so remote clients would never feel the blast. Emit it locally on each
+            // peer at the TNT position; Cinemachine attenuates it by distance.
+            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.Explosion, transform.position);
 
-            StartCoroutine(DeactivateAfterDelay(0.6f));
+            if (_visuals != null) _visuals.SetActive(false);
+
+            StartCoroutine(DeactivateAfterDelay(_endingTime));
         }
 
         private IEnumerator DeactivateAfterDelay(float delay)
