@@ -73,8 +73,14 @@ public class CarInjector : MonoBehaviour
         {
             
            var carSpeedOverlay = injectedCar.AddComponent<CarSpeedOverlay>();
-            //todo fix
-        //    carSpeedOverlay.speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
+            if (HUDManager.HasInstance)
+            {
+                var hudElement = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR);
+                if (hudElement != null)
+                {
+                    carSpeedOverlay.speedOverlayText = hudElement.textReference;
+                }
+            }
             carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
             var aimPushShootTrace = GetComponentInChildren<AimPushShootTrace>();
             if (aimPushShootTrace)
@@ -129,7 +135,14 @@ public class CarInjector : MonoBehaviour
         {
 
             injectedCar.AddComponent<CarSpeedOverlay>();
-            injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR).GetComponent<TextMeshProUGUI>();
+            if (HUDManager.HasInstance)
+            {
+                var hudElement = HUDManager.Instance.GetUIElement(UIDynamicElementType.SPEED_INDICATOR);
+                if (hudElement != null)
+                {
+                    injectedCar.GetComponent<CarSpeedOverlay>().speedOverlayText = hudElement.GetComponent<TextMeshProUGUI>();
+                }
+            }
             carMovementController.InputProvider = injectedCar.GetComponentInParent<PlayerInputProvider>();
             var aimPushShootTrace = GetComponentInChildren<AimPushShootTrace>();
             if (aimPushShootTrace)
