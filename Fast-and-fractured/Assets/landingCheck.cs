@@ -42,10 +42,14 @@ namespace FastAndFractured
             {
                 _rb = GetComponent<ICustomRigidbody>();
             }
+            // Guard: when the trampoline prefab is placed without an ICustomRigidbody adapter on
+            // its landingCheck child (common after networked variants strip components), the old
+            // unguarded AddForce threw an NRE on every scene load. Silently skip — there is no
+            // meaningful work to do without a rigidbody to push.
+            if (_rb == null) return;
             _rb.AddForce(force,forceMode);
             _startCheck = true;
-        //todo fix this
-            //    _rb.useGravity = true;
+            _rb.useGravity = true;
             applyForces = true;
         }
 
@@ -60,14 +64,16 @@ namespace FastAndFractured
 
         private void OnTriggerEnter(Collider other)
         {
+            // Same guard as StartChecking — without an ICustomRigidbody we have nothing to land
+            // onto and the original code would NRE on the first physics tick after spawn.
+            if (_rb == null) return;
             if (!((ignoreLayer & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)) {
                 _rb.linearVelocity = Vector3.zero;
-            //todo fix
-            //    _rb.useGravity = false;
+                _rb.useGravity = false;
                 onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
                 _landingTimer.StopTimer();
                 applyForces = false;
-            } 
+            }
         }
     }
 }
