@@ -64,8 +64,19 @@ namespace FastAndFractured
             }
         }
 
+        /// <summary>
+        /// Optional override hook. When non-null, LoadScene calls this first; if it returns true the
+        /// scene load is skipped. Used by the multiplayer flow to convert "load map scene" clicks
+        /// into "vote for map + return to lobby" without modifying the singleplayer map prefab buttons.
+        /// Singleplayer is unaffected when this is null.
+        /// </summary>
+        public static System.Func<int, bool> SceneLoadOverride;
+
         public void LoadScene(int sceneBuildIndex)
         {
+            if (SceneLoadOverride != null && SceneLoadOverride(sceneBuildIndex))
+                return;
+
             PlayerPrefs.SetInt(PREVIOUS_GAME_SCENE, sceneBuildIndex);
             TimerSystem.Instance.CreateTimer(SCENE_LOAD_DELAY, onTimerDecreaseComplete: () =>
             {
