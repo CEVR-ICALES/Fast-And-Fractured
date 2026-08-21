@@ -30,9 +30,9 @@ public class GameReadyScript : AbstractAutoInitializableMonoBehaviour
     {
         evenText.rectTransform.DOLocalMoveY(300, downTextDuration).From();
         evenText.DOFade(0, TRANSITION_DURATION).From();
-        var playerReference = LevelControllerButBetter.Instance.LocalPlayer;
+        var playerReference = LevelController.Instance.LocalPlayer;
         if(playerReference){
-            SoundManager.Instance.PlayOneShot(soundReference,LevelControllerButBetter.Instance.LocalPlayer.transform.position);
+            SoundManager.Instance.PlayOneShot(soundReference,LevelController.Instance.LocalPlayer.transform.position);
         }
     }
     void StartEventCountdown()

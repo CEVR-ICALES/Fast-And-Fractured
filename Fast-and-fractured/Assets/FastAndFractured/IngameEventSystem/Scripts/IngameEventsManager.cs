@@ -24,22 +24,34 @@ namespace FastAndFractured
         protected override void Construct()
         {
             base.Construct();
-            foreach (CharacterIcon playerIcon in HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS).gameObject.GetComponentsInChildren<CharacterIcon>(true))
+            
+            // If this instance is disabled (duplicate), or HUDManager is missing (server), abort.
+            if (!this.enabled || !HUDManager.HasInstance) return;
+
+            var playerIconsElement = HUDManager.Instance.GetUIElement(UIDynamicElementType.PLAYER_ICONS);
+            if (playerIconsElement != null)
             {
-                inGameCharactersTopIcons.Add(playerIcon);
+                foreach (CharacterIcon playerIcon in playerIconsElement.gameObject.GetComponentsInChildren<CharacterIcon>(true))
+                {
+                    inGameCharactersTopIcons.Add(playerIcon);
+                }
             }
-            eventTextContainer = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT).gameObject;
-            _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
-            if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(RELASE_SCENE_NAME))
+            
+            var eventTextElement = HUDManager.Instance.GetUIElement(UIDynamicElementType.EVENT_TEXT);
+            if (eventTextElement != null)
             {
+                eventTextContainer = eventTextElement.gameObject;
+                _localizedTextReference = eventTextContainer.GetComponent<LocalizedText>();
             }
-           
         }
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
-            SetCharactersTopElements);
+            if (LevelController.HasInstance)
+            {
+                LevelController.Instance.onLevelPreStart.AddListener(
+                SetCharactersTopElements);
+            }
         }
       
 
@@ -51,33 +63,53 @@ namespace FastAndFractured
 
         public void CreateEvent(string eventText, float timeInScreen, Action onEventComplete = null)
         {
-            if (_localizedTextReference != null)
+            if (_localizedTextReference == null) return;
+            
+            if (_timerReference != null && _localizedTextReference.LocalizationKey != string.Empty)
             {
-                if (_localizedTextReference.LocalizationKey != string.Empty)
-                {
-                    _timerReference.StopTimer();
-                    _timerReference = null;
-                }
-                _localizedTextReference.LocalizationKey = eventText;
-                _localizedTextReference.Localize();
-                _timerReference = TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
+                _timerReference.StopTimer();
+                _timerReference = null;
+            }
+            _localizedTextReference.LocalizationKey = eventText;
+            _localizedTextReference.Localize();
+            if (!TimerSystem.HasInstance)
+            {
+                onEventComplete?.Invoke();
+                return;
+            }
+            _timerReference = TimerSystem.Instance.CreateTimer(timeInScreen, onTimerDecreaseComplete: () =>
+            {
+                if (_localizedTextReference != null && _localizedTextReference.gameObject != null)
                 {
                     _localizedTextReference.LocalizationKey = string.Empty;
                     _localizedTextReference.Localize();
-                    onEventComplete?.Invoke();
-                });
-            }
+                }
+                onEventComplete?.Invoke();
+            });
         }
         public void SetCharactersTopElements()
         {
-            int i = 0;
-            foreach (GameObject character in LevelControllerButBetter.Instance.InGameCharacters)
+            if (!LevelController.HasInstance || inGameCharactersTopIcons == null || inGameCharactersTopIcons.Count == 0)
             {
-                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, LevelControllerButBetter.Instance.InGameCharactersNameCodes[i]);
+                return;
+            }
+            var levelController = LevelController.Instance;
+            if (levelController.InGameCharacters == null || levelController.InGameCharactersNameCodes == null)
+            {
+                return;
+            }
+            int i = 0;
+            foreach (GameObject character in levelController.InGameCharacters)
+            {
+                if (i >= inGameCharactersTopIcons.Count || i >= levelController.InGameCharactersNameCodes.Count)
+                {
+                    break;
+                }
+                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, levelController.InGameCharactersNameCodes[i]);
                 inGameCharactersTopIcons[i].gameObject.SetActive(true);
                 i++;
             }
-            LevelControllerButBetter.Instance.characterIcons = inGameCharactersTopIcons;
+            levelController.characterIcons = inGameCharactersTopIcons;
         }
         public void SetAlert()
         {
