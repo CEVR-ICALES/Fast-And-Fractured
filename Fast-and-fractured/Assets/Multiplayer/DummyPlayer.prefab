@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 6542210171586847583}
   - component: {fileID: 2334003019674829176}
   - component: {fileID: 5973808275957350561}
+  - component: {fileID: 5738995080940396131}
   m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
@@ -218,10 +219,10 @@ MonoBehaviour:
   m_MultiSelect: 0
   m_Options:
     m_Options:
-    - m_Text: Josefino
+    - m_Text: Pepe
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
-    - m_Text: Pepe
+    - m_Text: Josefino
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
     - m_Text: MariaAntonia
@@ -246,10 +247,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f689ba98a9d18b9439e120a69160d0ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 421190655232771163}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 421190655232771163}
   dropdown: {fileID: 0}
+--- !u!114 &5738995080940396131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137552747936676008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29a3c234044ed6742b7401f82a5a88a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.AutoCharacterSelector
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 421190655232771163}
+  _networkObjectCache: {fileID: 421190655232771163}
+  autoSelectEnabled: 1
+  selectionStartDelay: 0.2
+  retryInterval: 0.3
+  maxRetries: 20
+  characterPool:
+  - Pepe
+  - Josefino
+  - MariaAntonia
+  dropdown: {fileID: 2334003019674829176}
+  debugSelector: {fileID: 5973808275957350561}
 --- !u!1 &978293889859379800
 GameObject:
   m_ObjectHideFlags: 0
@@ -304,6 +330,8 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: -8053016241973733051}
+  - {fileID: 5973808275957350561}
+  - {fileID: 5738995080940396131}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -314,9 +342,14 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
+  _initializedTimestamp: -8584223811751996961
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
   NetworkObserver: {fileID: 0}
   _enablePrediction: 0
   _predictionType: 0
+  _localReconcileCorrectionType: 2
   _graphicalObject: {fileID: 0}
   _detachGraphicalObject: 0
   _enableStateForwarding: 1
@@ -328,10 +361,10 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 8
+  <PrefabId>k__BackingField: 22
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 11241033885520509194
-  <SceneId>k__BackingField: 0
+  SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -707,6 +740,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1314,6 +1348,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
