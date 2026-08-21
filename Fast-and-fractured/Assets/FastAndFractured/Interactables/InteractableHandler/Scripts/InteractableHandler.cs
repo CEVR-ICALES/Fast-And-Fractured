@@ -25,12 +25,12 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(MakeInitialPool);
+            LevelController.Instance.charactersCustomStart.AddListener(MakeInitialPool);
         }
 
         private void OnDisable()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
+            LevelController.Instance.charactersCustomStart.RemoveListener(MakeInitialPool);
             
         }
         protected override void Construct()
@@ -56,7 +56,7 @@ namespace FastAndFractured
         
         void UpdateVisibleInteractableList(int index = 0)
         {
-            for (int i = index; i < _shuffledActivePool.Count && i <= numberOfItemsActiveAtSameTime; i++)
+            for (int i = index; i < _shuffledActivePool.Count && i < numberOfItemsActiveAtSameTime; i++)
             {
                 GameObject interactable = _shuffledActivePool[i];
                 interactable.SetActive(true);
