@@ -124,6 +124,8 @@ namespace FastAndFractured
         public float totalDamageTaken = 0f;
         public float totalDamageDealt = 0f;
         public float totalDistanceDriven = 0f;
+        public int totalKills = 0;
+        public GameObject lastEnemyThatPushedMe;
         private Vector3 _lastPosition;
 
         public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
@@ -178,6 +180,8 @@ namespace FastAndFractured
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
             currentAcceleration = charDataSO.Acceleration;
+            currentMaxSpeedAscend = charDataSO.MaxSpeedAscend;
+            currentMaxSpeedDescend = charDataSO.MaxSpeedDescend;
             //Damage
             currentNormalShootDMG = charDataSO.NormalShootDMG;
             currentPushShootForce = charDataSO.PushShootFORCE;
@@ -357,6 +361,15 @@ namespace FastAndFractured
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die vfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);
+            if (lastEnemyThatPushedMe != null)
+            {
+                lastEnemyThatPushedMe.GetComponent<StatsController>().totalKills += 1;
+                lastEnemyThatPushedMe.GetComponent<StatsController>().CelebrateKill();
+            }
+        }
+        public void CelebrateKill()
+        {
+            //Kill celebration audio or particles can be triggered here when we decide what to do
         }
 
         public float GetEndurancePercentage()
@@ -420,6 +433,8 @@ namespace FastAndFractured
                 case Stats.MAX_SPEED:
                     currentMaxSpeed = ModCharStat(currentMaxSpeed, mod, charDataSO.MinSpeed, charDataSO.MaxSpeed * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     currentMaxSpeedDashing = ModCharStat(currentMaxSpeedDashing, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDashing * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedAscend = ModCharStat(currentMaxSpeedAscend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedAscend * charDataSO.MaxSpeedMultiplier, isProduct, false);
+                    currentMaxSpeedDescend = ModCharStat(currentMaxSpeedDescend, mod, charDataSO.MinSpeed, charDataSO.MaxSpeedDescend * charDataSO.MaxSpeedMultiplier, isProduct, false);
                     return true;
                 case Stats.MAX_SPEED_MULTIPLIER:
                     _currentMaxSpeedMultiplier = ModCharStat(_currentMaxSpeedMultiplier, mod, 1, float.MaxValue, isProduct, false);

@@ -24,8 +24,9 @@ namespace FastAndFractured
         private static string characterFolderPath = RESOURCES_FOLDER_PATH + "/" + LevelConstants.SKINS_LOADER_PATH;
         private const string GAMEPLAY_CAR_NAME = "GameplayCar";
         private const string PATH_TO_CHARACTERS = "Assets/FastAndFractured/Characters";
-        private const string PATH_TO_MENU_CHARACTERS = "Assets/FastAndFractured/MainMenu/Prefabs/MenuCarsPrefabs";
-        private const string PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS = "Assets/FastAndFractured/MainMenu/ScriptableObjects";
+        private const string PATH_TO_MENU = "Assets/FastAndFractured/!Environment/Scenes/!MainMenuPostRelease/MainMenuAssets";
+        private const string PATH_TO_MENU_CHARACTERS = PATH_TO_MENU + "/Prefabs/MenuCarsPrefabs";
+        private const string PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS = PATH_TO_MENU + "/ScriptableObjects";
         private const string PATH_TO_BASE_CAR_FROM_CHARACTERS = "!Common/BaseCar.prefab";
         private const string SCRIPTABLE_OBJECT_FOlDER = "ScriptableObjects";
         private const string PREFABS_FOLDER = "Prefabs";
@@ -33,28 +34,40 @@ namespace FastAndFractured
         private const string MENU_DATA_SO_Name = "MenuData.asset";
         private const string UNIQUE_ABILITY_SO_NAME = "UniqueAbilityData.asset";
 
+        private const string LIST_OF_CHARACTERS_DATA_SO_PATH = "CharactersSkins/ListOfCharactersData";
+        private const string LIST_OF_MENU_CHARACTERS_DATA_SO_PATH = "CharactersSkins/MainMenuSelectionScreenCharacters";
+
         //Prefab Hierarchy
+        private const string VISUAL_PATH = "Visuals";
         private const string CHARACTER_PATH = "Visuals/Character";
         private const string CHASSIS_PATH = "Visuals/Chassis";
         private const string FRONT_LEFT_WHEEL_PATH = "Visuals/WheelsVisuals/FrontLeftWheel";
         private const string FRONT_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/FrontRightWheel";
         private const string BACK_LEFT_WHEEL_PATH = "Visuals/WheelsVisuals/BackLeftWheel";
         private const string BACK_RIGHT_WHEEL_PATH = "Visuals/WheelsVisuals/BackRightWheel";
+        private const string TURRET_PATH = "Turret/Visuals/CanonVisuals";
         private const string WHEELS_COLLIDER_PATH = "WheelColliders";
-        private const string CHARACTER_MODEL_NAME = "Character";
+        private const string CHARACTER_HOLDER_NAME = "Character";
+        private const string CHARACTER_MODEL_NAME = "CharacterModel";
         private const string CHASIS_MODEL_NAME = "Chassis";
         private const string WHEEL_MODEL_NAME = "WheelVisuals";
 
-        //CharacterCreatorRelated
-
-        //Skins related
+        private const int RIGYDBODY_MENU_VARIANT_MASS = 10;
 
 
         #region character_creator_related
-        public static bool CreateNewCharacter(GameObject characterModel, GameObject chasisModel, GameObject wheelModel, string characterName)
+        public static bool CreateNewCharacter(GameObject characterModel, GameObject chasisModel, GameObject wheelModel, GameObject turretModel, string characterName)
         {
-            if (characterModel != null && chasisModel != null && wheelModel != null && characterName != string.Empty && characterName != null)
+            if (characterModel != null && chasisModel != null && wheelModel != null && turretModel != null && characterName != string.Empty && characterName != null)
             {
+                foreach (GameObject model in new GameObject[] { characterModel, chasisModel, wheelModel, turretModel })
+                {
+                    if (!CheckIfModelHaveVisuals(model))
+                    {
+                        Debug.LogError("The model " + model.name + " doesn't have a child called 'Visuals'. Use the FBX To Prefab tool to create the character prefab part.");
+                        return false;
+                    }
+                }
                 try
                 {
                     AssetDatabase.StartAssetEditing();
@@ -83,18 +96,22 @@ namespace FastAndFractured
                     Transform frontRightWheelHolder = newBaseCar.transform.Find(FRONT_RIGHT_WHEEL_PATH);
                     Transform backLeftWheelHolder = newBaseCar.transform.Find(BACK_LEFT_WHEEL_PATH);
                     Transform backRightWheelHolder = newBaseCar.transform.Find(BACK_RIGHT_WHEEL_PATH);
+                    Transform turretHolder = newBaseCar.transform.Find(TURRET_PATH);
                     GameObject[] wheelsMesh = new GameObject[4];
                     string pathToCreateNewCharacter = Path.Combine(prefabsDirectory, newBaseCar.name + ".prefab");
                     try
                     {
                         characterModel = PrefabUtility.InstantiatePrefab(characterModel, characterHolder) as GameObject;
+                        characterModel.name = characterName + CHARACTER_HOLDER_NAME;
+                        Transform model = characterModel.transform.Find(VISUAL_PATH).GetChild(0);
+                        model.name = CHARACTER_MODEL_NAME;
                         chasisModel = PrefabUtility.InstantiatePrefab(chasisModel, chassisHolder) as GameObject;
-                        chasisModel.name = characterName + CHARACTER_MODEL_NAME;
                         chasisModel.name = characterName + CHASIS_MODEL_NAME;
                         wheelsMesh[0] = PrefabUtility.InstantiatePrefab(wheelModel, frontRightWheelHolder) as GameObject;
                         wheelsMesh[1] = PrefabUtility.InstantiatePrefab(wheelModel, backLeftWheelHolder) as GameObject;
                         wheelsMesh[2] = PrefabUtility.InstantiatePrefab(wheelModel, backRightWheelHolder) as GameObject;
                         wheelsMesh[3] = PrefabUtility.InstantiatePrefab(wheelModel, frontLeftWheelHolder) as GameObject;
+                        turretModel = PrefabUtility.InstantiatePrefab(turretModel, turretHolder) as GameObject;
                         foreach (var wheelMesh in wheelsMesh)
                         {
                             wheelMesh.name = WHEEL_MODEL_NAME;
@@ -116,7 +133,7 @@ namespace FastAndFractured
                     string scriptableObjectDirectory = Path.Combine(pathToNewCharacterParentFolder, SCRIPTABLE_OBJECT_FOlDER);
 
                     FileUtils.CheckAndCreateDirectory(scriptableObjectDirectory);
-                    CharacterData characterData = new CharacterData();
+                    CharacterData characterData = ScriptableObject.CreateInstance<CharacterData>();
                     if (!File.Exists(scriptableObjectDirectory))
                     {
                         characterData.name = characterName + CAR_DATA_SO_NAME;
@@ -124,13 +141,14 @@ namespace FastAndFractured
                         characterData.CarDefaultPrefab = newBaseCarFromSource;
                         string carDataSOPath = Path.Combine(scriptableObjectDirectory, characterData.name);
                         AssetDatabase.CreateAsset(characterData, carDataSOPath);
+                        AddCharacterToListOfCharactersData(characterData);
                         Debug.Log("File " + carDataSOPath + " created");
                     }
 
 
                     if (!File.Exists(scriptableObjectDirectory))
                     {
-                        AbilityData abilityData = new AbilityData();
+                        AbilityData abilityData = ScriptableObject.CreateInstance<AbilityData>();
                         abilityData.name = characterName + UNIQUE_ABILITY_SO_NAME;
                         string uniqueAbilitySOPath = Path.Combine(scriptableObjectDirectory, abilityData.name);
                         AssetDatabase.CreateAsset(abilityData, uniqueAbilitySOPath);
@@ -155,6 +173,12 @@ namespace FastAndFractured
             return false;
         }
 
+        private static bool CheckIfModelHaveVisuals(GameObject model)
+        {
+            Transform modelVisual = model.transform.Find(VISUAL_PATH);
+            return modelVisual != null;
+        }
+
         private static bool CreateMenuVariant(GameObject gameplayCarParent, string characterName, GameObject[] wheelsMesh, CharacterData characterData)
         {
             if (!FileUtils.DirectoryExist(PATH_TO_MENU_CHARACTERS))
@@ -171,7 +195,7 @@ namespace FastAndFractured
                     UnityEngine.Object.DestroyImmediate(monoBehaviour);
                 }
                 Transform wheelsColliderParent = menuVariant.transform.Find(WHEELS_COLLIDER_PATH);
-                MonoBehaviour[] monoBehavioursInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<MonoBehaviour>();
+                MonoBehaviour[] monoBehavioursInWheelsCollider = menuVariant.GetComponentsInChildren<MonoBehaviour>();
                 Collider[] collidersInWheelsCollider = wheelsColliderParent.GetComponentsInChildren<Collider>();
                 foreach (MonoBehaviour monoBehaviour1 in monoBehavioursInWheelsCollider)
                 {
@@ -183,8 +207,7 @@ namespace FastAndFractured
                     UnityEngine.Object.DestroyImmediate(collider);
                 }
 
-                CharSelectionSimulatedMovement charSelectionSimulatedMovement = menuVariant.AddComponent<CharSelectionSimulatedMovement>();
-                charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
+                menuVariant.AddComponent<CharSelectionSimulatedMovement>();
                 string pathToCreateMenuCharacter = Path.Combine(PATH_TO_MENU_CHARACTERS, menuVariant.name + ".prefab");
                 PrefabUtility.SaveAsPrefabAsset(menuVariant, pathToCreateMenuCharacter);
                 UnityEngine.Object.DestroyImmediate(menuVariant);
@@ -193,18 +216,22 @@ namespace FastAndFractured
                 AssetDatabase.Refresh();
                 AssetDatabase.StartAssetEditing();
                 GameObject assetMenuVariant = AssetDatabase.LoadAssetAtPath(pathToCreateMenuCharacter, typeof(GameObject)) as GameObject;
-
-
+                Rigidbody rigidbody = assetMenuVariant.GetComponent<Rigidbody>();
+                rigidbody.mass = RIGYDBODY_MENU_VARIANT_MASS;
+                CharSelectionSimulatedMovement charSelectionSimulatedMovement = assetMenuVariant.GetComponent<CharSelectionSimulatedMovement>();
+                charSelectionSimulatedMovement.WheelsMesh = wheelsMesh;
                 string carDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
 
                 if (!File.Exists(carDataSOPath))
                 {
-                    CharacterMenuData characterMenuData = new CharacterMenuData();
+                    CharacterMenuData characterMenuData = ScriptableObject.CreateInstance<CharacterMenuData>();
                     characterMenuData.name = characterName + CAR_DATA_SO_NAME;
+                    characterMenuData.CharacterName = characterName;
                     characterMenuData.CharacterDescription = "Menu." + characterName;
                     characterMenuData.Models = new GameObject[] { assetMenuVariant };
                     characterMenuData.CharacterStats = characterData;
                     AssetDatabase.CreateAsset(characterMenuData, carDataSOPath);
+                    AddCharacterToListOfMenuCharactersData(characterMenuData);
                     Debug.Log("File " + carDataSOPath + " created");
                 }
             }
@@ -224,16 +251,13 @@ namespace FastAndFractured
                 Debug.LogError("List of protected characters doesn't exist. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
                 return;
             }
-            //if(listOfProtectedCharacters.ProtectedCharacters == Array.Empty<string>())
-            //{
-            //    Debug.LogError("List of protected characters is empty. To prevent any important character delete, the function will not procced. Check on the Resources file '" + listOfProtectedCharacters + "'");
-            //    return;
-            //}
             if (listOfProtectedCharacters.ProtectedCharacters.Contains(characterName))
             {
                 Debug.LogError("The character " + characterName + " is protected on the " + LIST_OF_PROTECTED_CHARACTERS + " from the Resources Folder. The function will not procced.");
                 return;
             }
+            RemoveCharacterFromListOfCharactersData(characterName);
+            RemoveCharacterFromListOfMenuCharactersData(characterName);
             string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
 
@@ -241,7 +265,7 @@ namespace FastAndFractured
             int skinNum = ReturnSkinCountOfACharacter(characterName);
             for (int i = skinNum; i >= 0; i--)
             {
-                string characterMenuVariantSkinPath = characterMenuVariantPath + i;
+                string characterMenuVariantSkinPath = characterMenuVariantPath + i + ".prefab";
                 FileUtils.DeleteAsset(characterMenuVariantSkinPath);
             }
             string pathToDeleteCharacterParentFolder = Path.Combine(PATH_TO_CHARACTERS, characterName);
@@ -257,6 +281,70 @@ namespace FastAndFractured
           }
             Debug.Log("Character " + characterName + " deleted Succesfully");
             GenerateCharacterSkinCountFile();
+        }
+
+        private static void AddCharacterToListOfCharactersData(CharacterData characterData)
+        {
+            ListOfCharactersData listOfCharactersData = Resources.Load<ListOfCharactersData>(LIST_OF_CHARACTERS_DATA_SO_PATH);
+            if(listOfCharactersData == null)
+            {
+                Debug.LogWarning("List of characters data doesn't exist. If this file doesn't exist, there will be no data available for the characters. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            listOfCharactersData.listOfCharactersData.Add(characterData);
+            EditorUtility.SetDirty(listOfCharactersData);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void RemoveCharacterFromListOfCharactersData(string characterName)
+        {
+            ListOfCharactersData listOfCharactersData = Resources.Load<ListOfCharactersData>(LIST_OF_CHARACTERS_DATA_SO_PATH);
+            if (listOfCharactersData == null)
+            {
+                Debug.LogWarning("List of characters data doesn't exist. If this file doesn't exist, there will be no data available for the characters. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            CharacterData characterDataToRemove = listOfCharactersData.listOfCharactersData.Find(characterData => characterData.CharacterName == characterName);
+            if(characterDataToRemove != null)
+            {
+                listOfCharactersData.listOfCharactersData.Remove(characterDataToRemove);
+                EditorUtility.SetDirty(listOfCharactersData);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+        }
+
+        private static void AddCharacterToListOfMenuCharactersData(CharacterMenuData characterMenuData)
+        {
+            MainMenuSelectionScreenCharacters listOfMenuCharactersData = Resources.Load<MainMenuSelectionScreenCharacters>(LIST_OF_MENU_CHARACTERS_DATA_SO_PATH);
+            if (listOfMenuCharactersData == null)
+            {
+                Debug.LogWarning("List of menu characters data doesn't exist. If this file doesn't exist, there will be no data available for the character selection screen. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            listOfMenuCharactersData.allMainMenuCharactersData.Add(characterMenuData);
+            EditorUtility.SetDirty(listOfMenuCharactersData);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void RemoveCharacterFromListOfMenuCharactersData(string characterName)
+        {
+            MainMenuSelectionScreenCharacters listOfMenuCharactersData = Resources.Load<MainMenuSelectionScreenCharacters>(LIST_OF_MENU_CHARACTERS_DATA_SO_PATH);
+            if (listOfMenuCharactersData == null)
+            {
+                Debug.LogWarning("List of menu characters data doesn't exist. If this file doesn't exist, there will be no data available for the character selection screen. Create it in the Resources/CharactersSkins folder.");
+                return;
+            }
+            CharacterMenuData characterMenuDataToRemove = listOfMenuCharactersData.allMainMenuCharactersData.Find(characterMenuData => characterMenuData.CharacterDescription == "Menu." + characterName);
+            if (characterMenuDataToRemove != null)
+            {
+                listOfMenuCharactersData.allMainMenuCharactersData.Remove(characterMenuDataToRemove);
+                EditorUtility.SetDirty(listOfMenuCharactersData);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
         }
         #endregion
 
@@ -395,7 +483,6 @@ namespace FastAndFractured
                 Debug.LogWarning("Character skin count is 0. Check if this statement is true on '" + Path.Combine(characterFolderPath, characterName) + "'. If is empty, the character doesn't have any skin. If you want to add one, use the character skin tool.");
                 return;
             }
-            string carDataSOPath = Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name);
             string characterMenuVariantPath = Path.Combine(PATH_TO_MENU_CHARACTERS, characterName + SKIN_PREFIX);
             string characterMenuVariantBaseSkinPath = FileUtils.NormalizePath(characterMenuVariantPath + BASE_SKIN + ".prefab");
             if (!File.Exists(characterMenuVariantBaseSkinPath))
@@ -403,34 +490,50 @@ namespace FastAndFractured
 
                 return;
             }
+            AssetDatabase.StartAssetEditing();
             GameObject menuCharacterVariant = AssetDatabase.LoadAssetAtPath(characterMenuVariantBaseSkinPath, typeof(GameObject)) as GameObject;
             newMenuList[0] = menuCharacterVariant;
+
             for (int i = SKIN_STARTING_INT; i <= skinCount; i++)
             {
                 string characterSkinVariantPath = FileUtils.NormalizePath(characterMenuVariantPath + i + ".prefab");
-                GameObject menuCharacterSkinVariant = new GameObject();
+                GameObject menuCharacterSkinVariant;
                 if (!File.Exists(characterSkinVariantPath))
                 {
                     menuCharacterSkinVariant = PrefabUtility.InstantiatePrefab(menuCharacterVariant) as GameObject;
                     menuCharacterSkinVariant.name = characterName + SKIN_PREFIX + i;
                     SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
                     PrefabUtility.SaveAsPrefabAsset(menuCharacterSkinVariant, characterSkinVariantPath);
+                    UnityEngine.Object.DestroyImmediate(menuCharacterSkinVariant);
                 }
-                else
-                {
-                    menuCharacterSkinVariant = AssetDatabase.LoadAssetAtPath(characterSkinVariantPath, typeof(GameObject)) as GameObject;
-                    SetCharacterSkin(menuCharacterSkinVariant.name, menuCharacterSkinVariant);
-                }
-                newMenuList[i] = menuCharacterSkinVariant;
             }
+              AssetDatabase.StopAssetEditing();
+              AssetDatabase.SaveAssets();
+              AssetDatabase.Refresh();
+              AssetDatabase.StartAssetEditing();
+
+            for (int i = SKIN_STARTING_INT; i <= skinCount; i++)
+            {
+                string characterSkinVariantPath = FileUtils.NormalizePath(characterMenuVariantPath + i + ".prefab");
+                GameObject menuCharacterSkinVariantSource;
+                menuCharacterSkinVariantSource = AssetDatabase.LoadAssetAtPath(characterSkinVariantPath, typeof(GameObject)) as GameObject;
+                SetCharacterSkin(menuCharacterSkinVariantSource.name, menuCharacterSkinVariantSource);
+                
+                newMenuList[i] = menuCharacterSkinVariantSource;
+            }
+
             string characterMenuDataSOPath = FileUtils.NormalizePath(Path.Combine(PATH_TO_MENU_CHARACTERS_SCRIPTABLE_OBJECTS, characterName + MENU_DATA_SO_Name));
             if (!File.Exists(characterMenuDataSOPath))
             {
-                //Error Log
+                Debug.LogError("Character menu data scriptable object doesn't exist. Check if the file " + characterMenuDataSOPath + " exist. If not, create it.");
                 return;
             }
             CharacterMenuData characterMenuData = AssetDatabase.LoadAssetAtPath(characterMenuDataSOPath, typeof(CharacterMenuData)) as CharacterMenuData;
             characterMenuData.Models = newMenuList;
+            EditorUtility.SetDirty(characterMenuData);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.StopAssetEditing();
+            AssetDatabase.Refresh();
             Debug.Log("Characters Skins in menu updated");
         }
 
@@ -472,12 +575,12 @@ namespace FastAndFractured
             //Character Skin
             //Hierarchy for the character model '/Visuals/Character/{characterName}Character/Visuals/CharacterModel/{characterName}' 
 
-            string characterPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH + "/" + name;
-            Transform character = visuals.Find(characterPath);
+            string characterModelPath = LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + name + LevelConstants.CHARACTER_MATERIALS_FOLDER + "/" + LevelConstants.CHARACTER_PREFAB_PATH;
+            Transform character = visuals.Find(characterModelPath);
 
             if (!SetSkinPart(character, skinPath + "/" + LevelConstants.CHARACTER_MATERIALS_FOLDER))
             {
-                Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterPath);
+                Debug.LogError($"Character model to change the skin not found. Make sure the hierarchy to get the model is " + characterModelPath);
             }
 
             //Chassis Skin
@@ -541,6 +644,18 @@ namespace FastAndFractured
                     return false;
                 }
                 Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                if (renderPart == null)
+                {
+                    if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
+                    {
+                        Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
+                    }
+                    else
+                    {
+                    Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                    return false;
+                    }
+                }
                 Material[] defaultSkinMaterials = renderPart.sharedMaterials;
                 for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                 {
@@ -571,6 +686,18 @@ namespace FastAndFractured
                         return false;
                     }
                     Renderer renderPart = instantiatedCarPart.GetComponent<Renderer>();
+                    if (renderPart == null)
+                    {
+                        if((renderPart = instantiatedCarPart.GetComponentInChildren<Renderer>()) != null)
+                        {
+                            Debug.Log("Renderer not found on " + instantiatedCarPart.name + ". Renderer found in child " + renderPart.name);
+                        }
+                        else
+                        {
+                            Debug.LogError("Renderer not found on " + instantiatedCarPart.name);
+                            return false;
+                        }
+                    }
                     Material[] defaultSkinMaterials = renderPart.sharedMaterials;
                     for (int materialIterator = 0; materialIterator < defaultSkinMaterials.Length; materialIterator++)
                     {
@@ -589,10 +716,6 @@ namespace FastAndFractured
             return true;
         }
 
-
-        #endregion
-
-        #region directory_related
 
         #endregion
     }

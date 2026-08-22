@@ -32,6 +32,8 @@ namespace FastAndFractured
         // timers
         private ITimer _climbStartTimer;
         private Tween _jumpTween;
+        private GameObject _creator;
+        public GameObject Creator { get => _creator; set => _creator = value; }
         private const int NUMBER_OF_JUMPS = 1;
 
         private void Awake()

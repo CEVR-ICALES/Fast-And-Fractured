@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{48670d6d-cfcd-4c60-a2d1-ca95ef2d1aff}">
 		<property name="name">
 			<value>PepeDefeat</value>
@@ -60,9 +60,9 @@
 	<object class="MarkerTrack" id="{2c3b107b-4b00-4e3d-a6ef-d3f65319f1be}" />
 	<object class="GroupTrack" id="{ce91a616-8930-41c7-ba1c-55ec79f98fad}">
 		<relationship name="modules">
-			<destination>{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}</destination>
 			<destination>{f4870775-ec97-40db-87c5-2be745ce52c7}</destination>
 			<destination>{6a136758-8ba5-4994-81eb-a486534fdab0}</destination>
+			<destination>{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}</destination>
 		</relationship>
 		<relationship name="mixerGroup">
 			<destination>{de27c4d0-e64a-4071-a647-931a2f95eeec}</destination>
@@ -70,9 +70,9 @@
 	</object>
 	<object class="Timeline" id="{89b87f02-21bc-42b9-b040-291c34ae93b2}">
 		<relationship name="modules">
-			<destination>{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}</destination>
 			<destination>{f4870775-ec97-40db-87c5-2be745ce52c7}</destination>
 			<destination>{6a136758-8ba5-4994-81eb-a486534fdab0}</destination>
+			<destination>{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{31975174-1881-44ff-a1fe-91e107958a8e}">
@@ -92,14 +92,6 @@
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{5417ae4f-44bb-488c-91ec-e461c3c9e93a}" />
-	<object class="SingleSound" id="{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}">
-		<property name="length">
-			<value>1.5</value>
-		</property>
-		<relationship name="audioFile">
-			<destination>{cfd8b518-5cb5-476d-a4d1-d5c885c9d26f}</destination>
-		</relationship>
-	</object>
 	<object class="SingleSound" id="{f4870775-ec97-40db-87c5-2be745ce52c7}">
 		<property name="start">
 			<value>1.5</value>
@@ -123,6 +115,14 @@
 		</property>
 		<property name="timelockedOffset">
 			<value>4.0999999999999996</value>
+		</property>
+		<relationship name="audioFile">
+			<destination>{cfd8b518-5cb5-476d-a4d1-d5c885c9d26f}</destination>
+		</relationship>
+	</object>
+	<object class="SingleSound" id="{2f7be973-8ec8-4bb5-94ed-ccb285fde3f6}">
+		<property name="length">
+			<value>1.5</value>
 		</property>
 		<relationship name="audioFile">
 			<destination>{cfd8b518-5cb5-476d-a4d1-d5c885c9d26f}</destination>

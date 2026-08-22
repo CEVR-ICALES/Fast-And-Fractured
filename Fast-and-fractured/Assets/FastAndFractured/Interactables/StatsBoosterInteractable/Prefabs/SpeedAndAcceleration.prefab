@@ -98,7 +98,7 @@ MonoBehaviour:
   boostList:
   - valueNumberType: 1
     _statToBoost: 0
-    _boostValue: 15
+    _boostValue: 1.5
     _boostTime: 10
     _onBoostStartEvent:
       m_PersistentCalls:
@@ -108,7 +108,7 @@ MonoBehaviour:
         m_Calls: []
   - valueNumberType: 1
     _statToBoost: 1
-    _boostValue: 0.25
+    _boostValue: 1.5
     _boostTime: 10
     _onBoostStartEvent:
       m_PersistentCalls:
@@ -116,13 +116,6 @@ MonoBehaviour:
     _onBoostEndEvent:
       m_PersistentCalls:
         m_Calls: []
-  pickUpSound:
-    Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
   ingameEventText: Events.SpeedBoost
   ingameEventTimeOnScreen: 2
 --- !u!65 &2080933110772431942
@@ -205,6 +198,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -325,6 +321,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlaceHolderVFX
       objectReference: {fileID: 0}
+    - target: {fileID: 3281619879533593925, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
+      propertyPath: m_Version
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 5779993228691571438, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -404,6 +404,10 @@ PrefabInstance:
     - target: {fileID: 8756758797081983225, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
       propertyPath: m_Color.r
       value: 0.8666667
+      objectReference: {fileID: 0}
+    - target: {fileID: 8756758797081983225, guid: 38dee3b3c148f144eb5782cb0dd5d493, type: 3}
+      propertyPath: m_LightUnit
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

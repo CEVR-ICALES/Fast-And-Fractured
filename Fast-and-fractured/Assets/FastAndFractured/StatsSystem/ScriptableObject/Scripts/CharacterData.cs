@@ -27,6 +27,8 @@ namespace FastAndFractured
 
         public float MaxSpeed = 100;
         public float MaxSpeedDashing = 140;
+        public float MaxSpeedAscend = 90;
+        public float MaxSpeedDescend = 110;
         [Tooltip("Top speed permitted which vehicle can achieve")] public float MaxSpeedMultiplier = 1;
         public float MinSpeed = 0;
         public float MaxAcceleration = 1500;
