@@ -20,7 +20,6 @@ namespace FastAndFractured
 
         private ITimer _pushShootCooldown;
 
-        // Ported from dev's shooting rewrite: screen shake juice on push shoot.
         [SerializeField] private ScreenShakeSourceController screenShakeSourceController;
 
         public void PushShooting()
