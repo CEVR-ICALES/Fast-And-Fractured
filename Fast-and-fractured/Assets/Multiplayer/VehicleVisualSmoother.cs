@@ -44,13 +44,19 @@ namespace FastAndFractured.Multiplayer
 
         private readonly struct Sample
         {
-            public readonly float Time;
+            /// <summary>
+            /// The simulation tick this pose belongs to. Deliberately NOT a Time.unscaledTime
+            /// stamp: FishNet can run several ticks inside one rendered frame, and Unity's clock
+            /// does not advance between them, so wall-clock stamped samples come out with
+            /// identical times and the interpolation between them collapses.
+            /// </summary>
+            public readonly uint Tick;
             public readonly Vector3 Position;
             public readonly Quaternion Rotation;
 
-            public Sample(float time, Vector3 position, Quaternion rotation)
+            public Sample(uint tick, Vector3 position, Quaternion rotation)
             {
-                Time = time;
+                Tick = tick;
                 Position = position;
                 Rotation = rotation;
             }
@@ -65,6 +71,10 @@ namespace FastAndFractured.Multiplayer
 
         private TimeManager _timeManager;
         private bool _subscribed;
+
+        /// <summary>Seconds elapsed since the most recent tick, used for the fractional part of the
+        /// render position between two samples.</summary>
+        private float _timeSinceTick;
 
         private void Awake() => CacheChildren();
 
@@ -92,6 +102,7 @@ namespace FastAndFractured.Multiplayer
             if (_subscribed && _timeManager != null) _timeManager.OnPostTick -= OnPostTick;
             _subscribed = false;
             _samples.Clear();
+            _timeSinceTick = 0f;
             RestoreAuthoredPose();
         }
 
@@ -108,7 +119,8 @@ namespace FastAndFractured.Multiplayer
         private void OnPostTick()
         {
             if (_samples.Count == BufferSize) _samples.RemoveAt(0);
-            _samples.Add(new Sample(Time.unscaledTime, transform.position, transform.rotation));
+            _samples.Add(new Sample(_timeManager.Tick, transform.position, transform.rotation));
+            _timeSinceTick = 0f;
         }
 
         private void LateUpdate()
@@ -121,8 +133,14 @@ namespace FastAndFractured.Multiplayer
 
             if (_children.Count == 0 || _samples.Count < 2) return;
 
+            _timeSinceTick += Time.deltaTime;
+
             float tickDelta = (float)_timeManager.TickDelta;
-            float renderTime = Time.unscaledTime - interpolationTicks * tickDelta;
+            // Position on the tick timeline, in ticks: the newest sample, plus however far into the
+            // current tick we are, minus the delay we deliberately render behind.
+            float renderTime = _samples[_samples.Count - 1].Tick
+                               + Mathf.Clamp01(_timeSinceTick / tickDelta)
+                               - interpolationTicks;
 
             if (!TryEvaluate(renderTime, out Vector3 position, out Quaternion rotation)) return;
 
@@ -132,6 +150,7 @@ namespace FastAndFractured.Multiplayer
             if ((position - bodyPosition).sqrMagnitude > teleportDistance * teleportDistance)
             {
                 _samples.Clear();
+                _timeSinceTick = 0f;
                 RestoreAuthoredPose();
                 return;
             }
@@ -165,7 +184,7 @@ namespace FastAndFractured.Multiplayer
             rotation = default;
 
             Sample newest = _samples[_samples.Count - 1];
-            if (renderTime >= newest.Time)
+            if (renderTime >= newest.Tick)
             {
                 // Rendering has fallen behind the buffer; drawing the newest sample is the same as
                 // doing nothing, which is correct - there is nothing newer to interpolate toward.
@@ -174,16 +193,16 @@ namespace FastAndFractured.Multiplayer
                 return true;
             }
 
-            if (renderTime <= _samples[0].Time) return false;
+            if (renderTime <= _samples[0].Tick) return false;
 
             for (int i = _samples.Count - 1; i > 0; i--)
             {
                 Sample to = _samples[i];
                 Sample from = _samples[i - 1];
-                if (renderTime < from.Time) continue;
+                if (renderTime < from.Tick) continue;
 
-                float span = to.Time - from.Time;
-                float t = span > Mathf.Epsilon ? Mathf.Clamp01((renderTime - from.Time) / span) : 1f;
+                float span = to.Tick - from.Tick;
+                float t = span > Mathf.Epsilon ? Mathf.Clamp01((renderTime - from.Tick) / span) : 1f;
                 position = Vector3.Lerp(from.Position, to.Position, t);
                 rotation = Quaternion.Slerp(from.Rotation, to.Rotation, t);
                 return true;
