@@ -82,6 +82,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8171266551940134014}
+    - targetCorrespondingSourceObject: {fileID: 4562356898158092377, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6415520892381527775}
     - targetCorrespondingSourceObject: {fileID: 7424819217355702749, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1212544027031110105}
@@ -303,6 +306,20 @@ MonoBehaviour:
   _effectDistance: 50
   _ascendingTime: 3
   _effectTime: 5
+--- !u!114 &6415520892381527775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6492947841860066190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db9119fbf481d034c80b97b7db13b53b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.VehicleVisualSmoother
+  interpolationTicks: 2
+  teleportDistance: 5
 --- !u!1 &7335371169944338441 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 38091424568048606, guid: 47fa51389998f124f8a16ec70c02dd05, type: 3}

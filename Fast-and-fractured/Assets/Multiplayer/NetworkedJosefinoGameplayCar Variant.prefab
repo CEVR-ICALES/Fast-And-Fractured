@@ -83,6 +83,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8918977521268068090}
+    - targetCorrespondingSourceObject: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4382230369744815004}
     - targetCorrespondingSourceObject: {fileID: 8878639141361372079, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2406575225774861939}
@@ -281,6 +284,20 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 3437050017870222519}
   _networkObjectCache: {fileID: 3437050017870222519}
   _networkedAbilityPrefab: {fileID: 0}
+--- !u!114 &4382230369744815004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4655980277527480527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db9119fbf481d034c80b97b7db13b53b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.VehicleVisualSmoother
+  interpolationTicks: 2
+  teleportDistance: 5
 --- !u!4 &6974511236189711798 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 232658802875862866, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
