@@ -1919,6 +1919,18 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2159848499145312847, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_SmoothingTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2159848499145312847, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_DampingWhenOccluded
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2159848499145312847, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      propertyPath: m_MinimumOcclusionTime
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 2244778713711679984, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3067,6 +3079,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2355938903064280616}
+    - targetCorrespondingSourceObject: {fileID: 2739815113383047756, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7733546647236705992}
   m_SourcePrefab: {fileID: 100100000, guid: 894d66a72a5753242b8adf852622d607, type: 3}
 --- !u!114 &1176046626976001688 stripped
 MonoBehaviour:
@@ -3095,6 +3110,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a515f62235d2bb4c85b3364d889f388, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &4675511059312416825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2739815113383047756, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+  m_PrefabInstance: {fileID: 7414903957506189941}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-7733546647236705992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4675511059312416825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb119bdfa7b0d714fad210ba3b0bdeaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.CameraTargetSmoother
+  smoothTime: 0.05
+  teleportDistance: 5
 --- !u!114 &5197161463857979176 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3370664004733236573, guid: 894d66a72a5753242b8adf852622d607, type: 3}
@@ -3148,7 +3182,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584223811751996961
+  _initializedTimestamp: -8584139280013472127
   _localLevelOfDetailCalculationType: 0
   _useLevelOfDetail: 0
   _useRootLevelOfDetail: 1
@@ -3167,7 +3201,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 3
+  <PrefabId>k__BackingField: 4
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 2275478779396045732
   SceneId: 0
@@ -3207,7 +3241,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 569250763184789247, guid: 894d66a72a5753242b8adf852622d607, type: 3}
   m_PrefabInstance: {fileID: 7414903957506189941}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 4675511059312416825}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a17a6e8a72042fa459a09a1e42e317c0, type: 3}
