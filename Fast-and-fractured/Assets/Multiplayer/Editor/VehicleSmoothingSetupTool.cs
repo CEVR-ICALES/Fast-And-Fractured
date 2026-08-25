@@ -67,6 +67,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (root.transform.Find("Turret") != null)
                         dirty |= EnsureSmoother(root, "Turret", path);
                     dirty |= ClearGraphicalObject(root, path);
+                    dirty |= EnsureVisualSmoother(root, path);
 
                     if (dirty)
                     {
@@ -83,6 +84,21 @@ namespace FastAndFractured.Multiplayer.Editor
             AssetDatabase.SaveAssets();
             Debug.Log($"[VehicleSmoothingSetupTool] Done. {changed}/{paths.Count} prefab(s) updated " +
                       $"(interpolation={INTERPOLATION}).");
+        }
+
+        /// <summary>
+        /// Adds VehicleVisualSmoother, which is what actually draws the car smoothly. The
+        /// NetworkTickSmoothers above are kept because they mark which children are graphical, but
+        /// NetworkedVehicle stops them at runtime - see ApplyVisualSmoothingForOwnership for why -
+        /// so without this the model is drawn straight off the tick-stepped physics transform.
+        /// </summary>
+        private static bool EnsureVisualSmoother(GameObject root, string path)
+        {
+            if (root.GetComponent<VehicleVisualSmoother>() != null) return false;
+
+            root.AddComponent<VehicleVisualSmoother>();
+            Debug.Log($"[VehicleSmoothingSetupTool] {path}: added VehicleVisualSmoother.");
+            return true;
         }
 
         private static List<string> FindCarPrefabPaths()
