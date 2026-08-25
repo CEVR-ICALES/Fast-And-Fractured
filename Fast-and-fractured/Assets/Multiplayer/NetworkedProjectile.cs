@@ -109,9 +109,10 @@ namespace FastAndFractured.Multiplayer
         private const float MIN_VELOCITY_FOR_DIRECTION = 0.0001f;
         private const float LATE_UPDATE_RESYNC_THRESHOLD_SQR = 0.0001f;
 
-        // Collision mask is the same for all projectile instances; compute once per session.
-        private static LayerMask _cachedCollisionMask;
-        private static bool _collisionMaskCached;
+        // One mask per projectile layer, mirroring the Unity layer collision matrix. Cached because
+        // the matrix cannot change at runtime.
+        private static readonly int[] _collisionMaskByLayer = new int[32];
+        private static readonly bool[] _collisionMaskByLayerCached = new bool[32];
         private static int _cachedCharactersLayer = -1;
         private static int _cachedDefaultLayer = -1;
 
@@ -122,6 +123,32 @@ namespace FastAndFractured.Multiplayer
                 if (_cachedCharactersLayer < 0) _cachedCharactersLayer = LayerMask.NameToLayer("Characters");
                 return _cachedCharactersLayer;
             }
+        }
+
+        /// <summary>
+        /// The set of layers a collider on <paramref name="layer"/> would actually collide with,
+        /// taken from the project's layer collision matrix. This sweep stands in for a real
+        /// Rigidbody collision, so it has to agree with the matrix or the networked bullet behaves
+        /// differently from the singleplayer one. Naming the layers by hand does not work:
+        /// LayerMask.GetMask contributes nothing, silently, for a name that does not exist, which is
+        /// how "Obstacles" (never a layer in this project) hid the fact that Static was missing -
+        /// and Static carries most of the map, so bullets and mines fell straight through the world.
+        /// </summary>
+        private static int GetCollisionMaskForLayer(int layer)
+        {
+            if (layer < 0 || layer > 31) layer = 0;
+            if (!_collisionMaskByLayerCached[layer])
+            {
+                int mask = 0;
+                for (int other = 0; other < 32; other++)
+                {
+                    if (!Physics.GetIgnoreLayerCollision(layer, other))
+                        mask |= 1 << other;
+                }
+                _collisionMaskByLayer[layer] = mask;
+                _collisionMaskByLayerCached[layer] = true;
+            }
+            return _collisionMaskByLayer[layer];
         }
 
         private static int DefaultLayer
@@ -262,12 +289,7 @@ namespace FastAndFractured.Multiplayer
             _damage = data.Damage;
             float lifetime = (data.InitialVelocity.magnitude > 0.1f) ? data.Range / data.InitialVelocity.magnitude : DEFAULT_LIFETIME_SECONDS;
 
-            if (!_collisionMaskCached)
-            {
-                _cachedCollisionMask = LayerMask.GetMask("Default", "Characters", "Ground", "Obstacles");
-                _collisionMaskCached = true;
-            }
-            _collisionMask = _cachedCollisionMask;
+            _collisionMask = GetCollisionMaskForLayer(gameObject.layer);
             _customGravity = data.CustomGravity;
             _useCustomGravity = (data.BouncingNum > 0 || data.IsMine);
 
@@ -548,7 +570,10 @@ namespace FastAndFractured.Multiplayer
             float distance = _simulatedVelocity.magnitude * delta;
             if (distance < MIN_VELOCITY_FOR_RAYCAST) return false;
 
-            if (Physics.SphereCast(simulationPosition, SPHERE_CAST_RADIUS, _simulatedVelocity.normalized, out RaycastHit hit, distance, _collisionMask))
+            // QueryTriggerInteraction.Ignore because this sweep stands in for OnCollisionEnter, which
+            // never fires against a trigger. Without it the projectile stops dead inside invisible
+            // volumes (interactable pickups, safe zones, the shield bubble).
+            if (Physics.SphereCast(simulationPosition, SPHERE_CAST_RADIUS, _simulatedVelocity.normalized, out RaycastHit hit, distance, _collisionMask, QueryTriggerInteraction.Ignore))
             {
                 // Ignore self-collider
                 if (_ownCollider != null && (hit.collider == _ownCollider || hit.collider.transform == transform))
@@ -581,13 +606,22 @@ namespace FastAndFractured.Multiplayer
                     _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
                     ApplySimulationPose();
                 }
-                else if (!hitCharacter && _currentBounces >= _maxBounces && _timeToExplode > 0f && base.IsServer)
+                else if (!hitCharacter && _currentBounces >= _maxBounces && _timeToExplode > 0f)
                 {
-                    // Mine: freeze in place, wait _timeToExplode ticks, then explode
+                    // Mine: rest on the surface it hit, wait _timeToExplode, then explode.
+                    // The position has to be written explicitly. Returning true only tells the caller
+                    // to skip the integration step, so without this the mine freezes at wherever the
+                    // previous tick left it instead of on the ground it just hit.
+                    _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
                     _simulatedVelocity = Vector3.zero;
                     _useCustomGravity = false;
                     _isFrozenMine = true;
-                    _mineExplodeTick = base.TimeManager.Tick + base.TimeManager.TimeToTicks(_timeToExplode);
+                    // Every peer freezes the mine so it stays visible and predicts correctly, but
+                    // only the server owns when it goes off. A client that fell through to the impact
+                    // branch instead used to hide the visuals and disable the collider permanently,
+                    // so the mine simply vanished the moment it landed.
+                    if (base.IsServer)
+                        _mineExplodeTick = base.TimeManager.Tick + base.TimeManager.TimeToTicks(_timeToExplode);
                     ApplySimulationPose();
                 }
                 else
