@@ -103,8 +103,11 @@ namespace FastAndFractured {
             if (_currentBouncingNum >= _bouncingNum)
             {
                 rb.linearVelocity = Vector3.zero;
-                rb.constraints = RigidbodyConstraints.FreezePosition;
-                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                // Both constraints in one assignment. Setting them on two lines meant the second
+                // replaced the first, so the mine kept its position free and custom gravity drove it
+                // through the floor while it counted down.
+                rb.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
+                _useCustomGravity = false;
                 if (_timeToExplode > 0)
                 {
                     TimerSystem.Instance.CreateTimer(_timeToExplode, TimerDirection.INCREASE, onTimerIncreaseComplete: () =>
