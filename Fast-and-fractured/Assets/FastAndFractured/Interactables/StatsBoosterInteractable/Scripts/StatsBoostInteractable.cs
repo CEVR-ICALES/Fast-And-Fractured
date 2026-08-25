@@ -16,15 +16,27 @@ namespace FastAndFractured
         public string ingameEventText;
         public float ingameEventTimeOnScreen = 2f;
 
+        /// <summary>
+        /// Optional hook for deciding who gets told about this pickup. Null in singleplayer, where
+        /// the only player is the local one. Multiplayer sets it because the pickup is resolved on
+        /// the server for every player, so "was it me?" cannot be answered by looking at the local
+        /// LevelController - it is always the server's own car there. Returning true means the hook
+        /// has taken care of showing the message.
+        /// </summary>
+        public System.Func<GameObject, bool> IngameEventRouter;
+
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
             VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
-            GameObject player = LevelController.Instance.LocalPlayer;
-            if (interactionFrom == player)
+            if (IngameEventRouter == null || !IngameEventRouter(interactionFrom))
             {
-                IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
-                if(ingameEventsManager != null) ingameEventsManager.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+                GameObject player = LevelController.Instance.LocalPlayer;
+                if (interactionFrom == player)
+                {
+                    IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
+                    if (ingameEventsManager != null) ingameEventsManager.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+                }
             }
             if (!statsController) return;
 
