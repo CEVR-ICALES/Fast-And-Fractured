@@ -230,6 +230,7 @@ namespace FastAndFractured.Multiplayer
             // We MUST destroy remote PlayerHUDs and init local PlayerHUD BEFORE that timer starts.
             DisableRemoteCanvases();
             DisableRemotePlayerHUDs();
+            DisableRemotePlayerCameraRigs();
             InitializeLocalPlayerHUD();
             
             // Ensure TimerSystem has a runner
@@ -352,6 +353,7 @@ namespace FastAndFractured.Multiplayer
             ForceRefreshHUDSprites(hostCharacter);
 
             DisableRemotePlayerHUDs();
+            DisableRemotePlayerCameraRigs();
 
             // The host used to skip this entirely — it was only ever called from
             // InitializeClientState — which is why the HOST's HUD showed no overheat, no push
@@ -591,6 +593,42 @@ namespace FastAndFractured.Multiplayer
 
             FishNet.Connection.NetworkConnection local = base.LocalConnection;
             return local != null && nob.Owner != null && nob.Owner.ClientId == local.ClientId;
+        }
+
+        /// <summary>
+        /// Deactivate the camera rig on every non-local player root.
+        ///
+        /// Each NetworkedPlayer carries its own FreeLookCameraLast rig (virtual camera, camera
+        /// collider, impulse listeners). Nothing used to switch the remote ones off, so a two-player
+        /// match ran two virtual cameras at equal priority against the single CinemachineBrain, plus
+        /// a second CinemachineCollider raycasting against the map every frame. Which one wins is
+        /// decided by activation order, which differs between host and client - that is why the
+        /// tremble showed up on the client and not on the host.
+        ///
+        /// Deactivating the whole rig object also takes its CameraBehaviours out of
+        /// AbstractSingleton's lookups, which exclude inactive objects, so CameraBehaviours.Instance
+        /// resolves to the local player's rig.
+        /// </summary>
+        private void DisableRemotePlayerCameraRigs()
+        {
+            var allRigs = FindObjectsByType<CameraBehaviours>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var rig in allRigs)
+            {
+                // Same fail-safe ownership rule as the HUD pass: includeInactive because FishNet
+                // deactivates a NetworkObject while spawning it, and a null NetworkObject means
+                // "not provably remote", so the rig stays.
+                var nob = rig.GetComponentInParent<NetworkObject>(true);
+                if (nob == null) continue;
+                if (IsLocalPlayerObject(nob)) continue;
+                if (!rig.gameObject.activeSelf) continue;
+
+                Debug.Log($"[NetworkedLevelControllerWrapper] Deactivating remote camera rig '{rig.gameObject.name}' " +
+                          $"under '{nob.gameObject.name}' (OwnerId={(nob.Owner != null ? nob.Owner.ClientId : -1)}, " +
+                          $"localClientId={(base.LocalConnection != null ? base.LocalConnection.ClientId : -1)}). " +
+                          "If this names the LOCAL player's rig, the local peer loses its camera and the ownership test is wrong.");
+
+                rig.gameObject.SetActive(false);
+            }
         }
 
         private void DisableRemotePlayerHUDs()
