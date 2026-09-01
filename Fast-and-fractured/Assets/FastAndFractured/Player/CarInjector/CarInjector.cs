@@ -56,10 +56,10 @@ public class CarInjector : MonoBehaviour
         }
 
 
+        var childBehaviours = transform.GetComponentsInChildren<Behaviour>();
         foreach (var controller in controllers)
         {
-
-            foreach (Behaviour mono in transform.GetComponentsInChildren<Behaviour>())
+            foreach (Behaviour mono in childBehaviours)
             {
                 controller.AddBehaviour(mono);
             }
@@ -118,10 +118,10 @@ public class CarInjector : MonoBehaviour
         }
 
 
+        var childBehaviours = transform.GetComponentsInChildren<Behaviour>();
         foreach (var controller in controllers)
         {
-
-            foreach (Behaviour mono in transform.GetComponentsInChildren<Behaviour>())
+            foreach (Behaviour mono in childBehaviours)
             {
                 controller.AddBehaviour(mono);
             }
