@@ -1,7 +1,14 @@
 # Multiplayer Handoff — everything needed to call MP *mechanically* done
 
-**Written:** 2026-08-21 · **Branch:** `misterious-branch` · **Audience:** Claude Code, Codex, or any
-agent picking this up cold. Read this file top to bottom before touching anything.
+**Written:** 2026-08-21 · **Last updated:** 2026-08-25 · **Branch:** `misterious-branch` ·
+**Audience:** Claude Code, Codex, or any agent picking this up cold. Read this file top to bottom
+before touching anything.
+
+> **2026-08-25 update:** BUG-1 (camera tremble) is fixed and root-caused — it was never the camera,
+> it was FishNet's `NetworkTickSmoother` sitting disabled at runtime, so the car itself stepped at
+> tick rate. See the rewritten BUG-1 entry. The mine-through-floor issue and the speedboost pickup
+> message going to the wrong peer are also fixed. BUG-2, BUG-3, BUG-4 are untouched. **The scoreboard
+> in §3 has not been re-walked row by row — only update a row after watching it pass, per R4.**
 
 "Mechanically done" means: **two humans can host, join, play a full match on any of the three maps,
 and every gameplay mechanic behaves the same as singleplayer.** Menus and visuals may stay
@@ -115,7 +122,7 @@ lobby), because a 2-player match ends the instant someone dies and hides those p
 ### B. Core gameplay
 | ID | Criterion | Status |
 |----|-----------|--------|
-| B1 | Driving feels like SP for the **owner** on host and client | host ok; **client trembles** — BUG-1 |
+| B1 | Driving feels like SP for the **owner** on host and client | fix shipped 2026-08-25 (was BUG-1) — **needs a live re-check**, see §4 |
 | B2 | The **remote** car looks smooth to the other peer | verified |
 | B3 | Dash works and matches SP | deterministic dash implemented, **not live-verified** |
 | B4 | Normal shoot: fires, overheats, damages, on both peers | works |
@@ -141,7 +148,7 @@ lobby), because a 2-player match ends the instant someone dies and hides those p
 | D1 | Sandstorm closes in and damages on both peers | 672 lines, **never live-verified** |
 | D2 | Mega chicken boss (MountainVillage) identical on both peers | implemented, unverified |
 | D3 | Trampolines, sucking buildings, breakable platforms, tomatoes | implemented, unverified |
-| D4 | Stat-boost interactables server-authoritative, no double-pickup | implemented, unverified |
+| D4 | Stat-boost interactables server-authoritative, no double-pickup | pickup-message routing fixed 2026-08-25 (was going to the host regardless of who picked it up); double-pickup itself still unverified |
 | D5 | All three maps playable start-to-finish | Golf ok; MountainVillage intermittent freeze (§5); Construction untested |
 
 ### E. Robustness
@@ -151,7 +158,7 @@ lobby), because a 2-player match ends the instant someone dies and hides those p
 | E2 | Pause doesn't desync or freeze the other peer | `MultiplayerPauseGate` exists, unverified |
 | E3 | A full match with no console errors on either peer | needs a clean run |
 | E4 | Playable with real latency, not two local editors | **never tested** — sim controls in `MultiplayerToolsHub` |
-| E5 | Works in a **build**, not just the editor | **never tested** — real risk, see M3 |
+| E5 | Works in a **build**, not just the editor | first build test run 2026-08-25 by the user — surfaced the car judder (BUG-1, fix shipped same day, needs a build re-check); no other build-only failures reported yet |
 
 **Scoreboard: 11 verified · 14 implemented-but-unverified · 4 open bugs · 5 untested.**
 The gap is dominated by *unverified*, not *missing*. The code is much further along than the
@@ -161,35 +168,47 @@ confidence in it. That is a testing problem, and it is fixable.
 
 ## 4. Open bugs, with everything already known
 
-### BUG-1 — Client camera trembles (owner's own car, on the joining client)
-Host is fine. Each peer sees the *other* car smooth.
+### BUG-1 — Camera / car tremble on the client — FIXED 2026-08-25, root-caused
 
-**Measured on the client while driving:**
+**Was never actually the camera.** Three compounding causes, found by instrumenting the live client
+via MCP (`execute_code`, not `MpAutoRecorder` — this needed A/B toggles on running components, which
+a passive log can't do) instead of theorizing from the car's transform, which is where every earlier
+session got stuck (see the old analysis this replaced, in git history if you want it).
 
-| Signal | mean/frame | max/frame | jerk |
-|---|---|---|---|
-| car transform | 0.0055 m | 0.0897 m | 0.0050 |
-| **rigidbody** | **0.0247 m** | **0.2631 m** | **0.0202** |
-| `Visuals` child | tracks the transform exactly | | |
+1. **`NetworkTickSmoother` on `Visuals`/`Turret` is enabled on the prefab but sits with
+   `SmootherController` never started at runtime** — `NetworkedVehicle.ApplyVisualSmoothingForOwnership`
+   stops it on purpose (262 m drift measured on 2026-08-12, see that method's own comment). So every
+   car has been drawn straight off the physics transform, which only moves on tick boundaries.
+   Confirmed live: client renders ~36 fps against a 50 Hz sim tick, so `deltaTime > tickDelta` and
+   each frame consumes 1 or 2 ticks alternating — raw per-frame steps read
+   `0.105 0.233 0.120 0.228 0.098 0.201`, a clean 1×/2× beat. **Fix:** `VehicleVisualSmoother`
+   (`Assets/Multiplayer/VehicleVisualSmoother.cs`) samples the body pose on `OnPostTick`, keyed by
+   **tick number, not wall-clock time** (a same-frame multi-tick otherwise stamps two samples
+   identically and collapses the interpolant to 1 — this bit an earlier version of the fix and
+   shipped silently broken into a build; fixed same day). Draws the graphical children a fixed
+   ~2-tick delay behind, interpolated. Attached to all 4 car prefabs via `VehicleSmoothingSetupTool`
+   (`Tools ▸ Fast And Fractured ▸ Vehicle Smoothing - Unify`).
+2. **The remote player's camera rig was never deactivated.** Each `NetworkedPlayer` carries its own
+   `FreeLookCameraLast` (vcam + `CinemachineCollider` + 2 impulse listeners). Two players → two vcams
+   at equal priority fighting the one `CinemachineBrain`, plus a second collider raycasting the map
+   every frame. Which one wins depends on activation order, which differs host vs. client — this is
+   why the symptom only ever showed on one side. **Fix:** `NetworkedLevelControllerWrapper.DisableRemotePlayerCameraRigs()`,
+   same fail-safe ownership rule as the HUD pass.
+3. **`CinemachineCollider` was configured to oscillate.** `m_MinimumOcclusionTime=0`,
+   `m_SmoothingTime=0`, `m_DampingWhenOccluded=0`, `m_Damping=5` — snap in on any occlusion, ease
+   back out over 5, re-occlude, snap in again. Measured on the host with the car **completely
+   stationary**: camera swung 0.66 m along its own view axis, 0.37 m in a single frame. **Fix:**
+   `CameraRigSetupTool` (`Tools ▸ Fast And Fractured ▸ Camera Rig - Fix Collider Oscillation`) retunes
+   it and attaches `CameraTargetSmoother`, a per-frame `SmoothDamp` on the Follow/LookAt target — a
+   smaller, secondary contributor, but real.
 
-**Ruled out by measurement — do not re-investigate:**
-- Prediction diverging: reconcile fires 41/s with **mean 0.00 cm, max 0.01 cm** correction.
-- An owner-only cause: the *remote* car on the client shows the same body/transform gap, and remote
-  cars never reconcile.
-- Rigidbody interpolation: `None` everywhere, confirmed.
-- Visual detachment: `Visuals` matches the body transform to 4 decimals.
-- A render-phase artifact: POSTTICK and RENDER gaps are identical.
-- `Physics.SyncTransforms()` on `OnPostReconcile`: wrong direction, tried and removed.
-- Double smoothers: fixed earlier and verified (`_graphicalObject` null, `PredictionSmoother` null,
-  only `NetworkTickSmoother` active).
+**All three are local/render-side only.** Nothing about the camera or the car's visual pose goes
+over the network or touches prediction/reconcile; aiming and turret rotation are untouched.
 
-**The live lead:** the rigidbody is the jumpy one while the rendered transform is comparatively
-smooth — the *opposite* of the usual "visuals lag the body" story. So the next question is **what
-the camera actually follows**. `CameraLookAtPoint` has a `PositionConstraint` sourcing the car's
-`Visuals` child, wired by `CarInjector.Install`. Check on the client whether that constraint
-resolved to the right source at all, and whether Cinemachine's `SmartUpdate`/`LateUpdate` sampling
-lands between the physics write and the smoother write. **Nobody has measured the camera rig itself
-yet** — every measurement so far was on the car. `MpAutoRecorder` now records it.
+**Status: fix shipped, not yet watched running by the user in a live match.** Per R4 do not mark B1
+verified until someone has. If it still judders after this: check whether turret aiming (applied in
+its own `LateUpdate`) runs after `VehicleVisualSmoother`'s (`[DefaultExecutionOrder(-150)]`) and
+overwrites its correction — that's the next suspect, untested.
 
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
@@ -224,6 +243,21 @@ Not investigated. Likely the `TimerSystem`-based match timer never starts on the
 
 ### BUG-4 — Stray "Josefino" TMP dropdown floating in the game view
 Debug UI leaking from a selector. Cosmetic, trivially visible, cheap.
+
+### BUG-5 — Mines and push bullets fell through the map — FIXED 2026-08-25
+`NetworkedProjectile`'s collision sweep used
+`LayerMask.GetMask("Default","Characters","Ground","Obstacles")`. No layer named `"Obstacles"`
+exists in this project; `GetMask` silently contributes nothing for an unknown name. `Static` (722
+colliders on MountainVillage, vs. 3 on `Ground`) was never in the mask, so a mine swept straight
+through the level. **Fix:** the mask is now derived from the project's own layer collision matrix
+for the projectile's layer, so a future renamed/missing layer can't silently vanish again. Also
+fixed in the same commit: the sweep now ignores triggers (it stands in for `OnCollisionEnter`,
+which never fires against one); a landed mine now writes its rest position instead of freezing
+wherever the previous tick left it; and a client-side mine no longer permanently hides itself
+because the freeze branch was gated on `IsServer`. Singleplayer's `PushBulletBehaviour` had the same
+freeze bug from a different cause (`rb.constraints = FreezePosition;` immediately overwritten by
+`rb.constraints = FreezeRotation;` on the next line) — fixed alongside it.
+**Not yet re-verified live**, per R4.
 
 ---
 
@@ -374,12 +408,17 @@ Assets/Multiplayer/
 
 ## 9. Honest scope estimate
 
-Ordered by risk, the real unknowns are **the first build (E5)** and **the first latency test (E4)**.
-Everything else is either verified, or implemented code that merely needs to be watched running.
+**2026-08-25:** the first build (E5) happened. It surfaced exactly one new failure — the car judder,
+which turned out to be the same root cause as BUG-1 (the tick smoother that's stopped on purpose)
+manifesting more visibly at build frame rates than in the editor. That's a good sign, not a bad one:
+one build run, one bug, and it was a variant of something already being fixed — not a wave of
+editor-only assumptions breaking. **The first latency test (E4) is still the biggest unknown left.**
 
-The two open blockers are each a few hours *once a recording exists* — and indefinite without one,
-which is precisely the history of this branch. M0 and M1 are what convert the rest of this list from
-open-ended into a finite, checkable queue.
+The two long-standing blockers (BUG-2 host push/ulti, BUG-1 tremble) are each a few hours *once a
+recording or a live A/B exists* — and indefinite without one, which is precisely the history of this
+branch. BUG-1 got that treatment on 2026-08-25 (live MCP A/B testing against the running client,
+not just reading logs) and resolved in one session. Do the same for BUG-2 next: don't re-theorize
+from the code, get a live client and toggle things.
 
 **Update §3's status column as things get verified, with the date.** A row reading "verified
 2026-08-21" is what makes this project feel finishable; a row reading "should work" is what got us
