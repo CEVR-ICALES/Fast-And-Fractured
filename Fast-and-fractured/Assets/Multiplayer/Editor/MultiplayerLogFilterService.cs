@@ -119,7 +119,12 @@ namespace FastAndFractured.Multiplayer.Editor
 
             _initialized = true;
             LoadConfig();
-            MergeDiscoveredCategories();
+
+            // Scanning every .cs file under Assets/Multiplayer with a regex was previously done
+            // here unconditionally, which re-ran on every domain reload (i.e. on every script
+            // recompile during a live editor session, not just once). New log tags are picked up
+            // by the "Rescan Categories" button in MultiplayerLogFilterWindow instead - this keeps
+            // the filter itself just as capable without paying that cost every reload.
         }
 
         public static bool ShouldEmit(LogType logType, string message, Object context)
@@ -284,28 +289,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             RebuildMapFromConfig();
-        }
-
-        private static void MergeDiscoveredCategories()
-        {
-            HashSet<string> discoveredTags = DiscoverProjectLogTags();
-            bool hasChanges = false;
-
-            foreach (string tag in discoveredTags)
-            {
-                if (CategoryMap.ContainsKey(tag))
-                {
-                    continue;
-                }
-
-                CategoryMap[tag] = true;
-                hasChanges = true;
-            }
-
-            if (hasChanges)
-            {
-                SaveConfig();
-            }
         }
 
         private static MultiplayerLogFilterConfig CreateDefaultConfig()
