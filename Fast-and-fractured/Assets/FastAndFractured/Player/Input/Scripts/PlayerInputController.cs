@@ -91,6 +91,20 @@ namespace FastAndFractured
 
         public void BindActions()
         {
+            // Idempotent by disposal, not by skip. Every car installation calls this once
+            // (CarInjector -> PlayerInputProvider.Initialize), so two players in a match used to
+            // leave two full sets of actions enabled on this singleton. ShootingMode is a TOGGLE
+            // (ChangeShootMode flips a bool), so an even number of live sets means a keypress
+            // toggles twice and reads as "did nothing" - the multiplayer host could not use push
+            // shoot or the ultimate while the client could, purely from car count. Disabling and
+            // disposing the previous set first leaves exactly one live set however often this runs.
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
+
             _inputActions = new PlayerInputAction();
 
             _inputActions.Enable();
