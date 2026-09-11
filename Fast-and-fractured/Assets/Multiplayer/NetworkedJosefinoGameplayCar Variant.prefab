@@ -92,6 +92,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2070056097290367404, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2314163124427475796}
+    - targetCorrespondingSourceObject: {fileID: 1094763155979244912, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4437809491205384701}
+    - targetCorrespondingSourceObject: {fileID: 749712319465165072, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 309418584460026183}
   m_SourcePrefab: {fileID: 100100000, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
 --- !u!1 &1785575773281659211 stripped
 GameObject:
@@ -296,13 +302,91 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db9119fbf481d034c80b97b7db13b53b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.VehicleVisualSmoother
-  interpolationTicks: 2
+  interpolationSteps: 2
   teleportDistance: 5
 --- !u!4 &6974511236189711798 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 232658802875862866, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   m_PrefabInstance: {fileID: 7201503153886749412}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7608659597757445108 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 749712319465165072, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+  m_PrefabInstance: {fileID: 7201503153886749412}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &309418584460026183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608659597757445108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  _initializationSettings:
+    TargetTransform: {fileID: 6974511236189711798}
+    DetachOnStart: 0
+    AttachOnStop: 0
+  _controllerMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 5078
+    AdaptiveInterpolationValue: 3
+    InterpolationValue: 15
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
+  _favorPredictionNetworkTransform: 1
+  _spectatorMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 16686
+    AdaptiveInterpolationValue: 4
+    InterpolationValue: 2
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
+--- !u!1 &7836687474697074580 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1094763155979244912, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
+  m_PrefabInstance: {fileID: 7201503153886749412}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4437809491205384701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7836687474697074580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 453481867b26f7c43b5bf38802a5f50e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 3437050017870222519}
+  _networkObjectCache: {fileID: 3437050017870222519}
+  _initializationSettings:
+    TargetTransform: {fileID: 6974511236189711798}
+    DetachOnStart: 0
+    AttachOnStop: 0
+  _controllerMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 5078
+    AdaptiveInterpolationValue: 3
+    InterpolationValue: 15
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
+  _favorPredictionNetworkTransform: 1
+  _spectatorMovementSettings:
+    EnableTeleport: 1
+    TeleportThreshold: 16686
+    AdaptiveInterpolationValue: 4
+    InterpolationValue: 2
+    SmoothedProperties: 4294967295
+    SnapNonSmoothedProperties: 0
 --- !u!1 &9172339282962666312 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2070056097290367404, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
