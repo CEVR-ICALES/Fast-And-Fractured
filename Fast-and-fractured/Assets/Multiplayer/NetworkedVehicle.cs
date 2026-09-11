@@ -47,6 +47,23 @@ namespace FastAndFractured.Multiplayer
             public bool DriftIsBackwards;
             public float LinearDamping;
 
+            // Whether the SP state machine considers this car flipped. Not previously reconciled,
+            // which let the two peers disagree forever: GetCarToNormalAction (SP) runs off the
+            // local per-peer state machine and applies a strong upward AddForceAtPosition impulse
+            // whenever ITS OWN flip detection says so, entirely outside Replicate/Reconcile - so a
+            // client that locally (and wrongly) decides it is flipped launches only its own copy,
+            // the server's stays put, and nothing about that impulse was ever synced state for a
+            // later reconcile to catch. GuardFalseFlipImpulse (this file) already clears the flag
+            // when grounded/stationary/upright at the START of a tick, but that only helps if the
+            // bad reading happens to appear before the guard runs - a false positive appearing
+            // right after a reconcile snap can still get through, and once IsFlipped sticks, the
+            // SP state machine stays in FlippedState and retries the impulse every 0.5s, which is
+            // consistent with a client-only car launching many meters straight up while the host
+            // sees the same car sitting on the ground the whole time (measured live, 2026-09-11).
+            // Reconciling it the same way as IsDrifting/DashTicksRemaining lets the server's
+            // opinion win within one reconcile interval instead of never.
+            public bool IsFlipped;
+
             public ReconcileData(PredictionRigidbody prb,float speed)
             {
                 PredictionRigidbody = prb;
@@ -61,6 +78,7 @@ namespace FastAndFractured.Multiplayer
                 InitialSpeedWhenDrifting = 0f;
                 DriftIsBackwards = false;
                 LinearDamping = 0.08f;
+                IsFlipped = false;
             }
 
             private uint _tick;
@@ -605,6 +623,7 @@ namespace FastAndFractured.Multiplayer
                 rd.DriftDirection = ReadFloat(SingleplayerReflectionCache.CarMovement_DriftDirection, 1f);
                 rd.InitialSpeedWhenDrifting = ReadFloat(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting);
                 rd.DriftIsBackwards = ReadBool(SingleplayerReflectionCache.CarMovement_DriftIsBackwards);
+                rd.IsFlipped = _coreMovementController != null && _coreMovementController.IsFlipped;
 
                 Reconcile(rd);
             }
@@ -834,6 +853,13 @@ namespace FastAndFractured.Multiplayer
             WriteField(SingleplayerReflectionCache.CarMovement_DriftDirection, rd.DriftDirection);
             WriteField(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting, rd.InitialSpeedWhenDrifting);
             WriteField(SingleplayerReflectionCache.CarMovement_DriftIsBackwards, rd.DriftIsBackwards);
+
+            if (_coreMovementController != null)
+            {
+                _coreMovementController.IsFlipped = rd.IsFlipped;
+                if (!rd.IsFlipped)
+                    _coreMovementController.StopFlippedTimer();
+            }
         }
 
         /// <summary>
