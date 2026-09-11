@@ -54,6 +54,19 @@ namespace FastAndFractured.Multiplayer.Testing
             public float MaxBodyGap;
             public double BodyGapSum;
             public int BodyGapCount;
+
+            // Does the car's PARENT move? A non-kinematic Rigidbody's world position is tracked by
+            // the physics engine independently of the transform hierarchy - moving an ancestor
+            // does not itself inform physics of the new position (that needs an explicit
+            // Physics.SyncTransforms()), so a moving parent is a textbook way for
+            // Body_Rigidbody.position and Body.position to drift apart, which is exactly the "TWO
+            // WRITERS FIGHTING" signature measured 2026-09-11 (up to 1.8-6.3 m, growing over time,
+            // client only).
+            public Transform Parent;
+            public Vector3 ParentLastPos;
+            public bool ParentHasLast;
+            public float ParentMaxStep;
+            public Vector3 ParentNetTravel;
         }
 
         private static readonly Dictionary<int, Track> Tracks = new();
@@ -151,6 +164,7 @@ namespace FastAndFractured.Multiplayer.Testing
                     Body = vehicle.transform,
                     Body_Rigidbody = vehicle.GetComponent<Rigidbody>(),
                     LastPos = visual.position,
+                    Parent = vehicle.transform.parent,
                 };
             }
 
@@ -221,6 +235,19 @@ namespace FastAndFractured.Multiplayer.Testing
                 t.LastDelta = delta;
                 t.LastPos = pos;
                 t.HasLast = true;
+
+                if (t.Parent != null)
+                {
+                    Vector3 parentPos = t.Parent.position;
+                    if (t.ParentHasLast)
+                    {
+                        Vector3 parentDelta = parentPos - t.ParentLastPos;
+                        t.ParentMaxStep = Mathf.Max(t.ParentMaxStep, parentDelta.magnitude);
+                        t.ParentNetTravel += parentDelta;
+                    }
+                    t.ParentLastPos = parentPos;
+                    t.ParentHasLast = true;
+                }
                 t.Steps++;
             }
         }
@@ -254,6 +281,17 @@ namespace FastAndFractured.Multiplayer.Testing
                 sb.AppendLine($"   body/transform  : mean {meanGap:F3} m, max {t.MaxBodyGap:F3} m{verdict}");
                 if (t.Body_Rigidbody != null)
                     sb.AppendLine($"   interpolation   : {t.Body_Rigidbody.interpolation}");
+
+                if (t.Parent != null)
+                {
+                    string parentVerdict = t.ParentMaxStep > 0.05f ? "  <-- PARENT IS MOVING (see body/transform note below)" : "";
+                    sb.AppendLine($"   parent          : '{t.Parent.name}', net travel {t.ParentNetTravel.magnitude:F3} m, " +
+                                  $"largest step {t.ParentMaxStep:F4} m{parentVerdict}");
+                }
+                else
+                {
+                    sb.AppendLine($"   parent          : none (car is a scene root)");
+                }
             }
 
             sb.AppendLine();
