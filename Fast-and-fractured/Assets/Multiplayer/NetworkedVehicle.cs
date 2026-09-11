@@ -803,6 +803,24 @@ namespace FastAndFractured.Multiplayer
             {
                 adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
                 adapter.linearDamping = rd.LinearDamping;
+
+                // DO NOT write the Transform from Rigidbody.position here. It looks like it fixes
+                // the transform/rigidbody gap this project's Physics.autoSyncTransforms=false
+                // creates, but it silently destroys every reconcile, and this is now the THIRD
+                // time a "sync the transform" idea has caused a regression here (see the handoff
+                // note about the removed Physics.SyncTransforms hook).
+                //
+                // Why it breaks: FishNet's RigidbodyState round-trips in LOCAL space -
+                // GetState captures rb.transform.localPosition and SetState (called just above,
+                // inside PredictionRigidbody.Reconcile) writes t.localPosition = state.Position.
+                // With autoSyncTransforms disabled, rb.position still reports the PRE-reconcile
+                // world pose at this point, so writing it back onto the transform reverts the
+                // correction that SetState just applied. Velocity survives (it lives on the
+                // Rigidbody, not the Transform), which is exactly what was measured live on a
+                // client (2026-09-11): every reconcile reset vy to ~0 while y never moved, so
+                // gravity could never pull the car down and it hung in the air, drifting upward,
+                // hundreds of metres above where the host correctly showed it on the ground.
+
             }
             _physicsBehaviour.CurrentSpeed = rd.Speed;
 
