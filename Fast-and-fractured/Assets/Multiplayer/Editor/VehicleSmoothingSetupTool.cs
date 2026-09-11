@@ -67,6 +67,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (root.transform.Find("Turret") != null)
                         dirty |= EnsureSmoother(root, "Turret", path);
                     dirty |= ClearGraphicalObject(root, path);
+                    dirty |= EnsureCosmeticSiblingsSmoothed(root, path);
                     dirty |= EnsureVisualSmoother(root, path);
 
                     if (dirty)
@@ -99,6 +100,43 @@ namespace FastAndFractured.Multiplayer.Editor
             root.AddComponent<VehicleVisualSmoother>();
             Debug.Log($"[VehicleSmoothingSetupTool] {path}: added VehicleVisualSmoother.");
             return true;
+        }
+
+        /// <summary>
+        /// Finds direct children of the car root that are purely cosmetic - a Renderer somewhere
+        /// in their subtree, no NetworkTickSmoother yet - and tags them the same way Visuals and
+        /// Turret are tagged, so VehicleVisualSmoother picks them up too.
+        ///
+        /// Found live (2026-09-11): Josefino's car has 'JosefinoGolfBag' and
+        /// 'JosefinoExtraObjects' as siblings of Visuals/Turret - visible props with no smoother -
+        /// while the other three cars have none. Reported symptom: the car body moved smoothly but
+        /// these still stepped, because they were never in VehicleVisualSmoother's child list.
+        ///
+        /// Functional anchors (PushApplyPoint, NormalShoot, PushShoot, TargetBehind,
+        /// WheelColliders) have no Renderer and are deliberately left alone: smoothing one would
+        /// shift its position away from what gameplay code reads it as (e.g. where a bullet
+        /// actually spawns), trading a render artifact for a correctness one.
+        /// </summary>
+        private static bool EnsureCosmeticSiblingsSmoothed(GameObject root, string path)
+        {
+            NetworkTickSmoother template = root.GetComponentInChildren<NetworkTickSmoother>(true);
+            bool dirty = false;
+
+            foreach (Transform child in root.transform)
+            {
+                if (child.GetComponent<NetworkTickSmoother>() != null) continue;
+                if (child.GetComponentInChildren<Renderer>(true) == null) continue;
+
+                NetworkTickSmoother added = child.gameObject.AddComponent<NetworkTickSmoother>();
+                if (template != null && template != added)
+                    EditorUtility.CopySerialized(template, added);
+
+                Debug.Log($"[VehicleSmoothingSetupTool] {System.IO.Path.GetFileName(path)}: " +
+                          $"added NetworkTickSmoother to cosmetic sibling '{child.name}'.");
+                dirty = true;
+            }
+
+            return dirty;
         }
 
         private static List<string> FindCarPrefabPaths()
