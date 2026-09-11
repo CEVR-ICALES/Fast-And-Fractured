@@ -57,6 +57,8 @@ namespace FastAndFractured
         public bool IsThrowingMine => _isThrowingMine;
         private bool _isThrowingMine;
 
+        public bool IsMapOpen => FullScreenMapManager.Instance != null && FullScreenMapManager.Instance.IsMapOpen;
+
         public bool IsPausing => _isPausing;
         private bool _isPausing;
 
@@ -134,6 +136,12 @@ namespace FastAndFractured
 
             _inputActions.PlayerInputActions.Dash.performed += ctx => _isDashing = true;
             _inputActions.PlayerInputActions.Dash.canceled += ctx => _isDashing = false;
+
+            _inputActions.PlayerInputActions.OpenMap.performed += ctx =>
+            {
+                if (FullScreenMapManager.Instance != null)
+                    FullScreenMapManager.Instance.ToggleMap();
+            };
 
             LoadInputSettings();
         }

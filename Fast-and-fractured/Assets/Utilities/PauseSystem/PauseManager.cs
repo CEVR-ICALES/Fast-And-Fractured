@@ -59,6 +59,12 @@ namespace Utilities.Managers.PauseSystem
         
         public void TogglePauseGame()
         {
+            if (FullScreenMapManager.Instance != null && FullScreenMapManager.Instance.IsMapOpen)
+            {
+                FullScreenMapManager.Instance.CloseMap();
+                return;
+            }
+
             if (_isGamePaused)
             {
                 if(MainMenuManager.Instance.IsInPauseMenu())

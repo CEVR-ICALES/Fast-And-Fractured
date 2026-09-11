@@ -16,6 +16,9 @@ namespace FastAndFractured
         private Camera _cameraReference;
         private const int IMAGE_X_ROTATION = 90;
         private const int IMAGE_Z_ROTATION = 0;
+
+        public bool IsFollowing = true;
+
         void Start()
         {
             Camera camera = GetComponent<Camera>();
@@ -39,6 +42,7 @@ namespace FastAndFractured
         
         void Update()
         {
+            if (!IsFollowing) return;
             if (_player != null && _isPlayerReceived)
             {
                 Vector3 newPosition = _player.transform.position;
@@ -54,6 +58,32 @@ namespace FastAndFractured
                 characterIconMinimap.transform.rotation = Quaternion.Euler(IMAGE_X_ROTATION, _player.transform.eulerAngles.y, IMAGE_Z_ROTATION);
             }
             
+        }
+
+        public void SetFixedRotation()
+        {
+            SetFixedView(_player != null ? _player.transform.position : transform.position);
+        }
+
+        public void SetFixedView(Vector3 worldCenter)
+        {
+            IsFollowing = false;
+            Vector3 newPosition = worldCenter;
+            newPosition.y = transform.position.y;
+            transform.position = newPosition;
+            if (_cameraReference != null)
+            {
+                transform.rotation = Quaternion.Euler(IMAGE_X_ROTATION, 0f, IMAGE_Z_ROTATION);
+            }
+            if (characterIconMinimap != null)
+            {
+                characterIconMinimap.transform.rotation = Quaternion.Euler(IMAGE_X_ROTATION, 0f, IMAGE_Z_ROTATION);
+            }
+        }
+
+        public void ResumeFollowing()
+        {
+            IsFollowing = true;
         }
         private void OnCharactersCustomStart()
         {

@@ -235,6 +235,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenMap"",
+                    ""type"": ""Button"",
+                    ""id"": ""bc6e6721-161e-44fd-a0e3-7477c91a3842"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -556,6 +565,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""DebugRemoveUltimateAbilityCooldown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c7efed50-0d55-4446-b503-a7e05db7e14d"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenMap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -819,6 +839,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
         m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown = m_PlayerInputActions.FindAction("DebugRemoveUltimateAbilityCooldown", throwIfNotFound: true);
+        m_PlayerInputActions_OpenMap = m_PlayerInputActions.FindAction("OpenMap", throwIfNotFound: true);
         // MenuInputActions
         m_MenuInputActions = asset.FindActionMap("MenuInputActions", throwIfNotFound: true);
         m_MenuInputActions_GoBack = m_MenuInputActions.FindAction("GoBack", throwIfNotFound: true);
@@ -929,6 +950,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_DebugAIChangeState;
     private readonly InputAction m_PlayerInputActions_DebugAIResetPosition;
     private readonly InputAction m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
+    private readonly InputAction m_PlayerInputActions_OpenMap;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInputActions".
     /// </summary>
@@ -1005,6 +1027,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @DebugRemoveUltimateAbilityCooldown => m_Wrapper.m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
         /// <summary>
+        /// Provides access to the underlying input action "PlayerInputActions/OpenMap".
+        /// </summary>
+        public InputAction @OpenMap => m_Wrapper.m_PlayerInputActions_OpenMap;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
@@ -1078,6 +1104,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugRemoveUltimateAbilityCooldown.started += instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.performed += instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.canceled += instance.OnDebugRemoveUltimateAbilityCooldown;
+            @OpenMap.started += instance.OnOpenMap;
+            @OpenMap.performed += instance.OnOpenMap;
+            @OpenMap.canceled += instance.OnOpenMap;
         }
 
         /// <summary>
@@ -1137,6 +1166,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugRemoveUltimateAbilityCooldown.started -= instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.performed -= instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.canceled -= instance.OnDebugRemoveUltimateAbilityCooldown;
+            @OpenMap.started -= instance.OnOpenMap;
+            @OpenMap.performed -= instance.OnOpenMap;
+            @OpenMap.canceled -= instance.OnOpenMap;
         }
 
         /// <summary>
@@ -1495,6 +1527,13 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDebugRemoveUltimateAbilityCooldown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "OpenMap" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenMap(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MenuInputActions" which allows adding and removing callbacks.
