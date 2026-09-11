@@ -134,7 +134,8 @@ namespace FastAndFractured.Multiplayer
         /// how "Obstacles" (never a layer in this project) hid the fact that Static was missing -
         /// and Static carries most of the map, so bullets and mines fell straight through the world.
         /// </summary>
-        private static int GetCollisionMaskForLayer(int layer)
+        // Public for the regression test: this is the invariant that "Obstacles" broke.
+        public static int GetCollisionMaskForLayer(int layer)
         {
             if (layer < 0 || layer > 31) layer = 0;
             if (!_collisionMaskByLayerCached[layer])
