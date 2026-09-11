@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using FishNet;
-using FishNet.Managing.Timing;
 using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
@@ -13,16 +11,30 @@ namespace FastAndFractured.Multiplayer
     /// NetworkedVehicle.ApplyVisualSmoothingForOwnership stops it on purpose, because it did not
     /// converge here - a remote car's Visuals ended up 262 m from its body and kept drifting. See
     /// that method for the measurements. So the car has been drawn straight off the physics
-    /// transform, which only moves on a tick boundary.
+    /// transform, which only moves on a physics-step boundary.
     ///
-    /// Why a buffer and not simple smoothing: measured on the client, the editor renders at ~36 fps
-    /// while the simulation ticks at 50 Hz, so Time.deltaTime (0.028 s) is LONGER than the tick
-    /// (0.02 s). Each frame therefore consumes one or two ticks, alternating, and the car advances
-    /// in a 1x / 2x pattern - the raw per-frame steps read 0.105, 0.233, 0.120, 0.228, 0.098, 0.201.
-    /// Exponential smoothing only halves that ripple; chasing "one tick behind" cannot help at all,
-    /// because with deltaTime above tickDelta the interpolant is already pinned at 1 every frame.
-    /// Rendering a fixed short delay in the past and interpolating between the two tick samples that
-    /// bracket it gives uniform motion whatever the frame rate costs.
+    /// Third revision (2026-09-11), and the one that actually holds up. The first two versions
+    /// keyed samples to FishNet's TimeManager.Tick / GetPreciseTick(), which runs from FishNet's
+    /// own Update()-driven accumulator - a SEPARATE clock from Unity's native fixed-timestep
+    /// accumulator that actually steps physics under this project's PhysicsMode.Unity (deliberate;
+    /// see MultiplayerTimingBootstrap - PhysicsMode.TimeManager re-simulates the whole PhysicsScene
+    /// per replay tick and hard-locks both editors on the physics-heavy maps, so unifying the two
+    /// clocks by moving physics onto FishNet's clock is not an option here). Two independent
+    /// accumulators nominally at the same 50 Hz can still land on opposite sides of their own
+    /// tick-boundary check within the same frame, entirely from normal per-frame timing jitter - no
+    /// drift or precision bug required. Measured live: reading the body's transform inside
+    /// FishNet's OnPostTick produced an EXACT 0.000 m step every 2-3 samples (physics had not
+    /// advanced yet for that "tick" of FishNet's clock), followed by a double-size catch-up - not
+    /// smoothable, because the noise is already in the recorded signal.
+    ///
+    /// The fix is not to reconcile the two clocks but to stop reading FishNet's clock in this file
+    /// at all. A physics-driven transform only ever moves inside Unity's own FixedUpdate, so
+    /// sampling from FixedUpdate cannot race it - there is no "tick with no physics behind it" to
+    /// observe, because FixedUpdate IS the physics step. The render fraction is Unity's own
+    /// textbook fixed-timestep interpolation math ((Time.time - Time.fixedTime) /
+    /// Time.fixedDeltaTime), exactly how Unity's docs describe smoothing a fixed-timestep value for
+    /// rendering - no FishNet involvement, so there is nothing left for two clocks to disagree
+    /// about.
     ///
     /// It cannot drift the way the FishNet smoother did: every frame the pose is rebuilt from the
     /// body's CURRENT transform plus a bounded offset, and anything past teleportDistance snaps.
@@ -33,10 +45,11 @@ namespace FastAndFractured.Multiplayer
     [DefaultExecutionOrder(-150)]
     public class VehicleVisualSmoother : MonoBehaviour
     {
-        [Tooltip("How far in the past to draw, in ticks. Must exceed one rendered frame or there is " +
-                 "nothing to interpolate between; 2 ticks (40 ms at 50 Hz) covers frame rates down " +
-                 "to 25 fps. Raise it if the car still steps, lower it if the car feels detached.")]
-        [SerializeField] private float interpolationTicks = 2f;
+        [Tooltip("How far in the past to draw, in physics steps. Must exceed one rendered frame or " +
+                 "there is nothing to interpolate between; 2 steps (40 ms at the default 0.02s fixed " +
+                 "timestep) covers frame rates down to 25 fps. Raise it if the car still steps, " +
+                 "lower it if the car feels detached.")]
+        [SerializeField] private float interpolationSteps = 2f;
 
         [Tooltip("Jumps larger than this are a teleport (spawn, respawn, reconcile correction) and " +
                  "snap instead of sliding the model across the level.")]
@@ -45,18 +58,17 @@ namespace FastAndFractured.Multiplayer
         private readonly struct Sample
         {
             /// <summary>
-            /// The simulation tick this pose belongs to. Deliberately NOT a Time.unscaledTime
-            /// stamp: FishNet can run several ticks inside one rendered frame, and Unity's clock
-            /// does not advance between them, so wall-clock stamped samples come out with
-            /// identical times and the interpolation between them collapses.
+            /// A local, monotonically increasing physics-step counter - not FishNet's network Tick.
+            /// It only needs to number this component's own FixedUpdate calls consistently; see the
+            /// class doc for why mixing in FishNet's separate clock is exactly what broke this twice.
             /// </summary>
-            public readonly uint Tick;
+            public readonly long Step;
             public readonly Vector3 Position;
             public readonly Quaternion Rotation;
 
-            public Sample(uint tick, Vector3 position, Quaternion rotation)
+            public Sample(long step, Vector3 position, Quaternion rotation)
             {
-                Tick = tick;
+                Step = step;
                 Position = position;
                 Rotation = rotation;
             }
@@ -69,12 +81,7 @@ namespace FastAndFractured.Multiplayer
         private readonly List<Vector3> _authoredLocalPositions = new();
         private readonly List<Quaternion> _authoredLocalRotations = new();
 
-        private TimeManager _timeManager;
-        private bool _subscribed;
-
-        /// <summary>Seconds elapsed since the most recent tick, used for the fractional part of the
-        /// render position between two samples.</summary>
-        private float _timeSinceTick;
+        private long _stepCounter;
 
         private void Awake() => CacheChildren();
 
@@ -95,81 +102,69 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        private void OnEnable() => TrySubscribe();
-
         private void OnDisable()
         {
-            if (_subscribed && _timeManager != null) _timeManager.OnPostTick -= OnPostTick;
-            _subscribed = false;
             _samples.Clear();
-            _timeSinceTick = 0f;
             RestoreAuthoredPose();
         }
 
-        private void TrySubscribe()
-        {
-            if (_subscribed) return;
-            _timeManager = InstanceFinder.TimeManager;
-            if (_timeManager == null) return;
-
-            _timeManager.OnPostTick += OnPostTick;
-            _subscribed = true;
-        }
-
-        private void OnPostTick()
+        /// <summary>
+        /// Runs once per REAL physics step, by definition - the whole point. Nothing here can
+        /// observe a step that has not happened yet, unlike reading a network tick callback that
+        /// fires from a different clock than the one that actually moves the Rigidbody.
+        /// </summary>
+        private void FixedUpdate()
         {
             if (_samples.Count == BufferSize) _samples.RemoveAt(0);
-            _samples.Add(new Sample(_timeManager.Tick, transform.position, transform.rotation));
-            _timeSinceTick = 0f;
+            _samples.Add(new Sample(_stepCounter, transform.position, transform.rotation));
+            _stepCounter++;
         }
 
         private void LateUpdate()
         {
-            if (!_subscribed)
-            {
-                TrySubscribe();
-                return;
-            }
-
             if (_children.Count == 0 || _samples.Count < 2) return;
 
-            _timeSinceTick += Time.deltaTime;
-
-            float tickDelta = (float)_timeManager.TickDelta;
-            // Position on the tick timeline, in ticks: the newest sample, plus however far into the
-            // current tick we are, minus the delay we deliberately render behind.
-            float renderTime = _samples[_samples.Count - 1].Tick
-                               + Mathf.Clamp01(_timeSinceTick / tickDelta)
-                               - interpolationTicks;
+            // Unity's own fixed-timestep interpolation fraction - how far past the last FixedUpdate
+            // "now" is, as a fraction of one physics step. Native to Unity, so there is no second
+            // clock for it to disagree with.
+            float frac = Mathf.Clamp01((float)((Time.timeAsDouble - Time.fixedTimeAsDouble) / Time.fixedDeltaTime));
+            float renderTime = _samples[_samples.Count - 1].Step + frac - interpolationSteps;
 
             if (!TryEvaluate(renderTime, out Vector3 position, out Quaternion rotation)) return;
 
-            Vector3 bodyPosition = transform.position;
-            Quaternion bodyRotation = transform.rotation;
-
-            if ((position - bodyPosition).sqrMagnitude > teleportDistance * teleportDistance)
+            if ((position - transform.position).sqrMagnitude > teleportDistance * teleportDistance)
             {
                 _samples.Clear();
-                _timeSinceTick = 0f;
                 RestoreAuthoredPose();
                 return;
             }
 
-            // Rebuild each child from its authored local pose, then apply the body-to-render-pose
-            // correction as one rigid transform about the body origin. Starting from the authored
-            // pose every frame is what keeps this from accumulating error.
-            Quaternion deltaRotation = rotation * Quaternion.Inverse(bodyRotation);
-            Vector3 deltaPosition = position - bodyPosition;
-
+            // Children are composed directly from the SMOOTHED body pose - not the live one - so
+            // any sudden jump in the body's own transform gets absorbed by the interpolation delay
+            // instead of passing straight through.
+            //
+            // The first version anchored to transform.position/rotation (read fresh every frame)
+            // and only smoothed the offset from it, which is correct as long as the body's raw
+            // motion is merely choppy in time, never wrong in value - true for ordinary tick
+            // stepping, but not for a resimulation artifact: a real client that has to replay
+            // several ticks after a reconcile queues each tick's forces via
+            // PredictionRigidbody.Simulate() (AddForce/MovePosition), and under this project's
+            // PhysicsMode.Unity nothing steps physics between those replayed ticks (FishNet only
+            // does that under PhysicsMode.TimeManager, ruled out elsewhere - it hard-locks the
+            // editor on physics-heavy maps AND stops Unity calling FixedUpdate at all, which this
+            // whole component depends on - tested live, both true). So several ticks' worth of
+            // force get integrated as one merged step, and the body can end up somewhere visibly
+            // wrong for a frame. Anchoring to the live body position let that artifact bypass the
+            // smoothing entirely; composing from the smoothed pose instead means it gets absorbed
+            // like any other body-level discontinuity, whatever caused it.
             for (int i = 0; i < _children.Count; i++)
             {
                 Transform child = _children[i];
                 if (child == null) continue;
 
-                child.SetLocalPositionAndRotation(_authoredLocalPositions[i], _authoredLocalRotations[i]);
                 child.SetPositionAndRotation(
-                    bodyPosition + deltaRotation * (child.position - bodyPosition) + deltaPosition,
-                    deltaRotation * child.rotation);
+                    position + rotation * _authoredLocalPositions[i],
+                    rotation * _authoredLocalRotations[i]);
             }
         }
 
@@ -184,7 +179,7 @@ namespace FastAndFractured.Multiplayer
             rotation = default;
 
             Sample newest = _samples[_samples.Count - 1];
-            if (renderTime >= newest.Tick)
+            if (renderTime >= newest.Step)
             {
                 // Rendering has fallen behind the buffer; drawing the newest sample is the same as
                 // doing nothing, which is correct - there is nothing newer to interpolate toward.
@@ -193,16 +188,16 @@ namespace FastAndFractured.Multiplayer
                 return true;
             }
 
-            if (renderTime <= _samples[0].Tick) return false;
+            if (renderTime <= _samples[0].Step) return false;
 
             for (int i = _samples.Count - 1; i > 0; i--)
             {
                 Sample to = _samples[i];
                 Sample from = _samples[i - 1];
-                if (renderTime < from.Tick) continue;
+                if (renderTime < from.Step) continue;
 
-                float span = to.Tick - from.Tick;
-                float t = span > Mathf.Epsilon ? Mathf.Clamp01((renderTime - from.Tick) / span) : 1f;
+                float span = to.Step - from.Step;
+                float t = span > Mathf.Epsilon ? Mathf.Clamp01((renderTime - from.Step) / span) : 1f;
                 position = Vector3.Lerp(from.Position, to.Position, t);
                 rotation = Quaternion.Slerp(from.Rotation, to.Rotation, t);
                 return true;
