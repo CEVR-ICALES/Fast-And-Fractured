@@ -40,10 +40,42 @@ namespace FastAndFractured.Multiplayer.Testing
 
         private static Runner _runner;
 
+        // Off by default: this samples the input chain and camera every frame of every real match.
+        // Flip it on (Tools > Fast And Fractured > Diagnostics) only while actively hunting a
+        // regression of the two bugs it was built for - push-shoot/ulti not firing on the host, or
+        // the client camera trembling. Both are root-caused and fixed as of this writing.
+#if UNITY_EDITOR
+        private const string EnabledPrefsKey = "FastAndFractured.Multiplayer.MpAutoRecorder.Enabled";
+
+        public static bool IsEnabled
+        {
+            get => UnityEditor.EditorPrefs.GetBool(EnabledPrefsKey, false);
+            set => UnityEditor.EditorPrefs.SetBool(EnabledPrefsKey, value);
+        }
+
+        private const string MenuPath = "Tools/Fast And Fractured/Diagnostics/Mp Auto Recorder (Enabled)";
+
+        [UnityEditor.MenuItem(MenuPath)]
+        private static void ToggleEnabled()
+        {
+            IsEnabled = !IsEnabled;
+        }
+
+        [UnityEditor.MenuItem(MenuPath, true)]
+        private static bool ToggleEnabledValidate()
+        {
+            UnityEditor.Menu.SetChecked(MenuPath, IsEnabled);
+            return true;
+        }
+#else
+        public static bool IsEnabled => false;
+#endif
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
             if (_runner != null) return;
+            if (!IsEnabled) return;
             var go = new GameObject("[MpAutoRecorder]");
             Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
