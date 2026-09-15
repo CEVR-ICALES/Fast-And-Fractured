@@ -428,6 +428,16 @@ the car itself will find your own test component instead and "restore" the wrong
 - If the host editor OOM-crashes, `CreateLobbyAsync` silently fails to start the server afterwards.
   Workaround: `tp.SetPort(7777); nm.ServerManager.StartConnection();` then
   `nm.ClientManager.StartConnection()` (this is now just the direct-connect recipe above).
+- **Do not rapid-fire reconnect/rematch cycles within the same play session to "test more."** Doing
+  5 connect→match→(die or disconnect)→reconnect cycles in a few minutes on a fresh port each time
+  (2026-09-16) produced dozens of `Object Id [N] already exists within ObjectId Cache` errors and one
+  instant, wrong `YOU WON!` resolution - FishNet's spawned-object ID cache from an earlier
+  cycle was still warm when the next one started spawning, inside the SAME Unity process. This is
+  a testing-methodology artifact, not a gameplay bug: no real player session does this. If a
+  connect/match cycle produces `ObjectId Cache` errors or a suspiciously instant win/loss, that is
+  the signature - `manage_editor stop` (a full stop, not just tearing down the FishNet connection)
+  before the next cycle, and treat what happened during the contaminated cycle as unverified, not as
+  a new bug to chase.
 
 ### Driving a match from MCP — UI-click recipe (older, more fragile, kept for reference)
 ```
