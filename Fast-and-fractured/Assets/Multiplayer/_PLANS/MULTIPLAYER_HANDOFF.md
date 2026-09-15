@@ -225,6 +225,59 @@ verified until someone has. If it still judders after this: check whether turret
 its own `LateUpdate`) runs after `VehicleVisualSmoother`'s (`[DefaultExecutionOrder(-150)]`) and
 overwrites its correction — that's the next suspect, untested.
 
+### BUG-1B — Client-only vehicle tremble / "se mueve solo" / excessive speed — FIXED 2026-09-16
+
+A second, unrelated tremble from BUG-1: BUG-1 was the camera/visual layer never touching the
+physics body. This one is the physics body itself, on the OWNED car, client-side only. Three
+real bugs stacked on top of each other; each was found live, with data, not by theorizing from
+the transform.
+
+1. **`IsMovingDecision` had no hysteresis.** `PhysicsBehaviour.IsVehicleMoving()` was
+   `_currentSpeed > isMovingThreshold` (0.5 m/s on every car prefab), and that SAME decision asset
+   is wired on both `PlayerIdleState` (exit when true) and `GroundedState` (exit when false).
+   Ordinary physics noise at rest (gravity settling, reconcile corrections) measured 0.2-0.5 m/s of
+   swing - enough to cross that one line constantly. Confirmed in `mp_canary.log` across many
+   sessions, independent of networking: dozens of `Grounded<->Idle` transitions per second. Only
+   `GroundedState`'s `ApplyMovementAction` applies motor torque, so every Idle flicker was one tick
+   of zero throttle - a real stutter, not just a label flapping. **Fix:** `PhysicsBehaviour` now
+   remembers its last result and requires crossing the OPPOSITE side of a +-0.25 dead band to flip
+   (`PhysicsBehaviour.cs`, `MovingHysteresisHalfWidth`). Singleplayer-side, but a genuine bug fixed
+   under the "SP may be touched for tests" rule's spirit - it affects singleplayer too, MP just
+   surfaces it more because of bug 2 below.
+2. **`PhysicsMode.TimeManager` causes a live catch-up spiral on this project - do not retry without
+   a plan for it.** Tried today on the theory that FishNet's own hard, unconditional reconcile (its
+   Rigidbody prediction demo, `Assets/FishNet/Demos/Prediction/Rigidbody`) only looks smooth because
+   that mode resimulates physics once per REPLAYED tick, converging the trajectory back to what was
+   already predicted. Confirmed live instead: WheelCollider RPM climbed past 130,000 and kept
+   climbing (motor torque re-applied and re-simulated every replayed tick, saturating the tire's
+   slip curve into pure wheelspin instead of ground force), while `Time.fixedTime` fell 12+ seconds
+   behind `Time.realtimeSinceStartup` and did not recover. FishNet bounds the incoming state queue
+   (`PredictionManager.RemoveExcessiveStates`) but nothing bounds how many ticks one reconcile's own
+   replay loop will run - unbounded here because of WheelCollider tire physics plus
+   construction-site colliders. **Reverted to `PhysicsMode.Unity`** (`MultiplayerTimingBootstrap.cs`);
+   confirmed RPM recovered from 137,000 to 594 within seconds of switching back.
+3. **The soft-reconcile layer that PhysicsMode.Unity needs went through two buggy designs before
+   landing on a third, deliberately minimal one.** See `NetworkedVehicle.cs`'s own comment above
+   `ApplyServerPose` for the full history (a per-tick pose history caused an 8-teleport burst in
+   150ms; a retroactive history rewrite on top of that caused a second, separate runaway). Current
+   version compares the server's report against the CURRENT body state (accepting round-trip error
+   as noise, which is fine at normal speed) and skips the velocity correction specifically while a
+   dash is in flight (`DashTicksRemaining > 0`), since that is the one case where "now" vs "the
+   server's slightly-stale report" reads as a large false error. No per-tick history, no retroactive
+   rewrites - less code, and everything that broke the first two versions cannot happen here because
+   there is no persistent state for a later reconcile to trip over.
+
+**Verified live** via an automated drive+dash+idle harness (see the new MCP recipe in §6) across
+three separate rounds on `NetworkedConstructionMap`: jitter index 7.5-16.8 (worst sessions before
+today measured 300-400+), owned-car `body/transform` mean 0.002-0.007 m (previously up to several
+METRES with `<-- TWO WRITERS FIGHTING`), reconcile corrections mean 0.17-0.66 cm at ~45/s. No
+teleport bursts across several minutes of combined automated driving on both peers. The remote
+(non-owned, spectated) car occasionally still flags one isolated large `body/transform` sample in a
+long window (mean stays tiny, ~0.01-0.05 m) - that looks like FishNet's correct hard-teleport path
+doing its job after the other peer moved a real distance between reconciles, not the old bug
+pattern (which had a sustained high mean, not an isolated spike). Not re-chased; flag if it turns
+into a sustained mean again.
+
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
 
@@ -307,7 +360,76 @@ so **use `return`**, and **fully qualify types**. Known quirks: `System.Action` 
 and `FastAndFractured.Controller` do not resolve — go through reflection; `nm.PredictionManager` is
 inaccessible — use `FindFirstObjectByType`.
 
-### Driving a match from MCP — this recipe works
+### Driving a match from MCP — direct-connect recipe (2026-09-16, preferred)
+
+Skips Steam, the lobby UI, and every flaky button below entirely. Bypasses
+`LobbyServiceLocator`/`SteamLobbyTransport` (the Steam-lobby layer) by talking straight to the
+`Tugboat` transport that FishNet's `TransportManager` actually wraps underneath it — Steam lobby
+creation was the one step in this whole flow that proved flaky/slow enough to be worth skipping for
+automated testing (see the `AskFeedbackDialog` gotcha below for the *other* thing that made Steam's
+layer look broken when it wasn't).
+
+```
+HOST : manage_editor play
+       var nm = FishNet.InstanceFinder.NetworkManager;
+       var tugboat = nm.TransportManager.Transport as FishNet.Transporting.Tugboat.Tugboat;
+       tugboat.SetPort(7779); nm.ServerManager.StartConnection(); nm.ClientManager.StartConnection();
+
+CLONE: manage_editor play
+       var tugboat = nm.TransportManager.Transport as FishNet.Transporting.Tugboat.Tugboat;
+       tugboat.SetClientAddress("127.0.0.1"); tugboat.SetPort(7779);
+       nm.ClientManager.StartConnection();
+
+HOST : var lobby = FindFirstObjectByType(typeof(NetworkedLobbyManager));  // via reflection, see below
+       // ServerSelectCharacter(string, NetworkConnection) and ServerSetReady(bool, NetworkConnection)
+       // are public but need an explicit NetworkConnection per player - loop nm.ServerManager.Clients
+       // and call both for each. Then force the match start directly instead of waiting on the
+       // ready/countdown wiring (which did not fire reliably from a reflection-set SyncDictionary):
+       var startInternal = lobbyType.GetMethod("StartGameInternal", NonPublic | Instance);
+       startInternal.Invoke(lobby, null);
+       // wait ~10s for the map-vote slot animation + FishNet's LoadGlobalScenes
+```
+
+All types not directly resolvable from `execute_code` (`NetworkedLobbyManager`,
+`NetworkedVehicle`, `NetworkInputProvider`, ...) — go through
+`System.Type.GetType("FastAndFractured.Multiplayer.X, Assembly-CSharp")` + reflection, same as the
+existing MCP quirks note above.
+
+**Driving a car once spawned, without a human:** swap the owned car's `InputProvider` for a fresh
+`NetworkInputProvider` (`gameObject.AddComponent`, `_localProvider` stays null so it reads whatever
+you feed `SetNetworkInput(VehicleInputData)` directly — `MoveInput`, `AccelerateInput`,
+`HandbrakeInput`, `DashInput`), same technique `NetworkedVehicle.Replicate` already uses for
+observed players. **Restore control afterward**, or the real player's input is silently ignored:
+`Destroy` the added component, then call `NetworkedVehicle.ApplyInputProviderLocally()` (public) to
+re-find and re-wire the REAL provider, which lives on the car's PARENT, not the car itself
+(`GetComponentInParent<NetworkInputProvider>()` in that method — a same-session `GetComponent` on
+the car itself will find your own test component instead and "restore" the wrong one).
+
+**Gotchas that cost hours:**
+- **`ParrelSync`'s `AskFeedbackDialog` fires a BLOCKING modal (`EditorUtility.DisplayDialogComplex`)
+  after ~20 domain reloads in a session** (`Assets/ParrelSync/Editor/NonCore/AskFeedbackDialog.cs`).
+  A modal dialog stops the Editor's main thread cold — MCP calls time out, `mp_canary.log`'s
+  heartbeat stops, and it looks exactly like a hang or a `PhysicsMode.TimeManager`-style spiral. A
+  session with many recompiles (any active bugfixing session) WILL cross this. Disable it once,
+  permanently, on every instance you'll drive from MCP:
+  `EditorPrefs.SetBool("ParrelSync_StopShowFeedBack", true)`.
+- Check `transport.GetConnectionState(true)`, not just `InstanceFinder.IsServerStarted`.
+- **A leftover server on the same port is not released between matches** — stop the previous play
+  session (`manage_editor stop`) or pick a different port before reconnecting.
+- Any blocking MCP call freezes Unity's main thread, so held keys / sustained input via the real
+  Input System releases mid-call. Use the `NetworkInputProvider` swap above instead — it is a plain
+  field write, not a held key, so it survives blocking calls on either side.
+- **Never `Stop-Process` an editor in Play Mode** — the next launch hangs for minutes on "Recovering
+  Scene Backups". Use `manage_editor stop`, then restart. If a hard restart is unavoidable (a real
+  hang, not the `AskFeedbackDialog` one above), get the exact exe + project path first:
+  `System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName` /
+  `Application.dataPath` from the SAME instance while it still responds, since you cannot ask a
+  hung one.
+- If the host editor OOM-crashes, `CreateLobbyAsync` silently fails to start the server afterwards.
+  Workaround: `tp.SetPort(7777); nm.ServerManager.StartConnection();` then
+  `nm.ClientManager.StartConnection()` (this is now just the direct-connect recipe above).
+
+### Driving a match from MCP — UI-click recipe (older, more fragile, kept for reference)
 ```
 HOST : play → McpTestDriver.GoToScreen("MULTIPLAYER_HOST_SETUP") → ClickButton("StartButton")
 CLONE: play → McpTestDriver.GoToScreen("MULTIPLAYER_BROWSER") → "JoinButton" → "ReadyButton"
@@ -315,22 +437,10 @@ HOST : ClickButton("ForceStartButton")
 wait for scene=Networked in the clone's canary
 ```
 `McpTestDriver` (`Assets/Multiplayer/Testing/`) exposes `GoToScreen`, `ClickButton`, `ListButtons`,
-`HoldKey`, `TapKey`, `ReleaseAllKeys`, `HoldMouseButton`, `Snapshot`, `GetLocalCarState`.
-
-**Gotchas that cost hours:**
-- The host `StartButton` is flaky — a stuck `_busy=true` on `MultiplayerHostSetupController` from a
-  previous click blocks it. Reflect it, set `_busy=false`, invoke private `OnStartClicked()`.
-- Check `transport.GetConnectionState(true)`, not just `InstanceFinder.IsServerStarted`.
-- **Port 7777 is not released between matches** — a leftover clone server gives the host a Bind
-  exception. Stop the clone's play mode first.
-- `HoldKey` uses `WaitForSecondsRealtime`, and any blocking MCP call freezes Unity's main thread, so
-  keys release during your own blocking calls. For sustained input, set
-  `PlayerInputController._moveInput` by reflection instead.
-- **Never `Stop-Process` an editor in Play Mode** — the next launch hangs for minutes on "Recovering
-  Scene Backups". Use `manage_editor stop`, then restart.
-- If the host editor OOM-crashes, `CreateLobbyAsync` silently fails to start the server afterwards.
-  Workaround: `tp.SetPort(7777); nm.ServerManager.StartConnection();` then
-  `nm.ClientManager.StartConnection()`.
+`HoldKey`, `TapKey`, `ReleaseAllKeys`, `HoldMouseButton`, `Snapshot`, `GetLocalCarState`. The host
+`StartButton` was also flaky in this recipe — a stuck `_busy=true` on
+`MultiplayerHostSetupController` from a previous click blocks it; reflect it, set `_busy=false`,
+invoke private `OnStartClicked()`.
 
 ### Instrumentation already in the repo
 - **`MpCanary`** — lightweight in-game log file, safe to read while a match runs.
