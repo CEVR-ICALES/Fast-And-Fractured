@@ -47,22 +47,15 @@ namespace FastAndFractured.Multiplayer
             public bool DriftIsBackwards;
             public float LinearDamping;
 
-            // Whether the SP state machine considers this car flipped. Not previously reconciled,
-            // which let the two peers disagree forever: GetCarToNormalAction (SP) runs off the
-            // local per-peer state machine and applies a strong upward AddForceAtPosition impulse
-            // whenever ITS OWN flip detection says so, entirely outside Replicate/Reconcile - so a
-            // client that locally (and wrongly) decides it is flipped launches only its own copy,
-            // the server's stays put, and nothing about that impulse was ever synced state for a
-            // later reconcile to catch. GuardFalseFlipImpulse (this file) already clears the flag
-            // when grounded/stationary/upright at the START of a tick, but that only helps if the
-            // bad reading happens to appear before the guard runs - a false positive appearing
-            // right after a reconcile snap can still get through, and once IsFlipped sticks, the
-            // SP state machine stays in FlippedState and retries the impulse every 0.5s, which is
-            // consistent with a client-only car launching many meters straight up while the host
-            // sees the same car sitting on the ground the whole time (measured live, 2026-09-11).
-            // Reconciling it the same way as IsDrifting/DashTicksRemaining lets the server's
-            // opinion win within one reconcile interval instead of never.
-            public bool IsFlipped;
+            // World-space snapshot of the server's rigidbody, read straight off the Rigidbody in
+            // CreateReconcile. Used by the owner's soft reconcile instead of
+            // PredictionRigidbody.RigidbodyState, which round-trips in LOCAL space - comparing that
+            // directly against a world-space value was the root cause of the 2026-09-11 levitation
+            // bug. Keeping a separate, unambiguous world-space copy avoids that trap entirely.
+            public Vector3 WorldPosition;
+            public Quaternion WorldRotation;
+            public Vector3 WorldVelocity;
+            public Vector3 WorldAngularVelocity;
 
             public ReconcileData(PredictionRigidbody prb,float speed)
             {
@@ -78,7 +71,10 @@ namespace FastAndFractured.Multiplayer
                 InitialSpeedWhenDrifting = 0f;
                 DriftIsBackwards = false;
                 LinearDamping = 0.08f;
-                IsFlipped = false;
+                WorldPosition = Vector3.zero;
+                WorldRotation = Quaternion.identity;
+                WorldVelocity = Vector3.zero;
+                WorldAngularVelocity = Vector3.zero;
             }
 
             private uint _tick;
@@ -316,12 +312,39 @@ namespace FastAndFractured.Multiplayer
         //     cars never reconcile — so it is a property of the CLIENT peer, not of ownership.
         //   * Rigidbody interpolation, which is None everywhere (see ApplyVisualSmoothingForOwnership).
         //
-        // A Physics.SyncTransforms() hook on OnPostReconcile was tried here and REMOVED: it syncs
-        // Transform -> physics engine, the opposite of the direction needed, so at best it does
-        // nothing and at worst it pushes the stale Transform back over the reconciled body pose.
+        // CORRECTION (2026-09-12). The paragraph that used to sit here said a Physics.SyncTransforms()
+        // hook was removed because it syncs "Transform -> physics engine, the opposite of the
+        // direction needed". That reasoning was backwards, and the open question it posed -
+        // "find what writes the Transform without the Rigidbody following" - now has an answer:
         //
-        // Still needed: find what writes the Transform without the Rigidbody following, by sampling
-        // both in FixedUpdate and in LateUpdate around one of the 25 cm jumps.
+        //   FishNet's RigidbodyState.SetState writes t.localPosition/t.localRotation plus the
+        //   velocities. It never writes rb.position. So the Transform IS the thing being written,
+        //   and Transform -> physics engine is exactly the direction a sync would need to go.
+        //
+        // FishNet normally does that sync itself, but PredictionManager.cs gates it:
+        //     bool timeManagerPhysics = tm.PhysicsMode == PhysicsMode.TimeManager;   // ~line 662
+        //     if (timeManagerPhysics) { ... Physics.SyncTransforms(); ... }          // ~line 670
+        // This project runs PhysicsMode.Unity, so that sync is skipped every reconcile.
+        //
+        // Do NOT conclude from that that adding Physics.SyncTransforms() here is the fix. It was
+        // considered and rejected on 2026-09-12 for two measured reasons:
+        //   * Unity syncs transforms at the start of every physics step anyway, so the physics
+        //     simulation itself already runs from the corrected pose. Only reads taken between the
+        //     reconcile and the next FixedUpdate see the stale pose.
+        //   * It would NOT fix the grounded flicker. SyncTransforms pushes poses into PhysX; it does
+        //     not re-run WheelCollider suspension queries, and WheelController reads
+        //     wheelCollider.isGrounded / GetGroundHit(), which only update on a simulation step.
+        //
+        // Also note the "body/transform" figure in NetworkedVehicleDiagnostics is measured in
+        // Update - precisely the window where transform and rb differ BY DESIGN under this
+        // project's autoSyncTransforms=false. Treat a nonzero mean there as expected, not as
+        // evidence of two writers.
+        //
+        // Still open: the client's car oscillates ~8 cm vertically while at rest, sampled in
+        // FixedUpdate (so it is real body motion, not a render artifact), while the state machine
+        // flips Grounded <-> Idle a few times a second. Leading hypothesis is that reconciling
+        // rb.linearVelocity ~40x/s never lets a resting body settle. ReconcileRestDiagnostics
+        // exists to confirm or kill that.
 
 
 
@@ -617,13 +640,19 @@ namespace FastAndFractured.Multiplayer
                 rd.DashTicksRemaining = _dashTicksRemaining;
                 rd.DashDirection = _dashWorldDirection;
                 rd.LinearDamping = adapter.linearDamping;
+
+                Rigidbody rb = adapter.PredictionRigidbody.Rigidbody;
+                rd.WorldPosition = rb.position;
+                rd.WorldRotation = rb.rotation;
+                rd.WorldVelocity = rb.linearVelocity;
+                rd.WorldAngularVelocity = rb.angularVelocity;
+
                 rd.CurrentSteerAngle = ReadFloat(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle);
                 rd.CurrentRbMaxVelocity = ReadFloat(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity);
                 rd.IsDrifting = ReadBool(SingleplayerReflectionCache.CarMovement_IsDrifting);
                 rd.DriftDirection = ReadFloat(SingleplayerReflectionCache.CarMovement_DriftDirection, 1f);
                 rd.InitialSpeedWhenDrifting = ReadFloat(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting);
                 rd.DriftIsBackwards = ReadBool(SingleplayerReflectionCache.CarMovement_DriftIsBackwards);
-                rd.IsFlipped = _coreMovementController != null && _coreMovementController.IsFlipped;
 
                 Reconcile(rd);
             }
@@ -705,6 +734,14 @@ namespace FastAndFractured.Multiplayer
                 // The state machine doesn't re-tick during replays, so its coasting deceleration
                 // (ApplyMovementAction.HandleAutoDeceleration) would be lost from every replayed
                 // tick and the owner would mispredict whenever rolling with no throttle.
+                //
+                // REVERTED (2026-09-15) a same-session attempt to gate this behind "only on a hard
+                // snap": under PhysicsMode.Unity, AddForce during a replayed tick only QUEUES a
+                // force - Unity integrates it at the next real physics step, not synchronously - so
+                // whether the body was rewound this reconcile has no bearing on whether a replayed
+                // tick's forces still need reproducing. Gating it broke coasting deceleration on
+                // almost every replay (soft reconcile is now the common case), which made ALL
+                // movement choppy, not just dash. See TickDeterministicDash for the matching revert.
                 if (isReplaying)
                     ApplyReplayAutoDeceleration(md);
             }
@@ -753,6 +790,10 @@ namespace FastAndFractured.Multiplayer
 
             if (_dashTicksRemaining <= 0) return;
 
+            // REVERTED (2026-09-15, see Replicate for the matching revert and why): re-apply the
+            // impulse on every tick this runs for, live or replayed, regardless of whether this
+            // reconcile happened to be a hard snap. See TickDeterministicDash's class doc: this is
+            // what makes the dash "replay-safe" in the first place.
             _customRigidbody.AddForce(_dashWorldDirection * GetDashForce(), ForceMode.Impulse);
             _dashTicksRemaining--;
 
@@ -820,7 +861,18 @@ namespace FastAndFractured.Multiplayer
             var adapter = _customRigidbody as MultiplayerRigidbodyAdapter;
             if (adapter != null)
             {
-                adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
+                Rigidbody rb = adapter.PredictionRigidbody.Rigidbody;
+
+                // Soft reconcile only for OUR OWN car - see ApplyServerPose's doc for why and for
+                // the two more elaborate designs already tried and abandoned here. A car we don't
+                // own was never locally predicted in the first place (Replicate/Simulate only run
+                // for IsOwner or IsServerInitialized - see TimeManager_OnTick), so there is no local
+                // prediction worth preserving for it; FishNet's own hard reconcile is correct there.
+                if (base.IsOwner)
+                    ApplyServerPose(adapter, rb, rd);
+                else
+                    adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
+
                 adapter.linearDamping = rd.LinearDamping;
 
                 // DO NOT write the Transform from Rigidbody.position here. It looks like it fixes
@@ -830,12 +882,12 @@ namespace FastAndFractured.Multiplayer
                 // note about the removed Physics.SyncTransforms hook).
                 //
                 // Why it breaks: FishNet's RigidbodyState round-trips in LOCAL space -
-                // GetState captures rb.transform.localPosition and SetState (called just above,
-                // inside PredictionRigidbody.Reconcile) writes t.localPosition = state.Position.
-                // With autoSyncTransforms disabled, rb.position still reports the PRE-reconcile
-                // world pose at this point, so writing it back onto the transform reverts the
-                // correction that SetState just applied. Velocity survives (it lives on the
-                // Rigidbody, not the Transform), which is exactly what was measured live on a
+                // GetState captures rb.transform.localPosition and SetState (called inside
+                // PredictionRigidbody.Reconcile, the hard path above) writes t.localPosition =
+                // state.Position. With autoSyncTransforms disabled, rb.position still reports the
+                // PRE-reconcile world pose at this point, so writing it back onto the transform
+                // reverts the correction that SetState just applied. Velocity survives (it lives on
+                // the Rigidbody, not the Transform), which is exactly what was measured live on a
                 // client (2026-09-11): every reconcile reset vy to ~0 while y never moved, so
                 // gravity could never pull the car down and it hung in the air, drifting upward,
                 // hundreds of metres above where the host correctly showed it on the ground.
@@ -853,13 +905,78 @@ namespace FastAndFractured.Multiplayer
             WriteField(SingleplayerReflectionCache.CarMovement_DriftDirection, rd.DriftDirection);
             WriteField(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting, rd.InitialSpeedWhenDrifting);
             WriteField(SingleplayerReflectionCache.CarMovement_DriftIsBackwards, rd.DriftIsBackwards);
+        }
 
-            if (_coreMovementController != null)
+        // --- Soft reconcile (owner only) --------------------------------------------------------
+        //
+        // History, so the mistakes are not repeated a third time:
+        //   1. FishNet's stock hard reconcile (teleport position/rotation, overwrite both
+        //      velocities, every reconcile) is correct under PhysicsMode.TimeManager, where every
+        //      replayed tick re-simulates physics for real and the trajectory converges back to
+        //      what was already predicted. This project cannot use that mode - tried 2026-09-16,
+        //      confirmed a live catch-up spiral (WheelCollider RPM climbing past 130,000, the
+        //      physics clock falling 12+ seconds behind real time and not recovering) - so under
+        //      PhysicsMode.Unity a hard reconcile never converges and trembles constantly.
+        //   2. The first fix compared the server's report for tick T against OUR OWN recorded
+        //      history for tick T (a 64-entry per-tick pose buffer), specifically to avoid baking
+        //      network round-trip time into the measured error. It worked for steady driving but
+        //      broke on bursts: a client that falls behind delivers its backlog as several
+        //      reconciles processed within one frame, and comparing each one against increasingly
+        //      stale history produced 8 real teleports in 150ms - "se mueve solo, se teleporta".
+        //      Complexity kept begetting new bugs (a retroactive history-rewrite step caused a
+        //      SEPARATE runaway before that was even found).
+        //   3. This version deletes the history buffer entirely and compares against the CURRENT
+        //      body state instead ("now" vs the server's slightly-stale report). That reintroduces
+        //      a small amount of round-trip error into ordinary driving, which is fine - it is
+        //      centimetres at normal speed - EXCEPT immediately after a dash, where a real ~10 m/s
+        //      impulse over a ~100-200ms round trip reads as several real m/s of "error" that isn't
+        //      one. Rather than rebuild per-tick history to fix that one case, the velocity
+        //      correction just skips itself while a dash is in flight (DashTicksRemaining > 0) -
+        //      position still gets corrected, and the velocity gap left behind by skipping is
+        //      inherently small once the dash impulse itself finishes and the next few ordinary
+        //      reconciles catch it up at normal driving error magnitude.
+        //
+        // On a host this is a no-op by construction: CreateReconcile reads rd straight off this
+        // same rigidbody moments before Reconcile() runs on it (a direct call, not a network round
+        // trip), so the error is ~0 either way.
+        private const float SnapDistance = 3f;
+        private const float SnapAngleDegrees = 60f;
+        private const float VelocityBlend = 0.15f;
+        private const float RotationBlend = 0.15f;
+        private const float PositionBlend = 0.15f;
+
+        private void ApplyServerPose(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd)
+        {
+            Vector3 positionError = rd.WorldPosition - rb.position;
+            float angleError = Quaternion.Angle(rb.rotation, rd.WorldRotation);
+
+            if (positionError.sqrMagnitude > SnapDistance * SnapDistance || angleError > SnapAngleDegrees)
             {
-                _coreMovementController.IsFlipped = rd.IsFlipped;
-                if (!rd.IsFlipped)
-                    _coreMovementController.StopFlippedTimer();
+                // Real desync (dropped connection, respawn, teleport pad): FishNet's hard path.
+                adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
+                return;
             }
+
+            // FishNet's Reconcile() would have returned this pooled object to the cache; on the
+            // soft path we must do it ourselves or one PredictionRigidbody leaks per reconcile.
+            if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
+                GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
+
+            if (rb.isKinematic)
+                return;
+
+            // See the class doc above: comparing "now" against the server's slightly-stale report
+            // over-corrects specifically during a dash impulse, so the velocity blend sits out
+            // while one is in flight. Position correction is unaffected - a dash's positional error
+            // stays small over one round trip regardless of the speed involved.
+            if (rd.DashTicksRemaining <= 0 && _dashTicksRemaining <= 0)
+            {
+                rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, rd.WorldVelocity, VelocityBlend);
+                rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, rd.WorldAngularVelocity, VelocityBlend);
+            }
+
+            rb.rotation = Quaternion.Slerp(rb.rotation, rd.WorldRotation, RotationBlend);
+            rb.position += positionError * PositionBlend;
         }
 
         /// <summary>
