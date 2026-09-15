@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Unity.Cinemachine;
+using Unity.Cinemachine.Editor;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -28,8 +29,11 @@ namespace FastAndFractured
         [SerializeField]
         private ScreenShakeProfile defaultProfile;
         private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
-        // [SerializeField]
-        // private CinemachineImpulseChannels _cinemachineImpulseChanels;
+         [SerializeField]
+         private CinemachineImpulseChannels _cinemachineImpulseChanels;
+
+        private const int LAYER_COMMON = 1;
+        private const int INIT_CHARACTER_COUNT = 1;
         protected override void Initialize()
         {
             base.Initialize();
@@ -169,6 +173,13 @@ namespace FastAndFractured
             cinemachineImpulseListener.ReactionSettings.AmplitudeGain = defaultProfile.listenerAmplitude;
             cinemachineImpulseListener.ReactionSettings.FrequencyGain = defaultProfile.listenerFrequency;
             cinemachineImpulseListener.ReactionSettings.Duration = defaultProfile.listenerDuration;
+        }
+
+        public void SetLocalCinemachineImpulseListener(int characterCount)
+        {
+            int layerPosition =  characterCount + INIT_CHARACTER_COUNT;
+            int newLayer = LAYER_COMMON << layerPosition;
+            localCinemachineImpulseListener.ChannelMask = newLayer;
         }
         #endregion
     }
