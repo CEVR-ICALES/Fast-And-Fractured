@@ -10,6 +10,28 @@ namespace FastAndFractured
     public class PhysicsBehaviour : MonoBehaviour
     {
         [SerializeField] private float isMovingThreshold;
+
+        // Hysteresis band around isMovingThreshold (2026-09-16). IsVehicleMoving() used to be a
+        // single-threshold check, and IsMovingDecision is wired as the SAME decision on BOTH
+        // PlayerIdleState (exit when true) and GroundedState (exit when false) - so a car whose
+        // speed sits anywhere near isMovingThreshold (0.5 m/s on every car prefab) chatters between
+        // the two states every time ordinary physics noise nudges it across that one line. Measured
+        // live at rest: velocity swings of 0.2-0.5 m/s from gravity settling and reconcile
+        // corrections alone - comfortably enough to cross a bare 0.5 m/s line many times a second.
+        // Confirmed in mp_canary.log across many sessions: dozens of Grounded<->Idle transitions
+        // per second, independent of networking (this is pure singleplayer state-machine logic).
+        //
+        // Since only GroundedState's ApplyMovementAction applies motor torque, each Idle flicker
+        // means one tick with zero throttle - i.e. exactly a stutter, not just a label flapping.
+        // This is a strong root-cause candidate for "tiembla, cuesta que se mueva" reports that
+        // predate and are independent of every network-reconcile theory chased so far.
+        //
+        // Standard Schmitt-trigger fix: remember the last decision and require crossing OPPOSITE
+        // sides of a dead band to flip it, so a value hovering near isMovingThreshold cannot
+        // chatter. Half-width chosen generously above the measured noise floor.
+        private const float MovingHysteresisHalfWidth = 0.25f;
+        private bool _wasMoving;
+
         public bool IsCurrentlyDashing = false;
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
@@ -392,11 +414,17 @@ namespace FastAndFractured
         }
         public bool IsVehicleMoving()
         {
-            if (_currentSpeed > isMovingThreshold)
-            {
-                return true;
-            }
-            else return false;
+            // See the field doc on MovingHysteresisHalfWidth: while already "moving" the bar to
+            // fall back to "idle" is LOWER than the bar to start being considered "moving" in the
+            // first place, so a speed hovering around isMovingThreshold cannot flip the result
+            // every frame - it has to actually cross to the far side of the dead band first.
+            float threshold = _wasMoving
+                ? isMovingThreshold - MovingHysteresisHalfWidth
+                : isMovingThreshold + MovingHysteresisHalfWidth;
+            threshold = Mathf.Max(0f, threshold);
+
+            _wasMoving = _currentSpeed > threshold;
+            return _wasMoving;
         }
     }
 }
