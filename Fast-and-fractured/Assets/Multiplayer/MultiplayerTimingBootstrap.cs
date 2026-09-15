@@ -16,11 +16,33 @@ namespace FastAndFractured.Multiplayer
     /// the same cadence as singleplayer physics, so per-tick forces (state machine, dash,
     /// deceleration) integrate like they do in singleplayer.
     ///
-    /// This project deliberately uses PhysicsMode.Unity. FishNet's TimeManager mode re-simulates
-    /// the entire map PhysicsScene for every replay tick; on these physics-heavy maps a single
-    /// long frame creates a catch-up spiral which hard-locks both editors. Vehicles still use
-    /// owner input prediction plus server reconcile, while projectiles and ability objects use
-    /// deterministic per-tick simulation and FishNet Pro predicted spawning.
+    /// PhysicsMode.Unity (reverted 2026-09-16 back from a same-day PhysicsMode.TimeManager
+    /// experiment; see git history for that attempt's changes to NetworkedVehicle.Reconcile).
+    ///
+    /// TimeManager mode was tried because FishNet's own Rigidbody prediction demo
+    /// (Assets/FishNet/Demos/Prediction/Rigidbody) reconciles with a plain, unconditional
+    /// PredictionRigidbody.Reconcile() - no blending, no history - which only looks smooth because
+    /// TimeManager mode calls TimeManager.SimulatePhysics() once per REPLAYED tick, so the body
+    /// teleports to the server's tick and then the same sequence of forces that already ran gets
+    /// re-applied WITH a real physics step between each one, converging the trajectory back to
+    /// nearly what was already being shown.
+    ///
+    /// CONFIRMED LIVE (2026-09-16) exactly the catch-up spiral this class previously only warned
+    /// about in a comment: with TimeManager mode active, driving produced a WheelCollider spinning
+    /// at 120,000-136,000 RPM and climbing - motor torque re-applied and re-simulated on every
+    /// replayed tick, converting into wheel rotation instead of ground force once the tire's slip
+    /// curve saturates, not vehicle motion - while Time.fixedTime fell 12+ seconds behind
+    /// Time.realtimeSinceStartup and kept falling further behind. Every replayed tick that resimulates
+    /// the whole PhysicsScene costs real time; a client that has fallen behind replays a bigger
+    /// backlog, which costs more time, which falls further behind - unbounded on this project's
+    /// maps (WheelCollider tire physics plus construction-site colliders). FishNet bounds the
+    /// incoming STATE queue (PredictionManager.RemoveExcessiveStates) but not how many ticks one
+    /// reconcile's replay loop itself will run, so nothing stopped this from compounding.
+    ///
+    /// Back on PhysicsMode.Unity, replayed ticks queue forces onto Unity's own independent
+    /// FixedUpdate schedule instead of re-simulating, so a hard, unconditional reconcile does not
+    /// converge and needs a soft correction in NetworkedVehicle.Reconcile - see that method's notes
+    /// for the current approach and for the more elaborate ones already tried and abandoned.
     /// </summary>
     public static class MultiplayerTimingBootstrap
     {
