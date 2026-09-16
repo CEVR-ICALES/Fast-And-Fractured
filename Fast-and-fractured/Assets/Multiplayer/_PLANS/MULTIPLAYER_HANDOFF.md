@@ -447,7 +447,24 @@ whether a REAL keypress reached the right instance, only whether the states LOOK
 recorded as a precise, actionable lead rather than shipped blind.
 
 ### BUG-3 — Match HUD timer shows 00:00
-Not investigated. Likely the `TimerSystem`-based match timer never starts on the MP path.
+**Actually already investigated - just never recorded here.** Found while re-reading
+`NetworkedLevelControllerWrapper.cs` for unrelated reasons (2026-09-16): the on-screen timer this
+game shows is almost certainly `GameLoopManager`'s storm/zone countdown (`_callStormTimer`,
+`GameLoopManager.cs`) - a battle-royale-style "time until the zone starts closing" clock, not a
+separate match-duration timer. `GameLoopManager.SetupStorm()` only creates that timer when
+`_sandStormController != null`, and **every MP match logs
+`"_sandStormController is null. Cannot set up storm."`** (confirmed live, every single match played
+this session) - so the timer backing the HUD display never starts, which reads exactly as "shows
+00:00". Root cause and a full paper trail already exist as a code comment at
+`NetworkedLevelControllerWrapper.cs:755-762` (`AssignListOfCharactersDataIfNeeded`, right after the
+`ListOfCharactersData` binding): **binding the map's `SandstormController` was already tried and
+made things WORSE** - the networked maps' `SandstormController` has its own unassigned
+`sphereCenter` field, so `SetupStorm()` then threw `UnassignedReferenceException` and **aborted
+match start entirely**, a strictly worse regression than today's cosmetic 00:00. The comment
+concludes the real fix needs **the networked map scenes regenerated with that reference wired** -
+squarely "the tool's" job per this project's standing rule (networked maps are tool-generated, never
+hand-edited), not a runtime code fix. **Do not re-attempt binding `_sandStormController` from
+code** - it has already been tried and reverted for a documented reason.
 
 ### BUG-4 — Stray "Josefino" TMP dropdown floating in the game view
 Debug UI leaking from a selector. Cosmetic, trivially visible, cheap.
