@@ -743,7 +743,28 @@ namespace FastAndFractured.Multiplayer
                 // almost every replay (soft reconcile is now the common case), which made ALL
                 // movement choppy, not just dash. See TickDeterministicDash for the matching revert.
                 if (isReplaying)
+                {
                     ApplyReplayAutoDeceleration(md);
+
+                    // ROOT CAUSE of the remaining runaway-speed reports after the reconcile rewrite
+                    // (2026-09-16, found via a live dash under NetworkedVehicleDiagnostics): the call
+                    // to ProcessMovementInput() above runs CarMovementController.HandleDashWithPhysics()
+                    // whenever the input provider still reports IsDashing - a level signal, true for as
+                    // long as the button is held (PlayerInputController sets it on .performed, clears on
+                    // .canceled). HandleDashWithPhysics only re-enters while its own _isDashing flag is
+                    // false, but that flag is owned by CarMovementController's TimerSystem timer, which
+                    // finishes on WALL-CLOCK time. A reconcile replay can revisit a tick whose real-time
+                    // equivalent has since elapsed, so _isDashing can already read false there even
+                    // though our own per-tick counter (_dashTicksRemaining) still has the dash in
+                    // flight - and HandleDashWithPhysics silently starts a SECOND SP dash: a fresh
+                    // frame-rate-driven TimerSystem timer stacking its own AddForce on top of the one
+                    // TickDeterministicDash already applies once per tick. Measured live: dashTicks
+                    // desynced to 56 local vs 28 server and rb speed spiked to 126 m/s mid-dash, not
+                    // from reconcile itself but from this second impulse source. Stop any such timer the
+                    // instant it appears - our per-tick counter already owns the rest of this dash.
+                    if (_dashTicksRemaining > 0)
+                        StopSpDashTimer();
+                }
             }
 
             TickDeterministicDash(isReplaying);
@@ -822,16 +843,26 @@ namespace FastAndFractured.Multiplayer
         {
             // Kill the frame-rate-dependent impulse timer before TimerSystem ever updates it
             // (we are inside the same call stack that created it).
-            var timerField = SingleplayerReflectionCache.CarMovement_DashTimer;
-            var timer = timerField?.GetValue(_coreMovementController) as ITimer;
-            if (timer != null && TimerSystem.Instance != null && TimerSystem.Instance.HasTimer(timer))
-                TimerSystem.Instance.StopTimer(timer.GetData().ID);
+            StopSpDashTimer();
 
             var stats = _physicsBehaviour != null ? _physicsBehaviour.StatsController : null;
             float dashTime = stats != null ? stats.DashTime : 0.5f;
 
             _dashWorldDirection = transform.forward.normalized;
             _dashTicksRemaining = Mathf.Max(1, Mathf.RoundToInt(dashTime * base.TimeManager.TickRate));
+        }
+
+        /// <summary>
+        /// Stops CarMovementController's own dash TimerSystem timer, if one is currently running.
+        /// Safe to call every tick: HasTimer is false once a timer has already been stopped, so this
+        /// is a no-op except the ticks where a fresh timer actually exists.
+        /// </summary>
+        private void StopSpDashTimer()
+        {
+            var timerField = SingleplayerReflectionCache.CarMovement_DashTimer;
+            var timer = timerField?.GetValue(_coreMovementController) as ITimer;
+            if (timer != null && TimerSystem.Instance != null && TimerSystem.Instance.HasTimer(timer))
+                TimerSystem.Instance.StopTimer(timer.GetData().ID);
         }
 
         private float GetDashForce()
@@ -858,6 +889,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (IsServerInitialized && !IsHostInitialized)
                 return;
+            bool restoreGameplayState = !base.IsOwner; // non-owned cars always follow the server; see below
             var adapter = _customRigidbody as MultiplayerRigidbodyAdapter;
             if (adapter != null)
             {
@@ -869,7 +901,7 @@ namespace FastAndFractured.Multiplayer
                 // for IsOwner or IsServerInitialized - see TimeManager_OnTick), so there is no local
                 // prediction worth preserving for it; FishNet's own hard reconcile is correct there.
                 if (base.IsOwner)
-                    ApplyServerPose(adapter, rb, rd);
+                    restoreGameplayState = ApplyServerPose(adapter, rb, rd);
                 else
                     adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
 
@@ -893,18 +925,33 @@ namespace FastAndFractured.Multiplayer
                 // hundreds of metres above where the host correctly showed it on the ground.
 
             }
-            _physicsBehaviour.CurrentSpeed = rd.Speed;
 
             // Restore the gameplay state that drives forces on subsequent ticks so the replay
             // (and the live ticks after it) start from the server's exact vehicle state.
-            _dashTicksRemaining = rd.DashTicksRemaining;
-            _dashWorldDirection = rd.DashDirection;
-            WriteField(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle, rd.CurrentSteerAngle);
-            WriteField(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity, rd.CurrentRbMaxVelocity);
-            WriteField(SingleplayerReflectionCache.CarMovement_IsDrifting, rd.IsDrifting);
-            WriteField(SingleplayerReflectionCache.CarMovement_DriftDirection, rd.DriftDirection);
-            WriteField(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting, rd.InitialSpeedWhenDrifting);
-            WriteField(SingleplayerReflectionCache.CarMovement_DriftIsBackwards, rd.DriftIsBackwards);
+            //
+            // ONLY when the body itself was actually rewound (a hard snap, or this is a non-owned
+            // car with no local prediction to begin with) - NOT on every soft reconcile. This used
+            // to run unconditionally, and it is what was actually causing "se mueve solo, tiembla,
+            // velocidad desmedida" during a dash (2026-09-16): rd.DashTicksRemaining is the SERVER's
+            // count as of a round-trip-OLD tick, always somewhat BEHIND the client's own count.
+            // Overwriting the client's live, correctly-decrementing counter with that stale, larger
+            // value every reconcile (~45/s) meant TickDeterministicDash kept re-entering ticks it
+            // had already dashed through and applying their AddForce(Impulse) again - not once per
+            // burst, but on every single reconcile for the whole dash. Measured live: WheelCollider-
+            // driven car speed climbing to 197 m/s against a server-reported ~40 m/s. The physics
+            // body was never wrong here; this gameplay-state block was quietly re-driving it.
+            if (restoreGameplayState)
+            {
+                _physicsBehaviour.CurrentSpeed = rd.Speed;
+                _dashTicksRemaining = rd.DashTicksRemaining;
+                _dashWorldDirection = rd.DashDirection;
+                WriteField(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle, rd.CurrentSteerAngle);
+                WriteField(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity, rd.CurrentRbMaxVelocity);
+                WriteField(SingleplayerReflectionCache.CarMovement_IsDrifting, rd.IsDrifting);
+                WriteField(SingleplayerReflectionCache.CarMovement_DriftDirection, rd.DriftDirection);
+                WriteField(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting, rd.InitialSpeedWhenDrifting);
+                WriteField(SingleplayerReflectionCache.CarMovement_DriftIsBackwards, rd.DriftIsBackwards);
+            }
         }
 
         // --- Soft reconcile (owner only) --------------------------------------------------------
@@ -945,7 +992,8 @@ namespace FastAndFractured.Multiplayer
         private const float RotationBlend = 0.15f;
         private const float PositionBlend = 0.15f;
 
-        private void ApplyServerPose(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd)
+        /// <summary>Returns true if a hard snap (real rewind) happened - see the call site for why that matters.</summary>
+        private bool ApplyServerPose(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd)
         {
             Vector3 positionError = rd.WorldPosition - rb.position;
             float angleError = Quaternion.Angle(rb.rotation, rd.WorldRotation);
@@ -954,7 +1002,7 @@ namespace FastAndFractured.Multiplayer
             {
                 // Real desync (dropped connection, respawn, teleport pad): FishNet's hard path.
                 adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
-                return;
+                return true;
             }
 
             // FishNet's Reconcile() would have returned this pooled object to the cache; on the
@@ -963,7 +1011,7 @@ namespace FastAndFractured.Multiplayer
                 GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
 
             if (rb.isKinematic)
-                return;
+                return false;
 
             // See the class doc above: comparing "now" against the server's slightly-stale report
             // over-corrects specifically during a dash impulse, so the velocity blend sits out
@@ -977,6 +1025,7 @@ namespace FastAndFractured.Multiplayer
 
             rb.rotation = Quaternion.Slerp(rb.rotation, rd.WorldRotation, RotationBlend);
             rb.position += positionError * PositionBlend;
+            return false;
         }
 
         /// <summary>
