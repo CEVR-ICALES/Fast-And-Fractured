@@ -349,6 +349,25 @@ into a sustained mean again.
    restart attempts during this session, each time ending the match before a sample could be taken.
    Unrelated to this fix; just restart again when it happens, per standing guidance.
 
+5. **Not yet approved by the user - do not call any of the above "fixed" in conversation with them
+   until they've verified it themselves.** Continued unattended soak-testing after the three fixes
+   above (dash-timer-replay, gated reconcile restore, `IsVehicleMoving` cooldown) turned up one more
+   data point worth recording honestly rather than smoothing over: **sustained full-lock steering +
+   full throttle for 25+ seconds continuously** (both cars circling in tight loops, not normal
+   driving) produced a worse sample than every other test today - owned-car jitter index 89.96, one
+   18.5 m single-frame jump, `body/transform` max 20 m (`TWO WRITERS FIGHTING`), and for the first
+   time this session the REMOTE (non-owned, spectated) car also flagged it, not just the owned one.
+   Checked from the HOST's own perspective during the exact same window: clean (jitter 7.39, zero
+   `body/transform` gap on either car) - consistent with the established pattern that this class of
+   symptom is a CLIENT-side prediction artifact, never visible on the host. Switching immediately
+   back to straight driving on the same client, same session, dropped every number back to the
+   healthy range within one sample (jitter 0.08, reconcile mean 0.01 cm). Read together: this looks
+   like a real but narrow edge case in continuous hard-lock cornering, not a regression in today's
+   three fixes and not the reported trembling (which was reproduced and fixed under ordinary driving
+   and dashing) - but it has not been chased to a root cause, and "one client editor hang + relaunch
+   happened earlier in this same test window" is a live confound that has not been ruled out either.
+   Flag for the user; do not present as understood or fixed.
+
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
 
