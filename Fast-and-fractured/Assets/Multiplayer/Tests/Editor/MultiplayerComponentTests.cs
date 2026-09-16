@@ -666,5 +666,59 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         #endregion
+
+        #region BUG-4 — Stray debug character-select dropdown
+
+        /// <summary>
+        /// BUG-4 (2026-09-16): a leftover DebugCharacterSelector "Dropdown" GameObject shipped
+        /// active on the networked player prefab, floating visibly in every match, because nothing
+        /// ever hid it once character selection was done. Confirmed live by inspecting a real match.
+        /// Fixed by NetworkedLevelControllerWrapper.HideDebugCharacterSelectorDropdowns(), which -
+        /// unlike the ownership-gated remote-canvas/HUD/camera passes it runs alongside - hides every
+        /// instance, not just remote ones (the debug selector's job is done in the lobby, before this
+        /// runs, regardless of who owns it). This test drives the real method against real
+        /// GameObjects instead of just checking it exists, so a future edit that narrows the
+        /// FindObjectsByType filter or re-adds an ownership check fails loudly.
+        /// </summary>
+        [Test]
+        public void HideDebugCharacterSelectorDropdowns_DeactivatesEveryInstance()
+        {
+            var wrapperObject = new GameObject("NetworkedLevelControllerWrapper under test");
+            var localDropdown = new GameObject("Dropdown (local player)");
+            var remoteDropdown = new GameObject("Dropdown (remote player, already inactive)");
+
+            try
+            {
+                var wrapper = wrapperObject.AddComponent<NetworkedLevelControllerWrapper>();
+                localDropdown.AddComponent<DebugCharacterSelector>();
+                remoteDropdown.AddComponent<DebugCharacterSelector>();
+                remoteDropdown.SetActive(false);
+
+                Assert.IsTrue(localDropdown.activeSelf, "Test setup should start with the dropdown active");
+
+                var method = typeof(NetworkedLevelControllerWrapper).GetMethod(
+                    "HideDebugCharacterSelectorDropdowns", BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.IsNotNull(method,
+                    "HideDebugCharacterSelectorDropdowns renamed or removed? BUG-4 will come back - " +
+                    "update this test alongside whatever replaced it.");
+
+                method.Invoke(wrapper, null);
+
+                Assert.IsFalse(localDropdown.activeSelf,
+                    "BUG-4 regression: the debug dropdown must be hidden even though it's on the LOCAL " +
+                    "player's own object - this pass has nothing to do with ownership, unlike the " +
+                    "canvas/HUD/camera passes it runs alongside.");
+                Assert.IsFalse(remoteDropdown.activeSelf,
+                    "An already-inactive dropdown must stay inactive, not throw or get re-activated.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(wrapperObject);
+                Object.DestroyImmediate(localDropdown);
+                Object.DestroyImmediate(remoteDropdown);
+            }
+        }
+
+        #endregion
     }
 }
