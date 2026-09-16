@@ -388,6 +388,13 @@ into a sustained mean again.
    still not something to describe to the user as understood or resolved - but no longer suspected
    of being a testing artifact either.
 
+   **Additional soak sample, same night:** 74s continuous mixed driving (moderate turning both
+   directions + one dash mid-session, `NetworkedConstructionMap`) survived the whole window without
+   dying (no spawn-death this run) - owned-car jitter 29.76, no `TWO WRITERS FIGHTING` flag,
+   `body/transform` mean 0.017 m (in line with the 0.02 m healthy reference), reconcile mean 1.69 cm
+   at 47/s. Ordinary mixed driving over more than a minute, including a dash, stays healthy; the
+   elevated numbers above are specific to sustained FULL-LOCK cornering, not driving in general.
+
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
 
