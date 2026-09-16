@@ -306,6 +306,29 @@ elsewhere. Do not re-derive this theory from scratch.
 showing whether the host's keypress reaches `PlayerInputProvider` and whether the toggle count is
 even, then fix what it shows.
 
+**Mechanism found live, 2026-09-16 (not yet fixed - needs a real second keyboard to verify):**
+`PlayerInputController` is instantiated PER CAR (confirmed live: exactly 2 live instances in a
+2-player match, one per `NetworkedPlayer` root), not once per scene as its `AbstractSingleton<T>`
+base assumes. `AbstractSingleton<T>.HandleDuplicate()` resolves the collision by construction
+ORDER ONLY - whichever instance's `Construct()` ran first stays `enabled`, the second is disabled -
+with **zero awareness of ownership**. In the live match checked, the surviving (enabled) instance
+happened to belong to the connection whose car spawned first, which happened to be the local
+player - so push shoot/ultimate worked in that specific test purely by luck of spawn order, not
+because the mechanism is correct. Confirms the earlier "even toggle count" theory was diagnosing a
+symptom of the SAME root class of bug already found and fixed elsewhere in this project (the
+host-HUD bug, the camera-rig bug): an SP singleton's generic conflict-resolution logic has no
+concept of "which one is ME" once two copies exist in one process, same as `AbstractSingleton<T>`
+here.
+
+The general fix (matching this project's own established rule: fail-safe on ownership) would be
+making `HandleDuplicate()` - or a caller of `ClaimSingletonOwnership()` - prefer the instance whose
+GameObject hierarchy has an owned `NetworkObject`, instead of first-constructed-wins. NOT attempted
+tonight: `AbstractSingleton<T>` is shared base infrastructure used by many singletons across the
+whole project (SP included), and this class of fix cannot be verified without a genuine second
+keyboard/player driving a live match - a synthetic/reflection-driven input test cannot tell you
+whether a REAL keypress reached the right instance, only whether the states LOOK plausible. Per R4,
+recorded as a precise, actionable lead rather than shipped blind.
+
 ### BUG-3 — Match HUD timer shows 00:00
 Not investigated. Likely the `TimerSystem`-based match timer never starts on the MP path.
 
