@@ -232,18 +232,32 @@ physics body. This one is the physics body itself, on the OWNED car, client-side
 real bugs stacked on top of each other; each was found live, with data, not by theorizing from
 the transform.
 
-1. **`IsMovingDecision` had no hysteresis.** `PhysicsBehaviour.IsVehicleMoving()` was
-   `_currentSpeed > isMovingThreshold` (0.5 m/s on every car prefab), and that SAME decision asset
-   is wired on both `PlayerIdleState` (exit when true) and `GroundedState` (exit when false).
-   Ordinary physics noise at rest (gravity settling, reconcile corrections) measured 0.2-0.5 m/s of
-   swing - enough to cross that one line constantly. Confirmed in `mp_canary.log` across many
-   sessions, independent of networking: dozens of `Grounded<->Idle` transitions per second. Only
-   `GroundedState`'s `ApplyMovementAction` applies motor torque, so every Idle flicker was one tick
-   of zero throttle - a real stutter, not just a label flapping. **Fix:** `PhysicsBehaviour` now
-   remembers its last result and requires crossing the OPPOSITE side of a +-0.25 dead band to flip
-   (`PhysicsBehaviour.cs`, `MovingHysteresisHalfWidth`). Singleplayer-side, but a genuine bug fixed
-   under the "SP may be touched for tests" rule's spirit - it affects singleplayer too, MP just
-   surfaces it more because of bug 2 below.
+1. **`IsMovingDecision` had no hysteresis - and once that was fixed, a dead band alone still
+   wasn't enough.** `PhysicsBehaviour.IsVehicleMoving()` was `_currentSpeed > isMovingThreshold`
+   (0.5 m/s on every car prefab), and that SAME decision asset is wired on both `PlayerIdleState`
+   (exit when true) and `GroundedState` (exit when false). Ordinary physics noise at rest (gravity
+   settling, reconcile corrections) measured 0.2-0.5 m/s of swing - enough to cross that one line
+   constantly. Confirmed in `mp_canary.log` across many sessions, independent of networking: dozens
+   of `Grounded<->Idle` transitions per second. Only `GroundedState`'s `ApplyMovementAction` applies
+   motor torque, so every Idle flicker was one tick of zero throttle - a real stutter, not just a
+   label flapping. **First fix:** `PhysicsBehaviour` remembers its last result and requires crossing
+   the OPPOSITE side of a +-0.25 dead band to flip (`MovingHysteresisHalfWidth`). Singleplayer-side,
+   but a genuine bug fixed under the "SP may be touched for tests" rule's spirit - it affects
+   singleplayer too, MP just surfaces it more because of bug 2 below.
+   **The user then confirmed live, playing a real match on `NetworkedMountainVillageMap`, that it
+   still trembled after that fix shipped.** Watched `mp_canary.log` update in real time during their
+   actual session: `Grounded<->Idle` was STILL flapping every 20-100ms continuously, the whole time.
+   A pure hysteresis band cannot help when the real speed doesn't just spike across the line once
+   but DWELLS right at one edge of the band for a while (easing off the throttle, climbing a slope
+   near stall speed) - a value sitting exactly on the boundary with a little noise still crosses it
+   repeatedly. **Second fix:** added a debounce on top of the dead band - `_movingFlipStreak` must
+   reach `MovingDebounceTicks` (5) consecutive calls agreeing with the candidate new value before
+   `IsVehicleMoving()` actually flips `_wasMoving`, resetting to 0 the instant the candidate goes
+   back in line with the current value. ~100ms in MP (50Hz tick), a handful of frames in SP.
+   **Verified live**, same map, same reproduction (a deliberately weak/near-threshold throttle to
+   force the car to dwell near the line): transitions went from continuous sub-100ms flapping to a
+   natural ~0.1-1.2s cadence, and a clean full-throttle sample right after read jitter index **0.45**
+   (previous healthy baseline was 7.5-16.8) with direction flips at 0.6%.
 2. **`PhysicsMode.TimeManager` causes a live catch-up spiral on this project - do not retry without
    a plan for it.** Tried today on the theory that FishNet's own hard, unconditional reconcile (its
    Rigidbody prediction demo, `Assets/FishNet/Demos/Prediction/Rigidbody`) only looks smooth because
@@ -277,6 +291,53 @@ long window (mean stays tiny, ~0.01-0.05 m) - that looks like FishNet's correct 
 doing its job after the other peer moved a real distance between reconciles, not the old bug
 pattern (which had a sustained high mean, not an isolated spike). Not re-chased; flag if it turns
 into a sustained mean again.
+
+4. **The real player report that came back after all of the above ("menos tembleque pero sigue
+   habiendo") had two more, separate causes - both in `NetworkedVehicle.cs`, found live with a
+   real dash under `NetworkedVehicleDiagnostics`, not by theorizing:**
+
+   a. **`Reconcile()` was overwriting the client's own gameplay state (`_dashTicksRemaining`,
+      steer angle, drift state, etc.) from the server's round-trip-stale report on EVERY reconcile,
+      including the ordinary soft path.** `TickDeterministicDash` decrements `_dashTicksRemaining`
+      once per tick and expects to own that countdown; a soft reconcile stomping it back to the
+      server's older value every ~22ms meant a dash's impulse count kept getting re-topped-up
+      mid-dash, measured live at speeds up to 197 m/s vs the server's ~40 m/s. **Fix:** gameplay
+      state restoration is now gated behind `restoreGameplayState` (`Reconcile()`), true only for
+      non-owned cars (which always follow the server) or when `ApplyServerPose` reports a genuine
+      hard snap happened (`ApplyServerPose` now returns `bool`) - an ordinary soft correction no
+      longer touches it.
+   b. **A second, independent source of the same symptom: `ProcessMovementInput()` (SP) can
+      re-trigger `HandleDashWithPhysics()` during a REPLAYED tick.** `HandleDashWithPhysics` only
+      re-enters while SP's own `_isDashing` is false, but that flag is owned by a `TimerSystem`
+      timer that finishes on WALL-CLOCK time. A reconcile replay revisits ticks whose real-time
+      equivalent has already elapsed, so `_isDashing` can read false there even though the MP
+      driver's own per-tick counter (`_dashTicksRemaining`) still has the dash in flight -
+      `HandleDashWithPhysics` then silently starts a SECOND, frame-rate-driven `TimerSystem` timer
+      that stacks its own `AddForce` on top of the one `TickDeterministicDash` already applies once
+      per tick. This is what actually produced the 126 m/s spike measured live (dashTicks desynced
+      to 56 local vs 28 server at the moment of the spike) - the reconcile hard-snap that followed
+      was a symptom of this, not the cause. **Fix:** extracted `OnSpDashStarted`'s "stop the SP
+      timer" logic into `StopSpDashTimer()`, now also called every replayed tick while
+      `_dashTicksRemaining > 0`, right after `ProcessMovementInput()` - safe to call every tick
+      since `TimerSystem.HasTimer` is false once a timer is already stopped, so it only does real
+      work the (rare) ticks a rogue timer actually appears.
+
+   **Verified live (2026-09-16):** replayed the exact scenario that produced the 126 m/s spike - a
+   2-second HELD dash button (not a tap) from a standstill, the worst case since
+   `PlayerInputController` reports dash as a level signal (`.performed`/`.canceled`), not an edge,
+   so a real player CAN hold it. Post-fix: ends at ~0 m/s (car came to rest against golf-map
+   geometry, not a runaway), zero `HARD SNAP`s during the dash, and a clean 9s steady-state sample
+   right after read reconcile corrections at **mean 0.04 cm, largest 0.05 cm** (down from the
+   pre-fix session's mean 1.39 cm / largest 35.88 cm measured earlier the same night, itself already
+   down from the original bug). Two shorter, more realistic dash taps (~100-120 ms, matching an
+   actual button press) both landed at sane speeds (13.91 m/s, 22.56 m/s) with no hard snaps either.
+   The temporary `MpCanary.Mark("HARD SNAP ...")` instrumentation added to find this has been
+   removed now that the cause is confirmed.
+
+   **Testing note:** verifying this required restarting the match many times - the pre-existing
+   "someone can die right at spawn" issue (see the gotcha in §6) hit on more than half of the
+   restart attempts during this session, each time ending the match before a sample could be taken.
+   Unrelated to this fix; just restart again when it happens, per standing guidance.
 
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
@@ -461,6 +522,18 @@ the car itself will find your own test component instead and "restore" the wrong
   the signature - `manage_editor stop` (a full stop, not just tearing down the FishNet connection)
   before the next cycle, and treat what happened during the contaminated cycle as unverified, not as
   a new bug to chase.
+- **A player can die right at spawn, before doing anything.** Confirmed by the user as a known,
+  pre-existing, separate issue - not something to investigate, just restart the match
+  (`[NetworkedStatsController] ... killed by Unknown` seconds after spawn, in `mp_canary.log` or the
+  console). Hit repeatedly during this session's testing (more than half of ~8 restart attempts on
+  2026-09-16). One restart in this session also showed a `NullReferenceException` at
+  `MultiplayerPauseGate.cs:56` immediately after a new match's scene loaded, preceded by "Some
+  objects were not cleaned up when closing the scene ... PauseManager" - a leftover `PauseManager`
+  singleton surviving match teardown into the next match's init. Same root-cause class as BUG-2's
+  `AbstractSingleton<T>` construction-order note above (not the same singleton, but the same
+  base-class mechanism). Not fixed - noted here in case it turns out to be a contributor to the
+  spawn-death issue rather than a coincidence; needs its own live investigation to confirm either
+  way.
 
 ### Driving a match from MCP — UI-click recipe (older, more fragile, kept for reference)
 ```
