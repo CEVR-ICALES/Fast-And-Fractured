@@ -32,6 +32,15 @@ namespace FastAndFractured
         private const float MovingHysteresisHalfWidth = 0.25f;
         private bool _wasMoving;
 
+        // See IsVehicleMoving()'s debounce comment. This is measured in calls to this method, not
+        // wall-clock time: ~100ms in multiplayer (50Hz network tick, Assets/Multiplayer/
+        // MultiplayerTimingBootstrap.cs) and roughly one to a few frames in singleplayer (Update-
+        // driven). Either way it is long enough that ordinary per-tick noise, or a speed dwelling
+        // right on the hysteresis edge, cannot sustain a false crossing, while a real start/stop
+        // still lands within a handful of calls.
+        private const int MovingDebounceTicks = 5;
+        private int _movingFlipStreak;
+
         public bool IsCurrentlyDashing = false;
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
@@ -423,7 +432,28 @@ namespace FastAndFractured
                 : isMovingThreshold + MovingHysteresisHalfWidth;
             threshold = Mathf.Max(0f, threshold);
 
-            _wasMoving = _currentSpeed > threshold;
+            // DEBOUNCE (2026-09-16): the hysteresis band alone was not enough. Confirmed live in a
+            // real match on NetworkedMountainVillageMap (mp_canary.log): Grounded<->Idle kept
+            // flapping every 20-100ms for the whole session even with the dead band above, because
+            // real driving speed can DWELL right at one edge of that band for a while (climbing a
+            // slope, easing off the throttle) rather than just noise flicking past it once - and a
+            // pure hysteresis band has no defense against a value that lingers exactly on its edge.
+            // Require MovingDebounceTicks consecutive ticks in agreement before actually flipping,
+            // so a genuine transition (starts driving / really stops) still lands within ~100ms,
+            // but a value dithering on the edge for a handful of ticks at a time cannot.
+            bool candidateMoving = _currentSpeed > threshold;
+            if (candidateMoving == _wasMoving)
+            {
+                _movingFlipStreak = 0;
+                return _wasMoving;
+            }
+
+            _movingFlipStreak++;
+            if (_movingFlipStreak < MovingDebounceTicks)
+                return _wasMoving;
+
+            _movingFlipStreak = 0;
+            _wasMoving = candidateMoving;
             return _wasMoving;
         }
     }
