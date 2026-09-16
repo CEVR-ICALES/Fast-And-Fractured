@@ -368,6 +368,26 @@ into a sustained mean again.
    happened earlier in this same test window" is a live confound that has not been ruled out either.
    Flag for the user; do not present as understood or fixed.
 
+   **Follow-up (same night): the confound is ruled out - the effect is real and reproduces
+   cleanly.** Repeated the identical scenario (full-lock steering + full throttle, ~25s continuous,
+   `NetworkedGolfMap` this time) in a fresh session with no editor instability anywhere near the
+   test window. Elevated jitter reproduced again (71.74, same order of magnitude as the 89.96
+   above) - but this run did NOT reproduce the 18-20 m single-frame spike or the
+   `TWO WRITERS FIGHTING` flag; `body/transform` stayed under the 1 m flag threshold (mean 0.036 m,
+   max 0.169 m). Reconcile corrections were also visibly larger than any straight-line sample today
+   (mean 3.70 cm, largest 17.16 cm) but at a notably LOWER rate (16/s vs the usual ~45/s) alongside a
+   lower frame rate (23 fps vs the usual ~38 fps) during the same window - hard cornering may simply
+   be more CPU/physics-expensive here (more collision checks, tire slip curve evaluation), which
+   would explain both numbers without implicating prediction correctness. Current best read: hard,
+   continuous cornering genuinely diverges more between client prediction and server ground truth
+   than straight driving (tire slip under lateral load is intrinsically harder to predict exactly),
+   so elevated jitter and reconcile magnitude during sustained full-lock turns may simply be the
+   REAL, expected cost of predicting a harder physics case - not a bug - while the occasional large
+   spike/flag is closer to the already-documented "isolated hard-teleport, not a sustained pattern"
+   category from item 3 above. Still not root-caused to the level of a specific line of code, and
+   still not something to describe to the user as understood or resolved - but no longer suspected
+   of being a testing artifact either.
+
 ### BUG-2 — Host cannot use push shoot or ultimate
 Host only. The client can use both. Driving and normal shoot work on the host.
 
