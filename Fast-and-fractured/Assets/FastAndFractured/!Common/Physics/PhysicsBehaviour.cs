@@ -35,11 +35,19 @@ namespace FastAndFractured
         // See IsVehicleMoving()'s debounce comment. This is measured in calls to this method, not
         // wall-clock time: ~100ms in multiplayer (50Hz network tick, Assets/Multiplayer/
         // MultiplayerTimingBootstrap.cs) and roughly one to a few frames in singleplayer (Update-
-        // driven). Either way it is long enough that ordinary per-tick noise, or a speed dwelling
-        // right on the hysteresis edge, cannot sustain a false crossing, while a real start/stop
-        // still lands within a handful of calls.
+        // driven).
+        //
+        // CORRECTED (same day): the first version of this required MovingDebounceTicks CONSECUTIVE
+        // calls to agree with the new value before flipping - a confirmation filter. A unit test
+        // added right after caught what live testing had not: that design delays EVERY transition
+        // by the full window, including a clean, one-time "starts moving from a dead stop" - i.e.
+        // it added a real ~100ms of input lag to normal driving, not just to noise. Switched to a
+        // cooldown instead: a flip is allowed to happen immediately, but then blocks any FURTHER
+        // flip for MovingDebounceTicks calls. A genuine transition still lands on the very next
+        // call (zero added lag); a value dithering on the hysteresis edge is capped at one flip per
+        // window instead of chattering every call.
         private const int MovingDebounceTicks = 5;
-        private int _movingFlipStreak;
+        private int _ticksSinceLastFlip = MovingDebounceTicks;
 
         public bool IsCurrentlyDashing = false;
         public bool HasBeenPushed { get => _hasBeenPushed; }
@@ -432,28 +440,24 @@ namespace FastAndFractured
                 : isMovingThreshold + MovingHysteresisHalfWidth;
             threshold = Mathf.Max(0f, threshold);
 
-            // DEBOUNCE (2026-09-16): the hysteresis band alone was not enough. Confirmed live in a
+            // COOLDOWN (2026-09-16): the hysteresis band alone was not enough. Confirmed live in a
             // real match on NetworkedMountainVillageMap (mp_canary.log): Grounded<->Idle kept
             // flapping every 20-100ms for the whole session even with the dead band above, because
             // real driving speed can DWELL right at one edge of that band for a while (climbing a
             // slope, easing off the throttle) rather than just noise flicking past it once - and a
             // pure hysteresis band has no defense against a value that lingers exactly on its edge.
-            // Require MovingDebounceTicks consecutive ticks in agreement before actually flipping,
-            // so a genuine transition (starts driving / really stops) still lands within ~100ms,
-            // but a value dithering on the edge for a handful of ticks at a time cannot.
+            // See the field doc on _ticksSinceLastFlip for why this is a cooldown (flip immediately,
+            // then hold) and not a confirmation filter (wait, then flip) - a confirmation filter
+            // delays every transition, including a clean one-time start/stop, by the whole window.
             bool candidateMoving = _currentSpeed > threshold;
-            if (candidateMoving == _wasMoving)
+            _ticksSinceLastFlip++;
+
+            if (candidateMoving != _wasMoving && _ticksSinceLastFlip >= MovingDebounceTicks)
             {
-                _movingFlipStreak = 0;
-                return _wasMoving;
+                _wasMoving = candidateMoving;
+                _ticksSinceLastFlip = 0;
             }
 
-            _movingFlipStreak++;
-            if (_movingFlipStreak < MovingDebounceTicks)
-                return _wasMoving;
-
-            _movingFlipStreak = 0;
-            _wasMoving = candidateMoving;
             return _wasMoving;
         }
     }
