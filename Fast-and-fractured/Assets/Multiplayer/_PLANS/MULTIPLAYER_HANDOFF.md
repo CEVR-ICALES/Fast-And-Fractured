@@ -250,14 +250,24 @@ the transform.
    A pure hysteresis band cannot help when the real speed doesn't just spike across the line once
    but DWELLS right at one edge of the band for a while (easing off the throttle, climbing a slope
    near stall speed) - a value sitting exactly on the boundary with a little noise still crosses it
-   repeatedly. **Second fix:** added a debounce on top of the dead band - `_movingFlipStreak` must
-   reach `MovingDebounceTicks` (5) consecutive calls agreeing with the candidate new value before
-   `IsVehicleMoving()` actually flips `_wasMoving`, resetting to 0 the instant the candidate goes
-   back in line with the current value. ~100ms in MP (50Hz tick), a handful of frames in SP.
-   **Verified live**, same map, same reproduction (a deliberately weak/near-threshold throttle to
-   force the car to dwell near the line): transitions went from continuous sub-100ms flapping to a
-   natural ~0.1-1.2s cadence, and a clean full-throttle sample right after read jitter index **0.45**
-   (previous healthy baseline was 7.5-16.8) with direction flips at 0.6%.
+   repeatedly. **Second fix, first attempt (same day, corrected within the hour):** a CONFIRMATION
+   filter - require `MovingDebounceTicks` (5) consecutive calls agreeing with the candidate value
+   before flipping. Live-verified as working (transitions went from continuous sub-100ms flapping to
+   a natural ~0.1-1.2s cadence, full-throttle jitter index **0.45** vs a 7.5-16.8 healthy baseline) -
+   but a unit test written right after (`VehicleMovingDebounceTests`, added specifically because live
+   testing alone had already been shown this session to miss things) caught that this design delays
+   EVERY transition by the full window, including a clean one-time "starts moving from a dead stop":
+   real added input lag on ordinary driving, not just on noise. **Shipped design: a cooldown
+   instead of a confirmation filter.** `_ticksSinceLastFlip` allows a flip to happen on the very next
+   disagreeing call (zero added lag for a genuine transition), then blocks any FURTHER flip for
+   `MovingDebounceTicks` calls - caps the flap rate instead of delaying every decision.
+   **Verified both ways:** `VehicleMovingDebounceTests` (4 EditMode tests - genuine transitions flip
+   immediately in both directions, edge-dwelling noise is rate-capped, a flip cannot reverse within
+   its own cooldown window) all pass; and live, same map, same reproduction (a deliberately
+   weak/near-threshold throttle to force the car to dwell near the line) as the confirmation-filter
+   version, transitions are similarly sparse (mostly 100ms+, one 36ms outlier against a ~100ms
+   theoretical floor - plausibly two decision evaluations landing in one tick, not a return to the
+   original continuous flapping) instead of the original continuous 20-100ms chatter.
 2. **`PhysicsMode.TimeManager` causes a live catch-up spiral on this project - do not retry without
    a plan for it.** Tried today on the theory that FishNet's own hard, unconditional reconcile (its
    Rigidbody prediction demo, `Assets/FishNet/Demos/Prediction/Rigidbody`) only looks smooth because
@@ -562,7 +572,11 @@ invoke private `OnStartClicked()`.
   `Assets/Multiplayer/Testing/test_results.json`.
 - **Edit-mode tests** in `Assets/Multiplayer/Tests/Editor/`: `NetworkedVehicleSetupTests`,
   `MultiplayerComponentTests`, `MatchDeathTrackerTests`, `MapVoteResolverTests`,
-  `LobbyTransportContractTests`, `AiSlotClampTests`. `Tests/Runtime/` is **empty** — see M1.
+  `LobbyTransportContractTests`, `AiSlotClampTests`, `NetworkedProjectileCollisionMaskTests`,
+  `VehicleMovingDebounceTests` (2026-09-16, pins §4 BUG-1B's `IsVehicleMoving` cooldown).
+  `Tests/Runtime/` has one file so far, `PlayerInputBindingTests` (pins BUG-2's input-leak signature)
+  — still thin relative to what M1 asks for; the FishNet host+fake-client play-mode tests it
+  describes are not written yet.
 
 ---
 
