@@ -93,6 +93,12 @@ namespace FastAndFractured.Multiplayer.Editor
             },
             new HazardDef
             {
+                DisplayName      = "Skin Unlock Pickup",
+                SingleplayerType = typeof(SkinUnlockerInteractable),
+                WrapperType      = typeof(NetworkedSkinUnlockerInteractable),
+            },
+            new HazardDef
+            {
                 DisplayName      = "Sucking Building",
                 SingleplayerType = typeof(SuckingBuilding),
                 WrapperType      = typeof(NetworkedSuckingBuilding),

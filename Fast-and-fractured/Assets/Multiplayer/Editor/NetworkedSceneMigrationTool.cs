@@ -56,6 +56,7 @@ namespace FastAndFractured.Multiplayer.Editor
             // instance, so storms/pickups/buildings desync between host and clients.
             new HazardDef { DisplayName = "Sandstorm",          SingleplayerType = typeof(SandstormController), WrapperType = typeof(NetworkedSandstormController)     },
             new HazardDef { DisplayName = "Stats Boost Pickup", SingleplayerType = typeof(StatsBoostInteractable), WrapperType = typeof(NetworkedStatsBoostInteractable) },
+            new HazardDef { DisplayName = "Skin Unlock Pickup", SingleplayerType = typeof(SkinUnlockerInteractable), WrapperType = typeof(NetworkedSkinUnlockerInteractable) },
             new HazardDef { DisplayName = "Sucking Building",   SingleplayerType = typeof(SuckingBuilding),     WrapperType = typeof(NetworkedSuckingBuilding)         },
             new HazardDef { DisplayName = "Building Dead Zone", SingleplayerType = typeof(BuildingDeadZone),    WrapperType = typeof(NetworkedBuildingDeadZone)        },
         };

@@ -16,6 +16,15 @@ namespace FastAndFractured
         private const string MARIA_ANTONIA_NAME = "Maria";
         [SerializeField] List<GameObject> visuals;
 
+        /// <summary>
+        /// Optional hook for crediting the unlock and showing the toast. Null in singleplayer.
+        /// Multiplayer sets it because OnInteract only ever runs on the server once this component
+        /// is server-authoritative (see NetworkedSkinUnlockerInteractable) - PlayerPrefs.SetInt
+        /// would otherwise write to the SERVER's own save file no matter which player picked the
+        /// item up. Returning true means the hook already credited the unlock and shown the toast.
+        /// </summary>
+        public System.Func<GameObject, bool> InteractionRouter;
+
         public void ChangeVisual(string skinToUnlock)
         {
             DisableAllVisuals();
@@ -60,10 +69,14 @@ namespace FastAndFractured
             {
                 if(statsController.IsPlayer)
                 {
-                    PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                    if (InteractionRouter == null || !InteractionRouter(interactionFrom))
+                    {
+                        PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                        IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
+                        //If the int of player prefs is 5, skin is unlocked
+                    }
                     InteractableHandler.Instance.DestroySkinInteractable(gameObject);
-                    IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
-                    //If the int of player prefs is 5, skin is unlocked
+                    base.OnInteract(interactionFrom, interactionTo);
                 }
             }
         }
