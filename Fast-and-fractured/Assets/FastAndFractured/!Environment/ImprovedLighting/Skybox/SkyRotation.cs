@@ -4,6 +4,8 @@ using UnityEngine.Rendering.HighDefinition;
 
 public class SkyRotation : MonoBehaviour
 {
+    private const float FULL_ROTATION = 360f;
+
     [SerializeField] private float rotationSpeed = 1f;
 
     private PhysicallyBasedSky sky;
@@ -11,12 +13,10 @@ public class SkyRotation : MonoBehaviour
 
     private void Start()
     {
-        // Busca todos los Volumes activos en la escena.
         Volume[] volumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
 
         foreach (Volume volume in volumes)
         {
-            // Solo nos interesan los Volumes activos.
             if (!volume.isActiveAndEnabled)
                 continue;
 
@@ -33,9 +33,7 @@ public class SkyRotation : MonoBehaviour
         }
 
         if (sky == null)
-        {
-            Debug.LogError("SkyRotate: No se ha encontrado un Physically Based Sky activo.");
-        }
+            Debug.LogError("SkyRotation: No active Physically Based Sky was found.");
     }
 
     private void Update()
@@ -45,8 +43,8 @@ public class SkyRotation : MonoBehaviour
 
         rotationY += rotationSpeed * Time.deltaTime;
 
-        if (rotationY >= 360f)
-            rotationY -= 360f;
+        if (rotationY >= FULL_ROTATION)
+            rotationY -= FULL_ROTATION;
 
         Vector3 rotation = sky.spaceRotation.value;
         rotation.y = rotationY;

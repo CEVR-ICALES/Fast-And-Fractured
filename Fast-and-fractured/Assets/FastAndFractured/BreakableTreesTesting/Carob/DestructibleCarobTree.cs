@@ -2,25 +2,25 @@ using UnityEngine;
 
 public class DestructibleCarobTree : MonoBehaviour
 {
+    private const string PLAYER_TAG = "Player";
+
     [SerializeField] private GameObject normalTree;
-    //[SerializeField] private GameObject replacementTree;
+    [SerializeField] private ParticleSystem starEffect;
+    [SerializeField] private ParticleSystem dustInitialEffect;
+    [SerializeField] private ParticleSystem dustEffect;
+    [SerializeField] private ParticleSystem leavesEffect;
+    [SerializeField] private ParticleSystem woodChunksEffect;
+    [SerializeField] private ParticleSystem carobs;
+    [SerializeField] private ParticleSystem branches;
 
-[SerializeField] private ParticleSystem starEffect;
-[SerializeField] private ParticleSystem dustInitialEffect;
-[SerializeField] private ParticleSystem dustEffect;
-[SerializeField] private ParticleSystem leavesEffect;
-[SerializeField] private ParticleSystem woodChunksEffect;
-[SerializeField] private ParticleSystem carobs;
-[SerializeField] private ParticleSystem branches;
-
-    private bool hasSwapped = false;
+    private bool _hasSwapped;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (hasSwapped)
+        if (_hasSwapped)
             return;
 
-        if (!other.CompareTag("Player"))
+        if (!other.CompareTag(PLAYER_TAG))
             return;
 
         SwapTree();
@@ -28,17 +28,23 @@ public class DestructibleCarobTree : MonoBehaviour
 
     private void SwapTree()
     {
-        hasSwapped = true;
+        _hasSwapped = true;
 
-        normalTree.SetActive(false);
-        //replacementTree.SetActive(true);
+        if (normalTree != null)
+            normalTree.SetActive(false);
 
-starEffect.Play();
-dustInitialEffect.Play();
-dustEffect.Play();
-leavesEffect.Play();
-woodChunksEffect.Play();
-carobs.Play();
-branches.Play();
+        PlayEffect(starEffect);
+        PlayEffect(dustInitialEffect);
+        PlayEffect(dustEffect);
+        PlayEffect(leavesEffect);
+        PlayEffect(woodChunksEffect);
+        PlayEffect(carobs);
+        PlayEffect(branches);
+    }
+
+    private static void PlayEffect(ParticleSystem effect)
+    {
+        if (effect != null)
+            effect.Play();
     }
 }
