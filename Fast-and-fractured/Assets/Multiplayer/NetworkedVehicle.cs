@@ -901,9 +901,46 @@ namespace FastAndFractured.Multiplayer
                 // for IsOwner or IsServerInitialized - see TimeManager_OnTick), so there is no local
                 // prediction worth preserving for it; FishNet's own hard reconcile is correct there.
                 if (base.IsOwner)
+                {
                     restoreGameplayState = ApplyServerPose(adapter, rb, rd);
+                }
                 else
-                    adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
+                {
+                    // FIX (2026-09-18): FishNet's own PredictionRigidbody.Reconcile() calls
+                    // Rigidbody.SetState(), which writes t.localPosition/t.localRotation -
+                    // RigidbodyState round-trips in LOCAL space. This project runs with
+                    // Physics.autoSyncTransforms disabled, which is EXACTLY the trap that caused
+                    // the 2026-09-11 levitation bug on the OWNER path (see the WorldPosition/
+                    // WorldRotation fields above and the "DO NOT write the Transform" note below) -
+                    // that fix only ever touched the owner's soft-reconcile branch, and this hard
+                    // branch (every non-owned car, every reconcile, ~45/s) was still going through
+                    // FishNet's raw local-space path untouched.
+                    //
+                    // Confirmed live in a real build (2026-09-18): during a dash, a remote
+                    // observer's view of the OTHER player's car read World Y=107.66 while that same
+                    // car's own machine read Y=54.93 at the same moment - a ~53 m local/world
+                    // mismatch, not network latency (it converged back on its own a moment later).
+                    // Matches the report "el dash se queda atascado, solo en el cliente remoto."
+                    //
+                    // Apply the same world-space snapshot the owner path already uses, directly on
+                    // the Rigidbody (not the Transform - see the note below for why that matters),
+                    // instead of routing through FishNet's own Reconcile()/RigidbodyState.
+                    rb.position = rd.WorldPosition;
+                    rb.rotation = rd.WorldRotation;
+                    if (!rb.isKinematic)
+                    {
+                        rb.linearVelocity = rd.WorldVelocity;
+                        rb.angularVelocity = rd.WorldAngularVelocity;
+                    }
+
+                    // Mirrors what FishNet's own Reconcile() would have done: this car never runs
+                    // Replicate/Simulate locally (see the comment above), so there are no pending
+                    // forces of its own to preserve - just clear them - and the incoming pooled
+                    // PredictionRigidbody must still be returned or it leaks one per reconcile.
+                    adapter.PredictionRigidbody.ClearPendingForces();
+                    if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
+                        GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
+                }
 
                 adapter.linearDamping = rd.LinearDamping;
 
