@@ -19,34 +19,34 @@ public class ScreenShakeSourceController : MonoBehaviour
         }
     }
 
-    public void PlayGlobalShake()
+    public void PlayGlobalShake(CameraBehaviours cameraBehaviour)
     {
-        CameraBehaviours.Instance?.ShakeCamera(cinemachineImpulseSource);
+        cameraBehaviour?.ShakeCamera(cinemachineImpulseSource);
     }
 
-    public void PlayGlobalShakeFromProfile(ScreenShakeProfileType profileType)
+    public void PlayGlobalShakeFromProfile(CameraBehaviours cameraBehaviours, ScreenShakeProfileType profileType)
     {
         ScreenShakeProfile screenShakeProfile = GetScreenShakeProfileByType(profileType);
         if (screenShakeProfile == null)
         {
             return;
         }
-        CameraBehaviours.Instance?.ShakeCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
+        cameraBehaviours?.ShakeCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
     }
 
-    public void PlayLocalShake()
+    public void PlayLocalShake(CameraBehaviours cameraBehaviours)
     {
-        CameraBehaviours.Instance?.ShakeLocalCamera(cinemachineImpulseSource);
+        cameraBehaviours?.ShakeLocalCamera(cinemachineImpulseSource);
     }
 
-    public void PlayLocalShakeFromProfile(ScreenShakeProfileType profileType)
+    public void PlayLocalShakeFromProfile(CameraBehaviours cameraBehaviours,ScreenShakeProfileType profileType)
     {
         ScreenShakeProfile screenShakeProfile = GetScreenShakeProfileByType(profileType);
         if(screenShakeProfile == null)
         {
             return;
         }
-        CameraBehaviours.Instance?.ShakeLocalCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
+        cameraBehaviours?.ShakeLocalCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
     }
 
     private ScreenShakeProfile GetScreenShakeProfileByType(ScreenShakeProfileType profileType)

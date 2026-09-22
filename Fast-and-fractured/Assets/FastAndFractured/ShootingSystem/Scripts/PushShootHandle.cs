@@ -46,7 +46,6 @@ namespace FastAndFractured {
         {
             if (canShoot)
             {
-                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.PushShoot);
                 canShoot = false;
                 _isPushShooting = true;
                float range = characterStatsController.PushShootRange;

@@ -19,7 +19,10 @@ namespace FastAndFractured {
         private float startSpeedMagnitudeToImpulse = 10f;
         [SerializeField]
         private landingCheck landindCheck;
-        private float _landingTime;
+
+        [Header("No Range Dependent values")]
+        [SerializeField]
+        private float _landingTime = 1f;
 
         [Header("Speed dependent values")]
 
@@ -48,8 +51,10 @@ namespace FastAndFractured {
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
+            if(rangeDependent){
             landindCheck.onLanding.AddListener(SetLandingTime);
             landindCheck.StartChecking(ParabolicForce(landindCheck.GetRigidbody()), ForceMode.VelocityChange);
+            }
         }
 
         // Update is called once per frame
