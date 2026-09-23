@@ -49,6 +49,15 @@ public class ScreenShakeSourceController : MonoBehaviour
         cameraBehaviours?.ShakeLocalCameraFromProfile(screenShakeProfile,cinemachineImpulseSource);
     }
 
+    public void PlayLocalShakeFromProfile(CameraBehaviours cameraBehaviours, ScreenShakeProfile shakeProfile)
+    {
+        if(shakeProfile == null)
+        {
+            return;
+        }
+        cameraBehaviours?.ShakeLocalCameraFromProfile(shakeProfile,cinemachineImpulseSource);
+    }
+
     private ScreenShakeProfile GetScreenShakeProfileByType(ScreenShakeProfileType profileType)
     {
         foreach(ScreenShakeProfile screenShakeProfile in screenShakeProfiles)
