@@ -41,6 +41,7 @@ namespace FastAndFractured.Multiplayer
         private ChickenPushZone _pushZone;
         private NetworkedChickenKillZoneRelay _killZoneRelay;
         private ParticleSystem _groundImpactEffect;
+        private Animator _animator;
 
         public readonly SyncVar<bool> SyncedIsJumping   = new SyncVar<bool>();
         public readonly SyncVar<bool> SyncedIsLayingEgg = new SyncVar<bool>();
@@ -60,6 +61,7 @@ namespace FastAndFractured.Multiplayer
         private void Awake()
         {
             _brain    = GetComponent<ChickenBrain>();
+            _animator = GetComponent<Animator>();
             _killZone = GetComponentInChildren<ChickenKillZone>(true);
             _pushZone = GetComponentInChildren<ChickenPushZone>(true);
 
@@ -74,6 +76,21 @@ namespace FastAndFractured.Multiplayer
             // its private hitbox; the server's authoritative impulse is reconciled by FishNet.
             if (!base.IsServerInitialized && _pushZone != null)
                 RemoveClientPushZone();
+
+            // The chicken's AI picks a random action every cooldown on whichever peer runs it,
+            // and its lay-egg action spawns a local pooled egg that rolls to a random point and
+            // pushes cars. Left running on clients, every client had its own chicken timing and its
+            // own phantom eggs pushing its own car where the server had none. Clients only mirror
+            // the server's animation through the SyncVars below.
+            if (!base.IsServerInitialized)
+                DisableClientAi();
+        }
+
+        private void DisableClientAi()
+        {
+            if (_brain != null) _brain.enabled = false;
+            var stateMachine = GetComponent<StateMachine.Controller>();
+            if (stateMachine != null) stateMachine.enabled = false;
         }
 
         public override void OnStartClient()
@@ -81,6 +98,12 @@ namespace FastAndFractured.Multiplayer
             base.OnStartClient();
             SyncedIsJumping.OnChange   += OnJumpingChanged;
             SyncedIsLayingEgg.OnChange += OnLayingEggChanged;
+
+            if (!base.IsServerInitialized && _animator != null)
+            {
+                _animator.SetBool("IsJumping", SyncedIsJumping.Value);
+                _animator.SetBool("IsLayingEgg", SyncedIsLayingEgg.Value);
+            }
         }
 
         public override void OnStopClient()
@@ -180,8 +203,10 @@ namespace FastAndFractured.Multiplayer
             // Kill a vehicle when the jump or egg-laying hitbox connects.
             if (!_brain.IsJumping && !_brain.IsLayingEgg) return;
 
+            // Same filter as the singleplayer ChickenKillZone: only the car body collider.
+            if (!other.TryGetComponent(out StatsController _)) return;
+
             var stats = other.GetComponentInParent<NetworkedStatsController>();
-            if (stats == null) stats = other.GetComponentInChildren<NetworkedStatsController>();
             if (stats == null) return;
 
             AnimatorStateInfo state = _brain.Animator.GetCurrentAnimatorStateInfo(0);
@@ -208,14 +233,14 @@ namespace FastAndFractured.Multiplayer
         // ── Animator sync ────────────────────────────────────────────────────────
         private void OnJumpingChanged(bool prev, bool next, bool asServer)
         {
-            if (asServer || _brain?.Animator == null) return;
-            _brain.Animator.SetBool("IsJumping", next);
+            if (asServer || _animator == null) return;
+            _animator.SetBool("IsJumping", next);
         }
 
         private void OnLayingEggChanged(bool prev, bool next, bool asServer)
         {
-            if (asServer || _brain?.Animator == null) return;
-            _brain.Animator.SetBool("IsLayingEgg", next);
+            if (asServer || _animator == null) return;
+            _animator.SetBool("IsLayingEgg", next);
         }
     }
 }

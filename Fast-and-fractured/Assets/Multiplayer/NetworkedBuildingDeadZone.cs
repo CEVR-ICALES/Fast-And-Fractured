@@ -22,8 +22,11 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServerInitialized) return;
 
+            // Same filter as the singleplayer BuildingDeadZone: only the car body collider (the
+            // one carrying the StatsController), not wheels or trigger children like a shield.
+            if (!other.TryGetComponent(out StatsController _)) return;
+
             var stats = other.GetComponentInParent<NetworkedStatsController>();
-            if (stats == null) stats = other.GetComponentInChildren<NetworkedStatsController>();
             if (stats == null) return;
 
             if (_lastKilled == stats) return;

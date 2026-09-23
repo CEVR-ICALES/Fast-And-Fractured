@@ -101,8 +101,22 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServerInitialized || other == null) return;
 
+            // Same filter as the singleplayer wall (DeadWallsBehaivour.OnTriggerEnter): only the
+            // car body collider - the one carrying the StatsController - and never while its body
+            // is kinematic, which is how a car being placed or teleported (spawn, respawn) avoids
+            // starting a kill timer. Without it any child collider of the car counted, kinematic
+            // or not.
+            if (!other.TryGetComponent(out StatsController _)) return;
+
             var stats = FindNetworkedStats(other);
             if (stats == null) return;
+
+            Rigidbody body = other.attachedRigidbody != null ? other.attachedRigidbody : other.GetComponent<Rigidbody>();
+            bool kinematic = body == null || body.isKinematic;
+            Debug.Log($"[NetworkedDeadWalls] '{other.name}' entered wall '{(wall != null ? wall.name : "?")}' " +
+                      $"kinematic={kinematic} pos={other.transform.position} t={Time.timeSinceLevelLoad:F2}" +
+                      (kinematic ? " -> ignored" : " -> kill countdown"));
+            if (kinematic) return;
 
             if (!_activeContacts.TryGetValue(stats, out var contacts))
             {
@@ -126,6 +140,7 @@ namespace FastAndFractured.Multiplayer
         internal void HandleWallExit(NetworkedDeadWallRelay wall, Collider other, int relayId)
         {
             if (!base.IsServerInitialized || other == null) return;
+            if (!other.TryGetComponent(out StatsController _)) return;
 
             var stats = FindNetworkedStats(other);
             if (stats == null) return;
