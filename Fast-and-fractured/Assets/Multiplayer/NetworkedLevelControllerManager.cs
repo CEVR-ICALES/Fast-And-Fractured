@@ -588,6 +588,11 @@ namespace FastAndFractured.Multiplayer
                 aiBrain = aiVehicleGO.GetComponentInChildren<EnemyAIBrain>(true);
             if (aiBrain == null) return;
 
+            var targeting = aiBrain.GetComponent<NetworkedAiPlayerTargeting>();
+            if (targeting == null)
+                targeting = aiBrain.gameObject.AddComponent<NetworkedAiPlayerTargeting>();
+            targeting.Configure(aiBrain);
+
             var playerShoot = aiVehicleGO.GetComponentInChildren<NetworkedShoot>(true);
             
             // Add NetworkedAIShoot if not present
