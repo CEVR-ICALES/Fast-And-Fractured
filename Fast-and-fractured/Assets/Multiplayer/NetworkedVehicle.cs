@@ -700,6 +700,15 @@ namespace FastAndFractured.Multiplayer
         {
             bool isReplaying = state.ContainsReplayed();
 
+            // A car we don't own is hard-set to the server's state on every reconcile, and under
+            // PhysicsMode.Unity a replay never steps physics - so replaying it can only queue forces
+            // (dash impulses, coasting deceleration) that then all land in the next physics step.
+            if (isReplaying && !base.IsOwner)
+                return;
+
+            if (!base.IsOwner)
+                md = ContinueLastInputIfMissing(md, state);
+
             if (!base.IsOwner)
             {
                 var provider = _coreMovementController.InputProvider as NetworkInputProvider;
@@ -784,6 +793,32 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
+        private MoveData _lastCreatedInput;
+        private int _missingInputTicks;
+        private const int MAX_CONTINUED_INPUT_TICKS = 5;
+
+        /// <summary>
+        /// When no input arrived for this tick (server or spectating client), FishNet runs the tick
+        /// with default data - zero throttle, so the car brakes for one tick and the owner then gets
+        /// corrected towards that. Keep driving with the last real input for a few ticks instead.
+        /// </summary>
+        private MoveData ContinueLastInputIfMissing(MoveData md, ReplicateState state)
+        {
+            if (state.ContainsCreated())
+            {
+                _lastCreatedInput = md;
+                _missingInputTicks = 0;
+                return md;
+            }
+
+            if (++_missingInputTicks > MAX_CONTINUED_INPUT_TICKS)
+                return md;
+
+            MoveData continued = _lastCreatedInput;
+            continued.SetTick(md.GetTick());
+            return continued;
+        }
+
         /// <summary>
         /// Replaces the singleplayer dash's per-frame TimerSystem impulses with per-tick impulses.
         ///
@@ -799,43 +834,52 @@ namespace FastAndFractured.Multiplayer
         {
             if (_coreMovementController == null) return;
 
-            if (!isReplaying)
+            // Replays must neither re-apply the impulse nor count the tick down. The owner's soft
+            // reconcile does not rewind the body, so its live ticks already applied these impulses;
+            // and counting down here let the counter reach 0 inside a replay, where the CancelDash
+            // below is skipped - the SP dash then never ended on the client (_isDashing stuck true,
+            // rotations blocked, _canDash false so no later dash started locally while the server
+            // still dashed): "el dash no avanza, se queda atascado", client only, since the host
+            // never replays.
+            if (isReplaying) return;
+
+            bool spDashing = _coreMovementController.IsDashing;
+            if (spDashing && !_wasSpDashing)
+                OnSpDashStarted();
+            else if (!spDashing && _wasSpDashing && _dashTicksRemaining > 0)
+                _dashTicksRemaining = 0; // externally cancelled (explosion, egg, push zone…)
+            _wasSpDashing = spDashing;
+
+            if (_dashTicksRemaining <= 0)
             {
-                bool spDashing = _coreMovementController.IsDashing;
-                if (spDashing && !_wasSpDashing)
-                    OnSpDashStarted();
-                else if (!spDashing && _wasSpDashing && _dashTicksRemaining > 0)
-                    _dashTicksRemaining = 0; // externally cancelled (explosion, egg, push zone…)
-                _wasSpDashing = spDashing;
-            }
-
-            if (_dashTicksRemaining <= 0) return;
-
-            // REVERTED (2026-09-15, see Replicate for the matching revert and why): re-apply the
-            // impulse on every tick this runs for, live or replayed, regardless of whether this
-            // reconcile happened to be a hard snap. See TickDeterministicDash's class doc: this is
-            // what makes the dash "replay-safe" in the first place.
-            _customRigidbody.AddForce(_dashWorldDirection * GetDashForce(), ForceMode.Impulse);
-            _dashTicksRemaining--;
-
-            if (!isReplaying)
-            {
-                var stats = _physicsBehaviour != null ? _physicsBehaviour.StatsController : null;
-                if (stats != null)
+                // A reconcile can restore the server's already-finished count before our own tick
+                // got to 0; end the SP dash here too or it stays on forever.
+                if (_wasSpDashing && _coreMovementController.IsDashing)
                 {
-                    float remainingSeconds = _dashTicksRemaining * (float)base.TimeManager.TickDelta;
-                    _coreMovementController.onDashCooldownUpdate?.Invoke(
-                        Mathf.Max(0f, stats.DashTime - remainingSeconds), stats.DashTime);
-                }
-
-                if (_dashTicksRemaining == 0 && _coreMovementController.IsDashing)
-                {
-                    // Ends the dash through the SP path (unblock rotations, restore max speed,
-                    // stop VFX, start the cooldown timer). Its impulse timer is already stopped,
-                    // so CancelDash just runs FinishDash.
                     _coreMovementController.CancelDash();
                     _wasSpDashing = false;
                 }
+                return;
+            }
+
+            _customRigidbody.AddForce(_dashWorldDirection * GetDashForce(), ForceMode.Impulse);
+            _dashTicksRemaining--;
+
+            var stats = _physicsBehaviour != null ? _physicsBehaviour.StatsController : null;
+            if (stats != null)
+            {
+                float remainingSeconds = _dashTicksRemaining * (float)base.TimeManager.TickDelta;
+                _coreMovementController.onDashCooldownUpdate?.Invoke(
+                    Mathf.Max(0f, stats.DashTime - remainingSeconds), stats.DashTime);
+            }
+
+            if (_dashTicksRemaining == 0 && _coreMovementController.IsDashing)
+            {
+                // Ends the dash through the SP path (unblock rotations, restore max speed,
+                // stop VFX, start the cooldown timer). Its impulse timer is already stopped,
+                // so CancelDash just runs FinishDash.
+                _coreMovementController.CancelDash();
+                _wasSpDashing = false;
             }
         }
 
@@ -897,9 +941,9 @@ namespace FastAndFractured.Multiplayer
 
                 // Soft reconcile only for OUR OWN car - see ApplyServerPose's doc for why and for
                 // the two more elaborate designs already tried and abandoned here. A car we don't
-                // own was never locally predicted in the first place (Replicate/Simulate only run
-                // for IsOwner or IsServerInitialized - see TimeManager_OnTick), so there is no local
-                // prediction worth preserving for it; FishNet's own hard reconcile is correct there.
+                // own is simulated live from the forwarded inputs (state forwarding is on), but it
+                // is not ours to predict: it follows the server's state exactly, and its replays are
+                // skipped in Replicate.
                 if (base.IsOwner)
                 {
                     restoreGameplayState = ApplyServerPose(adapter, rb, rd);
@@ -933,10 +977,9 @@ namespace FastAndFractured.Multiplayer
                         rb.angularVelocity = rd.WorldAngularVelocity;
                     }
 
-                    // Mirrors what FishNet's own Reconcile() would have done: this car never runs
-                    // Replicate/Simulate locally (see the comment above), so there are no pending
-                    // forces of its own to preserve - just clear them - and the incoming pooled
-                    // PredictionRigidbody must still be returned or it leaks one per reconcile.
+                    // Mirrors what FishNet's own Reconcile() would have done: drop pending forces
+                    // (the state is the server's now), and return the incoming pooled
+                    // PredictionRigidbody or it leaks one per reconcile.
                     adapter.PredictionRigidbody.ClearPendingForces();
                     if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
                         GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
