@@ -50,7 +50,6 @@ namespace FastAndFractured
 
         [Header("Delete Progress")]
         [SerializeField] private GameObject deleteButton;
-        [SerializeField] private GameObject deletePopupUI;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
 
         #region Player Prefs String Constants
@@ -117,6 +116,14 @@ namespace FastAndFractured
                 _menuScreen = GetComponent<MenuScreen>();
             }
             SetDefaultSelectedButton();
+            // if scene index is 1(main menu) then when moving to the right from accesibility settings button it will move to the delete button
+            if (SceneManager.GetActiveScene().buildIndex == 1)
+            {
+                Navigation navigation = accessibilitySettingsButton.navigation;
+                navigation.selectOnRight = deleteButton.GetComponent<Selectable>();
+                accessibilitySettingsButton.navigation = navigation;
+            }
+            
         }
 
         private void SetDefaultSelectedButton()
@@ -591,22 +598,11 @@ namespace FastAndFractured
         #region Delete Progress Methods
         public void DeleteAllProgress()
         {
-            deletePopupUI.SetActive(false);
             for (int i = 0; i < deletedProgressList.Count; i++)
             {
                 PlayerPrefs.DeleteKey(deletedProgressList[i]);
             }
             PlayerPrefs.Save();
-        }
-
-        public void CloseDeletePopup()
-        {
-            deletePopupUI.SetActive(false);
-        }
-
-        public void OpenDeletePopup()
-        {
-            deletePopupUI.SetActive(true);
         }
 
 
