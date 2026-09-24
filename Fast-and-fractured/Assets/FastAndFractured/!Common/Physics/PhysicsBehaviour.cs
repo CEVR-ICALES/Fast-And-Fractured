@@ -2,6 +2,7 @@ using Enums;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -53,6 +54,9 @@ namespace FastAndFractured
         private CarImpactHandler _carImpactHandler;
         public CharacterKinematicReactionsController CharacterKinematicReactionsController { get => _characterKinematicReactionsController; } 
         private CharacterKinematicReactionsController _characterKinematicReactionsController;
+
+        [Header("Events")]
+        public UnityEvent<Vector3> onForceCollision;
 
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         const float TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED = 0.3f;
@@ -213,6 +217,7 @@ namespace FastAndFractured
 
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, forceMode);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
+            onForceCollision?.Invoke(forceDirection);
             if(StatsController.IsPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
@@ -224,7 +229,7 @@ namespace FastAndFractured
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
             _carMovementController.IsInTrampolin = true;
-            _rb.AddForce(force, forceMode);
+            AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
                 if (!_carMovementController.IsDashing)
@@ -247,6 +252,7 @@ namespace FastAndFractured
             if (_rb != null)
             {
                 _rb.AddForce(force, forceMode);
+                onForceCollision?.Invoke(force.normalized);
             }
         }
 

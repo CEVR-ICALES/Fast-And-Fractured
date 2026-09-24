@@ -7,7 +7,7 @@ using Utilities;
 using Enums;
 
 namespace FastAndFractured {
-    public class PushBulletBehaviour : BulletBehaviour
+    public class PushBulletBehaviour : BulletBehaviour, ICanBeImpulseByTrampoline
     {
         //Explosion Values
         public float PushForce {set=> _pushForce = value; }

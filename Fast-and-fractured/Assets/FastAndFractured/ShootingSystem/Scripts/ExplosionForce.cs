@@ -29,7 +29,6 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
-                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.Explosion);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
