@@ -32,6 +32,8 @@ namespace FastAndFractured
          [SerializeField]
          private CinemachineImpulseChannels _cinemachineImpulseChanels;
 
+         private int _shakeLayer;
+
         private const int LAYER_COMMON = 1;
         private const int INIT_CHARACTER_COUNT = 1;
         protected override void Initialize()
@@ -146,12 +148,14 @@ namespace FastAndFractured
         public void ShakeLocalCamera(CinemachineImpulseSource impulseSource)
         {
             SetupDefaultScreenShakeListenerSettings(localCinemachineImpulseListener);
+            impulseSource.ImpulseDefinition.ImpulseChannel = _shakeLayer;
             impulseSource.GenerateImpulseWithForce(defaultProfile.impactForce);
         }
 
         public void ShakeLocalCameraFromProfile(ScreenShakeProfile screenShakeProfile, CinemachineImpulseSource impulseSource)
         {
             SetupScreenShakeSettings(screenShakeProfile, impulseSource,localCinemachineImpulseListener);
+            impulseSource.ImpulseDefinition.ImpulseChannel = _shakeLayer;
             impulseSource.GenerateImpulseWithForce(screenShakeProfile.impactForce);
         }
 
@@ -180,6 +184,7 @@ namespace FastAndFractured
             int layerPosition =  characterCount + INIT_CHARACTER_COUNT;
             int newLayer = LAYER_COMMON << layerPosition;
             localCinemachineImpulseListener.ChannelMask = newLayer;
+            _shakeLayer = newLayer;
         }
         #endregion
     }

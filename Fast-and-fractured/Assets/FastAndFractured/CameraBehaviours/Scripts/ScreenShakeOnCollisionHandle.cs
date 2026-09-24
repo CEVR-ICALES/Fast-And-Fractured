@@ -10,32 +10,39 @@ public enum ScreenShakeOnCollisionType
 }
 public class ScreenShakeOnCollisionHandle : MonoBehaviour
 {
+    [Tooltip("Listener is prepared only for players with a camera. Since is waiting form something to impact. The Source will cause impact only if the characte have a camera.")]
     [SerializeField]
     private ScreenShakeOnCollisionType type = ScreenShakeOnCollisionType.Source;
     
+
     [SerializeField]
     private Collider shakeCollider;
 
     [SerializeField]
     private ScreenShakeProfile screenShakeProfile;
 
+    [Header("Distance")]
     [SerializeField]
     private bool itDependOnDistance = false;
 
+    [Tooltip("If the distance from the object to the other object is close to this distance, the shake will be lower")]
+    [SerializeField]
+    private float maxDistanceReference = 50f;
+
+    [Tooltip("The quantity in percentage the distance will affect the result.")]
     [SerializeField]
     [Range(10,100)]
     private float strenghtOfFactorDistance = 50f;
 
-    [SerializeField]
-    private float maxDistanceDifference = 50f;
-
-    private float _boundToCenter;
-
+    [Header("Speed")]
     [SerializeField]
     private bool itDependOnSpeed = false;
 
+    [Tooltip("If the speed from the two objects combined is close to this speed, the shake will be higher")]
     [SerializeField]
     private float referenceHighSpeed = 300f;
+
+    [Tooltip("The quantity in percentage the speed will affect the result.")]
     [SerializeField]
     [Range(10,100)]
     private float strenghtOfFactorSpeed = 80f;
@@ -43,10 +50,12 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
     [SerializeField]
     private Rigidbody ownRigydbody;
 
+    [Header("References")]
+
     [SerializeField]
     private ScreenShakeSourceController screenShakeSourceController;
 
-    [Tooltip("This value is only needed if you're the listener.")]
+    [Tooltip("This value is only needed if you're the listener. The source don't own a camera behaviour")]
     [SerializeField]
     private CameraBehaviours ownCameraBehaviour;
 
@@ -67,10 +76,10 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
         }
         if (ownCameraBehaviour == null&&type==ScreenShakeOnCollisionType.Listener)
         {
-            if((ownCameraBehaviour = transform.parent.parent.GetComponentInChildren<CameraBehaviours>())==null)
+            if((ownCameraBehaviour = transform.parent.parent.GetComponentInChildren<CameraBehaviours>())==null){
             shakeCollider.enabled=false;
+            }
         }
-        _boundToCenter = shakeCollider.bounds.max.magnitude;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -94,11 +103,13 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
         
         if(cameraBehaviours!=null)
         {
+            Vector3 direction = (other.transform.position - transform.position).normalized;
             float baseImpactForce = screenShakeProfile.impactForce;
+            Vector3 baseDirection = screenShakeProfile.defaultVelocity;
             if(itDependOnDistance)
             {
                 float distanceToCenter = (other.transform.position - shakeCollider.bounds.center).magnitude;
-                float distanceFactor = (1 + ((maxDistanceDifference - distanceToCenter )/distanceToCenter))*(strenghtOfFactorDistance/MAX_PERCENTAGE);
+                float distanceFactor = (1 + ((maxDistanceReference - distanceToCenter )/distanceToCenter))*(strenghtOfFactorDistance/MAX_PERCENTAGE);
                 screenShakeProfile.impactForce*=distanceFactor;
             }
             if (itDependOnSpeed)
@@ -114,14 +125,11 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
                 float speedFactorWithPercentageApplied = speedFactor * (strenghtOfFactorSpeed/MAX_PERCENTAGE);
                 screenShakeProfile.impactForce*=speedFactorWithPercentageApplied;
             }
+            screenShakeProfile.defaultVelocity = direction;
             screenShakeSourceController.PlayLocalShakeFromProfile(cameraBehaviours,screenShakeProfile);
             screenShakeProfile.impactForce = baseImpactForce;
+            screenShakeProfile.defaultVelocity = baseDirection;
         }
-    }
-
-    private void HandleListenerCollision(Collider other)
-    {
-        
     }
 }
     
