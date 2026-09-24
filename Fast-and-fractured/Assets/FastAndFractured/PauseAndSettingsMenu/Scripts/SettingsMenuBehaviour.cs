@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.HighDefinition;
+using Assets.SimpleLocalization.Scripts;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utilities;
@@ -51,6 +52,15 @@ namespace FastAndFractured
         [Header("Delete Progress")]
         [SerializeField] private GameObject deleteButton;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
+        private static readonly FullScreenMode[] DISPLAY_MODES =
+        {
+            FullScreenMode.ExclusiveFullScreen,
+            FullScreenMode.Windowed,
+            FullScreenMode.FullScreenWindow
+        };
+        private const string TRANSLATION_KEY_WINDOWED = "Graphics.Windowed";
+        private const string TRANSLATION_KEY_FULLSCREEN = "Graphics.Fullscreen";
+        private const string TRANSLATION_KEY_FULLSCREEN_WINDOW = "Graphics.FullscreenWindow";
 
         #region Player Prefs String Constants
         private const string VSYNC_STRING = "Vsync";
@@ -454,11 +464,16 @@ namespace FastAndFractured
         #region Display Mode Methods
         private void SetDisplayMode(int option)
         {
-            string selectedOption = displayModeDropdown.options[option].text;
-            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedOption);
+
+            if (option < 0 || option >= DISPLAY_MODES.Length)
+                return;
+
+            FullScreenMode selectedMode = DISPLAY_MODES[option];
+
+            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedMode.ToString());
             PlayerPrefs.Save();
 
-            ApplyDisplayMode((FullScreenMode)Enum.Parse(typeof(FullScreenMode), selectedOption));
+            ApplyDisplayMode(selectedMode);
         }
 
         private void ApplyDisplayMode(FullScreenMode selectedOption)
@@ -468,19 +483,28 @@ namespace FastAndFractured
 
         private void LoadDisplayModeOptions()
         {
-            FullScreenMode mode = Screen.fullScreenMode;
-            List<string> displayModes = new List<string> {
-                Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen),
-                Enum.GetName(typeof(FullScreenMode), FullScreenMode.Windowed),
-                Enum.GetName(typeof(FullScreenMode),  FullScreenMode.FullScreenWindow),
-               };
+            List<string> localizationKeys = new List<string>
+            {
+                TRANSLATION_KEY_FULLSCREEN,
+                TRANSLATION_KEY_WINDOWED,
+                TRANSLATION_KEY_FULLSCREEN_WINDOW
+            };
+
+            List<string> displayModes = localizationKeys
+                .Select(LocalizationManager.Localize)
+                .ToList();
 
             displayModeDropdown.ClearOptions();
             displayModeDropdown.AddOptions(displayModes);
 
-            string savedMode = PlayerPrefs.GetString(DISPLAY_MODE_STRING, Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen));
-            int index = displayModes.IndexOf(savedMode);
-            displayModeDropdown.value = index >= 0 ? index : 0;
+            string savedMode = PlayerPrefs.GetString(
+                DISPLAY_MODE_STRING,
+                Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen));
+
+            int savedIndex = Array.IndexOf(DISPLAY_MODES, (FullScreenMode)Enum.Parse(
+                typeof(FullScreenMode), savedMode));
+
+            displayModeDropdown.value = savedIndex >= 0 ? savedIndex : 0;
             displayModeDropdown.RefreshShownValue();
         }
         #endregion
