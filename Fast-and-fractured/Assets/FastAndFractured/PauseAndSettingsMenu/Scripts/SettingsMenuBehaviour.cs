@@ -27,6 +27,8 @@ namespace FastAndFractured
 
         [SerializeField] private GameObject gamepadRemappingWindow;
         [SerializeField] private GameObject keyboardRemappingWindow;
+        [SerializeField] private GameObject textWaitingForInputKeyboard;
+        [SerializeField] private GameObject textWaitingForInputController;
 
         [Header("Audio Settings")]
         [SerializeField] private Slider generalVolumeSlider;
@@ -134,6 +136,12 @@ namespace FastAndFractured
                 accessibilitySettingsButton.navigation = navigation;
             }
             
+        }
+        void OnDisable()
+        {
+            OpenAudioSettings();
+            textWaitingForInputKeyboard.SetActive(false);
+            textWaitingForInputController.SetActive(false);
         }
 
         private void SetDefaultSelectedButton()
