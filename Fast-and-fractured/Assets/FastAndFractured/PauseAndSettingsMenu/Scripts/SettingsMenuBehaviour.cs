@@ -54,6 +54,9 @@ namespace FastAndFractured
         [Header("Delete Progress")]
         [SerializeField] private GameObject deleteButton;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
+        [Header("Remap first button")]
+        [SerializeField] private Button firstButtonKeyboardRemapping;
+        [SerializeField] private Button firstButtonControllerRemapping;
         private static readonly FullScreenMode[] DISPLAY_MODES =
         {
             FullScreenMode.ExclusiveFullScreen,
@@ -266,6 +269,7 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(false);
             gamepadRemappingWindow.SetActive(false);
             keyboardRemappingWindow.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(firstButtonKeyboardRemapping.gameObject);
         }
 
         public void OpenControllerRemapping()
@@ -275,6 +279,7 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(false);
             gamepadRemappingWindow.SetActive(true);
             keyboardRemappingWindow.SetActive(false);
+            EventSystem.current.SetSelectedGameObject(firstButtonControllerRemapping.gameObject);
         }
 
         #region Audio Settings
