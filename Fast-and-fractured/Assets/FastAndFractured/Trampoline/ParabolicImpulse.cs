@@ -109,7 +109,7 @@ namespace FastAndFractured {
         private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
-            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,false);
+            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,true);
         }
 
 

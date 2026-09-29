@@ -76,7 +76,7 @@ namespace FastAndFractured
         private bool _isGoingUphill;
         private bool _isGoingDownhill;
         private bool _isInTrampolin = false;
-        public bool IsInTrampolin { set => _isInTrampolin = value; }
+        public bool IsBeenImpulsed { set => _isInTrampolin = value; }
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;

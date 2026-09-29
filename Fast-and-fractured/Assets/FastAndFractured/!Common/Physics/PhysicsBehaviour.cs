@@ -223,7 +223,7 @@ namespace FastAndFractured
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
-            _carMovementController.IsInTrampolin = true;
+            _carMovementController.IsBeenImpulsed = true;
             _rb.AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
@@ -236,7 +236,30 @@ namespace FastAndFractured
                     // if (!_carMovementController.IsDashing)
                     // {
                         _carMovementController.SetMaxRbSpeedDelayed();
-                        _carMovementController.IsInTrampolin = false;
+                        _carMovementController.IsBeenImpulsed = false;
+                    // }
+                });
+            }
+        }
+
+        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
+        {
+            if (stopMomentum)
+                _rb.linearVelocity = Vector3.zero;
+            _carMovementController.IsBeenImpulsed = true;
+            ApplyForce(forceDirection, forcePoint, forceToApply, forceMode);
+            if (!limitRbSpeed)
+            {
+                // if (!_carMovementController.IsDashing)
+                // {
+                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
+                // }
+                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+                {
+                    // if (!_carMovementController.IsDashing)
+                    // {
+                        _carMovementController.SetMaxRbSpeedDelayed();
+                        _carMovementController.IsBeenImpulsed = false;
                     // }
                 });
             }

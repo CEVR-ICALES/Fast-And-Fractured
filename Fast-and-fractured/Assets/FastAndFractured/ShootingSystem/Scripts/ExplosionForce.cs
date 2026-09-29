@@ -18,9 +18,13 @@ namespace FastAndFractured
         [SerializeField] private float carWeightImportance = 0.2f;
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
-        private ITimer _explosionTimer;
         [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
+        private float explosionImpulseTime = 1f;
+        [SerializeField]
+        private bool stopSpeedOnHit = false;
+        [SerializeField]
+        private bool limitRbSpeed = false;
+        private ITimer _explosionTimer;
 
 
         //Provisinal value to select the type force aplication 
@@ -80,7 +84,7 @@ namespace FastAndFractured
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyImpulse(direction, closestPoint, forceToApply , forceMode,limitRbSpeed,explosionImpulseTime,stopSpeedOnHit); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                     if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
                     {
