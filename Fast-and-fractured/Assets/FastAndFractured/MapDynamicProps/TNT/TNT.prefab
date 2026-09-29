@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 573243362636912802}
   - component: {fileID: 511408137910949889}
   - component: {fileID: 5570889588176834981}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: TNT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,8 +28,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.94, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3.7, y: 3.7, z: 3.7}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8234073567344890683}
   - {fileID: 1105732272168088450}
@@ -48,12 +48,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec1c9d2c90db5914195e61387f506c8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  explosionRadius: 30
-  pushForce: 250000
+  explosionRadius: 5
+  pushForce: 350000
   explosionCenterOffset: {x: 0, y: 0, z: 0}
   explosionHitbox: {fileID: 8587492930792698581}
   damagePercentage: 0.3
   visuals: {fileID: 4810976380543654395}
+  endingTime: 1.5
   startHitTime: 0.1
   endHitTime: 0.7
 --- !u!65 &5570889588176834981
@@ -120,7 +121,7 @@ GameObject:
   - component: {fileID: 1105732272168088450}
   - component: {fileID: 8587492930792698581}
   - component: {fileID: 3316070567144309248}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ExplosionHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,6 +194,7 @@ MonoBehaviour:
   carWeightImportance: 0.2
   forceToOtherObjects: 10
   forceMode: 1
+  screenShakeSourceController: {fileID: 0}
   isGrounded: 1
 --- !u!135 &3316070567144309248
 SphereCollider:
@@ -223,13 +225,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1105732272168088450}
     m_Modifications:
+    - target: {fileID: 2533453691346659559, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 2753678774059208438, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3308323315555868419, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3406333046200991701, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5558909894687084935, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5818067966640238271, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: CollisionModule.type
@@ -257,7 +271,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5905341606697025904, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5905341606697025904, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_IsActive
@@ -317,11 +331,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7991254562565301939, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8493733481452126236, guid: 41fa7a4a0d1ba864089fa4dbdb8ff2c7, type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

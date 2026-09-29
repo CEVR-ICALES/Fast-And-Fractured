@@ -227,17 +227,17 @@ namespace FastAndFractured
             _rb.AddForce(force, forceMode);
             if (!limitRbSpeed)
             {
-                if (!_carMovementController.IsDashing)
-                {
+                // if (!_carMovementController.IsDashing)
+                // {
                     _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
-                }
+                // }
                 TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
                 {
-                    if (!_carMovementController.IsDashing)
-                    {
+                    // if (!_carMovementController.IsDashing)
+                    // {
                         _carMovementController.SetMaxRbSpeedDelayed();
                         _carMovementController.IsInTrampolin = false;
-                    }
+                    // }
                 });
             }
         }

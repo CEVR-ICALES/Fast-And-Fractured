@@ -92,6 +92,10 @@ namespace FastAndFractured
                     
                 }
             }
+            else if(other.gameObject.TryGetComponent(out PointExplosion pointExplosion))
+            {
+                pointExplosion.ExplodePoint();
+            }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))
             {
                 Vector3 otherPosition = other.transform.position;
