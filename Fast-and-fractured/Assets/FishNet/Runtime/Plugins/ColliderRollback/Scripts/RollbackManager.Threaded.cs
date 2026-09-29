@@ -2,10 +2,16 @@
 using FishNet.Managing;
 using FishNet.Managing.Timing;
 using FishNet.Transporting;
+using FishNet.Utility.Extension;
 using System;
 using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.SceneManagement;
+#if UNITY_6000_5_OR_NEWER
+using SceneHandle = System.UInt64;
+#else
+using SceneHandle = System.Int32;
+#endif
 
 namespace FishNet.Component.ColliderRollback
 {
@@ -224,12 +230,12 @@ namespace FishNet.Component.ColliderRollback
         public void Rollback(Scene scene, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, bool asOwnerAndClientHost = false)
         {
             //PROSTART
-            Rollback(scene.handle, origin, normalizedDirection, distance, pt, RollbackPhysicsType.Physics, asOwnerAndClientHost);
+            Rollback(scene.GetRawHandle(), origin, normalizedDirection, distance, pt, RollbackPhysicsType.Physics, asOwnerAndClientHost);
             //PROEND
         }
 
         [Obsolete("Use Rollback(int, Vector3, Vector3, float, PreciseTick, RollbackPhysicsType.Physics, bool) instead.")] //Remove on V5
-        public void Rollback(int sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, bool asOwnerAndClientHost = false)
+        public void Rollback(SceneHandle sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, bool asOwnerAndClientHost = false)
         {
             //PROSTART
             Rollback(sceneHandle, origin, normalizedDirection, distance, pt, RollbackPhysicsType.Physics, asOwnerAndClientHost);
@@ -240,7 +246,7 @@ namespace FishNet.Component.ColliderRollback
         public void Rollback(Scene scene, Vector2 origin, Vector2 normalizedDirection, float distance, PreciseTick pt, bool asOwnerAndClientHost = false)
         {
             //PROSTART
-            Rollback(scene.handle, origin, normalizedDirection, distance, pt, RollbackPhysicsType.Physics2D, asOwnerAndClientHost);
+            Rollback(scene.GetRawHandle(), origin, normalizedDirection, distance, pt, RollbackPhysicsType.Physics2D, asOwnerAndClientHost);
             //PROEND
         }
 
@@ -275,7 +281,7 @@ namespace FishNet.Component.ColliderRollback
         public void Rollback(Scene scene, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             //PROSTART
-            Rollback(scene.handle, pt, physicsType, asOwnerAndClientHost);
+            Rollback(scene.GetRawHandle(), pt, physicsType, asOwnerAndClientHost);
             //PROEND
         }
 
@@ -286,7 +292,7 @@ namespace FishNet.Component.ColliderRollback
         /// <param name = "pt">Precise tick received from the client.</param>
         /// <param name = "physicsType">Type of physics to rollback; this is often what your casts will use.</param>
         /// <param name = "asOwnerAndClientHost">True if IsOwner of the object the raycast is for. This can be ignored and only provides more accurate results for clientHost.</param>
-        public void Rollback(int sceneHandle, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
+        public void Rollback(SceneHandle sceneHandle, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             using (_pm_Rollback0.Auto())
             {
@@ -327,7 +333,7 @@ namespace FishNet.Component.ColliderRollback
         public void Rollback(Scene scene, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             //PROSTART
-            Rollback(scene.handle, origin, normalizedDirection, distance, pt, physicsType, asOwnerAndClientHost);
+            Rollback(scene.GetRawHandle(), origin, normalizedDirection, distance, pt, physicsType, asOwnerAndClientHost);
             //PROEND
         }
 
@@ -341,7 +347,7 @@ namespace FishNet.Component.ColliderRollback
         /// <param name = "pt">Precise tick received from the client.</param>
         /// <param name = "physicsType">Type of physics to rollback; this is often what your casts will use.</param>
         /// <param name = "asOwnerAndClientHost">True if IsOwner of the object the raycast is for. This can be ignored and only provides more accurate results for clientHost.</param>
-        public void Rollback(int sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
+        public void Rollback(SceneHandle sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             using (_pm_Rollback1.Auto())
             {
@@ -383,7 +389,7 @@ namespace FishNet.Component.ColliderRollback
         public void RequestRollbackDeferred(Scene scene, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             //PROSTART
-            RequestRollbackDeferred(scene.handle, origin, normalizedDirection, distance, pt, physicsType, asOwnerAndClientHost);
+            RequestRollbackDeferred(scene.GetRawHandle(), origin, normalizedDirection, distance, pt, physicsType, asOwnerAndClientHost);
             //PROEND
         }
         
@@ -397,7 +403,7 @@ namespace FishNet.Component.ColliderRollback
         /// <param name = "pt">Precise tick received from the client.</param>
         /// <param name = "physicsType">Type of physics to rollback; this is often what your casts will use.</param>
         /// <param name = "asOwnerAndClientHost">True if IsOwner of the object the raycast is for. This can be ignored and only provides more accurate results for clientHost.</param>
-        public void RequestRollbackDeferred(int sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
+        public void RequestRollbackDeferred(SceneHandle sceneHandle, Vector3 origin, Vector3 normalizedDirection, float distance, PreciseTick pt, RollbackPhysicsType physicsType, bool asOwnerAndClientHost = false)
         {
             using (_pm_RequestRollbackDeferred.Auto())
             {

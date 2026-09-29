@@ -155,11 +155,19 @@ namespace FishNet.Observing
                 foreach (ObserverCondition item in _observerConditions)
                 {
                     item.Deinitialize(destroyed);
-                    /* Use GetInstanceId to ensure the object is actually
-                     * instantiated. If Id is negative, then it's instantiated
-                     * and not a reference to the original object. */
+                    /* Conditions in this list are always Instantiate() clones once
+                     * _conditionsInitializedPreviously is set (see Initialize), so any item
+                     * here is a runtime copy and never a source asset.
+                     * Pre-6.5 the negative-InstanceID check confirms the object is a clone;
+                     * GetInstanceID() is obsolete on Unity 6000.5+, where the clone invariant
+                     * alone gates the destroy. */
+#if UNITY_6000_5_OR_NEWER
+                    if (destroyed)
+                        Destroy(item);
+#else
                     if (destroyed && item.GetInstanceID() < 0)
                         Destroy(item);
+#endif
                 }
 
                 // Clean up lists.

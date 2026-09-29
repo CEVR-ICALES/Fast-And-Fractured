@@ -101,7 +101,21 @@ namespace FishNet.Object
         /// <returns></returns>
         public override string ToString()
         {
-            return $"Name [{gameObject.name}] ComponentId [{ComponentIndex}] NetworkObject Name [{_networkObjectCache.name}] NetworkObject Id [{_networkObjectCache.ObjectId}]";
+            string networkObjectName;
+            int networkObjectId;
+            
+            if (_networkObjectCache == null)
+            {
+                networkObjectName = "Null";
+                networkObjectId = Object.NetworkObject.UNSET_OBJECTID_VALUE;
+            }
+            else
+            {
+                networkObjectName = _networkObjectCache.name;
+                networkObjectId = _networkObjectCache.ObjectId;
+            }
+            
+            return $"Name [{gameObject.name}] ComponentId [{ComponentIndex}] NetworkObject Name [{networkObjectName}] NetworkObject Id [{networkObjectId}]";
         }
 
         [MakePublic]

@@ -6,6 +6,11 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Jobs;
+#if UNITY_6000_5_OR_NEWER
+using SceneHandle = System.UInt64;
+#else
+using SceneHandle = System.Int32;
+#endif
 
 namespace FishNet.Component.ColliderRollback
 {
@@ -54,14 +59,14 @@ namespace FishNet.Component.ColliderRollback
         /// </summary>
         public struct RollbackRequest
         {
-	        public int sceneHandle;
+	        public SceneHandle sceneHandle;
 	        public float3 origin;
 	        public float3 direction;
 	        public float distance;
 	        public float time;
 	        public RollbackPhysicsType rollbackPhysicsType;
 
-	        public RollbackRequest(int sceneHandle, float3 origin, float3 direction, float distance, float time, RollbackPhysicsType rollbackPhysicsType)
+	        public RollbackRequest(SceneHandle sceneHandle, float3 origin, float3 direction, float distance, float time, RollbackPhysicsType rollbackPhysicsType)
 	        {
 		        this.sceneHandle = sceneHandle;
 		        this.origin = origin;
@@ -159,12 +164,12 @@ namespace FishNet.Component.ColliderRollback
 		[BurstCompile]
 		internal struct ApplyRollbackJob : IJobParallelForTransform
 		{
-			public int sceneHandle;
+			public SceneHandle sceneHandle;
 		    public int maxSnapshots;
 		    public float decimalFrame;
 
 		    [ReadOnly] public NativeArray<int> colliderToColliderRollbacks;            // [rollingColliderIdx] -> colliderRollbacksIdx
-		    [ReadOnly] public NativeArray<int> colliderRollbacksSceneHandles;          // [colliderRollbackIdx], scene handles
+		    [ReadOnly] public NativeArray<SceneHandle> colliderRollbacksSceneHandles;          // [colliderRollbackIdx], scene handles
 		    [ReadOnly] public NativeArray<int> colliderRollbacksLerpFrames;            // [colliderRollbackIdx], available frames
 		    [ReadOnly] public NativeArray<int> rollingCollidersWriteIndices;           // [rollingColliderIdx]
 		    
@@ -177,7 +182,7 @@ namespace FishNet.Component.ColliderRollback
 		    public void Execute(int rollingColliderIdx, TransformAccess transform)
 		    {
 		        int colliderRollbackIdx = colliderToColliderRollbacks[rollingColliderIdx];
-		        int colliderRollbacksSceneHandle = colliderRollbacksSceneHandles[colliderRollbackIdx];
+		        SceneHandle colliderRollbacksSceneHandle = colliderRollbacksSceneHandles[colliderRollbackIdx];
 				if (sceneHandle != 0 && sceneHandle != colliderRollbacksSceneHandle)
 					return;
 		        
@@ -211,7 +216,7 @@ namespace FishNet.Component.ColliderRollback
 		[BurstCompile]
 		internal struct ApplyRollbackRaycastJob : IJobParallelForTransform
 		{
-		    public int sceneHandle;
+		    public SceneHandle sceneHandle;
 		    public int maxSnapshots;
 		    public float decimalFrame;
 		    
@@ -221,7 +226,7 @@ namespace FishNet.Component.ColliderRollback
 		    public int physicsType; // RollbackPhysicsType
 
 		    [ReadOnly] public NativeArray<int> colliderToColliderRollbacks;                  // [rollingColliderIdx] -> colliderRollbacksIdx
-		    [ReadOnly] public NativeArray<int> colliderRollbacksSceneHandles;                // [colliderRollbackIdx] -> scene.handle
+		    [ReadOnly] public NativeArray<SceneHandle> colliderRollbacksSceneHandles;                // [colliderRollbackIdx] -> scene.handle
 		    [ReadOnly] public NativeArray<int> colliderRollbacksLerpFrames;                  // [colliderRollbackIdx] available frames
 		    [ReadOnly] public NativeArray<int> rollingCollidersWriteIndices;                 // [rollingColliderIdx]
 		    [ReadOnly] public NativeArray<BoundingBoxData> colliderRollbacksBoundingBoxData; // [colliderRollbackIdx]
@@ -303,7 +308,7 @@ namespace FishNet.Component.ColliderRollback
 
             [ReadOnly] public NativeArray<RollbackRequest> requests;
 
-            [ReadOnly] public NativeArray<int> colliderRollbacksSceneHandles;                // [colliderRollbackIdx]
+            [ReadOnly] public NativeArray<SceneHandle> colliderRollbacksSceneHandles;                // [colliderRollbackIdx]
             [ReadOnly] public NativeArray<int> colliderRollbacksLerpFrames;                  // [colliderRollbackIdx]
             [ReadOnly] public NativeArray<BoundingBoxData> colliderRollbacksBoundingBoxData; // [colliderRollbackIdx]
             [ReadOnly] public NativeArray<ColliderSnapshot> colliderRollbacksSnapshots;      // [colliderRollbackIdx]
@@ -317,7 +322,7 @@ namespace FishNet.Component.ColliderRollback
 	            if (frames <= 0)
 		            return;
 
-                int sceneHandle = colliderRollbacksSceneHandles[colliderRollbackIdx];
+                SceneHandle sceneHandle = colliderRollbacksSceneHandles[colliderRollbackIdx];
                 BoundingBoxData boundingBoxData = colliderRollbacksBoundingBoxData[colliderRollbackIdx];
 
                 ColliderSnapshot colliderRollbackSnapshot = colliderRollbacksSnapshots[colliderRollbackIdx];
