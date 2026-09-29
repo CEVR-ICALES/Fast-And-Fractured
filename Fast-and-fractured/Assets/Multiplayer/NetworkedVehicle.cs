@@ -99,9 +99,6 @@ namespace FastAndFractured.Multiplayer
         private Vector3 _dashWorldDirection;
         private float _cachedDashForce = float.NaN;
 
-        // Mirrors ApplyMovementAction.HandleAutoDeceleration's constant.
-        private const float AUTO_DECELERATION_FORCE = 10f;
-
         [Header("Multiplayer Runtime Guards")]
         [SerializeField] private bool suppressFalseFlipImpulse = true;
         [SerializeField, Range(-1f, 1f)] private float uprightDotThreshold = 0.8f;
@@ -620,6 +617,16 @@ namespace FastAndFractured.Multiplayer
                     Replicate(default);
                 }
             }
+            else
+            {
+                // Spectating client: FishNet only runs the forwarded inputs of a car we don't own
+                // when Replicate is called for it every tick (the data passed here is ignored; the
+                // forwarded input is used). Without this call the car never ran a live tick on
+                // clients - no throttle, brake, auto-deceleration or dash impulse - and just rolled
+                // under raw physics between reconciles, then snapped back: measured 2026-09-24 as
+                // a parked remote car sliding downhill to ~1 m/s and jumping ~30 cm per reconcile.
+                Replicate(default);
+            }
         }
 
         private void TimeManager_OnPostTick()
@@ -700,10 +707,12 @@ namespace FastAndFractured.Multiplayer
         {
             bool isReplaying = state.ContainsReplayed();
 
-            // A car we don't own is hard-set to the server's state on every reconcile, and under
-            // PhysicsMode.Unity a replay never steps physics - so replaying it can only queue forces
-            // (dash impulses, coasting deceleration) that then all land in the next physics step.
-            if (isReplaying && !base.IsOwner)
+            // Under PhysicsMode.Unity a replay never steps physics, and the owner's reconcile does
+            // not rewind the body (see ApplyServerPose): whatever a replayed tick adds - coasting
+            // deceleration, dash impulses - is extra force on top of what the live ticks already
+            // applied, all landing in the next physics step. Measured on the client-owned car: ~12
+            // replayed ticks per reconcile, ~47 reconciles/s. Replays do nothing.
+            if (isReplaying)
                 return;
 
             if (!base.IsOwner)
@@ -724,56 +733,14 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // Live tick vs replay split:
-            // - Live tick: drive the full state machine. ApplyMovementAction handles ProcessMovementInput,
-            //   transitions evaluate (grounded/air/dash), HandleAutoDeceleration kicks in, etc.
-            // - Replay: only re-apply ProcessMovementInput. Do NOT re-tick the state machine because
-            //   its actions have non-idempotent side effects (TimerSystem.CreateTimer for dashes,
-            //   AddForce in HandleAutoDeceleration). Re-running them N times during reconcile replay
-            //   creates N timers / N forces -> extreme acceleration on owner-client.
-            //   Motor torque setter is idempotent so re-applying input is safe.
-            if (!isReplaying && _stateMachineDriver != null && _stateMachineDriver.IsReady)
+            // Drive the full movement state machine (ApplyMovementAction, transitions, auto-deceleration).
+            if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
             {
                 _stateMachineDriver.TickStateMachine();
             }
             else
             {
                 _coreMovementController.ProcessMovementInput();
-
-                // The state machine doesn't re-tick during replays, so its coasting deceleration
-                // (ApplyMovementAction.HandleAutoDeceleration) would be lost from every replayed
-                // tick and the owner would mispredict whenever rolling with no throttle.
-                //
-                // REVERTED (2026-09-15) a same-session attempt to gate this behind "only on a hard
-                // snap": under PhysicsMode.Unity, AddForce during a replayed tick only QUEUES a
-                // force - Unity integrates it at the next real physics step, not synchronously - so
-                // whether the body was rewound this reconcile has no bearing on whether a replayed
-                // tick's forces still need reproducing. Gating it broke coasting deceleration on
-                // almost every replay (soft reconcile is now the common case), which made ALL
-                // movement choppy, not just dash. See TickDeterministicDash for the matching revert.
-                if (isReplaying)
-                {
-                    ApplyReplayAutoDeceleration(md);
-
-                    // ROOT CAUSE of the remaining runaway-speed reports after the reconcile rewrite
-                    // (2026-09-16, found via a live dash under NetworkedVehicleDiagnostics): the call
-                    // to ProcessMovementInput() above runs CarMovementController.HandleDashWithPhysics()
-                    // whenever the input provider still reports IsDashing - a level signal, true for as
-                    // long as the button is held (PlayerInputController sets it on .performed, clears on
-                    // .canceled). HandleDashWithPhysics only re-enters while its own _isDashing flag is
-                    // false, but that flag is owned by CarMovementController's TimerSystem timer, which
-                    // finishes on WALL-CLOCK time. A reconcile replay can revisit a tick whose real-time
-                    // equivalent has since elapsed, so _isDashing can already read false there even
-                    // though our own per-tick counter (_dashTicksRemaining) still has the dash in
-                    // flight - and HandleDashWithPhysics silently starts a SECOND SP dash: a fresh
-                    // frame-rate-driven TimerSystem timer stacking its own AddForce on top of the one
-                    // TickDeterministicDash already applies once per tick. Measured live: dashTicks
-                    // desynced to 56 local vs 28 server and rb speed spiked to 126 m/s mid-dash, not
-                    // from reconcile itself but from this second impulse source. Stop any such timer the
-                    // instant it appears - our per-tick counter already owns the rest of this dash.
-                    if (_dashTicksRemaining > 0)
-                        StopSpDashTimer();
-                }
             }
 
             TickDeterministicDash(isReplaying);
@@ -915,17 +882,6 @@ namespace FastAndFractured.Multiplayer
             var field = SingleplayerReflectionCache.CarMovement_DashForce;
             _cachedDashForce = field != null ? (float)field.GetValue(_coreMovementController) : 0f;
             return _cachedDashForce;
-        }
-
-        private void ApplyReplayAutoDeceleration(MoveData md)
-        {
-            if (md.MoveInput.y != 0 || _customRigidbody == null) return;
-
-            Vector3 velocity = _customRigidbody.linearVelocity;
-            if (velocity.magnitude > 0.1f)
-                _customRigidbody.AddForce(-velocity.normalized * AUTO_DECELERATION_FORCE, ForceMode.Acceleration);
-            else
-                _customRigidbody.linearVelocity = Vector3.zero;
         }
 
          [Reconcile]
@@ -1080,8 +1036,20 @@ namespace FastAndFractured.Multiplayer
 
             if (positionError.sqrMagnitude > SnapDistance * SnapDistance || angleError > SnapAngleDegrees)
             {
-                // Real desync (dropped connection, respawn, teleport pad): FishNet's hard path.
-                adapter.PredictionRigidbody.Reconcile(rd.PredictionRigidbody);
+                // Real desync (dropped connection, respawn, teleport pad). Snap in WORLD space:
+                // FishNet's own Reconcile() goes through RigidbodyState, which is LOCAL to the
+                // player root, and the roots are not at the same place on server and client - the
+                // snap then put the car somewhere else entirely (measured 2026-09-24: a 235 m jump).
+                rb.position = rd.WorldPosition;
+                rb.rotation = rd.WorldRotation;
+                if (!rb.isKinematic)
+                {
+                    rb.linearVelocity = rd.WorldVelocity;
+                    rb.angularVelocity = rd.WorldAngularVelocity;
+                }
+                adapter.PredictionRigidbody.ClearPendingForces();
+                if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
+                    GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
                 return true;
             }
 
