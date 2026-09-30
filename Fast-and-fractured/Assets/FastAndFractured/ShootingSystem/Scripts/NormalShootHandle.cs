@@ -106,14 +106,6 @@ namespace FastAndFractured
                   shootingDirection = limitedShootingDirection;
                 }
 
-                // MP diagnostic: log the resolved fire request so networked shoot desyncs are traceable.
-                Vector3 normalizedAim = shootingDirection.sqrMagnitude > 0.0001f ? shootingDirection.normalized : Vector3.zero;
-                Debug.Log(
-                    $"[NormalShootHandle] FireRequest car={transform.root.name} " +
-                    $"carForward={transform.forward} aimDir={normalizedAim} " +
-                    $"rawAim={currentShootDirection} offset={directionCenterOffSet} angle={angle:F2}",
-                    this);
-
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
                 screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);

@@ -1,0 +1,29 @@
+namespace FastAndFractured.Multiplayer
+{
+    /// <summary>
+    /// Process-wide counters for the server's verdicts on predicted shots and ultimates. A rejected
+    /// predicted spawn is a projectile the shooter already saw fly and then saw vanish, so these are
+    /// the numbers that say whether client-side prediction is actually holding (see
+    /// Testing/ShootingProbe). Plain increments on the server path; nothing is networked.
+    /// </summary>
+    public static class ShootingNetworkStats
+    {
+        public static int ProjectilesAccepted;
+        public static int ProjectilesRejected;
+        public static int AbilityObjectsAccepted;
+        public static int AbilityObjectsRejected;
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void Reset()
+        {
+            ProjectilesAccepted = 0;
+            ProjectilesRejected = 0;
+            AbilityObjectsAccepted = 0;
+            AbilityObjectsRejected = 0;
+        }
+
+        public static string Describe() =>
+            $"projectiles accepted={ProjectilesAccepted} rejected={ProjectilesRejected}; " +
+            $"ultimate objects accepted={AbilityObjectsAccepted} rejected={AbilityObjectsRejected}";
+    }
+}
