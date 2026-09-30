@@ -19,6 +19,23 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         [Test]
+        public void Only_AI_left_once_every_human_is_dead()
+        {
+            // The host may skip the rest of the match once no human is alive (feedback 2026-09-30).
+            _tracker.RegisterCharacter(10, ownerClientId: 0);
+            _tracker.RegisterCharacter(20, ownerClientId: 1);
+            _tracker.RegisterCharacter(30);
+            _tracker.RegisterCharacter(40);
+
+            _tracker.ReportDeath(10);
+            Assert.IsTrue(_tracker.AnyPlayerAlive, "one human is still playing");
+
+            _tracker.ReportDeath(20);
+            Assert.IsFalse(_tracker.AnyPlayerAlive);
+            Assert.AreEqual(2, _tracker.AliveCount, "two AIs are still fighting");
+        }
+
+        [Test]
         public void TwoPlayers_OneDies_OtherWins()
         {
             _tracker.RegisterCharacter(10, ownerClientId: 0); // host
