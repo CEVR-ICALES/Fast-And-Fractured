@@ -31,7 +31,7 @@ namespace FastAndFractured.Multiplayer.Editor
     /// </summary>
     public static class CameraRigSetupTool
     {
-        private const string PlayerPrefabPath = "Assets/Multiplayer/NetworkedPlayer.prefab";
+        private const string PlayerPrefabPath = "Assets/Multiplayer/Player/Prefabs/NetworkedPlayer.prefab";
 
         /// <summary>Occlusions shorter than this are ignored, so a ray clipping an edge for one
         /// frame no longer yanks the camera.</summary>

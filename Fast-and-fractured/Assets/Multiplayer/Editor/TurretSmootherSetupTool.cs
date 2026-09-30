@@ -17,10 +17,10 @@ namespace FastAndFractured.Multiplayer.Editor
     {
         private static readonly string[] CarPrefabPaths =
         {
-            "Assets/Multiplayer/NetworkedPepeGameplayCar Variant.prefab",
-            "Assets/Multiplayer/NetworkedJosefinoGameplayCar Variant.prefab",
-            "Assets/Multiplayer/NetworkedCarmeGameplayCar Variant.prefab",
-            "Assets/Multiplayer/NetworkedMariaAntoniaGameplayCar Variant.prefab",
+            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedPepeGameplayCar Variant.prefab",
+            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedJosefinoGameplayCar Variant.prefab",
+            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedCarmeGameplayCar Variant.prefab",
+            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedMariaAntoniaGameplayCar Variant.prefab",
         };
 
         [MenuItem("Tools/Fast And Fractured/Turret Smoother - Setup (Headless)")]

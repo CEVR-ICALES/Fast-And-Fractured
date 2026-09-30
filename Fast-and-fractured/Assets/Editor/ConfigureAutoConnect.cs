@@ -9,7 +9,7 @@ using FastAndFractured.Multiplayer.Testing;
 /// </summary>
 public class ConfigureAutoConnect : EditorWindow
 {
-    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
     private const string AUTO_CONNECT_GO_NAME = "AutoConnect";
     
     [MenuItem("Multiplayer/Configure Auto-Connect")]

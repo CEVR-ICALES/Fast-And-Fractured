@@ -9,7 +9,7 @@ using FishNet.Object;
 /// </summary>
 public class SetupMultiplayerWrappers : EditorWindow
 {
-    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
     
 [MenuItem("Multiplayer/Setup Wrappers in Scene")]
 public static void ShowWindow()

@@ -13,7 +13,7 @@ namespace FastAndFractured.Multiplayer.Editor
     /// </summary>
     public class MultiplayerToolsHub : EditorWindow
     {
-        private const string MultiplayerScenePath = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+        private const string MultiplayerScenePath = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
 
         private enum StressPreset
         {

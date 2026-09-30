@@ -39,7 +39,7 @@ public class SetupMultiplayerPoolManager : EditorWindow
     private static void SetupPoolManager()
     {
         // Load scene
-        string scenePath = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+        string scenePath = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
         
         if (!System.IO.File.Exists(scenePath))
         {

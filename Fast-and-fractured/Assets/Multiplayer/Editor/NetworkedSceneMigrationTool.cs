@@ -433,11 +433,12 @@ namespace FastAndFractured.Multiplayer.Editor
             foreach (var rootGO in scene.GetRootGameObjects())
                 MigrateGameObjectTree(rootGO, ref prefabSwaps, ref sceneOnlyConverts, perDefCounts);
 
+            int overridesRestored = RestoreSwappedHazardOverrides(scene, row.SourcePath);
             int autoInitSuppressed = SuppressLevelControllerAutoInit(scene);
             int prefabsRepointed   = RepointLevelControllerPrefabs(scene);
             int interactableFixes  = EnsureInteractableInfra(scene);
 
-            if (prefabSwaps > 0 || sceneOnlyConverts > 0 || strippedOverrides > 0 || autoInitSuppressed > 0 || prefabsRepointed > 0 || interactableFixes > 0)
+            if (prefabSwaps > 0 || sceneOnlyConverts > 0 || strippedOverrides > 0 || overridesRestored > 0 || autoInitSuppressed > 0 || prefabsRepointed > 0 || interactableFixes > 0)
             {
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene, row.OutputPath);
@@ -452,6 +453,7 @@ namespace FastAndFractured.Multiplayer.Editor
                             $"  Stripped bad overrides:    {strippedOverrides}\n" +
                             $"  Prefab swaps:              {prefabSwaps}\n" +
                             $"  Scene-only converts:       {sceneOnlyConverts}\n" +
+                            $"  SP overrides restored:     {overridesRestored}\n" +
                             $"  LevelControllers gated:    {autoInitSuppressed}\n" +
                             $"  LC prefabs repointed:      {prefabsRepointed}\n{perDef}";
 
@@ -473,7 +475,7 @@ namespace FastAndFractured.Multiplayer.Editor
         // singleton preservers) gets instantiated in multiplayer: the second player's duplicate
         // singletons resolve via DESTROY_GAMEOBJECT and the match implodes (see memory:
         // project-networked-scene-player-prefab).
-        private const string NETWORKED_PLAYER_PREFAB_PATH  = "Assets/Multiplayer/NetworkedPlayer.prefab";
+        private const string NETWORKED_PLAYER_PREFAB_PATH  = "Assets/Multiplayer/Player/Prefabs/NetworkedPlayer.prefab";
         private const string NETWORKED_AI_PREFAB_PATH      = "Assets/FastAndFractured/EnemyAI/Prefabs/NetworkedEnemyAI.prefab";
 
         /// <summary>
@@ -607,6 +609,387 @@ namespace FastAndFractured.Multiplayer.Editor
             return changes;
         }
 
+        /// <summary>
+        /// A swap keeps only the transform, so everything the singleplayer map had set on a swapped
+        /// hazard was lost - the references its instance carried as overrides, the values the level
+        /// designers tuned per map, and the references other objects held to it. Measured 2026-09-30
+        /// on all three maps: the storm had no sphereCenter (UnassignedReferenceException, it could
+        /// never start), the level had no storm ("_sandStormController is null", the AI never saw
+        /// it), the storm ran on prefab defaults (maxGrowthTime, sphereRadius, kill times), and the
+        /// golf map's rising lava used the prefab's 20 s rise instead of the map's 120 s, so a car on
+        /// the low spawn point died six seconds into the match.
+        ///
+        /// Reads the singleplayer source scene and, for every swapped instance, re-applies the
+        /// instance overrides of the singleplayer one:
+        ///  - a value only where the networked variant still has the singleplayer prefab's value,
+        ///    so a deliberate multiplayer change always wins;
+        ///  - a reference only where the networked field is empty.
+        /// Then every empty reference other objects had to a swapped instance is re-pointed at the
+        /// networked one. Objects are matched by hierarchy path (a swap keeps the name, the parent
+        /// and the sibling order) and components by type and order. Returns how many properties
+        /// were restored.
+        /// </summary>
+        private static int RestoreSwappedHazardOverrides(Scene output, string sourcePath)
+        {
+            if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath)) return 0;
+            var swappedRoots = FindSwappedHazardRoots(output);
+            if (swappedRoots.Count == 0) return 0;
+
+            Scene source = EditorSceneManager.OpenScene(sourcePath, OpenSceneMode.Additive);
+            int restored = 0;
+            try
+            {
+                // Each networked instance and the singleplayer instance it replaced.
+                var replaced = new List<KeyValuePair<Transform, Transform>>();
+                foreach (var outRoot in swappedRoots)
+                {
+                    Transform srcRoot = FindByScenePath(source, ScenePath(outRoot.transform));
+                    if (srcRoot != null) replaced.Add(new KeyValuePair<Transform, Transform>(srcRoot, outRoot.transform));
+                }
+
+                // 1. The overrides of the replaced singleplayer instances.
+                foreach (var pair in replaced)
+                {
+                    Transform srcRoot = pair.Key, outRoot = pair.Value;
+                    Func<UnityEngine.Object, UnityEngine.Object> mapReference = target =>
+                    {
+                        Transform targetTransform = TransformOf(target);
+                        if (targetTransform == null) return null;
+                        return targetTransform.IsChildOf(srcRoot) ? FindEquivalent(target, srcRoot, outRoot) : MapToScene(target, output);
+                    };
+
+                    foreach (var srcTransform in srcRoot.GetComponentsInChildren<Transform>(true))
+                    {
+                        bool isRoot = srcTransform == srcRoot;
+                        var dstGameObject = FindEquivalent(srcTransform.gameObject, srcRoot, outRoot) as GameObject;
+                        if (dstGameObject == null) continue;
+                        // The swap placed and named the root itself.
+                        if (!isRoot) restored += CopyInstanceOverrides(srcTransform.gameObject, dstGameObject, mapReference);
+
+                        foreach (var srcComponent in srcTransform.GetComponents<Component>())
+                        {
+                            if (srcComponent == null || (isRoot && srcComponent is Transform)) continue;
+                            var dstComponent = FindEquivalent(srcComponent, srcRoot, outRoot);
+                            if (dstComponent != null) restored += CopyInstanceOverrides(srcComponent, dstComponent, mapReference);
+                        }
+                    }
+                }
+
+                // 2. Empty references other objects had to a replaced instance.
+                foreach (var root in source.GetRootGameObjects())
+                {
+                    foreach (var srcBehaviour in root.GetComponentsInChildren<MonoBehaviour>(true))
+                    {
+                        if (srcBehaviour == null) continue;
+                        bool insideReplaced = false;
+                        foreach (var pair in replaced)
+                            if (srcBehaviour.transform.IsChildOf(pair.Key)) { insideReplaced = true; break; }
+                        if (insideReplaced) continue;
+
+                        UnityEngine.Object outBehaviour = MapToScene(srcBehaviour, output);
+                        if (outBehaviour == null) continue;
+                        restored += CopyEmptySceneReferences(srcBehaviour, outBehaviour, target =>
+                        {
+                            Transform targetTransform = TransformOf(target);
+                            if (targetTransform == null) return null;
+                            foreach (var pair in replaced)
+                                if (targetTransform.IsChildOf(pair.Key))
+                                    return FindEquivalent(target, pair.Key, pair.Value);
+                            return null;
+                        });
+                    }
+                }
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(source, removeScene: true);
+            }
+
+            if (restored > 0)
+                Debug.Log($"[SceneMigration] Restored {restored} singleplayer override(s) lost by the prefab swaps in '{output.name}'.");
+            return restored;
+        }
+
+        /// <summary>Outermost instances of the networked variants the swap pass places.</summary>
+        private static List<Transform> FindSwappedHazardRoots(Scene scene)
+        {
+            var roots = new List<Transform>();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (PrefabUtility.IsOutermostPrefabInstanceRoot(t.gameObject) && IsNetworkedVariantInstance(t.gameObject))
+                        roots.Add(t);
+                }
+            }
+            return roots;
+        }
+
+        private static bool IsNetworkedVariantInstance(GameObject prefabInstanceRoot)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(PrefabUtility.GetCorrespondingObjectFromSource(prefabInstanceRoot));
+            return !string.IsNullOrEmpty(assetPath) && assetPath.StartsWith(PROPS_FOLDER + "/Networked", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Re-applies to <paramref name="destination"/> what the singleplayer map changed on
+        /// <paramref name="source"/> relative to the base prefab both come from (its map variant and
+        /// its scene overrides): a value only where the networked instance still has the base value,
+        /// a reference only where the networked field is empty. Fields the networked scene already
+        /// overrides are left alone, so running the pass again changes nothing.
+        /// </summary>
+        private static int CopyInstanceOverrides(UnityEngine.Object source, UnityEngine.Object destination,
+            Func<UnityEngine.Object, UnityEngine.Object> mapReference)
+        {
+            UnityEngine.Object baseObject = PrefabUtility.GetCorrespondingObjectFromOriginalSource(source);
+            if (baseObject == null || baseObject == source) return 0;
+
+            var srcSo = new SerializedObject(source);
+            var baseSo = new SerializedObject(baseObject);
+            var dstSo = new SerializedObject(destination);
+            int restored = 0;
+            var it = srcSo.GetIterator();
+            bool enterChildren = true;
+            while (it.Next(enterChildren))
+            {
+                enterChildren = it.propertyType == SerializedPropertyType.Generic;
+                if (enterChildren || IsUnityInternal(it.propertyPath)) continue;
+
+                SerializedProperty dstProp = dstSo.FindProperty(it.propertyPath);
+                if (dstProp == null || dstProp.propertyType != it.propertyType || dstProp.prefabOverride) continue;
+
+                if (it.propertyType == SerializedPropertyType.ObjectReference)
+                {
+                    UnityEngine.Object value = it.objectReferenceValue;
+                    if (value == null || dstProp.objectReferenceValue != null) continue;
+                    UnityEngine.Object mapped = EditorUtility.IsPersistent(value) ? value : mapReference(value);
+                    if (mapped == null) continue;
+                    dstProp.objectReferenceValue = mapped;
+                }
+                else
+                {
+                    if (!IsCopyableValue(it.propertyType)) continue;
+                    object srcValue = it.boxedValue, dstValue = dstProp.boxedValue;
+                    if (Equals(srcValue, dstValue)) continue;
+                    // The networked variant changed this value itself: keep the multiplayer one.
+                    // (An array element past the base's size has no base value to compare with.)
+                    SerializedProperty baseProp = baseSo.FindProperty(it.propertyPath);
+                    if (baseProp != null && !Equals(baseProp.boxedValue, dstValue)) continue;
+                    dstProp.boxedValue = srcValue;
+                }
+                restored++;
+                Debug.Log($"[SceneMigration] Restored {destination.GetType().Name}.{it.propertyPath} on '{ScenePath(TransformOf(destination))}'.");
+            }
+            if (restored > 0)
+            {
+                dstSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(destination);
+            }
+            return restored;
+        }
+
+        private static bool IsCopyableValue(SerializedPropertyType type)
+        {
+            switch (type)
+            {
+                case SerializedPropertyType.Integer:
+                case SerializedPropertyType.Boolean:
+                case SerializedPropertyType.Float:
+                case SerializedPropertyType.String:
+                case SerializedPropertyType.Color:
+                case SerializedPropertyType.LayerMask:
+                case SerializedPropertyType.Enum:
+                case SerializedPropertyType.Vector2:
+                case SerializedPropertyType.Vector3:
+                case SerializedPropertyType.Vector4:
+                case SerializedPropertyType.Rect:
+                case SerializedPropertyType.ArraySize:
+                case SerializedPropertyType.AnimationCurve:
+                case SerializedPropertyType.Bounds:
+                case SerializedPropertyType.Quaternion:
+                case SerializedPropertyType.Vector2Int:
+                case SerializedPropertyType.Vector3Int:
+                case SerializedPropertyType.RectInt:
+                case SerializedPropertyType.BoundsInt:
+                case SerializedPropertyType.Hash128:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Copies every scene-object reference of <paramref name="source"/> that <paramref name="map"/>
+        /// resolves into the same field of <paramref name="destination"/>, where that field is empty.
+        /// Arrays of references the destination does not have yet are grown to the source's size.
+        /// </summary>
+        private static int CopyEmptySceneReferences(UnityEngine.Object source, UnityEngine.Object destination,
+            Func<UnityEngine.Object, UnityEngine.Object> map)
+        {
+            var srcSo = new SerializedObject(source);
+            var dstSo = new SerializedObject(destination);
+            int restored = 0;
+            var it = srcSo.GetIterator();
+            bool enterChildren = true;
+            while (it.Next(enterChildren))
+            {
+                enterChildren = it.propertyType == SerializedPropertyType.Generic;
+                if (it.isArray && it.propertyType == SerializedPropertyType.Generic && it.arrayElementType.StartsWith("PPtr<", StringComparison.Ordinal))
+                {
+                    var dstArray = dstSo.FindProperty(it.propertyPath);
+                    if (dstArray != null && dstArray.isArray && dstArray.arraySize == 0 && it.arraySize > 0)
+                        dstArray.arraySize = it.arraySize;
+                    continue;
+                }
+                if (it.propertyType != SerializedPropertyType.ObjectReference || IsUnityInternal(it.propertyPath)) continue;
+                UnityEngine.Object value = it.objectReferenceValue;
+                if (value == null || EditorUtility.IsPersistent(value)) continue;
+
+                var dstProp = dstSo.FindProperty(it.propertyPath);
+                if (dstProp == null || dstProp.propertyType != SerializedPropertyType.ObjectReference || dstProp.objectReferenceValue != null) continue;
+                UnityEngine.Object mapped = map(value);
+                if (mapped == null) continue;
+
+                dstProp.objectReferenceValue = mapped;
+                restored++;
+                Debug.Log($"[SceneMigration] Restored {destination.GetType().Name}.{it.propertyPath} on '{ScenePath(TransformOf(destination))}' -> '{ScenePath(TransformOf(mapped))}'.");
+            }
+            if (restored > 0)
+            {
+                dstSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(destination);
+            }
+            return restored;
+        }
+
+        // Unity's own bookkeeping and the hierarchy itself: never copied between instances (copying
+        // Transform.m_Children linked children twice to their parent).
+        private static readonly string[] UnityInternalProperties =
+        {
+            "m_Script", "m_GameObject", "m_PrefabInstance", "m_CorrespondingSourceObject", "m_PrefabAsset",
+            "m_Children", "m_Father", "m_Component", "m_ObjectHideFlags", "m_EditorHideFlags",
+        };
+
+        private static bool IsUnityInternal(string propertyPath)
+        {
+            foreach (string name in UnityInternalProperties)
+                if (propertyPath == name || propertyPath.StartsWith(name + ".", StringComparison.Ordinal))
+                    return true;
+            return false;
+        }
+
+        private static Transform TransformOf(UnityEngine.Object obj) =>
+            obj is GameObject go ? go.transform : obj is Component c ? c.transform : null;
+
+        /// <summary>"Root#0/Child#1": names, and which of the same-named siblings.</summary>
+        private static string ScenePath(Transform t)
+        {
+            if (t == null) return null;
+            var parts = new List<string>();
+            for (Transform current = t; current != null; current = current.parent)
+                parts.Add($"{current.name}#{SameNameIndex(current)}");
+            parts.Reverse();
+            return string.Join("/", parts);
+        }
+
+        private static int SameNameIndex(Transform t)
+        {
+            int index = 0;
+            if (t.parent != null)
+            {
+                for (int i = 0; i < t.parent.childCount; i++)
+                {
+                    Transform sibling = t.parent.GetChild(i);
+                    if (sibling == t) return index;
+                    if (sibling.name == t.name) index++;
+                }
+                return index;
+            }
+            foreach (var root in t.gameObject.scene.GetRootGameObjects())
+            {
+                if (root.transform == t) return index;
+                if (root.name == t.name) index++;
+            }
+            return index;
+        }
+
+        private static Transform FindByScenePath(Scene scene, string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            string[] parts = path.Split('/');
+            Transform current = null;
+            for (int p = 0; p < parts.Length; p++)
+            {
+                int hash = parts[p].LastIndexOf('#');
+                string name = parts[p].Substring(0, hash);
+                int wanted = int.Parse(parts[p].Substring(hash + 1));
+                int seen = 0;
+                Transform next = null;
+                if (current == null)
+                {
+                    foreach (var root in scene.GetRootGameObjects())
+                        if (root.name == name && seen++ == wanted) { next = root.transform; break; }
+                }
+                else
+                {
+                    for (int i = 0; i < current.childCount; i++)
+                    {
+                        Transform child = current.GetChild(i);
+                        if (child.name == name && seen++ == wanted) { next = child; break; }
+                    }
+                }
+                if (next == null) return null;
+                current = next;
+            }
+            return current;
+        }
+
+        /// <summary>The object at the same path in <paramref name="scene"/> (same component type and order).</summary>
+        private static UnityEngine.Object MapToScene(UnityEngine.Object obj, Scene scene)
+        {
+            Transform target = FindByScenePath(scene, ScenePath(TransformOf(obj)));
+            return target == null ? null : SameObjectOn(obj, target);
+        }
+
+        /// <summary>The object at the same path below <paramref name="toRoot"/> as <paramref name="obj"/> is below <paramref name="fromRoot"/>.</summary>
+        private static UnityEngine.Object FindEquivalent(UnityEngine.Object obj, Transform fromRoot, Transform toRoot)
+        {
+            Transform t = TransformOf(obj);
+            if (t == null) return null;
+            var parts = new List<string>();
+            for (Transform current = t; current != fromRoot; current = current.parent)
+            {
+                if (current == null) return null;
+                parts.Add($"{current.name}#{SameNameIndex(current)}");
+            }
+            Transform target = toRoot;
+            for (int p = parts.Count - 1; p >= 0 && target != null; p--)
+            {
+                int hash = parts[p].LastIndexOf('#');
+                string name = parts[p].Substring(0, hash);
+                int wanted = int.Parse(parts[p].Substring(hash + 1));
+                int seen = 0;
+                Transform next = null;
+                for (int i = 0; i < target.childCount; i++)
+                {
+                    Transform child = target.GetChild(i);
+                    if (child.name == name && seen++ == wanted) { next = child; break; }
+                }
+                target = next;
+            }
+            return target == null ? null : SameObjectOn(obj, target);
+        }
+
+        private static UnityEngine.Object SameObjectOn(UnityEngine.Object obj, Transform target)
+        {
+            if (obj is GameObject) return target.gameObject;
+            if (!(obj is Component component)) return null;
+            var mine = component.GetComponents(component.GetType());
+            int index = Array.IndexOf(mine, component);
+            var theirs = target.GetComponents(component.GetType());
+            return index >= 0 && index < theirs.Length ? theirs[index] : null;
+        }
+
         private static int SuppressLevelControllerAutoInit(Scene scene)
         {
             int suppressed = 0;
@@ -718,6 +1101,9 @@ namespace FastAndFractured.Multiplayer.Editor
                 MigrateGameObjectTree(root, ref prefabSwaps, ref sceneOnlyConverts, perDefCounts);
             }
 
+            // The swaps keep only the transform; bring back the scene wiring from the source.
+            int overridesRestored = RestoreSwappedHazardOverrides(scene, row.SourcePath);
+
             // Disable LC auto-init in the scene file — wrapper will drive Construct/Initialize.
             int autoInitSuppressed = SuppressLevelControllerAutoInit(scene);
 
@@ -748,6 +1134,7 @@ namespace FastAndFractured.Multiplayer.Editor
             string report = $"Migrated  {row.OutputName}\n" +
                             $"  Prefab swaps:           {prefabSwaps}\n" +
                             $"  Scene-only converts:    {sceneOnlyConverts}\n" +
+                            $"  SP overrides restored: {overridesRestored}\n" +
                             $"  LevelControllers gated: {autoInitSuppressed}\n" +
                             $"  LC prefabs repointed:   {prefabsRepointed}\n{perDef}{extras}";
 
@@ -855,6 +1242,13 @@ namespace FastAndFractured.Multiplayer.Editor
                     // Skip if we already swapped this prefab instance in a previous tree visit
                     // (e.g. encountered the root and a hazard-carrying child in the same migration).
                     if (!swappedRootInstanceIds.Add(prefabRoot.GetInstanceID()))
+                        return;
+
+                    // Already a networked variant whose wrapper sits on another object than the
+                    // singleplayer component (SuckingBuildingPrefab, DeadZones*): nothing to swap.
+                    // Re-swapping it replaced the instance on every Reapply - new file ids and
+                    // SceneIds each run (1229 changed lines in MountainVillage, 2026-09-30).
+                    if (IsNetworkedVariantInstance(prefabRoot))
                         return;
 
                     bool replaced = TryReplaceWithNetworkedVariant(prefabRoot, matched, out var newGo);

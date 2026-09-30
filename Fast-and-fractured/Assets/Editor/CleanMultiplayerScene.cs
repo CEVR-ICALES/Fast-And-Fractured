@@ -8,7 +8,7 @@ using UnityEditor.SceneManagement;
 /// </summary>
 public class CleanMultiplayerScene : EditorWindow
 {
-    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
     
     private Vector2 scrollPosition;
     private bool foundIssues = false;

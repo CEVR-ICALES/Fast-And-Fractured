@@ -12,7 +12,7 @@ using Utilities;
 /// </summary>
 public class AutomatedMultiplayerTestSetup : EditorWindow
 {
-    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+    private const string TARGET_SCENE_PATH = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
     private const string TEST_COORDINATOR_NAME = "TestCoordinator";
     private const string POOL_MANAGER_NAME = "ObjectPoolManager";
     

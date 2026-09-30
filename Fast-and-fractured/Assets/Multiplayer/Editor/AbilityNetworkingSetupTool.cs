@@ -26,10 +26,10 @@ namespace FastAndFractured.Multiplayer.EditorTools
         private const string ASCENDING_VARIANT = "Assets/Multiplayer/Pool/NetworkedAscendingTomato Variant.prefab";
         private const string DESCENDING_SOURCE = "Assets/FastAndFractured/Characters/Pepe/Prefabs/DescendingTomato.prefab";
         private const string DESCENDING_VARIANT = "Assets/Multiplayer/Pool/NetworkedDescendingTomato Variant.prefab";
-        private const string PEPE_CAR = "Assets/Multiplayer/NetworkedPepeGameplayCar Variant.prefab";
+        private const string PEPE_CAR = "Assets/Multiplayer/Vehicles/Prefabs/NetworkedPepeGameplayCar Variant.prefab";
         private const string CHICKEN_SOURCE = "Assets/FastAndFractured/Characters/Carme/McChicken/Prefab/McChickenUniqueAbility.prefab";
         private const string CHICKEN_VARIANT = "Assets/Multiplayer/Props/NetworkedMcChickenAbility.prefab";
-        private const string CARME_CAR = "Assets/Multiplayer/NetworkedCarmeGameplayCar Variant.prefab";
+        private const string CARME_CAR = "Assets/Multiplayer/Vehicles/Prefabs/NetworkedCarmeGameplayCar Variant.prefab";
 
         private const string INTERACTABLES_SPAWNABLE = "Assets/Multiplayer/Lobby/Resources/NetworkedInteractablesSpawnable.prefab";
         private const string GOLBAT_VARIANT = "Assets/Multiplayer/Pool/NetworkedPushShootGolBat Variant.prefab";

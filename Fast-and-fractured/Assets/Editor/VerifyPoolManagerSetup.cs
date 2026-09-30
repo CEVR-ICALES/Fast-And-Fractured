@@ -18,7 +18,7 @@ public class VerifyPoolManagerSetup : EditorWindow
     private static void VerifySetup()
     {
         // Load scene
-        string scenePath = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+        string scenePath = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
         var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
         
         // Find ObjectPoolManager
