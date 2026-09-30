@@ -217,7 +217,7 @@ namespace FastAndFractured.Multiplayer.Testing.Editor
 
             if (GUILayout.Button("Open MultiplayerRoomTest Scene", GUILayout.Height(25)))
             {
-                string scenePath = "Assets/Multiplayer/MultiplayerRoomTest.unity";
+                string scenePath = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
                 if (System.IO.File.Exists(scenePath))
                 {
                     if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
