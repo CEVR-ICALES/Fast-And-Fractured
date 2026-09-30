@@ -109,17 +109,16 @@ namespace FastAndFractured.Multiplayer.Tests
         #region NetworkedProjectile Tests
 
         [Test]
-        public void NetworkedProjectile_HasReconcileData()
+        public void NetworkedProjectile_IsNotReconciled()
         {
-            var reconcileDataType = typeof(NetworkedProjectile).GetNestedType("ReconcileData");
-            Assert.IsNotNull(reconcileDataType, "NetworkedProjectile should have ReconcileData struct");
-
-            Assert.IsNotNull(reconcileDataType.GetField("Position"),
-                "ReconcileData should have Position field");
-            Assert.IsNotNull(reconcileDataType.GetField("Velocity"),
-                "ReconcileData should have Velocity field");
-            Assert.IsNotNull(reconcileDataType.GetField("Bounces"),
-                "ReconcileData should have Bounces field");
+            // A shot has no input to predict: every peer flies it from the same launch state and the
+            // server's despawn ends it. Reconciling it (the previous design) snapped the owner's shot
+            // back to the server's older position and could not re-simulate the gap under
+            // PhysicsMode.Unity - see NetworkedProjectile's class doc for the measurements.
+            Assert.IsNull(typeof(NetworkedProjectile).GetNestedType("ReconcileData"),
+                "NetworkedProjectile must not be reconciled");
+            Assert.IsNull(typeof(NetworkedProjectile).GetNestedType("MoveData"),
+                "NetworkedProjectile has no input to replicate");
         }
 
         [Test]

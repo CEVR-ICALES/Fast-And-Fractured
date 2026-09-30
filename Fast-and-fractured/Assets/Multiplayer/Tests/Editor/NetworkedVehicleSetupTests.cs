@@ -50,6 +50,18 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         [TestCaseSource(nameof(CarPrefabCases))]
+        public void Car_resolves_to_the_multiplayer_rigidbody_adapter(GameObject prefab)
+        {
+            // Carme's variant kept the singleplayer UnityRigidbodyAdapter next to the multiplayer
+            // one, GetComponent<ICustomRigidbody>() returned the singleplayer adapter, and her car
+            // was never reconciled (2026-09-30). Fix: VehicleRigidbodyAdapterSetupTool.
+            Assert.That(prefab.GetComponent<UnityRigidbodyAdapter>(), Is.Null,
+                $"{prefab.name} still has the singleplayer UnityRigidbodyAdapter.");
+            Assert.That(prefab.GetComponent<FastAndFractured.Utilities.ICustomRigidbody>(), Is.InstanceOf<MultiplayerRigidbodyAdapter>(),
+                $"{prefab.name}: ICustomRigidbody must resolve to MultiplayerRigidbodyAdapter, or the car is never reconciled.");
+        }
+
+        [TestCaseSource(nameof(CarPrefabCases))]
         public void Car_has_prediction_enabled_as_rigidbody(GameObject prefab)
         {
             NetworkObject nob = prefab.GetComponent<NetworkObject>();
@@ -113,6 +125,21 @@ namespace FastAndFractured.Multiplayer.Tests
             // reconcile has nothing to restore and the car desyncs from the server.
             Assert.That(prefab.GetComponent<MultiplayerRigidbodyAdapter>(), Is.Not.Null,
                 $"{prefab.name}: missing MultiplayerRigidbodyAdapter.");
+        }
+
+        [TestCaseSource(nameof(CarPrefabCases))]
+        public void Car_tick_smoothers_target_their_own_car(GameObject prefab)
+        {
+            // Carme's smoothers targeted the root of Pepe's prefab asset, and every spawn of her
+            // car logged "Setting the parent of a transform which resides in a Prefab Asset" twice
+            // (2026-09-30). Fix: VehicleTickSmootherTargetSetupTool.
+            foreach (var smoother in prefab.GetComponentsInChildren<NetworkTickSmoother>(true))
+            {
+                var target = new SerializedObject(smoother)
+                    .FindProperty("_initializationSettings.TargetTransform").objectReferenceValue as Transform;
+                Assert.That(target == null || target.IsChildOf(prefab.transform), Is.True,
+                    $"{prefab.name}/{smoother.name}: the tick smoother targets '{target?.root.name}', another prefab.");
+            }
         }
 
         private static void AssertChildSmoothed(GameObject prefab, string childName)
