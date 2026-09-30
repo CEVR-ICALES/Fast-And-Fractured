@@ -25,6 +25,7 @@ namespace FastAndFractured
         [SerializeField]
         private bool limitRbSpeed = false;
         private ITimer _explosionTimer;
+        [SerializeField] private float limitRbSpeedLimit = 1000f;
 
 
         //Provisinal value to select the type force aplication 
@@ -84,7 +85,7 @@ namespace FastAndFractured
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyImpulse(direction, closestPoint, forceToApply , forceMode,limitRbSpeed,explosionImpulseTime,stopSpeedOnHit); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyImpulse(direction, closestPoint, forceToApply , forceMode,limitRbSpeed,explosionImpulseTime,stopSpeedOnHit,limitRbSpeedLimit); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                     if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
                     {

@@ -43,6 +43,8 @@ namespace FastAndFractured {
         [SerializeField]
         private TrampolineAnimations trampolineAnimations;
 
+        private const float TRAMPOLINE_SPEED_LIMIT = 600f;
+
 
 
 
@@ -109,7 +111,7 @@ namespace FastAndFractured {
         private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
-            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,true);
+            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, true, _landingTime,false,TRAMPOLINE_SPEED_LIMIT);
         }
 
 
@@ -126,7 +128,7 @@ namespace FastAndFractured {
         private void ParabolicRangeMovement(Rigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
-            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true);
+            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true,TRAMPOLINE_SPEED_LIMIT);
         }
 
         private void ParabolicRangeMovement(Rigidbody rb)

@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionRadius: 5
-  pushForce: 350000
+  pushForce: 200000
   explosionCenterOffset: {x: 0, y: 0, z: 0}
   explosionHitbox: {fileID: 8587492930792698581}
   damagePercentage: 0.3
@@ -191,10 +191,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   averageCarWeight: 1150
-  carWeightImportance: 0.2
+  carWeightImportance: 0.6
   forceToOtherObjects: 10
   forceMode: 1
-  screenShakeSourceController: {fileID: 0}
+  explosionImpulseTime: 1
+  stopSpeedOnHit: 0
+  limitRbSpeed: 0
   isGrounded: 1
 --- !u!135 &3316070567144309248
 SphereCollider:

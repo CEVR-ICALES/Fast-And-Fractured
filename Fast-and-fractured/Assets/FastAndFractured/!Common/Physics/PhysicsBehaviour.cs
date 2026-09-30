@@ -219,50 +219,52 @@ namespace FastAndFractured
             }
         }
 
-        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum, float speedLimit)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
             _carMovementController.IsBeenImpulsed = true;
             _rb.AddForce(force, forceMode);
-            if (!limitRbSpeed)
-            {
-                // if (!_carMovementController.IsDashing)
-                // {
-                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
-                // }
-                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+         ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
-                    // if (!_carMovementController.IsDashing)
-                    // {
-                        _carMovementController.SetMaxRbSpeedDelayed();
-                        _carMovementController.IsBeenImpulsed = false;
-                    // }
+                     if (_isTouchingGround)
+                     {
+                         _carMovementController.SetMaxRbSpeedDelayed();
+                         _carMovementController.IsBeenImpulsed = false;
+                         impulseTimer = null;
+                     }
+                }, onTimerDecreaseComplete: () =>
+                {
+                    _carMovementController.SetMaxRbSpeedDelayed();
+                    _carMovementController.IsBeenImpulsed = false;
+                    impulseTimer = null;
                 });
-            }
         }
 
-        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
+        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum,float speedLimit)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
             _carMovementController.IsBeenImpulsed = true;
             ApplyForce(forceDirection, forcePoint, forceToApply, forceMode);
-            if (!limitRbSpeed)
-            {
-                // if (!_carMovementController.IsDashing)
-                // {
-                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
-                // }
-                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+            ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
-                    // if (!_carMovementController.IsDashing)
-                    // {
-                        _carMovementController.SetMaxRbSpeedDelayed();
-                        _carMovementController.IsBeenImpulsed = false;
-                    // }
+                     if (_isTouchingGround)
+                     {
+                         _carMovementController.SetMaxRbSpeedDelayed();
+                         _carMovementController.IsBeenImpulsed = false;
+                         impulseTimer = null;
+                     }
+                }, onTimerDecreaseComplete: () =>
+                {
+                    _carMovementController.SetMaxRbSpeedDelayed();
+                    _carMovementController.IsBeenImpulsed = false;
+                    impulseTimer = null;
                 });
-            }
         }
 
         public void AddForce(Vector3 force, ForceMode forceMode)
