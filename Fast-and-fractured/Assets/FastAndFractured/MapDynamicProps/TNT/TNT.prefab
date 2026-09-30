@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionRadius: 5
-  pushForce: 200000
+  pushForce: 45000
   explosionCenterOffset: {x: 0, y: 0, z: 0}
   explosionHitbox: {fileID: 8587492930792698581}
   damagePercentage: 0.3
@@ -197,6 +197,7 @@ MonoBehaviour:
   explosionImpulseTime: 1
   stopSpeedOnHit: 0
   limitRbSpeed: 0
+  limitRbSpeedLimit: 1000
   isGrounded: 1
 --- !u!135 &3316070567144309248
 SphereCollider:
