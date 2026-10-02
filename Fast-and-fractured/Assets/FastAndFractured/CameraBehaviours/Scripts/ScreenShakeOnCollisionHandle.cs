@@ -2,12 +2,7 @@ using FastAndFractured;
 using StateMachine;
 using Unity.Cinemachine;
 using UnityEngine;
-
-public enum ScreenShakeOnCollisionType
-{
-    Listener,
-    Source,
-}
+using Enums;
 public class ScreenShakeOnCollisionHandle : MonoBehaviour
 {
     [Tooltip("Listener is prepared only for players with a camera. Since is waiting form something to impact. The Source will cause impact only if the characte have a camera.")]

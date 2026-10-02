@@ -244,4 +244,10 @@ namespace Enums
         Chassis,
         Wheel
     }
+
+    public enum ScreenShakeOnCollisionType
+    {
+    Listener,
+    Source,
+    }
 }
