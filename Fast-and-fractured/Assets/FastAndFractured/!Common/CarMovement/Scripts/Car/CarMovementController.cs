@@ -431,9 +431,9 @@ namespace FastAndFractured
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
-                    if(_physicsBehaviour.Rb.linearVelocity.magnitude < _currentRbMaxVelocity)
+                    if(_physicsBehaviour.Rb?.linearVelocity.magnitude < _currentRbMaxVelocity)
                     {
-                    _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
+                    _physicsBehaviour?.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                     }
                 });
 
