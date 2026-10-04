@@ -22,7 +22,6 @@ namespace FastAndFractured
             {
                 TimerSystem.Instance.CreateTimer(waitingTimeUntilEverythingIsLoaded, onTimerDecreaseComplete: () =>
                 {
-                    Debug.Log("RecoverSelectedMenuController: Loading Screens in Scene");
                     LoadScreensInScene();
                 });
             }
