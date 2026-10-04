@@ -31,7 +31,9 @@ public class MenuInputsController : MonoBehaviour
 
         private bool CompareCurrentScreenType(ScreensType screenType)
         {
-            return MainMenuManager.Instance.CurrentScreen.screenType == screenType;
+            MainMenuManager menuManager = MainMenuManager.Instance;
+            MenuScreen currentScreen = menuManager != null ? menuManager.CurrentScreen : null;
+            return currentScreen != null && currentScreen.screenType == screenType;
         }
 
         private void LoadSceneIfReady(int sceneIndex)
