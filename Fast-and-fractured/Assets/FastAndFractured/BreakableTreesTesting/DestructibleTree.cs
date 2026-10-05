@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DestructibleTree : MonoBehaviour
 {
-    private const string PLAYER_TAG = "Player";
+    private const string CHARACTER_TAG = "Character";
 
     [SerializeField] private GameObject normalTree;
     [SerializeField] private ParticleSystem starEffect;
@@ -10,15 +10,23 @@ public class DestructibleTree : MonoBehaviour
     [SerializeField] private ParticleSystem dustEffect;
     [SerializeField] private ParticleSystem leavesEffect;
     [SerializeField] private ParticleSystem woodChunksEffect;
+    [SerializeField] private Collider collider;
 
     private bool _hasSwapped;
 
+    private void Start()
+    {
+        if (collider == null)
+        {
+            collider = GetComponent<Collider>();
+        }
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (_hasSwapped)
             return;
 
-        if (!other.CompareTag(PLAYER_TAG))
+        if (!other.gameObject.CompareTag(CHARACTER_TAG))
             return;
 
         SwapTree();
@@ -36,6 +44,7 @@ public class DestructibleTree : MonoBehaviour
         PlayEffect(dustEffect);
         PlayEffect(leavesEffect);
         PlayEffect(woodChunksEffect);
+        collider.enabled = false;
     }
 
     private static void PlayEffect(ParticleSystem effect)
