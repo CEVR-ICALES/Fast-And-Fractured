@@ -97,9 +97,6 @@ namespace FastAndFractured
         private ITimer _slowDownAngularMomentumTimer;
         private IInputProvider _inputProvider;
 
-        [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
-
 
         private void Start()
         {
