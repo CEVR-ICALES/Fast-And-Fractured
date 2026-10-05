@@ -14,7 +14,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &6904230709162689742
 Transform:
@@ -128,16 +128,15 @@ GameObject:
   m_Component:
   - component: {fileID: 1938398097805492116}
   - component: {fileID: 1508940272150127419}
-  - component: {fileID: 2891626825332481097}
   - component: {fileID: 918240824387977664}
   - component: {fileID: 675361201345302003}
   - component: {fileID: 367576969032583763}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: GolfBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1938398097805492116
 Transform:
@@ -176,19 +175,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2891626825332481097
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4335951099628442604}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d2967b480714674c86ea81c0126ece1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbodyToPause: {fileID: 367576969032583763}
 --- !u!114 &918240824387977664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,6 +192,8 @@ MonoBehaviour:
   baseSpeedOnHit: 200
   reduceVelocityTime: 5
   timeOnMaxSpeed: 2
+  reductionBaseCarStrenght: 10
+  reductionYValueOfBaseCarStrenghtVector: 50
   massFactor:
     serializedVersion: 2
     m_Curve:
@@ -230,7 +218,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  baseForce: 50000
+  baseForceToApplyToCars: 50000
+  baseForceToApplyToOtherBalls: 1700
   speedFactor:
     serializedVersion: 2
     m_Curve:
@@ -255,6 +244,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  onOutOfBounds:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &675361201345302003
 MonoBehaviour:
   m_ObjectHideFlags: 0
