@@ -47,6 +47,13 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
                 }
             }
         }
+        else if(other.TryGetComponent(out GolfBallBehaviour golfBallBehaviour))
+        {
+             if (!other.GetComponent<Rigidbody>().isKinematic)
+            {
+                golfBallBehaviour.OutOfBoundsEvent();
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other) 
@@ -59,6 +66,13 @@ public class DeadWallsBehaivour : MonoBehaviour, IKillCharacters, IPausable
                 {
                     CharacterEscapedDead(statsController);
                 }
+            }
+        }
+        else if(other.TryGetComponent(out GolfBallBehaviour golfBallBehaviour))
+        {
+             if (!other.GetComponent<Rigidbody>().isKinematic)
+            {
+                golfBallBehaviour.CancelOutOfBoundsEvent();
             }
         }
     }

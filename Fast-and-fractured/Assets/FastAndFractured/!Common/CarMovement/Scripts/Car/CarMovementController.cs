@@ -75,8 +75,8 @@ namespace FastAndFractured
 
         private bool _isGoingUphill;
         private bool _isGoingDownhill;
-        private bool _isInTrampolin = false;
-        public bool IsInTrampolin { set => _isInTrampolin = value; }
+        private bool _isBeenImpulsed = false;
+        public bool IsBeenImpulsed { set => _isBeenImpulsed = value; }
         private float _targetSteerAngle;
         private float _currentSteerAngle;
         private float _currentRbMaxVelocity;
@@ -96,9 +96,6 @@ namespace FastAndFractured
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
         private IInputProvider _inputProvider;
-
-        [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
 
 
         private void Start()
@@ -142,7 +139,10 @@ namespace FastAndFractured
 
         public void SetMaxRbSpeed(float newMaxRbSpeed)
         {
+            if(!_isBeenImpulsed)
+            {
             _currentRbMaxVelocity = newMaxRbSpeed;
+            }
         }
 
         private void SmoothAccelerationAndDeacceleration()
@@ -428,9 +428,9 @@ namespace FastAndFractured
                 }, onTimerDecreaseUpdate: (progress) =>
                 {
                     onDashCooldownUpdate?.Invoke(statsController.DashTime - progress, statsController.DashTime);
-                    if(_physicsBehaviour.Rb.linearVelocity.magnitude < _currentRbMaxVelocity)
+                    if(_physicsBehaviour.Rb?.linearVelocity.magnitude < _currentRbMaxVelocity)
                     {
-                    _physicsBehaviour.AddForce(dashDirection * dashForce, ForceMode.Impulse);
+                    _physicsBehaviour?.AddForce(dashDirection * dashForce, ForceMode.Impulse);
                     }
                 });
 
@@ -442,7 +442,7 @@ namespace FastAndFractured
         {
             _isDashing = false;
             _physicsBehaviour.UnblockRigidBodyRotations();
-            _currentRbMaxVelocity = statsController.MaxSpeed;
+            SetMaxRbSpeed(statsController.MaxSpeed);
             _physicsBehaviour.IsCurrentlyDashing = false;
             vehicleVfxController.StopDashVfx();
             _dashCooldown = TimerSystem.Instance.CreateTimer(statsController.DashCooldown, onTimerDecreaseComplete: () =>
@@ -469,7 +469,7 @@ namespace FastAndFractured
 
         private void UpdateMaxRbSpeedOnSlopes()
         {
-            if (!IsDashing && !_isBraking && !_isInTrampolin)
+            if (!IsDashing && !_isBraking && !_isBeenImpulsed)
             {
                 if (_isGoingUphill)
                 {

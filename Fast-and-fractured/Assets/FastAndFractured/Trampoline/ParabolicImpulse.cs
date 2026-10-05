@@ -19,7 +19,10 @@ namespace FastAndFractured {
         private float startSpeedMagnitudeToImpulse = 10f;
         [SerializeField]
         private landingCheck landindCheck;
-        private float _landingTime;
+
+        [Header("No Range Dependent values")]
+        [SerializeField]
+        private float _landingTime = 1f;
 
         [Header("Speed dependent values")]
 
@@ -40,6 +43,8 @@ namespace FastAndFractured {
         [SerializeField]
         private TrampolineAnimations trampolineAnimations;
 
+        private const float TRAMPOLINE_SPEED_LIMIT = 600f;
+
 
 
 
@@ -48,8 +53,10 @@ namespace FastAndFractured {
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
+            if(rangeDependent){
             landindCheck.onLanding.AddListener(SetLandingTime);
             landindCheck.StartChecking(ParabolicForce(landindCheck.GetRigidbody()), ForceMode.VelocityChange);
+            }
         }
 
         // Update is called once per frame
@@ -80,7 +87,7 @@ namespace FastAndFractured {
                     Rigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
                     if (!rangeDependent)
                     {
-                        ImpulseRigydbody(rb, rb.linearVelocity, GENERIC_MASS);
+                        ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
                     }
                     else
                     {
@@ -104,7 +111,7 @@ namespace FastAndFractured {
         private void ImpulseRigydbody(Rigidbody rb, Vector3 startingVelocity, float maxWeightReference,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 velocity = ImpulseForce(rb, startingVelocity, maxWeightReference);
-            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, false, _landingTime,false);
+            physicsBehaviour.ApplyImpulse(velocity, ForceMode.VelocityChange, true, _landingTime,false,TRAMPOLINE_SPEED_LIMIT);
         }
 
 
@@ -121,7 +128,7 @@ namespace FastAndFractured {
         private void ParabolicRangeMovement(Rigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
-            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true);
+            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true,TRAMPOLINE_SPEED_LIMIT);
         }
 
         private void ParabolicRangeMovement(Rigidbody rb)

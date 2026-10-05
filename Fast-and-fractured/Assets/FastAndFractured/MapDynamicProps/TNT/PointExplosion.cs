@@ -27,17 +27,22 @@ namespace FastAndFractured
         {
             if (collision.gameObject.TryGetComponent(out PhysicsBehaviour physicsBehaviour) && physicsBehaviour.StatsController != null)
             {
-                if (explosionHitbox != null)
+                ExplodePoint();
+            }
+        }
+
+        public void ExplodePoint()
+        {
+            if (explosionHitbox != null)
                 {
                     explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, explosionCenterOffset,startHitTime,endHitTime);
                     visuals.SetActive(false);
                     TimerSystem.Instance.CreateTimer(endingTime, onTimerDecreaseComplete: () =>
                     {
-                        physicsBehaviour.StatsController.TakeEndurance(physicsBehaviour.StatsController.MaxEndurance * damagePercentage, false, gameObject);
+                        // physicsBehaviour.StatsController.TakeEndurance(physicsBehaviour.StatsController.MaxEndurance * damagePercentage, false, gameObject);
                         gameObject.SetActive(false);
                     });
                 }
-            }
         }
     }
 }
