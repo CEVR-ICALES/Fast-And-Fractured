@@ -33,12 +33,16 @@ public class GolfBallSpawnHandle : MonoBehaviour
        ITimer relocateTimer = TimerSystem.Instance.CreateTimer(waitTillRelocate, onTimerDecreaseComplete: () =>
         {
             golfBallBehaviour.transform.position = initialPosWithYOffset;
+            onCurrentOutOfBounds.Remove(golfBallBehaviour);
         });
+        if(!onCurrentOutOfBounds.ContainsKey(golfBallBehaviour)){
         onCurrentOutOfBounds.Add(golfBallBehaviour,relocateTimer);
+        }
     }
 
     private void StopRelocateTimer(GolfBallBehaviour golfBallBehaviour)
     {
         onCurrentOutOfBounds[golfBallBehaviour].StopTimer();
+        onCurrentOutOfBounds.Remove(golfBallBehaviour);
     }
 }
