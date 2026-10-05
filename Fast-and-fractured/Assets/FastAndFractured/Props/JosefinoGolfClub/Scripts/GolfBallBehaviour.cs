@@ -5,6 +5,7 @@ using Utilities;
 
 public class GolfBallBehaviour : MonoBehaviour, ICanBeImpulseByTrampoline
 {
+    public Rigidbody Rb {get=>rb;}
     [SerializeField]
     private Rigidbody rb;
 
@@ -49,7 +50,9 @@ public class GolfBallBehaviour : MonoBehaviour, ICanBeImpulseByTrampoline
 
     private ITimer _impulsedTimer;
 
-    public UnityEvent<Vector3> onOutOfBounds;
+    public UnityEvent<Vector3,GolfBallBehaviour> onOutOfBounds;
+
+    public UnityEvent<GolfBallBehaviour> onCancelOutOfBounds;
 
     private Vector3 _initialPosition;
     
@@ -147,5 +150,15 @@ public class GolfBallBehaviour : MonoBehaviour, ICanBeImpulseByTrampoline
     public float GetMassReference()
     {
         return rb.mass;
+    }
+
+    public void OutOfBoundsEvent()
+    {
+        onOutOfBounds?.Invoke(_initialPosition,this);
+    }
+
+    public void CancelOutOfBoundsEvent()
+    {
+        onCancelOutOfBounds?.Invoke(this);
     }
 }
