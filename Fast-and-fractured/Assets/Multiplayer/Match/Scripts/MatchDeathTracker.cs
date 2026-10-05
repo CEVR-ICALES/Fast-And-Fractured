@@ -109,6 +109,9 @@ namespace FastAndFractured.Multiplayer
             return -1;
         }
 
+        /// <summary>True while at least one human-controlled character is still alive.</summary>
+        public bool AnyPlayerAlive => _characterByClient.Values.Any(IsAlive);
+
         public IEnumerable<int> AliveObjectIds => _aliveById.Where(kvp => kvp.Value).Select(kvp => kvp.Key);
 
         /// <summary>Compact debug description for error logs ("3 tracked, 2 alive: [12+, 15+, 18-]").</summary>

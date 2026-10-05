@@ -787,7 +787,7 @@ namespace FastAndFractured.Multiplayer
             // Drive the full movement state machine (ApplyMovementAction, transitions, auto-deceleration).
             if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
             {
-                _stateMachineDriver.TickStateMachine();
+                _stateMachineDriver.TickStateMachine(md.GetTick());
             }
             else
             {

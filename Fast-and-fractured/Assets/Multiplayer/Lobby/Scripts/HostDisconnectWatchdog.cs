@@ -96,6 +96,10 @@ namespace FastAndFractured.Multiplayer
             if (wasIntentional)
                 return;
 
+            // Host migration (off by default): the match continues on another player instead.
+            if (wasInMatch && HostMigration.HostMigrationNetwork.TryHandleHostLoss())
+                return;
+
             // Not intentional — either host crashed, network died, or host stopped server.
             // Either way, returning to the hub is the safe default. Match cleanup happens
             // implicitly: scene gets unloaded by FishNet, all NetworkObjects despawn.

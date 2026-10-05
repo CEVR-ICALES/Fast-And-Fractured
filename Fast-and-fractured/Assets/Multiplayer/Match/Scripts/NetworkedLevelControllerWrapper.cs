@@ -257,9 +257,11 @@ namespace FastAndFractured.Multiplayer
             // Bind HUD to local player's car (CarInjector.Install(null,true) skips speed binding)
             BindLocalPlayerHUD();
 
-            // Resize the local player's icon in the top HUD strip.
-            // onLevelPreStart fires IngameEventsManager.SetCharactersTopElements first (registered earlier),
-            // then our listener runs after and resizes the icon for the local player.
+            // Resize the local player's icon in the top HUD strip (and hide the unused slots).
+            // InitializeAfterSpawn above invokes onLevelPreStart synchronously, so a listener added
+            // here would never run for this match: apply it now. The listener stays for the case
+            // where the pre-start is still pending (it is idempotent).
+            ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
 
         }
@@ -378,7 +380,9 @@ namespace FastAndFractured.Multiplayer
             // either ordering. BindLocalPlayerHUD is idempotent.
             _levelController.onLevelPreStart.AddListener(BindLocalPlayerHUD);
 
-            // Resize local player's icon after SetCharactersTopElements populates the icons
+            // Resize local player's icon after SetCharactersTopElements populates the icons (now
+            // if that already happened, else when the level pre-starts).
+            ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
 
             // Re-apply correct InputProviders on host.
@@ -906,9 +910,22 @@ namespace FastAndFractured.Multiplayer
             const float LOCAL_PLAYER_ICON_SIZE = 65f;
             const float OTHER_PLAYER_ICON_SIZE = 50f;
 
+            // The player canvas has a stray "SpeedOverlay" text that nothing writes to (the speed
+            // goes to the SPEED_INDICATOR element), so it showed its "New Text" placeholder under
+            // the icons. Empty it.
+            foreach (var text in FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
+                if (text.name == "SpeedOverlay" && text.text == "New Text") text.text = string.Empty;
+
             foreach (var icon in _levelController.characterIcons)
             {
-                if (icon == null || icon.Character == null) continue;
+                if (icon == null) continue;
+                // The networked HUD has 12 slots, all active; a slot with no character used to
+                // stay on screen as an empty square. Show only the characters in the match.
+                if (icon.Character == null)
+                {
+                    icon.gameObject.SetActive(false);
+                    continue;
+                }
 
                 var nob = icon.Character.GetComponentInParent<NetworkObject>(true);
                 if (nob == null)
@@ -917,7 +934,7 @@ namespace FastAndFractured.Multiplayer
                 var rt = icon.GetComponent<RectTransform>();
                 if (rt == null) continue;
 
-                if (nob != null && nob.IsOwner)
+                if (IsLocalPlayerObject(nob))
                 {
                     rt.sizeDelta = new Vector2(LOCAL_PLAYER_ICON_SIZE, LOCAL_PLAYER_ICON_SIZE);
                 }
@@ -928,5 +945,112 @@ namespace FastAndFractured.Multiplayer
             }
 
         }
+
+        #region HOST_MIGRATION
+        private const System.Reflection.BindingFlags INSTANCE_FLAGS =
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+
+        /// <summary>
+        /// The host's own car, once its NetworkObject is started on the host's client side.
+        /// </summary>
+        public GameObject FindLocalPlayerCar()
+        {
+            foreach (var vehicle in FindObjectsByType<NetworkedVehicle>(FindObjectsSortMode.None))
+            {
+                var nob = vehicle.GetComponent<NetworkObject>();
+                if (nob != null && nob.IsOwner) return vehicle.gameObject;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Host of a migrated match. The new host replays the original start, so the singleplayer
+        /// level makes the FIRST human - the host that left - its local player: LocalPlayer and
+        /// the player-root singletons (HUD, top icons, events, camera, input, pause menu) are that
+        /// car's, and they go when its root is removed. The new host's own root never got them,
+        /// so its HUD showed the empty icon strip (playtest 2026-10-04). Hand them to this
+        /// peer's car and replay the level-start steps that already ran for the departed one.
+        /// </summary>
+        public void RebindLocalPlayerAfterMigration(GameObject localCar)
+        {
+            if (_levelController == null || localCar == null) return;
+
+            typeof(LevelController).GetField("_localPlayer", INSTANCE_FLAGS)?.SetValue(_levelController, localCar);
+
+            var root = localCar.transform.parent != null ? localCar.transform.parent : localCar.transform;
+            AbstractAutoInitializableMonoBehaviour hudManager = null, ingameEvents = null;
+            var others = new List<AbstractAutoInitializableMonoBehaviour>();
+            foreach (var preserver in root.GetComponentsInChildren<NetworkedLocalSingletonPreserver>(true))
+            {
+                var singleton = preserver.SingletonToPreserve;
+                if (singleton == null) continue;
+                singleton.gameObject.SetActive(true);
+                singleton.enabled = true;
+                TakeSingletonInstance(singleton);
+                if (singleton is HUDManager) hudManager = singleton;
+                else if (singleton is IngameEventsManager) ingameEvents = singleton;
+                else others.Add(singleton);
+            }
+
+            // Construct/Initialize them as a fresh client does (ConstructPlayerSingletonsInOrder).
+            // GameReadyScript is left alone: its Initialize schedules the 3-2-1, which the
+            // manager already drives from the server tick. MainMenuManager.Construct shows the
+            // cursor (menu default); keep the in-match cursor state.
+            var ordered = new List<AbstractAutoInitializableMonoBehaviour>();
+            if (hudManager != null) ordered.Add(hudManager);
+            if (ingameEvents != null) ordered.Add(ingameEvents);
+            foreach (var s in others) if (!(s is GameReadyScript)) ordered.Add(s);
+            var cursorLock = Cursor.lockState;
+            bool cursorVisible = Cursor.visible;
+            // IngameEventsManager.Construct appends the HUD's icons to its list: start it empty.
+            if (ingameEvents != null &&
+                typeof(IngameEventsManager).GetField("inGameCharactersTopIcons", INSTANCE_FLAGS)?.GetValue(ingameEvents) is List<CharacterIcon> icons)
+                icons.Clear();
+            foreach (var s in ordered)
+            {
+                SingleplayerReflectionCache.AbstractAutoInit_IsConstructed?.SetValue(s, false);
+                SingleplayerReflectionCache.AbstractAutoInit_IsInitialized?.SetValue(s, false);
+                s.PerformConstruct();
+            }
+            foreach (var s in ordered) s.PerformInitialize();
+            Cursor.lockState = cursorLock;
+            Cursor.visible = cursorVisible;
+
+            // onLevelPreStart already fired, for the departed car: redo what it did for this one.
+            if (ingameEvents is IngameEventsManager events) events.SetCharactersTopElements();
+            foreach (var camera in root.GetComponentsInChildren<CameraBehaviours>(true))
+                typeof(CameraBehaviours).GetField("_statsController", INSTANCE_FLAGS)?.SetValue(camera, localCar.GetComponent<StatsController>());
+            foreach (var minimap in root.GetComponentsInChildren<MinimapFollowPlayer>(true))
+            {
+                typeof(MinimapFollowPlayer).GetField("_isPlayerReceived", INSTANCE_FLAGS)?.SetValue(minimap, false);
+                typeof(MinimapFollowPlayer).GetMethod("OnCharactersCustomStart", INSTANCE_FLAGS)?.Invoke(minimap, null);
+            }
+            if (PlayerInputController.HasInstance) PlayerInputController.Instance.BindActions();
+
+            InitializeLocalPlayerHUD();
+            ForceRefreshHUDSprites(LocalPlayerNameCode);
+            BindLocalPlayerHUD();
+            ResizeLocalPlayerIcon();
+            MpCanary.Mark($"HostMigration: local player is now '{localCar.name}' ({ordered.Count} HUD singleton(s) rebound)");
+        }
+
+        /// <summary>Point AbstractSingleton&lt;T&gt;.s_Instance at this component, dropping a stand-in.</summary>
+        private static void TakeSingletonInstance(Component singleton)
+        {
+            for (var type = singleton.GetType(); type != null && type != typeof(MonoBehaviour); type = type.BaseType)
+            {
+                if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(AbstractSingleton<>)) continue;
+                var field = type.GetField("s_Instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                if (field == null) return;
+                var current = field.GetValue(null) as Component;
+                // A singleton read after the departed root went away is recreated as a bare
+                // "auxiliar" object; remove it so it does not linger next to the real one.
+                if (current != null && current != singleton && current.GetComponentInParent<NetworkObject>(true) == null)
+                    Destroy(current.gameObject);
+                field.SetValue(null, singleton);
+                return;
+            }
+        }
+        #endregion
     }
 }

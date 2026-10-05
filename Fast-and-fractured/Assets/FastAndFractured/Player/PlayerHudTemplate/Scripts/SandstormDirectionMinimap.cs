@@ -35,7 +35,9 @@ namespace FastAndFractured
             _sandstormDirection = direction;
             _isDataReceived = true;
             arrowIcon.SetActive(true);
-            _cameraReference = _player.transform.parent.GetComponent<CameraHolder>().CameraToHold;
+            CameraHolder holder = _player != null && _player.transform.parent != null
+                ? _player.transform.parent.GetComponent<CameraHolder>() : null;
+            _cameraReference = holder != null && holder.CameraToHold != null ? holder.CameraToHold : Camera.main;
         }
     }
 }

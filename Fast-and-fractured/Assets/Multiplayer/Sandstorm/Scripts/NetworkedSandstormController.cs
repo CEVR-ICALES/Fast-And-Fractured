@@ -117,7 +117,6 @@ namespace FastAndFractured.Multiplayer
 
         private const System.Reflection.BindingFlags PrivateInstance = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         private static readonly System.Reflection.FieldInfo StormMinimapArrow = typeof(SandstormController).GetField("minimapSandstormDirection", PrivateInstance);
-        private static readonly System.Reflection.FieldInfo StormGrowthSpeed = typeof(SandstormController).GetField("_growthSpeed", PrivateInstance);
         private static readonly System.Reflection.FieldInfo StormDirection = typeof(SandstormController).GetField("_direction", PrivateInstance);
         private static readonly System.Reflection.FieldInfo ArrowDirection = typeof(SandstormDirectionMinimap).GetField("_sandstormDirection", PrivateInstance);
         private static readonly System.Reflection.FieldInfo ArrowCamera = typeof(SandstormDirectionMinimap).GetField("_cameraReference", PrivateInstance);
@@ -353,6 +352,13 @@ namespace FastAndFractured.Multiplayer
             if (gameLoop == null || !(GameLoopStormTimer.GetValue(gameLoop) is global::Utilities.ITimer timer)) return;
 
             GameLoopStormTimer.SetValue(gameLoop, null);
+            if (_restoredFromMigration)
+            {
+                // Keep the migrated schedule; only silence the singleplayer timer.
+                var ownTimers = global::Utilities.TimerSystem.ExistingInstance;
+                if (ownTimers != null && ownTimers.HasTimer(timer)) ownTimers.StopTimer(timer.GetData().ID);
+                return;
+            }
             global::Utilities.TimerData data = timer.GetData();
             float remaining = Mathf.Max(0f, data.CurrentTime);
             var timers = global::Utilities.TimerSystem.ExistingInstance;
@@ -448,6 +454,48 @@ namespace FastAndFractured.Multiplayer
             hud.UpdateUIElement(Enums.UIDynamicElementType.TIMER_TEXT, text);
         }
 
+        // ── Host migration ─────────────────────────────────────────────────────────────
+        private bool _restoredFromMigration;
+
+        /// <summary>Server: the storm's state for a host migration snapshot.</summary>
+        [Server]
+        internal void ServerDescribeForMigration(out bool started, out float secondsUntilStorm, out float growth,
+            out Vector3 spawnPoint, out Vector3 mirrorPoint)
+        {
+            started = _stormStarted;
+            uint now = base.TimeManager.Tick, start = SyncedStormStartTick.Value;
+            secondsUntilStorm = start == 0 ? -1f : start > now ? (start - now) * (float)base.TimeManager.TickDelta : 0f;
+            growth = _currentGrowthField != null ? (float)_currentGrowthField.GetValue(_sandstormController) : 0f;
+            spawnPoint = SyncedSpawnPoint.Value;
+            mirrorPoint = SyncedMirrorPoint.Value;
+        }
+
+        /// <summary>
+        /// Server, migrated match: continue the storm where the lost host left it - the same
+        /// countdown, or the same moving storm from the same side at the same size.
+        /// </summary>
+        [Server]
+        internal void ServerRestoreFromMigration(bool started, float secondsUntilStorm, float growth,
+            Vector3 spawnPoint, Vector3 mirrorPoint)
+        {
+            _restoredFromMigration = true;
+            if (!started)
+            {
+                if (secondsUntilStorm >= 0f)
+                    SyncedStormStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(secondsUntilStorm);
+                return;
+            }
+
+            _stormStarted = true;
+            SyncedStormStartTick.Value = base.TimeManager.Tick;
+            ApplySpawnPointsOnClient(spawnPoint, mirrorPoint, false);   // sets the singleplayer points on this peer
+            SyncSpawnPointsToClients(false);
+            ServerSpawnFogs();
+            ServerStartMovement();
+            if (_currentGrowthField != null) _currentGrowthField.SetValue(_sandstormController, growth);
+            MpCanary.Mark($"Sandstorm restored after host migration (growth {growth:F0})");
+        }
+
         internal static string FormatStormCountdown(float remainingSeconds)
         {
             int seconds = Mathf.CeilToInt(Mathf.Max(0f, remainingSeconds));
@@ -458,28 +506,16 @@ namespace FastAndFractured.Multiplayer
         #region MINIMAP_ARROW
         /// <summary>
         /// SandstormController.SpawnFogs on this peer, then this peer's minimap storm arrow.
-        ///
-        /// SpawnFogs ends by aiming the arrow through minimapSandstormDirection, a scene reference
-        /// into the PlayerHUD that DebuggingCommons used to hold. This branch moved the HUD onto the
-        /// player (ded751c7c), so the field is empty in every map - in singleplayer too - and
-        /// SpawnFogs threw on its last line: the server never went on to move the storm (measured
-        /// 2026-09-30). Its aiming also reads LevelController.LocalPlayer, which a remote client does
-        /// not have. So that last line's failure is contained - only once everything before it has
-        /// run, which _growthSpeed (set just before it) proves - and each peer aims its own HUD's
-        /// arrow with its own camera.
+        /// SpawnFogs aims the arrow it finds through LevelController.LocalPlayer, which on the host
+        /// is not necessarily the host's car and on a remote client may be unset, so the field is
+        /// bound to this peer's own HUD arrow first and the arrow is aimed with this peer's camera.
         /// </summary>
         private void SpawnFogsOnThisPeer()
         {
-            StormMinimapArrow?.SetValue(_sandstormController, null);
-            if (StormGrowthSpeed != null) StormGrowthSpeed.SetValue(_sandstormController, 0f);
-            try
-            {
-                _sandstormController.SpawnFogs();
-            }
-            catch (System.Exception e) when (e is UnassignedReferenceException || e is System.NullReferenceException)
-            {
-                if (StormGrowthSpeed == null || (float)StormGrowthSpeed.GetValue(_sandstormController) <= 0f) throw;
-            }
+            NetworkedVehicle localCar = FindLocalCar();
+            var arrow = localCar != null ? localCar.transform.root.GetComponentInChildren<SandstormDirectionMinimap>(true) : null;
+            StormMinimapArrow?.SetValue(_sandstormController, arrow != null ? arrow.gameObject : null);
+            _sandstormController.SpawnFogs();
             AimLocalMinimapArrow();
         }
 

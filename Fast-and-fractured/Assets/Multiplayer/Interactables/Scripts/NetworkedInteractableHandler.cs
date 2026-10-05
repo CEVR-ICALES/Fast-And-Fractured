@@ -443,6 +443,70 @@ namespace FastAndFractured.Multiplayer
             return _interactablesField?.GetValue(handler) as GameObject[];
         }
         
+        // -- Host migration -----------------------------------------------------------------
+        private static FieldInfo _cooldownField;
+        private static MethodInfo _updateVisibleMethod;
+
+        /// <summary>
+        /// Server: the pickups still in play, in pool order (raw indices), those on their short
+        /// post-pickup cooldown last. Picked skins are out of the pool and stay out.
+        /// </summary>
+        [Server]
+        public int[] ServerDescribePool()
+        {
+            var raw = GetRawInteractables(_interactableHandler);
+            if (raw == null) return new int[0];
+            _cooldownField ??= typeof(InteractableHandler).GetField("_interactablesOnCooldown", ReflectionFlags);
+            var order = new List<int>();
+            foreach (var item in _interactableHandler.ShuffledActivePool)
+            {
+                int index = System.Array.IndexOf(raw, item);
+                if (index >= 0 && !order.Contains(index)) order.Add(index);
+            }
+            if (_cooldownField?.GetValue(_interactableHandler) is List<GameObject> cooldown)
+                foreach (var item in cooldown)
+                {
+                    int index = System.Array.IndexOf(raw, item);
+                    if (index >= 0 && !order.Contains(index)) order.Add(index);
+                }
+            return order.ToArray();
+        }
+
+        /// <summary>
+        /// Server, migrated match: put the pickups back the way they were. Waits for the
+        /// singleplayer handler to build its initial pool first, or that would overwrite it.
+        /// </summary>
+        [Server]
+        public void ServerRestorePool(int[] order)
+        {
+            if (order == null || order.Length == 0 || _interactableHandler == null) return;
+            StartCoroutine(RestorePoolWhenReady(order));
+        }
+
+        private IEnumerator RestorePoolWhenReady(int[] order)
+        {
+            float waited = 0f;
+            while (_interactableHandler.ShuffledActivePool.Count == 0 && waited < 10f)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            var raw = GetRawInteractables(_interactableHandler);
+            if (raw == null) yield break;
+
+            var pool = _interactableHandler.ShuffledActivePool;
+            pool.Clear();
+            foreach (int index in order)
+                if (index >= 0 && index < raw.Length && raw[index] != null) pool.Add(raw[index]);
+            foreach (var item in raw)
+                if (item != null && !pool.Contains(item)) item.SetActive(false);
+
+            _updateVisibleMethod ??= typeof(InteractableHandler).GetMethod("UpdateVisibleInteractableList", ReflectionFlags);
+            _updateVisibleMethod?.Invoke(_interactableHandler, new object[] { 0 });
+            SyncPoolToAllClients();
+            MpCanary.Mark($"Pickups restored after host migration ({pool.Count} in play)");
+        }
+
         private void OnDestroy()
         {
             if (_interactableHandler != null)

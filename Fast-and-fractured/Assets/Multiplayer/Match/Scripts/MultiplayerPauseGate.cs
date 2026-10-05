@@ -51,6 +51,10 @@ namespace FastAndFractured.Multiplayer
             var pm = PauseManager.ExistingInstance;
             if (pm == null || pm == _hooked)
                 return;
+            // An auxiliary PauseManager created on the fly (AbstractSingleton, while a scene is
+            // being torn down) has no serialized events; wait for the scene's real one.
+            if (pm.onGamePaused == null || pm.onGameResumed == null)
+                return;
 
             _hooked = pm;
             pm.onGamePaused.AddListener(ClearPausablesIfOnline);

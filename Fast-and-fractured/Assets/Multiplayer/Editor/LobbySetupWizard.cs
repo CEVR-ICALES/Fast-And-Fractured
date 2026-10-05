@@ -1744,11 +1744,13 @@ namespace FastAndFractured.Multiplayer.Editor
 
                     var playerContainer = CreatePanel(listPanel.transform, "PlayerListContainer",
                         new Vector2(0f, 0f), new Vector2(1f, 1f));
-                    var vl = playerContainer.AddComponent<VerticalLayoutGroup>();
-                    vl.childForceExpandWidth  = true;
-                    vl.childForceExpandHeight = false;
-                    vl.spacing                = 6f;
-                    vl.padding                = new RectOffset(8, 8, 8, 8);
+                    // A grid: up to 8 slots (humans + AI) must fit the panel (LobbyReadyUI also
+                    // converts an older vertical list at runtime).
+                    var grid = playerContainer.AddComponent<GridLayoutGroup>();
+                    grid.cellSize       = new Vector2(400f, 120f);
+                    grid.spacing        = new Vector2(12f, 12f);
+                    grid.padding        = new RectOffset(8, 8, 8, 8);
+                    grid.childAlignment = TextAnchor.UpperCenter;
                     playerContainer.AddComponent<ContentSizeFitter>().verticalFit =
                         ContentSizeFitter.FitMode.PreferredSize;
 

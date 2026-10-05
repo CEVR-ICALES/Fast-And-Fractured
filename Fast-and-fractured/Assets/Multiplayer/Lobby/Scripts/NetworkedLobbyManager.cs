@@ -590,6 +590,18 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
+            ApplyRoomName(name);
+        }
+
+        /// <summary>
+        /// Host path. The host is the server, and a [ServerRpc] called from the server never runs
+        /// its logic (see memory: ServerRpc-from-host no-op) - the room name the host typed was
+        /// silently dropped and the lobby room showed "Room" (playtest feedback 2026-09-30).
+        /// </summary>
+        [Server]
+        public void ApplyRoomName(string name)
+        {
+            if (GameStarted.Value) return;
             string sanitized = string.IsNullOrWhiteSpace(name) ? "Room" : name.Trim();
             if (sanitized.Length > 64) sanitized = sanitized.Substring(0, 64);
             RoomName.Value = sanitized;

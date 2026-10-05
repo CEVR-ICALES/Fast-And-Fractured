@@ -412,6 +412,13 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"<color=red>[NetworkedStatsController] {gameObject.name} taking {damage:F1} damage from {attackerName}</color>");
             }
             
+            // Josefino's shield (active until it is broken, not only during the 5 s of damage
+            // invulnerability) absorbs this hit and breaks (see NetworkedUniqueAbility).
+            var ownerRoot = GetComponentInParent<NetworkObject>();
+            var ultimate = ownerRoot != null ? ownerRoot.GetComponentInChildren<NetworkedUniqueAbility>(true) : null;
+            if (ultimate != null && ultimate.ServerConsumeJosefinoShield())
+                return;
+
             // Apply damage. StatsController.TakeEndurance() calls HUDManager.Instance.UpdateUIElement()
             // when _isPlayer is true. Since HUDManager.Instance is a singleton, non-owner vehicles
             // would incorrectly update the local player's HUD. Temporarily suppress _isPlayer for non-owner.

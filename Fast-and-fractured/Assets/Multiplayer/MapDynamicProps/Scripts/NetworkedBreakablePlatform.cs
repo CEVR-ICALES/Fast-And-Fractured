@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
@@ -38,6 +39,9 @@ namespace FastAndFractured.Multiplayer
         private Coroutine _semiBreakCoroutine;
         private Coroutine _breakCoroutine;
         private bool _isBreaking;
+
+        // 0 intact, 1 cracked (semi-break), 2 broken - for the host migration snapshot.
+        private int _stage;
 
         private static void EnsureReflectionCached()
         {
@@ -109,7 +113,8 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc(RunLocally = true)]
         private void RpcSemiBreak()
         {
-            if (_wrapped == null) return;
+            if (_wrapped == null || _stage >= 1) return;
+            _stage = 1;
             _semiBreakMethod?.Invoke(_wrapped, null);
         }
 
@@ -117,9 +122,49 @@ namespace FastAndFractured.Multiplayer
         private void RpcBreak()
         {
             _isBreaking = true;
-            if (_wrapped == null) return;
+            if (_wrapped == null || _stage >= 2) return;
+            _stage = 2;
             _isBreakingField?.SetValue(_wrapped, true);
             _breakMethod?.Invoke(_wrapped, null);
+        }
+
+        // -- Host migration -----------------------------------------------------------------
+        private static List<NetworkedBreakablePlatform> AllInHierarchyOrder()
+        {
+            var list = new List<NetworkedBreakablePlatform>(FindObjectsByType<NetworkedBreakablePlatform>(FindObjectsSortMode.None));
+            var keys = new Dictionary<NetworkedBreakablePlatform, string>();
+            foreach (var p in list) keys[p] = NetworkedWorldBreakables.PathKey(p.transform);
+            list.Sort((a, b) => string.CompareOrdinal(keys[a], keys[b]));
+            return list;
+        }
+
+        /// <summary>Server: how far each platform got, in hierarchy order.</summary>
+        public static byte[] DescribeStages()
+        {
+            var list = AllInHierarchyOrder();
+            var stages = new byte[list.Count];
+            for (int i = 0; i < list.Count; i++) stages[i] = (byte)list[i]._stage;
+            return stages;
+        }
+
+        /// <summary>Server, migrated match: crack/break the platforms that were, on every peer.</summary>
+        public static void ServerRestoreStages(byte[] stages)
+        {
+            if (stages == null) return;
+            var list = AllInHierarchyOrder();
+            if (list.Count != stages.Length)
+            {
+                MpCanary.Mark($"Breakable platforms: snapshot has {stages.Length}, map has {list.Count} - not restored");
+                return;
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                var platform = list[i];
+                if (!platform.IsServerInitialized) continue;
+                // The singleplayer break expects the crack first.
+                if (stages[i] >= 1) platform.RpcSemiBreak();
+                if (stages[i] >= 2) platform.RpcBreak();
+            }
         }
     }
 }

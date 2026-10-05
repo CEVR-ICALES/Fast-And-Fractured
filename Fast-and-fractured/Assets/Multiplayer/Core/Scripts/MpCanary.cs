@@ -36,6 +36,7 @@ namespace FastAndFractured.Multiplayer
         {
             _path = null;
             _failed = false;
+            _consecutiveFailures = 0;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -47,18 +48,26 @@ namespace FastAndFractured.Multiplayer
             go.AddComponent<HeartbeatRunner>();
         }
 
+        // Several builds launched from one folder share the file: a write can collide with another
+        // process's, so only give up after many failures in a row, and tag each line with the process.
+        private const int MAX_CONSECUTIVE_FAILURES = 50;
+        private static int _consecutiveFailures;
+        private static readonly string ProcessTag = Application.isEditor
+            ? string.Empty : $"p={System.Diagnostics.Process.GetCurrentProcess().Id} ";
+
         public static void Mark(string message)
         {
             if (_failed) return;
             try
             {
                 File.AppendAllText(PathToLog,
-                    $"[{DateTime.Now:HH:mm:ss.fff}] f={Time.frameCount} {message}\n");
+                    $"[{DateTime.Now:HH:mm:ss.fff}] {ProcessTag}f={Time.frameCount} {message}\n");
+                _consecutiveFailures = 0;
             }
             catch
             {
                 // Never let forensics take the game down (or spam retries).
-                _failed = true;
+                if (++_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) _failed = true;
             }
         }
 

@@ -16,6 +16,379 @@ namespace FastAndFractured.Multiplayer
 {
     public class NetworkedLevelControllerManager : NetworkBehaviour
     {
+        #region MATCH_COUNTDOWN
+        // The 3-2-1 (GameReadyScript) and the moment the cars get control (GameLoopManager's
+        // delayUntilGameStarts timer) both started on each peer when ITS level finished
+        // initialising, and a remote client finishes later than the host - so the countdowns
+        // did not match, and the host's cars could drive during it (playtest feedback 2026-09-30).
+        // The server publishes the tick the "3" appears on: the on-screen countdown follows its RPC
+        // and MatchStartGate holds every car until "Start".
+        private readonly FishNet.Object.Synchronizing.SyncVar<uint> _countdownStartTick = new FishNet.Object.Synchronizing.SyncVar<uint>();
+
+        // Time for the slowest client to finish its level init after the cars spawn.
+        private const float COUNTDOWN_LEAD_SECONDS = 1.5f;
+        // GameReadyScript: "3" at StartEventCountdown, "Start" 3 s later - when the gate opens.
+        private const float COUNTDOWN_TO_CONTROLS_SECONDS = 3f;
+
+        // A match resumed after a host migration skips the 3-2-1: the frozen-frame overlay goes
+        // away at the start tick and the cars are released this long after (players see where
+        // they are first).
+        private readonly FishNet.Object.Synchronizing.SyncVar<bool> _resumedAfterMigration = new FishNet.Object.Synchronizing.SyncVar<bool>();
+        private const float MIGRATION_LEAD_SECONDS = 0.75f;
+        private const float MIGRATION_RESUME_SECONDS = 1f;
+
+        private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent;
+        private void LateUpdate()
+        {
+            if (_countdownStartTick.Value == 0 || base.TimeManager == null) return;
+            uint start = _countdownStartTick.Value;
+            bool resumed = _resumedAfterMigration.Value;
+            MatchStartGate.LockUntil(start + base.TimeManager.TimeToTicks(resumed ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
+
+            // The server says when the "3" appears. A remote client's own estimate of the server
+            // tick lagged ~1 s right after loading the map (measured 2026-09-30), so the on-screen
+            // countdown follows the server's RPC, not that estimate.
+            if (base.IsServerInitialized && !_countdownRpcSent && base.TimeManager.Tick >= start)
+            {
+                _countdownRpcSent = true;
+                RpcStartCountdown();
+            }
+
+            if (_countdownShown) return;
+            if (!_countdownSignalled)
+            {
+                // Until the server says so, no 3-2-1 may run anywhere. Each player root's
+                // GameReadyScript schedules one when it initialises, and which one is "ours" is
+                // not settled yet early on (a migrated host only owns its car a few frames after
+                // spawn): cancelling just the one found first left another running behind the
+                // migration overlay, and its "1" showed when the match resumed.
+                foreach (var script in FindObjectsByType<GameReadyScript>(FindObjectsSortMode.None))
+                    script.CancelInvoke("StartEventCountdown");
+            }
+            if (resumed && _countdownSignalled && FindLocalCountdown() == null)
+            {
+                // No car of our own after the migration (spectating): just drop the overlay.
+                _countdownShown = true;
+                HostMigration.HostMigrationOverlay.Hide();
+                return;
+            }
+            GameReadyScript countdown = FindLocalCountdown();
+            if (countdown == null) return;
+            if (!_countdownSuppressed)
+            {
+                // This peer's own init scheduled the countdown at its own time; wait for the server.
+                _countdownSuppressed = true;
+                countdown.CancelInvoke("StartEventCountdown");
+            }
+            if (!_countdownSignalled) return;
+            _countdownShown = true;
+            if (resumed)
+            {
+                HostMigration.HostMigrationOverlay.Hide();
+                MpCanary.Mark($"Match resumed on screen (server tick {start})");
+                return;
+            }
+            countdown.Invoke("StartEventCountdown", 0f);
+            MpCanary.Mark($"Countdown shown (server tick {start})");
+        }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcStartCountdown() => _countdownSignalled = true;
+
+        #region HOST_MIGRATION
+        // Everything here is inert while HostMigrationSettings.Enabled is off (see HostMigration/).
+        private int _replaySeed, _replayTotalCharacters;
+        private string[] _replayHumanTokens = new string[0], _replayHumanCodes = new string[0];
+        private readonly Dictionary<GameObject, int> _originalIndexByCar = new Dictionary<GameObject, int>();
+
+        private static bool IsResumingMigratedMatch =>
+            HostMigration.HostMigrationSettings.Enabled && HostMigration.HostMigrationResume.Pending.HasValue;
+
+        /// <summary>Server: what a new host needs to replay this match's start.</summary>
+        [Server]
+        private void RecordMigrationReplay(List<NetworkConnection> orderedConns, int seed, int totalCharacters, int humanCount)
+        {
+            _replaySeed = seed;
+            _replayTotalCharacters = totalCharacters;
+            if (IsResumingMigratedMatch)
+            {
+                // Keep the ORIGINAL start, so a second migration replays the same cast again.
+                var resume = HostMigration.HostMigrationResume.Pending.Value;
+                _replayHumanTokens = resume.HumanTokens;
+                _replayHumanCodes = resume.HumanCodes;
+            }
+            else
+            {
+                var codes = _levelControllerWrapper.GetCharacterNameCodes();
+                _replayHumanTokens = new string[humanCount];
+                _replayHumanCodes = new string[humanCount];
+                for (int i = 0; i < humanCount; i++)
+                {
+                    var conn = i < orderedConns.Count ? orderedConns[i] : null;
+                    string token = HostMigration.HostMigrationNetwork.TokenOf(conn);
+                    _replayHumanTokens[i] = token ?? ("client-" + (conn != null ? conn.ClientId : -1));
+                    _replayHumanCodes[i] = i < codes.Count ? codes[i] : string.Empty;
+                }
+            }
+
+            _originalIndexByCar.Clear();
+            var cars = _levelControllerWrapper.GetSpawnedCharacters();
+            for (int i = 0; i < cars.Count; i++)
+                if (cars[i] != null) _originalIndexByCar[cars[i]] = i;
+        }
+
+        /// <summary>
+        /// Server, migrated match: keep the characters that are still in the match - each
+        /// reconnected human with its own car, the surviving AIs - and remove the rest (the host
+        /// that left, the dead, anyone who did not come back) before anything is network-spawned.
+        /// Returns the connections that get a car, in the order the cars were reordered to.
+        /// </summary>
+        [Server]
+        private List<NetworkConnection> ApplyMigrationRoster(List<NetworkConnection> orderedConns)
+        {
+            var resume = HostMigration.HostMigrationResume.Pending.Value;
+            var tokens = new List<string>(orderedConns.Count);
+            foreach (var conn in orderedConns) tokens.Add(HostMigration.HostMigrationNetwork.TokenOf(conn) ?? string.Empty);
+            var plan = HostMigration.HostMigrationRoster.Build(resume, tokens);
+
+            var cars = _levelControllerWrapper.GetSpawnedCharacters();
+            var codes = _levelControllerWrapper.GetCharacterNameCodes();
+            var originalCars = new List<GameObject>(cars);
+            var originalCodes = new List<string>(codes);
+            var keptConns = new List<NetworkConnection>();
+            var keptCars = new List<GameObject>();
+            var keptCodes = new List<string>();
+
+            for (int i = 0; i < orderedConns.Count; i++)
+            {
+                int index = plan.HumanCharacterIndex[i];
+                if (index < 0 || index >= originalCars.Count || originalCars[index] == null) continue;
+                keptConns.Add(orderedConns[i]);
+                keptCars.Add(originalCars[index]);
+                keptCodes.Add(index < originalCodes.Count ? originalCodes[index] : string.Empty);
+            }
+            foreach (int index in plan.AiCharacterIndices)
+            {
+                if (index >= originalCars.Count || originalCars[index] == null) continue;
+                keptCars.Add(originalCars[index]);
+                keptCodes.Add(index < originalCodes.Count ? originalCodes[index] : string.Empty);
+            }
+
+            foreach (var car in originalCars)
+            {
+                if (car == null || keptCars.Contains(car)) continue;
+                _originalIndexByCar.Remove(car);
+                var root = car.transform.parent != null ? car.transform.parent.gameObject : car;
+                Destroy(root);
+            }
+            cars.Clear(); cars.AddRange(keptCars);
+            codes.Clear(); codes.AddRange(keptCodes);
+
+            // Put each kept car where it was when the host was lost (moving its root, so the
+            // root-relative pose the spawn code captures stays the authored one).
+            foreach (var car in keptCars)
+            {
+                if (!_originalIndexByCar.TryGetValue(car, out int index)) continue;
+                if (!TryGetSnapshotCharacter(resume, index, out var saved)) continue;
+                var root = car.transform.parent;
+                if (root != null) root.position += saved.Position - car.transform.position;
+                car.transform.SetPositionAndRotation(saved.Position, saved.Rotation);
+            }
+
+            MpCanary.Mark($"HostMigration: roster {keptConns.Count} human(s) + {plan.AiCharacterIndices.Count} AI kept, " +
+                          $"{originalCars.Count - keptCars.Count} removed");
+            return keptConns;
+        }
+
+        /// <summary>
+        /// Server, migrated match: restore the saved state once the cars have initialised (when
+        /// the 3-2-1 starts; they are held by MatchStartGate until "Start"). Applying it in the
+        /// spawn frame threw from the cars' endurance VFX, which were not set up yet, and the
+        /// exception also cut the rest of the match start short (playtest 2026-10-04).
+        /// </summary>
+        /// <summary>
+        /// Server, migrated match: once this host's own car is started on its client side, make
+        /// it the local player (see NetworkedLevelControllerWrapper.RebindLocalPlayerAfterMigration).
+        /// </summary>
+        private System.Collections.IEnumerator RebindLocalPlayerWhenOwned()
+        {
+            float waited = 0f;
+            GameObject localCar = null;
+            while (IsServerInitialized && waited < 5f && (localCar = _levelControllerWrapper.FindLocalPlayerCar()) == null)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            if (localCar == null)
+            {
+                MpCanary.Mark("HostMigration: this host has no car of its own - HUD not rebound");
+                yield break;
+            }
+            try { _levelControllerWrapper.RebindLocalPlayerAfterMigration(localCar); }
+            catch (Exception e)
+            {
+                MpCanary.Mark($"HostMigration: rebinding the local player failed: {e.GetType().Name}: {e.Message}");
+                Debug.LogException(e);
+            }
+        }
+
+        private System.Collections.IEnumerator ApplyMigratedStateWhenCarsAreReady()
+        {
+            while (IsServerInitialized && _countdownStartTick.Value != 0 && base.TimeManager.Tick < _countdownStartTick.Value)
+                yield return null;
+            if (IsServerInitialized) ApplyMigratedState();
+        }
+
+        /// <summary>
+        /// Server, migrated match: endurance, motion, the storm and the map. Each part is applied
+        /// on its own, so one failing does not leave the others unrestored.
+        /// </summary>
+        [Server]
+        private void ApplyMigratedState()
+        {
+            if (!HostMigration.HostMigrationResume.Pending.HasValue) return;
+            var resume = HostMigration.HostMigrationResume.Pending.Value;
+            HostMigration.HostMigrationResume.Pending = null;
+            HostMigration.HostMigrationNetwork.ClearSnapshot();
+
+            int failures = 0;
+            void Restore(string part, Action apply)
+            {
+                try { apply(); }
+                catch (Exception e)
+                {
+                    failures++;
+                    MpCanary.Mark($"HostMigration: restoring {part} failed: {e.GetType().Name}: {e.Message}");
+                    Debug.LogException(e);
+                }
+            }
+
+            foreach (var kv in _originalIndexByCar)
+            {
+                if (kv.Key == null || !TryGetSnapshotCharacter(resume, kv.Value, out var saved)) continue;
+                var car = kv.Key;
+                Restore($"endurance of {car.name}", () =>
+                {
+                    var stats = car.GetComponentInChildren<NetworkedStatsController>();
+                    var coreStats = car.GetComponentInChildren<StatsController>();
+                    if (stats != null && coreStats != null && SingleplayerReflectionCache.StatsController_CurrentEndurance != null)
+                    {
+                        SingleplayerReflectionCache.StatsController_CurrentEndurance.SetValue(coreStats, saved.Endurance);
+                        stats.ForceEnduranceSync();
+                    }
+                });
+                Restore($"motion of {car.name}", () =>
+                {
+                    var rb = car.GetComponent<Rigidbody>();
+                    if (rb != null && !rb.isKinematic)
+                    {
+                        rb.linearVelocity = saved.Velocity;
+                        rb.angularVelocity = saved.AngularVelocity;
+                    }
+                });
+            }
+            Restore("storm", () => NetworkedSandstormController.ServerInstance?.ServerRestoreFromMigration(resume.StormStarted,
+                resume.SecondsUntilStorm, resume.StormGrowth, resume.StormSpawnPoint, resume.StormMirrorPoint));
+            Restore("broken props", () => NetworkedWorldBreakables.Instance?.ServerRestore(resume.BrokenWorldProps));
+            Restore("platforms", () => NetworkedBreakablePlatform.ServerRestoreStages(resume.PlatformStages));
+            Restore("pickups", () => FindFirstObjectByType<NetworkedInteractableHandler>()?.ServerRestorePool(resume.InteractablePool));
+            MpCanary.Mark(failures == 0 ? "HostMigration: match resumed" : $"HostMigration: match resumed ({failures} part(s) failed)");
+        }
+
+        private static bool TryGetSnapshotCharacter(HostMigration.MatchSnapshotBroadcast snapshot, int index, out HostMigration.SnapshotCharacter character)
+        {
+            if (snapshot.Characters != null)
+                foreach (var c in snapshot.Characters)
+                    if (c.OriginalIndex == index) { character = c; return true; }
+            character = default;
+            return false;
+        }
+
+        /// <summary>Server: the current state of the match, for HostMigrationSnapshotSender.</summary>
+        [Server]
+        internal bool TryBuildMigrationSnapshot(out HostMigration.MatchSnapshotBroadcast snapshot)
+        {
+            snapshot = default;
+            if (!IsServerInitialized || _matchEnded || _replayHumanTokens.Length == 0) return false;
+            LevelController level = LevelController.ExistingInstance;
+            if (level == null) return false;
+
+            var successorTokens = new List<string>();
+            var successorAddresses = new List<string>();
+            foreach (var conn in GetOrderedActivePlayerConnections())
+            {
+                if (conn == null || conn.IsLocalClient) continue;
+                string token = HostMigration.HostMigrationNetwork.TokenOf(conn);
+                if (string.IsNullOrEmpty(token)) continue;
+                successorTokens.Add(token);
+                successorAddresses.Add(conn.GetAddress());
+            }
+
+            var characters = new List<HostMigration.SnapshotCharacter>(_originalIndexByCar.Count);
+            foreach (var kv in _originalIndexByCar)
+            {
+                var car = kv.Key;
+                var nob = car != null ? car.GetComponent<NetworkObject>() : null;
+                bool alive = nob != null && _deathTracker.IsAlive(nob.ObjectId);
+                var saved = new HostMigration.SnapshotCharacter { OriginalIndex = kv.Value, Alive = alive };
+                if (alive)
+                {
+                    var rb = car.GetComponent<Rigidbody>();
+                    var coreStats = car.GetComponentInChildren<StatsController>();
+                    saved.Position = rb != null ? rb.position : car.transform.position;
+                    saved.Rotation = rb != null ? rb.rotation : car.transform.rotation;
+                    saved.Velocity = rb != null ? rb.linearVelocity : Vector3.zero;
+                    saved.AngularVelocity = rb != null ? rb.angularVelocity : Vector3.zero;
+                    saved.Endurance = coreStats != null ? coreStats.Endurance : 0f;
+                }
+                characters.Add(saved);
+            }
+
+            var transport = base.NetworkManager.TransportManager.Transport;
+            snapshot = new HostMigration.MatchSnapshotBroadcast
+            {
+                MigrationEnabled = true,
+                SceneName = level.gameObject.scene.name,
+                Seed = _replaySeed,
+                TotalCharacters = _replayTotalCharacters,
+                HumanTokens = _replayHumanTokens,
+                HumanCodes = _replayHumanCodes,
+                SuccessorTokens = successorTokens.ToArray(),
+                SuccessorAddresses = successorAddresses.ToArray(),
+                Port = transport != null ? transport.GetPort() : (ushort)7770,
+                Characters = characters.ToArray(),
+            };
+            NetworkedSandstormController.ServerInstance?.ServerDescribeForMigration(
+                out snapshot.StormStarted, out snapshot.SecondsUntilStorm, out snapshot.StormGrowth,
+                out snapshot.StormSpawnPoint, out snapshot.StormMirrorPoint);
+            snapshot.BrokenWorldProps = NetworkedWorldBreakables.Instance != null
+                ? NetworkedWorldBreakables.Instance.ServerBrokenIndices() : new int[0];
+            snapshot.PlatformStages = NetworkedBreakablePlatform.DescribeStages();
+            snapshot.VolumeIndex = _serverVolumeIndex;
+            var pickups = FindFirstObjectByType<NetworkedInteractableHandler>();
+            snapshot.InteractablePool = pickups != null ? pickups.ServerDescribePool() : new int[0];
+            return true;
+        }
+        #endregion
+
+        public override void OnStopNetwork()
+        {
+            base.OnStopNetwork();
+            MatchStartGate.Clear();
+        }
+
+        private static GameReadyScript FindLocalCountdown()
+        {
+            foreach (var countdown in FindObjectsByType<GameReadyScript>(FindObjectsSortMode.None))
+            {
+                if (!countdown.isActiveAndEnabled) continue;
+                var owner = countdown.GetComponentInParent<NetworkObject>();
+                if (owner == null || owner.IsOwner) return countdown;
+            }
+            return null;
+        }
+        #endregion
+
         private NetworkedLevelControllerWrapper _levelControllerWrapper;
         private bool _gameStartTriggered;
 
@@ -24,6 +397,8 @@ namespace FastAndFractured.Multiplayer
             _levelControllerWrapper = GetComponent<NetworkedLevelControllerWrapper>();
             if (_levelControllerWrapper == null)
                 _levelControllerWrapper = gameObject.AddComponent<NetworkedLevelControllerWrapper>();
+            if (GetComponent<NetworkedWorldBreakables>() == null)
+                gameObject.AddComponent<NetworkedWorldBreakables>();
         }
 
         public override void OnStartServer()
@@ -36,6 +411,15 @@ namespace FastAndFractured.Multiplayer
                       $"GameStarted={lobbyManager?.GameStarted.Value}, " +
                       $"PlayerCharacterSelections={lobbyManager?.PlayerCharacterSelections.Count}, " +
                       $"AiSlotCount={lobbyManager?.AiSlotCount.Value}");
+
+            if (IsResumingMigratedMatch)
+            {
+                // Host migration: this peer took over a match in progress; rebuild it now.
+                if (lobbyManager != null) lobbyManager.GameStarted.Value = true;
+                StartGame();
+                ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
+                return;
+            }
 
             if (lobbyManager != null)
             {
@@ -104,6 +488,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartClient()
         {
             base.OnStartClient();
+            MatchResults.Clear();   // a new match: drop the previous one's table
         }
         
         public void AddCharacterSkin(NetworkConnection connection, string name)
@@ -167,10 +552,27 @@ namespace FastAndFractured.Multiplayer
                                                   connectedPlayerCount,
                                                   NetworkedLobbyManager.MAX_PLAYERS);
 
+            if (IsResumingMigratedMatch)
+            {
+                // Replay the original start exactly (same seed, same human characters in the same
+                // order): the singleplayer spawner then rebuilds the same cast in the same order.
+                // ApplyMigrationRoster later keeps only who is still in the match.
+                var resume = HostMigration.HostMigrationResume.Pending.Value;
+                gameSeed = resume.Seed;
+                _migratedVolumeIndex = resume.VolumeIndex;
+                connectedPlayerCount = resume.HumanCodes.Length;
+                totalCharacterCount = resume.TotalCharacters;
+                _levelControllerWrapper.PruneCharacterSelectionsToActiveClients(new List<int>());
+                for (int i = 0; i < resume.HumanCodes.Length; i++)
+                    _levelControllerWrapper.AddCharacterSelection(i, resume.HumanCodes[i]);
+                MpCanary.Mark($"HostMigration: replaying the start (seed {gameSeed}, {connectedPlayerCount} humans, {totalCharacterCount} characters)");
+            }
+
             Debug.Log($"[NetworkedLevelControllerManager] About to InitializeGame: " +
                       $"humans={connectedPlayerCount}, ai={aiSlotCount}, total={totalCharacterCount}, seed={gameSeed}");
 
             _levelControllerWrapper.InitializeGame(gameSeed, totalCharacterCount, connectedPlayerCount);
+            RecordMigrationReplay(orderedConns, gameSeed, totalCharacterCount, connectedPlayerCount);
 
             var spawnedCount = _levelControllerWrapper.GetSpawnedCharacters()?.Count ?? 0;
             Debug.Log($"[NetworkedLevelControllerManager] InitializeGame done. Spawned characters in scene: {spawnedCount}");
@@ -230,11 +632,31 @@ namespace FastAndFractured.Multiplayer
             }
 
             MpCanary.Mark("WaitForClientsThenSpawn: clients ready, spawning cars");
+            bool resumingMigration = IsResumingMigratedMatch;
+            if (resumingMigration)
+            {
+                orderedConns = ApplyMigrationRoster(orderedConns);
+                orderedClientIds.Clear();
+                foreach (var conn in orderedConns) orderedClientIds.Add(conn.ClientId);
+            }
             SpawnCharactersOnClients(orderedConns);
             MpCanary.Mark("WaitForClientsThenSpawn: cars spawned");
 
+            // Every peer shows 3-2-1 and gets control on the same server tick (see MATCH_COUNTDOWN).
+            _resumedAfterMigration.Value = resumingMigration;
+            _countdownStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_LEAD_SECONDS : COUNTDOWN_LEAD_SECONDS);
+            MatchStartGate.LockUntil(_countdownStartTick.Value + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
+
             // Initialize player tracking
             InitializePlayerTracking();
+
+            if (resumingMigration)
+            {
+                StartCoroutine(RebindLocalPlayerWhenOwned());
+                StartCoroutine(ApplyMigratedStateWhenCarsAreReady());
+            }
+            if (HostMigration.HostMigrationSettings.Enabled)
+                gameObject.AddComponent<HostMigration.HostMigrationSnapshotSender>().Initialize(this);
 
             // Load the voted map scene (idempotent, skips if already loaded)
             LoadResolvedScene();
@@ -294,6 +716,8 @@ namespace FastAndFractured.Multiplayer
         // in LevelController), so host and clients end up with different volumes. The server
         // replicates its chosen index explicitly instead.
         private const float VOLUME_SYNC_TIMEOUT = 30f;
+        private int _serverVolumeIndex = -1;     // for the host migration snapshot
+        private int _migratedVolumeIndex = -1;   // set when resuming a migrated match
 
         private System.Collections.IEnumerator ServerSyncVolumeWhenReady()
         {
@@ -311,11 +735,20 @@ namespace FastAndFractured.Multiplayer
             }
 
             int index = vm.VolumeList != null ? vm.VolumeList.IndexOf(vm.CurrentVolumeGameObject) : -1;
+            // A match resumed after a host migration keeps the lighting it had: the new host's
+            // own pick is random and the scene visibly changed colour on resuming.
+            if (_migratedVolumeIndex >= 0 && vm.VolumeList != null && _migratedVolumeIndex < vm.VolumeList.Count && _migratedVolumeIndex != index)
+            {
+                vm.ChangeCurrentVolume(_migratedVolumeIndex);
+                index = _migratedVolumeIndex;
+            }
+            _migratedVolumeIndex = -1;
             if (index < 0)
             {
                 Debug.LogWarning("[NetworkedLevelControllerManager] Could not resolve current volume index; volume sync skipped.");
                 yield break;
             }
+            _serverVolumeIndex = index;
 
             // Brightness auto-initialization is suppressed only by the network-map scene
             // overrides. Initialize it now that the server's authoritative volume is active,
@@ -678,7 +1111,44 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             _matchEnded = true;
+            StartCoroutine(RevealThenEndGame(winner));
+        }
 
+        /// <summary>
+        /// Seconds between the last decisive death and the win/lose screen. With two players the
+        /// screen used to appear on the same frame as the kill, before the explosion could even be
+        /// seen (playtest feedback 2026-09-30). The map stays loaded meanwhile, so a coroutine on
+        /// this component is safe here.
+        /// </summary>
+        internal const float END_OF_MATCH_REVEAL_DELAY = 3f;
+
+        /// <summary>
+        /// Server: every human is dead but AIs are still fighting. The host can then skip the
+        /// rest (playtest feedback 2026-09-30) instead of watching bots until one is left.
+        /// </summary>
+        public bool OnlyAiAlive => base.IsServerInitialized && !_matchEnded &&
+                                   _deathTracker.AliveCount > 1 && !_deathTracker.AnyPlayerAlive;
+
+        /// <summary>Server: ends an AI-only match now, with one of the surviving AIs as winner.</summary>
+        [Server]
+        public void ServerSkipAiOnlyMatch()
+        {
+            if (!OnlyAiAlive) return;
+            int winnerId = _deathTracker.FirstAliveObjectId();
+            _trackedCharacterNobs.TryGetValue(winnerId, out NetworkObject winner);
+            MpCanary.Mark($"Host skipped the AI-only end of the match (winner {winnerId})");
+            EndMatchOnServer(winner);
+        }
+
+        [Server]
+        private System.Collections.IEnumerator RevealThenEndGame(NetworkObject winner)
+        {
+            yield return new WaitForSeconds(END_OF_MATCH_REVEAL_DELAY);
+
+            // Before EndGameRpc (same reliable channel, so it arrives first): the win/lose screen
+            // reads it when the menu loads.
+            try { MatchResultsRpc(BuildMatchResults(winner)); }
+            catch (Exception e) { Debug.LogException(e); }
             EndGameRpc(winner);
             Debug.Log($"<color=magenta>[NetworkedLevelControllerManager] EndGameRpc dispatched. " +
                       $"Scheduling server teardown in {SERVER_SHUTDOWN_DELAY}s…</color>");
@@ -691,6 +1161,69 @@ namespace FastAndFractured.Multiplayer
             // on a DontDestroyOnLoad runner that survives the scene swap instead.
             MatchTeardownRunner.ScheduleStop(SERVER_SHUTDOWN_DELAY);
         }
+
+        #region MATCH_RESULTS
+        // End-of-match table for the multiplayer win/lose screen (MatchResults / MultiplayerResultsPanel).
+        private readonly Dictionary<int, MatchResults.Participant> _resultsParticipants = new Dictionary<int, MatchResults.Participant>();
+        private readonly List<MatchResults.Death> _deathLog = new List<MatchResults.Death>();
+
+        [Server]
+        private void RegisterResultsParticipant(int objectId, int? ownerClientId, string characterCode)
+        {
+            bool human = ownerClientId.HasValue;
+            string name = human
+                ? (LobbyLocator.GetLobbyManager()?.GetPlayerName(ownerClientId.Value) ?? $"Player {ownerClientId.Value}")
+                : $"{MatchResults.CharacterName(characterCode)} (AI)";
+            _resultsParticipants[objectId] = new MatchResults.Participant
+            {
+                Id = objectId,
+                DisplayName = name,
+                CharacterCode = characterCode,
+                IsHuman = human,
+                OwnerClientId = human ? ownerClientId.Value : -1,
+            };
+        }
+
+        /// <summary>Tracked character id of a killer, or -1 (no killer, or not a character).</summary>
+        [Server]
+        private int FindTrackedId(NetworkObject nob)
+        {
+            if (nob == null) return -1;
+            if (_deathTracker.IsKnown(nob.ObjectId)) return nob.ObjectId;
+            foreach (var parent in nob.GetComponentsInParent<NetworkObject>(true))
+                if (_deathTracker.IsKnown(parent.ObjectId)) return parent.ObjectId;
+            foreach (var child in nob.GetComponentsInChildren<NetworkObject>(true))
+                if (_deathTracker.IsKnown(child.ObjectId)) return child.ObjectId;
+            if (nob.Owner != null && nob.Owner.IsValid && _deathTracker.TryGetCharacterForClient(nob.Owner.ClientId, out int id))
+                return id;
+            return -1;
+        }
+
+        [Server]
+        private MatchResultEntry[] BuildMatchResults(NetworkObject winner)
+        {
+            var participants = new List<MatchResults.Participant>(_resultsParticipants.Count);
+            foreach (var kv in _resultsParticipants)
+            {
+                var p = kv.Value;
+                if (_trackedCharacterNobs.TryGetValue(kv.Key, out var nob) && nob != null)
+                {
+                    var stats = nob.GetComponentInChildren<NetworkedStatsController>(true) ?? nob.GetComponentInParent<NetworkedStatsController>();
+                    if (stats != null) p.DamageDealt = Mathf.RoundToInt(stats.TotalDamageDealt.Value);
+                }
+                participants.Add(p);
+            }
+            var entries = MatchResults.Build(participants, _deathLog, FindTrackedId(winner));
+            MpCanary.Mark($"Match results: {string.Join(" | ", System.Array.ConvertAll(entries, e => $"#{e.Placement} {e.DisplayName} k{e.Kills}"))}");
+            return entries;
+        }
+
+        [ObserversRpc]
+        private void MatchResultsRpc(MatchResultEntry[] entries)
+        {
+            MatchResults.Store(entries, base.LocalConnection != null ? base.LocalConnection.ClientId : -1);
+        }
+        #endregion
 
         /// <summary>Scene-swap-proof server teardown after the win/lose screen delay.</summary>
         private sealed class MatchTeardownRunner : MonoBehaviour
@@ -758,6 +1291,7 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"[NetworkedLevelControllerManager] Duplicate death report for ObjectId {victimId} ignored.");
                 return;
             }
+            _deathLog.Add(new MatchResults.Death { VictimId = victimId, KillerId = FindTrackedId(killer) });
 
             // Every death brings the storm forward, as GameLoopManager.OnCharacterDied does in singleplayer.
             NetworkedSandstormController.ServerInstance?.ServerAdvanceStormForDeath();
@@ -842,12 +1376,16 @@ namespace FastAndFractured.Multiplayer
         {
             _deathTracker.Reset();
             _trackedCharacterNobs.Clear();
+            _resultsParticipants.Clear();
+            _deathLog.Clear();
 
             // Use the singleton's InGameCharacters list which contains both Players and AI
             var allCharacters = LevelController.Instance.InGameCharacters;
+            var nameCodes = LevelController.Instance.InGameCharactersNameCodes;
 
-            foreach (var charGO in allCharacters)
+            for (int characterIndex = 0; characterIndex < allCharacters.Count; characterIndex++)
             {
+                var charGO = allCharacters[characterIndex];
                 if (charGO == null) continue;
 
                 var nob = charGO.GetComponent<NetworkObject>();
@@ -860,6 +1398,8 @@ namespace FastAndFractured.Multiplayer
                     int? ownerClientId = (nob.Owner != null && nob.Owner.IsValid) ? nob.Owner.ClientId : (int?)null;
                     _deathTracker.RegisterCharacter(nob.ObjectId, ownerClientId);
                     _trackedCharacterNobs[nob.ObjectId] = nob;
+                    RegisterResultsParticipant(nob.ObjectId, ownerClientId,
+                        nameCodes != null && characterIndex < nameCodes.Count ? nameCodes[characterIndex] : string.Empty);
                 }
                 else
                 {
@@ -923,6 +1463,7 @@ namespace FastAndFractured.Multiplayer
             var deathResult = _deathTracker.ReportDeath(characterObjectId);
             if (deathResult.Applied)
             {
+                _deathLog.Add(new MatchResults.Death { VictimId = characterObjectId, KillerId = -1 });
                 Debug.Log($"<color=orange>[NetworkedLevelControllerManager] Disconnect death: {victimName}. Characters alive: {_deathTracker.AliveCount}</color>");
                 HandleDeathOutcome(deathResult);
             }
@@ -1084,6 +1625,9 @@ namespace FastAndFractured.Multiplayer
                 gameEndData.totalDamageTaken      = "0";
                 gameEndData.totalDistanceTraveled = "0";
             }
+            // Kills were never filled in multiplayer (the screen showed the default): take them
+            // from the match table, which the server sent just before EndGameRpc.
+            gameEndData.killCount = MatchResults.TryGetLocal(out var myResult) ? myResult.Kills.ToString() : "0";
 
             // finalAnimation drives StartMode: a non-null value makes the MainMenu show the
             // win/lose stats screen instead of the normal menu. Resolve the character-specific

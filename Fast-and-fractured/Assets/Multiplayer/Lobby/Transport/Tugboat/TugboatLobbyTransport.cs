@@ -87,6 +87,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
             if (options.IsPublic)
                 StartBroadcasting();
 
+            // The match teardown stops the server directly, not through LeaveLobbyAsync; without
+            // this the room kept being broadcast after its server was gone - empty rooms in the
+            // browser after a match (playtest feedback 2026-09-30).
+            nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
+            nm.ServerManager.OnServerConnectionState += HandleServerStopped;
+
             return _currentHandle;
         }
 
@@ -232,6 +238,21 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                 };
             }
             catch { return null; }
+        }
+
+        private void HandleServerStopped(ServerConnectionStateArgs args)
+        {
+            if (args.ConnectionState != LocalConnectionState.Stopped) return;
+            var nm = InstanceFinder.NetworkManager;
+            if (nm != null)
+            {
+                nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
+                nm.ServerManager.OnRemoteConnectionState -= HandleRemoteState;
+            }
+            StopBroadcasting();
+            if (!_hosting) return;
+            _hosting = false;
+            OnLobbyClosed?.Invoke();
         }
 
         private void HandleRemoteState(NetworkConnection conn, RemoteConnectionStateArgs args)

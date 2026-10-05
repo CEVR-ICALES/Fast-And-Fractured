@@ -90,9 +90,10 @@ namespace FastAndFractured.Multiplayer
         /// Tick the state machine: run current state's actions and evaluate transitions.
         /// Called from NetworkedVehicle.Replicate on every tick (including replays during reconcile).
         /// </summary>
-        public void TickStateMachine()
+        public void TickStateMachine(uint tick)
         {
             if (!_ready || _controller == null) return;
+            if (MatchStartGate.IsLocked(tick)) return;   // countdown still running
 
             var state = _controller.GetCurrentState();
             if (state == null) return;

@@ -123,6 +123,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             await StartServerAsync(nm, ct);
 
+            // The match teardown stops the server directly, not through LeaveLobbyAsync; without
+            // this the Steam lobby outlived its server and showed up empty in the browser after
+            // the match (playtest feedback 2026-09-30).
+            nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
+            nm.ServerManager.OnServerConnectionState += HandleServerStopped;
+
             // Host+client mode: also connect local client (skip for headless dedicated server)
             if (!options.HostAsServer)
             {
@@ -184,6 +190,26 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             nm.TransportManager.Transport?.SetPort(port);
 
             return await StartClientAsync(nm, ct);
+        }
+
+        private void HandleServerStopped(FishNet.Transporting.ServerConnectionStateArgs args)
+        {
+            if (args.ConnectionState != FishNet.Transporting.LocalConnectionState.Stopped) return;
+            var nm = InstanceFinder.NetworkManager;
+            if (nm != null)
+            {
+                nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
+                nm.ServerManager.OnRemoteConnectionState -= HandleRemoteState;
+                nm.ClientManager.OnClientConnectionState -= HandleLocalClientState;
+            }
+            if (!_hosting) return;
+            if (_currentLobbyId != CSteamID.Nil)
+            {
+                SteamMatchmaking.LeaveLobby(_currentLobbyId);
+                _currentLobbyId = CSteamID.Nil;
+            }
+            _hosting = false;
+            OnLobbyClosed?.Invoke();
         }
 
         // ── Leave ────────────────────────────────────────────────────────────────

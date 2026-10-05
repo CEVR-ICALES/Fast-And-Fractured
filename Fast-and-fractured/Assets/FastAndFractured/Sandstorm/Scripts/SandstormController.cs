@@ -175,7 +175,20 @@ namespace FastAndFractured
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
             IngameEventsManager.Instance.CreateEvent("Events.Sandstorm", 5f);
 
-            minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
+            // The PlayerHUD (and its minimap arrow) lives on the player now, so maps can no longer
+            // reference the arrow; find it on the local player. Without an arrow the storm still runs.
+            if (minimapSandstormDirection == null) minimapSandstormDirection = FindLocalPlayerMinimapArrow();
+            if (minimapSandstormDirection != null && minimapSandstormDirection.TryGetComponent(out SandstormDirectionMinimap directionArrow))
+                directionArrow.SetSandstormDirection(_direction);
+        }
+
+        private static GameObject FindLocalPlayerMinimapArrow()
+        {
+            GameObject player = LevelController.ExistingInstance != null ? LevelController.ExistingInstance.LocalPlayer : null;
+            SandstormDirectionMinimap arrow = player != null
+                ? player.transform.root.GetComponentInChildren<SandstormDirectionMinimap>(true)
+                : FindFirstObjectByType<SandstormDirectionMinimap>(FindObjectsInactive.Include);
+            return arrow != null ? arrow.gameObject : null;
         }
 
         /// <summary>

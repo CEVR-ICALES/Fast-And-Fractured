@@ -86,7 +86,15 @@ namespace FastAndFractured.Multiplayer
         private void Update()
         {
             if (!_active) return;
+            UpdateSkipButton();
             var kb = Keyboard.current;
+            var pad = Gamepad.current;
+            if (_skipButton != null && _skipButton.activeSelf &&
+                (kb != null && kb.enterKey.wasPressedThisFrame || pad != null && pad.startButton.wasPressedThisFrame))
+            {
+                SkipAiOnlyMatch();
+                return;
+            }
             if (kb == null) return;
 
             // Exit key — leave the match cleanly.
@@ -507,6 +515,41 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
+        // ── Skip (host, only AIs left) ───────────────────────────────────────────
+        private GameObject _skipButton;
+        private NetworkedLevelControllerManager _manager;
+
+        private void UpdateSkipButton()
+        {
+            if (_skipButton == null) return;
+            if (_manager == null) _manager = FindFirstObjectByType<NetworkedLevelControllerManager>();
+            bool show = InstanceFinder.IsServerStarted && _manager != null && _manager.OnlyAiAlive;
+            if (_skipButton.activeSelf != show) _skipButton.SetActive(show);
+        }
+
+        private void SkipAiOnlyMatch()
+        {
+            if (_manager == null || !_manager.OnlyAiAlive) return;
+            _skipButton.SetActive(false);
+            _manager.ServerSkipAiOnlyMatch();
+        }
+
+        private void BuildSkipButton(Transform parent)
+        {
+            _skipButton = new GameObject("SkipButton");
+            _skipButton.transform.SetParent(parent, false);
+            var rt = _skipButton.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-40f, 90f);
+            rt.sizeDelta = new Vector2(420f, 80f);
+            var bg = _skipButton.AddComponent<Image>();
+            bg.color = new Color(0.85f, 0.3f, 0.15f, 0.95f);
+            _skipButton.AddComponent<Button>().onClick.AddListener(SkipAiOnlyMatch);
+            var label = MakeLabel(_skipButton.transform, 30, TextAlignmentOptions.Center, Color.white);
+            label.text = "ONLY AI LEFT - SKIP  (Enter / Start)";
+            _skipButton.SetActive(false);
+        }
+
         // ── UI (built in code, zero scene wiring) ────────────────────────────────
         private void EnsureUi()
         {
@@ -530,6 +573,8 @@ namespace FastAndFractured.Multiplayer
             // Bottom controls bar
             var bottomBar = MakeBar(rootGO.transform, anchorY: 0f, pivotY: 0f, anchoredY: 20f, height: 50f);
             _controlsLabel = MakeLabel(bottomBar.transform, 26, TextAlignmentOptions.Center, new Color(0.85f, 0.85f, 0.85f, 1f));
+
+            BuildSkipButton(rootGO.transform);
         }
 
         private static GameObject MakeBar(Transform parent, float anchorY, float pivotY, float anchoredY, float height)

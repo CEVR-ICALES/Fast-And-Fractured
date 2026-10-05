@@ -89,6 +89,11 @@ namespace FastAndFractured.Multiplayer
                 _hideRoutine = null;
             }
 
+            // A host migration reloads the map behind its own frozen-frame overlay; a loading
+            // screen popping up over it would undo the "the match just paused" look.
+            if (HostMigration.HostMigrationOverlay.IsShown)
+                return;
+
             if (TrySpawnSingleplayerScreen())
                 return;
 

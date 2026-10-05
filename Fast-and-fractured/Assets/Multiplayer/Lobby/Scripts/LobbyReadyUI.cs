@@ -57,6 +57,34 @@ namespace FastAndFractured.Multiplayer
         private const int MAX_LATE_SUBSCRIBE_RETRIES = 20; // 10 seconds @ 0.5s interval
         private readonly Dictionary<int, GameObject> _playerEntries = new Dictionary<int, GameObject>();
 
+        private void Awake()
+        {
+            ArrangePlayerListAsGrid();
+        }
+
+        /// <summary>
+        /// The player list was a vertical stack: with 8 players (humans + AI) the entries ran off
+        /// the panel (playtest feedback 2026-09-30). Lay the slots out as a grid that wraps by the
+        /// panel's width (4 per row at 1920x1080).
+        /// </summary>
+        private void ArrangePlayerListAsGrid()
+        {
+            if (_playerListContainer == null) return;
+            var vertical = _playerListContainer.GetComponent<VerticalLayoutGroup>();
+            if (vertical != null) DestroyImmediate(vertical);
+
+            var grid = _playerListContainer.GetComponent<GridLayoutGroup>();
+            if (grid == null) grid = _playerListContainer.gameObject.AddComponent<GridLayoutGroup>();
+            var entryRect = _playerEntryPrefab != null ? _playerEntryPrefab.GetComponent<RectTransform>() : null;
+            grid.cellSize = entryRect != null && entryRect.sizeDelta.x > 0f && entryRect.sizeDelta.y > 0f
+                ? entryRect.sizeDelta : new Vector2(400f, 120f);
+            grid.spacing = new Vector2(12f, 12f);
+            grid.padding = new RectOffset(8, 8, 8, 8);
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperCenter;
+            grid.constraint = GridLayoutGroup.Constraint.Flexible;
+        }
+
         private void OnEnable()
         {
             _lateSubscribeRetries = 0;

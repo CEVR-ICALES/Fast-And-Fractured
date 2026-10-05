@@ -105,12 +105,12 @@ namespace FastAndFractured.Multiplayer.Lobby
             while (waited < MAX_WAIT_MS)
             {
                 lobby = LobbyLocator.GetLobbyManager();
-                if (lobby != null && FishNet.InstanceFinder.IsServerStarted) break;
+                if (lobby != null && lobby.IsServerInitialized) break;
                 await System.Threading.Tasks.Task.Delay(100);
                 waited += 100;
             }
 
-            if (lobby == null)
+            if (lobby == null || !lobby.IsServerInitialized)
             {
                 Debug.LogWarning("[MultiplayerHostSetupController] Could not find NetworkedLobbyManager after " +
                                  $"{MAX_WAIT_MS}ms. Room name = '{roomName}' NOT applied. " +
@@ -119,7 +119,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
 
             Debug.Log($"[MultiplayerHostSetupController] Applying host choices: room='{roomName}'.");
-            lobby.ServerSetRoomName(roomName);
+            lobby.ApplyRoomName(roomName);
         }
 
         private void SetStatus(string msg)

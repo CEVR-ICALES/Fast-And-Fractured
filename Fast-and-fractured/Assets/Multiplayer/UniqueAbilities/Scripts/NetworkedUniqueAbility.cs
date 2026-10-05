@@ -452,6 +452,38 @@ namespace FastAndFractured.Multiplayer
             }
 
             OnAbilityEndedRpc();
+
+            // The owner ends its own ultimate by itself - except Josefino's shield, which only ends
+            // when he is hit, and hits are resolved here on the server. OnAbilityEndedRpc skips the
+            // owner, so a remote Josefino kept his shield (and push immunity) for the rest of the
+            // match on his own screen (playtest feedback 2026-09-30).
+            if (_isJosefinoAbility && base.Owner != null && base.Owner.IsValid && !base.Owner.IsLocalClient)
+                TargetEndJosefinoShield(base.Owner);
+        }
+
+        [TargetRpc]
+        private void TargetEndJosefinoShield(FishNet.Connection.NetworkConnection owner)
+        {
+            if (!(_ability is JosefinoUniqueAbility josefino) || !josefino.IsAbilityActive) return;
+            _suppressLocalEventForwarding = true;
+            try { josefino.OnInvulnerabilityLost(); }
+            finally { _suppressLocalEventForwarding = false; }
+        }
+
+        /// <summary>
+        /// Server: a hit landed on Josefino while his shield was up. The shield absorbs that hit and
+        /// breaks, like a push breaks it in singleplayer (JosefinoCarImpactHandler). Before, shots
+        /// were simply ignored during the multiplayer invulnerability and the shield never broke.
+        /// </summary>
+        [Server]
+        internal bool ServerConsumeJosefinoShield()
+        {
+            if (!_isJosefinoAbility || !_abilityActiveOnServer) return false;
+            if (_ability is JosefinoUniqueAbility josefino && josefino.IsAbilityActive)
+                josefino.OnInvulnerabilityLost();   // ends the ability -> OnLocalAbilityEnded -> HandleAbilityEndedOnServer
+            HandleAbilityEndedOnServer();
+            MpCanary.Mark($"Josefino shield broken by a hit ({gameObject.name})");
+            return true;
         }
 
         /// <summary>
