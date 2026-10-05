@@ -101,6 +101,13 @@ namespace FastAndFractured
             {
                 pointExplosion.ExplodePoint();
             }
+            else if(other.gameObject.TryGetComponent(out GolfBallBehaviour golfBall))
+            {
+                Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
+                Vector3 vectorCenterToContactPoint = closestPoint - transform.position;
+                Vector3 direction = vectorCenterToContactPoint.normalized;
+                golfBall.OnCollide(_pushForce,direction);
+            }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))
             {
                 Vector3 otherPosition = other.transform.position;

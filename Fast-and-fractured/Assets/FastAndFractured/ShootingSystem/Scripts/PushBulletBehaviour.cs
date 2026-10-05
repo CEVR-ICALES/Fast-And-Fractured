@@ -127,5 +127,10 @@ namespace FastAndFractured {
         {
            return rb;
         }
+
+        public float GetMassReference()
+        {
+            return rb.mass;
+        }
     }
 }

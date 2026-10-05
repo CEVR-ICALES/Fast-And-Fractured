@@ -87,7 +87,7 @@ namespace FastAndFractured {
                     Rigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
                     if (!rangeDependent)
                     {
-                        ImpulseRigydbody(rb, rb.linearVelocity, GENERIC_MASS);
+                        ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
                     }
                     else
                     {

@@ -89,6 +89,7 @@ namespace FastAndFractured
             if (IsCurrentlyDashing)
             {
                 RefactoredVehicleCollision(collision);
+                OtherElementsCollision(collision);
                 CheckWallCollision(collision);
             }
             GroundCheck(collision);
@@ -160,6 +161,14 @@ namespace FastAndFractured
                 collision.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = this.gameObject;
             }  
             
+        }
+
+        private void OtherElementsCollision(Collision collision)
+        {
+            if(collision.gameObject.TryGetComponent(out GolfBallBehaviour golfBall))
+            {
+                golfBall.OnCollide(statsController.BaseForce,Rb.linearVelocity.magnitude,statsController.MaxSpeedDashing,Rb.mass,Rb.linearVelocity.normalized);
+            }
         }
 
         private void GroundCheck(Collision collision)
