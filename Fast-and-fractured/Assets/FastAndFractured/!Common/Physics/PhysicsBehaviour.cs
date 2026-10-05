@@ -63,6 +63,10 @@ namespace FastAndFractured
         const float TIME_UNTIL_CAR_PUSH_EFFECT_FADE_OUT = 0.3f;
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
 
+        const float SPEED_LIMIT_DASH_PUSH = 1000f;
+
+        const float TIME_ON_DASH_PUSH = 1f;
+
         GameObject hudEffect;
 
         private void OnEnable()
@@ -157,7 +161,7 @@ namespace FastAndFractured
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                otherComponentPhysicsBehaviours.ApplyImpulse((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse,false,1,false,1000); // for now we just apply an offset on the y axis provisional
+                otherComponentPhysicsBehaviours.ApplyImpulse((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse,false,TIME_ON_DASH_PUSH,false,SPEED_LIMIT_DASH_PUSH); 
                 otherComponentPhysicsBehaviours.CharacterKinematicReactionsController?.ApplyImpactReaction(-collisionNormal, 1, 1);
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 if(isTheOneToPush) _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
