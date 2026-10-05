@@ -698,7 +698,7 @@ namespace FastAndFractured.Multiplayer
             // Screen shake for everyone near the blast. The singleplayer ExplosionForce (which is
             // what normally triggers the Explosion profile) is stripped from networked projectiles,
             // so without this no peer — not even the shooter — feels an explosion.
-            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.Explosion, point);
+            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, point);
 
             if (_explosionPrefab != null)
             {

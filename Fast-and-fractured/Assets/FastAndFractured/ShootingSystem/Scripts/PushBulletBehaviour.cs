@@ -8,7 +8,7 @@ using Enums;
 using FastAndFractured.Utilities;
 
 namespace FastAndFractured {
-    public class PushBulletBehaviour : BulletBehaviour
+    public class PushBulletBehaviour : BulletBehaviour, ICanBeImpulseByTrampoline
     {
         //Explosion Values
         public float PushForce {set=> _pushForce = value; }
@@ -131,6 +131,11 @@ namespace FastAndFractured {
         public ICustomRigidbody GetRigidbody()
         {
            return rb;
+        }
+
+        public float GetMassReference()
+        {
+            return rb.mass;
         }
     }
 }

@@ -213,11 +213,14 @@ namespace FastAndFractured
 
                     CarInjector carInjector = Object.Instantiate(_playerPrefab, _spawnPoints[characterSpawnIndex].transform.position, _spawnPoints[characterSpawnIndex].transform.rotation);
                     GameObject instantiatedCar = carInjector.Install(characterModelPrefab,charNameCodeToSpawn,_characterDataProvider);
-
                     InGameCharacters.Add(instantiatedCar);
                     PlayerReference = instantiatedCar;
                     playerCarInstance = instantiatedCar;
                     playerReferenceForAI = playerCarInstance;
+
+                    //Camera Related
+                    _characterDataProvider.SetShakeLocalProfile(instantiatedCar,i);
+
 
                     var playerInputController = instantiatedCar.GetComponentInParent<PlayerInputController>();
                     if (playerInputController) playerInputController.enabled = false;

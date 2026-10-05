@@ -1,4 +1,5 @@
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine; 
 namespace FastAndFractured
 {
@@ -206,6 +207,13 @@ namespace FastAndFractured
                 }
             }
             return allNameCodes;
+        }
+
+        public void SetShakeLocalProfile(GameObject baseCar, int playerCount)
+        {
+            GameObject playerBase = baseCar.transform.parent.gameObject;
+            CameraBehaviours camera = playerBase.GetComponentInChildren<CameraBehaviours>();
+            camera.SetLocalCinemachineImpulseListener(playerCount);
         }
     }
 }

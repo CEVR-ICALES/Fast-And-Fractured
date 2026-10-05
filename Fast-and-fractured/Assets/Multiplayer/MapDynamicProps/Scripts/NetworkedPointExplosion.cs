@@ -159,7 +159,7 @@ namespace FastAndFractured.Multiplayer
             // The TNT's ExplosionForce (which raises the Explosion shake profile) is only activated
             // on the server, so remote clients would never feel the blast. Emit it locally on each
             // peer at the TNT position; Cinemachine attenuates it by distance.
-            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.Explosion, transform.position);
+            NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, transform.position);
 
             if (_visuals != null) _visuals.SetActive(false);
 

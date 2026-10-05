@@ -18,9 +18,14 @@ namespace FastAndFractured
         [SerializeField] private float carWeightImportance = 0.2f;
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
-        private ITimer _explosionTimer;
         [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
+        private float explosionImpulseTime = 1f;
+        [SerializeField]
+        private bool stopSpeedOnHit = false;
+        [SerializeField]
+        private bool limitRbSpeed = false;
+        private ITimer _explosionTimer;
+        [SerializeField] private float limitRbSpeedLimit = 1000f;
 
 
         //Provisinal value to select the type force aplication 
@@ -29,7 +34,6 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
-                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.Explosion);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
@@ -81,7 +85,7 @@ namespace FastAndFractured
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyImpulse(direction, closestPoint, forceToApply , forceMode,limitRbSpeed,explosionImpulseTime,stopSpeedOnHit,limitRbSpeedLimit); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
                     if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
                     {
@@ -92,6 +96,17 @@ namespace FastAndFractured
                     }
                     
                 }
+            }
+            else if(other.gameObject.TryGetComponent(out PointExplosion pointExplosion))
+            {
+                pointExplosion.ExplodePoint();
+            }
+            else if(other.gameObject.TryGetComponent(out GolfBallBehaviour golfBall))
+            {
+                Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
+                Vector3 vectorCenterToContactPoint = closestPoint - transform.position;
+                Vector3 direction = vectorCenterToContactPoint.normalized;
+                golfBall.OnCollide(_pushForce,direction);
             }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))
             {

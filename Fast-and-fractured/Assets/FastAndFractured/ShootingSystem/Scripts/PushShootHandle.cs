@@ -26,7 +26,7 @@ namespace FastAndFractured
         {
             if (!canShoot) return;
 
-            screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.PushShoot);
+            // The push-shoot screen shake is played by the state machine (AplyScreenShakeAction).
             canShoot = false;
             _isPushShooting = true;
             _shootingMine = false;

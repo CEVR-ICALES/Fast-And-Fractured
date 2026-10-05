@@ -108,7 +108,7 @@ namespace FastAndFractured
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
-                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);
+                // The shooting screen shake is played by the state machine (AplyScreenShakeAction).
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
 
                 canShoot = false;
