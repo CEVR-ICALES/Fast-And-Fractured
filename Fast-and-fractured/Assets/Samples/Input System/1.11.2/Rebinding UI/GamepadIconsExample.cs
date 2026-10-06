@@ -167,6 +167,8 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             public Sprite KeyArrowDown;
             public Sprite KeyArrowLeft;
             public Sprite KeyArrowRight;
+            public Sprite KeyLeftClick;
+            public Sprite KeyRightClick;
 
 
             public Sprite GetSprite(string controlPath)
@@ -227,6 +229,8 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                     case "downArrow": return KeyArrowDown;
                     case "leftArrow": return KeyArrowLeft;
                     case "rightArrow": return KeyArrowRight;
+                    case "leftButton": return KeyLeftClick;
+                    case "rightButton": return KeyRightClick;
                 }
                 return null;
             }
