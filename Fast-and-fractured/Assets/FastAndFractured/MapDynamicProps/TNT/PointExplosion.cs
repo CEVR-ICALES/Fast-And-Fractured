@@ -35,7 +35,7 @@ namespace FastAndFractured
         {
             if (explosionHitbox != null)
                 {
-                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, explosionCenterOffset,startHitTime,endHitTime,gameObject);
+                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, damagePercentage, explosionCenterOffset,startHitTime,endHitTime,gameObject);
                     visuals.SetActive(false);
                     TimerSystem.Instance.CreateTimer(endingTime, onTimerDecreaseComplete: () =>
                     {
