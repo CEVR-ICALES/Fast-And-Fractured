@@ -28,6 +28,7 @@ namespace FastAndFractured {
             pushBulletBehaviour.ExplosionRadius = characterStatsController.ExplosionRadius;
             pushBulletBehaviour.ExplosionCenterOffset = characterStatsController.ExplosionCenterOffset;
             pushBulletBehaviour.CustomGravity = Physics.gravity * characterStatsController.PushShootGravityMultiplier;
+            pushBulletBehaviour.Author = author;
             if (!_shootingMine)
             {
                 pushBulletBehaviour.BouncingNum = characterStatsController.PushShootBounceNum;

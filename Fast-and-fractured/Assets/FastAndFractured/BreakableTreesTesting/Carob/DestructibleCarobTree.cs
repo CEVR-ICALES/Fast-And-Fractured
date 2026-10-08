@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DestructibleCarobTree : MonoBehaviour
 {
-    private const string PLAYER_TAG = "Player";
+    private const string PLAYER_TAG = "Character";
 
     [SerializeField] private GameObject normalTree;
     [SerializeField] private ParticleSystem starEffect;
