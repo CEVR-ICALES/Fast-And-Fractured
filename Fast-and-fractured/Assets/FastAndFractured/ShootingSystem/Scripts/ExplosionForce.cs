@@ -8,6 +8,8 @@ namespace FastAndFractured
     public class ExplosionForce : MonoBehaviour
     {
         private float _pushForce;
+
+        private float _explosionDamagePercentage = 0;
         public SphereCollider ExplosionCollider { set => _explosionCollider = value; }
         private SphereCollider _explosionCollider;
         [SerializeField] private Transform _explosionVFX;
@@ -18,24 +20,58 @@ namespace FastAndFractured
         [SerializeField] private float carWeightImportance = 0.2f;
         [SerializeField, Range(0f, 100f)] private float forceToOtherObjects = 10f;
         [SerializeField] private ForceMode forceMode = ForceMode.Impulse;
-        private ITimer _explosionTimer;
         [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
+        private float explosionImpulseTime = 1f;
+        [SerializeField]
+        private bool stopSpeedOnHit = false;
+        [SerializeField]
+        private bool limitRbSpeed = false;
+        private ITimer _explosionTimer;
+        [SerializeField] private float limitRbSpeedLimit = 1000f;
+
+        private GameObject _author;
 
 
         //Provisinal value to select the type force aplication 
         [SerializeField] private bool isGrounded = true;
-        public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center, float startHitTime,float endHitTime)
+        public void ActivateExplosionHitbox(float radius, float pushForce, Vector3 center, float startHitTime,float endHitTime, GameObject author)
         {
             if (_explosionCollider != null)
             {
-                screenShakeSourceController?.PlayGlobalShakeFromProfile(ScreenShakeProfileType.Explosion);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
                 _explosionCollider.radius = radius;
                 _explosionCollider.enabled = false;
                 _explosionVFX.localScale = Vector3.one * radius;
+                _author = author;
+                _explosionTimer = TimerSystem.Instance.CreateTimer(startHitTime, onTimerDecreaseComplete: () =>
+                {
+                  _explosionCollider.enabled = true; 
+                  float realExplosionTime = endHitTime - startHitTime; 
+                 _explosionTimer =  TimerSystem.Instance.CreateTimer(realExplosionTime,
+                  onTimerDecreaseComplete: () =>
+                  {
+                      _explosionTimer = null;
+                      _explosionCollider.enabled = false;
+                  });
+                 
+                });
+            }
+        }
+
+        public void ActivateExplosionHitbox(float radius, float pushForce, float damagePercentage, Vector3 center, float startHitTime,float endHitTime, GameObject author)
+        {
+            if (_explosionCollider != null)
+            {
+                gameObject.SetActive(true);
+                _pushForce = pushForce;
+                _explosionCollider.center = center;
+                _explosionCollider.radius = radius;
+                _explosionCollider.enabled = false;
+                _explosionVFX.localScale = Vector3.one * radius;
+                _explosionDamagePercentage = damagePercentage;
+                _author = author;
                 _explosionTimer = TimerSystem.Instance.CreateTimer(startHitTime, onTimerDecreaseComplete: () =>
                 {
                   _explosionCollider.enabled = true; 
@@ -66,9 +102,10 @@ namespace FastAndFractured
                 }
 
                 otherComponentPhysicsBehaviours.CancelDash();
-                float otherCarEnduranceFactor = otherComponentPhysicsBehaviours.StatsController.Endurance / otherComponentPhysicsBehaviours.StatsController.MaxEndurance; // calculate current value of the other car endurance
-                float otherCarWeight = otherComponentPhysicsBehaviours.StatsController.Weight;
-                float otherCarEnduranceImportance = otherComponentPhysicsBehaviours.StatsController.EnduranceImportanceWhenColliding;
+                StatsController otherComponentStatsController = otherComponentPhysicsBehaviours.StatsController;
+                float otherCarEnduranceFactor = otherComponentStatsController.Endurance / otherComponentStatsController.MaxEndurance; // calculate current value of the other car endurance
+                float otherCarWeight = otherComponentStatsController.Weight;
+                float otherCarEnduranceImportance = otherComponentStatsController.EnduranceImportanceWhenColliding;
                 float forceToApply;
                 
                 Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
@@ -81,17 +118,30 @@ namespace FastAndFractured
 
                 if (!otherComponentPhysicsBehaviours.HasBeenPushed)
                 {
-                    otherComponentPhysicsBehaviours.ApplyForce(direction, closestPoint, forceToApply , forceMode); // for now we just apply an offset on the y axis provisional
+                    otherComponentPhysicsBehaviours.ApplyImpulse(direction, closestPoint, forceToApply , forceMode,limitRbSpeed,explosionImpulseTime,stopSpeedOnHit,limitRbSpeedLimit); // for now we just apply an offset on the y axis provisional
                     otherComponentPhysicsBehaviours.CarImpactHandler.OnHasBeenPushed(otherComponentPhysicsBehaviours);
+                    if(_explosionDamagePercentage!=0)
+                    otherComponentStatsController.TakeEndurance(_explosionDamagePercentage * otherComponentStatsController.MaxEndurance,false,_author);
                     if(transform.parent.gameObject.TryGetComponent(out PushBulletBehaviour pushBullet))
                     {
                         if(other.gameObject != pushBullet.Creator)
                         {
-                            other.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = transform.parent.gameObject.GetComponent<PushBulletBehaviour>().Creator;
+                            otherComponentStatsController.lastEnemyThatPushedMe = _author;
                         }
                     }
                     
                 }
+            }
+            else if(other.gameObject.TryGetComponent(out PointExplosion pointExplosion))
+            {
+                pointExplosion.ExplodePoint();
+            }
+            else if(other.gameObject.TryGetComponent(out GolfBallBehaviour golfBall))
+            {
+                Vector3 closestPoint = _explosionCollider.ClosestPointOnBounds(other.bounds.max);
+                Vector3 vectorCenterToContactPoint = closestPoint - transform.position;
+                Vector3 direction = vectorCenterToContactPoint.normalized;
+                golfBall.OnCollide(_pushForce,direction);
             }
             else if (other.gameObject.TryGetComponent(out Rigidbody otherRigidbody))
             {

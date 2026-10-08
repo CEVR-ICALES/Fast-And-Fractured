@@ -87,7 +87,6 @@ namespace FastAndFractured
 
             if (canShoot)
             {
-                screenShakeSourceController.PlayGlobalShakeFromProfile(ScreenShakeProfileType.NormalShoot);
                 ActiveShootingVFX(shootingTurretVFX);
                 Vector3 shootingDirection =  currentShootDirection + directionCenterOffSet;
                 float angle = Vector3.Angle(shootingDirection, transform.forward);

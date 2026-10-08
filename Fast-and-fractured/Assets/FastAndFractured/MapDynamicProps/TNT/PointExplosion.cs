@@ -25,19 +25,23 @@ namespace FastAndFractured
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.TryGetComponent(out PhysicsBehaviour physicsBehaviour) && physicsBehaviour.StatsController != null)
+            if (collision.gameObject.TryGetComponent(out PhysicsBehaviour physicsBehaviour))
             {
-                if (explosionHitbox != null)
+                ExplodePoint();
+            }
+        }
+
+        public void ExplodePoint()
+        {
+            if (explosionHitbox != null)
                 {
-                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, explosionCenterOffset,startHitTime,endHitTime);
+                    explosionHitbox.ActivateExplosionHitbox(explosionRadius, pushForce, damagePercentage, explosionCenterOffset,startHitTime,endHitTime,gameObject);
                     visuals.SetActive(false);
                     TimerSystem.Instance.CreateTimer(endingTime, onTimerDecreaseComplete: () =>
                     {
-                        physicsBehaviour.StatsController.TakeEndurance(physicsBehaviour.StatsController.MaxEndurance * damagePercentage, false, gameObject);
                         gameObject.SetActive(false);
                     });
                 }
-            }
         }
     }
 }

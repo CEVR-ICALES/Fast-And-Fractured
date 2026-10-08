@@ -2,6 +2,7 @@ using Enums;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 namespace FastAndFractured
@@ -54,10 +55,17 @@ namespace FastAndFractured
         public CharacterKinematicReactionsController CharacterKinematicReactionsController { get => _characterKinematicReactionsController; } 
         private CharacterKinematicReactionsController _characterKinematicReactionsController;
 
+        [Header("Events")]
+        public UnityEvent<Vector3> onForceCollision;
+
         const string PUSHED_EFFECT_NAME = "Broken_Crystal";
         const float TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED = 0.3f;
         const float TIME_UNTIL_CAR_PUSH_EFFECT_FADE_OUT = 0.3f;
         const float TIME_UNTIL_CAR_PUSH_STATE_RESET = 0.5f;
+
+        const float SPEED_LIMIT_DASH_PUSH = 1000f;
+
+        const float TIME_ON_DASH_PUSH = 1f;
 
         GameObject hudEffect;
 
@@ -89,6 +97,7 @@ namespace FastAndFractured
             if (IsCurrentlyDashing)
             {
                 RefactoredVehicleCollision(collision);
+                OtherElementsCollision(collision);
                 CheckWallCollision(collision);
             }
             GroundCheck(collision);
@@ -152,7 +161,7 @@ namespace FastAndFractured
                 forceToApply = _carImpactHandler.ApplyModifierToPushForceAsAttacker(forceToApply, otherCarModifiedState, isFrontalHit, isOtherCarDashing); // chheck modifier for attacker
                 forceToApply = otherComponentPhysicsBehaviours.CarImpactHandler.ApplyModifierToPushForceAsPushed(forceToApply, carModifiedState, isFrontalHit, true); // check modifier for dash reciver
 
-                otherComponentPhysicsBehaviours.ApplyForce((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse); // for now we just apply an offset on the y axis provisional
+                otherComponentPhysicsBehaviours.ApplyImpulse((-collisionNormal + Vector3.up * applyForceYOffset).normalized, collisionPos, forceToApply, ForceMode.Impulse,false,TIME_ON_DASH_PUSH,false,SPEED_LIMIT_DASH_PUSH); 
                 otherComponentPhysicsBehaviours.CharacterKinematicReactionsController?.ApplyImpactReaction(-collisionNormal, 1, 1);
                 _carImpactHandler.HandleOnCarImpact(isTheOneToPush, otherComponentPhysicsBehaviours);
                 if(isTheOneToPush) _characterKinematicReactionsController?.ApplyImpactReaction(transform.forward, forceToApply, statsController.BaseForce);
@@ -160,6 +169,14 @@ namespace FastAndFractured
                 collision.gameObject.GetComponent<StatsController>().lastEnemyThatPushedMe = this.gameObject;
             }  
             
+        }
+
+        private void OtherElementsCollision(Collision collision)
+        {
+            if(collision.gameObject.TryGetComponent(out GolfBallBehaviour golfBall))
+            {
+                golfBall.OnCollide(statsController.BaseForce,Rb.linearVelocity.magnitude,statsController.MaxSpeedDashing,Rb.mass,Rb.linearVelocity.normalized);
+            }
         }
 
         private void GroundCheck(Collision collision)
@@ -213,33 +230,59 @@ namespace FastAndFractured
 
             _rb.AddForceAtPosition(forceDirection * forceToApply, forcePoint, forceMode);
             Debug.DrawRay(forcePoint, forceDirection * 5f, Color.red, 5f);
+            onForceCollision?.Invoke(forceDirection);
             if(StatsController.IsPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.NORMAL_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(PUSHED_EFFECT_NAME), TIME_UNTIL_CAR_PUSH_EFFECT_DEACTIVATED);
             }
         }
 
-        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum)
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum, float speedLimit)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
-            _carMovementController.IsInTrampolin = true;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
+            _carMovementController.IsBeenImpulsed = true;
             _rb.AddForce(force, forceMode);
-            if (!limitRbSpeed)
-            {
-                if (!_carMovementController.IsDashing)
+         ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
-                    _carMovementController.SetMaxRbSpeed(Mathf.Infinity);
-                }
-                TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseComplete: () =>
+                     if (_isTouchingGround)
+                     {
+                         _carMovementController.SetMaxRbSpeedDelayed();
+                         _carMovementController.IsBeenImpulsed = false;
+                         impulseTimer = null;
+                     }
+                }, onTimerDecreaseComplete: () =>
                 {
-                    if (!_carMovementController.IsDashing)
-                    {
-                        _carMovementController.SetMaxRbSpeedDelayed();
-                        _carMovementController.IsInTrampolin = false;
-                    }
+                    _carMovementController.SetMaxRbSpeedDelayed();
+                    _carMovementController.IsBeenImpulsed = false;
+                    impulseTimer = null;
                 });
-            }
+        }
+
+        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum,float speedLimit)
+        {
+            if (stopMomentum)
+                _rb.linearVelocity = Vector3.zero;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
+            _carMovementController.IsBeenImpulsed = true;
+            ApplyForce(forceDirection, forcePoint, forceToApply, forceMode);
+            ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
+                {
+                     if (_isTouchingGround)
+                     {
+                         _carMovementController.SetMaxRbSpeedDelayed();
+                         _carMovementController.IsBeenImpulsed = false;
+                         impulseTimer = null;
+                     }
+                }, onTimerDecreaseComplete: () =>
+                {
+                    _carMovementController.SetMaxRbSpeedDelayed();
+                    _carMovementController.IsBeenImpulsed = false;
+                    impulseTimer = null;
+                });
         }
 
         public void AddForce(Vector3 force, ForceMode forceMode)
@@ -247,6 +290,7 @@ namespace FastAndFractured
             if (_rb != null)
             {
                 _rb.AddForce(force, forceMode);
+                onForceCollision?.Invoke(force.normalized);
             }
         }
 

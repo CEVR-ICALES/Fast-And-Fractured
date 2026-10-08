@@ -855,11 +855,12 @@ GameObject:
   - component: {fileID: 3418725416974131902}
   - component: {fileID: 3354677737533228885}
   - component: {fileID: 9016514513498141912}
-  - component: {fileID: 475735137831720905}
-  - component: {fileID: 2584534482645837430}
+  - component: {fileID: 5298347114576590605}
+  - component: {fileID: 2975653490430476900}
+  - component: {fileID: 7629573301812665865}
   m_Layer: 6
   m_Name: BaseCar
-  m_TagString: Untagged
+  m_TagString: Character
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1015,7 +1016,6 @@ MonoBehaviour:
   statsController: {fileID: 2898550601115800401}
   vehicleVfxController: {fileID: 856863917156540184}
   slowingDownAngularMomentumTime: 0.75
-  screenShakeSourceController: {fileID: 2584534482645837430}
 --- !u!114 &5672472646167121783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1053,7 +1053,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 0.1
+      value: 0.50042117
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1078,6 +1078,9 @@ MonoBehaviour:
   _checkGroundTime: 0.5
   slowDownFactor: 0.95
   statsController: {fileID: 2898550601115800401}
+  onForceCollision:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &2898550601115800401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1269,7 +1272,73 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &475735137831720905
+--- !u!114 &5298347114576590605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 417b00979db42dee480365badd13e3eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  shakeCollider: {fileID: 8639848427772867770}
+  screenShakeProfile: {fileID: 11400000, guid: dc3873adbc8d75f3481f1876fcbb2753, type: 2}
+  itDependOnDistance: 0
+  maxDistanceReference: 50
+  factorDistance:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  itDependOnSpeed: 1
+  referenceHighSpeed: 300
+  factorSpeed:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ownRigydbody: {fileID: 4737484894664670994}
+  screenShakeSourceController: {fileID: 2975653490430476900}
+  ownCameraBehaviour: {fileID: 0}
+--- !u!114 &2975653490430476900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570406966506803950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b22866361cfc86b58021bc015f54ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screenShakeProfiles: []
+  cinemachineImpulseSource: {fileID: 7629573301812665865}
+--- !u!114 &7629573301812665865
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1282,8 +1351,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ImpulseDefinition:
-    ImpulseChannel: 1
-    ImpulseShape: 0
+    ImpulseChannel: 2
+    ImpulseShape: 4
     CustomImpulseShape:
       serializedVersion: 2
       m_Curve: []
@@ -1291,7 +1360,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     ImpulseDuration: 0.2
-    ImpulseType: 1
+    ImpulseType: 0
     DissipationRate: 0.25
     RawSignal: {fileID: 0}
     AmplitudeGain: 1
@@ -1322,21 +1391,6 @@ MonoBehaviour:
     DissipationDistance: 100
     PropagationSpeed: 343
   DefaultVelocity: {x: 0, y: -1, z: 0}
---- !u!114 &2584534482645837430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5570406966506803950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b22866361cfc86b58021bc015f54ab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenShakeProfiles:
-  - {fileID: 11400000, guid: 3af190bf65350adb1b7c10ed742a7f0a, type: 2}
-  cinemachineImpulseSource: {fileID: 475735137831720905}
 --- !u!1 &5731704433943934497
 GameObject:
   m_ObjectHideFlags: 0

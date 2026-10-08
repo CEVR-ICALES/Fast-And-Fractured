@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.HighDefinition;
+using Assets.SimpleLocalization.Scripts;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utilities;
@@ -26,6 +27,8 @@ namespace FastAndFractured
 
         [SerializeField] private GameObject gamepadRemappingWindow;
         [SerializeField] private GameObject keyboardRemappingWindow;
+        [SerializeField] private GameObject textWaitingForInputKeyboard;
+        [SerializeField] private GameObject textWaitingForInputController;
 
         [Header("Audio Settings")]
         [SerializeField] private Slider generalVolumeSlider;
@@ -50,8 +53,19 @@ namespace FastAndFractured
 
         [Header("Delete Progress")]
         [SerializeField] private GameObject deleteButton;
-        [SerializeField] private GameObject deletePopupUI;
         [SerializeField] private List<string> deletedProgressList = new List<string>();
+        [Header("Remap first button")]
+        [SerializeField] private Button firstButtonKeyboardRemapping;
+        [SerializeField] private Button firstButtonControllerRemapping;
+        private static readonly FullScreenMode[] DISPLAY_MODES =
+        {
+            FullScreenMode.ExclusiveFullScreen,
+            FullScreenMode.Windowed,
+            FullScreenMode.FullScreenWindow
+        };
+        private const string TRANSLATION_KEY_WINDOWED = "Graphics.Windowed";
+        private const string TRANSLATION_KEY_FULLSCREEN = "Graphics.Fullscreen";
+        private const string TRANSLATION_KEY_FULLSCREEN_WINDOW = "Graphics.FullscreenWindow";
 
         #region Player Prefs String Constants
         private const string VSYNC_STRING = "Vsync";
@@ -117,6 +131,20 @@ namespace FastAndFractured
                 _menuScreen = GetComponent<MenuScreen>();
             }
             SetDefaultSelectedButton();
+            // if scene index is 1(main menu) then when moving to the right from accesibility settings button it will move to the delete button
+            if (SceneManager.GetActiveScene().buildIndex == 1)
+            {
+                Navigation navigation = accessibilitySettingsButton.navigation;
+                navigation.selectOnRight = deleteButton.GetComponent<Selectable>();
+                accessibilitySettingsButton.navigation = navigation;
+            }
+            
+        }
+        void OnDisable()
+        {
+            OpenAudioSettings();
+            textWaitingForInputKeyboard.SetActive(false);
+            textWaitingForInputController.SetActive(false);
         }
 
         private void SetDefaultSelectedButton()
@@ -241,6 +269,7 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(false);
             gamepadRemappingWindow.SetActive(false);
             keyboardRemappingWindow.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(firstButtonKeyboardRemapping.gameObject);
         }
 
         public void OpenControllerRemapping()
@@ -250,6 +279,7 @@ namespace FastAndFractured
             accessibilitySettingsUI.SetActive(false);
             gamepadRemappingWindow.SetActive(true);
             keyboardRemappingWindow.SetActive(false);
+            EventSystem.current.SetSelectedGameObject(firstButtonControllerRemapping.gameObject);
         }
 
         #region Audio Settings
@@ -447,11 +477,16 @@ namespace FastAndFractured
         #region Display Mode Methods
         private void SetDisplayMode(int option)
         {
-            string selectedOption = displayModeDropdown.options[option].text;
-            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedOption);
+
+            if (option < 0 || option >= DISPLAY_MODES.Length)
+                return;
+
+            FullScreenMode selectedMode = DISPLAY_MODES[option];
+
+            PlayerPrefs.SetString(DISPLAY_MODE_STRING, selectedMode.ToString());
             PlayerPrefs.Save();
 
-            ApplyDisplayMode((FullScreenMode)Enum.Parse(typeof(FullScreenMode), selectedOption));
+            ApplyDisplayMode(selectedMode);
         }
 
         private void ApplyDisplayMode(FullScreenMode selectedOption)
@@ -461,19 +496,28 @@ namespace FastAndFractured
 
         private void LoadDisplayModeOptions()
         {
-            FullScreenMode mode = Screen.fullScreenMode;
-            List<string> displayModes = new List<string> {
-                Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen),
-                Enum.GetName(typeof(FullScreenMode), FullScreenMode.Windowed),
-                Enum.GetName(typeof(FullScreenMode),  FullScreenMode.FullScreenWindow),
-               };
+            List<string> localizationKeys = new List<string>
+            {
+                TRANSLATION_KEY_FULLSCREEN,
+                TRANSLATION_KEY_WINDOWED,
+                TRANSLATION_KEY_FULLSCREEN_WINDOW
+            };
+
+            List<string> displayModes = localizationKeys
+                .Select(LocalizationManager.Localize)
+                .ToList();
 
             displayModeDropdown.ClearOptions();
             displayModeDropdown.AddOptions(displayModes);
 
-            string savedMode = PlayerPrefs.GetString(DISPLAY_MODE_STRING, Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen));
-            int index = displayModes.IndexOf(savedMode);
-            displayModeDropdown.value = index >= 0 ? index : 0;
+            string savedMode = PlayerPrefs.GetString(
+                DISPLAY_MODE_STRING,
+                Enum.GetName(typeof(FullScreenMode), FullScreenMode.ExclusiveFullScreen));
+
+            int savedIndex = Array.IndexOf(DISPLAY_MODES, (FullScreenMode)Enum.Parse(
+                typeof(FullScreenMode), savedMode));
+
+            displayModeDropdown.value = savedIndex >= 0 ? savedIndex : 0;
             displayModeDropdown.RefreshShownValue();
         }
         #endregion
@@ -591,22 +635,11 @@ namespace FastAndFractured
         #region Delete Progress Methods
         public void DeleteAllProgress()
         {
-            deletePopupUI.SetActive(false);
             for (int i = 0; i < deletedProgressList.Count; i++)
             {
                 PlayerPrefs.DeleteKey(deletedProgressList[i]);
             }
             PlayerPrefs.Save();
-        }
-
-        public void CloseDeletePopup()
-        {
-            deletePopupUI.SetActive(false);
-        }
-
-        public void OpenDeletePopup()
-        {
-            deletePopupUI.SetActive(true);
         }
 
 
