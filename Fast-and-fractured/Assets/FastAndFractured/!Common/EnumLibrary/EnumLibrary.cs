@@ -70,7 +70,10 @@ namespace Enums
         MULTIPLAYER_BROWSER,
         MULTIPLAYER_DIRECT_JOIN,
         LOBBY_ROOM,
-        LOBBY_MAP_VOTE
+        LOBBY_MAP_VOTE,
+        // Added on dev at the same position as the multiplayer screens; kept last so both
+        // serialized values stay valid (DeleteConfirm / SettingsMenu prefabs were moved to 18).
+        DELETE_DATA_POPUP
     }
 
     public enum Pooltype

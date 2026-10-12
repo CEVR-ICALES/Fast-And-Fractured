@@ -24,10 +24,8 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
     [SerializeField]
     private float maxDistanceReference = 50f;
 
-    [Tooltip("The quantity in percentage the distance will affect the result.")]
     [SerializeField]
-    [Range(10,100)]
-    private float strenghtOfFactorDistance = 50f;
+    private AnimationCurve factorDistance;
 
     [Header("Speed")]
     [SerializeField]
@@ -37,10 +35,8 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
     [SerializeField]
     private float referenceHighSpeed = 300f;
 
-    [Tooltip("The quantity in percentage the speed will affect the result.")]
     [SerializeField]
-    [Range(10,100)]
-    private float strenghtOfFactorSpeed = 80f;
+    private AnimationCurve factorSpeed;
 
     [SerializeField]
     private Rigidbody ownRigydbody;
@@ -69,15 +65,31 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
         {
             screenShakeSourceController = GetComponent<ScreenShakeSourceController>();
         }
-        if (ownCameraBehaviour == null&&type==ScreenShakeOnCollisionType.Listener)
+        if (ownCameraBehaviour == null&&type==ScreenShakeOnCollisionType.Listener&&transform.parent!=null)
         {
-            if((ownCameraBehaviour = transform.parent.parent.GetComponentInChildren<CameraBehaviours>())==null){
-            shakeCollider.enabled=false;
+            if((ownCameraBehaviour = transform.parent.GetComponentInChildren<CameraBehaviours>())==null){
+            enabled=false;
             }
         }
     }
 
     private void OnTriggerEnter(Collider other)
+    {
+        CameraBehaviours cameraBehaviours;
+        if(type== ScreenShakeOnCollisionType.Source)
+        {
+        Transform carBaseReference = other.transform.parent;
+         cameraBehaviours = carBaseReference != null ? carBaseReference.GetComponentInChildren<CameraBehaviours>() : null;
+        }
+        else
+        {
+            cameraBehaviours = ownCameraBehaviour;
+        }
+
+        HandleSourceCollision(cameraBehaviours,other);
+    }
+
+    private void OnCollisionEnter(Collision other)
     {
         CameraBehaviours cameraBehaviours;
         if(type== ScreenShakeOnCollisionType.Source)
@@ -104,8 +116,8 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
             if(itDependOnDistance)
             {
                 float distanceToCenter = (other.transform.position - shakeCollider.bounds.center).magnitude;
-                float distanceFactor = (1 + ((maxDistanceReference - distanceToCenter )/distanceToCenter))*(strenghtOfFactorDistance/MAX_PERCENTAGE);
-                screenShakeProfile.impactForce*=distanceFactor;
+                float distanceFactorEvaluate = factorDistance.Evaluate(maxDistanceReference/distanceToCenter);
+                screenShakeProfile.impactForce*=distanceFactorEvaluate;
             }
             if (itDependOnSpeed)
             {
@@ -116,8 +128,42 @@ public class ScreenShakeOnCollisionHandle : MonoBehaviour
                 }
                 float combinedSpeed = other.attachedRigidbody!=null ? ownRigydbody.linearVelocity.magnitude + other.attachedRigidbody.linearVelocity.magnitude : ownRigydbody.linearVelocity.magnitude;
                 float referenceHighSpeedInUnitsPerSecond = referenceHighSpeed/SPEED_TO_METER_PER_SECOND;
-                float speedFactor = combinedSpeed/referenceHighSpeedInUnitsPerSecond;
-                float speedFactorWithPercentageApplied = speedFactor * (strenghtOfFactorSpeed/MAX_PERCENTAGE);
+                float speedFactorEvaluate = factorSpeed.Evaluate(combinedSpeed/referenceHighSpeedInUnitsPerSecond);
+                float speedFactorWithPercentageApplied = speedFactorEvaluate;
+                screenShakeProfile.impactForce*=speedFactorWithPercentageApplied;
+            }
+            screenShakeProfile.defaultVelocity = direction;
+            screenShakeSourceController.PlayLocalShakeFromProfile(cameraBehaviours,screenShakeProfile);
+            screenShakeProfile.impactForce = baseImpactForce;
+            screenShakeProfile.defaultVelocity = baseDirection;
+        }
+    }
+
+    private void HandleSourceCollision(CameraBehaviours cameraBehaviours,Collision other)
+    {
+        
+        if(cameraBehaviours!=null)
+        {
+            Vector3 direction = (other.transform.position - transform.position).normalized;
+            float baseImpactForce = screenShakeProfile.impactForce;
+            Vector3 baseDirection = screenShakeProfile.defaultVelocity;
+            if(itDependOnDistance)
+            {
+                float distanceToCenter = (other.transform.position - shakeCollider.bounds.center).magnitude;
+                float distanceFactorEvaluate = factorDistance.Evaluate(maxDistanceReference/distanceToCenter);
+                screenShakeProfile.impactForce*=distanceFactorEvaluate;
+            }
+            if (itDependOnSpeed)
+            {
+                if (ownRigydbody == null)
+                {
+                    Debug.LogWarning("The variable ownRigydbody form " + this + " is null. Assign the corresponding rigydbody or untrigger the itDependOnSpeedFlag.");
+                    return;
+                }
+                float combinedSpeed = other.rigidbody!=null ? ownRigydbody.linearVelocity.magnitude + other.rigidbody.linearVelocity.magnitude : ownRigydbody.linearVelocity.magnitude;
+                float referenceHighSpeedInUnitsPerSecond = referenceHighSpeed/SPEED_TO_METER_PER_SECOND;
+                float speedFactorEvaluate = factorSpeed.Evaluate(combinedSpeed/referenceHighSpeedInUnitsPerSecond);
+                float speedFactorWithPercentageApplied = speedFactorEvaluate;
                 screenShakeProfile.impactForce*=speedFactorWithPercentageApplied;
             }
             screenShakeProfile.defaultVelocity = direction;

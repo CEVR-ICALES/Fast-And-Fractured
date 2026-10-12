@@ -144,6 +144,7 @@ namespace FastAndFractured
                 pbb.BouncingNum = parameters.BouncingNum;
                 pbb.BouncingStrenght = parameters.BouncingStrenght;
                 pbb.TimeToExplode = parameters.TimeToExplode;
+                pbb.Author = parameters.Author;
             }
         }
     }

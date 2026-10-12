@@ -29,6 +29,9 @@ namespace FastAndFractured {
         private int _currentBouncingNum;
         public float BouncingStrenght { set => _bounceStrenght = value; }
         private float _bounceStrenght = 0;
+
+        public GameObject Author {set=> _author = value;}
+        private GameObject _author;
         private float _currentBounceStrenght;
         private Vector3 initialPosition;
         private bool _firstTime = true;
@@ -83,7 +86,7 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
-            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset,startHitBoxTime,endHitBoxTime);
+            _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset,startHitBoxTime,endHitBoxTime,_author);
             OnBulletEndTrayectory();
         }
 

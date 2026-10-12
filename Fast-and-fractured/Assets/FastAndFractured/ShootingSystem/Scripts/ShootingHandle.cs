@@ -21,6 +21,7 @@ namespace FastAndFractured
         [SerializeField] protected Transform shootPoint;
         [SerializeField] internal Pooltype pooltype;
         [SerializeField] protected Vector3 directionCenterOffSet;
+        protected GameObject author;
         protected bool canShoot = true;
         [SerializeField] private EventReference bulletSound;
         [SerializeField] protected PhysicsBehaviour physicsBehaviour;
@@ -31,6 +32,8 @@ namespace FastAndFractured
                 Debug.LogError($"Character {gameObject.name} needs a StatsController for {name} Script");
             if (physicsBehaviour == null)
                 Debug.LogError($"Character {gameObject.name} needs a PhysicsBehaviour for {name} Script");
+            else
+                author = physicsBehaviour.gameObject;
         }
 
          
@@ -43,7 +46,8 @@ namespace FastAndFractured
                 Range = range,
                 Damage = characterStatsController.NormalShootDamage,
                 ShootPoint = this.shootPoint,
-                IgnoredCollider = this.GetComponentInParent<Collider>()
+                IgnoredCollider = this.GetComponentInParent<Collider>(),
+                Author = author
             };
         }
 

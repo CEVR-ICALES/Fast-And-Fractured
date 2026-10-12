@@ -120,8 +120,8 @@ namespace FastAndFractured.Multiplayer
         private void OnCollisionEnter(Collision collision)
         {
             if (!base.IsServerInitialized || _exploded) return;
+            // Like dev's PointExplosion: anything with physics sets it off (golf balls too).
             if (!collision.gameObject.TryGetComponent(out PhysicsBehaviour physics)) return;
-            if (physics.StatsController == null) return;
 
             _exploded = true;
 
@@ -129,14 +129,16 @@ namespace FastAndFractured.Multiplayer
             // The resulting impulse forces propagate to clients via FishNet rigidbody reconcile.
             if (_explosionHitbox != null)
             {
+                // No damage percentage here: damage goes through the networked pipeline below.
+                // The TNT is the author (dev credits it as the last thing that pushed the victim).
                 _explosionHitbox.ActivateExplosionHitbox(
-                    _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime);
+                    _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime, gameObject);
             }
 
             // Route damage through the networked pipeline using the original endingTime.
             var networkedStats = physics.GetComponentInParent<NetworkedStatsController>();
             if (networkedStats == null) networkedStats = physics.GetComponentInChildren<NetworkedStatsController>();
-            if (networkedStats != null)
+            if (networkedStats != null && physics.StatsController != null)
             {
                 float damage = physics.StatsController.MaxEndurance * _damagePercentage;
                 StartCoroutine(DelayedDamage(networkedStats, damage));

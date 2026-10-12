@@ -18,5 +18,9 @@ public struct BulletSpawnParameters
         public float BouncingStrenght;
         public float TimeToExplode;
         public bool IsMine;
+
+        // Car that fired (dev, 2026-10): explosions credit it as the last one who pushed the victim.
+        // Local only - never sent over the network.
+        public GameObject Author;
     }
     

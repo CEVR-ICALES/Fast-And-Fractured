@@ -621,7 +621,17 @@ namespace FastAndFractured.Multiplayer
                 pbb.BouncingNum = parameters.BouncingNum;
                 pbb.BouncingStrenght = parameters.BouncingStrenght;
                 pbb.TimeToExplode = parameters.TimeToExplode;
+                // A client-predicted shot reaches the server without object references: the
+                // shooter is this car.
+                pbb.Author = parameters.Author != null ? parameters.Author : ShooterCar();
             }
+        }
+
+        private GameObject ShooterCar()
+        {
+            var physics = GetComponentInParent<PhysicsBehaviour>();
+            if (physics == null) physics = GetComponentInChildren<PhysicsBehaviour>();
+            return physics != null ? physics.gameObject : null;
         }
 
         private bool EnsureShootHandles()
