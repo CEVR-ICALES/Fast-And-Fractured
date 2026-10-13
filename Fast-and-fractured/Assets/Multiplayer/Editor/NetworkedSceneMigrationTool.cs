@@ -59,6 +59,7 @@ namespace FastAndFractured.Multiplayer.Editor
             new HazardDef { DisplayName = "Skin Unlock Pickup", SingleplayerType = typeof(SkinUnlockerInteractable), WrapperType = typeof(NetworkedSkinUnlockerInteractable) },
             new HazardDef { DisplayName = "Sucking Building",   SingleplayerType = typeof(SuckingBuilding),     WrapperType = typeof(NetworkedSuckingBuilding)         },
             new HazardDef { DisplayName = "Building Dead Zone", SingleplayerType = typeof(BuildingDeadZone),    WrapperType = typeof(NetworkedBuildingDeadZone)        },
+            new HazardDef { DisplayName = "Golf Ball",          SingleplayerType = typeof(GolfBallBehaviour),   WrapperType = typeof(NetworkedGolfBall)                },
         };
 
         private struct SourceMap

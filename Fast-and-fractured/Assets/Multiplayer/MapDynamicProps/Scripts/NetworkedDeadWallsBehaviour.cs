@@ -100,6 +100,7 @@ namespace FastAndFractured.Multiplayer
         internal void HandleWallEnter(NetworkedDeadWallRelay wall, Collider other, int relayId)
         {
             if (!base.IsServerInitialized || other == null) return;
+            if (HandleGolfBall(other, entered: true)) return;
 
             // Same filter as the singleplayer wall (DeadWallsBehaivour.OnTriggerEnter): only the
             // car body collider - the one carrying the StatsController - and never while its body
@@ -140,6 +141,7 @@ namespace FastAndFractured.Multiplayer
         internal void HandleWallExit(NetworkedDeadWallRelay wall, Collider other, int relayId)
         {
             if (!base.IsServerInitialized || other == null) return;
+            if (HandleGolfBall(other, entered: false)) return;
             if (!other.TryGetComponent(out StatsController _)) return;
 
             var stats = FindNetworkedStats(other);
@@ -165,6 +167,29 @@ namespace FastAndFractured.Multiplayer
 
             if (stats.Owner != null && stats.Owner.IsValid)
                 RpcNotifyOutsideMap(stats.Owner, false);
+        }
+
+        /// <summary>
+        /// Dev's walls also send golf balls that leave the map back to their start
+        /// (GolfBallSpawnHandle). The legacy wall component is gone on every peer here, so do the
+        /// same on the server; NetworkedGolfBall shows the move to the clients.
+        /// </summary>
+        private static bool HandleGolfBall(Collider other, bool entered)
+        {
+            if (!other.TryGetComponent(out GolfBallBehaviour ball)) return false;
+            Rigidbody body = other.attachedRigidbody != null ? other.attachedRigidbody : other.GetComponent<Rigidbody>();
+            if (body == null || body.isKinematic) return true;
+            try
+            {
+                if (entered) ball.OutOfBoundsEvent();
+                else ball.CancelOutOfBoundsEvent();
+            }
+            catch (KeyNotFoundException)
+            {
+                // GolfBallSpawnHandle throws when a ball leaves a wall it was already moved away
+                // from (same in singleplayer); nothing to cancel.
+            }
+            return true;
         }
 
         private IEnumerator KillCountdown(NetworkedStatsController stats, float delay)

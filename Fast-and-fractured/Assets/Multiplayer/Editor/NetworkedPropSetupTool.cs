@@ -109,6 +109,13 @@ namespace FastAndFractured.Multiplayer.Editor
                 SingleplayerType = typeof(BuildingDeadZone),
                 WrapperType      = typeof(NetworkedBuildingDeadZone),
             },
+            new HazardDef
+            {
+                // Golf balls (dev, 2026-10): server-simulated, streamed to clients.
+                DisplayName      = "Golf Ball",
+                SingleplayerType = typeof(GolfBallBehaviour),
+                WrapperType      = typeof(NetworkedGolfBall),
+            },
         };
 
         // ── State ──────────────────────────────────────────────────────────────
