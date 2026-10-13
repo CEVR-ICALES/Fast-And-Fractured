@@ -35,6 +35,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         // SteamMatchmaking.GetNumLobbyMembers() returns stale/zero data for lobbies the
         // caller hasn't joined — GetLobbyData() is always served fresh by RequestLobbyList.
         private const string KEY_NUM_PLAYERS = "num_players";
+        private const string KEY_HOST_LINK   = "host_link";
 
         private CSteamID _currentLobbyId = CSteamID.Nil;
         private bool _hosting;
@@ -106,6 +107,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             // Seed the count to 0; the real value is written below once the host's local client
             // has connected (or on first remote join for dedicated servers).
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_NUM_PLAYERS, "0");
+            SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_HOST_LINK,
+                ((byte)FastAndFractured.Multiplayer.NetworkLink.Detect()).ToString());
 
             if (options.Metadata != null)
                 foreach (var kv in options.Metadata)
@@ -300,6 +303,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                     CurrentPlayers = members,
                     MaxPlayers     = maxP,
                     PingMs         = 0,
+                    HostLink       = FastAndFractured.Multiplayer.NetworkLink.Parse(SteamMatchmaking.GetLobbyData(sid, KEY_HOST_LINK)),
+                    InMatch        = SteamMatchmaking.GetLobbyData(sid, LobbyListing.KEY_IN_MATCH) == "1",
                 });
             }
 

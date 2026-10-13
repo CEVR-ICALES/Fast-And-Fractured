@@ -56,7 +56,14 @@ namespace FastAndFractured.Multiplayer.Abstractions
         public int CurrentPlayers;
         public int MaxPlayers;
         public int PingMs;
+        /// <summary>The host's Wi-Fi / cable link, as it advertised it (Unknown on older hosts).</summary>
+        public FastAndFractured.Multiplayer.LinkKind HostLink;
+        /// <summary>The room is playing a match; joining waits in the room for the next one.</summary>
+        public bool InMatch;
         public IReadOnlyDictionary<string, string> Metadata = new Dictionary<string, string>();
+
+        /// <summary>Lobby metadata key the host sets to "1" while its room plays a match.</summary>
+        public const string KEY_IN_MATCH = "in_match";
     }
 
     public interface ILobbyTransport

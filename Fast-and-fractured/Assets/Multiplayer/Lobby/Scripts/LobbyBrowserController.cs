@@ -72,7 +72,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 {
                     SetStatus(haveOwn ? "You are hosting · others see this room over LAN." : string.Empty);
 
-                    if (haveOwn) AddEntry(ownListing);
+                    if (haveOwn) AddEntry(ownListing, own: true);
 
                     foreach (var listing in listings)
                     {
@@ -111,17 +111,46 @@ namespace FastAndFractured.Multiplayer.Lobby
                 CurrentPlayers = currentPlayers,
                 MaxPlayers     = 8,
                 PingMs         = 0,
+                HostLink       = FastAndFractured.Multiplayer.NetworkLink.Local,
+                InMatch        = LobbyLocator.GetLobbyManager()?.GameStarted.Value ?? false,
             };
         }
 
-        private void AddEntry(LobbyListing listing)
+        private void AddEntry(LobbyListing listing, bool own = false)
         {
             if (_entryPrefab == null || _entryContainer == null) return;
             var entry = Instantiate(_entryPrefab, _entryContainer);
             bool full = listing.CurrentPlayers >= listing.MaxPlayers;
             entry.Populate(listing, OnJoinSelected);
+            // A room in a match stays joinable: the newcomer waits in it for the next match.
             entry.SetJoinable(!full);
+            entry.SetInMatch(listing.InMatch);
             _entries.Add(entry);
+            if (own) entry.SetPing(0);
+            else MeasurePing(entry, listing.Handle.Address);
+        }
+
+        /// <summary>
+        /// ICMP echo to the room's address. LAN hosts usually answer; a firewall that drops echo
+        /// requests leaves "-- ms" (the room stays joinable, only the number is missing).
+        /// </summary>
+        private static async void MeasurePing(LobbyBrowserEntry entry, string address)
+        {
+            if (string.IsNullOrEmpty(address)) return;
+            int best = -1;
+            try
+            {
+                using var ping = new System.Net.NetworkInformation.Ping();
+                for (int i = 0; i < 3; i++)
+                {
+                    var reply = await ping.SendPingAsync(address, 1000);
+                    if (reply.Status == System.Net.NetworkInformation.IPStatus.Success &&
+                        (best < 0 || reply.RoundtripTime < best))
+                        best = (int)reply.RoundtripTime;
+                }
+            }
+            catch { /* unreachable or not allowed */ }
+            if (entry != null) entry.SetPing(best);
         }
 
         private void ClearEntries()

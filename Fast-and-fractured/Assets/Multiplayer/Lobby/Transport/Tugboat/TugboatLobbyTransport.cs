@@ -14,7 +14,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 {
     /// <summary>
     /// LAN implementation of ILobbyTransport using FishNet Tugboat + UDP broadcast on port 47777.
-    /// Broadcast payload format: RoomName|Port|CurrentPlayers|GameVersion|MaxPlayers
+    /// Broadcast payload format: RoomName|Port|CurrentPlayers|GameVersion|MaxPlayers|HostLink|InMatch
     /// </summary>
     public sealed class TugboatLobbyTransport : ILobbyTransport, IDisposable
     {
@@ -216,9 +216,14 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         }
 
         private string BuildPayload(int playerCount) =>
-            string.Join(SEPARATOR.ToString(), _roomName, _gamePort, playerCount, Application.version, _maxPlayers);
+            BuildPayload(_roomName, _gamePort, playerCount, Application.version, _maxPlayers,
+                FastAndFractured.Multiplayer.NetworkLink.Local, GetLobbyMetadata(LobbyListing.KEY_IN_MATCH) == "1");
 
-        private static LobbyListing ParsePayload(byte[] data, IPEndPoint remote)
+        public static string BuildPayload(string roomName, ushort port, int players, string version, int maxPlayers,
+                                          FastAndFractured.Multiplayer.LinkKind hostLink, bool inMatch) =>
+            string.Join(SEPARATOR.ToString(), roomName, port, players, version, maxPlayers, (byte)hostLink, inMatch ? 1 : 0);
+
+        public static LobbyListing ParsePayload(byte[] data, IPEndPoint remote)
         {
             try
             {
@@ -235,6 +240,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                     CurrentPlayers = players,
                     MaxPlayers     = maxPlayers,
                     PingMs         = 0,
+                    HostLink       = parts.Length > 5 ? FastAndFractured.Multiplayer.NetworkLink.Parse(parts[5]) : FastAndFractured.Multiplayer.LinkKind.Unknown,
+                    InMatch        = parts.Length > 6 && parts[6] == "1",
                 };
             }
             catch { return null; }
