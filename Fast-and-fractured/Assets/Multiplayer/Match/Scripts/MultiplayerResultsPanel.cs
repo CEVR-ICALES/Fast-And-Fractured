@@ -57,42 +57,7 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
 
-        // ── Visibility ─────────────────────────────────────────────────────────────────
-        // The menu canvas draws through "Main Camera" (depth -1), but the win/lose cutscene
-        // brings its own camera (depth 0) that stays on after the cutscene ends and is drawn on
-        // top - the whole screen, table included, was invisible behind the final shot (seen on
-        // a client after a multiplayer match, 2026-10-05). While this screen shows, draw the
-        // canvas through the top camera instead, over that final shot.
-        private Canvas _rootCanvas;
-        private Camera _originalCamera;
-        private float _originalPlaneDistance;
-
-        private void LateUpdate()
-        {
-            if (_rootCanvas == null)
-            {
-                var canvas = GetComponentInParent<Canvas>(true);
-                _rootCanvas = canvas != null ? canvas.rootCanvas : null;
-                if (_rootCanvas == null || _rootCanvas.renderMode != RenderMode.ScreenSpaceCamera) { enabled = false; return; }
-                _originalCamera = _rootCanvas.worldCamera;
-                _originalPlaneDistance = _rootCanvas.planeDistance;
-            }
-            Camera top = null;
-            foreach (var cam in Camera.allCameras)
-                if (cam.targetTexture == null && (top == null || cam.depth > top.depth)) top = cam;
-            if (top != null && _rootCanvas.worldCamera != top)
-            {
-                _rootCanvas.worldCamera = top;
-                _rootCanvas.planeDistance = Mathf.Max(top.nearClipPlane + 0.05f, 0.5f);
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (_rootCanvas == null || _originalCamera == null) return;
-            _rootCanvas.worldCamera = _originalCamera;
-            _rootCanvas.planeDistance = _originalPlaneDistance;
-        }
+        // Visibility over the cutscene's camera: WinLoseScreenCameraFix (singleplayer too).
 
         // ── Layout ─────────────────────────────────────────────────────────────────────
         private void Build(Transform screen, MatchResultEntry[] entries)
