@@ -70,15 +70,19 @@ namespace FastAndFractured
                 Debug.LogError("GameEndData ScriptableObject is not assigned.");
             }
 
-             if (MainMenuManager.Instance != null)
+            // Curtain transition into the win/lose screen; the menu loads once it is shut.
+            SceneCurtain.Close(() =>
             {
-                MainMenuManager.Instance.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX);  
-            }
-            else
-            {
-                Debug.LogWarning("MainMenuManager.Instance is null. Attempting direct scene load to index 0.");
-                SceneManager.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX); 
-            }
+                if (MainMenuManager.Instance != null)
+                {
+                    MainMenuManager.Instance.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX);  
+                }
+                else
+                {
+                    Debug.LogWarning("MainMenuManager.Instance is null. Attempting direct scene load to index 0.");
+                    SceneManager.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX); 
+                }
+            });
         }
     }
 }
