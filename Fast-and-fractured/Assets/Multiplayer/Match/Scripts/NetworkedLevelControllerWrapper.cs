@@ -263,6 +263,7 @@ namespace FastAndFractured.Multiplayer
             // where the pre-start is still pending (it is idempotent).
             ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
+            AssignScreenShakeChannels(characters);
 
         }
 
@@ -397,6 +398,7 @@ namespace FastAndFractured.Multiplayer
             // and disabled PlayerInputControllers get BindActions creating duplicate input listeners.
             // Register a post-guard that fixes both issues after the event fires.
             RegisterCharactersCustomStartGuard();
+            AssignScreenShakeChannels(_levelController.InGameCharacters);
 
         }
 
@@ -944,6 +946,26 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
+        }
+
+        /// <summary>
+        /// One Cinemachine impulse channel per car on every peer (dev's per-player "local" screen
+        /// shake). The singleplayer spawner sets them (CharacterDataProvider.SetShakeLocalProfile),
+        /// but only where it runs - the server. On clients every car stayed on channel 0, which no
+        /// listener hears, so a client never felt its own shots or crashes. Remote cars run their
+        /// state machines here too (shooting shake action), so they must not share our channel.
+        /// </summary>
+        private static void AssignScreenShakeChannels(List<GameObject> characters)
+        {
+            if (characters == null) return;
+            for (int i = 0; i < characters.Count; i++)
+            {
+                var car = characters[i];
+                if (car == null) continue;
+                var root = car.transform.parent != null ? car.transform.parent : car.transform;
+                var camera = root.GetComponentInChildren<CameraBehaviours>(true);
+                if (camera != null) camera.SetLocalCinemachineImpulseListener(i);
+            }
         }
 
         #region HOST_MIGRATION
