@@ -31,6 +31,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
         /// <summary>Server: migration token of each connected client.</summary>
         public static readonly Dictionary<int, string> TokensByClientId = new Dictionary<int, string>();
 
+        /// <summary>Server: clients that turned off "take over the room" in their settings.</summary>
+        public static readonly HashSet<int> UnwillingToHost = new HashSet<int>();
+
         public static MatchSnapshotBroadcast? LatestSnapshot { get; private set; }
         private static float _latestSnapshotTime;
         private const float MAX_SNAPSHOT_AGE = 5f;
@@ -65,18 +68,20 @@ namespace FastAndFractured.Multiplayer.HostMigration
         // ── Server ─────────────────────────────────────────────────────────────────────
         private static void OnServerState(ServerConnectionStateArgs args)
         {
-            if (args.ConnectionState == LocalConnectionState.Stopped) TokensByClientId.Clear();
+            if (args.ConnectionState == LocalConnectionState.Stopped) { TokensByClientId.Clear(); UnwillingToHost.Clear(); }
         }
 
         private static void OnRemoteState(NetworkConnection conn, RemoteConnectionStateArgs args)
         {
-            if (args.ConnectionState == RemoteConnectionState.Stopped) TokensByClientId.Remove(conn.ClientId);
+            if (args.ConnectionState == RemoteConnectionState.Stopped) { TokensByClientId.Remove(conn.ClientId); UnwillingToHost.Remove(conn.ClientId); }
         }
 
         private static void OnTokenReceived(NetworkConnection conn, MigrationTokenBroadcast msg, Channel channel)
         {
             if (conn == null || string.IsNullOrEmpty(msg.Token)) return;
             TokensByClientId[conn.ClientId] = msg.Token;
+            if (msg.WillingToHost) UnwillingToHost.Remove(conn.ClientId);
+            else UnwillingToHost.Add(conn.ClientId);
         }
 
         public static string TokenOf(NetworkConnection conn) =>
@@ -94,7 +99,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private static void OnClientState(ClientConnectionStateArgs args)
         {
             if (args.ConnectionState != LocalConnectionState.Started) return;
-            InstanceFinder.ClientManager.Broadcast(new MigrationTokenBroadcast { Token = LocalToken });
+            InstanceFinder.ClientManager.Broadcast(new MigrationTokenBroadcast { Token = LocalToken, WillingToHost = MultiplayerSettings.WillingToHost });
             if (HostMigrationSettings.Enabled && !InstanceFinder.IsServerStarted)
                 InstanceFinder.TransportManager.Transport.SetTimeout(CLIENT_TIMEOUT_SECONDS, asServer: false);
         }

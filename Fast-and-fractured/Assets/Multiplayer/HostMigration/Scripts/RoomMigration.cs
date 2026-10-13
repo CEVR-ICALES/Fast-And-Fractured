@@ -100,7 +100,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             foreach (var conn in nm.ServerManager.Clients.Values)
                 if (conn != null && conn.IsActive && !conn.IsLocalClient)
                     remotes.Add(conn);
-            var order = RoomSuccession.Order(remotes.ConvertAll(c => c.ClientId), lobby.MatchParticipants);
+            var order = RoomSuccession.Order(remotes.ConvertAll(c => c.ClientId), lobby.MatchParticipants, HostMigrationNetwork.UnwillingToHost);
 
             var tokens = new List<string>(order.Count);
             var addresses = new List<string>(order.Count);
@@ -273,15 +273,21 @@ namespace FastAndFractured.Multiplayer.HostMigration
     public static class RoomSuccession
     {
         /// <summary>
-        /// Remote players in take-over order: the match's players first (a lost match host then
-        /// hands the room to someone who was playing), then the rest, each by connection order.
+        /// Remote players in take-over order: those willing to host before those who said no in
+        /// their settings (they still take over if nobody else is left); among them the match's
+        /// players first (a lost match host then hands the room to someone who was playing), then
+        /// the rest, each by connection order.
         /// </summary>
-        public static List<int> Order(IEnumerable<int> remoteClientIds, IEnumerable<int> matchParticipants)
+        public static List<int> Order(IEnumerable<int> remoteClientIds, IEnumerable<int> matchParticipants,
+                                      IEnumerable<int> unwillingToHost = null)
         {
             var playing = new HashSet<int>(matchParticipants ?? Array.Empty<int>());
+            var unwilling = new HashSet<int>(unwillingToHost ?? Array.Empty<int>());
             var order = new List<int>(remoteClientIds);
             order.Sort((a, b) =>
             {
+                bool ua = unwilling.Contains(a), ub = unwilling.Contains(b);
+                if (ua != ub) return ua ? 1 : -1;
                 bool pa = playing.Contains(a), pb = playing.Contains(b);
                 return pa != pb ? (pa ? -1 : 1) : a.CompareTo(b);
             });

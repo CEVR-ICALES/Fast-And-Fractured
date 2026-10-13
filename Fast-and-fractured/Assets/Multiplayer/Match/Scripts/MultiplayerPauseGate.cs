@@ -178,6 +178,11 @@ namespace FastAndFractured.Multiplayer
                 }
 
             if (pause != null) RouteExitToRoom(pause);
+
+            // Settings ▸ Multiplayer in the pause menu too (player roots spawn after the scene load).
+            foreach (var screen in screens)
+                if (screen.TryGetComponent(out SettingsMenuBehaviour settings) && settings.GetComponent<MultiplayerSettingsTab>() == null)
+                    settings.gameObject.AddComponent<MultiplayerSettingsTab>();
             return true;
         }
 

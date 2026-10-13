@@ -42,6 +42,7 @@ namespace FastAndFractured.Multiplayer
         {
             _instance = null;
             _hiddenByUser = false;
+            MultiplayerSettings.Changed -= ApplySetting;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -53,7 +54,17 @@ namespace FastAndFractured.Multiplayer
             _instance = go.AddComponent<NetworkStatsHud>();
         }
 
-        private void Awake() => Build();
+        private void Awake()
+        {
+            Build();
+            ApplySetting();
+            MultiplayerSettings.Changed += ApplySetting;
+        }
+
+        private void OnDestroy() => MultiplayerSettings.Changed -= ApplySetting;
+
+        /// <summary>Settings ▸ Multiplayer decides whether it starts shown; F3 still toggles it in a match.</summary>
+        private static void ApplySetting() => _hiddenByUser = !MultiplayerSettings.ShowNetworkStats;
 
         private void Update()
         {

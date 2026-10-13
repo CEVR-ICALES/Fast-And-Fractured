@@ -11,6 +11,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
     public struct MigrationTokenBroadcast : IBroadcast
     {
         public string Token;
+        /// <summary>Settings ▸ Multiplayer: this player accepts taking over the room.</summary>
+        public bool WillingToHost;
     }
 
     /// <summary>

@@ -25,6 +25,13 @@ namespace FastAndFractured.Multiplayer.Tests
             CollectionAssert.AreEqual(new[] { 1, 2, 4 }, order);
         }
 
+        [Test]
+        public void Succession_UnwillingHostsGoLast()
+        {
+            var order = RoomSuccession.Order(new[] { 5, 2, 7, 3 }, new[] { 7, 3 }, new[] { 3, 2 });
+            CollectionAssert.AreEqual(new[] { 7, 5, 3, 2 }, order);
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void LanAdvert_CarriesInMatch(bool inMatch)
