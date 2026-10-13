@@ -113,6 +113,8 @@ namespace FastAndFractured.Multiplayer
                 () => MultiplayerSettings.ShowNetworkStats, v => MultiplayerSettings.ShowNetworkStats = v);
             AddToggle(content, toggleTemplate, separatorTemplate, "Host the room if the host leaves",
                 () => MultiplayerSettings.WillingToHost, v => MultiplayerSettings.WillingToHost = v);
+            AddToggle(content, toggleTemplate, separatorTemplate, "Share gameplay statistics",
+                () => GameTelemetry.Telemetry.Sharing, v => GameTelemetry.Telemetry.Sharing = v);
 
             _panel.SetActive(false);
         }

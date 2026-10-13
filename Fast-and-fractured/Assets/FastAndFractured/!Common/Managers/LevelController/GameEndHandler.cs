@@ -15,6 +15,7 @@ namespace FastAndFractured
 
         public void ProcessGameEnd(bool hasPlayerWon, GameObject playerReference, string selectedPlayerKeyInPrefs)
         {
+            GameplayEvents.RaiseMatchEnded(hasPlayerWon);
             if (playerReference == null)
             {
                 Debug.LogError("Player reference is null, cannot process game end stats.");

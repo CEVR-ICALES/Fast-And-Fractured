@@ -1676,6 +1676,7 @@ namespace FastAndFractured.Multiplayer
         // who quits early gets the same defeat screen + MainMenu flow as a normal match end.
         public void ShowWinLoseScreen(bool isWin)
         {
+            GameplayEvents.RaiseMatchEnded(isWin);
             var gameEndData = ResolveGameEndData();
             if (gameEndData == null)
             {
