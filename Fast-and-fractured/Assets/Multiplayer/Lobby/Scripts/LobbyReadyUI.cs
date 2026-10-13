@@ -52,6 +52,7 @@ namespace FastAndFractured.Multiplayer
         [SerializeField] private FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI _mapVoteAnimation;
 
         private NetworkedLobbyManager _lobbyManager;
+        private bool _subscribed;
         private bool _isReady;
         private int _lateSubscribeRetries;
         private const int MAX_LATE_SUBSCRIBE_RETRIES = 20; // 10 seconds @ 0.5s interval
@@ -120,6 +121,7 @@ namespace FastAndFractured.Multiplayer
 
         private void Subscribe()
         {
+            _subscribed = true;
             _lobbyManager.OnPlayerReadyChanged     += HandlePlayerReadyChanged;
             _lobbyManager.OnPlayerCharacterChanged += HandlePlayerCharacterChanged;
             _lobbyManager.OnPlayerNameChanged      += HandlePlayerNameChanged;
@@ -134,6 +136,8 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.RoomName.OnChange                 += HandleRoomNameSync;
             _lobbyManager.AiSlotCount.OnChange              += HandleAiSlotCountSync;
             _lobbyManager.OnMapVoteAnimationRequested       += HandleMapVoteAnimation;
+            _lobbyManager.GameStarted.OnChange              += HandleGameStartedSync;
+            _lobbyManager.MatchParticipants.OnChange        += HandleParticipantsSync;
             UpdateRoomName(_lobbyManager.RoomName.Value);
 
             // Forward local character selection to the server
@@ -172,10 +176,12 @@ namespace FastAndFractured.Multiplayer
                 _countdownPanel.SetActive(false);
 
             RefreshPlayerList();
+            RefreshMatchState();
         }
 
         private void Unsubscribe()
         {
+            _subscribed = false;
             if (_lobbyManager == null) return;
             _lobbyManager.OnPlayerReadyChanged     -= HandlePlayerReadyChanged;
             _lobbyManager.OnPlayerCharacterChanged -= HandlePlayerCharacterChanged;
@@ -191,6 +197,97 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.RoomName.OnChange                 -= HandleRoomNameSync;
             _lobbyManager.AiSlotCount.OnChange              -= HandleAiSlotCountSync;
             _lobbyManager.OnMapVoteAnimationRequested       -= HandleMapVoteAnimation;
+            _lobbyManager.GameStarted.OnChange              -= HandleGameStartedSync;
+            _lobbyManager.MatchParticipants.OnChange        -= HandleParticipantsSync;
+        }
+
+        /// <summary>
+        /// The room is a new object after a host migration (the new host spawns its own):
+        /// bind to it as soon as it appears.
+        /// </summary>
+        private void Update()
+        {
+            if (!_subscribed || _lobbyManager != null) return;
+            _subscribed = false;
+            foreach (var entry in _playerEntries.Values)
+                if (entry != null) Destroy(entry);
+            _playerEntries.Clear();
+            _isReady = false;
+            _lateSubscribeRetries = 0;
+            TryLateSubscribe();
+        }
+
+        // ── Match in progress ────────────────────────────────────────────────────────
+        private GameObject _matchBanner;
+
+        private void HandleGameStartedSync(bool prev, bool next, bool asServer)
+        {
+            if (asServer) return;   // the host gets the client-side call as well
+            if (prev && !next)
+            {
+                // The match is over and the room starts over: nobody is ready any more.
+                _isReady = false;
+                UpdateReadyButtonVisual();
+                if (_countdownPanel != null) _countdownPanel.SetActive(false);
+            }
+            RefreshMatchState();
+            RefreshPlayerList();
+        }
+
+        private void HandleParticipantsSync(FishNet.Object.Synchronizing.SyncListOperation op, int index, int prev, int next, bool asServer)
+        {
+            if (asServer) return;
+            RefreshMatchState();
+            RefreshPlayerList();
+        }
+
+        /// <summary>
+        /// While the room plays a match, players in the room (joined mid-match, or left it) wait
+        /// for the next one: a banner says so and the ready / start buttons rest.
+        /// </summary>
+        private void RefreshMatchState()
+        {
+            if (_lobbyManager == null) return;
+            bool running = _lobbyManager.GameStarted.Value;
+            int localId = InstanceFinder.ClientManager?.Connection?.ClientId ?? -1;
+            bool waiting = running && !_lobbyManager.IsInMatch(localId);
+
+            if (_readyButton != null) _readyButton.interactable = !running;
+            if (_forceStartButton != null) _forceStartButton.interactable = !running;
+            if (waiting && _readyButtonText != null) _readyButtonText.text = "MATCH IN PROGRESS";
+            else if (!running) UpdateReadyButtonVisual();
+
+            if (waiting && _matchBanner == null) _matchBanner = BuildMatchBanner();
+            if (_matchBanner != null) _matchBanner.SetActive(waiting);
+        }
+
+        private GameObject BuildMatchBanner()
+        {
+            var go = new GameObject("MatchInProgressBanner", typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(transform, false);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -128f);
+            rect.sizeDelta = new Vector2(1100f, 56f);
+            var background = go.AddComponent<Image>();
+            background.color = new Color(0.96f, 0.69f, 0.25f, 0.92f);
+            background.raycastTarget = false;
+
+            var textGo = new GameObject("Text", typeof(RectTransform));
+            var textRect = (RectTransform)textGo.transform;
+            textRect.SetParent(rect, false);
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(16f, 0f);
+            textRect.offsetMax = new Vector2(-16f, 0f);
+            var text = textGo.AddComponent<TextMeshProUGUI>();
+            if (_roomNameLabel != null) text.font = _roomNameLabel.font;
+            text.fontSize = 28f;
+            text.color = new Color(0.12f, 0.08f, 0.04f, 1f);
+            text.alignment = TextAlignmentOptions.Center;
+            text.raycastTarget = false;
+            text.text = "MATCH IN PROGRESS  ·  you will play the next one";
+            return go;
         }
 
         private void HandleAiSlotCountSync(int prev, int next, bool asServer) => RefreshPlayerList();
@@ -229,7 +326,7 @@ namespace FastAndFractured.Multiplayer
         #region UI_CALLBACKS
         private void OnReadyClicked()
         {
-            if (_lobbyManager == null) return;
+            if (_lobbyManager == null || _lobbyManager.GameStarted.Value) return;
             _isReady = !_isReady;
             _lobbyManager.ServerSetReady(_isReady);
             UpdateReadyButtonVisual();
@@ -371,6 +468,7 @@ namespace FastAndFractured.Multiplayer
                 if (slot != null)
                 {
                     slot.SetData(clientId, code, isReady, voteSprite, isLocal, displayName);
+                    slot.SetInMatch(_lobbyManager.IsInMatch(clientId));
                     var btn = slot.GetSelectButton();
                     if (btn != null && isLocal)
                     {
