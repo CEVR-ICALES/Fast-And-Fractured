@@ -15,6 +15,12 @@ namespace FastAndFractured.Multiplayer
     /// focus back when it is lost (a clicked-away mouse, an entry list rebuilt under it).
     ///
     /// Added at runtime to the screens under the MultiplayerUICanvas; no scene wiring.
+    ///
+    /// Since dev's controller-menu work (RecoverSelectedMenuController, 2026-10) the menu itself
+    /// clears the selection while the mouse/keyboard is in use and, with a gamepad, restores the
+    /// last button or the current screen's defaultInteractable. So this keeps defaultInteractable
+    /// pointing at the main action and only selects on its own when a screen opens with a
+    /// gamepad in use - selecting every frame fought dev's clearing (a flickering highlight).
     /// </summary>
     public sealed class MultiplayerScreenFocus : MonoBehaviour
     {
@@ -61,23 +67,29 @@ namespace FastAndFractured.Multiplayer
             bool becameCurrent = current && !_wasCurrent;
             _wasCurrent = current;
             if (!current) return;
-            if (becameCurrent) { FocusPrimary(); return; }
+            Selectable primary = FindPrimary();
+            if (primary == null) return;
+            if (_screen != null) _screen.defaultInteractable = primary;   // dev's recovery uses it
 
             EventSystem events = EventSystem.current;
-            if (events == null) return;
+            if (events == null || !GamepadInUse()) return;
             GameObject selected = events.currentSelectedGameObject;
             bool lost = selected == null || !selected.activeInHierarchy ||
                         !selected.transform.IsChildOf(transform) ||
                         selected.TryGetComponent(out Selectable s) && !s.IsInteractable();
-            if (lost) FocusPrimary();
+            if (becameCurrent || lost) events.SetSelectedGameObject(primary.gameObject);
         }
 
-        private void FocusPrimary()
+        /// <summary>The gamepad was used more recently than the keyboard and the mouse.</summary>
+        private static bool GamepadInUse()
         {
-            Selectable primary = FindPrimary();
-            if (primary == null) return;
-            if (_screen != null) _screen.defaultInteractable = primary;
-            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(primary.gameObject);
+            var pad = UnityEngine.InputSystem.Gamepad.current;
+            if (pad == null) return false;
+            double padTime = pad.lastUpdateTime;
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            return (keyboard == null || padTime >= keyboard.lastUpdateTime)
+                && (mouse == null || padTime >= mouse.lastUpdateTime);
         }
 
         private Selectable FindPrimary()
