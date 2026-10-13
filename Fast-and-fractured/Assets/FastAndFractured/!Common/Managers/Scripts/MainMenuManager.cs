@@ -203,7 +203,8 @@ namespace FastAndFractured
 
         public void UseBackButton()
         {
-            if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
+            // No screen open (in a match, before Escape opens the pause menu): nothing to go back from.
+            if (_currentScreen != null && _currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
             {
                 _currentScreen.backButton.onClick.Invoke();
             }
@@ -233,7 +234,7 @@ namespace FastAndFractured
         }
         public bool IsInPauseMenu()
         {
-            return _currentScreen.screenType == ScreensType.PAUSE;
+            return _currentScreen != null && _currentScreen.screenType == ScreensType.PAUSE;
         }
         #endregion
     }
