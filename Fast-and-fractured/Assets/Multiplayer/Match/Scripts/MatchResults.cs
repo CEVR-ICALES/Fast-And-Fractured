@@ -48,6 +48,18 @@ namespace FastAndFractured.Multiplayer
         {
             Latest = entries;
             LocalClientId = localClientId;
+            AwardLocalXp();
+        }
+
+        /// <summary>The local player's XP for this match, from its own result (players only, not spectators).</summary>
+        private static void AwardLocalXp()
+        {
+            if (!TryGetLocal(out var mine) || Latest == null) return;
+            int xp = Progression.ProgressionMath.MatchXp(mine.Placement, Latest.Length, mine.Kills, mine.DamageDealt);
+            // One award per match even if the results arrive twice (host and client share the process).
+            string matchKey = System.DateTime.UtcNow.ToString("yyyyMMddHHmm") + "|" + Latest.Length + "|" + mine.Placement + "|" + mine.Kills;
+            try { Progression.PlayerProgression.AwardMatch(matchKey, xp); }
+            catch (System.Exception e) { UnityEngine.Debug.LogException(e); }
         }
 
         public static void Clear()

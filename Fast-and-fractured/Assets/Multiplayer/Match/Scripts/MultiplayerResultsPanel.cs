@@ -92,6 +92,15 @@ namespace FastAndFractured.Multiplayer
             var place = Text(row, $"#{mine.Placement}", _displayFont, 104f, mine.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft);
             Fit(place, 190f);
             Text(row, $"<size=80%><color=#FFFFFFB0>of {total} racers</color></size>\n{Headline(mine)}", _bodyFont, 32f, Color.white, TextAlignmentOptions.MidlineLeft);
+            BuildXpLine();
+        }
+
+        /// <summary>The XP this match gave, with the level bar filling up (Progression).</summary>
+        private void BuildXpLine()
+        {
+            var award = Progression.PlayerProgression.LastAward;
+            if (!award.HasValue) return;
+            Progression.XpGainBar.Create(transform, award.Value, _bodyFont);
         }
 
         private static string Headline(MatchResultEntry mine)

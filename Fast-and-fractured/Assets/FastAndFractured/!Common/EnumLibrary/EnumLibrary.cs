@@ -73,7 +73,12 @@ namespace Enums
         LOBBY_MAP_VOTE,
         // Added on dev at the same position as the multiplayer screens; kept last so both
         // serialized values stay valid (DeleteConfirm / SettingsMenu prefabs were moved to 18).
-        DELETE_DATA_POPUP
+        DELETE_DATA_POPUP,
+        // Main menu restructure (MainMenuPlayModesTool): Play → Singleplayer / Multiplayer, plus
+        // the progression and accessories screens. Appended so serialized values stay valid.
+        PLAY_MODE_SELECTION,
+        PROGRESSION,
+        ACCESSORIES
     }
 
     public enum Pooltype

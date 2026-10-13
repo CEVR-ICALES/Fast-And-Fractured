@@ -618,6 +618,25 @@ namespace FastAndFractured.Multiplayer
         /// Comparing the owner CONNECTION is valid on the server as soon as Spawn(conn) returns,
         /// and is equivalent to IsOwner on a pure client.
         /// </summary>
+        /// <summary>
+        /// The local player's equipped accessories on its own car (Progression). Other players'
+        /// choices are not sent over the network yet, so their cars show none.
+        /// </summary>
+        private void ApplyLocalAccessories(List<GameObject> characters)
+        {
+            if (characters == null || string.IsNullOrEmpty(LocalPlayerNameCode)) return;
+            string character = LocalPlayerNameCode.Split('_')[0];
+            foreach (var car in characters)
+            {
+                if (car == null) continue;
+                var nob = car.GetComponentInParent<NetworkObject>(true) ?? car.GetComponentInChildren<NetworkObject>(true);
+                if (nob == null || !IsLocalPlayerObject(nob)) continue;
+                try { Progression.AccessoryApplier.ApplyLocalLoadout(car, character); }
+                catch (System.Exception e) { Debug.LogException(e); }
+                break;
+            }
+        }
+
         private bool IsLocalPlayerObject(NetworkObject nob)
         {
             if (nob == null) return false;
