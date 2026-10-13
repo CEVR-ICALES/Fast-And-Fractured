@@ -150,7 +150,7 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>Local player's platform display name (Steam persona), or null if unavailable.</summary>
-        private static string GetLocalDisplayName()
+        internal static string GetLocalDisplayName()
         {
             var provider = Abstractions.LobbyServiceLocator.IdentityProvider;
             if (provider == null) return null;
