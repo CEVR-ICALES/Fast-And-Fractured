@@ -212,8 +212,11 @@ namespace FastAndFractured
         public void SetShakeLocalProfile(GameObject baseCar, int playerCount)
         {
             GameObject playerBase = baseCar.transform.parent.gameObject;
-            CameraBehaviours camera = playerBase.GetComponentInChildren<CameraBehaviours>();
-            camera.SetLocalCinemachineImpulseListener(playerCount);
+            // Include inactive: the multiplayer player root keeps its camera rig inactive until the
+            // owner is known, and a missing camera must not abort the whole spawn.
+            CameraBehaviours camera = playerBase.GetComponentInChildren<CameraBehaviours>(true);
+            if (camera != null)
+                camera.SetLocalCinemachineImpulseListener(playerCount);
         }
     }
 }
