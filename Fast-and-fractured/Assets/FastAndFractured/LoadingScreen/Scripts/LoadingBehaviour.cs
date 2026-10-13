@@ -35,13 +35,15 @@ namespace FastAndFractured
         void OnEnable()
         {
             eventSystem = EventSystem.current;
-            inputModule = eventSystem.GetComponent<InputSystemUIInputModule>();
-            inputModule.enabled = false;
+            inputModule = eventSystem != null ? eventSystem.GetComponent<InputSystemUIInputModule>() : null;
+            if (inputModule != null) inputModule.enabled = false;
             SetRandomBackgroundImage();
         }
         void OnDisable()
         {
-            inputModule.enabled = true;
+            // The scene that owned the event system may already be gone (multiplayer keeps this
+            // screen up across the map load and destroys it afterwards).
+            if (inputModule != null) inputModule.enabled = true;
             if (_timerReference != null)
             {
                 _timerReference.StopTimer();
