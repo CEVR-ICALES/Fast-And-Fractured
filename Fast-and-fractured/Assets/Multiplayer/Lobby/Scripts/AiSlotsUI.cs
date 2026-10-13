@@ -47,6 +47,17 @@ namespace FastAndFractured.Multiplayer.Lobby
             _incButton?.onClick.RemoveAllListeners();
         }
 
+        /// <summary>
+        /// The room is a new object after a host migration (the new host spawns its own), and
+        /// this peer may now be the host: bind again as soon as it appears.
+        /// </summary>
+        private void Update()
+        {
+            if (_lobby != null || LobbyLocator.GetLobbyManager() == null) return;
+            OnDisable();
+            OnEnable();
+        }
+
         private void OnReadyStatesChanged(FishNet.Object.Synchronizing.SyncDictionaryOperation op,
                                           int key, bool value, bool asServer) => RefreshUI();
 

@@ -15,7 +15,11 @@ namespace FastAndFractured.Multiplayer.HostMigration
         [Tooltip("Seconds the remaining players keep trying to reach the new host before giving up.")]
         [SerializeField] private float reconnectTimeout = 20f;
 
+        [Tooltip("Keep the room when its host leaves: another player takes it over and everyone rejoins. Off = everyone goes back to the multiplayer hub.")]
+        [SerializeField] private bool roomMigration = true;
+
         public bool Enabled { get => enabled; set => enabled = value; }
+        public bool RoomMigration { get => roomMigration; set => roomMigration = value; }
         public float SnapshotInterval => Mathf.Max(0.1f, snapshotInterval);
         public float ReconnectTimeout => Mathf.Max(5f, reconnectTimeout);
     }

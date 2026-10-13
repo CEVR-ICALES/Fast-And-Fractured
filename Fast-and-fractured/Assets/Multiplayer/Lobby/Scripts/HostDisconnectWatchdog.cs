@@ -89,15 +89,25 @@ namespace FastAndFractured.Multiplayer
             if (args.ConnectionState != LocalConnectionState.Stopped) return;
 
             bool wasIntentional = _intentionalLeave;
-            bool wasInMatch = _inMatch;
+            // A player waiting in the room while the others play is not in that match.
+            bool wasInMatch = _inMatch &&
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX;
             _intentionalLeave = false;
             _inMatch = false;
 
             if (wasIntentional)
                 return;
 
+            // A migration is reconnecting: its failed attempts stop the client too.
+            if (HostMigration.HostMigrationNetwork.Migrating || HostMigration.RoomMigration.Migrating)
+                return;
+
             // Host migration (off by default): the match continues on another player instead.
             if (wasInMatch && HostMigration.HostMigrationNetwork.TryHandleHostLoss())
+                return;
+
+            // Room migration: the room carries on under another player.
+            if (HostMigration.RoomMigration.TryHandleHostLoss())
                 return;
 
             // Not intentional — either host crashed, network died, or host stopped server.
