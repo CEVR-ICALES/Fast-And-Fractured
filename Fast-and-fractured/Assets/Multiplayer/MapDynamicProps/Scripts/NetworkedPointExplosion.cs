@@ -135,24 +135,38 @@ namespace FastAndFractured.Multiplayer
                     _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime, gameObject);
             }
 
-            // Route damage through the networked pipeline using the original endingTime.
-            var networkedStats = physics.GetComponentInParent<NetworkedStatsController>();
-            if (networkedStats == null) networkedStats = physics.GetComponentInChildren<NetworkedStatsController>();
-            if (networkedStats != null && physics.StatsController != null)
-            {
-                float damage = physics.StatsController.MaxEndurance * _damagePercentage;
-                StartCoroutine(DelayedDamage(networkedStats, damage));
-            }
+            // Damage every car the blast reaches while its hitbox is live (dev moved the damage
+            // from the car that touched the TNT to ExplosionForce, i.e. everyone in the radius),
+            // through the networked pipeline.
+            StartCoroutine(ServerRadiusDamage());
 
             // Hide visuals and deactivate on all clients.
             RpcExplosionTriggered();
         }
 
-        private IEnumerator DelayedDamage(NetworkedStatsController stats, float damage)
+        private IEnumerator ServerRadiusDamage()
         {
-            yield return new WaitForSeconds(_endingTime);
-            if (stats != null)
-                stats.DealDamageServerRpc(damage, null);
+            if (_damagePercentage <= 0f) yield break;
+            yield return new WaitForSeconds(_startHitTime);
+
+            var damaged = new HashSet<NetworkedStatsController>();
+            float until = Time.time + Mathf.Max(0f, _endHitTime - _startHitTime);
+            do
+            {
+                Transform origin = _explosionHitbox != null ? _explosionHitbox.transform : transform;
+                Vector3 center = origin.TransformPoint(_explosionCenter);
+                Vector3 scale = origin.lossyScale;
+                float radius = _explosionRadius * Mathf.Max(scale.x, Mathf.Max(scale.y, scale.z));
+                foreach (var hit in Physics.OverlapSphere(center, radius, ~0, QueryTriggerInteraction.Ignore))
+                {
+                    if (!hit.TryGetComponent(out StatsController core)) continue;   // the car body collider
+                    var stats = hit.GetComponentInParent<NetworkedStatsController>();
+                    if (stats == null) stats = hit.GetComponentInChildren<NetworkedStatsController>();
+                    if (stats == null || !damaged.Add(stats)) continue;
+                    stats.DealEnvironmentDamageServer(core.MaxEndurance * _damagePercentage);
+                }
+                yield return new WaitForSeconds(0.1f);
+            } while (Time.time < until);
         }
 
         [ObserversRpc(RunLocally = true)]

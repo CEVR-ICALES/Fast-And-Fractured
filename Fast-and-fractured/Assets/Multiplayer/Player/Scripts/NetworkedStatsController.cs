@@ -400,6 +400,25 @@ namespace FastAndFractured.Multiplayer
                 Debug.LogWarning($"[NetworkedStatsController] Damage {damage:F1} exceeds cap {MAX_DAMAGE_PER_CALL}, clamping (possible cheat attempt).");
                 damage = MAX_DAMAGE_PER_CALL;
             }
+
+            ApplyDamageOnServer(damage, attacker);
+        }
+
+        /// <summary>
+        /// Server: damage from the map itself (TNT, explosions). Not callable by clients, so the
+        /// anti-cheat cap of DealDamageServerRpc does not apply - a TNT takes half of a car's max
+        /// endurance, which is more than the cap for most cars.
+        /// </summary>
+        [Server]
+        public void DealEnvironmentDamageServer(float damage, NetworkConnection attacker = null)
+        {
+            if (damage <= 0f) return;
+            ApplyDamageOnServer(damage, attacker);
+        }
+
+        [Server]
+        private void ApplyDamageOnServer(float damage, NetworkConnection attacker)
+        {
             
             // Obtener GameObject del atacante para el sistema de stats
             GameObject attackerObject = attacker != null && attacker.FirstObject != null 
