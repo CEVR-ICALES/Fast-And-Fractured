@@ -57,8 +57,15 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private IEnumerator Build()
         {
             _shownAt = Time.unscaledTime;
-            yield return new WaitForEndOfFrame();
-            _frozenFrame = ScreenCapture.CaptureScreenshotAsTexture();
+            // The frame kept from before the host was lost still has the cars and the HUD: by
+            // the end of this frame FishNet has already removed them. Fall back to a capture.
+            Texture frozen = LastFrameKeeper.Freeze();
+            if (frozen == null)
+            {
+                yield return new WaitForEndOfFrame();
+                _frozenFrame = ScreenCapture.CaptureScreenshotAsTexture();
+                frozen = _frozenFrame;
+            }
 
             var canvas = gameObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -71,7 +78,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
             _group = gameObject.AddComponent<CanvasGroup>();
 
             var frame = Stretch(new GameObject("Frame", typeof(RectTransform)).AddComponent<RawImage>());
-            frame.texture = _frozenFrame;
+            frame.texture = frozen;
+            if (frozen is RenderTexture && SystemInfo.graphicsUVStartsAtTop)
+                frame.uvRect = new Rect(0f, 1f, 1f, -1f);   // screen grabs into a RenderTexture come in upside down on D3D
             var dim = Stretch(new GameObject("Dim", typeof(RectTransform)).AddComponent<Image>());
             dim.color = new Color(0f, 0f, 0f, 0.55f);
 
@@ -144,6 +153,69 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             if (_frozenFrame != null) Destroy(_frozenFrame);
             if (_instance == this) _instance = null;
+            LastFrameKeeper.Unfreeze();
+        }
+    }
+
+    /// <summary>
+    /// While a match that could migrate is running, keeps a GPU copy of the last rendered frame
+    /// (no read-back to the CPU, every other frame), so the overlay can freeze the picture as
+    /// it was just before the host was lost - cars and HUD included.
+    /// </summary>
+    internal sealed class LastFrameKeeper : MonoBehaviour
+    {
+        private static LastFrameKeeper _instance;
+        private RenderTexture _frame;
+        private bool _hasFrame, _frozen;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Bootstrap()
+        {
+            if (_instance != null) return;
+            var go = new GameObject("[HostMigrationFrameKeeper]");
+            DontDestroyOnLoad(go);
+            _instance = go.AddComponent<LastFrameKeeper>();
+        }
+
+        /// <summary>Stops updating and returns the kept frame (null if there is none).</summary>
+        public static Texture Freeze()
+        {
+            if (_instance == null || !_instance._hasFrame) return null;
+            _instance._frozen = true;
+            return _instance._frame;
+        }
+
+        public static void Unfreeze()
+        {
+            if (_instance == null) return;
+            _instance._frozen = false;
+            _instance._hasFrame = false;
+        }
+
+        private IEnumerator Start()
+        {
+            var endOfFrame = new WaitForEndOfFrame();
+            while (true)
+            {
+                yield return endOfFrame;
+                if (_frozen || (Time.frameCount & 1) != 0 || !ShouldKeep()) continue;
+                if (_frame == null || _frame.width != Screen.width || _frame.height != Screen.height)
+                {
+                    if (_frame != null) _frame.Release();
+                    _frame = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+                }
+                ScreenCapture.CaptureScreenshotIntoRenderTexture(_frame);
+                _hasFrame = true;
+            }
+        }
+
+        private static bool ShouldKeep() =>
+            HostMigrationSettings.Enabled && !HostMigrationNetwork.Migrating &&
+            HostMigrationNetwork.LatestSnapshot.HasValue && FishNet.InstanceFinder.IsClientStarted;
+
+        private void OnDestroy()
+        {
+            if (_frame != null) _frame.Release();
         }
     }
 }
