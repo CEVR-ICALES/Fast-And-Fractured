@@ -57,6 +57,27 @@ namespace FastAndFractured
         const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
         const float SWEEP_FREQUENCY = 0.5f;
+        const int MAX_ITEM_TYPE_ATTEMPTS = 20;
+
+        // Driving: ease off the throttle into tight turns instead of taking every corner flat out.
+        const float CORNER_SLOWDOWN_START_ANGLE = 35f;
+        const float MIN_CORNER_THROTTLE = 0.35f;
+        // Aiming: lead moving targets, and miss more the farther they are.
+        const float MAX_LEAD_SECONDS = 1.2f;
+        const float AIM_ERROR_DISTANCE = 30f;
+        // Targeting: stick with a target a while instead of switching every frame.
+        const float TARGET_COMMIT_SECONDS = 3f;
+        const float SCORE_HUMAN_BONUS = 10f;
+        const float SCORE_DAMAGED_ME_BONUS = 15f;
+        const float SCORE_LOW_HEALTH_BONUS = 20f;
+
+        // Personality, stable per AI and identical on every peer (seeded from its spawn point,
+        // no shared random stream consumed): how well it aims, how fast it reacts, how
+        // carefully it corners.
+        private float _aimErrorScale = 1f;
+        private float _reactionTime = 0.3f;
+        private float _cornerCaution = 1f;
+        private float _targetAcquiredAt;
         const float DISTANCE_MARGIN_ERROR = 35f;
         const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
@@ -275,6 +296,21 @@ namespace FastAndFractured
             
             _currentPosition = carMovementController.transform.position;
             _player = LevelController.Instance.LocalPlayer;
+            RollPersonality();
+        }
+
+        private void RollPersonality()
+        {
+            int seed = unchecked(Mathf.RoundToInt(startPosition.x * 10f) * 73856093 ^ Mathf.RoundToInt(startPosition.z * 10f) * 19349663);
+            var rng = new System.Random(seed);
+            float Roll(float min, float max) => Mathf.Lerp(min, max, (float)rng.NextDouble());
+
+            _aimErrorScale = Roll(0.6f, 1.8f);
+            _reactionTime = Roll(0.15f, 0.5f);
+            _cornerCaution = Roll(0.7f, 1.3f);
+            // Some are bolder, some flee sooner.
+            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-10f, 10f), 5f, 95f);
+            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-10f, 10f), 5f, 95f);
         }
         public void ReturnToStartPosition()
         {
@@ -304,6 +340,12 @@ namespace FastAndFractured
             if (angle > ANGLE_90 || angle < -ANGLE_90)
             {
                 inputY = -MAX_INPUT_VALUE;
+            }
+            else
+            {
+                // Lift off into a tight turn, like a driver would, rather than flat out always.
+                float slowFrom = CORNER_SLOWDOWN_START_ANGLE / _cornerCaution;
+                inputY = Mathf.Lerp(MAX_INPUT_VALUE, MIN_CORNER_THROTTLE, Mathf.InverseLerp(slowFrom, ANGLE_90, Mathf.Abs(angle)));
             }
 
             Vector2 input = new Vector2(inputX, inputY);
@@ -352,16 +394,31 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            if (_player != null)
+            // Online every AI used to hunt the same car - the host's, LevelController's
+            // LocalPlayer. Go for the best human target instead (in singleplayer the only human
+            // is the player, so nothing changes there).
+            GameObject target = ChooseBestTarget(humansOnly: true);
+            if (target == null) target = _player;
+            if (target != null)
             {
-                ChangeTargetToShoot(_player);
+                ChangeTargetToShoot(target);
             }
         }
 
         public void ChooseItemFromType()
         {
+            // With no stat item left on the map the loop below could never find one and never
+            // end (the empty-list exception further down used to be what broke out of it).
+            var allItems = InteractableHandler.Instance.GetStatBoostItems();
+            if (allItems == null || allItems.Count == 0) return;
+            int attempts = 0;
             do
             {
+                if (++attempts > MAX_ITEM_TYPE_ATTEMPTS)
+                {
+                    ChooseNearestItem();
+                    return;
+                }
                 CalculateTotalDecisionPercentage();
                 //+1 because it's max is exclusive
                 int decision = DeterministicRandom.Instance.NextInt(0, _totalDecisionPercentage + 1);
@@ -429,8 +486,59 @@ namespace FastAndFractured
 
         public void ChooseNearestCharacter()
         {
-            GameObject nearestTarget = CalcNearestCharacter();
-            ChangeTargetToShoot(nearestTarget);
+            // Not strictly the nearest any more: nearby, weakened, or the one that hurt me -
+            // and keep the current target for a while unless it is gone.
+            GameObject target = ChooseBestTarget(humansOnly: false);
+            if (target == null) target = CalcNearestCharacter();
+            ChangeTargetToShoot(target);
+        }
+
+        /// <summary>
+        /// Lowest score wins: distance in metres, minus bonuses for humans, for whoever damaged
+        /// this AI recently and for low health. Keeps the current target while it is alive and
+        /// was picked less than TARGET_COMMIT_SECONDS ago.
+        /// </summary>
+        private GameObject ChooseBestTarget(bool humansOnly)
+        {
+            // LevelController picks the first target before this AI has initialized.
+            if (carMovementController == null || !LevelController.HasInstance) return null;
+            if (_targetToShoot != null && IsAliveCharacter(_targetToShoot) &&
+                Time.time - _targetAcquiredAt < TARGET_COMMIT_SECONDS &&
+                (!humansOnly || !IsAICharacter(_targetToShoot)))
+                return _targetToShoot;
+
+            List<GameObject> characters = ListWithGameElementNotInsideSandstorm(LevelController.Instance.InGameCharacters);
+            GameObject best = null;
+            float bestScore = float.MaxValue;
+            foreach (GameObject character in characters)
+            {
+                if (!character || character == carMovementController.gameObject || !IsAliveCharacter(character)) continue;
+                bool ai = IsAICharacter(character);
+                if (humansOnly && ai) continue;
+
+                float score = Vector3.Distance(character.transform.position, _currentPosition);
+                if (!ai) score -= SCORE_HUMAN_BONUS;
+                if (_carsThatDamagedAI.ContainsKey(character)) score -= SCORE_DAMAGED_ME_BONUS;
+                var stats = character.GetComponentInChildren<StatsController>();
+                if (stats != null) score -= (1f - stats.GetEndurancePercentage() / PERCENTAGE_VALUE) * SCORE_LOW_HEALTH_BONUS;
+
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = character;
+                }
+            }
+            return best;
+        }
+
+        private static bool IsAICharacter(GameObject character) =>
+            character.GetComponentInParent<EnemyAIBrain>() != null || character.GetComponentInChildren<EnemyAIBrain>() != null;
+
+        private static bool IsAliveCharacter(GameObject character)
+        {
+            if (!character || !character.activeInHierarchy) return false;
+            var stats = character.GetComponentInChildren<StatsController>();
+            return stats == null || stats.Endurance > 0f;
         }
 
 
@@ -531,6 +639,7 @@ namespace FastAndFractured
         public void NormalShoot()
         {
             if (!TargetToShoot) return;
+            if (Time.time - _targetAcquiredAt < _reactionTime) return;   // still reacting to the new target
 
             normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             normalShootHandle.NormalShooting();
@@ -546,6 +655,7 @@ namespace FastAndFractured
         public void PushShoot()
         {
             if (!_targetToShoot) return;
+            if (Time.time - _targetAcquiredAt < _reactionTime) return;
             pushShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             pushShootHandle.PushShooting();
         }
@@ -765,7 +875,7 @@ namespace FastAndFractured
                         }
                         else
                         {
-                            Debug.LogWarning("No path to follow" + _currentPath.ToString());
+                            //Debug.LogWarning("No path to follow" + _currentPath.ToString());
                             if (Physics.Raycast(_positionToDrive, Vector3.down, out RaycastHit hit, 100f, ignoreLayerMask))
                             {
                                 Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
@@ -860,14 +970,25 @@ namespace FastAndFractured
 
         public Vector3 GetShootingDirectionWithError()
         {
-            Vector3 shootingDirection = CalcNormalizedShootingDirection();
+            // Aim where the target will be when the bullet arrives, not where it is now.
+            Vector3 shootFrom = normalShootHandle.ShootPoint.position;
+            Vector3 aimPoint = _currentTarget.transform.position;
+            float distance = Vector3.Distance(shootFrom, aimPoint);
+            Rigidbody targetBody = _currentTarget.GetComponentInParent<Rigidbody>();
+            if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<Rigidbody>();
+            float bulletSpeed = statsController.NormalShootSpeed;
+            if (targetBody != null && bulletSpeed > 1f)
+                aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, MAX_LEAD_SECONDS);
+
+            Vector3 shootingDirection = (aimPoint - shootFrom).normalized;
             if (turretRotationMovement != null)
             {
                 turretRotationMovement.TargetDirection = shootingDirection;
             }
-            //Add shooting error 
-            return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
-                UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
+            //Add shooting error: per-AI skill, and wider the farther the target is
+            float error = shootingMarginErrorAngle * _aimErrorScale * (1f + distance / AIM_ERROR_DISTANCE);
+            return shootingDirection + new Vector3(UnityEngine.Random.Range(-error, error),
+                UnityEngine.Random.Range(0, error), UnityEngine.Random.Range(-error, error));
         }
 
         public void StopMovement()
@@ -894,6 +1015,8 @@ namespace FastAndFractured
 
         private void GetClosestItemByList(List<StatsBoostInteractable> list)
         {
+            // No item of that type on the map right now (all picked up): keep the current target.
+            if (list == null || list.Count == 0) return;
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = list;
             GameObject nearestTarget = items[0].gameObject;
@@ -992,6 +1115,7 @@ namespace FastAndFractured
         /// </summary>
         private void ChangeTargetToShoot(GameObject target)
         {
+            if (target != _targetToShoot) _targetAcquiredAt = Time.time;
             _targetToShoot = target;
             UpdateCurrentTarget(_targetToShoot);
         }
