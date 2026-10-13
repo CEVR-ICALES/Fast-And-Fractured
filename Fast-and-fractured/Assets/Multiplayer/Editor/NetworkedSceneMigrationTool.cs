@@ -442,6 +442,7 @@ namespace FastAndFractured.Multiplayer.Editor
             if (prefabSwaps > 0 || sceneOnlyConverts > 0 || strippedOverrides > 0 || overridesRestored > 0 || autoInitSuppressed > 0 || prefabsRepointed > 0 || interactableFixes > 0)
             {
                 EditorSceneManager.MarkSceneDirty(scene);
+                AssignSceneIds(scene);
                 EditorSceneManager.SaveScene(scene, row.OutputPath);
             }
 
@@ -1116,6 +1117,7 @@ namespace FastAndFractured.Multiplayer.Editor
 
             // Save the modified duplicate.
             EditorSceneManager.MarkSceneDirty(scene);
+            AssignSceneIds(scene);
             EditorSceneManager.SaveScene(scene, row.OutputPath);
 
             // Auto-register: add to Build Settings and update MapCatalog.NetworkedSceneName.
@@ -1252,6 +1254,20 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (IsNetworkedVariantInstance(prefabRoot))
                         return;
 
+                    // The hazard sits in a prefab NESTED inside a group prefab (dev's TNT.prefab
+                    // holding 25 TNTs, GolfBalls.prefab, Trampolines.prefab). Swapping the outermost
+                    // root replaced the whole group with ONE networked hazard - the group "TNT" even
+                    // matched NetworkedTNT by name and 24 TNTs vanished (2026-10-12). Unpack the
+                    // group one level in this networked copy and swap each hazard on its own.
+                    var nearestRoot = PrefabUtility.GetNearestPrefabInstanceRoot(go);
+                    if (nearestRoot != null && nearestRoot != prefabRoot && HasNetworkedVariant(nearestRoot))
+                    {
+                        swappedRootInstanceIds.Remove(prefabRoot.GetInstanceID());
+                        PrefabUtility.UnpackPrefabInstance(prefabRoot, PrefabUnpackMode.OutermostRoot, InteractionMode.AutomatedAction);
+                        MigrateGameObjectTree(prefabRoot, ref prefabSwaps, ref sceneOnlyConverts, perDefCounts, swappedRootInstanceIds);
+                        return;
+                    }
+
                     bool replaced = TryReplaceWithNetworkedVariant(prefabRoot, matched, out var newGo);
                     if (replaced)
                     {
@@ -1286,6 +1302,37 @@ namespace FastAndFractured.Multiplayer.Editor
                 if (child != null) // guard against destroyed transforms
                     MigrateGameObjectTree(child.gameObject, ref prefabSwaps, ref sceneOnlyConverts, perDefCounts, swappedRootInstanceIds);
             }
+        }
+
+        /// <summary>
+        /// Give every NetworkObject in the networked scene its SceneId before saving. Swapped and
+        /// unpacked hazards (nested NetworkObjects such as TrampolineParabolicLogic/TriggerCheck)
+        /// were saved without one, so the server never spawned them and the match never started
+        /// ("ObjectId [65535] is expected to be initialized", 2026-10-12). Same as FishNet's
+        /// Utility > Reserialize NetworkObjects > Scenes, which uses this internal method.
+        /// </summary>
+        private static void AssignSceneIds(Scene scene)
+        {
+            var create = typeof(NetworkObject).GetMethod("CreateSceneId",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public,
+                null, new[] { typeof(Scene), typeof(bool), typeof(int).MakeByRefType() }, null);
+            if (create == null)
+            {
+                Debug.LogError("[SceneMigration] FishNet NetworkObject.CreateSceneId not found - run Fish-Networking > Utility > Reserialize NetworkObjects on the networked scenes.");
+                return;
+            }
+            var args = new object[] { scene, true, 0 };
+            create.Invoke(null, args);
+            EditorSceneManager.MarkSceneDirty(scene);
+        }
+
+        /// <summary>The prefab this instance comes from has a Networked&lt;Name&gt; variant in PROPS_FOLDER.</summary>
+        private static bool HasNetworkedVariant(GameObject instanceRoot)
+        {
+            var baseAsset = PrefabUtility.GetCorrespondingObjectFromOriginalSource(instanceRoot);
+            if (baseAsset == null) baseAsset = PrefabUtility.GetCorrespondingObjectFromSource(instanceRoot);
+            return baseAsset != null &&
+                   AssetDatabase.LoadAssetAtPath<GameObject>($"{PROPS_FOLDER}/Networked{baseAsset.name}.prefab") != null;
         }
 
         /// <summary>
