@@ -186,6 +186,7 @@ namespace FastAndFractured.Multiplayer
         private static FieldInfo _carDashForce;
         private static FieldInfo _carCurrentSteerAngle;
         private static FieldInfo _carCurrentRbMaxVelocity;
+        private static FieldInfo _carIsBeenImpulsed;
         private static FieldInfo _carIsDrifting;
         private static FieldInfo _carDriftDirection;
         private static FieldInfo _carInitialSpeedWhenDrifting;
@@ -204,6 +205,9 @@ namespace FastAndFractured.Multiplayer
 
         public static FieldInfo CarMovement_CurrentRbMaxVelocity =>
             _carCurrentRbMaxVelocity ??= typeof(CarMovementController).GetField("_currentRbMaxVelocity", InstancePrivate);
+
+        public static FieldInfo CarMovement_IsBeenImpulsed =>
+            _carIsBeenImpulsed ??= typeof(CarMovementController).GetField("_isBeenImpulsed", InstancePrivate);
 
         public static FieldInfo CarMovement_IsDrifting =>
             _carIsDrifting ??= typeof(CarMovementController).GetField("_isDrifting", InstancePrivate);

@@ -41,6 +41,9 @@ namespace FastAndFractured.Multiplayer
             public Vector3 DashDirection;
             public float CurrentSteerAngle;
             public float CurrentRbMaxVelocity;
+            // dev (2026-10): while a trampoline/TNT/dash-push impulse lasts the max speed is not
+            // re-clamped. Without it the owner's replays clamped a flying car the server let fly.
+            public bool IsBeenImpulsed;
             public bool IsDrifting;
             public float DriftDirection;
             public float InitialSpeedWhenDrifting;
@@ -66,6 +69,7 @@ namespace FastAndFractured.Multiplayer
                 DashDirection = Vector3.zero;
                 CurrentSteerAngle = 0f;
                 CurrentRbMaxVelocity = 0f;
+                IsBeenImpulsed = false;
                 IsDrifting = false;
                 DriftDirection = 1f;
                 InitialSpeedWhenDrifting = 0f;
@@ -707,6 +711,7 @@ namespace FastAndFractured.Multiplayer
 
                 rd.CurrentSteerAngle = ReadFloat(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle);
                 rd.CurrentRbMaxVelocity = ReadFloat(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity);
+                rd.IsBeenImpulsed = ReadBool(SingleplayerReflectionCache.CarMovement_IsBeenImpulsed);
                 rd.IsDrifting = ReadBool(SingleplayerReflectionCache.CarMovement_IsDrifting);
                 rd.DriftDirection = ReadFloat(SingleplayerReflectionCache.CarMovement_DriftDirection, 1f);
                 rd.InitialSpeedWhenDrifting = ReadFloat(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting);
@@ -1057,6 +1062,7 @@ namespace FastAndFractured.Multiplayer
                 _dashWorldDirection = rd.DashDirection;
                 WriteField(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle, rd.CurrentSteerAngle);
                 WriteField(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity, rd.CurrentRbMaxVelocity);
+                WriteField(SingleplayerReflectionCache.CarMovement_IsBeenImpulsed, rd.IsBeenImpulsed);
                 WriteField(SingleplayerReflectionCache.CarMovement_IsDrifting, rd.IsDrifting);
                 WriteField(SingleplayerReflectionCache.CarMovement_DriftDirection, rd.DriftDirection);
                 WriteField(SingleplayerReflectionCache.CarMovement_InitialSpeedWhenDrifting, rd.InitialSpeedWhenDrifting);

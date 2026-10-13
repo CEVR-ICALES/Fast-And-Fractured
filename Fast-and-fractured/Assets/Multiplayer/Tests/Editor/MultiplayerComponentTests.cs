@@ -655,6 +655,18 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         [Test]
+        public void ReflectionCache_ResolvesCarMovementPredictionState()
+        {
+            // Every CarMovementController field the car's reconcile state captures and restores.
+            Assert.IsNotNull(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity, "_currentRbMaxVelocity renamed?");
+            Assert.IsNotNull(SingleplayerReflectionCache.CarMovement_IsBeenImpulsed,
+                "_isBeenImpulsed renamed? Trampoline/TNT flights will be re-clamped in the owner's replays.");
+            Assert.AreEqual(typeof(bool), SingleplayerReflectionCache.CarMovement_IsBeenImpulsed.FieldType);
+            Assert.IsNotNull(SingleplayerReflectionCache.CarMovement_CurrentSteerAngle);
+            Assert.IsNotNull(SingleplayerReflectionCache.CarMovement_IsDrifting);
+        }
+
+        [Test]
         public void ReflectionCache_ResolvesAbstractAutoInitFields()
         {
             Assert.IsNotNull(SingleplayerReflectionCache.AbstractAutoInit_IsConstructed);
