@@ -291,6 +291,7 @@ namespace FastAndFractured.Multiplayer
                 resume.SecondsUntilStorm, resume.StormGrowth, resume.StormSpawnPoint, resume.StormMirrorPoint));
             Restore("broken props", () => NetworkedWorldBreakables.Instance?.ServerRestore(resume.BrokenWorldProps));
             Restore("platforms", () => NetworkedBreakablePlatform.ServerRestoreStages(resume.PlatformStages));
+            Restore("golf balls", () => NetworkedGolfBall.ServerRestorePositions(resume.GolfBallPositions));
             Restore("pickups", () => FindFirstObjectByType<NetworkedInteractableHandler>()?.ServerRestorePool(resume.InteractablePool));
             MpCanary.Mark(failures == 0 ? "HostMigration: match resumed" : $"HostMigration: match resumed ({failures} part(s) failed)");
         }
@@ -365,6 +366,7 @@ namespace FastAndFractured.Multiplayer
                 ? NetworkedWorldBreakables.Instance.ServerBrokenIndices() : new int[0];
             snapshot.PlatformStages = NetworkedBreakablePlatform.DescribeStages();
             snapshot.VolumeIndex = _serverVolumeIndex;
+            snapshot.GolfBallPositions = NetworkedGolfBall.DescribePositions();
             var pickups = FindFirstObjectByType<NetworkedInteractableHandler>();
             snapshot.InteractablePool = pickups != null ? pickups.ServerDescribePool() : new int[0];
             return true;

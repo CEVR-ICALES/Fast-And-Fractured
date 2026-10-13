@@ -53,6 +53,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         // Lighting (VolumeManager volume) the match was using; -1 if unknown.
         public int VolumeIndex;
+
+        // Golf ball positions, in NetworkedGolfBall.AllInHierarchyOrder order.
+        public Vector3[] GolfBallPositions;
     }
 
     public struct SnapshotCharacter
