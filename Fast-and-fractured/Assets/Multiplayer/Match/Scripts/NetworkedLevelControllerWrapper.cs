@@ -758,6 +758,52 @@ namespace FastAndFractured.Multiplayer
         /// The asset lives under a Resources folder precisely so it can be resolved without a scene
         /// reference, so load it and assign it via reflection (no singleplayer code is modified).
         /// </summary>
+        private static ListOfCharactersData _networkedRoster;
+        private static ListOfCharactersData _networkedRosterSource;
+
+        /// <summary>
+        /// The singleplayer roster with each car swapped for its networked variant
+        /// ("Networked{Car} Variant", registered with the NetworkManager), built in memory. The
+        /// shared CharacterData assets keep the singleplayer cars: pointing them at the
+        /// networked prefabs (what NetworkedVehicleSetupTool's "Update CarDefaultPrefab" does)
+        /// broke singleplayer - offline, FishNet leaves those cars deactivated and no match
+        /// starts. Stats come from the same assets, so both modes stay in sync.
+        /// </summary>
+        private static ListOfCharactersData NetworkedRoster(ListOfCharactersData source)
+        {
+            if (_networkedRoster != null && _networkedRosterSource == source) return _networkedRoster;
+
+            var prefabsByName = new Dictionary<string, GameObject>();
+            var spawnables = FishNet.InstanceFinder.NetworkManager != null ? FishNet.InstanceFinder.NetworkManager.SpawnablePrefabs : null;
+            if (spawnables != null)
+                for (int i = 0; i < spawnables.GetObjectCount(); i++)
+                {
+                    var nob = spawnables.GetObject(true, i);
+                    if (nob != null) prefabsByName[nob.gameObject.name] = nob.gameObject;
+                }
+
+            var roster = ScriptableObject.CreateInstance<ListOfCharactersData>();
+            roster.name = source.name + " (networked)";
+            roster.listOfCharactersData = new List<CharacterData>();
+            foreach (var data in source.listOfCharactersData)
+            {
+                if (data == null) continue;
+                var copy = Instantiate(data);
+                copy.name = data.name;
+                var car = data.CarDefaultPrefab;
+                if (car != null && !car.name.StartsWith("Networked") &&
+                    prefabsByName.TryGetValue($"Networked{car.name} Variant", out var networkedCar))
+                    copy.CarDefaultPrefab = networkedCar;
+                else if (car != null && !car.name.StartsWith("Networked"))
+                    Debug.LogError($"[NetworkedLevelControllerWrapper] No networked variant 'Networked{car.name} Variant' " +
+                                   $"registered for {data.CharacterName}; that character cannot spawn online.");
+                roster.listOfCharactersData.Add(copy);
+            }
+            _networkedRoster = roster;
+            _networkedRosterSource = source;
+            return roster;
+        }
+
         private void EnsureCharactersDataAssigned()
         {
             var field = SingleplayerReflectionCache.LevelController_CharactersDataScriptableObject;
@@ -769,10 +815,8 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            if (field.GetValue(_levelController) != null)
-                return; // already wired (scene-placed controller)
-
-            var asset = Resources.Load<ListOfCharactersData>(CHARACTERS_DATA_RESOURCES_PATH);
+            var asset = field.GetValue(_levelController) as ListOfCharactersData;   // scene-placed controller
+            if (asset == null) asset = Resources.Load<ListOfCharactersData>(CHARACTERS_DATA_RESOURCES_PATH);
             if (asset == null)
             {
                 Debug.LogError($"[NetworkedLevelControllerWrapper] ListOfCharactersData not found at " +
@@ -780,6 +824,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
+            asset = NetworkedRoster(asset);
             field.SetValue(_levelController, asset);
             Debug.Log($"[NetworkedLevelControllerWrapper] Assigned ListOfCharactersData " +
                       $"({asset.listOfCharactersData?.Count ?? 0} characters) to the runtime LevelController.");

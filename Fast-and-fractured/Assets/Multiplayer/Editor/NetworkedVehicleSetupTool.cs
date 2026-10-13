@@ -28,7 +28,8 @@ namespace FastAndFractured.Multiplayer.Editor
 
         private GameObject _existingPrefab;
         private DefaultAsset _characterDataFolder;
-        private bool _updateCharacterDataPrefabReference = true;
+        // Off: singleplayer must keep its own cars; online the networked variants are swapped in at runtime (NetworkedLevelControllerWrapper.NetworkedRoster).
+        private bool _updateCharacterDataPrefabReference = false;
 
         // Where the project keeps CharacterData ScriptableObjects. Used to auto-fill the batch
         // folder so the user can hit the button without manually pointing at it.
