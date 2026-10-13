@@ -24,8 +24,17 @@ namespace FastAndFractured.Multiplayer.Lobby
             _hostButton?.onClick.AddListener(()       => Go(ScreensType.MULTIPLAYER_HOST_SETUP));
             _browseButton?.onClick.AddListener(()     => Go(ScreensType.MULTIPLAYER_BROWSER));
             _directJoinButton?.onClick.AddListener(() => Go(ScreensType.MULTIPLAYER_DIRECT_JOIN));
-            _backButton?.onClick.AddListener(()       => Go(ScreensType.MAIN_MENU));
+            _backButton?.onClick.AddListener(()       => Go(BackTarget()));
         }
+
+        /// <summary>
+        /// With the Play ▸ Singleplayer / Multiplayer menu (MainMenuPlayModesTool) the hub is
+        /// reached from that screen, so Back returns there; without it, to the main menu.
+        /// </summary>
+        private static ScreensType BackTarget() =>
+            MainMenuManager.HasInstance && MainMenuManager.Instance.menuScreens.ContainsKey(ScreensType.PLAY_MODE_SELECTION)
+                ? ScreensType.PLAY_MODE_SELECTION
+                : ScreensType.MAIN_MENU;
 
         private void Go(ScreensType screen) =>
             MainMenuManager.Instance.TransitionBetweenScreens(screen, _fadeDuration);
