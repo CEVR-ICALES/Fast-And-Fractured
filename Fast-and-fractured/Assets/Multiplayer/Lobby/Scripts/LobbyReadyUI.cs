@@ -279,7 +279,7 @@ namespace FastAndFractured.Multiplayer
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = new Vector2(16f, 0f);
-            textRect.offsetMax = new Vector2(-16f, 0f);
+            textRect.offsetMax = new Vector2(-200f, 0f);
             var text = textGo.AddComponent<TextMeshProUGUI>();
             if (_roomNameLabel != null) text.font = _roomNameLabel.font;
             text.fontSize = 28f;
@@ -287,7 +287,39 @@ namespace FastAndFractured.Multiplayer
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
             text.text = "MATCH IN PROGRESS  ·  you will play the next one";
+
+            // Watch it meanwhile: loads the map for this client only, the match is unaffected.
+            var watchGo = new GameObject("WatchButton", typeof(RectTransform));
+            var watchRect = (RectTransform)watchGo.transform;
+            watchRect.SetParent(rect, false);
+            watchRect.anchorMin = watchRect.anchorMax = watchRect.pivot = new Vector2(1f, 0.5f);
+            watchRect.anchoredPosition = new Vector2(-8f, 0f);
+            watchRect.sizeDelta = new Vector2(176f, 44f);
+            var watchImage = watchGo.AddComponent<Image>();
+            watchImage.color = new Color(0.12f, 0.08f, 0.04f, 0.92f);
+            var watch = watchGo.AddComponent<Button>();
+            watch.targetGraphic = watchImage;
+            watch.onClick.AddListener(OnWatchClicked);
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.SetParent(watchRect, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (_roomNameLabel != null) label.font = _roomNameLabel.font;
+            label.fontSize = 24f;
+            label.color = new Color(0.96f, 0.69f, 0.25f, 1f);
+            label.alignment = TextAlignmentOptions.Center;
+            label.raycastTarget = false;
+            label.text = "WATCH";
             return go;
+        }
+
+        private void OnWatchClicked()
+        {
+            if (_lobbyManager == null || !_lobbyManager.GameStarted.Value) return;
+            _lobbyManager.ServerSpectateMatch();
         }
 
         private void HandleAiSlotCountSync(int prev, int next, bool asServer) => RefreshPlayerList();

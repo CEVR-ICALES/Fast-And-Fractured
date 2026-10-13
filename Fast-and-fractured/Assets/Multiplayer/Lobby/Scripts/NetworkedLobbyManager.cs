@@ -110,6 +110,11 @@ namespace FastAndFractured.Multiplayer
         /// <summary>True when the client is playing the match in progress.</summary>
         public bool IsInMatch(int clientId) => GameStarted.Value && MatchParticipants.Contains(clientId);
 
+        /// <summary>Clients in the room watching the match in progress (they load its map, without a car).</summary>
+        public readonly SyncList<int> MatchSpectators = new SyncList<int>();
+
+        public bool IsSpectating(int clientId) => GameStarted.Value && MatchSpectators.Contains(clientId);
+
         /// <summary>Server: a participant went back to the room before the match ended.</summary>
         public event Action<NetworkConnection> OnParticipantLeftMatch;
 
@@ -249,6 +254,7 @@ namespace FastAndFractured.Multiplayer
                 PlayerNames.Remove(conn.ClientId);
                 PlayerMapVotes.Remove(conn.ClientId);
                 MatchParticipants.Remove(conn.ClientId);
+                MatchSpectators.Remove(conn.ClientId);
 
                 if (_countdownActive && PlayerReadyStates.Count < MinPlayersToStart)
                     CancelCountdown();
@@ -421,21 +427,14 @@ namespace FastAndFractured.Multiplayer
         {
             yield return new WaitForSeconds(MAP_VOTE_ANIMATION_DURATION);
 
-            var catalog = FastAndFractured.Multiplayer.Lobby.MapCatalogLoader.Get();
-            if (catalog == null || !catalog.TryGetById(ResolvedMapId.Value, out var entry))
-            {
-                Debug.LogError($"[NetworkedLobbyManager] Cannot load map: ResolvedMapId={ResolvedMapId.Value} not in MapCatalog.");
-                yield break;
-            }
-
-            string sceneToLoad = entry.GetSceneNameForMultiplayer();
+            string sceneToLoad = MatchSceneName();
             if (string.IsNullOrEmpty(sceneToLoad))
             {
-                Debug.LogError($"[NetworkedLobbyManager] MapCatalog entry id={entry.Id} has no scene name.");
+                Debug.LogError($"[NetworkedLobbyManager] Cannot load map: ResolvedMapId={ResolvedMapId.Value} has no scene in MapCatalog.");
                 yield break;
             }
 
-            Debug.Log($"[NetworkedLobbyManager] Loading map scene '{sceneToLoad}' for resolved mapId={entry.Id}.");
+            Debug.Log($"[NetworkedLobbyManager] Loading map scene '{sceneToLoad}' for resolved mapId={ResolvedMapId.Value}.");
 
             // Only the match's players load the map (a connection scene, not a global one):
             // a global scene would also be pushed onto anyone joining the room mid-match, and
@@ -459,6 +458,42 @@ namespace FastAndFractured.Multiplayer
             FishNet.InstanceFinder.SceneManager.LoadConnectionScenes(players.ToArray(), sceneLoadData);
         }
 
+        /// <summary>Scene of the voted map (null before the vote is resolved).</summary>
+        private string MatchSceneName()
+        {
+            var catalog = FastAndFractured.Multiplayer.Lobby.MapCatalogLoader.Get();
+            if (catalog == null || ResolvedMapId.Value < 0 || !catalog.TryGetById(ResolvedMapId.Value, out var entry))
+                return null;
+            return entry.GetSceneNameForMultiplayer();
+        }
+
+        // -- Watching a match in progress ----------------------------------------------
+        /// <summary>A player waiting in the room asks to watch the match in progress.</summary>
+        [ServerRpc(RequireOwnership = false)]
+        public void ServerSpectateMatch(NetworkConnection conn = null) => SpectateMatch(conn);
+
+        /// <summary>
+        /// Loads the match's map for this one connection. The match itself is untouched: the
+        /// server already runs the scene, it only starts sending its objects to one more client
+        /// (MatchSceneVisibility) - a little upload bandwidth, nothing simulated twice. The
+        /// match's controller hands the spectator the start data once its map has loaded.
+        /// </summary>
+        [Server]
+        public void SpectateMatch(NetworkConnection conn)
+        {
+            if (conn == null || !GameStarted.Value || conn.IsHost) return;
+            if (MatchParticipants.Contains(conn.ClientId) || MatchSpectators.Contains(conn.ClientId)) return;
+            string scene = MatchSceneName();
+            if (string.IsNullOrEmpty(scene)) return;
+
+            MatchSpectators.Add(conn.ClientId);
+            SceneManager.LoadConnectionScenes(conn, new FishNet.Managing.Scened.SceneLoadData(scene)
+            {
+                ReplaceScenes = FishNet.Managing.Scened.ReplaceOption.All
+            });
+            Debug.Log($"[NetworkedLobbyManager] Client {conn.ClientId} is now watching the match ('{scene}').");
+        }
+
         // -- End of a match: back to the room ------------------------------------------
         /// <summary>
         /// Server: the match is over (or was abandoned); the room is ready for the next one.
@@ -471,6 +506,7 @@ namespace FastAndFractured.Multiplayer
             _countdownActive = false;
             CurrentCountdown.Value = -1;
             MatchParticipants.Clear();
+            MatchSpectators.Clear();
             PlayerMapVotes.Clear();
             ResolvedMapId.Value = -1;
             var ids = new List<int>(PlayerReadyStates.Keys);
@@ -497,8 +533,12 @@ namespace FastAndFractured.Multiplayer
                 ServerAbortMatch();
                 return;
             }
-            if (!MatchParticipants.Remove(conn.ClientId)) return;
-            OnParticipantLeftMatch?.Invoke(conn);
+            bool spectator = MatchSpectators.Remove(conn.ClientId);
+            if (!spectator)
+            {
+                if (!MatchParticipants.Remove(conn.ClientId)) return;
+                OnParticipantLeftMatch?.Invoke(conn);
+            }
             try { SceneManager.RemoveConnectionsFromNonGlobalScenes(new[] { conn }); }
             catch (Exception e) { Debug.LogException(e); }
         }

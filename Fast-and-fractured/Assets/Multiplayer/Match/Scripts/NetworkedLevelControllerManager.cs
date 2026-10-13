@@ -444,6 +444,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
+            base.SceneManager.OnClientPresenceChangeEnd += HandleSpectatorPresence;
         }
 
         private void PullCharacterSelectionsFromLobby(NetworkedLobbyManager lobby)
@@ -481,6 +482,8 @@ namespace FastAndFractured.Multiplayer
 
             if (ServerManager != null)
                 ServerManager.OnRemoteConnectionState -= HandleRemoteConnectionState;
+            if (base.SceneManager != null)
+                base.SceneManager.OnClientPresenceChangeEnd -= HandleSpectatorPresence;
         }
 
         /// <summary>
@@ -685,6 +688,8 @@ namespace FastAndFractured.Multiplayer
             // skipped — the same class of bug as the ServerRpc-from-host no-op on car NOBs.
             _levelControllerWrapper.InitializeHostHUD(orderedClientIds);
             SentLevelControllerStartData(levelControllerStartData);
+            _startData = levelControllerStartData;
+            _hasStartData = true;
 
             // Volume selection cannot rely on the shared DeterministicRandom stream (see VOLUME_SYNC).
             StartCoroutine(ServerSyncVolumeWhenReady());
@@ -830,6 +835,66 @@ namespace FastAndFractured.Multiplayer
 
             brightnessManager.ForceInitialize();
             Debug.Log($"[NetworkedLevelControllerManager] Brightness initialized after applying the {peer} volume.");
+        }
+        #endregion
+
+        #region SPECTATORS
+        // Players waiting in the room can watch the match (NetworkedLobbyManager.SpectateMatch).
+        // A spectator loads the map late, so it missed SentLevelControllerStartData: the server
+        // sends it again to that client alone once it is in the scene. Nothing changes for the
+        // players: no car, no input, no state - the spectator only receives what they receive.
+        private LevelControllerStartData _startData;
+        private bool _hasStartData;
+
+        private void HandleSpectatorPresence(FishNet.Managing.Scened.ClientPresenceChangeEventArgs args)
+        {
+            if (!args.Added || args.Connection == null || args.Scene != gameObject.scene) return;
+            var lobby = LobbyLocator.GetLobbyManager();
+            if (lobby == null || !lobby.MatchSpectators.Contains(args.Connection.ClientId)) return;
+            StartCoroutine(SendSpectatorStart(args.Connection));
+        }
+
+        [Server]
+        private System.Collections.IEnumerator SendSpectatorStart(NetworkConnection conn)
+        {
+            // The match may still be spawning its cars (a spectator who came in during the
+            // countdown); the cars then reach the spectator with the next observer rebuild.
+            for (float waited = 0f; !_hasStartData && waited < 30f; waited += Time.unscaledDeltaTime)
+                yield return null;
+            yield return new WaitForSeconds(SPECTATOR_SPAWN_GRACE);
+            if (!_hasStartData || conn == null || !conn.IsActive || _matchEnded) yield break;
+            MpCanary.Mark($"Spectator {conn.ClientId} joined the match");
+            TargetSpectatorStart(conn, _startData);
+        }
+
+        /// <summary>Time for the cars' spawn messages to reach a spectator before the start data.</summary>
+        private const float SPECTATOR_SPAWN_GRACE = 0.5f;
+
+        [TargetRpc]
+        private void TargetSpectatorStart(NetworkConnection conn, LevelControllerStartData data)
+        {
+            StartCoroutine(ClientStartSpectating(data));
+        }
+
+        private System.Collections.IEnumerator ClientStartSpectating(LevelControllerStartData data)
+        {
+            // Every car of the cast must exist here before the singleplayer level is set up.
+            for (float waited = 0f; waited < 5f && !AllPresent(data.AllCharacters); waited += Time.unscaledDeltaTime)
+                yield return null;
+            var cast = data.AllCharacters != null ? data.AllCharacters.FindAll(c => c != null) : new List<GameObject>();
+            try
+            {
+                _levelControllerWrapper.InitializeSpectatorState(cast, data.InGameCharactersNameCodes, data.RandomSeed);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+            MatchSpectatorCamera.Begin(cast);
+
+            static bool AllPresent(List<GameObject> characters)
+            {
+                if (characters == null) return true;
+                foreach (var c in characters) if (c == null) return false;
+                return true;
+            }
         }
         #endregion
 
@@ -1561,6 +1626,14 @@ namespace FastAndFractured.Multiplayer
         {
             // The match is over: losing the host from now on is a room matter, not a match one.
             HostDisconnectWatchdog.NotifyMatchEnded();
+
+            if (MatchSpectatorCamera.IsSpectating)
+            {
+                // Watched, not played: no result of its own, straight back to the room.
+                MatchSpectatorCamera.End();
+                MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
+                return;
+            }
 
             string winnerName = winner != null ? winner.gameObject.name : "DRAW";
 

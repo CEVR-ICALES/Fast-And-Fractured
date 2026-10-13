@@ -157,6 +157,16 @@ namespace FastAndFractured.Multiplayer
         /// 3. Re-apply input providers, destroy remote PlayerHUDs, bind local HUD
         /// </summary>
         [Client]
+        /// <summary>
+        /// A spectator who joined mid-match: the same set-up as a player's client, with every car
+        /// remote (no local player, so no HUD, input or camera of its own - MatchSpectatorCamera
+        /// films the match).
+        /// </summary>
+        public void InitializeSpectatorState(List<GameObject> characters, List<string> characterNameCodes, int gameSeed)
+        {
+            InitializeClientState(characters, characterNameCodes, new List<int>(), gameSeed);
+        }
+
         public void InitializeClientState(List<GameObject> characters, List<string> characterNameCodes, List<int> orderedClientIds, int gameSeed)
         {
             if (IsServerInitialized)
