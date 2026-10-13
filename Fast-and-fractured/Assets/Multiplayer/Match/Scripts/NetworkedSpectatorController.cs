@@ -23,7 +23,7 @@ namespace FastAndFractured.Multiplayer
     /// Controls (when active):
     ///   TAB / Click  - cycle to next alive player
     ///   F            - toggle free camera flight
-    ///   ESC          - leave the match and return to the multiplayer hub
+    ///   ESC          - back to the room (the host: end the match for everyone)
     ///   (free-cam)   - WASD/Arrows: pan | E/Q: up/down | Shift: faster
     /// </summary>
     public class NetworkedSpectatorController : MonoBehaviour
@@ -481,39 +481,16 @@ namespace FastAndFractured.Multiplayer
         // ── Exit ─────────────────────────────────────────────────────────────────
         private void LeaveMatch()
         {
-            Debug.Log("[NetworkedSpectatorController] User pressed ESC — leaving match.");
+            Debug.Log("[NetworkedSpectatorController] User pressed ESC — back to the room.");
             DeactivateSpectator();
 
-            // NOTE: the old flow notified the watchdog the stop was INTENTIONAL and then relied
-            // on the watchdog to route back to the hub — but that notification is precisely what
-            // makes the watchdog ignore the stop, so nobody ever navigated anywhere and the
-            // client sat dead in the map scene. Drive the exit ourselves instead: a spectating
-            // player already lost, so show the defeat screen through the same GameEndData +
-            // MainMenu flow a normal match end uses (it notifies the watchdog internally).
-            var manager = FindFirstObjectByType<NetworkedLevelControllerManager>();
-            if (manager != null)
-            {
-                manager.ShowWinLoseScreen(false);
-            }
-            else
-            {
-                Debug.LogWarning("[NetworkedSpectatorController] No NetworkedLevelControllerManager found; hard-exiting to MainMenu.");
-                HostDisconnectWatchdog.NotifyIntentionalLeave();
-                HostDisconnectWatchdog.NotifyMatchEnded();
-                MultiplayerSceneTeardown.LoadMainMenu();
-            }
-
-            // Stop the connection after the local exit flow is queued. If the HOST leaves,
-            // the server goes with him regardless (loading MainMenu unloads the map scene),
-            // so stop it explicitly — remote clients get routed out by their watchdog.
-            if (InstanceFinder.ClientManager != null && InstanceFinder.IsClientStarted)
-                InstanceFinder.ClientManager.StopConnection();
-            if (InstanceFinder.IsServerStarted && InstanceFinder.ServerManager != null)
-            {
-                Debug.Log("[NetworkedSpectatorController] Host left as spectator — stopping server (no host migration).");
-                InstanceFinder.ServerManager.StopConnection(true);
-            }
+            // The room outlives the match: a spectating player goes back to it and waits for the
+            // next match. The host cannot leave a match running on it, so for the host this
+            // ends the match for everyone, who all go back to the room.
+            MultiplayerRoomReturn.LeaveMatchToRoom();
         }
+
+        private static string LeaveHint => InstanceFinder.IsServerStarted ? "ESC: End Match" : "ESC: Back to Room";
 
         // ── Skip (host, only AIs left) ───────────────────────────────────────────
         private GameObject _skipButton;
@@ -616,7 +593,7 @@ namespace FastAndFractured.Multiplayer
             if (_freeCam)
             {
                 _statusLabel.text = "FREE CAMERA";
-                _controlsLabel.text = "WASD/Arrows: Move   Space/Ctrl (or E/Q): Up/Down   Shift: Faster   Right-Click + Mouse: Look   F: Back to Player   ESC: Leave";
+                _controlsLabel.text = "WASD/Arrows: Move   Space/Ctrl (or E/Q): Up/Down   Shift: Faster   Right-Click + Mouse: Look   F: Back to Player   " + LeaveHint;
             }
             else
             {
@@ -632,7 +609,7 @@ namespace FastAndFractured.Multiplayer
                     targetName = $"{_aliveTargets[_currentTargetIndex].name}{ownerLabel}";
                 }
                 _statusLabel.text = $"SPECTATING: {targetName}   ({_aliveTargets.Count} alive)";
-                _controlsLabel.text = "TAB / Click: Next   F: Free Camera   ESC: Leave Match";
+                _controlsLabel.text = "TAB / Click: Next   F: Free Camera   " + LeaveHint;
             }
         }
     }
