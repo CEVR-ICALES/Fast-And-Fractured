@@ -416,14 +416,50 @@ namespace FastAndFractured.Multiplayer
             ApplyDamageOnServer(damage, attacker);
         }
 
+        /// <summary>
+        /// Server: damage dealt by a car that may have no connection - an AI's bullets. They
+        /// used to bypass the networked pipeline, so the kill went uncredited ("Unknown").
+        /// </summary>
         [Server]
-        private void ApplyDamageOnServer(float damage, NetworkConnection attacker)
+        public void DealDamageFromCarServer(float damage, NetworkObject attackerCar)
         {
+            if (damage <= 0f) return;
+            var owner = attackerCar != null && attackerCar.Owner != null && attackerCar.Owner.IsValid ? attackerCar.Owner : null;
+            ApplyDamageOnServer(damage, owner, attackerCar);
+        }
+
+        // -- Kill credit -----------------------------------------------------------------
+        // Who hit this car last, and when. A car pushed into a pit or the storm a few seconds
+        // after a hit counts as killed by whoever hit it, as in other battle royales.
+        private NetworkObject _lastAttacker;
+        private float _lastAttackerTime;
+        private const float LAST_HIT_CREDIT_SECONDS = 8f;
+
+        /// <summary>Server: remember the car that just hit or pushed this one.</summary>
+        [Server]
+        public void ServerNoteAttacker(NetworkObject attackerCar)
+        {
+            if (attackerCar == null) return;
+            var self = GetComponentInParent<NetworkObject>();
+            if (self != null && (attackerCar == self || attackerCar.transform.IsChildOf(self.transform) ||
+                                 self.transform.IsChildOf(attackerCar.transform)))
+                return;
+            _lastAttacker = attackerCar;
+            _lastAttackerTime = Time.time;
+        }
+
+        private NetworkObject RecentAttacker() =>
+            _lastAttacker != null && Time.time - _lastAttackerTime <= LAST_HIT_CREDIT_SECONDS ? _lastAttacker : null;
+
+        [Server]
+        private void ApplyDamageOnServer(float damage, NetworkConnection attacker, NetworkObject attackerCar = null)
+        {
+            if (attackerCar == null && attacker != null && attacker.FirstObject != null)
+                attackerCar = attacker.FirstObject;
+            ServerNoteAttacker(attackerCar);
             
             // Obtener GameObject del atacante para el sistema de stats
-            GameObject attackerObject = attacker != null && attacker.FirstObject != null 
-                ? attacker.FirstObject.gameObject 
-                : null;
+            GameObject attackerObject = attackerCar != null ? attackerCar.gameObject : null;
             
             if (verboseLogging)
             {
@@ -449,18 +485,13 @@ namespace FastAndFractured.Multiplayer
             // Track stats
             TotalDamageTaken.Value += damage;
             
-            // Track attacker stats
-            if (attacker != null)
+            // Track attacker stats (players and AIs alike)
+            if (attackerCar != null)
             {
-                foreach (var nob in attacker.Objects)
-                {
-                    var attackerStats = nob.GetComponentInChildren<NetworkedStatsController>();
-                    if (attackerStats != null)
-                    {
-                        attackerStats.TotalDamageDealt.Value += damage;
-                        break;
-                    }
-                }
+                var attackerStats = attackerCar.GetComponentInChildren<NetworkedStatsController>();
+                if (attackerStats == null) attackerStats = attackerCar.GetComponentInParent<NetworkedStatsController>();
+                if (attackerStats != null && attackerStats != this)
+                    attackerStats.TotalDamageDealt.Value += damage;
             }
 
             // Verificar muerte
@@ -591,10 +622,12 @@ namespace FastAndFractured.Multiplayer
             // would let you cycle to a "dead" target.
             _syncedEndurance.Value = 0f;
 
-            // Find killer's NetworkObject for more robust identification (works for Players and AI)
-            NetworkObject killerNob = (killer != null && killer.FirstObject != null) 
-                ? killer.FirstObject.GetComponent<NetworkObject>() 
+            // Find killer's NetworkObject for more robust identification (works for Players and AI):
+            // the killing connection's car, else whoever hit or pushed this car last.
+            NetworkObject killerNob = (killer != null && killer.FirstObject != null)
+                ? killer.FirstObject.GetComponent<NetworkObject>()
                 : null;
+            if (killerNob == null) killerNob = RecentAttacker();
             
             string killerName = killerNob != null ? killerNob.gameObject.name : "Unknown";
             
@@ -638,9 +671,9 @@ namespace FastAndFractured.Multiplayer
             // arrived. Quiesce their singleplayer countdown as soon as the death is replicated.
             CancelPendingSingleplayerDeath();
 
-            string victimName = victim != null ? victim.gameObject.name : "Unknown";
-            string killerName = killer != null ? killer.gameObject.name : "Unknown";
-            
+            string victimName = victim != null ? MatchNames.Of(victim.gameObject) : null;
+            string killerName = killer != null ? MatchNames.Of(killer.gameObject) : null;
+                        
             // Instantiate death VFX with auto-destroy to prevent memory leak
             if (dieExplosionVfx != null)
             {
@@ -651,7 +684,9 @@ namespace FastAndFractured.Multiplayer
             // Show kill feed message
             if (HUDManager.HasInstance)
             {
-                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, $"{killerName} eliminated {victimName}");
+                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, string.IsNullOrEmpty(killerName)
+                    ? $"{victimName ?? "A player"} was eliminated"
+                    : $"{killerName} eliminated {victimName}");
             }
 
             // Gray out the victim's icon in the top HUD strip. The singleplayer path that does this

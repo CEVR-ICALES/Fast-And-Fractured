@@ -264,6 +264,8 @@ namespace FastAndFractured.Multiplayer
             ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
             AssignScreenShakeChannels(characters);
+            CarNameplate.AttachAll(characters);
+            ApplyLocalAccessories(characters);
 
         }
 
@@ -399,6 +401,11 @@ namespace FastAndFractured.Multiplayer
             // Register a post-guard that fixes both issues after the event fires.
             RegisterCharactersCustomStartGuard();
             AssignScreenShakeChannels(_levelController.InGameCharacters);
+            CarNameplate.AttachAll(_levelController.InGameCharacters);
+            ApplyLocalAccessories(_levelController.InGameCharacters);
+            // The debug character dropdown floated over the host's car ("Josefino"): only the
+            // client path hid it.
+            HideDebugCharacterSelectorDropdowns();
 
         }
 
@@ -487,6 +494,7 @@ namespace FastAndFractured.Multiplayer
 
         private void OnCharactersCustomStartGuard()
         {
+            HideDebugCharacterSelectorDropdowns();   // the start re-enables it
             // ActivateCharacterControls re-enabled every Controller, remote ones included.
             DisableRemoteStateMachines();
             

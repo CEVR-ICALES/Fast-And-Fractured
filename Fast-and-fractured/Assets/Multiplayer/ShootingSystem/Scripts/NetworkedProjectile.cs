@@ -636,6 +636,10 @@ namespace FastAndFractured.Multiplayer
                     {
                         physicsBehaviour.ApplyForce(direction, closestPoint, forceToApply, ForceMode.Impulse);
                         if (carImpact != null) carImpact.OnHasBeenPushed(physicsBehaviour);
+                        // Pushed into a pit or the storm: the kill goes to the shooter.
+                        var pushedStats = physicsBehaviour.GetComponentInParent<NetworkedStatsController>();
+                        if (pushedStats == null) pushedStats = physicsBehaviour.GetComponentInChildren<NetworkedStatsController>();
+                        if (pushedStats != null && base.IsServerInitialized) pushedStats.ServerNoteAttacker(_shooter);
                     }
                 }
                 else if (physicsBehaviour == null)
@@ -662,6 +666,11 @@ namespace FastAndFractured.Multiplayer
             if (networkedStats != null && _attackerConnection != null && _attackerConnection.IsValid)
             {
                 networkedStats.DealDamageServerRpc(_damage, _attackerConnection);
+            }
+            else if (networkedStats != null && _shooter != null && base.IsServerInitialized)
+            {
+                // An AI's bullet: no connection, but the car is known - networked damage with credit.
+                networkedStats.DealDamageFromCarServer(_damage, _shooter);
             }
             else
             {

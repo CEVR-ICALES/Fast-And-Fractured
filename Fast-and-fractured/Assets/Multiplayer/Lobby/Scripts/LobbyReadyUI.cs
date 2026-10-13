@@ -410,14 +410,6 @@ namespace FastAndFractured.Multiplayer
             _countdownText.text = seconds > 0 ? $"Starting in {seconds}..." : "GO!";
         }
 
-        // Stable bot name pool. Index = AI slot index. AiSlotCount=3 → first 3 names are used.
-        // All clients use the same pool so everyone sees the same bot names.
-        private static readonly string[] BOT_NAMES =
-        {
-            "Bot Sandra", "Bot Mike",   "Bot Carla",  "Bot Diego",
-            "Bot Lucia",  "Bot Tomas",  "Bot Elena",  "Bot Marcos",
-            "Bot Paula",  "Bot Hector", "Bot Nuria",  "Bot Javier",
-        };
 
         // AI slots use synthetic negative client IDs so they don't collide with real clients.
         private const int AI_SLOT_ID_BASE = -1000;
@@ -494,7 +486,7 @@ namespace FastAndFractured.Multiplayer
             // Render synthetic slots for each AI configured. Slot IDs are negative so they
             // never collide with real clientIds. AI names come from a stable pool indexed by
             // bot number so every peer sees the same name for the same slot.
-            int aiCount = Mathf.Min(_lobbyManager.AiSlotCount.Value, BOT_NAMES.Length);
+            int aiCount = Mathf.Min(_lobbyManager.AiSlotCount.Value, MatchNames.BotNames.Length);
             for (int i = 0; i < aiCount; i++)
             {
                 int slotId = AI_SLOT_ID_BASE - i;
@@ -506,7 +498,7 @@ namespace FastAndFractured.Multiplayer
                     _playerEntries[slotId] = aiEntry;
                 }
 
-                string aiName = BOT_NAMES[i];
+                string aiName = MatchNames.BotName(i);
                 var aiSlot = aiEntry.GetComponent<PlayerSlotUI>();
                 if (aiSlot != null)
                 {

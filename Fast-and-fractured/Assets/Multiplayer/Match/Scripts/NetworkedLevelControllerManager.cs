@@ -1182,7 +1182,7 @@ namespace FastAndFractured.Multiplayer
             bool human = ownerClientId.HasValue;
             string name = human
                 ? (LobbyLocator.GetLobbyManager()?.GetPlayerName(ownerClientId.Value) ?? $"Player {ownerClientId.Value}")
-                : $"{MatchResults.CharacterName(characterCode)} (AI)";
+                : AiResultsName(objectId, characterCode);
             _resultsParticipants[objectId] = new MatchResults.Participant
             {
                 Id = objectId,
@@ -1191,6 +1191,13 @@ namespace FastAndFractured.Multiplayer
                 IsHuman = human,
                 OwnerClientId = human ? ownerClientId.Value : -1,
             };
+        }
+
+        /// <summary>The bot's name, as the room listed it and the kill feed shows it.</summary>
+        private string AiResultsName(int objectId, string characterCode)
+        {
+            string botName = _trackedCharacterNobs.TryGetValue(objectId, out var nob) && nob != null ? MatchNames.Of(nob.gameObject) : null;
+            return string.IsNullOrEmpty(botName) ? $"{MatchResults.CharacterName(characterCode)} (AI)" : botName;
         }
 
         /// <summary>Tracked character id of a killer, or -1 (no killer, or not a character).</summary>
@@ -1453,7 +1460,7 @@ namespace FastAndFractured.Multiplayer
             NetworkObject victimNob = null;
             base.ServerManager.Objects.Spawned.TryGetValue(characterObjectId, out victimNob);
 
-            string victimName = victimNob != null ? victimNob.gameObject.name : $"Player_{clientId}";
+            string victimName = LobbyLocator.GetLobbyManager()?.GetPlayerName(clientId) ?? $"Player {clientId}";
 
             // Notify all clients to play death effects (VFX + icon + killfeed)
             DisconnectDeathRpc(victimNob, victimName);
