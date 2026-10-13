@@ -146,7 +146,7 @@ namespace FastAndFractured.Multiplayer
             if (!_armed) return;
             Disarm();
             HideFinalCutscene();
-            var target = InstanceFinder.IsClientStarted ? ScreensType.LOBBY_ROOM : ScreensType.MULTIPLAYER_HUB;
+            var target = InstanceFinder.IsClientStarted ? ScreensType.LOBBY_ROOM : ScreensType.MAIN_MENU;
             Debug.Log($"[MultiplayerPostMatchFlow] Leaving the win/lose screen → {target}.");
             if (MainMenuManager.HasInstance)
                 MainMenuManager.Instance.TransitionBetweenScreens(target, 0.25f);

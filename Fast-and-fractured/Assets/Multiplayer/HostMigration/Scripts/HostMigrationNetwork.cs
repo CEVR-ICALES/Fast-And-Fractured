@@ -261,7 +261,10 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (_instance != null) _instance.StartCoroutine(ReturnToHub());
         }
 
-        /// <summary>The migration happens in an empty scene: load the menu, then open the hub.</summary>
+        /// <summary>
+        /// The migration happens in an empty scene, out of a match: load the menu, which opens on
+        /// the main screen. Already in the menu, back to the hub.
+        /// </summary>
         private static IEnumerator ReturnToHub()
         {
             if (SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX)
@@ -274,6 +277,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                     yield return null;
                 }
                 yield return null;
+                yield break;
             }
             if (MainMenuManager.HasInstance)
                 MainMenuManager.Instance.TransitionBetweenScreens(Enums.ScreensType.MULTIPLAYER_HUB, 0.5f);

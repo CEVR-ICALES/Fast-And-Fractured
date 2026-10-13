@@ -15,7 +15,8 @@ namespace FastAndFractured.Multiplayer
     ///    the room and waits there; the match goes on without them;
     ///  - the host leaves early: the map runs on the host, so the match ends for everyone and
     ///    they all go back to the room.
-    /// Leaving the room itself (its Back button) is what disconnects.
+    /// Leaving the room itself (its Back button) is what disconnects. Out of a match with no room
+    /// left to go back to, the player lands on the main menu.
     /// </summary>
     public static class MultiplayerRoomReturn
     {
@@ -36,8 +37,8 @@ namespace FastAndFractured.Multiplayer
             var lobby = LobbyLocator.GetLobbyManager();
             if (!Online || lobby == null)
             {
-                // No room to go back to (connection already gone): plain exit to the hub.
-                MultiplayerSceneTeardown.LoadMainMenu(ScreensType.MULTIPLAYER_HUB);
+                // No room to go back to (connection already gone): plain exit to the main menu.
+                MultiplayerSceneTeardown.LoadMainMenu(ScreensType.MAIN_MENU);
                 return;
             }
 
@@ -102,7 +103,7 @@ namespace FastAndFractured.Multiplayer
 
             SkipMenuIntro();
             if (screen == ScreensType.LOBBY_ROOM && !Online)
-                screen = ScreensType.MULTIPLAYER_HUB;   // the room closed on the way back
+                screen = ScreensType.MAIN_MENU;   // the room closed on the way back
             MainMenuManager.Instance.TransitionBetweenScreens(screen, -1);
         }
 
