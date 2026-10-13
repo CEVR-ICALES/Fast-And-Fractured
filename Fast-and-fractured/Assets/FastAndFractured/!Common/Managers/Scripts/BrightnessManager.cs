@@ -27,15 +27,48 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
    
     protected override void Initialize()
     {
-        boxVolume = VolumeManager.Instance.CurrentVolumeGameObject.transform.GetChild(2).GetComponent<Volume>();
+        if (TryBindVolume())
+            ApplyBrightnessToScene();
+    }
+
+    private GameObject _boundVolume;
+
+    /// <summary>The volume can be picked (or changed) after this initialized: follow it.</summary>
+    private void Update()
+    {
+        if (!_isInitialized || !VolumeManager.HasInstance) return;
+        GameObject current = VolumeManager.Instance.CurrentVolumeGameObject;
+        if (current == null || current == _boundVolume) return;
+        exposure = null;
+        ApplyBrightnessToScene();
+    }
+
+    /// <summary>
+    /// Finds the exposure of the current volume. The VolumeManager may not have picked a volume
+    /// yet when this initializes (OnEnable order is not guaranteed; online its start is held
+    /// until the match data arrives) - reading it then threw UnassignedReferenceException on
+    /// currentVolumeObject. Binding is retried whenever the brightness is applied, and again
+    /// whenever the VolumeManager switches volume (Update).
+    /// </summary>
+    private bool TryBindVolume()
+    {
+        if (exposure != null) return true;
+        if (!VolumeManager.HasInstance) return false;
+        GameObject current = VolumeManager.Instance.CurrentVolumeGameObject;
+        if (current == null || current.transform.childCount <= 2) return false;
+        _boundVolume = current;
+
+        boxVolume = current.transform.GetChild(2).GetComponent<Volume>();
         if (boxVolume == null)
         {
             Debug.LogError("NO VOLUME FOUND. IS THERE A VOLUME? IS IT CALLED \"Box Volume\"????");
+            return false;
         }
 
         exposure = GetComponentOfTypeOnVolume<Exposure>(boxVolume);
+        if (exposure == null) return false;
         _startingExposure = exposure.fixedExposure.value;
-        ApplyBrightnessToScene();
+        return true;
     }
     static T GetComponentOfTypeOnVolume<T>(Volume vol) where T : VolumeComponent
     {
@@ -71,6 +104,7 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
 
     private void ApplyBrightnessToScene()
     {
+        if (!TryBindVolume()) return;
         exposure.fixedExposure.value = CalculateExposureFromBrightness(_brightness);
     }
 
