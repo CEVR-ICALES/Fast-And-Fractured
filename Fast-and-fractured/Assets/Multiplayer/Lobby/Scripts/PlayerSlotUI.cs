@@ -46,6 +46,9 @@ namespace FastAndFractured.Multiplayer
         /// <param name="isLocal">True for the slot belonging to the local connection — shows the action button.</param>
         public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null)
         {
+            // AI slots use negative ids and have no connection to show.
+            _networkClientId = clientId;
+            _networkVersion = -1;
             string playerName = string.IsNullOrEmpty(displayName) ? $"Player {clientId}" : displayName;
 
             if (_nameLabel != null)
@@ -70,6 +73,69 @@ namespace FastAndFractured.Multiplayer
             if (_mapVoteContainer != null) _mapVoteContainer.SetActive(mapVoteThumbnail != null);
 
             if (_selectButtonRoot != null) _selectButtonRoot.SetActive(isLocal);
+        }
+
+        private static readonly Color InMatchColor = new Color(0.45f, 0.30f, 0.08f, 0.85f);
+
+        /// <summary>
+        /// While a match runs, marks the players in it (the rest are waiting in the room). Call
+        /// after <see cref="SetData"/>.
+        /// </summary>
+        public void SetInMatch(bool inMatch)
+        {
+            if (!inMatch) return;
+            if (_readyBadge != null) _readyBadge.SetActive(true);
+            if (_readyLabel != null)
+            {
+                // The badge was sized for "READY": shrink to fit on one line.
+                if (!_readyLabel.enableAutoSizing)
+                {
+                    _readyLabel.enableWordWrapping = false;
+                    _readyLabel.fontSizeMax = _readyLabel.fontSize;
+                    _readyLabel.fontSizeMin = 6f;
+                    _readyLabel.enableAutoSizing = true;
+                }
+                _readyLabel.text = "IN MATCH";
+            }
+            if (_backgroundTint != null) _backgroundTint.color = InMatchColor;
+            if (_selectButtonRoot != null) _selectButtonRoot.SetActive(false);
+        }
+
+        // ── Connection (Wi-Fi / cable, ping to the host) ──────────────────────────────
+        private int _networkClientId = -1;
+        private int _networkVersion = -1;
+        private NetworkSignalIndicator _signal;
+
+        private void Update()
+        {
+            if (_networkVersion == NetworkQuality.Version) return;
+            _networkVersion = NetworkQuality.Version;
+
+            bool human = _networkClientId >= 0;
+            if (!human)
+            {
+                if (_signal != null) _signal.gameObject.SetActive(false);
+                return;
+            }
+            if (_signal == null) _signal = CreateSignal();
+            _signal.gameObject.SetActive(true);
+
+            if (NetworkQuality.TryGet(_networkClientId, out var report))
+                _signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? "HOST" : null);
+            else
+                _signal.Set(LinkKind.Unknown, -1);
+        }
+
+        /// <summary>Top-right corner of the slot, outside its layout.</summary>
+        private NetworkSignalIndicator CreateSignal()
+        {
+            float height = _nameLabel != null ? Mathf.Clamp(_nameLabel.fontSize * 0.9f, 20f, 28f) : 22f;
+            var signal = NetworkSignalIndicator.Create(transform, _nameLabel, height);
+            var rect = (RectTransform)signal.transform;
+            rect.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1f, 1f);
+            rect.anchoredPosition = new Vector2(-8f, -6f);
+            return signal;
         }
 
         /// <summary>
