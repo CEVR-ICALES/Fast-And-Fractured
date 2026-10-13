@@ -99,6 +99,20 @@ namespace FastAndFractured.Multiplayer
 
         public event Action<int> OnAiSlotCountChanged;
 
+        // MATCH IN PROGRESS
+        /// <summary>
+        /// Clients playing the current match (empty between matches). The room outlives the
+        /// match: players who join while it runs, and players who leave it early, wait in the
+        /// room for the next one.
+        /// </summary>
+        public readonly SyncList<int> MatchParticipants = new SyncList<int>();
+
+        /// <summary>True when the client is playing the match in progress.</summary>
+        public bool IsInMatch(int clientId) => GameStarted.Value && MatchParticipants.Contains(clientId);
+
+        /// <summary>Server: a participant went back to the room before the match ended.</summary>
+        public event Action<NetworkConnection> OnParticipantLeftMatch;
+
         public int HumanPlayerCount => PlayerReadyStates.Count;
         public int TotalSlotCount   => HumanPlayerCount + AiSlotCount.Value;
         public int FreeSlotCount    => Mathf.Max(0, MAX_PLAYERS - TotalSlotCount);
@@ -118,6 +132,8 @@ namespace FastAndFractured.Multiplayer
             PlayerNames.OnChange += HandlePlayerNameChange;
             PlayerMapVotes.OnChange += HandleMapVoteChange;
             AiSlotCount.OnChange   += HandleAiSlotChange;
+            GameStarted.OnChange   += HandleGameStartedServer;
+            AdvertiseMatchState(false);
         }
 
         public override void OnStopServer()
@@ -130,6 +146,7 @@ namespace FastAndFractured.Multiplayer
             PlayerNames.OnChange -= HandlePlayerNameChange;
             PlayerMapVotes.OnChange -= HandleMapVoteChange;
             AiSlotCount.OnChange   -= HandleAiSlotChange;
+            GameStarted.OnChange   -= HandleGameStartedServer;
         }
 
         public override void OnStartClient()
@@ -231,6 +248,7 @@ namespace FastAndFractured.Multiplayer
                 PlayerCharacterSelections.Remove(conn.ClientId);
                 PlayerNames.Remove(conn.ClientId);
                 PlayerMapVotes.Remove(conn.ClientId);
+                MatchParticipants.Remove(conn.ClientId);
 
                 if (_countdownActive && PlayerReadyStates.Count < MinPlayersToStart)
                     CancelCountdown();
@@ -333,6 +351,11 @@ namespace FastAndFractured.Multiplayer
             // a few frames later after Force Start already kicked the match off.
             _countdownActive = false;
 
+            // Everyone in the room plays; whoever joins from now on waits for the next match.
+            MatchParticipants.Clear();
+            foreach (var kv in PlayerReadyStates)
+                MatchParticipants.Add(kv.Key);
+
             // Resolve map vote first so ResolvedMapId is set before anyone reads it.
             ResolveMapVote();
 
@@ -414,11 +437,98 @@ namespace FastAndFractured.Multiplayer
 
             Debug.Log($"[NetworkedLobbyManager] Loading map scene '{sceneToLoad}' for resolved mapId={entry.Id}.");
 
+            // Only the match's players load the map (a connection scene, not a global one):
+            // a global scene would also be pushed onto anyone joining the room mid-match, and
+            // nobody could go back to the room while it is loaded. MatchSceneVisibility keeps
+            // the map's objects away from the players in the room.
+            var players = new List<NetworkConnection>();
+            foreach (int clientId in MatchParticipants)
+                if (ServerManager.Clients.TryGetValue(clientId, out var conn) && conn.IsActive)
+                    players.Add(conn);
+            if (players.Count == 0)
+            {
+                Debug.LogWarning("[NetworkedLobbyManager] Every player left before the map loaded; back to the room.");
+                ServerEndMatch();
+                yield break;
+            }
+
             var sceneLoadData = new FishNet.Managing.Scened.SceneLoadData(sceneToLoad)
             {
                 ReplaceScenes = FishNet.Managing.Scened.ReplaceOption.All
             };
-            FishNet.InstanceFinder.SceneManager.LoadGlobalScenes(sceneLoadData);
+            FishNet.InstanceFinder.SceneManager.LoadConnectionScenes(players.ToArray(), sceneLoadData);
+        }
+
+        // -- End of a match: back to the room ------------------------------------------
+        /// <summary>
+        /// Server: the match is over (or was abandoned); the room is ready for the next one.
+        /// Players, characters, AI slots and the room name stay; ready states and map votes
+        /// start over.
+        /// </summary>
+        [Server]
+        public void ServerEndMatch()
+        {
+            _countdownActive = false;
+            CurrentCountdown.Value = -1;
+            MatchParticipants.Clear();
+            PlayerMapVotes.Clear();
+            ResolvedMapId.Value = -1;
+            var ids = new List<int>(PlayerReadyStates.Keys);
+            foreach (int id in ids)
+                PlayerReadyStates[id] = false;
+            GameStarted.Value = false;
+            Debug.Log("[NetworkedLobbyManager] Match over - the room is open for the next one.");
+        }
+
+        /// <summary>A player leaves the match in progress and goes back to the room.</summary>
+        [ServerRpc(RequireOwnership = false)]
+        public void ServerLeaveMatch(NetworkConnection conn = null) => LeaveMatch(conn);
+
+        /// <summary>
+        /// Server side of leaving a match early. The host cannot leave its own match (the map
+        /// runs on it), so the host leaving ends the match for everyone.
+        /// </summary>
+        [Server]
+        public void LeaveMatch(NetworkConnection conn)
+        {
+            if (conn == null || !GameStarted.Value) return;
+            if (conn.IsHost)
+            {
+                ServerAbortMatch();
+                return;
+            }
+            if (!MatchParticipants.Remove(conn.ClientId)) return;
+            OnParticipantLeftMatch?.Invoke(conn);
+            try { SceneManager.RemoveConnectionsFromNonGlobalScenes(new[] { conn }); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        /// <summary>Server: ends the match without a result and brings everyone back to the room.</summary>
+        [Server]
+        public void ServerAbortMatch()
+        {
+            if (!GameStarted.Value) return;
+            RpcReturnToRoom();
+            ServerEndMatch();
+        }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcReturnToRoom() => MultiplayerRoomReturn.ReturnFromAbortedMatch();
+
+        private void HandleGameStartedServer(bool prev, bool next, bool asServer)
+        {
+            if (asServer) AdvertiseMatchState(next);
+        }
+
+        /// <summary>The room list shows rooms in a match as "In a match" (still joinable).</summary>
+        private static void AdvertiseMatchState(bool inMatch)
+        {
+            try
+            {
+                Abstractions.LobbyServiceLocator.Transport?.SetLobbyMetadata(
+                    Abstractions.LobbyListing.KEY_IN_MATCH, inMatch ? "1" : "0");
+            }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         private void ResolveMapVote()
@@ -488,8 +598,8 @@ namespace FastAndFractured.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         public void ServerSelectCharacter(string characterName, NetworkConnection conn = null)
         {
-            if (GameStarted.Value) return;
             if (conn == null) return;
+            if (IsInMatch(conn.ClientId)) return;   // players waiting in the room pick for the next match
 
             string characterCode = NormalizeCharacterCode(characterName);
             if (string.IsNullOrEmpty(characterCode))
@@ -530,7 +640,7 @@ namespace FastAndFractured.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         public void ServerVoteMap(int mapId, NetworkConnection conn = null)
         {
-            if (GameStarted.Value || conn == null) return;
+            if (conn == null || IsInMatch(conn.ClientId)) return;
             PlayerMapVotes[conn.ClientId] = mapId;
         }
 
@@ -545,7 +655,8 @@ namespace FastAndFractured.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         public void ServerRegisterPlayerRpc(string preferredCharacter, string displayName, NetworkConnection conn = null)
         {
-            if (GameStarted.Value || conn == null) return;
+            // Also while a match runs: the newcomer waits in the room for the next one.
+            if (conn == null) return;
 
             if (!PlayerReadyStates.ContainsKey(conn.ClientId))
                 PlayerReadyStates[conn.ClientId] = false;

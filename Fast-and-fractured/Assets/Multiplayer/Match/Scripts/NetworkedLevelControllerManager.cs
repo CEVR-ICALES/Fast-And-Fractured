@@ -426,6 +426,7 @@ namespace FastAndFractured.Multiplayer
             if (lobbyManager != null)
             {
                 lobbyManager.OnGameStarting += OnLobbyGameStarting;
+                lobbyManager.OnParticipantLeftMatch += HandleParticipantLeftMatch;
 
                 if (lobbyManager.GameStarted.Value)
                 {
@@ -473,7 +474,10 @@ namespace FastAndFractured.Multiplayer
 
             var lobbyManager = LobbyLocator.GetLobbyManager();
             if (lobbyManager != null)
+            {
                 lobbyManager.OnGameStarting -= OnLobbyGameStarting;
+                lobbyManager.OnParticipantLeftMatch -= HandleParticipantLeftMatch;
+            }
 
             if (ServerManager != null)
                 ServerManager.OnRemoteConnectionState -= HandleRemoteConnectionState;
@@ -611,7 +615,9 @@ namespace FastAndFractured.Multiplayer
                     if (conn == null || !conn.IsActive) continue;
                     // The host's local connection is already in scene by definition.
                     if (conn == base.LocalConnection) continue;
-                    if (conn.Scenes == null || conn.Scenes.Count == 0)
+                    // This map specifically: a scene left over from the previous match must not
+                    // count as loaded.
+                    if (conn.Scenes == null || !conn.Scenes.Contains(gameObject.scene))
                     {
                         allReady = false;
                         break;
@@ -991,9 +997,16 @@ namespace FastAndFractured.Multiplayer
             var ordered = new List<NetworkConnection>();
             var seenClientIds = new HashSet<int>();
 
+            // Only the players the room sent into this match: anyone who joined the room since
+            // waits there for the next one (and never loads this map).
+            var lobby = LobbyLocator.GetLobbyManager();
+            bool onlyParticipants = lobby != null && lobby.MatchParticipants.Count > 0 && !IsResumingMigratedMatch;
+
             foreach (var conn in base.ServerManager.Clients.Values)
             {
                 if (conn == null || !conn.IsActive)
+                    continue;
+                if (onlyParticipants && !lobby.MatchParticipants.Contains(conn.ClientId))
                     continue;
 
                 if (seenClientIds.Add(conn.ClientId))
@@ -1092,13 +1105,10 @@ namespace FastAndFractured.Multiplayer
 
         private bool _matchEnded;
 
-        /// <summary>Seconds the win/lose screen stays up before the server tears down.</summary>
-        private const float SERVER_SHUTDOWN_DELAY = 8f;
-
         /// <summary>
-        /// Server-side match end: notify clients (win/lose screen) once, then schedule a server
-        /// shutdown so the host doesn't keep running an empty match. Guarded so multiple
-        /// near-simultaneous deaths can't double-fire.
+        /// Server-side match end: notify clients (win/lose screen) once, then open the room for
+        /// the next match - the connection stays up and everyone returns to the room.
+        /// Guarded so multiple near-simultaneous deaths can't double-fire.
         /// </summary>
         [Server]
         private void EndMatchOnServer(NetworkObject winner)
@@ -1152,16 +1162,13 @@ namespace FastAndFractured.Multiplayer
             try { MatchResultsRpc(BuildMatchResults(winner)); }
             catch (Exception e) { Debug.LogException(e); }
             EndGameRpc(winner);
-            Debug.Log($"<color=magenta>[NetworkedLevelControllerManager] EndGameRpc dispatched. " +
-                      $"Scheduling server teardown in {SERVER_SHUTDOWN_DELAY}s…</color>");
+            Debug.Log("<color=magenta>[NetworkedLevelControllerManager] EndGameRpc dispatched. The room stays open for the next match.</color>");
 
-            // CANNOT run the teardown as a coroutine on THIS component: the host's own
-            // EndGameRpc handler loads the MainMenu seconds from now, which unloads the map
-            // scene and destroys this spawned NetworkObject — the coroutine dies before ever
-            // reaching StopConnection, leaving the server (and its advertised room) running.
-            // That is exactly the "host can't create another room after a match" bug. Run it
-            // on a DontDestroyOnLoad runner that survives the scene swap instead.
-            MatchTeardownRunner.ScheduleStop(SERVER_SHUTDOWN_DELAY);
+            // The server is no longer stopped after a match: the room outlives it. Everyone
+            // goes to the win/lose screen (the host's own load unloads the map on the server
+            // too) and from there back to the room.
+            LobbyLocator.GetLobbyManager()?.ServerEndMatch();
+            MpCanary.Mark("Match over - room open for the next match");
         }
 
         #region MATCH_RESULTS
@@ -1227,42 +1234,6 @@ namespace FastAndFractured.Multiplayer
         }
         #endregion
 
-        /// <summary>Scene-swap-proof server teardown after the win/lose screen delay.</summary>
-        private sealed class MatchTeardownRunner : MonoBehaviour
-        {
-            public static void ScheduleStop(float delay)
-            {
-                var go = new GameObject("[MatchTeardown]");
-                DontDestroyOnLoad(go);
-                var runner = go.AddComponent<MatchTeardownRunner>();
-                runner.StartCoroutine(runner.StopAfter(delay));
-            }
-
-            private System.Collections.IEnumerator StopAfter(float delay)
-            {
-                MpCanary.Mark($"MatchTeardown scheduled ({delay}s)");
-                yield return new WaitForSeconds(delay);
-
-                Debug.Log($"<color=magenta>[MatchTeardown] Match ended — stopping server now. " +
-                          $"IsClientStarted={InstanceFinder.IsClientStarted}, IsServerStarted={InstanceFinder.IsServerStarted}</color>");
-                // Mark the upcoming client/server stop as intentional so the watchdog doesn't
-                // fire its "host disconnected" path on the host's own client side.
-                HostDisconnectWatchdog.NotifyIntentionalLeave();
-                HostDisconnectWatchdog.NotifyMatchEnded();
-                if (InstanceFinder.ClientManager != null && InstanceFinder.IsClientStarted)
-                {
-                    Debug.Log("[MatchTeardown] Calling ClientManager.StopConnection()");
-                    InstanceFinder.ClientManager.StopConnection();
-                }
-                if (InstanceFinder.ServerManager != null && InstanceFinder.IsServerStarted)
-                {
-                    Debug.Log("[MatchTeardown] Calling ServerManager.StopConnection(true)");
-                    InstanceFinder.ServerManager.StopConnection(true);
-                }
-                MpCanary.Mark("MatchTeardown executed (server/client stopped)");
-                Destroy(gameObject);
-            }
-        }
         
         /// <summary>
         /// Server-side death tracking entry point. Called by NetworkedStatsController.HandleServerSideDeath
@@ -1421,10 +1392,37 @@ namespace FastAndFractured.Multiplayer
         /// </summary>
         private void HandleRemoteConnectionState(NetworkConnection conn, RemoteConnectionStateArgs args)
         {
-            if (!IsServerInitialized || !_gameStartTriggered) return;
             if (args.ConnectionState != RemoteConnectionState.Stopped) return;
+            RemovePlayerFromMatch(conn.ClientId);
+        }
 
-            int clientId = conn.ClientId;
+        /// <summary>A player went back to the room mid-match: for the match it is the same as leaving.</summary>
+        private void HandleParticipantLeftMatch(NetworkConnection conn)
+        {
+            if (conn == null) return;
+            RemovePlayerFromMatch(conn.ClientId);
+
+            // A disconnect makes FishNet despawn the player's objects; a player who only went
+            // back to the room keeps its connection, and an owner always observes its own
+            // objects - its car would keep streaming to its menu. Despawn them, as a disconnect would.
+            var owned = new List<NetworkObject>(conn.Objects);
+            owned.Sort((a, b) => Depth(a).CompareTo(Depth(b)));   // parents first; they take their nested objects along
+            foreach (var nob in owned)
+                if (nob != null && nob.IsSpawned && nob.gameObject.scene == gameObject.scene)
+                    base.ServerManager.Despawn(nob);
+
+            static int Depth(NetworkObject nob)
+            {
+                int depth = 0;
+                for (var t = nob != null ? nob.transform : null; t != null; t = t.parent) depth++;
+                return depth;
+            }
+        }
+
+        /// <summary>The player's car explodes and counts as a death, unless it was already dead.</summary>
+        private void RemovePlayerFromMatch(int clientId)
+        {
+            if (!IsServerInitialized || !_gameStartTriggered) return;
 
             if (!_deathTracker.TryGetCharacterForClient(clientId, out int characterObjectId))
                 return;
@@ -1554,12 +1552,8 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         private void EndGameRpc(NetworkObject winner)
         {
-            // Remote clients are about to receive a server-side StopConnection in ~8s
-            // (SERVER_SHUTDOWN_DELAY). Without this notification, the resulting client-stop
-            // would trigger HostDisconnectWatchdog's "host disconnected" return-to-hub flow
-            // on TOP of the WinLoseScreen — they'd never get to see who won.
+            // The match is over: losing the host from now on is a room matter, not a match one.
             HostDisconnectWatchdog.NotifyMatchEnded();
-            HostDisconnectWatchdog.NotifyIntentionalLeave();
 
             string winnerName = winner != null ? winner.gameObject.name : "DRAW";
 
@@ -1702,7 +1696,6 @@ namespace FastAndFractured.Multiplayer
         private void LoadMainMenuLocally()
         {
             HostDisconnectWatchdog.NotifyMatchEnded();
-            HostDisconnectWatchdog.NotifyIntentionalLeave();
             MultiplayerSceneTeardown.LoadMainMenu();
         }
 
