@@ -66,6 +66,8 @@ namespace FastAndFractured
         [SerializeField] public List<GameObject> availablePlayer;
         public List<GameObject> InGameCharacters => _characterSpawner?.InGameCharacters ?? new List<GameObject>();
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
+        /// <summary>Seconds until the storm is called; null when no countdown is running (StormCountdownHud).</summary>
+        public float? StormSecondsLeft => _gameLoopManager?.StormSecondsLeft;
         // Exposed for the multiplayer wrapper, which reads the debug flag off the real controller.
         public bool DebugMode { get => debugMode; set => debugMode = value; }
         private bool _isStormActive = false;

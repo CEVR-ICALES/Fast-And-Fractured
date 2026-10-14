@@ -86,6 +86,12 @@ namespace FastAndFractured
         }
 
 
+        /// <summary>Seconds until the storm is called; null when no storm countdown is running.</summary>
+        public float? StormSecondsLeft =>
+            _callStormTimer != null && TimerSystem.ExistingInstance != null && TimerSystem.ExistingInstance.HasTimer(_callStormTimer)
+                ? Mathf.Max(0f, _callStormTimer.GetData().CurrentTime)
+                : (float?)null;
+
         public void SetupStorm(bool callStormInitially, bool debugModeForStormSpawns)
         {
             if (callStormInitially)

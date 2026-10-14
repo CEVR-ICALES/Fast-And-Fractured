@@ -165,6 +165,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartClient()
         {
             base.OnStartClient();
+            StormCountdownHud.DrivenByNetwork = true;   // the synced countdown below owns the HUD timer
             
             // Subscribe to SyncVar changes for client-side state application
             SyncedSpawnPoint.OnChange += OnSpawnPointChanged;
@@ -177,6 +178,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStopClient()
         {
             base.OnStopClient();
+            StormCountdownHud.DrivenByNetwork = false;
             
             SyncedSpawnPoint.OnChange -= OnSpawnPointChanged;
             SyncedMirrorPoint.OnChange -= OnMirrorPointChanged;
