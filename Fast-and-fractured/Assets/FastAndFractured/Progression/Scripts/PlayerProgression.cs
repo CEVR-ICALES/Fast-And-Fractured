@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>
     /// The local player's profile: total XP (and so the level), the rewards unlocked so far and

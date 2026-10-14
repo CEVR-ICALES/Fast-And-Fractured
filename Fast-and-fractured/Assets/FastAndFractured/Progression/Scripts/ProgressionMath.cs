@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>Pure rules of the levelling system (unit tested): the XP curve and what a match is worth.</summary>
     public static class ProgressionMath

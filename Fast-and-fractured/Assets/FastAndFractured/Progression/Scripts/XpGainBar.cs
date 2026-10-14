@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>
     /// The XP a match gave, on the results screen: "+N XP", the level bar filling up from where

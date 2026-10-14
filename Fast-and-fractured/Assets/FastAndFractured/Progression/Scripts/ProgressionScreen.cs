@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>
     /// PROGRESSION screen (Multiplayer ▸ Progress): level, XP towards the next one and the reward

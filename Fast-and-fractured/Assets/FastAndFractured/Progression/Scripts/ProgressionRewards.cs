@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     public enum RewardType { Cap, Accessory, Title }
 

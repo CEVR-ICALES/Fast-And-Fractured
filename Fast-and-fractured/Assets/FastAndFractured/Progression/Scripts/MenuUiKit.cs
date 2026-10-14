@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>Small builders for the code-built menu screens, in the multiplayer menus' look.</summary>
     internal static class MenuUiKit

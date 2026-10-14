@@ -2,7 +2,7 @@ using FishNet;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>
     /// The equipped accessories on the player's car in singleplayer too (the multiplayer wrapper

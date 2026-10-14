@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Enums;
+using FastAndFractured.Multiplayer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>
     /// ACCESSORIES screen: per character, what is equipped in each slot (head, face, car), cycled

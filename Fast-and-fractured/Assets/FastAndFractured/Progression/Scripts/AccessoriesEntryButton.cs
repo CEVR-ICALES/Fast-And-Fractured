@@ -2,7 +2,7 @@ using Enums;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Progression
+namespace FastAndFractured.Progression
 {
     /// <summary>Opens the ACCESSORIES screen, which then returns to <see cref="returnTo"/>.</summary>
     [RequireComponent(typeof(Button))]
