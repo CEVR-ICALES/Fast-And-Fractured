@@ -6,8 +6,10 @@ using FastAndFractured;
 public class MinimapScaler : MonoBehaviour
 {
     private const float SCALE_OFFSET = 0.5f;
+    private const float MINIMAP_DEFAULT_VALUE = 0.5f;
     private const string MINIMAP_SCALE_PREFS = "Minimap_Scale";
     private const string TOGGLE_MINIMAP_ACTION = "ToggleMinimap";
+    Vector2 VECTOR_HALF;
 
     private float expandedScale = 3f;
 
@@ -41,7 +43,8 @@ public class MinimapScaler : MonoBehaviour
         originalPivot = rectTransform.pivot;
         originalAnchoredPosition = rectTransform.anchoredPosition;
 
-        baseScale = PlayerPrefs.GetFloat(MINIMAP_SCALE_PREFS, 0.5f) + SCALE_OFFSET;
+        baseScale = PlayerPrefs.GetFloat(MINIMAP_SCALE_PREFS, MINIMAP_DEFAULT_VALUE) + SCALE_OFFSET;
+        VECTOR_HALF = new Vector2(0.5f, 0.5f);
     }
 
     void OnEnable()
@@ -107,14 +110,14 @@ public class MinimapScaler : MonoBehaviour
         ToggleExpanded();
     }
 
-    public void setCurrentScale()
+    public void SetCurrentScale()
     {
         if (rectTransform == null)
         {
             rectTransform = GetComponent<RectTransform>();
         }
 
-        float currentScale = PlayerPrefs.GetFloat(MINIMAP_SCALE_PREFS, 0.5f);
+        float currentScale = PlayerPrefs.GetFloat(MINIMAP_SCALE_PREFS, MINIMAP_DEFAULT_VALUE);
         baseScale = currentScale + SCALE_OFFSET;
 
         if (!isExpanded)
@@ -151,9 +154,9 @@ public class MinimapScaler : MonoBehaviour
         Transform targetParent = rootCanvas != null ? rootCanvas.rootCanvas.transform : rectTransform.root;
 
         rectTransform.SetParent(targetParent, false);
-        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMin = VECTOR_HALF;
+        rectTransform.anchorMax = VECTOR_HALF;
+        rectTransform.pivot = VECTOR_HALF;
         rectTransform.anchoredPosition = Vector2.zero;
         rectTransform.SetAsLastSibling();
         rectTransform.localScale = Vector3.one * expandedScale;
@@ -180,7 +183,7 @@ public class MinimapScaler : MonoBehaviour
         rectTransform.anchoredPosition = originalAnchoredPosition;
 
         isExpanded = false;
-        setCurrentScale();
+        SetCurrentScale();
     }
 
     public static bool TryCollapseExpanded()
@@ -207,6 +210,6 @@ public class MinimapScaler : MonoBehaviour
         {
             rectTransform = GetComponent<RectTransform>();
         }
-        setCurrentScale();
+        SetCurrentScale();
     }
 }
