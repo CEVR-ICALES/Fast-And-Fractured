@@ -53,6 +53,15 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Fired when a player's display name syncs. Args: clientId, name.</summary>
         public event Action<int, string> OnPlayerNameChanged;
 
+        /// <summary>Fired on every peer when a player's progression level arrives or changes. Args: clientId, level</summary>
+        public event Action<int, int> OnPlayerLevelChanged;
+
+        /// <summary>Each player's progression level, sent by the player itself (shown in the room).</summary>
+        public readonly SyncDictionary<int, int> PlayerLevels = new SyncDictionary<int, int>();
+
+        /// <summary>The player's level, or 0 when it has not arrived yet.</summary>
+        public int GetPlayerLevel(int clientId) => PlayerLevels.TryGetValue(clientId, out int level) ? level : 0;
+
         public string GetPlayerName(int clientId) =>
             PlayerNames.TryGetValue(clientId, out var n) && !string.IsNullOrEmpty(n) ? n : $"Player {clientId}";
 
@@ -160,6 +169,8 @@ namespace FastAndFractured.Multiplayer
             PlayerReadyStates.OnChange += HandleReadyStateChange;
             PlayerCharacterSelections.OnChange += HandleCharacterSelectionChange;
             PlayerNames.OnChange += HandlePlayerNameChange;
+            PlayerLevels.OnChange += HandlePlayerLevelChange;
+            Progression.PlayerProgression.OnChanged += SendLocalLevel;
             CurrentCountdown.OnChange += HandleCountdownChange;
             GameStarted.OnChange += HandleGameStartedChange;
             AiSlotCount.OnChange += HandleAiSlotChange;
@@ -168,7 +179,31 @@ namespace FastAndFractured.Multiplayer
             // AND seed the default character + display name in one RPC. We deliberately do NOT
             // read "Selected_Player" — Construct overwrites that with the scene default, so it
             // can't persist the real online choice.
-            ServerRegisterPlayerRpc(GetPreferredCharacterCode(), GetLocalDisplayName());
+            ServerRegisterPlayerRpc(GetPreferredCharacterCode(), GetLocalDisplayName(), Progression.PlayerProgression.Level);
+        }
+
+        /// <summary>The local level after it changes (a match's XP), so the room shows the new one.</summary>
+        private void SendLocalLevel()
+        {
+            if (!IsClientInitialized) return;
+            int level = Progression.PlayerProgression.Level;
+            if (LocalConnection != null && GetPlayerLevel(LocalConnection.ClientId) == level) return;
+            ServerSetLevelRpc(level);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void ServerSetLevelRpc(int level, NetworkConnection conn = null)
+        {
+            if (conn != null) PlayerLevels[conn.ClientId] = ClampLevel(level);
+        }
+
+        /// <summary>A level sent by a client, kept within the progression's range.</summary>
+        public static int ClampLevel(int level) => Mathf.Clamp(level, 1, Progression.ProgressionMath.MAX_LEVEL);
+
+        private void HandlePlayerLevelChange(SyncDictionaryOperation op, int clientId, int level, bool asServer)
+        {
+            if (asServer && IsClientInitialized) return;   // the host hears it once, as client
+            OnPlayerLevelChanged?.Invoke(clientId, level);
         }
 
         /// <summary>Local player's platform display name (Steam persona), or null if unavailable.</summary>
@@ -204,6 +239,8 @@ namespace FastAndFractured.Multiplayer
             PlayerReadyStates.OnChange -= HandleReadyStateChange;
             PlayerCharacterSelections.OnChange -= HandleCharacterSelectionChange;
             PlayerNames.OnChange -= HandlePlayerNameChange;
+            PlayerLevels.OnChange -= HandlePlayerLevelChange;
+            Progression.PlayerProgression.OnChanged -= SendLocalLevel;
             CurrentCountdown.OnChange -= HandleCountdownChange;
             GameStarted.OnChange -= HandleGameStartedChange;
             AiSlotCount.OnChange -= HandleAiSlotChange;
@@ -252,6 +289,7 @@ namespace FastAndFractured.Multiplayer
                 PlayerReadyStates.Remove(conn.ClientId);
                 PlayerCharacterSelections.Remove(conn.ClientId);
                 PlayerNames.Remove(conn.ClientId);
+                PlayerLevels.Remove(conn.ClientId);
                 PlayerMapVotes.Remove(conn.ClientId);
                 MatchParticipants.Remove(conn.ClientId);
                 MatchSpectators.Remove(conn.ClientId);
@@ -693,7 +731,7 @@ namespace FastAndFractured.Multiplayer
         /// Idempotent: safe to call twice.
         /// </summary>
         [ServerRpc(RequireOwnership = false)]
-        public void ServerRegisterPlayerRpc(string preferredCharacter, string displayName, NetworkConnection conn = null)
+        public void ServerRegisterPlayerRpc(string preferredCharacter, string displayName, int level, NetworkConnection conn = null)
         {
             // Also while a match runs: the newcomer waits in the room for the next one.
             if (conn == null) return;
@@ -710,6 +748,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             PlayerNames[conn.ClientId] = string.IsNullOrWhiteSpace(displayName) ? $"Player {conn.ClientId}" : displayName;
+            PlayerLevels[conn.ClientId] = ClampLevel(level);
 
             int maxAi = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount);
             if (AiSlotCount.Value > maxAi) AiSlotCount.Value = maxAi;

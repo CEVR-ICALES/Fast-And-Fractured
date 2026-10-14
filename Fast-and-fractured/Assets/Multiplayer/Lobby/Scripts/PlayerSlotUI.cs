@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using FastAndFractured.Multiplayer.Lobby;
 using TMPro;
 using UnityEngine;
@@ -44,12 +45,14 @@ namespace FastAndFractured.Multiplayer
         /// <param name="isReady">Ready state.</param>
         /// <param name="mapVoteThumbnail">Sprite from MapCatalog.Entry.Thumbnail. Null = no vote yet.</param>
         /// <param name="isLocal">True for the slot belonging to the local connection — shows the action button.</param>
-        public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null)
+        /// <param name="level">Progression level shown next to the name; 0 = hidden (setting off, AI, not arrived).</param>
+        public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null, int level = 0)
         {
             // AI slots use negative ids and have no connection to show.
             _networkClientId = clientId;
             _networkVersion = -1;
             string playerName = string.IsNullOrEmpty(displayName) ? $"Player {clientId}" : displayName;
+            if (level > 0) playerName = $"{playerName}  <color=#FFC759>{LocalizationManager.Localize("MP.Room.Level", level)}</color>";
 
             if (_nameLabel != null)
                 _nameLabel.text = string.IsNullOrEmpty(characterCode)
@@ -66,7 +69,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             if (_readyBadge != null) _readyBadge.SetActive(isReady);
-            if (_readyLabel != null) _readyLabel.text = isReady ? "READY" : "...";
+            if (_readyLabel != null) _readyLabel.text = isReady ? LocalizationManager.Localize("MP.Room.Ready") : "...";
             if (_backgroundTint != null) _backgroundTint.color = isReady ? _readyColor : _notReadyColor;
 
             if (_mapVoteThumbnail != null) _mapVoteThumbnail.sprite = mapVoteThumbnail;
@@ -95,7 +98,7 @@ namespace FastAndFractured.Multiplayer
                     _readyLabel.fontSizeMin = 6f;
                     _readyLabel.enableAutoSizing = true;
                 }
-                _readyLabel.text = "IN MATCH";
+                _readyLabel.text = LocalizationManager.Localize("MP.Room.InMatch");
             }
             if (_backgroundTint != null) _backgroundTint.color = InMatchColor;
             if (_selectButtonRoot != null) _selectButtonRoot.SetActive(false);
@@ -121,7 +124,7 @@ namespace FastAndFractured.Multiplayer
             _signal.gameObject.SetActive(true);
 
             if (NetworkQuality.TryGet(_networkClientId, out var report))
-                _signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? "HOST" : null);
+                _signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? LocalizationManager.Localize("MP.Host") : null);
             else
                 _signal.Set(LinkKind.Unknown, -1);
         }

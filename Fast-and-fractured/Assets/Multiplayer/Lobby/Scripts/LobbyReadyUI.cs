@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using FishNet;
 using Enums;
 using FastAndFractured;
@@ -27,8 +28,6 @@ namespace FastAndFractured.Multiplayer
         // like status labels rather than a button you can press.
         [SerializeField] private Color     _notReadyColor = new Color(0.90f, 0.50f, 0.10f, 1f); // orange (act)
         [SerializeField] private Color     _readyColor    = new Color(0.15f, 0.65f, 0.25f, 1f); // green  (set)
-        [SerializeField] private string    _notReadyLabel = "PRESS TO READY UP";
-        [SerializeField] private string    _readyLabel    = "READY  ·  CLICK TO CANCEL";
 
         [Header("Player List")]
         [SerializeField] private Transform  _playerListContainer;
@@ -125,6 +124,8 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.OnPlayerReadyChanged     += HandlePlayerReadyChanged;
             _lobbyManager.OnPlayerCharacterChanged += HandlePlayerCharacterChanged;
             _lobbyManager.OnPlayerNameChanged      += HandlePlayerNameChanged;
+            _lobbyManager.OnPlayerLevelChanged     += HandlePlayerLevelChanged;
+            MultiplayerSettings.Changed            += RefreshPlayerList;
             _lobbyManager.OnPlayerMapVoteChanged   += HandlePlayerMapVoteChanged;
             _lobbyManager.OnCountdownStarted       += HandleCountdownStarted;
             _lobbyManager.OnGameStarting           += HandleGameStarting;
@@ -186,6 +187,8 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.OnPlayerReadyChanged     -= HandlePlayerReadyChanged;
             _lobbyManager.OnPlayerCharacterChanged -= HandlePlayerCharacterChanged;
             _lobbyManager.OnPlayerNameChanged      -= HandlePlayerNameChanged;
+            _lobbyManager.OnPlayerLevelChanged     -= HandlePlayerLevelChanged;
+            MultiplayerSettings.Changed            -= RefreshPlayerList;
             _lobbyManager.OnPlayerMapVoteChanged   -= HandlePlayerMapVoteChanged;
             _lobbyManager.OnCountdownStarted       -= HandleCountdownStarted;
             _lobbyManager.OnGameStarting           -= HandleGameStarting;
@@ -254,7 +257,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_readyButton != null) _readyButton.interactable = !running;
             if (_forceStartButton != null) _forceStartButton.interactable = !running;
-            if (waiting && _readyButtonText != null) _readyButtonText.text = "MATCH IN PROGRESS";
+            if (waiting && _readyButtonText != null) _readyButtonText.text = LocalizationManager.Localize("MP.Room.InProgress");
             else if (!running) UpdateReadyButtonVisual();
 
             if (waiting && _matchBanner == null) _matchBanner = BuildMatchBanner();
@@ -286,7 +289,7 @@ namespace FastAndFractured.Multiplayer
             text.color = new Color(0.12f, 0.08f, 0.04f, 1f);
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
-            text.text = "MATCH IN PROGRESS  ·  you will play the next one";
+            text.text = LocalizationManager.Localize("MP.Room.InProgressNext");
 
             // Watch it meanwhile: loads the map for this client only, the match is unaffected.
             var watchGo = new GameObject("WatchButton", typeof(RectTransform));
@@ -312,7 +315,7 @@ namespace FastAndFractured.Multiplayer
             label.color = new Color(0.96f, 0.69f, 0.25f, 1f);
             label.alignment = TextAlignmentOptions.Center;
             label.raycastTarget = false;
-            label.text = "WATCH";
+            label.text = LocalizationManager.Localize("MP.Room.Watch");
             return go;
         }
 
@@ -349,7 +352,7 @@ namespace FastAndFractured.Multiplayer
         private void UpdateRoomName(string name)
         {
             if (_roomNameLabel != null)
-                _roomNameLabel.text = string.IsNullOrEmpty(name) ? "Room" : name;
+                _roomNameLabel.text = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
         }
 
         private void OnLocalCharacterChanged(string code) =>
@@ -386,6 +389,7 @@ namespace FastAndFractured.Multiplayer
         private void HandlePlayerReadyChanged(int clientId, bool isReady)    => RefreshPlayerList();
         private void HandlePlayerCharacterChanged(int clientId, string code) => RefreshPlayerList();
         private void HandlePlayerNameChanged(int clientId, string name)      => RefreshPlayerList();
+        private void HandlePlayerLevelChanged(int clientId, int level)       => RefreshPlayerList();
         private void HandlePlayerMapVoteChanged(int clientId, int mapId)     => RefreshPlayerList();
 
         private void HandleCountdownStarted(int seconds)
@@ -398,7 +402,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (_readyButton     != null) _readyButton.interactable     = false;
             if (_forceStartButton != null) _forceStartButton.interactable = false;
-            if (_countdownText   != null) _countdownText.text            = "STARTING!";
+            if (_countdownText   != null) _countdownText.text            = LocalizationManager.Localize("MP.Room.Starting");
         }
 
         private void HandleReadyStatesSync(FishNet.Object.Synchronizing.SyncDictionaryOperation op, int key, bool value, bool asServer)
@@ -432,14 +436,14 @@ namespace FastAndFractured.Multiplayer
         #region UI_UPDATES
         private void UpdateReadyButtonVisual()
         {
-            if (_readyButtonText  != null) _readyButtonText.text   = _isReady ? _readyLabel : _notReadyLabel;
+            if (_readyButtonText  != null) _readyButtonText.text   = _isReady ? LocalizationManager.Localize("MP.Room.ReadyButton") : LocalizationManager.Localize("MP.Room.NotReadyButton");
             if (_readyButtonImage != null) _readyButtonImage.color = _isReady ? _readyColor : _notReadyColor;
         }
 
         private void UpdateCountdownText(int seconds)
         {
             if (_countdownText == null) return;
-            _countdownText.text = seconds > 0 ? $"Starting in {seconds}..." : "GO!";
+            _countdownText.text = seconds > 0 ? LocalizationManager.Localize("MP.Room.StartingIn", seconds) : LocalizationManager.Localize("MP.Room.Go");
         }
 
 
@@ -491,7 +495,8 @@ namespace FastAndFractured.Multiplayer
                 var slot = entry.GetComponent<PlayerSlotUI>();
                 if (slot != null)
                 {
-                    slot.SetData(clientId, code, isReady, voteSprite, isLocal, displayName);
+                    slot.SetData(clientId, code, isReady, voteSprite, isLocal, displayName,
+                        MultiplayerSettings.ShowPlayerLevels ? _lobbyManager.GetPlayerLevel(clientId) : 0);
                     slot.SetInMatch(_lobbyManager.IsInMatch(clientId));
                     var btn = slot.GetSelectButton();
                     if (btn != null && isLocal)
@@ -540,7 +545,7 @@ namespace FastAndFractured.Multiplayer
                 else
                 {
                     var label = aiEntry.GetComponentInChildren<TMP_Text>();
-                    if (label != null) label.text = $"{aiName} [AI READY]";
+                    if (label != null) label.text = LocalizationManager.Localize("MP.Room.AiReady", aiName);
                 }
             }
 

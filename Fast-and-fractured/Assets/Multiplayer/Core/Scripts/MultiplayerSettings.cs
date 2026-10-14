@@ -14,6 +14,7 @@ namespace FastAndFractured.Multiplayer
         private const string KEY_NAME_DISTANCE = "MP_NameTagDistance";
         private const string KEY_NETWORK_STATS = "MP_ShowNetworkStats";
         private const string KEY_WILLING_HOST = "MP_WillingToHost";
+        private const string KEY_PLAYER_LEVELS = "MP_ShowPlayerLevels";
 
         public const float MIN_NAME_DISTANCE = 40f;
         public const float MAX_NAME_DISTANCE = 200f;
@@ -51,6 +52,13 @@ namespace FastAndFractured.Multiplayer
         {
             get => GetBool(KEY_NETWORK_STATS, true);
             set => SetBool(KEY_NETWORK_STATS, value);
+        }
+
+        /// <summary>Other players' progression level next to their name in the room.</summary>
+        public static bool ShowPlayerLevels
+        {
+            get => GetBool(KEY_PLAYER_LEVELS, true);
+            set => SetBool(KEY_PLAYER_LEVELS, value);
         }
 
         /// <summary>Take over the room when its host leaves (room migration). Off = others are picked first.</summary>

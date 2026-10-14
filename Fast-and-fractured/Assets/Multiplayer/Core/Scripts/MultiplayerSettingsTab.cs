@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -83,7 +84,7 @@ namespace FastAndFractured.Multiplayer
             _tab = tabGo.GetComponent<Button>();
             Silence(_tab.onClick);
             _tab.onClick.AddListener(Open);
-            SetLabel(tabGo.transform, "Multiplayer");
+            SetLabel(tabGo.transform, "MP.Menu.Multiplayer");
             foreach (var path in OtherTabs)
             {
                 var other = transform.Find(path);
@@ -102,16 +103,18 @@ namespace FastAndFractured.Multiplayer
             var separatorTemplate = panelTemplate.Find(SEPARATOR);
             for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
 
-            AddToggle(content, toggleTemplate, separatorTemplate, "Player names",
+            AddToggle(content, toggleTemplate, separatorTemplate, "Player names", "MP.Settings.PlayerNames",
                 () => MultiplayerSettings.ShowPlayerNames, v => MultiplayerSettings.ShowPlayerNames = v);
-            AddToggle(content, toggleTemplate, separatorTemplate, "Bot names",
+            AddToggle(content, toggleTemplate, separatorTemplate, "Bot names", "MP.Settings.BotNames",
                 () => MultiplayerSettings.ShowBotNames, v => MultiplayerSettings.ShowBotNames = v);
-            AddSlider(content, sliderTemplate, separatorTemplate, "Name distance",
+            AddToggle(content, toggleTemplate, separatorTemplate, "Player levels in the room", "MP.Settings.PlayerLevels",
+                () => MultiplayerSettings.ShowPlayerLevels, v => MultiplayerSettings.ShowPlayerLevels = v);
+            AddSlider(content, sliderTemplate, separatorTemplate, "Name distance", "MP.Settings.NameDistance",
                 MultiplayerSettings.MIN_NAME_DISTANCE, MultiplayerSettings.MAX_NAME_DISTANCE,
                 () => MultiplayerSettings.NameTagDistance, v => MultiplayerSettings.NameTagDistance = v);
-            AddToggle(content, toggleTemplate, separatorTemplate, "Connection panel (F3)",
+            AddToggle(content, toggleTemplate, separatorTemplate, "Connection panel (F3)", "MP.Settings.ConnectionPanel",
                 () => MultiplayerSettings.ShowNetworkStats, v => MultiplayerSettings.ShowNetworkStats = v);
-            AddToggle(content, toggleTemplate, separatorTemplate, "Host the room if the host leaves",
+            AddToggle(content, toggleTemplate, separatorTemplate, "Host the room if the host leaves", "MP.Settings.WillingToHost",
                 () => MultiplayerSettings.WillingToHost, v => MultiplayerSettings.WillingToHost = v);
 
             _panel.SetActive(false);
@@ -133,13 +136,15 @@ namespace FastAndFractured.Multiplayer
         }
 
         // -- Rows --------------------------------------------------------------------------
-        private static void AddToggle(Transform content, Transform template, Transform separator, string label,
+        /// <param name="rowName">English name of the row: also its tooltip key (SettingsTooltips).</param>
+        /// <param name="labelKey">Localization key of the label (Multiplayer sheet).</param>
+        private static void AddToggle(Transform content, Transform template, Transform separator, string rowName, string labelKey,
                                       System.Func<bool> get, UnityAction<bool> set)
         {
             if (template == null) return;
             var row = Instantiate(template.gameObject, content);
-            row.name = label;
-            SetLabel(row.transform, label);
+            row.name = rowName;
+            SetLabel(row.transform, labelKey);
             var toggle = row.GetComponentInChildren<Toggle>(true);
             if (toggle != null)
             {
@@ -150,13 +155,13 @@ namespace FastAndFractured.Multiplayer
             AddSeparator(content, separator);
         }
 
-        private static void AddSlider(Transform content, Transform template, Transform separator, string label,
+        private static void AddSlider(Transform content, Transform template, Transform separator, string rowName, string labelKey,
                                       float min, float max, System.Func<float> get, UnityAction<float> set)
         {
             if (template == null) return;
             var row = Instantiate(template.gameObject, content);
-            row.name = label;
-            SetLabel(row.transform, label);
+            row.name = rowName;
+            SetLabel(row.transform, labelKey);
             var slider = row.GetComponentInChildren<Slider>(true);
             if (slider != null)
             {
@@ -175,14 +180,15 @@ namespace FastAndFractured.Multiplayer
             if (template != null) Instantiate(template.gameObject, content).SetActive(true);
         }
 
-        /// <summary>The row / button text, without the localization that would overwrite it.</summary>
-        private static void SetLabel(Transform root, string text)
+        /// <summary>The row / button text: the copied LocalizedText now shows <paramref name="key"/>.</summary>
+        private static void SetLabel(Transform root, string key)
         {
             var label = root.GetComponentInChildren<TMP_Text>(true);
             if (label == null) return;
-            foreach (var behaviour in label.GetComponents<MonoBehaviour>())
-                if (behaviour.GetType().Name == "LocalizedText") Destroy(behaviour);
-            label.text = text;
+            var localized = label.GetComponent<LocalizedText>();
+            if (localized == null && label is TextMeshProUGUI) localized = label.gameObject.AddComponent<LocalizedText>();
+            if (localized != null) localized.LocalizationKey = key;
+            label.text = LocalizationManager.Localize(key);
         }
 
         /// <summary>Copied controls keep their original listeners (colour blind mode, minimap...): drop them.</summary>
