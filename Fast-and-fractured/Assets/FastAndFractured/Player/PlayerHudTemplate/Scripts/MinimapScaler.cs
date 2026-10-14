@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utilities.Managers.PauseSystem;
+using FastAndFractured;
 
 public class MinimapScaler : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class MinimapScaler : MonoBehaviour
 
     RectTransform rectTransform;
     InputAction toggleMinimapAction;
+    LevelControllerButBetter levelController;
+    bool inputEnabled;
     bool isExpanded;
     float baseScale = 1f;
 
@@ -47,8 +50,28 @@ public class MinimapScaler : MonoBehaviour
         if (toggleMinimapAction != null)
         {
             toggleMinimapAction.performed += OnToggleMinimapPerformed;
-            toggleMinimapAction.Enable();
         }
+
+        levelController = LevelControllerButBetter.Instance;
+        if (levelController != null)
+        {
+            levelController.charactersCustomStart.AddListener(OnCharactersCustomStart);
+
+            if (levelController.HasGameStarted)
+            {
+                OnCharactersCustomStart();
+            }
+        }
+        else
+        {
+            OnCharactersCustomStart();
+        }
+    }
+
+    private void OnCharactersCustomStart()
+    {
+        inputEnabled = true;
+        toggleMinimapAction?.Enable();
     }
 
     void OnDisable()
@@ -57,6 +80,12 @@ public class MinimapScaler : MonoBehaviour
         {
             toggleMinimapAction.performed -= OnToggleMinimapPerformed;
             toggleMinimapAction = null;
+        }
+
+        if (levelController != null)
+        {
+            levelController.charactersCustomStart.RemoveListener(OnCharactersCustomStart);
+            levelController = null;
         }
     }
 
@@ -70,6 +99,11 @@ public class MinimapScaler : MonoBehaviour
 
     void OnToggleMinimapPerformed(InputAction.CallbackContext context)
     {
+        if (!inputEnabled)
+        {
+            return;
+        }
+
         ToggleExpanded();
     }
 
