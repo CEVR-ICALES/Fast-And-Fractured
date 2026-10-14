@@ -64,6 +64,7 @@ namespace FastAndFractured
         [SerializeField] public List<GameObject> availablePlayer;
         public List<GameObject> InGameCharacters => _characterSpawner?.InGameCharacters ?? new List<GameObject>();
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
+        public bool HasGameStarted { get; private set; }
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -166,6 +167,7 @@ namespace FastAndFractured
             _gameLoopManager.InitializeSession(foundCharacters.Count, foundCharacters, _localPlayer, charactersCustomStart);
             _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
             _gameLoopManager.ActivateCharacterControls();
+            HasGameStarted = true;
         }
 
         private void StartLevelWithSpawnedCharacters()
@@ -230,6 +232,7 @@ namespace FastAndFractured
         private void OnGameStartDelayComplete()
         {
             _gameLoopManager.ActivateCharacterControls();
+            HasGameStarted = true;
 
             foreach (var character in InGameCharacters)
             {
