@@ -12,9 +12,11 @@ namespace FastAndFractured.Multiplayer
     /// a freeze tells us exactly which stage the main thread died in.
     ///
     /// Cost: one small file append per second plus one per stage marker — negligible.
+    /// Editor and development builds only: a release build must not write next to the game.
     /// </summary>
     public static class MpCanary
     {
+        private static readonly bool Enabled = Application.isEditor || Debug.isDebugBuild;
         private static string _path;
         private static bool _failed;
 
@@ -42,6 +44,7 @@ namespace FastAndFractured.Multiplayer
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
+            if (!Enabled) return;
             Mark($"=== play session start (unity {Application.unityVersion}) ===");
             var go = new GameObject("[MpCanary]");
             UnityEngine.Object.DontDestroyOnLoad(go);
@@ -57,7 +60,7 @@ namespace FastAndFractured.Multiplayer
 
         public static void Mark(string message)
         {
-            if (_failed) return;
+            if (_failed || !Enabled) return;
             try
             {
                 File.AppendAllText(PathToLog,

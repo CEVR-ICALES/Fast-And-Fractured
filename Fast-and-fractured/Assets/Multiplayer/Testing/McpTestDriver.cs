@@ -1,3 +1,5 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+// Test tooling (driven from the editor through MCP): never in a release build.
 using System.Collections;
 using System.Linq;
 using System.Text;
@@ -170,3 +172,4 @@ namespace FastAndFractured.Multiplayer.Testing
         }
     }
 }
+#endif
