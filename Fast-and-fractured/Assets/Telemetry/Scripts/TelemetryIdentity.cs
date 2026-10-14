@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 #if STEAMWORKS_NET
-using FastAndFractured.Multiplayer;
+using FastAndFractured.Platform;
 using Steamworks;
 #endif
 

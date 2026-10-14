@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using FastAndFractured.Multiplayer.Progression;
+using FastAndFractured.Progression;
 using UnityEngine;
 
 namespace FastAndFractured.GameTelemetry

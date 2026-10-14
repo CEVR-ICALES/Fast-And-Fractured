@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using FastAndFractured.Multiplayer;
-using FastAndFractured.Multiplayer.Progression;
+using FastAndFractured.Progression;
 using FishNet;
 using UnityEngine;
 using UnityEngine.SceneManagement;
