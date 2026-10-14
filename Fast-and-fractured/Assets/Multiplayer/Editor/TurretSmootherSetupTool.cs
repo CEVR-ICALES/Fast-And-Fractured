@@ -15,19 +15,13 @@ namespace FastAndFractured.Multiplayer.Editor
     /// </summary>
     public static class TurretSmootherSetupTool
     {
-        private static readonly string[] CarPrefabPaths =
-        {
-            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedPepeGameplayCar Variant.prefab",
-            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedJosefinoGameplayCar Variant.prefab",
-            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedCarmeGameplayCar Variant.prefab",
-            "Assets/Multiplayer/Vehicles/Prefabs/NetworkedMariaAntoniaGameplayCar Variant.prefab",
-        };
+        private static System.Collections.Generic.List<string> CarPrefabPaths => NetworkedCarFixes.FindCarPrefabPaths();
 
-        [MenuItem("Tools/Fast And Fractured/Turret Smoother - Setup (Headless)")]
         public static void Run()
         {
             int changed = 0;
-            foreach (string path in CarPrefabPaths)
+            var carPrefabPaths = CarPrefabPaths;
+            foreach (string path in carPrefabPaths)
             {
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
                 if (root == null)
@@ -83,7 +77,7 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             AssetDatabase.SaveAssets();
-            Debug.Log($"[TurretSmootherSetupTool] Done. {changed}/{CarPrefabPaths.Length} prefabs updated.");
+            Debug.Log($"[TurretSmootherSetupTool] Done. {changed}/{carPrefabPaths.Count} prefabs updated.");
         }
 
         /// <summary>

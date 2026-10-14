@@ -1,20 +1,17 @@
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using FishNet.Managing;
 using FastAndFractured.Multiplayer.Testing.Editor;
+using FastAndFractured.EditorTools;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// Unified entrypoint for multiplayer editor workflows.
-    /// Keeps old tools available, but centralizes common flows in one place.
+    /// Unified entrypoint for multiplayer editor workflows: the pipeline tools (maps, cars,
+    /// bullets, AI, lobby, menu), diagnostics and the network stress simulation.
     /// </summary>
     public class MultiplayerToolsHub : EditorWindow
     {
-        private const string MultiplayerScenePath = "Assets/Multiplayer/Testing/Scenes/MultiplayerRoomTest.unity";
-
         private enum StressPreset
         {
             Disabled,
@@ -28,13 +25,12 @@ namespace FastAndFractured.Multiplayer.Editor
         private long _latencyMs;
         private double _packetLoss;
         private double _outOfOrder;
-        private bool _autoLoadScene = true;
 
         [MenuItem("Tools/Fast And Fractured/Multiplayer Tools Hub", priority = 0)]
         public static void ShowWindow()
         {
             var window = GetWindow<MultiplayerToolsHub>("MP Tools Hub");
-            window.minSize = new Vector2(480f, 520f);
+            window.minSize = new Vector2(480f, 420f);
             window.Show();
         }
 
@@ -45,38 +41,11 @@ namespace FastAndFractured.Multiplayer.Editor
 
         private void OnGUI()
         {
-            DrawSceneSection();
-            EditorGUILayout.Space(8f);
             DrawSetupSection();
             EditorGUILayout.Space(8f);
             DrawValidationAndTestingSection();
             EditorGUILayout.Space(8f);
             DrawStressSection();
-        }
-
-        private void DrawSceneSection()
-        {
-            EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                Scene current = SceneManager.GetActiveScene();
-                bool inMultiplayerScene = current.path == MultiplayerScenePath;
-                EditorGUILayout.LabelField("Active Scene", string.IsNullOrEmpty(current.path) ? current.name : current.path);
-                EditorGUILayout.LabelField("MultiplayerRoomTest Loaded", inMultiplayerScene ? "Yes" : "No");
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Open MultiplayerRoomTest", GUILayout.Height(24f)))
-                    {
-                        OpenMultiplayerScene();
-                    }
-
-                    if (GUILayout.Button("Save Scene", GUILayout.Height(24f)))
-                    {
-                        EditorSceneManager.SaveOpenScenes();
-                    }
-                }
-            }
         }
 
         private void DrawSetupSection()
@@ -116,28 +85,9 @@ namespace FastAndFractured.Multiplayer.Editor
                         NetworkedAISetupTool.ShowWindow();
                     }
 
-                    if (GUILayout.Button("Ability Variants", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Main Menu: Singleplayer / Multiplayer", GUILayout.Height(28f)))
                     {
-                        CreateAbilityVariants.CreateVariants();
-                    }
-                }
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Setup Scene Wrappers", GUILayout.Height(28f)))
-                    {
-                        if (TryEnsureMultiplayerSceneLoaded())
-                        {
-                            global::SetupMultiplayerWrappers.ShowWindow();
-                        }
-                    }
-
-                    if (GUILayout.Button("Setup Pool Manager", GUILayout.Height(28f)))
-                    {
-                        if (TryEnsureMultiplayerSceneLoaded())
-                        {
-                            global::SetupMultiplayerPoolManager.ShowWindow();
-                        }
+                        MainMenuPlayModesTool.Apply();
                     }
                 }
 
@@ -165,44 +115,15 @@ namespace FastAndFractured.Multiplayer.Editor
                         MultiplayerSceneValidator.ShowWindow();
                     }
 
-                    if (GUILayout.Button("Verify Pool Manager", GUILayout.Height(28f)))
-                    {
-                        global::VerifyPoolManagerSetup.ShowWindow();
-                    }
-                }
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Distributed Test Setup", GUILayout.Height(28f)))
-                    {
-                        DistributedTestSetupWindow.ShowWindow();
-                    }
-
-                    if (GUILayout.Button("Automated Test Setup", GUILayout.Height(28f)))
-                    {
-                        global::AutomatedMultiplayerTestSetup.ShowWindow();
-                    }
-                }
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Configure Auto-Connect", GUILayout.Height(28f)))
-                    {
-                        global::ConfigureAutoConnect.ShowWindow();
-                    }
-
-                    if (GUILayout.Button("Clean MP Scene", GUILayout.Height(28f)))
-                    {
-                        global::CleanMultiplayerScene.ShowWindow();
-                    }
-                }
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
                     if (GUILayout.Button("Multiplayer Log Filter", GUILayout.Height(28f)))
                     {
                         MultiplayerLogFilterWindow.ShowWindow();
                     }
+                }
+
+                if (GUILayout.Button("Distributed Test Setup", GUILayout.Height(28f)))
+                {
+                    DistributedTestSetupWindow.ShowWindow();
                 }
             }
         }
@@ -221,7 +142,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 _latencyMs = EditorGUILayout.LongField("Latency (ms)", _latencyMs);
                 _packetLoss = EditorGUILayout.Slider("Packet Loss", (float)_packetLoss, 0f, 1f);
                 _outOfOrder = EditorGUILayout.Slider("Out Of Order", (float)_outOfOrder, 0f, 1f);
-                _autoLoadScene = EditorGUILayout.Toggle("Auto-open MP Scene", _autoLoadScene);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -273,18 +193,10 @@ namespace FastAndFractured.Multiplayer.Editor
         private void ApplyRuntimeStressSettings(bool enable)
         {
             NetworkManager manager = FindFirstObjectByType<NetworkManager>();
-            if (manager == null)
-            {
-                if (_autoLoadScene && TryEnsureMultiplayerSceneLoaded())
-                {
-                    manager = FindFirstObjectByType<NetworkManager>();
-                }
-            }
-
             if (manager == null || manager.TransportManager == null)
             {
                 EditorUtility.DisplayDialog("NetworkManager Missing",
-                    "Could not find an active NetworkManager with TransportManager in the current scene.",
+                    "Could not find an active NetworkManager with TransportManager (enter Play mode first).",
                     "OK");
                 return;
             }
@@ -311,38 +223,6 @@ namespace FastAndFractured.Multiplayer.Editor
             _preset = StressPreset.Disabled;
             ApplyPresetValues(_preset);
             ApplyRuntimeStressSettings(enable: false);
-        }
-
-        private bool TryEnsureMultiplayerSceneLoaded()
-        {
-            if (SceneManager.GetActiveScene().path == MultiplayerScenePath)
-            {
-                return true;
-            }
-
-            if (!_autoLoadScene)
-            {
-                return false;
-            }
-
-            return OpenMultiplayerScene();
-        }
-
-        private bool OpenMultiplayerScene()
-        {
-            if (!System.IO.File.Exists(MultiplayerScenePath))
-            {
-                EditorUtility.DisplayDialog("Scene Not Found", $"Missing scene:\n{MultiplayerScenePath}", "OK");
-                return false;
-            }
-
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-            {
-                return false;
-            }
-
-            EditorSceneManager.OpenScene(MultiplayerScenePath, OpenSceneMode.Single);
-            return true;
         }
     }
 }

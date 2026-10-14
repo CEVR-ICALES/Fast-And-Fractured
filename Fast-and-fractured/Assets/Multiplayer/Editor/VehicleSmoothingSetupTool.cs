@@ -41,12 +41,10 @@ namespace FastAndFractured.Multiplayer.Editor
         /// </summary>
         private const RigidbodyInterpolation INTERPOLATION = RigidbodyInterpolation.None;
 
-        private const string CarFolder = "Assets/Multiplayer";
 
-        [MenuItem("Tools/Fast And Fractured/Vehicle Smoothing - Unify (Headless)")]
         public static void Run()
         {
-            List<string> paths = FindCarPrefabPaths();
+            List<string> paths = NetworkedCarFixes.FindCarPrefabPaths();
             if (paths.Count == 0)
             {
                 Debug.LogError("[VehicleSmoothingSetupTool] No networked car prefabs found.");
@@ -137,19 +135,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             return dirty;
-        }
-
-        private static List<string> FindCarPrefabPaths()
-        {
-            var paths = new List<string>();
-            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { CarFolder }))
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (prefab != null && prefab.GetComponent<NetworkedVehicle>() != null)
-                    paths.Add(path);
-            }
-            return paths;
         }
 
         private static bool ApplyInterpolation(GameObject root, string path)

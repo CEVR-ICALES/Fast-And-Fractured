@@ -9,6 +9,7 @@ using FishNet;
 using FishNet.Connection;
 using FishNet.Transporting;
 using Steamworks;
+using FastAndFractured.Platform;
 using UnityEngine;
 
 namespace FastAndFractured.Multiplayer.Abstractions.Steam

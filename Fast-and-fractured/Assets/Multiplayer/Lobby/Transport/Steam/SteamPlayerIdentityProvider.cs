@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Steamworks;
+using FastAndFractured.Platform;
 using UnityEngine;
 
 namespace FastAndFractured.Multiplayer.Abstractions.Steam

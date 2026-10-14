@@ -82,6 +82,13 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 DrawBatchGUI();
             }
+
+            EditorGUILayout.Space(10);
+            EditorGUILayout.HelpBox("Car fixes (rigidbody adapter, smoother targets, turret smoother, motion smoothing) run on every networked car after creating or updating one. Run them again here after editing a car by hand.", MessageType.None);
+            if (GUILayout.Button("Apply Car Fixes To All Networked Cars", GUILayout.Height(28)))
+            {
+                NetworkedCarFixes.ApplyToAllCars();
+            }
         }
 
         private void DrawCreateVariantGUI()
@@ -272,6 +279,7 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 DestroyImmediate(instance);
             }
+            NetworkedCarFixes.ApplyToAllCars();
         }
 
         private void UpdateExistingPrefab()
@@ -307,6 +315,7 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 PrefabUtility.UnloadPrefabContents(contents);
             }
+            NetworkedCarFixes.ApplyToAllCars();
         }
 
         private void GenerateBatchFromCharacterData()
@@ -421,6 +430,7 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             AssetDatabase.Refresh();
+            NetworkedCarFixes.ApplyToAllCars();
 
             string summary =
                 $"Created: {created}\n" +

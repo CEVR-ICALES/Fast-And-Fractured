@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Enums;
-using FastAndFractured.Multiplayer.Progression;
+using FastAndFractured.Progression;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Events;
@@ -11,7 +11,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace FastAndFractured.Multiplayer.Editor
+namespace FastAndFractured.EditorTools
 {
     /// <summary>
     /// Restructures the main menu scene (open it first) - and can put it back:

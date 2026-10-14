@@ -26,15 +26,13 @@ namespace FastAndFractured.Multiplayer.Editor
     /// </summary>
     public static class VehicleTickSmootherTargetSetupTool
     {
-        private const string CarFolder = "Assets/Multiplayer";
         private const string TargetProperty = "_initializationSettings.TargetTransform";
         private static readonly string[] NetworkObjectProperties = { "_addedNetworkObject", "_networkObjectCache" };
 
-        [MenuItem("Tools/Fast And Fractured/Vehicle Setup - Tick Smoother Targets (Headless)")]
         public static void Run()
         {
             int changed = 0, checkedCount = 0;
-            foreach (string path in FindCarPrefabPaths())
+            foreach (string path in NetworkedCarFixes.FindCarPrefabPaths())
             {
                 checkedCount++;
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
@@ -94,19 +92,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
             return fixedCount;
-        }
-
-        private static List<string> FindCarPrefabPaths()
-        {
-            var paths = new List<string>();
-            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { CarFolder }))
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (prefab != null && prefab.GetComponent<NetworkedVehicle>() != null)
-                    paths.Add(path);
-            }
-            return paths;
         }
     }
 }

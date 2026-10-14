@@ -241,7 +241,6 @@ namespace FastAndFractured.Multiplayer
             DisableRemoteCanvases();
             DisableRemotePlayerHUDs();
             DisableRemotePlayerCameraRigs();
-            HideDebugCharacterSelectorDropdowns();
             InitializeLocalPlayerHUD();
             
             // Ensure TimerSystem has a runner
@@ -413,10 +412,6 @@ namespace FastAndFractured.Multiplayer
             AssignScreenShakeChannels(_levelController.InGameCharacters);
             CarNameplate.AttachAll(_levelController.InGameCharacters);
             ApplyLocalAccessories(_levelController.InGameCharacters);
-            // The debug character dropdown floated over the host's car ("Josefino"): only the
-            // client path hid it.
-            HideDebugCharacterSelectorDropdowns();
-
         }
 
         /// <summary>
@@ -504,7 +499,6 @@ namespace FastAndFractured.Multiplayer
 
         private void OnCharactersCustomStartGuard()
         {
-            HideDebugCharacterSelectorDropdowns();   // the start re-enables it
             // ActivateCharacterControls re-enabled every Controller, remote ones included.
             DisableRemoteStateMachines();
             
@@ -575,31 +569,6 @@ namespace FastAndFractured.Multiplayer
                 {
                     c.enabled = false;
                 }
-            }
-        }
-
-        /// <summary>
-        /// BUG-4 fix (2026-09-16): a stray "Josefino" TMP dropdown floats in the game view during
-        /// every match. Root cause found live: DebugCharacterSelector's "Dropdown" GameObject ships
-        /// active on the networked player prefab and is never hidden once character selection is
-        /// done - confirmed by inspecting a live match, where the LOCAL player's own Dropdown was
-        /// active=true under an ENABLED canvas (DisableRemoteCanvases correctly leaves the local
-        /// player's own canvas alone, since that canvas is the real HUD - this dropdown just rides
-        /// along inside it). Unlike the HUD/camera/canvas passes above, this has nothing to do with
-        /// ownership: DebugCharacterSelector's job (send a character choice to the server) is done
-        /// well before this init runs (character selection happens in the lobby, this runs after
-        /// spawn), so it is safe to hide for every player, not just remote ones. Deactivating the
-        /// GameObject only stops it from rendering/receiving UI input - AutoCharacterSelector or
-        /// DistributedTestSystem calling its public methods directly (not via a click) still works,
-        /// since those are plain C# calls, unaffected by the GameObject being inactive.
-        /// </summary>
-        private void HideDebugCharacterSelectorDropdowns()
-        {
-            var selectors = FindObjectsByType<DebugCharacterSelector>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var selector in selectors)
-            {
-                if (selector != null && selector.gameObject.activeSelf)
-                    selector.gameObject.SetActive(false);
             }
         }
 
