@@ -43,6 +43,8 @@ namespace Utilities.Managers.PauseSystem
         {
             if (_isGamePaused) return;  
 
+            if (MinimapScaler.TryCollapseExpanded()) return;
+
             _isGamePaused = true;
             //Time.timeScale = 0f;
             MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.PAUSE, -1);

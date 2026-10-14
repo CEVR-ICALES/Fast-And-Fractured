@@ -70,6 +70,7 @@ namespace FastAndFractured
         public float? StormSecondsLeft => _gameLoopManager?.StormSecondsLeft;
         // Exposed for the multiplayer wrapper, which reads the debug flag off the real controller.
         public bool DebugMode { get => debugMode; set => debugMode = value; }
+        public bool HasGameStarted { get; private set; }
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -264,6 +265,7 @@ namespace FastAndFractured
         private void OnGameStartDelayComplete()
         {
             _gameLoopManager.ActivateCharacterControls();
+            HasGameStarted = true;
 
             foreach (var character in InGameCharacters)
             {
