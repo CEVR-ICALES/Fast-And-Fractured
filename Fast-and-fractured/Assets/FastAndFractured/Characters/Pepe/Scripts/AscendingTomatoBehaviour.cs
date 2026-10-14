@@ -43,7 +43,7 @@ namespace FastAndFractured
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            PauseManager.TryUnregisterPausable(this);   // never creates a PauseManager while the scene closes
         }
 
         public void StartTimer()
