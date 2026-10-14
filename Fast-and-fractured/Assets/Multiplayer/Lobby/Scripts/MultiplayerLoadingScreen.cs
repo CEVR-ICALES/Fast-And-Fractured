@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections;
 using System.Reflection;
 using FishNet;
@@ -198,7 +199,7 @@ namespace FastAndFractured.Multiplayer
 
             var label = new GameObject("Label").AddComponent<TextMeshProUGUI>();
             label.transform.SetParent(canvasGO.transform, false);
-            label.text = "CARGANDO MAPA…";
+            label.text = LocalizationManager.Localize("MP.Loading.Map");
             label.fontSize = 52;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(1f, 0.9f, 0.5f, 1f);

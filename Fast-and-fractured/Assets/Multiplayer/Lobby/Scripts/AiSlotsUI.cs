@@ -4,6 +4,7 @@
 //   - Wire _decButton   (Button, −)
 //   - Wire _incButton   (Button, +)
 //   - Panel is shown to all but buttons are only interactable for the host.
+using Assets.SimpleLocalization.Scripts;
 using FastAndFractured.Multiplayer.Abstractions;
 using FishNet;
 using TMPro;
@@ -76,7 +77,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             bool isHost = InstanceFinder.IsServerStarted;
 
             if (_countLabel != null)
-                _countLabel.text = $"AI: {_lobby.AiSlotCount.Value}  |  Total: {_lobby.TotalSlotCount}/{NetworkedLobbyManager.MAX_PLAYERS}";
+                _countLabel.text = LocalizationManager.Localize("MP.Room.AiCount", _lobby.AiSlotCount.Value, _lobby.TotalSlotCount, NetworkedLobbyManager.MAX_PLAYERS);
 
             if (_decButton != null) _decButton.interactable = isHost && _lobby.AiSlotCount.Value > 0;
             if (_incButton != null) _incButton.interactable = isHost && _lobby.FreeSlotCount > 0;

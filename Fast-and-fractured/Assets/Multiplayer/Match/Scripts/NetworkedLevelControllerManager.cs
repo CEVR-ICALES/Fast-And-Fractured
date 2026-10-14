@@ -1,4 +1,5 @@
 
+using Assets.SimpleLocalization.Scripts;
 using FastAndFractured;
 using FastAndFractured.Multiplayer;
 using FastAndFractured.Multiplayer.Abstractions;
@@ -1596,7 +1597,7 @@ namespace FastAndFractured.Multiplayer
             // Show kill feed message
             if (HUDManager.HasInstance)
             {
-                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, $"{victimName} disconnected");
+                HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, LocalizationManager.Localize("MP.Feed.Disconnected", victimName));
             }
 
             // Notify spectator to refresh targets if the disconnected character was being spectated.

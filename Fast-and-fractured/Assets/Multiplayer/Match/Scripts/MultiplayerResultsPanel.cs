@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using Enums;
 using TMPro;
 using UnityEngine;
@@ -91,7 +92,7 @@ namespace FastAndFractured.Multiplayer
             var row = NewRow(transform, "Placement", 118f, null);
             var place = Text(row, $"#{mine.Placement}", _displayFont, 104f, mine.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft);
             Fit(place, 190f);
-            Text(row, $"<size=80%><color=#FFFFFFB0>of {total} racers</color></size>\n{Headline(mine)}", _bodyFont, 32f, Color.white, TextAlignmentOptions.MidlineLeft);
+            Text(row, $"<size=80%><color=#FFFFFFB0>{LocalizationManager.Localize("MP.Results.OfRacers", total)}</color></size>\n{Headline(mine)}", _bodyFont, 32f, Color.white, TextAlignmentOptions.MidlineLeft);
             BuildXpLine();
         }
 
@@ -105,9 +106,9 @@ namespace FastAndFractured.Multiplayer
 
         private static string Headline(MatchResultEntry mine)
         {
-            if (mine.Placement == 1) return "Winner!";
-            if (!string.IsNullOrEmpty(mine.EliminatedBy)) return $"Eliminated by <color=#FFC759>{mine.EliminatedBy}</color>";
-            return mine.Survived ? "Still racing" : "Eliminated";
+            if (mine.Placement == 1) return LocalizationManager.Localize("MP.Results.Winner");
+            if (!string.IsNullOrEmpty(mine.EliminatedBy)) return LocalizationManager.Localize("MP.Results.EliminatedByColored", mine.EliminatedBy);
+            return mine.Survived ? LocalizationManager.Localize("MP.Results.StillRacing") : LocalizationManager.Localize("MP.Results.Eliminated");
         }
 
         private void BuildTableHeader()
@@ -115,9 +116,9 @@ namespace FastAndFractured.Multiplayer
             var row = NewRow(transform, "Header", 40f, null);
             Fit(Text(row, "#", _displayFont, 26f, Muted, TextAlignmentOptions.MidlineLeft), 56f);
             Fit(Text(row, "", _bodyFont, 22f, Muted, TextAlignmentOptions.Midline), 52f);
-            Text(row, "Player", _displayFont, 26f, Muted, TextAlignmentOptions.MidlineLeft);
-            Fit(Text(row, "Kills", _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 90f);
-            Fit(Text(row, "Damage", _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 130f);
+            Text(row, LocalizationManager.Localize("MP.Results.Player"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineLeft);
+            Fit(Text(row, LocalizationManager.Localize("MP.Results.Kills"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 90f);
+            Fit(Text(row, LocalizationManager.Localize("MP.Results.Damage"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 130f);
         }
 
         private void BuildRow(MatchResultEntry entry, bool isLocal)
@@ -127,9 +128,9 @@ namespace FastAndFractured.Multiplayer
             Fit(Icon(row, entry.CharacterCode, entry.Survived), 52f);
 
             string sub = entry.Survived
-                ? (entry.Placement == 1 ? "Winner" : "Survived")
-                : string.IsNullOrEmpty(entry.EliminatedBy) ? "Eliminated" : $"Eliminated by {entry.EliminatedBy}";
-            string name = entry.DisplayName + (isLocal ? " <color=#FFC759>(you)</color>" : string.Empty);
+                ? (entry.Placement == 1 ? LocalizationManager.Localize("MP.Results.WinnerShort") : LocalizationManager.Localize("MP.Results.Survived"))
+                : string.IsNullOrEmpty(entry.EliminatedBy) ? LocalizationManager.Localize("MP.Results.Eliminated") : LocalizationManager.Localize("MP.Results.EliminatedBy", entry.EliminatedBy);
+            string name = entry.DisplayName + (isLocal ? $" <color=#FFC759>{LocalizationManager.Localize("MP.Results.You")}</color>" : string.Empty);
             Text(row, $"{name}\n<size=72%><color=#FFFFFFB0>{MatchResults.CharacterName(entry.CharacterCode)} · {sub}</color></size>",
                 _bodyFont, 24f, Color.white, TextAlignmentOptions.MidlineLeft);
             Fit(Text(row, entry.Kills.ToString(), _bodyFont, 26f, Color.white, TextAlignmentOptions.MidlineRight), 90f);

@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -37,6 +38,17 @@ namespace FastAndFractured.Progression
             var image = rect.gameObject.AddComponent<Image>();
             image.color = color;
             return image;
+        }
+
+        /// <summary>Shows a localization key on the text (or on a button's label) and follows language changes.</summary>
+        public static T Localized<T>(T target, string key) where T : Component
+        {
+            var text = target as TextMeshProUGUI ?? target.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (text == null) return target;
+            var localized = text.GetComponent<LocalizedText>() ?? text.gameObject.AddComponent<LocalizedText>();
+            localized.LocalizationKey = key;
+            text.text = LocalizationManager.Localize(key);
+            return target;
         }
 
         public static TextMeshProUGUI Text(Transform parent, string text, float size, Color color,

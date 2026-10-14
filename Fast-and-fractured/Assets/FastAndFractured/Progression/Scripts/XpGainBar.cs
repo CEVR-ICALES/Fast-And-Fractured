@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -48,7 +49,7 @@ namespace FastAndFractured.Progression
             column.childForceExpandHeight = false;
 
             var top = Row(transform, 40f);
-            _gain = Label(top, $"+{_award.Xp} XP", font, 32f, Gain, TextAlignmentOptions.MidlineLeft);
+            _gain = Label(top, LocalizationManager.Localize("MP.Progress.XpGain", _award.Xp), font, 32f, Gain, TextAlignmentOptions.MidlineLeft);
             _level = Label(top, "", font, 28f, Color.white, TextAlignmentOptions.MidlineRight);
 
             var back = new GameObject("Bar", typeof(RectTransform), typeof(Image));
@@ -83,7 +84,7 @@ namespace FastAndFractured.Progression
         private IEnumerator Animate()
         {
             Show(_award.TotalBefore);
-            _gain.text = "+0 XP";
+            _gain.text = LocalizationManager.Localize("MP.Progress.XpGain", 0);
             for (float t = 0f; t < START_DELAY; t += Time.unscaledDeltaTime) yield return null;
 
             int shownLevel = ProgressionMath.LevelForTotalXp(_award.TotalBefore);
@@ -96,7 +97,7 @@ namespace FastAndFractured.Progression
                 {
                     // The bar reaches the end, says so, and starts again from empty.
                     Fill(1f);
-                    _level.text = "<color=#FFC759>LEVEL UP!</color>";
+                    _level.text = $"<color=#FFC759>{LocalizationManager.Localize("MP.Progress.LevelUp")}</color>";
                     StartCoroutine(Pulse(_level.transform));
                     for (float p = 0f; p < LEVEL_UP_PAUSE; p += Time.unscaledDeltaTime) yield return null;
                     t += LEVEL_UP_PAUSE * 0.5f;   // the pause eats a little of the fill, not all
@@ -104,15 +105,15 @@ namespace FastAndFractured.Progression
                     _leveledUp = true;
                 }
                 Show(total);
-                _gain.text = $"+{total - _award.TotalBefore} XP";
+                _gain.text = LocalizationManager.Localize("MP.Progress.XpGain", total - _award.TotalBefore);
                 yield return null;
             }
             Show(_award.TotalAfter);
-            _gain.text = $"+{_award.Xp} XP";
+            _gain.text = LocalizationManager.Localize("MP.Progress.XpGain", _award.Xp);
 
             if (_award.NewRewards != null && _award.NewRewards.Count > 0)
             {
-                _unlocked.text = "Unlocked: " + string.Join(", ", _award.NewRewards.ConvertAll(r => r.displayName));
+                _unlocked.text = LocalizationManager.Localize("MP.Progress.UnlockedList", string.Join(", ", _award.NewRewards.ConvertAll(r => r.displayName)));
                 _unlocked.gameObject.SetActive(true);
                 StartCoroutine(Pulse(_unlocked.transform));
             }
@@ -126,8 +127,8 @@ namespace FastAndFractured.Progression
             int needed = ProgressionMath.XpToNextLevel(level);
             Fill(max ? 1f : into / (float)needed);
 
-            _level.text = _leveledUp ? $"<color=#FFC759>LEVEL {level}</color>" : $"LEVEL {level}";
-            _numbers.text = max ? "Max level" : $"{into} / {needed} XP";
+            _level.text = _leveledUp ? $"<color=#FFC759>{LocalizationManager.Localize("MP.Progress.Level", level)}</color>" : LocalizationManager.Localize("MP.Progress.Level", level);
+            _numbers.text = max ? LocalizationManager.Localize("MP.Progress.MaxLevel") : LocalizationManager.Localize("MP.Progress.Xp", into, needed);
             _next.text = NextRewardText(total);
         }
 
@@ -137,9 +138,9 @@ namespace FastAndFractured.Progression
         public static string NextRewardText(int totalXp)
         {
             var reward = NextReward(ProgressionRewards.Load().rewards, ProgressionMath.LevelForTotalXp(totalXp));
-            if (reward == null) return "Every reward unlocked";
+            if (reward == null) return LocalizationManager.Localize("MP.Progress.AllUnlocked");
             int toGo = Mathf.Max(0, ProgressionMath.TotalXpForLevel(reward.level) - totalXp);
-            return $"Next: {reward.displayName} (level {reward.level}) · {toGo} XP to go";
+            return LocalizationManager.Localize("MP.Progress.NextReward", reward.displayName, reward.level, toGo);
         }
 
         /// <summary>The first reward above <paramref name="level"/>, or null when none is left.</summary>

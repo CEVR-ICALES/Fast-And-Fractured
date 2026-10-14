@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using FishNet;
 using FishNet.Transporting;
 using UnityEngine;
@@ -118,8 +119,8 @@ namespace FastAndFractured.Multiplayer
                              " Returning to multiplayer hub.");
 
             ConnectionLostNotifier.Show(wasInMatch
-                ? "Host disconnected — match ended."
-                : "Connection lost — returning to the multiplayer hub.");
+                ? LocalizationManager.Localize("MP.HostDisconnected")
+                : LocalizationManager.Localize("MP.ConnectionLost"));
 
             // TransitionBetweenScreens is a UI-only transition within the menu scene; if we're
             // sitting in a map scene (active match), it cannot move us out — the player just

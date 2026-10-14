@@ -5,6 +5,7 @@
 //   - Wire _refreshButton   (Button)
 //   - Wire _backButton      (Button)
 //   - Wire _statusLabel     (TMP_Text, "Searching..." / "No rooms found")
+using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -48,7 +49,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
             ClearEntries();
-            SetStatus("Searching...");
+            SetStatus(LocalizationManager.Localize("MP.Browser.Searching"));
             SetRefreshInteractable(false);
 
             try
@@ -66,11 +67,11 @@ namespace FastAndFractured.Multiplayer.Lobby
 
                 if (listings.Count == 0 && !haveOwn)
                 {
-                    SetStatus("No rooms found.");
+                    SetStatus(LocalizationManager.Localize("MP.Browser.NoRooms"));
                 }
                 else
                 {
-                    SetStatus(haveOwn ? "You are hosting · others see this room over LAN." : string.Empty);
+                    SetStatus(haveOwn ? LocalizationManager.Localize("MP.Browser.Hosting") : string.Empty);
 
                     if (haveOwn) AddEntry(ownListing, own: true);
 
@@ -86,7 +87,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 }
             }
             catch (OperationCanceledException) { }
-            catch { SetStatus("Search failed."); }
+            catch { SetStatus(LocalizationManager.Localize("MP.Browser.Failed")); }
             finally { SetRefreshInteractable(true); }
         }
 
@@ -107,7 +108,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             return new LobbyListing
             {
                 Handle         = LobbyHandle.FromAddress("127.0.0.1", port),
-                RoomName       = "★ Your Room (hosting)",
+                RoomName       = LocalizationManager.Localize("MP.Browser.YourRoom"),
                 CurrentPlayers = currentPlayers,
                 MaxPlayers     = 8,
                 PingMs         = 0,
@@ -165,7 +166,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_joining) return;
             _joining = true;
             SetRefreshInteractable(false);
-            SetStatus("Connecting...");
+            SetStatus(LocalizationManager.Localize("MP.Connecting"));
 
             _cts?.Cancel();
             _cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -175,10 +176,10 @@ namespace FastAndFractured.Multiplayer.Lobby
                 if (ok)
                     MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, _fadeDuration);
                 else
-                    SetStatus("Connection refused.");
+                    SetStatus(LocalizationManager.Localize("MP.ConnectionRefused"));
             }
-            catch (OperationCanceledException) { SetStatus("Timed out."); }
-            catch (Exception ex)               { SetStatus($"Error: {ex.Message}"); }
+            catch (OperationCanceledException) { SetStatus(LocalizationManager.Localize("MP.TimedOut")); }
+            catch (Exception ex)               { SetStatus(LocalizationManager.Localize("MP.Error", ex.Message)); }
             finally
             {
                 _joining = false;

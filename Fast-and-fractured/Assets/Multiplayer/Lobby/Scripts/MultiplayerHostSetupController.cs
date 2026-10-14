@@ -7,6 +7,7 @@
 //   - Wire _statusLabel    (TMP_Text, shows errors)
 //
 // AI slot count is configured from the lobby ready screen (AiSlotsUI), not here.
+using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Threading;
 using Enums;
@@ -49,7 +50,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             ushort port = 7777;
             if (_portInput != null && !ushort.TryParse(_portInput.text, out port))
             {
-                SetStatus("Invalid port.");
+                SetStatus(LocalizationManager.Localize("MP.HostSetup.InvalidPort"));
                 SetInteractable(true);
                 _busy = false;
                 return;
@@ -59,7 +60,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             {
                 RoomName      = _roomNameInput != null && !string.IsNullOrWhiteSpace(_roomNameInput.text)
                                     ? _roomNameInput.text.Trim()
-                                    : $"{Environment.UserName}'s Room",
+                                    : LocalizationManager.Localize("MP.HostSetup.DefaultRoom", Environment.UserName),
                 Port          = port,
                 InitialAiSlots = 0,
                 IsPublic      = true,
@@ -78,12 +79,12 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
             catch (OperationCanceledException)
             {
-                SetStatus("Connection timed out.");
+                SetStatus(LocalizationManager.Localize("MP.ConnectionTimedOut"));
                 SetInteractable(true);
             }
             catch (Exception ex)
             {
-                SetStatus($"Failed: {ex.Message}");
+                SetStatus(LocalizationManager.Localize("MP.Error", ex.Message));
                 SetInteractable(true);
             }
             finally

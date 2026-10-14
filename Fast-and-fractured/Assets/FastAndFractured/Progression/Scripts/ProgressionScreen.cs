@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using Enums;
 using TMPro;
 using UnityEngine;
@@ -40,13 +41,13 @@ namespace FastAndFractured.Progression
             MenuUiKit.Background(root, MenuUiKit.Panel);
             var column = MenuUiKit.Stretch(MenuUiKit.Column(root, "Column", 18f, new RectOffset(40, 40, 30, 30)));
 
-            var title = MenuUiKit.Text(column, "PROGRESS", 56f, Color.white, TextAlignmentOptions.Center, _font);
+            var title = MenuUiKit.Localized(MenuUiKit.Text(column, "", 56f, Color.white, TextAlignmentOptions.Center, _font), "MP.Hub.Progress");
             title.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
 
             // Level card: level, bar, XP numbers, next reward.
             var card = MenuUiKit.RowOf(column, "Level", 120f, 30f);
             MenuUiKit.Background(card, MenuUiKit.Row);
-            _level = MenuUiKit.Fixed(MenuUiKit.Text(card, "LEVEL 1", 60f, MenuUiKit.Accent, TextAlignmentOptions.MidlineLeft, _font), 300f);
+            _level = MenuUiKit.Fixed(MenuUiKit.Text(card, "", 60f, MenuUiKit.Accent, TextAlignmentOptions.MidlineLeft, _font), 300f);
             var barColumn = MenuUiKit.Flexible(MenuUiKit.Column(card, "Bar", 8f, new RectOffset(0, 0, 22, 22)));
             var barBack = MenuUiKit.Rect("BarBack", barColumn);
             barBack.gameObject.AddComponent<LayoutElement>().preferredHeight = 26f;
@@ -55,14 +56,15 @@ namespace FastAndFractured.Progression
             _bar.type = Image.Type.Filled;
             _bar.fillMethod = Image.FillMethod.Horizontal;
             _bar.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), Vector2.one * 0.5f);
-            _xp = MenuUiKit.Text(barColumn, "0 / 200 XP", 26f, Color.white, TextAlignmentOptions.MidlineLeft, _font);
+            _xp = MenuUiKit.Text(barColumn, "", 26f, Color.white, TextAlignmentOptions.MidlineLeft, _font);
             _next = MenuUiKit.Text(barColumn, "", 22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font);
 
-            var hint = MenuUiKit.Text(column, "Play multiplayer matches to earn XP: placement, eliminations and damage all count.",
+            var hint = MenuUiKit.Text(column, "",
                 22f, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
+            MenuUiKit.Localized(hint, "MP.Progress.Hint");
             hint.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
 
-            var trackTitle = MenuUiKit.Text(column, "REWARDS", 30f, Color.white, TextAlignmentOptions.MidlineLeft, _font);
+            var trackTitle = MenuUiKit.Localized(MenuUiKit.Text(column, "", 30f, Color.white, TextAlignmentOptions.MidlineLeft, _font), "MP.Progress.Rewards");
             trackTitle.gameObject.AddComponent<LayoutElement>().preferredHeight = 40f;
             _track = MenuUiKit.ScrollList(column, "Track");
             var trackElement = _track.parent.parent.gameObject.AddComponent<LayoutElement>();
@@ -71,12 +73,14 @@ namespace FastAndFractured.Progression
 
             var buttons = MenuUiKit.RowOf(column, "Buttons", 80f, 24f);
             buttons.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
-            var back = MenuUiKit.Button(buttons, "BACK", () => Go(ScreensType.MULTIPLAYER_HUB), _font, 300f, 72f, MenuUiKit.ButtonDim);
-            var accessories = MenuUiKit.Button(buttons, "ACCESSORIES", () =>
+            var back = MenuUiKit.Localized(MenuUiKit.Button(buttons, "", () => Go(ScreensType.MULTIPLAYER_HUB), _font, 300f, 72f, MenuUiKit.ButtonDim), "MP.Back");
+            var accessories = MenuUiKit.Button(buttons, "", () =>
             {
                 AccessoriesScreen.ReturnTo = ScreensType.PROGRESSION;
                 Go(ScreensType.ACCESSORIES);
             }, _font, 360f);
+
+            MenuUiKit.Localized(accessories, "MP.Hub.Accessories");
 
             var screen = GetComponent<MenuScreen>();
             screen.backButton = back;
@@ -87,22 +91,22 @@ namespace FastAndFractured.Progression
         {
             if (_level == null) return;
             int level = PlayerProgression.Level;
-            _level.text = $"LEVEL {level}";
+            _level.text = LocalizationManager.Localize("MP.Progress.Level", level);
             if (PlayerProgression.IsMaxLevel)
             {
                 _bar.fillAmount = 1f;
-                _xp.text = $"{PlayerProgression.TotalXp} XP · max level";
+                _xp.text = LocalizationManager.Localize("MP.Progress.XpMax", PlayerProgression.TotalXp);
             }
             else
             {
                 _bar.fillAmount = PlayerProgression.XpIntoLevel / (float)PlayerProgression.XpForThisLevel;
-                _xp.text = $"{PlayerProgression.XpIntoLevel} / {PlayerProgression.XpForThisLevel} XP";
+                _xp.text = LocalizationManager.Localize("MP.Progress.Xp", PlayerProgression.XpIntoLevel, PlayerProgression.XpForThisLevel);
             }
 
             ProgressionReward next = null;
             foreach (var reward in ProgressionRewards.Load().rewards)
                 if (reward != null && reward.level > level && (next == null || reward.level < next.level)) next = reward;
-            _next.text = next != null ? $"Next reward at level {next.level}: {next.displayName}" : "Every reward unlocked";
+            _next.text = next != null ? LocalizationManager.Localize("MP.Progress.NextRewardAt", next.level, next.displayName) : LocalizationManager.Localize("MP.Progress.AllUnlocked");
 
             MenuUiKit.Clear(_track);
             foreach (var reward in ProgressionRewards.Load().rewards)
@@ -111,14 +115,17 @@ namespace FastAndFractured.Progression
                 bool unlocked = PlayerProgression.IsUnlocked(reward.id);
                 var row = MenuUiKit.RowOf(_track, reward.id, 56f);
                 MenuUiKit.Background(row, unlocked ? new Color(0.49f, 0.88f, 0.54f, 0.12f) : MenuUiKit.Row);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, $"Lv {reward.level}", 26f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 110f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, LocalizationManager.Localize("MP.Room.Level", reward.level), 26f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 110f);
                 MenuUiKit.Flexible(MenuUiKit.Text(row, reward.displayName, 26f, Color.white, TextAlignmentOptions.MidlineLeft, _font));
-                string what = reward.type == RewardType.Title ? "Title"
-                    : $"{reward.type} · {reward.slot}{(string.IsNullOrEmpty(reward.character) ? "" : " · " + reward.character)}";
+                string what = reward.type == RewardType.Title ? TypeName(reward.type)
+                    : $"{TypeName(reward.type)} · {SlotName(reward.slot)}{(string.IsNullOrEmpty(reward.character) ? "" : " · " + reward.character)}";
                 MenuUiKit.Fixed(MenuUiKit.Text(row, what, 22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 360f);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, unlocked ? "UNLOCKED" : "LOCKED", 22f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 150f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, unlocked ? LocalizationManager.Localize("MP.Progress.Unlocked") : LocalizationManager.Localize("MP.Progress.Locked"), 22f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 150f);
             }
         }
+
+        public static string TypeName(RewardType type) => LocalizationManager.Localize("MP.Progress.Type." + type);
+        public static string SlotName(AccessorySlot slot) => LocalizationManager.Localize("MP.Progress.Slot." + slot);
 
         private static void Go(ScreensType screen)
         {

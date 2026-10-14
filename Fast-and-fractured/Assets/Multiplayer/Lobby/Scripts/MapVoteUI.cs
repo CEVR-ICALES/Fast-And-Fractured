@@ -4,6 +4,7 @@
 //   - Wire _mapCardPrefab    (MapVoteCard prefab — Image for thumbnail + TMP_Text for name + Button)
 //   - Wire _voteCountLabel   (TMP_Text, e.g. "3 votes cast")
 //   - Assign _catalog        (MapCatalog ScriptableObject from Resources/MapCatalog)
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using FastAndFractured.Multiplayer.Abstractions;
 using FishNet.Object.Synchronizing;
@@ -89,7 +90,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
 
             if (_voteCountLabel != null)
-                _voteCountLabel.text = $"{_lobby.PlayerMapVotes.Count} votes cast";
+                _voteCountLabel.text = LocalizationManager.Localize("MP.Room.VotesCast", _lobby.PlayerMapVotes.Count);
 
             foreach (var (mapId, btn, img) in _cards)
             {

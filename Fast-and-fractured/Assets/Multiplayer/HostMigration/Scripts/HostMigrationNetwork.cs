@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using FishNet;
@@ -146,8 +147,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private IEnumerator LeaveCurrentMatchScene(bool becomingHost)
         {
             HostMigrationOverlay.Show(becomingHost
-                ? "The host left the match\n<size=70%>You are the new host - continuing...</size>"
-                : "The host left the match\n<size=70%>Reconnecting to the new host...</size>");
+                ? LocalizationManager.Localize("MP.Migration.NewHost")
+                : LocalizationManager.Localize("MP.Migration.Reconnecting"));
             MpCanary.Mark("HostMigration: host lost, leaving the map scene");
             yield return new WaitForEndOfFrame();   // let the overlay capture the frame first
 
@@ -250,7 +251,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             MpCanary.Mark($"HostMigration FAILED: {reason}");
             Migrating = false;
             HostMigrationResume.Pending = null;
-            ConnectionLostNotifier.Show("Could not continue the match - returning to the multiplayer hub.");
+            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.Migration.Failed"));
             var nm = InstanceFinder.NetworkManager;
             if (nm != null)
             {

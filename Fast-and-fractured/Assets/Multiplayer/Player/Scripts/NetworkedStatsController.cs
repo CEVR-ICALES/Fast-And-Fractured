@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Connection;
@@ -685,8 +686,8 @@ namespace FastAndFractured.Multiplayer
             if (HUDManager.HasInstance)
             {
                 HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, string.IsNullOrEmpty(killerName)
-                    ? $"{victimName ?? "A player"} was eliminated"
-                    : $"{killerName} eliminated {victimName}");
+                    ? LocalizationManager.Localize("MP.Feed.Eliminated", victimName ?? LocalizationManager.Localize("MP.Feed.APlayer"))
+                    : LocalizationManager.Localize("MP.Feed.Kill", killerName, victimName));
             }
 
             // Gray out the victim's icon in the top HUD strip. The singleplayer path that does this
@@ -700,7 +701,7 @@ namespace FastAndFractured.Multiplayer
             {
                 if (HUDManager.HasInstance)
                 {
-                    HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, "YOU DIED");
+                    HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, LocalizationManager.Localize("MP.YouDied"));
                 }
 
                 // Cut off input on the dead car: PlayerInputController, NetworkedShoot,

@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using Enums;
 using FastAndFractured.Multiplayer;
@@ -54,7 +55,7 @@ namespace FastAndFractured.Progression
             MenuUiKit.Background(root, MenuUiKit.Panel);
             var column = MenuUiKit.Stretch(MenuUiKit.Column(root, "Column", 18f, new RectOffset(40, 40, 30, 30)));
 
-            var title = MenuUiKit.Text(column, "ACCESSORIES", 56f, Color.white, TextAlignmentOptions.Center, _font);
+            var title = MenuUiKit.Localized(MenuUiKit.Text(column, "", 56f, Color.white, TextAlignmentOptions.Center, _font), "MP.Hub.Accessories");
             title.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
 
             var tabs = MenuUiKit.RowOf(column, "Characters", 76f, 14f);
@@ -68,16 +69,19 @@ namespace FastAndFractured.Progression
             _slots = MenuUiKit.Column(column, "Slots", 10f);
             _slots.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1f;
 
-            var note = MenuUiKit.Text(column, "What you equip shows on every model of the character. Test items: no model yet.",
+            var note = MenuUiKit.Text(column, "",
                 22f, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
+            MenuUiKit.Localized(note, "MP.Progress.AccessoriesNote");
             note.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
 
             var buttons = MenuUiKit.RowOf(column, "Buttons", 80f, 24f);
             buttons.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
-            var back = MenuUiKit.Button(buttons, "BACK", () =>
+            var back = MenuUiKit.Button(buttons, "", () =>
             {
                 if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(ReturnTo, 0.25f);
             }, _font, 300f, 72f, MenuUiKit.ButtonDim);
+
+            MenuUiKit.Localized(back, "MP.Back");
 
             var screen = GetComponent<MenuScreen>();
             screen.backButton = back;
@@ -105,13 +109,13 @@ namespace FastAndFractured.Progression
 
                 var row = MenuUiKit.RowOf(_slots, slot.ToString(), 84f, 20f);
                 MenuUiKit.Background(row, MenuUiKit.Row);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, slot.ToString().ToUpperInvariant(), 30f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 160f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, ProgressionScreen.SlotName(slot).ToUpperInvariant(), 30f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 160f);
                 AccessorySlot s = slot;
                 MenuUiKit.Button(row, "<", () => Cycle(s, options, index - 1), _font, 72f, 64f, MenuUiKit.ButtonDim);
-                string name = options[index] != null ? options[index].displayName : "None";
+                string name = options[index] != null ? options[index].displayName : LocalizationManager.Localize("MP.Progress.None");
                 MenuUiKit.Flexible(MenuUiKit.Text(row, name, 30f, options[index] != null ? MenuUiKit.Accent : Color.white, TextAlignmentOptions.Center, _font));
                 MenuUiKit.Button(row, ">", () => Cycle(s, options, index + 1), _font, 72f, 64f, MenuUiKit.ButtonDim);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, options.Count > 1 ? $"{options.Count - 1} unlocked" : "none unlocked yet",
+                MenuUiKit.Fixed(MenuUiKit.Text(row, options.Count > 1 ? LocalizationManager.Localize("MP.Progress.UnlockedCount", options.Count - 1) : LocalizationManager.Localize("MP.Progress.NoneUnlocked"),
                     22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 220f);
             }
         }

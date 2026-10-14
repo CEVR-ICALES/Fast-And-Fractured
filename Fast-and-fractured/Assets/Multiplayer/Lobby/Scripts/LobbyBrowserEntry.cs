@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using FastAndFractured.Multiplayer.Abstractions;
 using TMPro;
 using UnityEngine;
@@ -82,7 +83,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_roomNameText == null || _listing == null) return;
             _roomNameText.richText = true;
             _roomNameText.text = inMatch
-                ? $"{_listing.RoomName}  <size=70%><color=#F5B041>IN A MATCH</color></size>"
+                ? $"{_listing.RoomName}  <size=70%><color=#F5B041>{LocalizationManager.Localize("MP.Browser.InMatch")}</color></size>"
                 : _listing.RoomName;
         }
     }

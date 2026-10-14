@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using FishNet;
 using TMPro;
@@ -118,14 +119,14 @@ namespace FastAndFractured.Multiplayer
             string name = string.IsNullOrEmpty(report.Name) ? $"Player {clientId}" : report.Name;
             row.Name.text = local ? $"<b>{name}</b>" : name;
             row.Name.color = local ? Color.white : new Color(1f, 1f, 1f, 0.8f);
-            row.Signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? "HOST" : null);
+            row.Signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? LocalizationManager.Localize("MP.Host") : null);
 
             if (report.IsHost)
-                row.Frames.text = "<color=#9aa0a6>delay 0f · rollback 0f</color>";
+                row.Frames.text = $"<color=#9aa0a6>{LocalizationManager.Localize("MP.Stats.Frames", 0, 0)}</color>";
             else
                 row.Frames.text =
-                    $"delay {Colored(report.DelayFrames, 3, 6)}f · rollback {Colored(report.RollbackFrames, 4, 8)}f" +
-                    $" <color=#9aa0a6>(máx {report.RollbackMaxFrames})</color>";
+                    LocalizationManager.Localize("MP.Stats.Frames", Colored(report.DelayFrames, 3, 6), Colored(report.RollbackFrames, 4, 8)) +
+                    $" <color=#9aa0a6>{LocalizationManager.Localize("MP.Stats.Max", report.RollbackMaxFrames)}</color>";
         }
 
         private static string Colored(int value, int warn, int bad)

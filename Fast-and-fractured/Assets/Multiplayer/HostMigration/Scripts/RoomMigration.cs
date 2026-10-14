@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -156,7 +157,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private IEnumerator BecomeHost(RoomSnapshotBroadcast snapshot)
         {
             MpCanary.Mark($"RoomMigration: the host left, this peer opens '{snapshot.RoomName}' on port {snapshot.Port}");
-            ConnectionLostNotifier.Show("The host left - you are the new host of the room.");
+            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.NewHost"));
             yield return BackToMenu();
             yield return WaitFor(LobbyServiceLocator.Transport.LeaveLobbyAsync());
 
@@ -195,7 +196,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             string address = snapshot.SuccessorAddresses[0];
             MpCanary.Mark($"RoomMigration: the host left, rejoining the room at {address}:{snapshot.Port}");
-            ConnectionLostNotifier.Show("The host left - joining the room's new host...");
+            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.Joining"));
             yield return BackToMenu();
             yield return WaitFor(LobbyServiceLocator.Transport.LeaveLobbyAsync());
             yield return new WaitForSecondsRealtime(SUCCESSOR_HEAD_START);
@@ -256,7 +257,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             MpCanary.Mark($"RoomMigration FAILED: {reason}");
             Migrating = false;
-            ConnectionLostNotifier.Show("Could not reach the room's new host - returning to the multiplayer hub.");
+            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.Failed"));
             var nm = InstanceFinder.NetworkManager;
             if (nm != null)
             {

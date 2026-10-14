@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using Enums;
 using FastAndFractured;
@@ -490,7 +491,7 @@ namespace FastAndFractured.Multiplayer
             MultiplayerRoomReturn.LeaveMatchToRoom();
         }
 
-        private static string LeaveHint => InstanceFinder.IsServerStarted ? "ESC: End Match" : "ESC: Back to Room";
+        private static string LeaveHint => InstanceFinder.IsServerStarted ? LocalizationManager.Localize("MP.Spectator.EndMatch") : LocalizationManager.Localize("MP.Spectator.BackToRoom");
 
         // ── Skip (host, only AIs left) ───────────────────────────────────────────
         private GameObject _skipButton;
@@ -523,7 +524,7 @@ namespace FastAndFractured.Multiplayer
             bg.color = new Color(0.85f, 0.3f, 0.15f, 0.95f);
             _skipButton.AddComponent<Button>().onClick.AddListener(SkipAiOnlyMatch);
             var label = MakeLabel(_skipButton.transform, 30, TextAlignmentOptions.Center, Color.white);
-            label.text = "ONLY AI LEFT - SKIP  (Enter / Start)";
+            label.text = LocalizationManager.Localize("MP.Spectator.SkipAi");
             _skipButton.SetActive(false);
         }
 
@@ -592,8 +593,8 @@ namespace FastAndFractured.Multiplayer
 
             if (_freeCam)
             {
-                _statusLabel.text = "FREE CAMERA";
-                _controlsLabel.text = "WASD/Arrows: Move   Space/Ctrl (or E/Q): Up/Down   Shift: Faster   Right-Click + Mouse: Look   F: Back to Player   " + LeaveHint;
+                _statusLabel.text = LocalizationManager.Localize("MP.Spectator.FreeCamera");
+                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.FreeControls") + "   " + LeaveHint;
             }
             else
             {
@@ -608,8 +609,8 @@ namespace FastAndFractured.Multiplayer
                         ownerLabel = $" #{nob.Owner.ClientId}";
                     targetName = $"{_aliveTargets[_currentTargetIndex].name}{ownerLabel}";
                 }
-                _statusLabel.text = $"SPECTATING: {targetName}   ({_aliveTargets.Count} alive)";
-                _controlsLabel.text = "TAB / Click: Next   F: Free Camera   " + LeaveHint;
+                _statusLabel.text = LocalizationManager.Localize("MP.Spectator.Spectating", targetName, _aliveTargets.Count);
+                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.Controls") + "   " + LeaveHint;
             }
         }
     }

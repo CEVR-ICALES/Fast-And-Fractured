@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections;
 using Enums;
 using FastAndFractured.Multiplayer.Abstractions;
@@ -69,7 +70,7 @@ namespace FastAndFractured.Multiplayer
             if (InMenuScene)
                 return;   // waiting in the room already
             if (!InstanceFinder.IsServerStarted)
-                ConnectionLostNotifier.Show("The host ended the match - back to the room.");
+                ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.HostEndedMatch"));
             MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
         }
 

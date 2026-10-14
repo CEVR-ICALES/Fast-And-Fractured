@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,6 +15,7 @@ namespace FastAndFractured.GameTelemetry
     public sealed class TelemetrySettingRow : MonoBehaviour
     {
         public const string ROW_NAME = "Share gameplay statistics";
+        private const string LABEL_KEY = "MP.Settings.ShareStats";
         private const string CONTENT = "SettingsContainer/AccesibilityContainer/Viewport/Content";
         private const string TOGGLE_ROW = "ColorblindToggle";
         private const string SEPARATOR = "Panel (7)";
@@ -60,9 +62,10 @@ namespace FastAndFractured.GameTelemetry
             var label = row.GetComponentInChildren<TMP_Text>(true);
             if (label != null)
             {
-                foreach (var behaviour in label.GetComponents<MonoBehaviour>())
-                    if (behaviour.GetType().Name == "LocalizedText") Destroy(behaviour);
-                label.text = ROW_NAME;
+                var localized = label.GetComponent<LocalizedText>();
+                if (localized == null && label is TextMeshProUGUI) localized = label.gameObject.AddComponent<LocalizedText>();
+                if (localized != null) localized.LocalizationKey = LABEL_KEY;
+                label.text = LocalizationManager.Localize(LABEL_KEY);
             }
 
             _toggle = row.GetComponentInChildren<Toggle>(true);

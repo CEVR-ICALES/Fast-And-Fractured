@@ -1,3 +1,4 @@
+using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using FastAndFractured.Multiplayer.Abstractions;
 using FishNet.Object;
@@ -180,7 +181,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (_label == null) return;
             string who = _target != null ? NameOf(_target) : "-";
-            _label.text = $"WATCHING  <b>{who}</b>   <color=#9aa0a6>({_alive.Count} alive)   TAB: next car   ESC: back to the room</color>";
+            _label.text = LocalizationManager.Localize("MP.Spectate.Watching", who, _alive.Count);
         }
 
         private static string NameOf(Transform car)

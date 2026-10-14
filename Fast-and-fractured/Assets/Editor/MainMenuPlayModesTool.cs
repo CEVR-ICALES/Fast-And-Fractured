@@ -174,6 +174,7 @@ namespace FastAndFractured.EditorTools
 
             EditorSceneManager.MarkSceneDirty(scene);
             Undo.CollapseUndoOperations(group);
+            FastAndFractured.Multiplayer.Editor.LocalizeSceneTextsTool.Localize(scene);   // the labels it wrote
             Debug.Log("[MainMenuPlayModesTool] Applied. Save the scene to keep it.");
         }
 

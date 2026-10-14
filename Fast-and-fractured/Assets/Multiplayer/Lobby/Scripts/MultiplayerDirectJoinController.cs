@@ -5,6 +5,7 @@
 //   - Wire _joinButton  (Button)
 //   - Wire _backButton  (Button)
 //   - Wire _statusLabel (TMP_Text)
+using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Threading;
 using Enums;
@@ -60,10 +61,10 @@ namespace FastAndFractured.Multiplayer.Lobby
                 if (ok)
                     MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, _fadeDuration);
                 else
-                    SetStatus("Could not connect. Check IP and port.");
+                    SetStatus(LocalizationManager.Localize("MP.Join.Failed"));
             }
-            catch (OperationCanceledException) { SetStatus("Connection timed out."); }
-            catch (Exception ex)               { SetStatus($"Error: {ex.Message}"); }
+            catch (OperationCanceledException) { SetStatus(LocalizationManager.Localize("MP.ConnectionTimedOut")); }
+            catch (Exception ex)               { SetStatus(LocalizationManager.Localize("MP.Error", ex.Message)); }
             finally
             {
                 _busy = false;
