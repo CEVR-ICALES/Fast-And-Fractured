@@ -12,16 +12,15 @@ namespace FastAndFractured
     /// Tooltips for the settings: hovering a row (or selecting it with the gamepad / keyboard)
     /// shows what that setting does, next to the pointer or under the row. Works for every settings
     /// menu - main menu, pause menu, tabs added at runtime - without touching them: a row is any
-    /// child of "SettingsContainer/&lt;tab&gt;/Viewport/Content", and its name is the text key.
+    /// child of "SettingsContainer/&lt;tab&gt;/Viewport/Content", and its name gives the text key.
     ///
-    /// Texts: Resources/SettingsTooltips.csv (English, Espanol, Catala, like the game's sheets),
-    /// in the language chosen in the settings. The remapping rows reuse the controls'
-    /// descriptions (Controls.csv) the game already has.
+    /// Texts: the "Settings" localization sheet, keys "Settings.Tooltip.&lt;RowName&gt;" (see KeyFor).
+    /// The remapping rows reuse the controls' descriptions (Controls sheet).
     /// </summary>
     public sealed class SettingsTooltips : MonoBehaviour
     {
-        private const string TEXTS = "SettingsTooltips";
-        private const string HINT_KEY = "Remap.Hint";
+        private const string KEY_PREFIX = "Settings.Tooltip.";
+        private const string HINT_KEY = "Settings.Tooltip.RemapHint";
         private const float HOVER_DELAY = 0.35f;
         private const float SELECT_DELAY = 0.15f;
         private const float FADE_TIME = 0.12f;
@@ -44,8 +43,6 @@ namespace FastAndFractured
             ["SpecialAbility"] = "Controls.Ultimate",
             ["Mine"] = "Controls.Mine",
         };
-
-        private static Dictionary<string, Dictionary<string, string>> _texts;
 
         private readonly List<RaycastResult> _hits = new List<RaycastResult>();
         private Canvas _canvas;
@@ -160,15 +157,29 @@ namespace FastAndFractured
             if (string.IsNullOrEmpty(rowName)) return null;
             if (ControlDescriptions.TryGetValue(rowName, out var controlKey))
             {
-                string action = GameText(controlKey);
+                string action = Text(controlKey);
                 if (action == null) return null;
-                string hint = OwnText(HINT_KEY);
+                string hint = Text(HINT_KEY);
                 return hint == null ? action : $"{action}\n<size=85%><color=#FFFFFFA0>{hint}</color></size>";
             }
-            return OwnText(rowName);
+            return Text(KeyFor(rowName));
         }
 
-        private static string GameText(string key)
+        /// <summary>"Connection panel (F3)" → "Settings.Tooltip.ConnectionPanelF3": words in PascalCase, letters and digits only.</summary>
+        public static string KeyFor(string rowName)
+        {
+            var key = new System.Text.StringBuilder(KEY_PREFIX);
+            bool wordStart = true;
+            foreach (char c in rowName)
+            {
+                if (!char.IsLetterOrDigit(c)) { wordStart = true; continue; }
+                key.Append(wordStart ? char.ToUpperInvariant(c) : c);
+                wordStart = false;
+            }
+            return key.ToString();
+        }
+
+        private static string Text(string key)
         {
             try
             {
@@ -176,32 +187,6 @@ namespace FastAndFractured
                 return LocalizationManager.HasKey(key) ? LocalizationManager.Localize(key) : null;
             }
             catch { return null; }   // localization not ready: no tooltip rather than an error
-        }
-
-        private static string OwnText(string key)
-        {
-            LoadTexts();
-            string language = LocalizationManager.Language;
-            if (_texts.TryGetValue(language, out var texts) && texts.TryGetValue(key, out var text) && !string.IsNullOrEmpty(text)) return text;
-            return _texts.TryGetValue("English", out var english) && english.TryGetValue(key, out var fallback) ? fallback : null;
-        }
-
-        private static void LoadTexts()
-        {
-            if (_texts != null) return;
-            _texts = new Dictionary<string, Dictionary<string, string>>();
-            var asset = Resources.Load<TextAsset>(TEXTS);
-            if (asset == null) return;
-            var lines = LocalizationManager.GetLines(asset.text);
-            if (lines.Count == 0) return;
-            var languages = LocalizationManager.GetColumns(lines[0]);
-            for (int l = 1; l < languages.Count; l++) _texts[languages[l]] = new Dictionary<string, string>();
-            for (int i = 1; i < lines.Count; i++)
-            {
-                var columns = LocalizationManager.GetColumns(lines[i]);
-                if (columns.Count == 0 || string.IsNullOrEmpty(columns[0])) continue;
-                for (int l = 1; l < languages.Count && l < columns.Count; l++) _texts[languages[l]][columns[0]] = columns[l];
-            }
         }
 
         // ── Box ─────────────────────────────────────────────────────────────────────────

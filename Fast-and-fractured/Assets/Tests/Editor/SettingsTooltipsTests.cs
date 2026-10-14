@@ -30,16 +30,23 @@ namespace FastAndFractured.Tests
                 }
             }
             Assert.Greater(rows, 20, "the settings rows were not found");
-            CollectionAssert.IsEmpty(missing, "Settings rows without a tooltip (add them to SettingsTooltips.csv)");
+            CollectionAssert.IsEmpty(missing, "Settings rows without a tooltip (add them to the Settings localization sheet)");
         }
 
         [TestCase("Player names")]
         [TestCase("Bot names")]
+        [TestCase("Player levels in the room")]
         [TestCase("Name distance")]
         [TestCase("Connection panel (F3)")]
         [TestCase("Host the room if the host leaves")]
         [TestCase("Share gameplay statistics")]
         public void MultiplayerRowsHaveATooltip(string row) => Assert.IsNotEmpty(SettingsTooltips.TextFor(row));
+
+        [TestCase("Connection panel (F3)", "Settings.Tooltip.ConnectionPanelF3")]
+        [TestCase("ColorblindMode (1)", "Settings.Tooltip.ColorblindMode1")]
+        [TestCase("FPS Cap", "Settings.Tooltip.FPSCap")]
+        [TestCase("Host the room if the host leaves", "Settings.Tooltip.HostTheRoomIfTheHostLeaves")]
+        public void RowName_GivesItsSheetKey(string row, string key) => Assert.AreEqual(key, SettingsTooltips.KeyFor(row));
 
         [Test]
         public void RemapRows_UseTheControlsDescription_PlusTheHint()
