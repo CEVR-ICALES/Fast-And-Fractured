@@ -646,8 +646,27 @@ namespace FastAndFractured.Multiplayer.Editor
                 foreach (var outRoot in swappedRoots)
                 {
                     Transform srcRoot = FindByScenePath(source, ScenePath(outRoot.transform));
-                    if (srcRoot != null) replaced.Add(new KeyValuePair<Transform, Transform>(srcRoot, outRoot.transform));
+                    if (srcRoot == null) continue;
+                    Transform dstRoot = outRoot.transform;
+
+                    // Placed before the singleplayer prefab variant had its own networked
+                    // variant (health pickups as NetworkedShootingDamage): place the right one.
+                    var wanted = NetworkedVariantFor(srcRoot.gameObject);
+                    var placed = PrefabUtility.GetCorrespondingObjectFromSource(dstRoot.gameObject);
+                    if (wanted != null && placed != wanted)
+                    {
+                        var swapped = ReplaceInstance(dstRoot.gameObject, wanted);
+                        if (swapped == null) continue;
+                        Debug.Log($"[SceneMigration] Re-swapped '{ScenePath(swapped.transform)}' from {placed?.name} to {wanted.name}.");
+                        dstRoot = swapped.transform;
+                        restored++;
+                    }
+                    replaced.Add(new KeyValuePair<Transform, Transform>(srcRoot, dstRoot));
                 }
+
+                // 0. What the singleplayer map deleted from or added to its instance.
+                foreach (var pair in replaced)
+                    restored += MirrorSingleplayerHierarchy(pair.Key, pair.Value);
 
                 // 1. The overrides of the replaced singleplayer instances.
                 foreach (var pair in replaced)
@@ -710,6 +729,81 @@ namespace FastAndFractured.Multiplayer.Editor
             if (restored > 0)
                 Debug.Log($"[SceneMigration] Restored {restored} singleplayer override(s) lost by the prefab swaps in '{output.name}'.");
             return restored;
+        }
+
+        /// <summary>
+        /// Gives a swapped instance the hierarchy the singleplayer instance has. The swap places a
+        /// fresh variant, so what the map deleted from its instance came back and what it added
+        /// was lost:
+        ///  - deleted GameObjects / components (m_RemovedGameObjects / m_RemovedComponents):
+        ///    ConstructionMap keeps one of the 63 walls of the DeadZone prefab (the kill floor
+        ///    under the map) and the networked map had all 63 - red walls across the play area
+        ///    that cars spawned and drove into (2026-10-16). Matched by the base prefab object
+        ///    they come from, so same-named walls cannot be confused and what the networked
+        ///    variant adds is never touched.
+        ///  - added GameObjects (the breakable platforms swap the prefab's stage meshes for their
+        ///    own): copied to the same parent and sibling position.
+        /// Returns how many objects were deleted or added.
+        /// </summary>
+        private static int MirrorSingleplayerHierarchy(Transform srcRoot, Transform outRoot)
+        {
+            var srcBase = PrefabUtility.GetCorrespondingObjectFromOriginalSource(srcRoot.gameObject);
+            string baseAsset = srcBase != null ? AssetDatabase.GetAssetPath(srcBase) : null;
+            if (string.IsNullOrEmpty(baseAsset)) return 0;
+
+            // Every base prefab object the singleplayer instance still has.
+            var kept = new HashSet<UnityEngine.Object>();
+            foreach (var t in srcRoot.GetComponentsInChildren<Transform>(true))
+            {
+                kept.Add(PrefabUtility.GetCorrespondingObjectFromOriginalSource(t.gameObject));
+                foreach (var c in t.GetComponents<Component>())
+                    if (c != null) kept.Add(PrefabUtility.GetCorrespondingObjectFromOriginalSource(c));
+            }
+
+            bool RemovedInSingleplayer(UnityEngine.Object obj)
+            {
+                var original = PrefabUtility.GetCorrespondingObjectFromOriginalSource(obj);
+                return original != null && AssetDatabase.GetAssetPath(original) == baseAsset && !kept.Contains(original);
+            }
+
+            int removed = 0;
+            foreach (var t in outRoot.GetComponentsInChildren<Transform>(true).ToList())
+            {
+                if (t == null || t == outRoot) continue;   // already gone with its parent
+                if (RemovedInSingleplayer(t.gameObject))
+                {
+                    Debug.Log($"[SceneMigration] Removed '{ScenePath(t)}' (deleted in the singleplayer map).");
+                    UnityEngine.Object.DestroyImmediate(t.gameObject);
+                    removed++;
+                    continue;
+                }
+                foreach (var c in t.GetComponents<Component>())
+                {
+                    if (c == null || c is Transform || !RemovedInSingleplayer(c)) continue;
+                    Debug.Log($"[SceneMigration] Removed {c.GetType().Name} from '{ScenePath(t)}' (deleted in the singleplayer map).");
+                    UnityEngine.Object.DestroyImmediate(c);
+                    removed++;
+                }
+            }
+
+            int added = 0;
+            foreach (var t in srcRoot.GetComponentsInChildren<Transform>(true))
+            {
+                if (t == srcRoot) continue;
+                var original = PrefabUtility.GetCorrespondingObjectFromOriginalSource(t.gameObject);
+                if (original != null && AssetDatabase.GetAssetPath(original) == baseAsset) continue;   // the prefab's own
+                if (FindEquivalent(t.gameObject, srcRoot, outRoot) != null) continue;                    // already there
+                if (!(FindEquivalent(t.parent.gameObject, srcRoot, outRoot) is GameObject parent)) continue;   // copied with its parent
+
+                var copy = UnityEngine.Object.Instantiate(t.gameObject, parent.transform, false);
+                copy.name = t.name;
+                copy.transform.SetLocalPositionAndRotation(t.localPosition, t.localRotation);
+                copy.transform.localScale = t.localScale;
+                copy.transform.SetSiblingIndex(Mathf.Min(t.GetSiblingIndex(), parent.transform.childCount - 1));
+                Debug.Log($"[SceneMigration] Added '{ScenePath(copy.transform)}' (added in the singleplayer map).");
+                added++;
+            }
+            return removed + added;
         }
 
         /// <summary>Outermost instances of the networked variants the swap pass places.</summary>
@@ -1327,12 +1421,25 @@ namespace FastAndFractured.Multiplayer.Editor
         }
 
         /// <summary>The prefab this instance comes from has a Networked&lt;Name&gt; variant in PROPS_FOLDER.</summary>
-        private static bool HasNetworkedVariant(GameObject instanceRoot)
+        private static bool HasNetworkedVariant(GameObject instanceRoot) => NetworkedVariantFor(instanceRoot) != null;
+
+        /// <summary>
+        /// The networked variant to place for an instance: the one made from the instance's own
+        /// prefab variant when Networked Prop Setup generated one (NetworkedRecoverHealth
+        /// Variant), else "Networked&lt;BaseName&gt;" of the base prefab. Map variants without their
+        /// own networked variant (Trampolines, BigTrampoline) keep resolving to the base one.
+        /// </summary>
+        private static GameObject NetworkedVariantFor(GameObject instanceRoot)
         {
+            var source = PrefabUtility.GetCorrespondingObjectFromSource(instanceRoot);
+            for (var asset = source; asset != null; asset = PrefabUtility.GetCorrespondingObjectFromSource(asset))
+            {
+                var own = AssetDatabase.LoadAssetAtPath<GameObject>($"{PROPS_FOLDER}/Networked{asset.name}.prefab");
+                if (own != null && PrefabUtility.GetCorrespondingObjectFromSource(own) == asset) return own;
+            }
             var baseAsset = PrefabUtility.GetCorrespondingObjectFromOriginalSource(instanceRoot);
-            if (baseAsset == null) baseAsset = PrefabUtility.GetCorrespondingObjectFromSource(instanceRoot);
-            return baseAsset != null &&
-                   AssetDatabase.LoadAssetAtPath<GameObject>($"{PROPS_FOLDER}/Networked{baseAsset.name}.prefab") != null;
+            if (baseAsset == null) baseAsset = source;
+            return baseAsset == null ? null : AssetDatabase.LoadAssetAtPath<GameObject>($"{PROPS_FOLDER}/Networked{baseAsset.name}.prefab");
         }
 
         /// <summary>
@@ -1349,23 +1456,22 @@ namespace FastAndFractured.Multiplayer.Editor
             if (status != PrefabInstanceStatus.Connected) return false;
             if (!PrefabUtility.IsOutermostPrefabInstanceRoot(go)) return false;
 
-            // Walk through prefab variants up to the base. e.g. Trampolines.prefab (map variant)
-            // → Trampoline.prefab (base). We want the base so the variant is named
-            // "NetworkedTrampoline" not "NetworkedTrampolines".
-            var baseAsset = PrefabUtility.GetCorrespondingObjectFromOriginalSource(go);
-            if (baseAsset == null) baseAsset = PrefabUtility.GetCorrespondingObjectFromSource(go);
-            if (baseAsset == null) return false;
-
-            string variantPath = $"{PROPS_FOLDER}/Networked{baseAsset.name}.prefab";
-            var variantAsset = AssetDatabase.LoadAssetAtPath<GameObject>(variantPath);
+            // e.g. Trampolines.prefab (map variant) → NetworkedTrampoline (base), but
+            // RecoverHealth Variant → NetworkedRecoverHealth Variant (see NetworkedVariantFor).
+            var variantAsset = NetworkedVariantFor(go);
             if (variantAsset == null)
             {
-                Debug.LogWarning($"[SceneMigration] No networked variant found at {variantPath} " +
-                                 $"for base prefab '{baseAsset.name}' on GameObject '{go.name}'. " +
+                Debug.LogWarning($"[SceneMigration] No networked variant found for '{go.name}'. " +
                                  "Run Networked Prop Setup first, or this hazard will be left untouched.");
                 return false;
             }
+            newInstance = ReplaceInstance(go, variantAsset);
+            return newInstance != null;
+        }
 
+        /// <summary>Swaps <paramref name="go"/> for an instance of <paramref name="variantAsset"/>, keeping its pose, name and sibling index.</summary>
+        private static GameObject ReplaceInstance(GameObject go, GameObject variantAsset)
+        {
             // Capture transform so we can restore it on the replacement.
             var t = go.transform;
             Vector3   pos    = t.position;
@@ -1376,8 +1482,8 @@ namespace FastAndFractured.Multiplayer.Editor
             int       siblingIdx = t.GetSiblingIndex();
 
             // Instantiate the variant in the scene at the parent's position.
-            var inst = (GameObject)PrefabUtility.InstantiatePrefab(variantAsset);
-            if (inst == null) return false;
+            var inst = (GameObject)PrefabUtility.InstantiatePrefab(variantAsset, go.scene);
+            if (inst == null) return null;
 
             Undo.RegisterCreatedObjectUndo(inst, "Replace with networked variant");
             inst.transform.SetParent(parent, worldPositionStays: true);
@@ -1388,9 +1494,7 @@ namespace FastAndFractured.Multiplayer.Editor
 
             // Destroy the original.
             UnityEngine.Object.DestroyImmediate(go);
-
-            newInstance = inst;
-            return true;
+            return inst;
         }
 
         /// <summary>
