@@ -10,7 +10,12 @@ namespace FastAndFractured.Multiplayer
     /// the bot's (MatchNames). Not shown above your own car, nor above dead cars; fades out with
     /// distance. Added to every car of the match at start (NetworkedLevelControllerWrapper), so
     /// every networked car prefab gets it without being edited.
+    ///
+    /// It follows the car's model smoothed per frame, like the camera (CameraTargetSmoother):
+    /// cars move on simulation ticks, so pinning the name to the car made it jump every tick.
+    /// Runs after CinemachineBrain so it is placed with this frame's camera.
     /// </summary>
+    [DefaultExecutionOrder(1000)]
     public sealed class CarNameplate : MonoBehaviour
     {
         // Above the top of the car and its driver, measured from the car's renderers.
@@ -28,8 +33,15 @@ namespace FastAndFractured.Multiplayer
         private const float NAME_REFRESH_SECONDS = 2f;
         private static readonly Color HumanColor = Color.white;
         private static readonly Color BotColor = new Color(0.80f, 0.86f, 0.92f, 1f);
+        private const float SMOOTH_TIME = 0.05f;
+        private const float TELEPORT_DISTANCE = 5f;
 
         private Transform _car;
+        private Transform _point;        // the car's Visuals (or the car), followed smoothly
+        private Vector3 _smoothed;
+        private Vector3 _smoothVelocity;
+        private Vector3 _lastPoint;
+        private Vector3 _pointVelocity;
         private StatsController _stats;
         private NetworkObject _carNob;
         private CanvasGroup _group;
@@ -66,6 +78,9 @@ namespace FastAndFractured.Multiplayer
             _car = stats.transform;
             _carNob = stats.GetComponentInParent<NetworkObject>();
             _height = MeasureHeight(_car);
+            _point = NetworkedSpectatorController.SmoothedPointOf(_car);
+            if (_point == _car && _carNob != null) _point = NetworkedSpectatorController.SmoothedPointOf(_carNob.transform);
+            _smoothed = _lastPoint = _point.position;
 
             var rect = (RectTransform)transform;
             rect.SetParent(SharedCanvas(stats.gameObject.scene), false);
@@ -162,7 +177,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            Vector3 position = _car.position + Vector3.up * _height;
+            Vector3 position = SmoothedPoint() + Vector3.up * _height;
             Vector3 screen = cam.WorldToScreenPoint(position);
             float distance = Vector3.Distance(position, cam.transform.position);
             if (screen.z <= 0f)
@@ -174,6 +189,28 @@ namespace FastAndFractured.Multiplayer
             _group.alpha = 1f - Mathf.InverseLerp(fadeEnd * FADE_START_FRACTION, fadeEnd, distance);
             transform.position = new Vector3(screen.x, screen.y, 0f);
             _text.fontSize = Mathf.Lerp(NEAR_FONT_SIZE, FAR_FONT_SIZE, Mathf.InverseLerp(NEAR_DISTANCE, fadeEnd, distance));
+        }
+
+        /// <summary>The followed point smoothed per frame; a jump its own motion does not explain snaps.</summary>
+        private Vector3 SmoothedPoint()
+        {
+            Transform point = _point != null ? _point : _car;
+            Vector3 target = point.position;
+            float deltaTime = Time.deltaTime;
+            Vector3 expected = _lastPoint + _pointVelocity * deltaTime;
+            bool teleported = (target - expected).sqrMagnitude > TELEPORT_DISTANCE * TELEPORT_DISTANCE;
+            _pointVelocity = teleported || deltaTime <= 0f ? Vector3.zero : (target - _lastPoint) / deltaTime;
+            _lastPoint = target;
+            if (teleported)
+            {
+                _smoothed = target;
+                _smoothVelocity = Vector3.zero;
+            }
+            else
+            {
+                _smoothed = Vector3.SmoothDamp(_smoothed, target, ref _smoothVelocity, SMOOTH_TIME, Mathf.Infinity, deltaTime);
+            }
+            return _smoothed;
         }
     }
 }
