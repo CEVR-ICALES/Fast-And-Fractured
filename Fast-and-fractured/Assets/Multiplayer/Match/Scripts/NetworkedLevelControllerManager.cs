@@ -402,6 +402,8 @@ namespace FastAndFractured.Multiplayer
                 _levelControllerWrapper = gameObject.AddComponent<NetworkedLevelControllerWrapper>();
             if (GetComponent<NetworkedWorldBreakables>() == null)
                 gameObject.AddComponent<NetworkedWorldBreakables>();
+            if (GetComponent<NetworkedLooseProps>() == null)
+                gameObject.AddComponent<NetworkedLooseProps>();
         }
 
         public override void OnStartServer()
