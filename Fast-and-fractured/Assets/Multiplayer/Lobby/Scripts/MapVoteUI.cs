@@ -58,7 +58,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 var outline = card.GetComponent<Outline>() ?? card.GetComponentInChildren<Outline>();
 
                 if (img   != null && entry.Thumbnail != null) img.sprite = entry.Thumbnail;
-                if (label != null) label.text = entry.DisplayNameKey;
+                if (label != null) label.text = MapCatalog.DisplayName(entry);
 
                 int mapId = entry.Id;
                 btn?.onClick.AddListener(() => CastVote(mapId));

@@ -178,6 +178,7 @@ namespace FastAndFractured.Multiplayer
 
             RefreshPlayerList();
             RefreshMatchState();
+            HideMapPickWhenIdle();
         }
 
         private void Unsubscribe()
@@ -232,6 +233,7 @@ namespace FastAndFractured.Multiplayer
                 _isReady = false;
                 UpdateReadyButtonVisual();
                 if (_countdownPanel != null) _countdownPanel.SetActive(false);
+                HideMapPickWhenIdle();
             }
             RefreshMatchState();
             RefreshPlayerList();
@@ -327,24 +329,32 @@ namespace FastAndFractured.Multiplayer
 
         private void HandleAiSlotCountSync(int prev, int next, bool asServer) => RefreshPlayerList();
 
-        /// <summary>
-        /// Fired on every client (including host via RunLocally) when the server has resolved
-        /// the map vote and is about to load the map scene. We trigger the slot-machine animation
-        /// here; the server-side coroutine in NetworkedLobbyManager waits a matching duration
-        /// before kicking off the actual FishNet scene load.
-        /// </summary>
-        private void HandleMapVoteAnimation(int[] votedMapIds, int resolvedMapId)
-        {
-            // Resolve via SerializeField first, fall back to a search inside this screen.
-            var anim = _mapVoteAnimation != null
+        private FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI MapPickAnimation =>
+            _mapVoteAnimation != null
                 ? _mapVoteAnimation
                 : GetComponentInChildren<FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI>(true);
+
+        /// <summary>
+        /// Fired on every client (including host via RunLocally) when the server has resolved
+        /// the map vote and is about to load the map scene. The server-side coroutine in
+        /// NetworkedLobbyManager waits for the animation before the actual FishNet scene load.
+        /// </summary>
+        private void HandleMapVoteAnimation(int[] candidates, int[] votes, int[] hops, bool random)
+        {
+            var anim = MapPickAnimation;
             if (anim == null)
             {
                 Debug.LogWarning("[LobbyReadyUI] OnMapVoteAnimationRequested but no MapVoteAnimationUI found in scene.");
                 return;
             }
-            anim.Play(votedMapIds, resolvedMapId);
+            anim.Play(candidates, random ? null : votes, hops, random);
+        }
+
+        /// <summary>The pick stays on screen until the curtain covers it; back in the room, it goes.</summary>
+        private void HideMapPickWhenIdle()
+        {
+            if (_lobbyManager == null || _lobbyManager.GameStarted.Value) return;
+            MapPickAnimation?.Hide();
         }
 
         private void HandleRoomNameSync(string prev, string next, bool asServer) => UpdateRoomName(next);

@@ -27,21 +27,21 @@ namespace FastAndFractured.Multiplayer.Editor
             new DefaultMapDef
             {
                 SceneGuid   = "1c251044aeaa846428dbf86821c160d3",   // GolfMap.unity
-                DisplayName = "Golf Map",
+                DisplayName = "Menu.Golf",
                 CatalogId   = 0,
                 ThumbnailSearchName = "GOLF2",
             },
             new DefaultMapDef
             {
                 SceneGuid   = "f0e339ead76f23943b9db6bcdaf20d92",   // ConstructionMap.unity
-                DisplayName = "Construction Map",
+                DisplayName = "Menu.Obras",
                 CatalogId   = 1,
                 ThumbnailSearchName = "OBRAS_RENDER",
             },
             new DefaultMapDef
             {
                 SceneGuid   = "1354e600b46f3c3488593866c2ca43b3",   // MountainVillageMap.unity
-                DisplayName = "Mountain Village Map",
+                DisplayName = "Menu.Pueblo",
                 CatalogId   = 2,
                 ThumbnailSearchName = "PUEBLO_SCREENSHOT",
             },

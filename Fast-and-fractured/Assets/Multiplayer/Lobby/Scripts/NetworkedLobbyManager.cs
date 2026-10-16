@@ -376,10 +376,11 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Client-side event fired when the server broadcasts the map vote resolution. Args:
-        /// votedMapIds (deck to cycle through), resolvedMapId (the winner). LobbyRoom UI listens.
+        /// Client-side event fired when the server broadcasts the map pick. Args: candidate map
+        /// ids, their votes (empty when nobody voted), the hops (indices into the candidates, the
+        /// last one is the chosen map) and whether it is a random pick. LobbyRoom UI listens.
         /// </summary>
-        public event System.Action<int[], int> OnMapVoteAnimationRequested;
+        public event System.Action<int[], int[], int[], bool> OnMapVoteAnimationRequested;
 
         private void StartGameInternal()
         {
@@ -403,21 +404,12 @@ namespace FastAndFractured.Multiplayer
             // Resolve map vote first so ResolvedMapId is set before anyone reads it.
             ResolveMapVote();
 
-            // Build the "voted maps deck" — the unique set of mapIds players voted for. If empty
-            // (everyone abstained) we'll just animate landing on the resolved one.
-            var votedIds = new HashSet<int>();
-            foreach (var kv in PlayerMapVotes)
-            {
-                if (kv.Value >= 0) votedIds.Add(kv.Value);
-            }
-            if (votedIds.Count == 0) votedIds.Add(ResolvedMapId.Value);
-            int[] deck = new int[votedIds.Count];
-            votedIds.CopyTo(deck);
-
-            // Tell every client (including host) to start the slot-machine animation.
-            // The server schedules the actual scene load after the animation duration so the
-            // visual reveal completes before the menu scene unloads.
-            RpcPlayMapVoteAnimation(deck, ResolvedMapId.Value);
+            // The pick every peer animates: a wheel over the voted maps, or random hops over all
+            // of them when nobody voted. The server waits for it before loading the map.
+            var pick = BuildMapPick(PlayerMapVotes, CatalogMapIds(), ResolvedMapId.Value,
+                                    new System.Random(unchecked((int)TimeManager.LocalTick * 31 + 7)));
+            _mapPickDuration = FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI.DurationFor(pick.Hops.Length);
+            RpcPlayMapVoteAnimation(pick.Candidates, pick.Votes, pick.Hops, pick.Random);
             OnGameStarting?.Invoke();
 
             // Legacy path: if a NetworkedLevelControllerManager happens to be in this scene
@@ -452,18 +444,89 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // ── Slot-machine animation + scene load ───────────────────────────────
-        private const float MAP_VOTE_ANIMATION_DURATION = 3.2f;
+        // ── Map pick animation + scene load ───────────────────────────────────
+        private const int MIN_MAP_PICK_HOPS = 12;
+        private const int RANDOM_MAP_PICK_HOPS = 14;
+        private float _mapPickDuration = 3f;
+
+        /// <summary>What the map pick animation shows; see MapVoteAnimationUI.</summary>
+        public struct MapPick
+        {
+            public int[] Candidates;   // map ids on the strip
+            public int[] Votes;        // votes per candidate; empty for a random pick
+            public int[] Hops;         // indices into Candidates; the last one is the winner
+            public bool Random;
+        }
+
+        /// <summary>
+        /// Votes cast: the voted maps, in id order, and a wheel going round them that stops on
+        /// the winner after at least MIN_MAP_PICK_HOPS hops (just the winner when only one map got
+        /// votes). Nobody voted: every map, and random hops that never repeat the previous one,
+        /// ending on the winner.
+        /// </summary>
+        public static MapPick BuildMapPick(IEnumerable<KeyValuePair<int, int>> votes, IList<int> allMapIds,
+                                           int winner, System.Random rng)
+        {
+            var tally = new SortedDictionary<int, int>();
+            if (votes != null)
+                foreach (var vote in votes)
+                    if (allMapIds.Contains(vote.Value))
+                        tally[vote.Value] = tally.TryGetValue(vote.Value, out int n) ? n + 1 : 1;
+
+            var pick = new MapPick();
+            if (tally.Count > 0 && tally.ContainsKey(winner))
+            {
+                pick.Candidates = new int[tally.Count];
+                pick.Votes = new int[tally.Count];
+                int i = 0;
+                foreach (var kv in tally) { pick.Candidates[i] = kv.Key; pick.Votes[i] = kv.Value; i++; }
+                int count = pick.Candidates.Length;
+                int target = System.Array.IndexOf(pick.Candidates, winner);
+                int hops = count == 1 ? 1 : target + 1;
+                while (count > 1 && hops < MIN_MAP_PICK_HOPS) hops += count;
+                pick.Hops = new int[hops];
+                for (int k = 0; k < hops; k++) pick.Hops[k] = k % count;
+                return pick;
+            }
+
+            var all = new List<int>(allMapIds);
+            if (!all.Contains(winner)) all.Add(winner);
+            all.Sort();
+            pick.Candidates = all.ToArray();
+            pick.Votes = new int[0];
+            pick.Random = true;
+            int winnerIndex = all.IndexOf(winner);
+            pick.Hops = new int[all.Count == 1 ? 1 : RANDOM_MAP_PICK_HOPS];
+            int previous = -1;
+            for (int k = 0; k < pick.Hops.Length - 1; k++)
+            {
+                int next;
+                do next = rng.Next(all.Count);
+                while (next == previous || (k == pick.Hops.Length - 2 && next == winnerIndex));
+                pick.Hops[k] = previous = next;
+            }
+            pick.Hops[pick.Hops.Length - 1] = winnerIndex;
+            return pick;
+        }
+
+        private static List<int> CatalogMapIds()
+        {
+            var ids = new List<int>();
+            var catalog = FastAndFractured.Multiplayer.Lobby.MapCatalogLoader.Get();
+            if (catalog != null)
+                foreach (var entry in catalog.Entries) ids.Add(entry.Id);
+            return ids;
+        }
 
         [ObserversRpc(RunLocally = true)]
-        private void RpcPlayMapVoteAnimation(int[] votedMapIds, int resolvedMapId)
+        private void RpcPlayMapVoteAnimation(int[] candidates, int[] votes, int[] hops, bool random)
         {
-            OnMapVoteAnimationRequested?.Invoke(votedMapIds, resolvedMapId);
+            OnMapVoteAnimationRequested?.Invoke(candidates, votes, hops, random);
         }
 
         private System.Collections.IEnumerator LoadMapSceneAfterAnimation()
         {
-            yield return new WaitForSeconds(MAP_VOTE_ANIMATION_DURATION);
+            yield return new WaitForSeconds(_mapPickDuration);
 
             string sceneToLoad = MatchSceneName();
             if (string.IsNullOrEmpty(sceneToLoad))

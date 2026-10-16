@@ -1373,9 +1373,9 @@ namespace FastAndFractured.Multiplayer.Editor
             string villageScene = SceneNameFromPath(villagePath, "MountainVillageMap");
 
             entriesProp.arraySize = 3;
-            SetEntry(entriesProp.GetArrayElementAtIndex(0), 0, "Golf Map",            golfScene,    "GOLF2");
-            SetEntry(entriesProp.GetArrayElementAtIndex(1), 1, "Construction Map",    constScene,   "OBRAS_RENDER");
-            SetEntry(entriesProp.GetArrayElementAtIndex(2), 2, "Mountain Village Map", villageScene, "PUEBLO_SCREENSHOT");
+            SetEntry(entriesProp.GetArrayElementAtIndex(0), 0, "Menu.Golf",           golfScene,    "GOLF2");
+            SetEntry(entriesProp.GetArrayElementAtIndex(1), 1, "Menu.Obras",          constScene,   "OBRAS_RENDER");
+            SetEntry(entriesProp.GetArrayElementAtIndex(2), 2, "Menu.Pueblo", villageScene, "PUEBLO_SCREENSHOT");
 
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(catalog);

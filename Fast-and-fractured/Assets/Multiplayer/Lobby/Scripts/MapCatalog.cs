@@ -28,6 +28,21 @@ namespace FastAndFractured.Multiplayer.Lobby
 
         public IReadOnlyList<Entry> Entries => _entries ?? Array.Empty<Entry>();
 
+        /// <summary>The map's name in the current language (DisplayNameKey as is when it is not a key).</summary>
+        public static string DisplayName(Entry entry)
+        {
+            string key = entry.DisplayNameKey;
+            if (string.IsNullOrEmpty(key)) return entry.SceneName;
+            try
+            {
+                Assets.SimpleLocalization.Scripts.LocalizationManager.Read();
+                if (Assets.SimpleLocalization.Scripts.LocalizationManager.HasKey(key))
+                    return Assets.SimpleLocalization.Scripts.LocalizationManager.Localize(key);
+            }
+            catch (Exception) { }
+            return key;
+        }
+
         public bool TryGetById(int id, out Entry entry)
         {
             if (_entries == null) { entry = default; return false; }
