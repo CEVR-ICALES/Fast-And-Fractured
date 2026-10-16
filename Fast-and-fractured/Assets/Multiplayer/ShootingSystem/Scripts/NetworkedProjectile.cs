@@ -59,6 +59,15 @@ namespace FastAndFractured.Multiplayer
 
         private float _pushForce;
         private float _explosionRadius;
+
+        // How the singleplayer ExplosionForce on this prefab hands its push to the car
+        // (PhysicsBehaviour.ApplyImpulse). Read before that component is destroyed; the defaults
+        // are ExplosionForce's own.
+        private ForceMode _impulseForceMode = ForceMode.Impulse;
+        private bool _impulseLimitRbSpeed;
+        private float _impulseTime = 1f;
+        private bool _impulseStopMomentum;
+        private float _impulseSpeedLimit = 1000f;
         private Vector3 _explosionCenterOffset;
         private float _bounceStrength;
         private int _maxBounces;
@@ -219,6 +228,7 @@ namespace FastAndFractured.Multiplayer
             // OverlapSphere instead.
             foreach (var ef in GetComponentsInChildren<ExplosionForce>(true))
             {
+                ReadImpulseSettings(ef);
                 ef.gameObject.SetActive(false);
                 DestroyImmediate(ef);
             }
@@ -582,6 +592,32 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region EXPLOSION_AND_DAMAGE
+        private void ReadImpulseSettings(ExplosionForce source)
+        {
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var type = typeof(ExplosionForce);
+            if (type.GetField("forceMode", flags)?.GetValue(source) is ForceMode mode) _impulseForceMode = mode;
+            if (type.GetField("limitRbSpeed", flags)?.GetValue(source) is bool limit) _impulseLimitRbSpeed = limit;
+            if (type.GetField("explosionImpulseTime", flags)?.GetValue(source) is float time) _impulseTime = time;
+            if (type.GetField("stopSpeedOnHit", flags)?.GetValue(source) is bool stop) _impulseStopMomentum = stop;
+            if (type.GetField("limitRbSpeedLimit", flags)?.GetValue(source) is float speedLimit) _impulseSpeedLimit = speedLimit;
+        }
+
+        /// <summary>
+        /// Singleplayer's push direction (ExplosionForce.OnTriggerEnter): from the explosion
+        /// towards the car's upper corner, clamped to the blast's box. The old networked version
+        /// aimed at the closest point of the car to the blast centre, which on a direct hit is the
+        /// centre itself - a zero vector, replaced by straight up: the car shot vertically.
+        /// </summary>
+        public static Vector3 PushDirection(Vector3 impactPoint, Vector3 blastCenter, float blastRadius, Bounds carBounds)
+        {
+            var blast = new Bounds(blastCenter, Vector3.one * (blastRadius * 2f));
+            Vector3 direction = blast.ClosestPoint(carBounds.max) - impactPoint;
+            if (direction.sqrMagnitude < MIN_DIRECTION_SQR_MAG) direction = carBounds.center - impactPoint;
+            if (direction.sqrMagnitude < MIN_DIRECTION_SQR_MAG) return Vector3.up;
+            return direction.normalized;
+        }
+
         /// <summary>
         /// Server-side: find all vehicles in explosion radius and apply push force.
         /// Mirrors singleplayer ExplosionForce.OnTriggerEnter() logic.
@@ -625,16 +661,24 @@ namespace FastAndFractured.Multiplayer
                     float weight = stats.Weight;
                     float enduranceImportance = stats.EnduranceImportanceWhenColliding;
 
-                    Vector3 closestPoint = hit.ClosestPointOnBounds(explosionCenter);
-                    Vector3 direction = (closestPoint - explosionCenter).normalized;
-                    if (direction.sqrMagnitude < MIN_DIRECTION_SQR_MAG) direction = Vector3.up;
+                    // The car body's collider, like singleplayer's trigger sees it; not whichever
+                    // child collider (a wheel) the overlap happened to return first.
+                    Collider body = physicsBehaviour.GetComponent<Collider>();
+                    Bounds carBounds = body != null ? body.bounds : hit.bounds;
+                    var blast = new Bounds(explosionCenter, Vector3.one * (_explosionRadius * 2f));
+                    Vector3 closestPoint = blast.ClosestPoint(carBounds.max);
+                    Vector3 direction = PushDirection(center, explosionCenter, _explosionRadius, carBounds);
 
                     float forceToApply = physicsBehaviour.CalculateForceToApplyToOtherCar(
                         enduranceFactor, weight, enduranceImportance, _pushForce);
 
                     if (!physicsBehaviour.HasBeenPushed)
                     {
-                        physicsBehaviour.ApplyForce(direction, closestPoint, forceToApply, ForceMode.Impulse);
+                        // ApplyImpulse, as singleplayer: it also lifts the car's speed cap and marks
+                        // it impulsed for a moment (both replicated in the reconcile), otherwise
+                        // the cap cut the sideways part of the push and left mostly the vertical.
+                        physicsBehaviour.ApplyImpulse(direction, closestPoint, forceToApply, _impulseForceMode,
+                            _impulseLimitRbSpeed, _impulseTime, _impulseStopMomentum, _impulseSpeedLimit);
                         if (carImpact != null) carImpact.OnHasBeenPushed(physicsBehaviour);
                         // Pushed into a pit or the storm: the kill goes to the shooter.
                         var pushedStats = physicsBehaviour.GetComponentInParent<NetworkedStatsController>();
