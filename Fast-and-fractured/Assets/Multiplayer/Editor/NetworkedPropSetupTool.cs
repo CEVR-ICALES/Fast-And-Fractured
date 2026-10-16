@@ -34,6 +34,11 @@ namespace FastAndFractured.Multiplayer.Editor
             public Type   SingleplayerType;
             public Type   WrapperType;
             public string SceneOnlyNote;     // non-null if this may not exist as a prefab
+            // A prefab variant of this hazard gets its own networked variant. For pickups the
+            // variant IS the pickup (RecoverHealth Variant is ShootingDamage with the health
+            // model, icon, colours and sound); without its own networked variant the maps
+            // placed NetworkedShootingDamage and health pickups looked like damage boosts.
+            public bool   VariantsGetOwnPrefab;
         }
 
         private static readonly HazardDef[] HAZARD_DEFS =
@@ -88,12 +93,14 @@ namespace FastAndFractured.Multiplayer.Editor
             new HazardDef
             {
                 DisplayName      = "Stats Boost Pickup",
+                VariantsGetOwnPrefab = true,
                 SingleplayerType = typeof(StatsBoostInteractable),
                 WrapperType      = typeof(NetworkedStatsBoostInteractable),
             },
             new HazardDef
             {
                 DisplayName      = "Skin Unlock Pickup",
+                VariantsGetOwnPrefab = true,
                 SingleplayerType = typeof(SkinUnlockerInteractable),
                 WrapperType      = typeof(NetworkedSkinUnlockerInteractable),
             },
@@ -188,6 +195,8 @@ namespace FastAndFractured.Multiplayer.Editor
                     // on the nested Trampoline instance at scene-migration time, not by creating
                     // a NetworkedTrampolines.prefab variant.
                     var spComponent = FindOwnedComponentInPrefab(prefab, def.SingleplayerType);
+                    if (spComponent == null && def.VariantsGetOwnPrefab)
+                        spComponent = FindVariantRootComponent(prefab, def.SingleplayerType);
                     if (spComponent == null) continue;
 
                     // Skip if any GO in the tree already carries the wrapper.
@@ -484,6 +493,18 @@ namespace FastAndFractured.Multiplayer.Editor
         /// generate redundant NetworkedTrampolines.prefab / NetworkedTrampolineMountainVillage.prefab
         /// containers that just re-wrap the same nested logic.
         /// </summary>
+        /// <summary>
+        /// The hazard component of a prefab VARIANT, when it sits on the variant's own root
+        /// (inherited from the base, not inside a nested prefab). Containers holding hazard
+        /// instances are still skipped.
+        /// </summary>
+        private static Component FindVariantRootComponent(GameObject prefab, Type spType)
+        {
+            if (PrefabUtility.GetPrefabAssetType(prefab) != PrefabAssetType.Variant) return null;
+            var c = prefab.GetComponent(spType);
+            return c != null && PrefabUtility.GetNearestPrefabInstanceRoot(c.gameObject) == prefab ? c : null;
+        }
+
         private static Component FindOwnedComponentInPrefab(GameObject prefab, Type spType)
         {
             var components = prefab.GetComponentsInChildren(spType, includeInactive: true);
