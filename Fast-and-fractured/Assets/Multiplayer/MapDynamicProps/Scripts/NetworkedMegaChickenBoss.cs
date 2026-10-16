@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
@@ -71,6 +72,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
+            RestoreRelayedColliders();
 
             // Pure clients never apply local push physics. Destroy both the legacy callback and
             // its private hitbox; the server's authoritative impulse is reconciled by FishNet.
@@ -127,6 +129,149 @@ namespace FastAndFractured.Multiplayer
                 SyncedIsJumping.Value   = _brain.IsJumping;
                 SyncedIsLayingEgg.Value = _brain.IsLayingEgg;
             }
+
+            _eggSyncTimer += Time.deltaTime;
+            if (_eggSyncTimer >= EGG_SYNC_INTERVAL)
+            {
+                _eggSyncTimer = 0f;
+                ServerSendEggs();
+            }
+        }
+
+        // ── Eggs ─────────────────────────────────────────────────────────────────
+        // The eggs are pooled objects that only the server's chicken lays, rolls and explodes, and
+        // they push cars on the server - so a client got pushed by eggs it could not see. Both
+        // peers build the same egg pool in the same order when the map loads, so the server sends
+        // each egg's state by its index in that pool and the client moves its own copy, with the
+        // egg's logic, agent and physics removed: a picture of the server's egg, nothing more.
+        private const float EGG_SYNC_INTERVAL = 0.1f;
+        private const float EGG_FOLLOW_SHARPNESS = 12f;
+        private const byte EGG_OFF = 0, EGG_ROLLING = 1, EGG_EXPLODING = 2;
+
+        private float _eggSyncTimer;
+        private bool _eggsWereActive;
+        private List<GameObject> _eggPool;
+
+        private sealed class EggMirror
+        {
+            public GameObject Root;
+            public Transform Model;
+            public GameObject Explosion;
+            public float Radius = 0.68f;
+            public Vector3 Target;
+            public bool HasTarget;
+        }
+        private EggMirror[] _eggMirrors;
+
+        private List<GameObject> EggPool()
+        {
+            if (_eggPool != null) return _eggPool;
+            if (_brain == null || !global::Utilities.ObjectPoolManager.HasInstance) return null;
+            _eggPool = global::Utilities.ObjectPoolManager.Instance.GiveAllMyPooledObjects(_brain.pooltypeMegaChickenEgg);
+            return _eggPool;
+        }
+
+        [Server]
+        private void ServerSendEggs()
+        {
+            var pool = EggPool();
+            if (pool == null || pool.Count == 0) return;
+
+            bool anyActive = false;
+            var states = new byte[pool.Count];
+            var positions = new Vector3[pool.Count];
+            for (int i = 0; i < pool.Count; i++)
+            {
+                var egg = pool[i];
+                if (egg == null || !egg.activeInHierarchy) continue;
+                var logic = egg.GetComponent<MegaChickenEgg>();
+                bool rolling = logic == null || logic.visualModel == null || logic.visualModel.gameObject.activeSelf;
+                states[i] = rolling ? EGG_ROLLING : EGG_EXPLODING;
+                positions[i] = egg.transform.position;
+                anyActive = true;
+            }
+
+            // While eggs are out, and once more when the last one is gone.
+            if (!anyActive && !_eggsWereActive) return;
+            _eggsWereActive = anyActive;
+            RpcEggs(states, positions);
+        }
+
+        [ObserversRpc]
+        private void RpcEggs(byte[] states, Vector3[] positions)
+        {
+            if (base.IsServerInitialized) return;
+            var pool = EggPool();
+            if (pool == null) return;
+            if (_eggMirrors == null) _eggMirrors = new EggMirror[pool.Count];
+
+            for (int i = 0; i < pool.Count && i < states.Length; i++)
+            {
+                var mirror = _eggMirrors[i] ??= MakeEggMirror(pool[i]);
+                if (mirror == null) continue;
+
+                if (states[i] == EGG_OFF)
+                {
+                    if (mirror.Root.activeSelf) mirror.Root.SetActive(false);
+                    mirror.HasTarget = false;
+                    continue;
+                }
+
+                if (!mirror.Root.activeSelf || !mirror.HasTarget)
+                {
+                    mirror.Root.transform.position = positions[i];
+                    mirror.Root.SetActive(true);
+                }
+                mirror.Target = positions[i];
+                mirror.HasTarget = true;
+                bool rolling = states[i] == EGG_ROLLING;
+                if (mirror.Model != null) mirror.Model.gameObject.SetActive(rolling);
+                if (mirror.Explosion != null) mirror.Explosion.SetActive(!rolling);
+            }
+        }
+
+        /// <summary>Client: turns a pooled egg into a moving picture of the server's one.</summary>
+        private static EggMirror MakeEggMirror(GameObject egg)
+        {
+            if (egg == null) return null;
+            egg.SetActive(false);
+            var mirror = new EggMirror { Root = egg };
+            var logic = egg.GetComponent<MegaChickenEgg>();
+            if (logic != null)
+            {
+                mirror.Model = logic.visualModel;
+                mirror.Explosion = logic.explosionParticles;
+                Destroy(logic);
+            }
+            var sphere = egg.GetComponent<SphereCollider>();
+            if (sphere != null)
+                mirror.Radius = sphere.radius * Mathf.Max(egg.transform.lossyScale.x, egg.transform.lossyScale.y, egg.transform.lossyScale.z);
+            var agent = egg.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null) Destroy(agent);
+            foreach (var collider in egg.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
+            var body = egg.GetComponent<Rigidbody>();
+            if (body != null) body.isKinematic = true;
+            return mirror;
+        }
+
+        private void LateUpdate()
+        {
+            if (_eggMirrors == null) return;
+            float blend = 1f - Mathf.Exp(-EGG_FOLLOW_SHARPNESS * Time.deltaTime);
+            foreach (var mirror in _eggMirrors)
+            {
+                if (mirror == null || !mirror.HasTarget || mirror.Root == null || !mirror.Root.activeSelf) continue;
+                Transform egg = mirror.Root.transform;
+                Vector3 before = egg.position;
+                egg.position = Vector3.Lerp(before, mirror.Target, blend);
+
+                // Roll the model the way MegaChickenEgg does.
+                Vector3 movement = egg.position - before;
+                movement.y = 0f;
+                if (mirror.Model != null && movement.sqrMagnitude > 1e-8f && mirror.Radius > 0f)
+                    mirror.Model.Rotate(Vector3.Cross(Vector3.up, movement.normalized),
+                                        movement.magnitude / mirror.Radius * Mathf.Rad2Deg, Space.World);
+            }
         }
 
         private void ReplaceLegacyKillZone()
@@ -156,18 +301,36 @@ namespace FastAndFractured.Multiplayer
             Destroy(_killZone);
             _killZone = null;
 
-            StartCoroutine(RestoreRelayedCollidersNextFrame(colliders, enabledStates));
+            _quarantined = colliders;
+            _quarantinedStates = enabledStates;
+            StartCoroutine(RestoreRelayedCollidersNextFrame());
         }
 
-        private static IEnumerator RestoreRelayedCollidersNextFrame(Collider[] colliders, bool[] enabledStates)
+        // The kill zone's colliders while the legacy component is being destroyed.
+        private Collider[] _quarantined;
+        private bool[] _quarantinedStates;
+
+        private IEnumerator RestoreRelayedCollidersNextFrame()
         {
             yield return null;
+            RestoreRelayedColliders();
+        }
 
-            for (int i = 0; i < colliders.Length; i++)
+        /// <summary>
+        /// Also run from OnStartNetwork: FishNet deactivates scene objects between Awake and their
+        /// spawn, which stops the coroutine above, and the kill zone stayed without colliders for
+        /// the whole match (same as the dead walls and the TNT).
+        /// </summary>
+        private void RestoreRelayedColliders()
+        {
+            if (_quarantined == null) return;
+            for (int i = 0; i < _quarantined.Length; i++)
             {
-                if (colliders[i] != null)
-                    colliders[i].enabled = enabledStates[i];
+                if (_quarantined[i] != null)
+                    _quarantined[i].enabled = _quarantinedStates[i];
             }
+            _quarantined = null;
+            _quarantinedStates = null;
         }
 
         private void RemoveClientPushZone()
