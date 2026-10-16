@@ -80,6 +80,25 @@ namespace FastAndFractured.Multiplayer
             _freeLook.LookAt = _proxy;
         }
 
+        /// <summary>The point the proxy chases (the car's Visuals, not the proxy itself).</summary>
+        public Transform RawTarget => _rawTarget;
+
+        /// <summary>
+        /// Chase another point - the spectator uses it to watch other cars through the same
+        /// smoothing. Setting the rig's Follow directly would bypass the proxy and bring the
+        /// tick-rate stepping back. The camera jumps to the new point instead of sliding there.
+        /// </summary>
+        public void Retarget(Transform target)
+        {
+            if (target == null || target == _rawTarget) return;
+            _rawTarget = target;
+            if (_proxy == null) return;
+            _proxy.position = target.position;
+            _velocity = Vector3.zero;
+            _lastTarget = target.position;
+            _targetVelocity = Vector3.zero;
+        }
+
         private void OnDisable()
         {
             if (_freeLook != null && _rawTarget != null && _freeLook.Follow == _proxy)

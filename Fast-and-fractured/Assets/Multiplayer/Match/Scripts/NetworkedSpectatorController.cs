@@ -24,6 +24,7 @@ namespace FastAndFractured.Multiplayer
     /// Controls (when active):
     ///   TAB / Click  - cycle to next alive player
     ///   F            - toggle free camera flight
+    ///   H / button   - hide or show the watched car's HUD (SpectatedHud)
     ///   ESC          - back to the room (the host: end the match for everyone)
     ///   (free-cam)   - WASD/Arrows: pan | E/Q: up/down | Shift: faster
     /// </summary>
@@ -39,6 +40,8 @@ namespace FastAndFractured.Multiplayer
         private Camera _mainCamera;
         private Transform _originalFollow;
         private Transform _originalLookAt;
+        private CameraTargetSmoother _smoother;
+        private Transform _originalSmootherTarget;
         private readonly List<Transform> _aliveTargets = new List<Transform>();
         private int _currentTargetIndex = -1;
         private bool _active;
@@ -54,6 +57,9 @@ namespace FastAndFractured.Multiplayer
         private readonly List<Behaviour> _hiddenHudComponents = new List<Behaviour>();
 
         public bool IsActive => _active;
+
+        // The match HUD shows the car being watched.
+        private readonly SpectatedHud _hud = new SpectatedHud();
 
         // ── UI ───────────────────────────────────────────────────────────────────
         private Canvas _uiCanvas;
@@ -88,6 +94,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (!_active) return;
             UpdateSkipButton();
+            if (!_freeCam) _hud.Tick();
             var kb = Keyboard.current;
             var pad = Gamepad.current;
             if (_skipButton != null && _skipButton.activeSelf &&
@@ -120,8 +127,17 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Cycle target.
-            if (kb.tabKey.wasPressedThisFrame || Mouse.current?.leftButton.wasPressedThisFrame == true)
+            if (kb.hKey.wasPressedThisFrame)
+            {
+                ToggleHud();
+                return;
+            }
+
+            // Cycle target (a click on the overlay's buttons is not a cycle).
+            bool click = Mouse.current?.leftButton.wasPressedThisFrame == true &&
+                         (UnityEngine.EventSystems.EventSystem.current == null ||
+                          !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject());
+            if (kb.tabKey.wasPressedThisFrame || click)
             {
                 CycleToNextTarget();
                 UpdateUiText();
@@ -144,13 +160,18 @@ namespace FastAndFractured.Multiplayer
 
             _originalFollow = _camera.Follow;
             _originalLookAt = _camera.LookAt;
+            _smoother = _camera.GetComponent<CameraTargetSmoother>();
+            _originalSmootherTarget = _smoother != null ? _smoother.RawTarget : null;
             _currentTargetIndex = 0;
             ApplyCurrentTarget();
             _active = true;
 
             HideLocalPlayerHud();
+            _hud.SetVisible(true);
+            BindHudToCurrentTarget();
             EnsureUi();
             _uiCanvas.gameObject.SetActive(true);
+            UpdateHudButton();
             UpdateUiText();
         }
 
@@ -166,16 +187,21 @@ namespace FastAndFractured.Multiplayer
                 _camera.Follow = _originalFollow;
                 _camera.LookAt = _originalLookAt;
             }
+            if (_smoother != null && _originalSmootherTarget != null)
+                _smoother.Retarget(_originalSmootherTarget);
 
             _aliveTargets.Clear();
             _currentTargetIndex = -1;
 
+            _hud.Release();
+            _hudTarget = null;
             RestoreLocalPlayerHud();
             if (_uiCanvas != null) _uiCanvas.gameObject.SetActive(false);
         }
 
         /// <summary>
-        /// HUD elements that are player-specific and should disappear while spectating. The rest
+        /// HUD elements that are player-specific. While spectating, those in SpectatedHud.Mirrored
+        /// show the watched car instead and the others disappear. The rest
         /// (EVENT_TEXT, TIMER_TEXT, PLAYER_ICONS) are global and must stay visible so the user
         /// can still see kill feed, match timer and "X alive" indicator.
         /// </summary>
@@ -224,6 +250,7 @@ namespace FastAndFractured.Multiplayer
             {
                 foreach (var t in PlayerHudElementsToHide)
                 {
+                    if (System.Array.IndexOf(SpectatedHud.Mirrored, t) >= 0) continue;   // shows the watched car
                     var el = HUDManager.Instance.GetUIElement(t);
                     if (el == null) continue;
                     if (!el.gameObject.activeSelf) continue; // already off — leave it
@@ -310,8 +337,47 @@ namespace FastAndFractured.Multiplayer
             if (_currentTargetIndex < 0 || _currentTargetIndex >= _aliveTargets.Count) return;
             var target = _aliveTargets[_currentTargetIndex];
             if (target == null) return;
-            _camera.Follow = target;
-            _camera.LookAt = target;
+
+            // The car's Visuals, drawn interpolated by VehicleVisualSmoother, through the rig's
+            // CameraTargetSmoother proxy - the same path the player's own camera uses. Following
+            // the car root showed every physics step: without input prediction for other cars
+            // the body only moves on ticks, so the view jerked.
+            Transform point = SmoothedPointOf(target);
+            if (_active) BindHudToCurrentTarget();
+            if (_smoother != null && _smoother.isActiveAndEnabled)
+            {
+                _smoother.Retarget(point);
+                return;
+            }
+            _camera.Follow = point;
+            _camera.LookAt = point;
+        }
+
+        private Transform _hudTarget;
+
+        private void BindHudToCurrentTarget()
+        {
+            if (_currentTargetIndex < 0 || _currentTargetIndex >= _aliveTargets.Count) return;
+            var target = _aliveTargets[_currentTargetIndex];
+            if (target == null || target == _hudTarget) return;
+            _hudTarget = target;
+            _hud.Bind(target);
+        }
+
+        private void ToggleHud()
+        {
+            _hud.SetVisible(!_hud.Visible);
+            UpdateHudButton();
+        }
+
+        private const string VISUALS_CHILD_NAME = "Visuals";
+
+        /// <summary>The interpolated model of a car, or the car itself when it has none.</summary>
+        public static Transform SmoothedPointOf(Transform car)
+        {
+            if (car == null) return null;
+            Transform visuals = car.Find(VISUALS_CHILD_NAME);
+            return visuals != null ? visuals : car;
         }
 
         private bool CacheCamera()
@@ -518,7 +584,7 @@ namespace FastAndFractured.Multiplayer
             _skipButton.transform.SetParent(parent, false);
             var rt = _skipButton.AddComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1f, 0f);
-            rt.anchoredPosition = new Vector2(-40f, 90f);
+            rt.anchoredPosition = new Vector2(-40f, 190f);   // above the ability icons
             rt.sizeDelta = new Vector2(420f, 80f);
             var bg = _skipButton.AddComponent<Image>();
             bg.color = new Color(0.85f, 0.3f, 0.15f, 0.95f);
@@ -553,6 +619,32 @@ namespace FastAndFractured.Multiplayer
             _controlsLabel = MakeLabel(bottomBar.transform, 26, TextAlignmentOptions.Center, new Color(0.85f, 0.85f, 0.85f, 1f));
 
             BuildSkipButton(rootGO.transform);
+            BuildHudButton(rootGO.transform);
+        }
+
+        // ── HUD toggle button ────────────────────────────────────────────────────
+        private TMP_Text _hudButtonLabel;
+
+        private void BuildHudButton(Transform parent)
+        {
+            var go = new GameObject("HudButton");
+            go.transform.SetParent(parent, false);
+            var rt = go.AddComponent<RectTransform>();
+            // Top left, under the status bar: the minimap takes the top right corner.
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(30f, -110f);
+            rt.sizeDelta = new Vector2(300f, 60f);
+            var bg = go.AddComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.65f);
+            go.AddComponent<Button>().onClick.AddListener(ToggleHud);
+            _hudButtonLabel = MakeLabel(go.transform, 26, TextAlignmentOptions.Center, Color.white);
+            UpdateHudButton();
+        }
+
+        private void UpdateHudButton()
+        {
+            if (_hudButtonLabel == null) return;
+            _hudButtonLabel.text = LocalizationManager.Localize(_hud.Visible ? "MP.Spectator.HideHud" : "MP.Spectator.ShowHud");
         }
 
         private static GameObject MakeBar(Transform parent, float anchorY, float pivotY, float anchoredY, float height)
@@ -601,13 +693,7 @@ namespace FastAndFractured.Multiplayer
                 string targetName = "—";
                 if (_currentTargetIndex >= 0 && _currentTargetIndex < _aliveTargets.Count && _aliveTargets[_currentTargetIndex] != null)
                 {
-                    var nob = _aliveTargets[_currentTargetIndex].GetComponentInParent<NetworkObject>(true);
-                    string ownerLabel;
-                    if (nob == null || nob.Owner == null || !nob.Owner.IsValid || nob.Owner.ClientId < 0)
-                        ownerLabel = " (AI)";
-                    else
-                        ownerLabel = $" #{nob.Owner.ClientId}";
-                    targetName = $"{_aliveTargets[_currentTargetIndex].name}{ownerLabel}";
+                    targetName = MatchNames.Of(_aliveTargets[_currentTargetIndex].gameObject);
                 }
                 _statusLabel.text = LocalizationManager.Localize("MP.Spectator.Spectating", targetName, _aliveTargets.Count);
                 _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.Controls") + "   " + LeaveHint;

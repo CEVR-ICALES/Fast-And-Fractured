@@ -148,9 +148,12 @@ namespace FastAndFractured.Multiplayer
             if (heading.sqrMagnitude < 0.01f) heading = Vector3.forward;
             heading = Quaternion.Euler(0f, _orbitYaw, 0f) * heading.normalized;
 
-            Vector3 wanted = _target.position - heading * DISTANCE + Vector3.up * HEIGHT;
+            // The interpolated model, not the car root: the root only moves on physics steps, and
+            // aiming the camera straight at it every frame made the whole view jerk.
+            Vector3 point = NetworkedSpectatorController.SmoothedPointOf(_target).position;
+            Vector3 wanted = point - heading * DISTANCE + Vector3.up * HEIGHT;
             transform.position = Vector3.SmoothDamp(transform.position, wanted, ref _velocity, FOLLOW_SMOOTH, Mathf.Infinity, Time.unscaledDeltaTime);
-            transform.rotation = Quaternion.LookRotation(_target.position + Vector3.up * LOOK_HEIGHT - transform.position);
+            transform.rotation = Quaternion.LookRotation(point + Vector3.up * LOOK_HEIGHT - transform.position);
         }
 
         private void RefreshAlive()
@@ -180,19 +183,8 @@ namespace FastAndFractured.Multiplayer
         private void UpdateLabel()
         {
             if (_label == null) return;
-            string who = _target != null ? NameOf(_target) : "-";
+            string who = _target != null ? MatchNames.Of(_target.gameObject) : "-";
             _label.text = LocalizationManager.Localize("MP.Spectate.Watching", who, _alive.Count);
-        }
-
-        private static string NameOf(Transform car)
-        {
-            var nob = car.GetComponentInParent<NetworkObject>();
-            if (nob != null && nob.Owner != null && nob.Owner.IsValid)
-            {
-                var lobby = LobbyLocator.GetLobbyManager();
-                if (lobby != null) return lobby.GetPlayerName(nob.Owner.ClientId);
-            }
-            return car.name.Replace("(Clone)", string.Empty).Replace("Networked", string.Empty).Replace("GameplayCar Variant", " (AI)").Trim();
         }
     }
 }
