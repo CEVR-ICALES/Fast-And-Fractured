@@ -58,21 +58,84 @@ namespace FastAndFractured.Multiplayer
                     if (go != null && !rebuilt.Contains(go)) rebuilt.Add(go);
             }
 
-            foreach (var interactable in FindObjectsByType<GenericInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID))
+            // Sorted by hierarchy path: the pool is synced by index, so every peer must build the
+            // same order. Instance ids (the old sort) are assigned per process.
+            var found = new List<GameObject>();
+            foreach (var interactable in FindObjectsByType<GenericInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (interactable.gameObject.scene != handler.gameObject.scene) continue;
-                if (!rebuilt.Contains(interactable.gameObject))
-                    rebuilt.Add(interactable.gameObject);
+                if (!rebuilt.Contains(interactable.gameObject) && !found.Contains(interactable.gameObject))
+                    found.Add(interactable.gameObject);
             }
+            found.Sort((a, b) => string.CompareOrdinal(HierarchyPath(a.transform), HierarchyPath(b.transform)));
+            rebuilt.AddRange(found);
 
             _interactablesField.SetValue(handler, rebuilt.ToArray());
             Debug.LogWarning($"[NetworkedInteractableHandler] interactablesToToggle had missing entries " +
                              $"(scene-migration prefab swaps). Rebuilt with {rebuilt.Count} interactables found in scene.", this);
         }
 
+        /// <summary>"Root/Child/Grandchild", with sibling indices so same-named siblings stay distinct.</summary>
+        private static string HierarchyPath(Transform t)
+        {
+            var path = new System.Text.StringBuilder();
+            for (; t != null; t = t.parent)
+                path.Insert(0, $"/{t.GetSiblingIndex():D4}{t.name}");
+            return path.ToString();
+        }
+
         private InteractableHandler _interactableHandler;
         private InteractableHandler _clientCachedHandler;
         private int[] _pendingActiveIndices;
+
+        // Client: the pickups the server has in play, by raw index. Null until the first sync.
+        private bool[] _serverActive;
+        private const float CLIENT_ENFORCE_INTERVAL = 0.2f;
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!IsServerInitialized) StartCoroutine(ClientEnforceServerState());
+        }
+
+        /// <summary>
+        /// Pure client: keep the pickups exactly as the server has them.
+        ///
+        /// The server only sends the pool when it changes on its side, but on a client two
+        /// things change it locally afterwards: FishNet activates every scene NetworkObject when
+        /// it spawns it for that client (pickups are scene NOBs), and the singleplayer
+        /// InteractableHandler still runs there - it builds its own shuffled pool when the match
+        /// starts and toggles items from its own timers. Either one left a pickup showing on one
+        /// screen and not on the other until the next pickup re-sent the pool.
+        /// </summary>
+        private IEnumerator ClientEnforceServerState()
+        {
+            var wait = new WaitForSeconds(CLIENT_ENFORCE_INTERVAL);
+            while (true)
+            {
+                yield return wait;
+                if (_serverActive == null) continue;
+                var rawItems = GetRawInteractables(GetClientHandler());
+                if (rawItems == null) continue;
+                int fixedCount = 0;
+                for (int i = 0; i < rawItems.Length && i < _serverActive.Length; i++)
+                {
+                    var item = rawItems[i];
+                    if (item == null || item.activeSelf == _serverActive[i]) continue;
+                    item.SetActive(_serverActive[i]);
+                    fixedCount++;
+                }
+                if (fixedCount > 0) MpCanary.Mark($"Pickups: {fixedCount} put back to the server's state");
+            }
+        }
+
+        private void RememberServerState(int length, int[] activeRawIndices)
+        {
+            _serverActive = new bool[length];
+            if (activeRawIndices == null) return;
+            foreach (int index in activeRawIndices)
+                if (index >= 0 && index < length) _serverActive[index] = true;
+        }
 
         /// <summary>
         /// Client-side cached lookup for InteractableHandler. Avoids FindFirstObjectByType per RPC.
@@ -194,6 +257,7 @@ namespace FastAndFractured.Multiplayer
         
         private void ApplyFromRawIndices(GameObject[] rawItems, int[] activeRawIndices)
         {
+            RememberServerState(rawItems.Length, activeRawIndices);
             // Deactivate all
             foreach (var item in rawItems)
             {
@@ -227,6 +291,8 @@ namespace FastAndFractured.Multiplayer
             {
                 rawItems[rawIndex].SetActive(false);
             }
+            if (_serverActive != null && rawIndex < _serverActive.Length)
+                _serverActive[rawIndex] = false;
         }
 
         [Server]
