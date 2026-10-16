@@ -94,27 +94,42 @@ namespace FastAndFractured.Multiplayer
             return field != null ? (float)field.GetValue(_wrapped) : fallback;
         }
 
+        private readonly List<Collider> _collidersToRestore = new List<Collider>();
+
         private IEnumerator RemoveLegacyAfterColliderQuarantine()
         {
-            var collidersToRestore = new List<Collider>();
             foreach (var collider in GetComponentsInChildren<Collider>(true))
             {
                 if (collider == null || !collider.enabled)
                     continue;
 
                 collider.enabled = false;
-                collidersToRestore.Add(collider);
+                _collidersToRestore.Add(collider);
             }
 
             Destroy(_wrapped);
             _wrapped = null;
             yield return null;
+            RestoreColliders();
+        }
 
-            foreach (var collider in collidersToRestore)
+        public override void OnStartNetwork()
+        {
+            base.OnStartNetwork();
+            // FishNet deactivates scene objects between Awake and their spawn, which stops the
+            // coroutine above: every TNT kept its collider off for the whole match, so nothing
+            // could touch it and it never went off. Restore here too (like the dead walls).
+            RestoreColliders();
+        }
+
+        private void RestoreColliders()
+        {
+            foreach (var collider in _collidersToRestore)
             {
                 if (collider != null)
                     collider.enabled = true;
             }
+            _collidersToRestore.Clear();
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -178,8 +193,27 @@ namespace FastAndFractured.Multiplayer
             NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, transform.position);
 
             if (_visuals != null) _visuals.SetActive(false);
+            if (!base.IsServerInitialized) ShowClientBlast();
 
             StartCoroutine(DeactivateAfterDelay(_endingTime));
+        }
+
+        private static readonly FieldInfo _explosionVfxField =
+            typeof(ExplosionForce).GetField("_explosionVFX", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        /// <summary>
+        /// The blast's VFX lives on the hitbox, which only the server activates: clients saw the
+        /// crate vanish without an explosion. Show it here with its colliders off - the push and
+        /// the damage are the server's.
+        /// </summary>
+        private void ShowClientBlast()
+        {
+            if (_explosionHitbox == null) return;
+            foreach (var collider in _explosionHitbox.GetComponentsInChildren<Collider>(true))
+                collider.enabled = false;
+            if (_explosionVfxField?.GetValue(_explosionHitbox) is Transform vfx)
+                vfx.localScale = Vector3.one * _explosionRadius;
+            _explosionHitbox.gameObject.SetActive(true);
         }
 
         private IEnumerator DeactivateAfterDelay(float delay)
