@@ -27,22 +27,26 @@ namespace Utilities
         }
         #region TIMER_MANAGEMENT
 
+        private readonly List<KeyValuePair<string, ITimer>> _timersToUpdate = new List<KeyValuePair<string, ITimer>>();
+
         private void UpdateAllTimers(float deltaTime)
         {
-            List<string> timersToRemove = new List<string>();
-            for (int i = 0; i < _timers.Count; i++)
+            _timersToUpdate.Clear();
+            _timersToUpdate.AddRange(_timers);
+
+            foreach (var timerPair in _timersToUpdate)
             {
-                var timerPair = _timers.ElementAt(i);
-                timerPair.Value.UpdateTimer(deltaTime);
-                if (!timerPair.Value.GetData().IsRunning)
-                {
-                    timersToRemove.Add(timerPair.Key);
-                }
+                if (_timers.TryGetValue(timerPair.Key, out ITimer current) && current == timerPair.Value)
+                    timerPair.Value.UpdateTimer(deltaTime);
             }
 
-            for (int i = 0; i < timersToRemove.Count; i++)
+            foreach (var timerPair in _timersToUpdate)
             {
-                _timers.Remove(timersToRemove[i]);
+                if (!timerPair.Value.GetData().IsRunning &&
+                    _timers.TryGetValue(timerPair.Key, out ITimer current) && current == timerPair.Value)
+                {
+                    _timers.Remove(timerPair.Key);
+                }
             }
         }
 
