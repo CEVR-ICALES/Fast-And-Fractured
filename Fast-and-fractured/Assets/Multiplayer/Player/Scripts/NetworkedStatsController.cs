@@ -602,6 +602,22 @@ namespace FastAndFractured.Multiplayer
         /// so the RPC roundtrip was redundant and added a frame of latency.
         /// </summary>
         /// <param name="killer">The NetworkConnection that dealt the final blow.</param>
+        // The frames above HandleServerSideDeath: which hazard or damage path reported the death.
+        private static string DeathCaller()
+        {
+            var frames = new System.Diagnostics.StackTrace(2, false).GetFrames();
+            if (frames == null) return "?";
+            var names = new System.Collections.Generic.List<string>();
+            foreach (var f in frames)
+            {
+                var m = f.GetMethod();
+                if (m?.DeclaringType == null) continue;
+                names.Add(m.DeclaringType.Name + "." + m.Name);
+                if (names.Count == 4) break;
+            }
+            return string.Join(" < ", names);
+        }
+
         [Server]
         private void HandleServerSideDeath(NetworkConnection killer)
         {
@@ -631,7 +647,8 @@ namespace FastAndFractured.Multiplayer
             if (killerNob == null) killerNob = RecentAttacker();
             
             string killerName = killerNob != null ? killerNob.gameObject.name : "Unknown";
-            
+            MpCanary.Mark($"Death '{transform.root.name}' at {transform.position:F0} killer={killerName} via {DeathCaller()}");
+
             if (verboseLogging)
                 Debug.Log($"<color=red>[NetworkedStatsController] {gameObject.name} killed by {killerName}</color>");
             

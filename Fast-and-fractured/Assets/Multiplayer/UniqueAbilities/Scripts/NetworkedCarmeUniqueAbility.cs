@@ -81,18 +81,25 @@ namespace FastAndFractured.Multiplayer
                 ? _localAbility.uniqueAbilityShootPoint
                 : _localAbility.transform;
 
-            // Reproduce CarmeUniqueAbility.CalculateLandingPoint with the same serialized config.
-            if (!TryComputeAim(out Vector3 aimDirection, out Vector3 landPoint, shootPoint))
-                yield break; // SP flow also refunded the ability (no valid landing point)
-
             // Destroy the owner's local cosmetic chicken: the networked one replaces it for
             // everyone. (Replicas never spawn one — Carme keeps the events-only RPC path.)
+            bool localChickenSpawned = false;
             foreach (var chicken in FindObjectsByType<McChicken>(FindObjectsSortMode.None))
             {
                 if (chicken.GetComponent<NetworkObject>() != null) continue;
                 if ((chicken.transform.position - shootPoint.position).sqrMagnitude > 400f) continue;
+                localChickenSpawned = true;
                 Destroy(chicken.gameObject);
             }
+
+            // No local chicken: the SP flow found no landing point and refunded the cooldown.
+            // Re-running the raycasts a frame later could still find ground and launch a free one.
+            if (!localChickenSpawned)
+                yield break;
+
+            // Reproduce CarmeUniqueAbility.CalculateLandingPoint with the same serialized config.
+            if (!TryComputeAim(out Vector3 aimDirection, out Vector3 landPoint, shootPoint))
+                yield break;
 
             // HOST: [ServerRpc] from a server context never delivers (FishNet pitfall,
             // live-debugged on Pepe's tomato 2026-07-11). Call the server logic directly.

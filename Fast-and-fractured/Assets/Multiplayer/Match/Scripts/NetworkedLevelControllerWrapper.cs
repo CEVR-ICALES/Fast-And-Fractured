@@ -124,6 +124,9 @@ namespace FastAndFractured.Multiplayer
                       $"Player_Num={PlayerPrefs.GetInt("Player_Num")}, InGameCharacters(before)={beforeCount}");
 
             _levelController.PerformInitialize();
+            // Player_Num is only read during Initialize. Left in the prefs, the next singleplayer
+            // match expects that many humans and spawns no one ("Not all players have selected").
+            PlayerPrefs.DeleteKey("Player_Num");
 
             int afterCount = _levelController.InGameCharacters?.Count ?? -1;
             Debug.Log($"[NetworkedLevelControllerWrapper] PerformInitialize done. InGameCharacters(after)={afterCount}");

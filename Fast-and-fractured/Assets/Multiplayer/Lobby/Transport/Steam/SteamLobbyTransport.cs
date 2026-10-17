@@ -152,10 +152,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
         public async Task<bool> JoinLobbyAsync(LobbyHandle handle, CancellationToken ct = default)
         {
-            if (!SteamManager.Initialized) return false;
+            // PlatformId = Steam lobby CSteamID string. Anything else is a direct IP join
+            // (LobbyHandle.FromAddress), which has no Steam lobby to read: connect straight away.
+            if (!ulong.TryParse(handle.PlatformId, out ulong lobbyRaw))
+                return !string.IsNullOrEmpty(handle.Address) && await JoinAddressAsync(handle.Address, handle.Port, ct);
 
-            // PlatformId = Steam lobby CSteamID string
-            if (!ulong.TryParse(handle.PlatformId, out ulong lobbyRaw)) return false;
+            if (!SteamManager.Initialized) return false;
 
             // Join Steam lobby to access its data
             var joinTcs = new TaskCompletionSource<LobbyEnter_t>();
@@ -186,11 +188,16 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             if (!ushort.TryParse(serverPort, out ushort port)) port = (ushort)7777;
 
-            // Connect via Tugboat (or whatever transport is on the NetworkManager)
+            return await JoinAddressAsync(serverIp, port, ct);
+        }
+
+        // Connect via Tugboat (or whatever transport is on the NetworkManager)
+        private static async Task<bool> JoinAddressAsync(string ip, ushort port, CancellationToken ct)
+        {
             var nm = InstanceFinder.NetworkManager;
             if (nm == null) return false;
 
-            nm.TransportManager.Transport?.SetClientAddress(serverIp);
+            nm.TransportManager.Transport?.SetClientAddress(ip);
             nm.TransportManager.Transport?.SetPort(port);
 
             return await StartClientAsync(nm, ct);
