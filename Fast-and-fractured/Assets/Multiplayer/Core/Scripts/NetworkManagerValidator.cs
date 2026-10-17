@@ -10,7 +10,7 @@ namespace FastAndFractured.Multiplayer
     public class NetworkManagerValidator : MonoBehaviour
     {
         [Header("Expected Configuration")]
-        [Tooltip("DummyPlayer prefab that should spawn for each connecting client")]
+        [Tooltip("Player prefab that should spawn for each connecting client")]
         public GameObject expectedPlayerPrefab;
         
         private void Start()
@@ -33,7 +33,7 @@ namespace FastAndFractured.Multiplayer
             if (playerPrefab == null)
             {
                 Debug.LogError("<color=red>[NetworkManagerValidator] ❁ENO PLAYER PREFAB SET!</color>");
-                Debug.LogError("<color=red>Fix: NetworkManager ->Inspector ->Spawnable Prefabs ->Player Prefab ->Set to DummyPlayer</color>");
+                Debug.LogError("<color=red>Fix: NetworkManager ->Inspector ->Spawnable Prefabs ->Player Prefab ->Set to NetworkedPlayer</color>");
                 return;
             }
             
@@ -46,7 +46,7 @@ namespace FastAndFractured.Multiplayer
                 Debug.LogWarning($"  Actual: {playerPrefab.name}");
             }
             
-            // Validate DummyPlayer has required components
+            // Validate the player prefab has required components
             var networkObject = playerPrefab.GetComponent<FishNet.Object.NetworkObject>();
             if (networkObject == null)
             {
@@ -55,27 +55,6 @@ namespace FastAndFractured.Multiplayer
             else
             {
                 Debug.Log($"<color=cyan>[NetworkManagerValidator] [OK]{playerPrefab.name} has NetworkObject</color>");
-            }
-            
-            var debugSelector = playerPrefab.GetComponent<DebugCharacterSelector>();
-            if (debugSelector == null)
-            {
-                Debug.LogWarning($"<color=yellow>[NetworkManagerValidator] ⚠ {playerPrefab.name} missing DebugCharacterSelector!</color>");
-            }
-            else
-            {
-                Debug.Log($"<color=cyan>[NetworkManagerValidator] [OK]{playerPrefab.name} has DebugCharacterSelector</color>");
-            }
-            
-            var autoSelector = playerPrefab.GetComponent<AutoCharacterSelector>();
-            if (autoSelector == null)
-            {
-                Debug.LogWarning($"<color=yellow>[NetworkManagerValidator] ⚠ {playerPrefab.name} missing AutoCharacterSelector (optional)</color>");
-            }
-            else
-            {
-                Debug.Log($"<color=cyan>[NetworkManagerValidator] [OK]{playerPrefab.name} has AutoCharacterSelector</color>");
-                Debug.Log($"  Auto-select enabled: {autoSelector.enabled}");
             }
         }
     }

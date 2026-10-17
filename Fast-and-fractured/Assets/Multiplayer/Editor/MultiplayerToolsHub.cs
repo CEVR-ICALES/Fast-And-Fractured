@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using FishNet.Managing;
-using FastAndFractured.Multiplayer.Testing.Editor;
 using FastAndFractured.EditorTools;
 
 namespace FastAndFractured.Multiplayer.Editor
@@ -119,11 +118,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         MultiplayerLogFilterWindow.ShowWindow();
                     }
-                }
-
-                if (GUILayout.Button("Distributed Test Setup", GUILayout.Height(28f)))
-                {
-                    DistributedTestSetupWindow.ShowWindow();
                 }
             }
         }

@@ -677,22 +677,5 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         #endregion
-
-        #region BUG-4 — Stray debug character-select dropdown
-
-        /// <summary>
-        /// BUG-4 (2026-09-16): a leftover debug character-select dropdown ("Josefino") floated in
-        /// every match. It was hidden at runtime; since 2026-10-14 it is gone from the networked
-        /// player prefab (characters are picked in the lobby). It must not come back.
-        /// </summary>
-        [Test]
-        public void NetworkedPlayerPrefab_HasNoDebugCharacterDropdown()
-        {
-            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Multiplayer/Player/Prefabs/NetworkedPlayer.prefab");
-            Assert.IsNotNull(prefab);
-            Assert.IsEmpty(prefab.GetComponentsInChildren<DebugCharacterSelector>(true), "BUG-4: the debug dropdown is back on the player prefab");
-        }
-
-        #endregion
     }
 }

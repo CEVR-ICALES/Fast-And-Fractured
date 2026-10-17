@@ -85,7 +85,6 @@ namespace FastAndFractured.Multiplayer.Editor
 
             ValidateNetworkManager();
             ValidateLevelController();
-            ValidatePlayerSpawner();
             ValidateSpawnableVehicles();
             ValidateSpawnableBullets();
             ValidateSceneObjects();
@@ -154,27 +153,6 @@ namespace FastAndFractured.Multiplayer.Editor
             else
             {
                 AddResult(cat, "LevelController found.", MessageType.Info);
-            }
-        }
-
-        private void ValidatePlayerSpawner()
-        {
-            string cat = "Player Spawning";
-
-            var autoStarter = Object.FindFirstObjectByType<AutoGameStarter>();
-            if (autoStarter == null)
-            {
-                AddResult(cat, "No AutoGameStarter found. Game won't auto-start.", MessageType.Warning);
-            }
-            else
-            {
-                AddResult(cat, "AutoGameStarter found.", MessageType.Info);
-            }
-
-            var autoSetup = Object.FindFirstObjectByType<AutoSceneSetup>();
-            if (autoSetup == null)
-            {
-                AddResult(cat, "No AutoSceneSetup found. Player spawning may not work.", MessageType.Warning);
             }
         }
 
@@ -291,13 +269,6 @@ namespace FastAndFractured.Multiplayer.Editor
             if (guard == null)
             {
                 AddResult(cat, "No MultiplayerSingletonGuard found. Singleton lifecycle may break.", MessageType.Warning);
-            }
-
-            // Check for test coordinator
-            var testCoord = Object.FindFirstObjectByType<Testing.MultiplayerTestCoordinator>(FindObjectsInactive.Include);
-            if (testCoord != null)
-            {
-                AddResult(cat, "MultiplayerTestCoordinator found  Etests will run on play.", MessageType.Info);
             }
 
             // Check spawn points

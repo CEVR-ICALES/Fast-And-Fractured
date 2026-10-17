@@ -857,7 +857,6 @@ GameObject:
   - component: {fileID: 387945244246068758}
   - component: {fileID: 1334182754793340020}
   - component: {fileID: 1949140199736289190}
-  - component: {fileID: 5438304929023964034}
   - component: {fileID: 8947982575739604106}
   m_Layer: 0
   m_Name: NetworkedLevelController
@@ -953,27 +952,6 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 0}
     Scale: {x: 0, y: 0, z: 0}
     IsValid: 0
---- !u!114 &5438304929023964034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6544987028275868450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d9b4dfd50e30a7498a3e69ff157f5da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.AutoGameStarter
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 0}
-  _networkObjectCache: {fileID: 0}
-  autoStartEnabled: 1
-  minPlayersToStart: 3
-  useDistributedExpectedPlayers: 1
-  requireAllConnectedPlayersReady: 1
-  countdownTime: 5
-  levelManager: {fileID: 1334182754793340020}
 --- !u!114 &8947982575739604106
 MonoBehaviour:
   m_ObjectHideFlags: 0
