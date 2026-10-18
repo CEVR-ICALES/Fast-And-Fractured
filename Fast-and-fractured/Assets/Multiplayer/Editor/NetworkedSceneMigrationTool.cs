@@ -393,7 +393,9 @@ namespace FastAndFractured.Multiplayer.Editor
             int prefabsRepointed   = RepointLevelControllerPrefabs(scene);
             int interactableFixes  = EnsureInteractableInfra(scene);
 
-            if (prefabSwaps > 0 || sceneOnlyConverts > 0 || strippedOverrides > 0 || overridesRestored > 0 || autoInitSuppressed > 0 || prefabsRepointed > 0 || interactableFixes > 0)
+            bool missingSceneIds = HasUnassignedSceneIds(scene);
+
+            if (prefabSwaps > 0 || sceneOnlyConverts > 0 || strippedOverrides > 0 || overridesRestored > 0 || autoInitSuppressed > 0 || prefabsRepointed > 0 || interactableFixes > 0 || missingSceneIds)
             {
                 EditorSceneManager.MarkSceneDirty(scene);
                 AssignSceneIds(scene);
@@ -1233,6 +1235,18 @@ namespace FastAndFractured.Multiplayer.Editor
         }
 
         /// <summary>Gives every NetworkObject in the scene its SceneId before saving (FishNet's Reserialize NetworkObjects > Scenes).</summary>
+        private static readonly System.Reflection.FieldInfo SceneIdField = typeof(NetworkObject).GetField("SceneId",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+
+        private static bool HasUnassignedSceneIds(Scene scene)
+        {
+            if (SceneIdField == null) return false;
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var nob in root.GetComponentsInChildren<NetworkObject>(true))
+                    if ((ulong)SceneIdField.GetValue(nob) == 0) return true;
+            return false;
+        }
+
         private static void AssignSceneIds(Scene scene)
         {
             var create = typeof(NetworkObject).GetMethod("CreateSceneId",

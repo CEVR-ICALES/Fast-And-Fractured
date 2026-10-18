@@ -372,21 +372,14 @@ namespace FastAndFractured.Multiplayer.Editor
                                    $"vanished from instance of {entry.OriginalPath}. Variant NOT created.");
                     return;
                 }
-                GameObject targetGO = spComponent.gameObject;
-
-                // NetworkObject first so the wrapper's [RequireComponent] finds it.
-                if (targetGO.GetComponent<NetworkObject>() == null)
-                    targetGO.AddComponent<NetworkObject>();
-
-                if (targetGO.GetComponent(entry.Def.WrapperType) == null)
-                    targetGO.AddComponent(entry.Def.WrapperType);
+                WireHazards(instance);
 
                 var saved = PrefabUtility.SaveAsPrefabAsset(instance, entry.OutputPath);
                 if (saved != null)
                 {
                     TryRefreshNetworkObject(saved);
 
-                    Debug.Log($"[NetworkedPropSetup] Created: {entry.OutputPath} (wrapper on '{targetGO.name}')", saved);
+                    Debug.Log($"[NetworkedPropSetup] Created: {entry.OutputPath}", saved);
                 }
                 else
                 {
@@ -397,6 +390,70 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 UnityEngine.Object.DestroyImmediate(instance);
             }
+        }
+
+        private static int WireHazards(GameObject root)
+        {
+            int changes = 0;
+            var strippedObjects = new HashSet<GameObject>();
+            foreach (var def in HAZARD_DEFS)
+            {
+                foreach (Component wrapper in root.GetComponentsInChildren(def.WrapperType, true))
+                {
+                    if (wrapper.GetComponent(def.SingleplayerType) != null) continue;
+                    strippedObjects.Add(wrapper.gameObject);
+                    UnityEngine.Object.DestroyImmediate(wrapper, true);
+                    changes++;
+                }
+
+                if (root.GetComponentInChildren(def.WrapperType, true) != null) continue;
+                Component hazard = root.GetComponentsInChildren(def.SingleplayerType, true).FirstOrDefault(c =>
+                {
+                    GameObject owner = PrefabUtility.GetNearestPrefabInstanceRoot(c.gameObject);
+                    return owner == null || owner == root;
+                });
+                if (hazard == null) continue;
+
+                GameObject target = hazard.gameObject;
+                // NetworkObject first so the wrapper's [RequireComponent] finds it.
+                if (target.GetComponent<NetworkObject>() == null) { target.AddComponent<NetworkObject>(); changes++; }
+                target.AddComponent(def.WrapperType);
+                changes++;
+            }
+
+            foreach (GameObject stripped in strippedObjects)
+            {
+                var nob = stripped.GetComponent<NetworkObject>();
+                if (nob == null || stripped == root || stripped.GetComponent<NetworkBehaviour>() != null) continue;
+                UnityEngine.Object.DestroyImmediate(nob, true);
+                changes++;
+            }
+            return changes;
+        }
+
+        [MenuItem("Tools/Fast And Fractured/Networked Prop Setup - Repair Variants (Headless)", priority = 11)]
+        public static void RepairVariantsHeadless()
+        {
+            int repaired = 0;
+            foreach (var guid in AssetDatabase.FindAssets("t:Prefab", new[] { OUTPUT_FOLDER }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    int changes = WireHazards(root);
+                    if (changes == 0) continue;
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    repaired++;
+                    Debug.Log($"[NetworkedPropSetup] Repaired {path} ({changes} change(s))");
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[NetworkedPropSetup] Repair complete: {repaired} variant(s) changed. Run Scene Migration - Reapply All next.");
         }
 
         private static void TryRefreshNetworkObject(GameObject prefab)

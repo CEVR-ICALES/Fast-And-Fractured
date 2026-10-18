@@ -1,5 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-// Test tooling (driven from the editor through MCP): never in a release build.
+// Test tooling (driven from the editor through MCP): never in a release build. This is to automate game testing using MCP
 using System.Collections;
 using System.Linq;
 using System.Text;

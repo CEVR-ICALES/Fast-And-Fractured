@@ -56,30 +56,63 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2204866554014977888, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6162550546593530244}
+    - targetCorrespondingSourceObject: {fileID: 2204866554014977888, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 281776892925698862}
     - targetCorrespondingSourceObject: {fileID: 9136861166272028797, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5219993476385184345}
     - targetCorrespondingSourceObject: {fileID: 9136861166272028797, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8166757676660486517}
+      addedObject: {fileID: 2592105793024942950}
   m_SourcePrefab: {fileID: 100100000, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
---- !u!1 &4923242972520838423 stripped
+--- !u!1 &2596109434082925066 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 9136861166272028797, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2204866554014977888, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
   m_PrefabInstance: {fileID: 4223947316563694954}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5219993476385184345
+--- !u!114 &6162550546593530244
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4923242972520838423}
+  m_GameObject: {fileID: 2596109434082925066}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _localReconcileCorrectionType: 2
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 16979151871533567426
+  SceneId: 0
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
@@ -98,6 +131,38 @@ MonoBehaviour:
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
   _initializedTimestamp: 0
+--- !u!114 &281776892925698862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2596109434082925066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 535b162e9f0aeb14387f9efa4c23f21e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedSuckingBuilding
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6162550546593530244}
+  _networkObjectCache: {fileID: 0}
+--- !u!1 &4923242972520838423 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9136861166272028797, guid: 717453025ec3eaa4db42545f06b12641, type: 3}
+  m_PrefabInstance: {fileID: 4223947316563694954}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5219993476385184345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4923242972520838423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
   _localLevelOfDetailCalculationType: 0
   _useLevelOfDetail: 0
   _useRootLevelOfDetail: 1
@@ -125,7 +190,25 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 0}
     Scale: {x: 0, y: 0, z: 0}
     IsValid: 0
---- !u!114 &8166757676660486517
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 1
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  _initializedTimestamp: 0
+--- !u!114 &2592105793024942950
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,9 +217,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 4923242972520838423}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 535b162e9f0aeb14387f9efa4c23f21e, type: 3}
+  m_Script: {fileID: 11500000, guid: 819a30d9bdfe84244b8e806250668ceb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedSuckingBuilding
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedBuildingDeadZone
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 5219993476385184345}
   _networkObjectCache: {fileID: 0}

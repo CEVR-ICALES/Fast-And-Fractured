@@ -15,6 +15,7 @@ namespace FastAndFractured.Multiplayer
         protected T Wrapped { get; private set; }
 
         private bool _wrappedRemovalScheduled;
+        private List<Collider> _quarantinedColliders;
 
         protected virtual void Awake()
         {
@@ -24,6 +25,9 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
+
+            // FishNet deactivates scene objects before spawn, which stops a restore started in Awake.
+            RestoreQuarantinedColliders();
 
             if (Wrapped != null && !base.IsServerInitialized)
                 RemoveWrappedBehaviour();
@@ -38,32 +42,40 @@ namespace FastAndFractured.Multiplayer
                 return;
 
             _wrappedRemovalScheduled = true;
-            var collidersToRestore = new List<Collider>();
+            _quarantinedColliders = new List<Collider>();
             foreach (var collider in GetComponents<Collider>())
             {
                 if (collider == null || !collider.enabled)
                     continue;
 
                 collider.enabled = false;
-                collidersToRestore.Add(collider);
+                _quarantinedColliders.Add(collider);
             }
 
             Destroy(Wrapped);
             Wrapped = null;
 
-            if (collidersToRestore.Count > 0)
-                StartCoroutine(RestoreCollidersNextFrame(collidersToRestore));
+            if (_quarantinedColliders.Count > 0)
+                StartCoroutine(RestoreCollidersNextFrame());
         }
 
-        private static IEnumerator RestoreCollidersNextFrame(List<Collider> colliders)
+        private IEnumerator RestoreCollidersNextFrame()
         {
             yield return null;
+            RestoreQuarantinedColliders();
+        }
 
-            foreach (var collider in colliders)
+        private void RestoreQuarantinedColliders()
+        {
+            if (_quarantinedColliders == null)
+                return;
+
+            foreach (var collider in _quarantinedColliders)
             {
                 if (collider != null)
                     collider.enabled = true;
             }
+            _quarantinedColliders = null;
         }
 
         protected virtual void OnConfigured() { }

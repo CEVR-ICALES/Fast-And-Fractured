@@ -332,7 +332,7 @@ namespace FastAndFractured.Multiplayer
 
                 // The owner's child state machines (shooting) keep running from Update as in singleplayer; remote ones stay off.
                 bool isMovementController = ctrl.gameObject == nob.gameObject;
-                if (nob.IsOwner && !isMovementController)
+                if (IsLocalPlayerObject(nob) && !isMovementController)
                 {
                     var existingDriver = ctrl.GetComponent<FastAndFractured.Multiplayer.NetworkedStateMachineDriver>();
                     if (existingDriver != null)

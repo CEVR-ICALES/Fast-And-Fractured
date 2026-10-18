@@ -70,11 +70,6 @@ namespace FastAndFractured.Multiplayer
         private BulletSpawnParameters _capturedPredictedParams;
         private bool _loggedMissingInputProvider;
 
-        [Header("Cosmetic Projectile Types")]
-        [SerializeField] private Pooltype _cosmeticNormalBulletType;
-        [SerializeField] private Pooltype _cosmeticPushBulletType;
-        [SerializeField] private Pooltype _cosmeticMineType;
-
         [Header("Networked Projectile Prefabs")]
         [SerializeField] private GameObject _networkedNormalBulletPrefab;
         [SerializeField] private GameObject _networkedPushBulletPrefab;
@@ -526,73 +521,6 @@ namespace FastAndFractured.Multiplayer
                 _networkedNormalBulletPrefab,
                 _networkedPushBulletPrefab,
                 _networkedMinePrefab);
-        }
-
-        private void SpawnCosmeticProjectile(BulletSpawnParameters spawnParams)
-        {
-            if (!base.IsOwner) return;
-            if (ObjectPoolManager.Instance == null) return;
-            if (spawnParams.ShootPoint == null) return;
-
-            Pooltype cosmeticType;
-            if (spawnParams.IsMine)
-                cosmeticType = _cosmeticMineType;
-            else if (spawnParams.Pooltype == _normalShootHandle.Pooltype)
-                cosmeticType = _cosmeticNormalBulletType;
-            else
-                cosmeticType = _cosmeticPushBulletType;
-
-            GameObject cosmeticBulletGO = ObjectPoolManager.Instance.GivePooledObject(cosmeticType);
-            if (cosmeticBulletGO == null) return;
-
-            cosmeticBulletGO.transform.SetPositionAndRotation(spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
-
-            var bulletBehaviour = cosmeticBulletGO.GetComponent<BulletBehaviour>();
-            if (bulletBehaviour != null)
-            {
-                ConfigureBullet(bulletBehaviour, spawnParams, true);
-                bulletBehaviour.InitBulletTrayectory();
-            }
-        }
-
-        private static int _bulletDefaultLayer = -1;
-        private static int _bulletIgnoreRaycastLayer = -1;
-
-        private void ConfigureBullet(BulletBehaviour bullet, BulletSpawnParameters parameters, bool isCosmetic)
-        {
-            bullet.Velocity = parameters.Velocity;
-            bullet.Range = parameters.Range;
-            bullet.Damage = isCosmetic ? 0 : parameters.Damage;
-
-            if (_bulletDefaultLayer < 0) _bulletDefaultLayer = LayerMask.NameToLayer("Default");
-            if (_bulletIgnoreRaycastLayer < 0) _bulletIgnoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
-
-            bullet.gameObject.layer = isCosmetic ? _bulletIgnoreRaycastLayer : _bulletDefaultLayer;
-
-            if (bullet is NormalBulletBehaviour nbb)
-            {
-                nbb.IgnoreCollider = parameters.IgnoredCollider;
-            }
-            else if (bullet is PushBulletBehaviour pbb)
-            {
-                pbb.PushForce = parameters.PushForce;
-                pbb.ExplosionRadius = parameters.ExplosionRadius;
-                pbb.ExplosionCenterOffset = parameters.ExplosionCenterOffset;
-                pbb.CustomGravity = parameters.CustomGravity;
-                pbb.BouncingNum = parameters.BouncingNum;
-                pbb.BouncingStrenght = parameters.BouncingStrenght;
-                pbb.TimeToExplode = parameters.TimeToExplode;
-                // A client-predicted shot reaches the server without object references: the
-                // shooter is this car.
-                pbb.Author = parameters.Author != null ? parameters.Author : ShooterCar();
-            }
-        }
-
-        private GameObject ShooterCar()
-        {
-            var physics = GetComponentInParent<PhysicsBehaviour>();
-            if (physics == null) physics = GetComponentInChildren<PhysicsBehaviour>();
-            return physics != null ? physics.gameObject : null;
         }
 
         private bool EnsureShootHandles()

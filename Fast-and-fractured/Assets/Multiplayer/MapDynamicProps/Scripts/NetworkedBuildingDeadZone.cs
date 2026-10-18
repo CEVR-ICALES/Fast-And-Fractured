@@ -4,7 +4,6 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>Re-routes the kill through DealDamageServerRpc so the networked death pipeline fires.</summary>
-    [RequireComponent(typeof(BuildingDeadZone))]
     public class NetworkedBuildingDeadZone : ServerAuthoritativeWrapper<BuildingDeadZone>
     {
         private NetworkedStatsController _lastKilled;
