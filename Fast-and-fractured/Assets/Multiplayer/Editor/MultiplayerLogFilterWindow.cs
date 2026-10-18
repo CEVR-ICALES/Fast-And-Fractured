@@ -7,6 +7,12 @@ namespace FastAndFractured.Multiplayer.Editor
 {
     public class MultiplayerLogFilterWindow : EditorWindow
     {
+        private const float SECTION_SPACING = 6f;
+        private const float BUTTON_HEIGHT = 24f;
+        private const float SMALL_BUTTON_HEIGHT = 22f;
+        private const float ADD_BUTTON_WIDTH = 80f;
+        private static readonly Vector2 MIN_WINDOW_SIZE = new Vector2(480f, 420f);
+
         private Vector2 _scrollPosition;
         private string _searchFilter = string.Empty;
         private string _newCategory = string.Empty;
@@ -16,7 +22,7 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             MultiplayerLogFilterService.EnsureInitialized();
             MultiplayerLogFilterWindow window = GetWindow<MultiplayerLogFilterWindow>("MP Log Filter");
-            window.minSize = new Vector2(480f, 420f);
+            window.minSize = MIN_WINDOW_SIZE;
             window.Show();
         }
 
@@ -30,11 +36,11 @@ namespace FastAndFractured.Multiplayer.Editor
                 MessageType.Info);
 
             DrawGlobalSettings();
-            EditorGUILayout.Space(6f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawCategoryActions();
-            EditorGUILayout.Space(6f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawCategorySearchAndAdd();
-            EditorGUILayout.Space(6f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawCategoryList();
         }
 
@@ -55,17 +61,17 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Enable All", GUILayout.Height(24f)))
+                if (GUILayout.Button("Enable All", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     MultiplayerLogFilterService.SetAllCategories(true);
                 }
 
-                if (GUILayout.Button("Disable All", GUILayout.Height(24f)))
+                if (GUILayout.Button("Disable All", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     MultiplayerLogFilterService.SetAllCategories(false);
                 }
 
-                if (GUILayout.Button("Rescan Categories", GUILayout.Height(24f)))
+                if (GUILayout.Button("Rescan Categories", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     int addedCount = MultiplayerLogFilterService.RescanProjectCategories();
                     Debug.Log($"[MultiplayerLogFilter] Rescan finished. Added categories: {addedCount}");
@@ -74,7 +80,7 @@ namespace FastAndFractured.Multiplayer.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Reset Defaults", GUILayout.Height(22f)))
+                if (GUILayout.Button("Reset Defaults", GUILayout.Height(SMALL_BUTTON_HEIGHT)))
                 {
                     MultiplayerLogFilterService.ResetToDefaults();
                 }
@@ -90,7 +96,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 _newCategory = EditorGUILayout.TextField("Add Category", _newCategory);
                 using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(_newCategory)))
                 {
-                    if (GUILayout.Button("Add", GUILayout.Width(80f)))
+                    if (GUILayout.Button("Add", GUILayout.Width(ADD_BUTTON_WIDTH)))
                     {
                         bool added = MultiplayerLogFilterService.EnsureCategory(_newCategory);
                         if (added)

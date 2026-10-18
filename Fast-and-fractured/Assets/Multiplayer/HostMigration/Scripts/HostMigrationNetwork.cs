@@ -12,18 +12,9 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer.HostMigration
 {
     /// <summary>
-    /// Host migration runtime (everything is a no-op while HostMigrationSettings.Enabled is off).
-    ///
-    /// During a match the host sends a MatchSnapshotBroadcast every half second
-    /// (HostMigrationSnapshotSender). When the connection to the host is lost, the remaining
-    /// players do not go back to the hub (HostDisconnectWatchdog asks TryHandleHostLoss first):
-    ///  - the successor named in the last snapshot opens a server on the same port, waits for
-    ///    the others and reloads the map, where NetworkedLevelControllerManager rebuilds the match
-    ///    from the snapshot (HostMigrationResume);
-    ///  - everyone else reconnects to the successor's address and is carried into the map by the
-    ///    normal global scene load.
-    /// The game connection is FishNet over Tugboat to the host's address both in the editor and
-    /// in the Steam build (Steam only lists lobbies), so the same path serves both.
+    /// Host migration (a no-op unless HostMigrationSettings.Enabled). The host sends snapshots during the match;
+    /// when it is lost, the successor named in the last one opens a server and reloads the map from it
+    /// (HostMigrationResume) and everyone else reconnects to it.
     /// </summary>
     public sealed class HostMigrationNetwork : MonoBehaviour
     {
@@ -38,8 +29,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
         public static MatchSnapshotBroadcast? LatestSnapshot { get; private set; }
         private static float _latestSnapshotTime;
         private const float MAX_SNAPSHOT_AGE = 5f;
+        private const float SERVER_START_TIMEOUT = 5f;
+        private const float MAX_RECONNECT_WAIT = 5f;
+        private const float CLIENT_START_TIMEOUT = 3f;
+        private const float RECONNECT_RETRY_INTERVAL = 0.25f;
+        private const float DEFAULT_RECONNECT_TIMEOUT = 20f;
+        private const float MENU_LOAD_TIMEOUT = 15f;
+        private const float SCREEN_TRANSITION_SECONDS = 0.5f;
 
-        /// <summary>True while a migration is being carried out on this peer.</summary>
         public static bool Migrating { get; private set; }
 
         private static HostMigrationNetwork _instance;
@@ -66,7 +63,6 @@ namespace FastAndFractured.Multiplayer.HostMigration
             nm.ClientManager.RegisterBroadcast<MatchSnapshotBroadcast>(OnSnapshotReceived);
         }
 
-        // ── Server ─────────────────────────────────────────────────────────────────────
         private static void OnServerState(ServerConnectionStateArgs args)
         {
             if (args.ConnectionState == LocalConnectionState.Stopped) { TokensByClientId.Clear(); UnwillingToHost.Clear(); }
@@ -88,12 +84,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
         public static string TokenOf(NetworkConnection conn) =>
             conn != null && TokensByClientId.TryGetValue(conn.ClientId, out string token) ? token : null;
 
-        // ── Client ─────────────────────────────────────────────────────────────────────
         /// <summary>
-        /// Seconds without hearing from the host before a client gives up on it. Tugboat is set
-        /// to 1800 (30 min): a host that quits cleanly is noticed at once, but one that crashes
-        /// or loses its connection would have kept everyone waiting half an hour before the
-        /// migration could even start.
+        /// Seconds without hearing from the host before a client gives up. Tugboat's own timeout is 30 min, so a
+        /// crashed host would block the migration that long.
         /// </summary>
         public const int CLIENT_TIMEOUT_SECONDS = 5;
 
@@ -113,18 +106,13 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public static void ClearSnapshot() => LatestSnapshot = null;
 
-        // ── Migration ──────────────────────────────────────────────────────────────────
-        /// <summary>
-        /// Called by HostDisconnectWatchdog when the connection to the host dropped unexpectedly
-        /// during a match. Returns true when this peer takes the migration path instead of the
-        /// usual return to the hub.
-        /// </summary>
+        /// <summary>HostDisconnectWatchdog, unexpected host loss in a match: true when this peer migrates.</summary>
         public static bool TryHandleHostLoss()
         {
             if (!HostMigrationSettings.Enabled || Migrating || _instance == null) return false;
             if (!LatestSnapshot.HasValue || !LatestSnapshot.Value.MigrationEnabled) return false;
             if (Time.unscaledTime - _latestSnapshotTime > MAX_SNAPSHOT_AGE) return false;
-            // A client that runs the server itself is the host that left; nothing to migrate to.
+            // A client that runs the server is the host that left.
             if (InstanceFinder.IsServerStarted) return false;
 
             var snapshot = LatestSnapshot.Value;
@@ -138,12 +126,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         private const string TRANSIT_SCENE = "HostMigrationTransit";
 
-        /// <summary>
-        /// Freeze the screen on the last frame and drop the old map behind it, into an empty
-        /// scene created on the spot. Going through the main menu (loading it, running its
-        /// intro) was slow and showed the menu for a moment, which is not how a host migration
-        /// is expected to look.
-        /// </summary>
+        /// <summary>Freezes the last frame and drops the old map into an empty scene (faster than via the main menu).</summary>
         private IEnumerator LeaveCurrentMatchScene(bool becomingHost)
         {
             HostMigrationOverlay.Show(becomingHost
@@ -152,8 +135,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             MpCanary.Mark("HostMigration: host lost, leaving the map scene");
             yield return new WaitForEndOfFrame();   // let the overlay capture the frame first
 
-            // Same preparation as MultiplayerSceneTeardown: abilities clean up while the map's
-            // services still exist, one frame before the map goes.
+            // As in MultiplayerSceneTeardown: abilities clean up a frame before the map goes.
             NetworkedUniqueAbility.PrepareAllForSceneTeardown();
             yield return null;
 
@@ -184,18 +166,16 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (tugboat != null) tugboat.SetPort(snapshot.Port);
             nm.ServerManager.StartConnection();
             float waited = 0f;
-            while (!nm.ServerManager.Started && waited < 5f) { waited += Time.unscaledDeltaTime; yield return null; }
+            while (!nm.ServerManager.Started && waited < SERVER_START_TIMEOUT) { waited += Time.unscaledDeltaTime; yield return null; }
             if (!nm.ServerManager.Started) { Fail("could not open a server"); yield break; }
             if (tugboat != null) tugboat.SetClientAddress("localhost");
             nm.ClientManager.StartConnection();
 
-            // Give the others time to find us.
             var expected = new HashSet<string>();
             for (int i = 1; i < snapshot.SuccessorTokens.Length; i++) expected.Add(snapshot.SuccessorTokens[i]);
             waited = 0f;
-            // Reconnecting takes well under a second on a LAN and about one over the internet;
-            // anyone later than this joins the reloaded map as a spectator.
-            float timeout = Mathf.Min(5f, ConfigReconnectTimeout());
+            // Later arrivals join the reloaded map as spectators.
+            float timeout = Mathf.Min(MAX_RECONNECT_WAIT, ConfigReconnectTimeout());
             while (waited < timeout)
             {
                 int arrived = 0;
@@ -228,14 +208,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 if (tugboat != null) { tugboat.SetClientAddress(address); tugboat.SetPort(snapshot.Port); }
                 nm.ClientManager.StartConnection();
                 float attempt = 0f;
-                while (attempt < 3f && !nm.ClientManager.Started) { attempt += Time.unscaledDeltaTime; yield return null; }
+                while (attempt < CLIENT_START_TIMEOUT && !nm.ClientManager.Started) { attempt += Time.unscaledDeltaTime; yield return null; }
                 if (nm.ClientManager.Started)
                 {
                     MpCanary.Mark("HostMigration: reconnected to the new host");
                     Migrating = false;
                     yield break;
                 }
-                yield return new WaitForSecondsRealtime(0.25f);
+                yield return new WaitForSecondsRealtime(RECONNECT_RETRY_INTERVAL);
             }
             Fail("the new host did not answer");
         }
@@ -243,7 +223,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private static float ConfigReconnectTimeout()
         {
             var config = Resources.Load<HostMigrationConfig>(HostMigrationSettings.CONFIG_RESOURCES_PATH);
-            return config != null ? config.ReconnectTimeout : 20f;
+            return config != null ? config.ReconnectTimeout : DEFAULT_RECONNECT_TIMEOUT;
         }
 
         private static void Fail(string reason)
@@ -262,17 +242,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (_instance != null) _instance.StartCoroutine(ReturnToHub());
         }
 
-        /// <summary>
-        /// The migration happens in an empty scene, out of a match: load the menu, which opens on
-        /// the main screen. Already in the menu, back to the hub.
-        /// </summary>
+        /// <summary>Out of a match after a failed migration: load the menu, or back to the hub if already there.</summary>
         private static IEnumerator ReturnToHub()
         {
             if (SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX)
             {
                 MultiplayerSceneTeardown.LoadMainMenu();
                 float waited = 0f;
-                while ((SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX || !MainMenuManager.HasInstance) && waited < 15f)
+                while ((SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX || !MainMenuManager.HasInstance) && waited < MENU_LOAD_TIMEOUT)
                 {
                     waited += Time.unscaledDeltaTime;
                     yield return null;
@@ -281,7 +258,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 yield break;
             }
             if (MainMenuManager.HasInstance)
-                MainMenuManager.Instance.TransitionBetweenScreens(Enums.ScreensType.MULTIPLAYER_HUB, 0.5f);
+                MainMenuManager.Instance.TransitionBetweenScreens(Enums.ScreensType.MULTIPLAYER_HUB, SCREEN_TRANSITION_SECONDS);
         }
     }
 }

@@ -6,16 +6,17 @@ using UnityEngine.UI;
 
 namespace FastAndFractured.Progression
 {
-    /// <summary>
-    /// PROGRESSION screen (Multiplayer ▸ Progress): level, XP towards the next one and the reward
-    /// track - what every level unlocks, already earned or still to come - plus the way into the
-    /// accessories. XP is earned in multiplayer matches (shown on the results screen).
-    ///
-    /// The tool (MainMenuPlayModesTool) creates the screen object; the content is built here.
-    /// </summary>
+    /// <summary>PROGRESSION screen (Multiplayer > Progress): level, XP to the next one and the reward track.</summary>
     [RequireComponent(typeof(MenuScreen))]
     public sealed class ProgressionScreen : MonoBehaviour
     {
+        private const float SCREEN_TRANSITION_SECONDS = 0.25f;
+        private const float ROW_FONT_SIZE = 26f;
+        private const float SMALL_FONT_SIZE = 22f;
+        private const float BACK_BUTTON_WIDTH = 300f;
+        private const float BACK_BUTTON_HEIGHT = 72f;
+        private static readonly Color UNLOCKED_ROW_COLOR = new Color(0.49f, 0.88f, 0.54f, 0.12f);
+
         private TMP_FontAsset _font;
         private TextMeshProUGUI _level, _xp, _next;
         private Image _bar;
@@ -44,7 +45,6 @@ namespace FastAndFractured.Progression
             var title = MenuUiKit.Localized(MenuUiKit.Text(column, "", 56f, Color.white, TextAlignmentOptions.Center, _font), "MP.Hub.Progress");
             title.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
 
-            // Level card: level, bar, XP numbers, next reward.
             var card = MenuUiKit.RowOf(column, "Level", 120f, 30f);
             MenuUiKit.Background(card, MenuUiKit.Row);
             _level = MenuUiKit.Fixed(MenuUiKit.Text(card, "", 60f, MenuUiKit.Accent, TextAlignmentOptions.MidlineLeft, _font), 300f);
@@ -56,11 +56,11 @@ namespace FastAndFractured.Progression
             _bar.type = Image.Type.Filled;
             _bar.fillMethod = Image.FillMethod.Horizontal;
             _bar.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), Vector2.one * 0.5f);
-            _xp = MenuUiKit.Text(barColumn, "", 26f, Color.white, TextAlignmentOptions.MidlineLeft, _font);
-            _next = MenuUiKit.Text(barColumn, "", 22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font);
+            _xp = MenuUiKit.Text(barColumn, "", ROW_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineLeft, _font);
+            _next = MenuUiKit.Text(barColumn, "", SMALL_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font);
 
             var hint = MenuUiKit.Text(column, "",
-                22f, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
+                SMALL_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
             MenuUiKit.Localized(hint, "MP.Progress.Hint");
             hint.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
 
@@ -73,7 +73,7 @@ namespace FastAndFractured.Progression
 
             var buttons = MenuUiKit.RowOf(column, "Buttons", 80f, 24f);
             buttons.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
-            var back = MenuUiKit.Localized(MenuUiKit.Button(buttons, "", () => Go(ScreensType.MULTIPLAYER_HUB), _font, 300f, 72f, MenuUiKit.ButtonDim), "MP.Back");
+            var back = MenuUiKit.Localized(MenuUiKit.Button(buttons, "", () => Go(ScreensType.MULTIPLAYER_HUB), _font, BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, MenuUiKit.ButtonDim), "MP.Back");
             var accessories = MenuUiKit.Button(buttons, "", () =>
             {
                 AccessoriesScreen.ReturnTo = ScreensType.PROGRESSION;
@@ -114,13 +114,13 @@ namespace FastAndFractured.Progression
                 if (reward == null) continue;
                 bool unlocked = PlayerProgression.IsUnlocked(reward.id);
                 var row = MenuUiKit.RowOf(_track, reward.id, 56f);
-                MenuUiKit.Background(row, unlocked ? new Color(0.49f, 0.88f, 0.54f, 0.12f) : MenuUiKit.Row);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, LocalizationManager.Localize("MP.Room.Level", reward.level), 26f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 110f);
-                MenuUiKit.Flexible(MenuUiKit.Text(row, reward.displayName, 26f, Color.white, TextAlignmentOptions.MidlineLeft, _font));
+                MenuUiKit.Background(row, unlocked ? UNLOCKED_ROW_COLOR : MenuUiKit.Row);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, LocalizationManager.Localize("MP.Room.Level", reward.level), ROW_FONT_SIZE, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 110f);
+                MenuUiKit.Flexible(MenuUiKit.Text(row, reward.displayName, ROW_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineLeft, _font));
                 string what = reward.type == RewardType.Title ? TypeName(reward.type)
                     : $"{TypeName(reward.type)} · {SlotName(reward.slot)}{(string.IsNullOrEmpty(reward.character) ? "" : " · " + reward.character)}";
-                MenuUiKit.Fixed(MenuUiKit.Text(row, what, 22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 360f);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, unlocked ? LocalizationManager.Localize("MP.Progress.Unlocked") : LocalizationManager.Localize("MP.Progress.Locked"), 22f, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 150f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, what, SMALL_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 360f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, unlocked ? LocalizationManager.Localize("MP.Progress.Unlocked") : LocalizationManager.Localize("MP.Progress.Locked"), SMALL_FONT_SIZE, unlocked ? MenuUiKit.Good : MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 150f);
             }
         }
 
@@ -129,7 +129,7 @@ namespace FastAndFractured.Progression
 
         private static void Go(ScreensType screen)
         {
-            if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(screen, 0.25f);
+            if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(screen, SCREEN_TRANSITION_SECONDS);
         }
     }
 }

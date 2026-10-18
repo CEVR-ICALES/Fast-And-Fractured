@@ -7,27 +7,18 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-authoritative wrapper for BreakablePlatform (used in ConstructionMap).
-    ///
-    /// The singleplayer component uses TimerSystem.Instance (a singleplayer scene singleton)
-    /// to schedule semi-break and full-break events. In multiplayer each client would start
-    /// its own independent timer, causing platforms to break at different times per client —
-    /// resulting in players falling through on one machine but not another.
-    ///
-    /// This wrapper neutralizes BreakablePlatform's local trigger path and drives the timer
-    /// via server coroutines. RpcSemiBreak and RpcBreak broadcast visual/physics state
-    /// changes so all peers apply them simultaneously.
-    ///
-    /// Setup: add this component and a NetworkObject to each BreakablePlatform GameObject
-    /// in the scene. The NetworkObject is required because we broadcast RPCs.
+    /// Server-authoritative BreakablePlatform: the server times the crack and the break (the singleplayer timer
+    /// would run per peer) and broadcasts them to every peer.
     /// </summary>
     [RequireComponent(typeof(BreakablePlatform))]
     [RequireComponent(typeof(NetworkObject))]
     public class NetworkedBreakablePlatform : NetworkBehaviour
     {
+        private const float DEFAULT_BREAK_TIME = 15f;
+        private const float DEFAULT_SEMI_BREAK_FRACTION = 0.5f;
+
         private BreakablePlatform _wrapped;
 
-        // Cached reflection handles for BreakablePlatform's private state.
         private static MethodInfo _semiBreakMethod;
         private static MethodInfo _breakMethod;
         private static FieldInfo _isBreakingField;
@@ -60,9 +51,7 @@ namespace FastAndFractured.Multiplayer
             _wrapped = GetComponent<BreakablePlatform>();
             EnsureReflectionCached();
 
-            // BreakablePlatform checks this field at the top of both trigger callbacks. Keep
-            // the component enabled so Start initializes its visual references, but permanently
-            // neutralize its singleplayer timer path on every multiplayer peer.
+            // BreakablePlatform checks this field in both trigger callbacks: its timer path stays off on every peer.
             _isBreakingField?.SetValue(_wrapped, true);
         }
 
@@ -88,8 +77,8 @@ namespace FastAndFractured.Multiplayer
 
         private void StartBreakTimers()
         {
-            float breakTime  = _breakTimeField   != null ? (float)_breakTimeField.GetValue(_wrapped)   : 15f;
-            float semiPct    = _semiBreakPctField != null ? (float)_semiBreakPctField.GetValue(_wrapped) : 0.5f;
+            float breakTime  = _breakTimeField   != null ? (float)_breakTimeField.GetValue(_wrapped)   : DEFAULT_BREAK_TIME;
+            float semiPct    = _semiBreakPctField != null ? (float)_semiBreakPctField.GetValue(_wrapped) : DEFAULT_SEMI_BREAK_FRACTION;
 
             _semiBreakCoroutine = StartCoroutine(BreakAfterDelay(breakTime * semiPct, semiBreak: true));
             _breakCoroutine     = StartCoroutine(BreakAfterDelay(breakTime,           semiBreak: false));
@@ -128,7 +117,6 @@ namespace FastAndFractured.Multiplayer
             _breakMethod?.Invoke(_wrapped, null);
         }
 
-        // -- Host migration -----------------------------------------------------------------
         private static List<NetworkedBreakablePlatform> AllInHierarchyOrder()
         {
             var list = new List<NetworkedBreakablePlatform>(FindObjectsByType<NetworkedBreakablePlatform>(FindObjectsSortMode.None));

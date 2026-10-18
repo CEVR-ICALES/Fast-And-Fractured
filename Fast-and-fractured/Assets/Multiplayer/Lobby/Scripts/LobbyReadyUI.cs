@@ -12,20 +12,14 @@ using TMPro;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Drives the player-list + ready/countdown section of the LOBBY_ROOM screen.
-    /// Character selection is handled by the existing CharacterSelectorManager;
-    /// this component subscribes to OnCharacterCodeChanged and forwards to the lobby manager.
-    /// </summary>
+    /// <summary>Player list, ready state and countdown of the LOBBY_ROOM screen; forwards the local character pick.</summary>
     public class LobbyReadyUI : MonoBehaviour
     {
         [Header("Ready Button")]
         [SerializeField] private Button    _readyButton;
         [SerializeField] private TMP_Text  _readyButtonText;
         [SerializeField] private Image     _readyButtonImage;
-        // Default colors are tuned for legibility: orange = call-to-action ("act now"),
-        // saturated green = confirmed state. Plain red/green felt ambiguous because both look
-        // like status labels rather than a button you can press.
+        // Orange reads as a button to press, green as a confirmed state.
         [SerializeField] private Color     _notReadyColor = new Color(0.90f, 0.50f, 0.10f, 1f); // orange (act)
         [SerializeField] private Color     _readyColor    = new Color(0.15f, 0.65f, 0.25f, 1f); // green  (set)
 
@@ -54,7 +48,17 @@ namespace FastAndFractured.Multiplayer
         private bool _subscribed;
         private bool _isReady;
         private int _lateSubscribeRetries;
-        private const int MAX_LATE_SUBSCRIBE_RETRIES = 20; // 10 seconds @ 0.5s interval
+        private const int MAX_LATE_SUBSCRIBE_RETRIES = 20;
+        private const float LATE_SUBSCRIBE_INTERVAL = 0.5f;
+        private const float SCREEN_TRANSITION_SECONDS = 0.5f;
+        private const float BANNER_FONT_SIZE = 28f;
+        private const float WATCH_FONT_SIZE = 24f;
+        private static readonly Vector2 DEFAULT_SLOT_SIZE = new Vector2(400f, 120f);
+        private static readonly Vector2 SLOT_SPACING = new Vector2(12f, 12f);
+        private static readonly Color BANNER_COLOR = new Color(0.96f, 0.69f, 0.25f, 0.92f);
+        private static readonly Color BANNER_TEXT_COLOR = new Color(0.12f, 0.08f, 0.04f, 1f);
+        private static readonly Color WATCH_BUTTON_COLOR = new Color(0.12f, 0.08f, 0.04f, 0.92f);
+        private static readonly Color WATCH_TEXT_COLOR = new Color(0.96f, 0.69f, 0.25f, 1f);
         private readonly Dictionary<int, GameObject> _playerEntries = new Dictionary<int, GameObject>();
 
         private void Awake()
@@ -62,11 +66,7 @@ namespace FastAndFractured.Multiplayer
             ArrangePlayerListAsGrid();
         }
 
-        /// <summary>
-        /// The player list was a vertical stack: with 8 players (humans + AI) the entries ran off
-        /// the panel (playtest feedback 2026-09-30). Lay the slots out as a grid that wraps by the
-        /// panel's width (4 per row at 1920x1080).
-        /// </summary>
+        /// <summary>Lays the player slots out as a wrapping grid (eight players overflowed a vertical stack).</summary>
         private void ArrangePlayerListAsGrid()
         {
             if (_playerListContainer == null) return;
@@ -77,8 +77,8 @@ namespace FastAndFractured.Multiplayer
             if (grid == null) grid = _playerListContainer.gameObject.AddComponent<GridLayoutGroup>();
             var entryRect = _playerEntryPrefab != null ? _playerEntryPrefab.GetComponent<RectTransform>() : null;
             grid.cellSize = entryRect != null && entryRect.sizeDelta.x > 0f && entryRect.sizeDelta.y > 0f
-                ? entryRect.sizeDelta : new Vector2(400f, 120f);
-            grid.spacing = new Vector2(12f, 12f);
+                ? entryRect.sizeDelta : DEFAULT_SLOT_SIZE;
+            grid.spacing = SLOT_SPACING;
             grid.padding = new RectOffset(8, 8, 8, 8);
             grid.startAxis = GridLayoutGroup.Axis.Horizontal;
             grid.childAlignment = TextAnchor.UpperCenter;
@@ -91,7 +91,7 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager = LobbyLocator.GetLobbyManager();
             if (_lobbyManager == null)
             {
-                Invoke(nameof(TryLateSubscribe), 0.5f);
+                Invoke(nameof(TryLateSubscribe), LATE_SUBSCRIBE_INTERVAL);
                 return;
             }
             Subscribe();
@@ -106,7 +106,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             if (++_lateSubscribeRetries < MAX_LATE_SUBSCRIBE_RETRIES)
-                Invoke(nameof(TryLateSubscribe), 0.5f);
+                Invoke(nameof(TryLateSubscribe), LATE_SUBSCRIBE_INTERVAL);
         }
 
         private void OnDisable()
@@ -141,17 +141,14 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.MatchParticipants.OnChange        += HandleParticipantsSync;
             UpdateRoomName(_lobbyManager.RoomName.Value);
 
-            // Forward local character selection to the server
             if (CharacterSelectorManager.HasInstance)
             {
                 CharacterSelectorManager.Instance.OnCharacterCodeChanged += OnLocalCharacterChanged;
-                // Send current selection immediately
                 string current = CharacterSelectorManager.Instance.CurrentCharacterCode;
                 if (!string.IsNullOrEmpty(current))
                     _lobbyManager.ServerSelectCharacter(current);
             }
 
-            // Initial UI setup
             if (_readyButton != null)
             {
                 _readyButton.onClick.RemoveAllListeners();
@@ -205,10 +202,7 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.MatchParticipants.OnChange        -= HandleParticipantsSync;
         }
 
-        /// <summary>
-        /// The room is a new object after a host migration (the new host spawns its own):
-        /// bind to it as soon as it appears.
-        /// </summary>
+        /// <summary>A host migration spawns a new room object: bind to it as soon as it appears.</summary>
         private void Update()
         {
             if (!_subscribed || _lobbyManager != null) return;
@@ -221,7 +215,6 @@ namespace FastAndFractured.Multiplayer
             TryLateSubscribe();
         }
 
-        // ── Match in progress ────────────────────────────────────────────────────────
         private GameObject _matchBanner;
 
         private void HandleGameStartedSync(bool prev, bool next, bool asServer)
@@ -246,10 +239,7 @@ namespace FastAndFractured.Multiplayer
             RefreshPlayerList();
         }
 
-        /// <summary>
-        /// While the room plays a match, players in the room (joined mid-match, or left it) wait
-        /// for the next one: a banner says so and the ready / start buttons rest.
-        /// </summary>
+        /// <summary>While the room plays a match, players waiting in it see a banner and the ready/start buttons rest.</summary>
         private void RefreshMatchState()
         {
             if (_lobbyManager == null) return;
@@ -275,7 +265,7 @@ namespace FastAndFractured.Multiplayer
             rect.anchoredPosition = new Vector2(0f, -128f);
             rect.sizeDelta = new Vector2(1100f, 56f);
             var background = go.AddComponent<Image>();
-            background.color = new Color(0.96f, 0.69f, 0.25f, 0.92f);
+            background.color = BANNER_COLOR;
             background.raycastTarget = false;
 
             var textGo = new GameObject("Text", typeof(RectTransform));
@@ -287,13 +277,13 @@ namespace FastAndFractured.Multiplayer
             textRect.offsetMax = new Vector2(-200f, 0f);
             var text = textGo.AddComponent<TextMeshProUGUI>();
             if (_roomNameLabel != null) text.font = _roomNameLabel.font;
-            text.fontSize = 28f;
-            text.color = new Color(0.12f, 0.08f, 0.04f, 1f);
+            text.fontSize = BANNER_FONT_SIZE;
+            text.color = BANNER_TEXT_COLOR;
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
             text.text = LocalizationManager.Localize("MP.Room.InProgressNext");
 
-            // Watch it meanwhile: loads the map for this client only, the match is unaffected.
+            // Watching loads the map for this client only.
             var watchGo = new GameObject("WatchButton", typeof(RectTransform));
             var watchRect = (RectTransform)watchGo.transform;
             watchRect.SetParent(rect, false);
@@ -301,7 +291,7 @@ namespace FastAndFractured.Multiplayer
             watchRect.anchoredPosition = new Vector2(-8f, 0f);
             watchRect.sizeDelta = new Vector2(176f, 44f);
             var watchImage = watchGo.AddComponent<Image>();
-            watchImage.color = new Color(0.12f, 0.08f, 0.04f, 0.92f);
+            watchImage.color = WATCH_BUTTON_COLOR;
             var watch = watchGo.AddComponent<Button>();
             watch.targetGraphic = watchImage;
             watch.onClick.AddListener(OnWatchClicked);
@@ -313,8 +303,8 @@ namespace FastAndFractured.Multiplayer
             labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             if (_roomNameLabel != null) label.font = _roomNameLabel.font;
-            label.fontSize = 24f;
-            label.color = new Color(0.96f, 0.69f, 0.25f, 1f);
+            label.fontSize = WATCH_FONT_SIZE;
+            label.color = WATCH_TEXT_COLOR;
             label.alignment = TextAlignmentOptions.Center;
             label.raycastTarget = false;
             label.text = LocalizationManager.Localize("MP.Room.Watch");
@@ -334,11 +324,7 @@ namespace FastAndFractured.Multiplayer
                 ? _mapVoteAnimation
                 : GetComponentInChildren<FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI>(true);
 
-        /// <summary>
-        /// Fired on every client (including host via RunLocally) when the server has resolved
-        /// the map vote and is about to load the map scene. The server-side coroutine in
-        /// NetworkedLobbyManager waits for the animation before the actual FishNet scene load.
-        /// </summary>
+        /// <summary>Every client: the server resolved the map vote and loads the map once this animation ends.</summary>
         private void HandleMapVoteAnimation(int[] candidates, int[] votes, int[] hops, bool random)
         {
             var anim = MapPickAnimation;
@@ -382,11 +368,9 @@ namespace FastAndFractured.Multiplayer
 
         private async void OnBackClicked()
         {
-            // Flag the upcoming client-stop as intentional so HostDisconnectWatchdog
-            // doesn't fire its "Host disconnected" path on a user-triggered leave.
+            // An intentional stop: HostDisconnectWatchdog must not report the host as lost.
             HostDisconnectWatchdog.NotifyIntentionalLeave();
 
-            // Tear down our networking so we don't leak a half-connected client.
             try { await LobbyServiceLocator.Transport.LeaveLobbyAsync(); }
             catch { /* best-effort */ }
 
@@ -457,7 +441,6 @@ namespace FastAndFractured.Multiplayer
         }
 
 
-        // AI slots use synthetic negative client IDs so they don't collide with real clients.
         private const int AI_SLOT_ID_BASE = -1000;
 
         private void RefreshPlayerList()
@@ -481,7 +464,6 @@ namespace FastAndFractured.Multiplayer
                     _playerEntries[clientId] = entry;
                 }
 
-                // Resolve voted map's thumbnail (null if not voted yet or vote invalid).
                 Sprite voteSprite = null;
                 if (catalog != null &&
                     _lobbyManager.PlayerMapVotes.TryGetValue(clientId, out int mapId) &&
@@ -493,10 +475,7 @@ namespace FastAndFractured.Multiplayer
 
                 bool isLocal = clientId == localClientId;
 
-                // Keep the singleplayer "Selected_Player" key in sync with the local player's
-                // lobby character (default Josefino or their pick). The reused singleplayer
-                // character/HUD UI reads this key; with PlayerPrefs cleared it would otherwise be
-                // empty and the UI would stall half-loaded when you never open Character Selection.
+                // The reused singleplayer character/HUD UI reads "Selected_Player": keep it on the lobby pick.
                 if (isLocal && !string.IsNullOrEmpty(code))
                     PlayerPrefs.SetString("Selected_Player", code);
 
@@ -517,7 +496,7 @@ namespace FastAndFractured.Multiplayer
                 }
                 else
                 {
-                    // Backward compat: legacy text-only entry prefab (no PlayerSlotUI).
+                    // Legacy text-only entry prefab.
                     var label = entry.GetComponentInChildren<TMP_Text>();
                     if (label != null)
                     {
@@ -529,10 +508,7 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // ── AI slots ──────────────────────────────────────────────────────────
-            // Render synthetic slots for each AI configured. Slot IDs are negative so they
-            // never collide with real clientIds. AI names come from a stable pool indexed by
-            // bot number so every peer sees the same name for the same slot.
+            // AI slots: negative ids, names from a pool indexed by bot number so every peer shows the same.
             int aiCount = Mathf.Min(_lobbyManager.AiSlotCount.Value, MatchNames.BotNames.Length);
             for (int i = 0; i < aiCount; i++)
             {
@@ -549,7 +525,6 @@ namespace FastAndFractured.Multiplayer
                 var aiSlot = aiEntry.GetComponent<PlayerSlotUI>();
                 if (aiSlot != null)
                 {
-                    // AI is always "ready", has no map vote, and never shows the local SELECT btn.
                     aiSlot.SetData(slotId, aiName, isReady: true, mapVoteThumbnail: null, isLocal: false);
                 }
                 else
@@ -573,35 +548,24 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Click handler for the local player's SELECT CHARACTER &amp; MAP button on their slot.
-        /// Kicks off MultiplayerMenuRouter and routes the user through the existing character
-        /// + map selection screens, which then return them to LOBBY_ROOM with a vote registered.
-        /// Explicitly activates the character selection camera as belt-and-braces: the
-        /// CharacterScreen MenuScreen may have a null screenCamera in singleplayer, which would
-        /// leave Cinemachine on InitialCamera after MenuScreen.ActivateCamera does nothing.
+        /// The local player's SELECT CHARACTER &amp; MAP button: routes through the character and map screens back to
+        /// LOBBY_ROOM. The character camera is activated by hand, as CharacterScreen may have no screenCamera.
         /// </summary>
         private void OnSelectCharacterClicked()
         {
             MultiplayerMenuRouter.BeginLobbyFlow();
 
-            // Aggressively activate the char selection camera before screen transition fires its
-            // own (possibly empty) ActivateCamera. We try all plausible names that the user might
-            // have in their scene.
             ForceActivateCameraByName("CharSlectionCamera", "CharSelectionCamera", "CharacterSelectionCamera");
 
             if (MainMenuManager.HasInstance)
-                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.CHARACTER_SELECTION, 0.5f);
+                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.CHARACTER_SELECTION, SCREEN_TRANSITION_SECONDS);
         }
 
-        /// <summary>
-        /// Searches the scene for the first GameObject matching any of the supplied names and
-        /// SetActive(true)s it. Used to compensate for MenuScreens with no screenCamera wired.
-        /// </summary>
+        /// <summary>Activates the first scene GameObject with one of the names (inactive ones included).</summary>
         private static void ForceActivateCameraByName(params string[] candidates)
         {
             foreach (string name in candidates)
             {
-                // Use Resources.FindObjectsOfTypeAll to find inactive GameObjects too.
                 foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
                 {
                     if (t == null) continue;

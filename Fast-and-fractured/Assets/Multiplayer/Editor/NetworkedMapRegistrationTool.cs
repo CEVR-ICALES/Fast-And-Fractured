@@ -8,20 +8,25 @@ using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// Scans all Unity scenes in the project, shows which are registered in MapCatalog,
-    /// and lets you register/unregister them with one click.
-    ///
-    /// Default maps are defined via GUIDs — add new ones to DEFAULT_MAPS below.
-    /// Open via: Tools > Fast And Fractured > Map Registration Tool
-    /// </summary>
+    /// <summary>Registers project scenes in MapCatalog; the default maps are listed by GUID in DEFAULT_MAPS.</summary>
     public class NetworkedMapRegistrationTool : EditorWindow
     {
         private const string CATALOG_RESOURCE_PATH = "Assets/Multiplayer/Lobby/Resources/MapCatalog.asset";
         private const string RESOURCES_DIR         = "Assets/Multiplayer/Lobby/Resources";
 
-        // ── Default map definitions — add new maps here ─────────────────────────
-        // GUID is stable even if the file is renamed or moved within Assets/.
+        private const float SPACING = 4f;
+        private const float SMALL_SPACING = 2f;
+        private const float BUTTON_HEIGHT = 24f;
+        private const float LARGE_BUTTON_HEIGHT = 26f;
+        private const float SMALL_BUTTON_WIDTH = 70f;
+        private const float ROW_BUTTON_WIDTH = 80f;
+        private const float ICON_WIDTH = 18f;
+        private static readonly Vector2 MIN_WINDOW_SIZE = new Vector2(580f, 560f);
+        private static readonly Color ROW_REGISTERED_COLOR = new Color(0.2f, 0.4f, 0.2f, 0.25f);
+        private static readonly Color ROW_DEFAULT_COLOR = new Color(0.3f, 0.3f, 0.1f, 0.25f);
+        private static readonly Color ROW_OTHER_COLOR = new Color(0.15f, 0.15f, 0.15f, 0.25f);
+
+        // Default maps by scene GUID (stable across renames).
         private static readonly DefaultMapDef[] DEFAULT_MAPS =
         {
             new DefaultMapDef
@@ -45,11 +50,9 @@ namespace FastAndFractured.Multiplayer.Editor
                 CatalogId   = 2,
                 ThumbnailSearchName = "PUEBLO_SCREENSHOT",
             },
-            // ── Add future maps below — increment CatalogId sequentially ────────
-            // new DefaultMapDef { SceneGuid = "YOUR_GUID_HERE", DisplayName = "New Map", CatalogId = 3, ThumbnailSearchName = "SPRITE_NAME" },
+            // New maps go here, with the next CatalogId.
         };
 
-        // GUID for NetworkingCommons.prefab (the multiplayer-infrastructure prefab)
         private const string NETWORKING_COMMONS_GUID = "8096a6240cc47914d94ecd79c8f0e955";
 
         private struct DefaultMapDef
@@ -60,7 +63,6 @@ namespace FastAndFractured.Multiplayer.Editor
             public string ThumbnailSearchName;   // partial name searched in Assets/FastAndFractured/MapSelection/Sprites
         }
 
-        // ── Runtime state ──────────────────────────────────────────────────────
         private MapCatalog       _catalog;
         private GameObject       _networkingCommons;
         private Vector2          _scroll;
@@ -91,7 +93,6 @@ namespace FastAndFractured.Multiplayer.Editor
             public ValidationStatus Status;
             public string StatusDetail;
 
-            // Per-row edit state (only when expanding to register)
             public bool   IsExpanded;
             public int    PendingId;
             public string PendingDisplayName;
@@ -100,37 +101,34 @@ namespace FastAndFractured.Multiplayer.Editor
 
         private enum ValidationStatus { Unknown, OK, Warning, Error }
 
-        // ── Menu entry ─────────────────────────────────────────────────────────
         [MenuItem("Tools/Fast And Fractured/Map Registration Tool", priority = 13)]
         public static void ShowWindow()
         {
             var w = GetWindow<NetworkedMapRegistrationTool>("Map Registration");
-            w.minSize = new Vector2(580f, 560f);
+            w.minSize = MIN_WINDOW_SIZE;
             w.Refresh();
             w.Show();
         }
 
         private void OnEnable() => Refresh();
 
-        // ── Main GUI ──────────────────────────────────────────────────────────
         private void OnGUI()
         {
             DrawToolbar();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawMultiplayerWorkflowInfo();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawNetworkingCommonsSection();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawDefaultsSection();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawCatalogStatus();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawFilters();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             DrawSceneList();
         }
 
-        // ── How multiplayer scenes work ────────────────────────────────────────
         private void DrawMultiplayerWorkflowInfo()
         {
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -143,15 +141,15 @@ namespace FastAndFractured.Multiplayer.Editor
                     "FishNet SceneManager loads the map scene.  NetworkingCommons (NetworkManager, etc.) " +
                     "persists via DontDestroyOnLoad from the lobby — it does NOT live inside the map scene.",
                     EditorStyles.wordWrappedMiniLabel);
-                EditorGUILayout.Space(2f);
+                EditorGUILayout.Space(SMALL_SPACING);
                 EditorGUILayout.LabelField("  1.  Register the map in MapCatalog (use the section below).", EditorStyles.miniLabel);
                 EditorGUILayout.LabelField("  2.  Add it to Build Settings (button inside each row, or the bulk button below).", EditorStyles.miniLabel);
                 EditorGUILayout.LabelField("  3.  That's it — no prefab swaps, no scene duplication.", EditorStyles.miniLabel);
-                EditorGUILayout.Space(2f);
+                EditorGUILayout.Space(SMALL_SPACING);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Add All Registered Maps to Build Settings", GUILayout.Height(24)))
+                    if (GUILayout.Button("Add All Registered Maps to Build Settings", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         int added = 0;
                         foreach (var s in _scenes)
@@ -169,19 +167,17 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        // ── Toolbar ────────────────────────────────────────────────────────────
         private void DrawToolbar()
         {
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
                 GUILayout.Label("Map Registration Tool", EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(70)))
+                if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(SMALL_BUTTON_WIDTH)))
                     Refresh();
             }
         }
 
-        // ── NetworkingCommons ──────────────────────────────────────────────────
         private void DrawNetworkingCommonsSection()
         {
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -215,7 +211,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        // ── Default maps ───────────────────────────────────────────────────────
         private void DrawDefaultsSection()
         {
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -237,7 +232,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         var prevColor = GUI.color;
                         GUI.color = registered ? Color.green : (found ? Color.yellow : Color.red);
-                        GUILayout.Label(registered ? "✓" : (found ? "○" : "✗"), GUILayout.Width(18));
+                        GUILayout.Label(registered ? "✓" : (found ? "○" : "✗"), GUILayout.Width(ICON_WIDTH));
                         GUI.color = prevColor;
 
                         GUILayout.Label($"[{def.CatalogId}] {def.DisplayName}", GUILayout.ExpandWidth(true));
@@ -250,7 +245,7 @@ namespace FastAndFractured.Multiplayer.Editor
                         {
                             GUILayout.Label(System.IO.Path.GetFileNameWithoutExtension(path),
                                 EditorStyles.miniLabel, GUILayout.Width(160));
-                            if (GUILayout.Button("Register", GUILayout.Width(70)))
+                            if (GUILayout.Button("Register", GUILayout.Width(SMALL_BUTTON_WIDTH)))
                             {
                                 RegisterFromDefault(def, path);
                                 Refresh();
@@ -259,15 +254,15 @@ namespace FastAndFractured.Multiplayer.Editor
                         }
                         else
                         {
-                            GUILayout.Label("In catalog", EditorStyles.miniLabel, GUILayout.Width(70));
+                            GUILayout.Label("In catalog", EditorStyles.miniLabel, GUILayout.Width(SMALL_BUTTON_WIDTH));
                         }
                     }
                 }
 
-                EditorGUILayout.Space(4f);
+                EditorGUILayout.Space(SPACING);
                 using (new EditorGUI.DisabledScope(allRegistered || _catalog == null && false))
                 {
-                    if (GUILayout.Button("Register All Missing Defaults", GUILayout.Height(26)))
+                    if (GUILayout.Button("Register All Missing Defaults", GUILayout.Height(LARGE_BUTTON_HEIGHT)))
                     {
                         foreach (var def in DEFAULT_MAPS)
                         {
@@ -287,7 +282,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        // ── Catalog status ─────────────────────────────────────────────────────
         private void DrawCatalogStatus()
         {
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -297,7 +291,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     EditorGUILayout.HelpBox(
                         "MapCatalog.asset not found. Run Lobby Setup Wizard first, or click Create below.",
                         MessageType.Warning);
-                    if (GUILayout.Button("Create MapCatalog.asset", GUILayout.Height(26)))
+                    if (GUILayout.Button("Create MapCatalog.asset", GUILayout.Height(LARGE_BUTTON_HEIGHT)))
                     {
                         CreateCatalog();
                         Refresh();
@@ -316,7 +310,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        // ── Filters ────────────────────────────────────────────────────────────
         private void DrawFilters()
         {
             using (new EditorGUILayout.HorizontalScope())
@@ -327,7 +320,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        // ── Scene list ─────────────────────────────────────────────────────────
         private void DrawSceneList()
         {
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
@@ -352,15 +344,14 @@ namespace FastAndFractured.Multiplayer.Editor
             int idx = _scenes.FindIndex(s => s.Path == info.Path);
 
             Color bg = info.InCatalog
-                ? new Color(0.2f, 0.4f, 0.2f, 0.25f)
+                ? ROW_REGISTERED_COLOR
                 : info.IsDefault
-                    ? new Color(0.3f, 0.3f, 0.1f, 0.25f)
-                    : new Color(0.15f, 0.15f, 0.15f, 0.25f);
+                    ? ROW_DEFAULT_COLOR
+                    : ROW_OTHER_COLOR;
 
             var rect = EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUI.DrawRect(rect, bg);
 
-            // Header row
             using (new EditorGUILayout.HorizontalScope())
             {
                 string icon = info.Status switch
@@ -379,7 +370,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 };
                 var prev = GUI.color;
                 GUI.color = iconColor;
-                GUILayout.Label(icon, GUILayout.Width(18));
+                GUILayout.Label(icon, GUILayout.Width(ICON_WIDTH));
                 GUI.color = prev;
 
                 GUILayout.Label(info.Name, EditorStyles.boldLabel, GUILayout.ExpandWidth(true));
@@ -407,7 +398,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         var prev2 = GUI.color;
                         GUI.color = Color.yellow;
-                        if (GUILayout.Button("Add to Build", GUILayout.Width(80)))
+                        if (GUILayout.Button("Add to Build", GUILayout.Width(ROW_BUTTON_WIDTH)))
                         {
                             AddToBuildSettings(info.Path);
                             Refresh();
@@ -415,7 +406,7 @@ namespace FastAndFractured.Multiplayer.Editor
                         }
                         GUI.color = prev2;
                     }
-                    if (GUILayout.Button("Unregister", GUILayout.Width(80)))
+                    if (GUILayout.Button("Unregister", GUILayout.Width(ROW_BUTTON_WIDTH)))
                     {
                         UnregisterScene(info.Name);
                         Refresh();
@@ -424,7 +415,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 else
                 {
-                    if (GUILayout.Button("▼ Register", GUILayout.Width(80)))
+                    if (GUILayout.Button("▼ Register", GUILayout.Width(ROW_BUTTON_WIDTH)))
                     {
                         var updated = _scenes[idx];
                         updated.IsExpanded = !updated.IsExpanded;
@@ -438,14 +429,12 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            // Validation detail
             if (!string.IsNullOrEmpty(info.StatusDetail))
                 EditorGUILayout.LabelField($"  {info.StatusDetail}", EditorStyles.miniLabel);
 
-            // Expanded form
             if (!info.InCatalog && idx >= 0 && _scenes[idx].IsExpanded)
             {
-                EditorGUILayout.Space(4f);
+                EditorGUILayout.Space(SPACING);
                 EditorGUI.indentLevel++;
                 var s = _scenes[idx];
 
@@ -459,10 +448,10 @@ namespace FastAndFractured.Multiplayer.Editor
                 s.PendingThumbnail   = (Sprite)EditorGUILayout.ObjectField(
                     "Thumbnail", s.PendingThumbnail, typeof(Sprite), false);
 
-                EditorGUILayout.Space(4f);
+                EditorGUILayout.Space(SPACING);
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (!info.InBuildSettings && GUILayout.Button("Add to Build Settings", GUILayout.Height(24)))
+                    if (!info.InBuildSettings && GUILayout.Button("Add to Build Settings", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         AddToBuildSettings(info.Path);
                         Refresh();
@@ -471,7 +460,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     bool canRegister = !idConflict && !string.IsNullOrWhiteSpace(s.PendingDisplayName);
                     using (new EditorGUI.DisabledScope(!canRegister))
                     {
-                        if (GUILayout.Button("Confirm Registration", GUILayout.Height(24)))
+                        if (GUILayout.Button("Confirm Registration", GUILayout.Height(BUTTON_HEIGHT)))
                         {
                             RegisterScene(info.Name, s.PendingId, s.PendingDisplayName, s.PendingThumbnail);
                             Refresh();
@@ -485,21 +474,18 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             EditorGUILayout.EndVertical();
-            EditorGUILayout.Space(2f);
+            EditorGUILayout.Space(SMALL_SPACING);
         }
 
-        // ── Data refresh ──────────────────────────────────────────────────────
         private void Refresh()
         {
             _catalog = AssetDatabase.LoadAssetAtPath<MapCatalog>(CATALOG_RESOURCE_PATH);
 
-            // Load NetworkingCommons by GUID
             string ncPath = AssetDatabase.GUIDToAssetPath(NETWORKING_COMMONS_GUID);
             _networkingCommons = string.IsNullOrEmpty(ncPath)
                 ? null
                 : AssetDatabase.LoadAssetAtPath<GameObject>(ncPath);
 
-            // Build set of default GUIDs for quick lookup
             var defaultGuids = new HashSet<string>(DEFAULT_MAPS.Select(d => d.SceneGuid));
 
             var prev          = _scenes.Where(s => s.IsExpanded).Select(s => s.Path).ToHashSet();
@@ -552,8 +538,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 });
             }
 
-            // AssetDatabase.FindAssets can miss scenes in some Unity versions / project configs.
-            // Explicitly inject any DEFAULT_MAPS scenes that weren't returned by the scan.
+            // FindAssets can miss scenes: add any default map it did not return.
             var foundPaths = new HashSet<string>(_scenes.Select(s => s.Path), System.StringComparer.OrdinalIgnoreCase);
             foreach (var def in DEFAULT_MAPS)
             {
@@ -601,7 +586,6 @@ namespace FastAndFractured.Multiplayer.Editor
 
             _scenes.Sort((a, b) =>
             {
-                // Default maps first, then registered, then alphabetical
                 if (a.IsDefault != b.IsDefault) return a.IsDefault ? -1 : 1;
                 if (a.InCatalog != b.InCatalog) return a.InCatalog ? -1 : 1;
                 return string.Compare(a.Name, b.Name, System.StringComparison.OrdinalIgnoreCase);
@@ -610,26 +594,20 @@ namespace FastAndFractured.Multiplayer.Editor
             Repaint();
         }
 
-        // Script GUIDs — Unity scene YAML stores MonoBehaviour refs by script GUID, not class name.
+        // Scene YAML references MonoBehaviours by script GUID, not class name.
         private const string GUID_LEVEL_CONTROLLER_SCRIPT  = "a0ca2c67c9478114d8d628ab87d87e56";
 
         private static (ValidationStatus, string) QuickValidate(string path)
         {
-            // Active scene: live component checks (fast, accurate)
             if (SceneManager.GetActiveScene().path == path)
                 return ValidateActiveScene();
 
-            // Unloaded scenes: scan raw YAML text.
-            // Unity serialises MonoBehaviour script refs as:
-            //   m_Script: {fileID: 11500000, guid: <SCRIPT_GUID>, type: 3}
-            // So we search for the script's GUID, not the class name string.
+            // Unloaded scenes: search the raw YAML for the script GUID.
             try
             {
                 string text = System.IO.File.ReadAllText(path);
                 bool hasLC = text.Contains(GUID_LEVEL_CONTROLLER_SCRIPT);
-                // "SpawnPoint" appears as a plain string (GameObject name / tag) in the YAML
                 bool hasSP = text.Contains("SpawnPoint");
-                // NetworkManager is also referenced by script GUID, but keep as a nice-to-have info only
                 bool hasNM = text.Contains("NetworkManager");
 
                 if (!hasLC && !hasSP)
@@ -666,18 +644,15 @@ namespace FastAndFractured.Multiplayer.Editor
             return (ValidationStatus.OK, $"LevelController ✓  SpawnPoints: {sp}");
         }
 
-        // ── Registration helpers ──────────────────────────────────────────────
         private void RegisterFromDefault(DefaultMapDef def, string scenePath)
         {
             if (_catalog == null) { CreateCatalog(); _catalog = AssetDatabase.LoadAssetAtPath<MapCatalog>(CATALOG_RESOURCE_PATH); }
 
             string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
 
-            // Ensure scene is in Build Settings
             if (!EditorBuildSettings.scenes.Any(s => s.path == scenePath))
                 AddToBuildSettings(scenePath);
 
-            // Find thumbnail by name in sprite folder
             Sprite thumbnail = FindSprite(def.ThumbnailSearchName);
 
             RegisterScene(sceneName, def.CatalogId, def.DisplayName, thumbnail);
@@ -691,7 +666,6 @@ namespace FastAndFractured.Multiplayer.Editor
             var so      = new SerializedObject(_catalog);
             var entries = so.FindProperty("_entries");
 
-            // Check not already present
             for (int i = 0; i < entries.arraySize; i++)
             {
                 if (entries.GetArrayElementAtIndex(i)

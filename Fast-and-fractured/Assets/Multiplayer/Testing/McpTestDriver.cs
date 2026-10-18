@@ -12,21 +12,15 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Runtime helpers for driving the game from MCP (execute_code) during smoke tests —
-    /// navigate menus, click buttons, inject virtual keyboard input, and read game state
-    /// without touching the real devices.
-    ///
-    /// Usage from MCP execute_code while in play mode:
-    ///   return FastAndFractured.Multiplayer.Testing.McpTestDriver.Snapshot();
-    ///   FastAndFractured.Multiplayer.Testing.McpTestDriver.GoToScreen("MULTIPLAYER_HUB");
-    ///   return FastAndFractured.Multiplayer.Testing.McpTestDriver.ListButtons();
-    ///   FastAndFractured.Multiplayer.Testing.McpTestDriver.ClickButton("HostButton");
-    ///   FastAndFractured.Multiplayer.Testing.McpTestDriver.HoldKey("W", 3f);   // accelerate 3s
-    ///   return FastAndFractured.Multiplayer.Testing.McpTestDriver.GetLocalCarState();
+    /// Helpers to drive the game from MCP execute_code in smoke tests: screens, buttons, virtual input and state.
+    /// <code>McpTestDriver.HoldKey("W", 3f);</code>
     /// </summary>
     public static class McpTestDriver
     {
-        // ── Menu navigation ──────────────────────────────────────────────────────
+        private const float SCREEN_TRANSITION_SECONDS = 0.1f;
+        private const float TAP_SECONDS = 0.15f;
+        private const float MS_TO_KMH = 3.6f;
+
         public static string GoToScreen(string screensTypeName)
         {
             if (!System.Enum.TryParse(screensTypeName, true, out Enums.ScreensType screen))
@@ -34,7 +28,7 @@ namespace FastAndFractured.Multiplayer.Testing
             if (!MainMenuManager.HasInstance)
                 return "ERROR: no MainMenuManager (not in a menu scene?)";
 
-            MainMenuManager.Instance.TransitionBetweenScreens(screen, 0.1f);
+            MainMenuManager.Instance.TransitionBetweenScreens(screen, SCREEN_TRANSITION_SECONDS);
             return $"OK: transitioned to {screen}";
         }
 
@@ -58,7 +52,6 @@ namespace FastAndFractured.Multiplayer.Testing
             return "Active buttons:\n" + string.Join("\n", buttons);
         }
 
-        // ── Virtual keyboard input ───────────────────────────────────────────────
         private static Keyboard _virtualKeyboard;
         private static Mouse _virtualMouse;
 
@@ -78,7 +71,7 @@ namespace FastAndFractured.Multiplayer.Testing
             return $"OK: holding {key} for {seconds:F1}s";
         }
 
-        public static string TapKey(string keyName) => HoldKey(keyName, 0.15f);
+        public static string TapKey(string keyName) => HoldKey(keyName, TAP_SECONDS);
 
         public static string ReleaseAllKeys()
         {
@@ -122,7 +115,6 @@ namespace FastAndFractured.Multiplayer.Testing
             InputSystem.QueueStateEvent(kb, default(KeyboardState));
         }
 
-        // ── State inspection ─────────────────────────────────────────────────────
         public static string Snapshot()
         {
             var sb = new StringBuilder();
@@ -148,14 +140,13 @@ namespace FastAndFractured.Multiplayer.Testing
             foreach (var vehicle in vehicles)
             {
                 var rb = vehicle.GetComponent<Rigidbody>();
-                float speedKmh = rb != null ? rb.linearVelocity.magnitude * 3.6f : -1f;
+                float speedKmh = rb != null ? rb.linearVelocity.magnitude * MS_TO_KMH : -1f;
                 sb.AppendLine($"car '{vehicle.transform.root.name}/{vehicle.name}' owner={vehicle.IsOwner} " +
                               $"speed={speedKmh:F1}km/h pos={vehicle.transform.position}");
             }
             return sb.ToString();
         }
 
-        // ── Internal coroutine host ──────────────────────────────────────────────
         private sealed class Runner : MonoBehaviour { }
 
         private static Runner _runner;

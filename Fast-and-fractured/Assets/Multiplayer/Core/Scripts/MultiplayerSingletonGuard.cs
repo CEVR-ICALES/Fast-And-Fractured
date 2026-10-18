@@ -4,16 +4,8 @@ using Utilities;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Runs VERY early to prevent singleton auxiliar creation cascade in multiplayer.
-    /// 
-    /// Problem: InteractableHandler.OnEnable() calls LevelController.Instance
-    /// before it's initialized, creating a broken auxiliar. This cascades into dozens
-    /// of NullReferenceExceptions.
-    /// 
-    /// Solution: This script runs before any singletons and ensures the scene's
-    /// LevelController is registered as the singleton instance before
-    /// anything else tries to access it. It also disables auto-initialization
-    /// on singletons that should only be initialized by the server.
+    /// Runs before every singleton: registers the scene's LevelController and InteractableHandler as instances,
+    /// so an early .Instance call does not create an auxiliary one, and holds their initialization for the server.
     /// </summary>
     [DefaultExecutionOrder(-999)]
     public class MultiplayerSingletonGuard : MonoBehaviour
@@ -33,11 +25,9 @@ namespace FastAndFractured.Multiplayer
             if (_interactableHandler == null)
                 _interactableHandler = FindFirstObjectByType<InteractableHandler>(FindObjectsInactive.Include);
 
-            // Register LevelController as the singleton instance before anything calls
-            // .Instance, which would otherwise create an auxiliar one.
             if (_levelController != null)
             {
-                // Use reflection to set s_Instance directly without triggering Construct.
+                // s_Instance directly, without triggering Construct.
                 var instanceField = typeof(AbstractSingleton<LevelController>)
                     .GetField("s_Instance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                 if (instanceField != null)
@@ -45,9 +35,7 @@ namespace FastAndFractured.Multiplayer
                     instanceField.SetValue(null, _levelController);
                 }
                 
-                // Suppress auto-init so LevelController doesn't call Initialize() 
-                // (which starts the game loop) before the server sends game data.
-                // Construction is still allowed (other singletons need LevelController.Instance).
+                // No auto-init (it starts the game loop) before the server's game data; construction stays allowed.
                 var autoInitStartField = typeof(AbstractAutoInitializableMonoBehaviour)
                     .GetField("_autoInitializeOnStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var autoInitEnableField = typeof(AbstractAutoInitializableMonoBehaviour)
@@ -60,11 +48,9 @@ namespace FastAndFractured.Multiplayer
                 Debug.LogWarning("[MultiplayerSingletonGuard] LevelController not found in scene!");
             }
 
-            // Disable InteractableHandler's OnEnable from triggering too early
-            // It will be re-enabled when the server starts the game
+            // InteractableHandler waits for the server to start the game.
             if (_interactableHandler != null)
             {
-                // Disable auto-initialization flags so it doesn't try to Initialize on Start/OnEnable
                 var autoConstructField = typeof(AbstractAutoInitializableMonoBehaviour)
                     .GetField("_autoConstructOnAwake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var autoInitStartField = typeof(AbstractAutoInitializableMonoBehaviour)
@@ -76,7 +62,6 @@ namespace FastAndFractured.Multiplayer
                 if (autoInitStartField != null) autoInitStartField.SetValue(_interactableHandler, false);
                 if (autoInitEnableField != null) autoInitEnableField.SetValue(_interactableHandler, false);
 
-                // Register InteractableHandler as singleton instance too
                 var ihInstanceField = typeof(AbstractSingleton<InteractableHandler>)
                     .GetField("s_Instance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                 if (ihInstanceField != null)

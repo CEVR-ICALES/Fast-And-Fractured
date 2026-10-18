@@ -6,14 +6,13 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Auto-starts the FishNet server and creates a Steam lobby when running as a dedicated server.
-    /// Place this GameObject in the multiplayer scene (or a persistent bootstrap scene).
-    ///
-    /// Activate only in dedicated-server builds: either use a separate scene or check
-    /// Application.isBatchMode (headless builds launched with -batchmode set this to true).
+    /// Dedicated server builds: starts the FishNet server and creates a Steam lobby. Only for those builds (separate
+    /// scene, or Application.isBatchMode).
     /// </summary>
     public sealed class DedicatedServerBootstrap : MonoBehaviour
     {
+        private const int START_TIMEOUT_SECONDS = 30;
+
         [Header("Lobby Settings")]
         [SerializeField] private string _roomName  = "Dedicated Server";
         [SerializeField] private ushort _port      = 7777;
@@ -34,7 +33,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(START_TIMEOUT_SECONDS));
 
             var options = new LobbyCreateOptions
             {

@@ -6,27 +6,16 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Watches for the "car levitates while stationary, client-only" report (2026-09-11): the
-    /// client sees its OWN car float above the ground when stopped; the host, looking at the same
-    /// (server-authoritative) car, sees it correctly on the ground. That split means the physics
-    /// body itself is fine and this is specifically how the CLIENT renders it - the render layer
-    /// (VehicleVisualSmoother) is the prime suspect, not physics or reconciliation.
-    ///
-    /// Self-installs and only watches a non-host client's OWNED car (the exact combination that
-    /// reproduces it). The moment the rendered Visuals diverge from the physics body by more than
-    /// FloatThreshold while speed is near zero, it dumps a full snapshot - body pose, Visuals pose,
-    /// the interpolation buffer's own state via reflection, ground raycast - so this can be read
-    /// after the fact from disk instead of needing anyone to drive while a live diagnostic runs.
-    ///
-    /// Output: <project>/../StationaryFloatWatcher.log
-    ///
-    /// To remove it, delete this file. It writes nothing on a host or when nothing floats.
+    /// Diagnostic for a client's own car floating while stopped: logs a snapshot to
+    /// &lt;project&gt;/../StationaryFloatWatcher.log when its Visuals diverge from the body at rest.
     /// </summary>
     public static class StationaryFloatWatcher
     {
         private const float FloatThreshold = 0.15f;
         private const float StationarySpeedThreshold = 0.3f;
         private const int MaxEvents = 20;
+        private const float ScanIntervalSeconds = 0.25f;
+        private const float GroundRayDistance = 50f;
 
         private static Runner _runner;
 
@@ -54,7 +43,7 @@ namespace FastAndFractured.Multiplayer.Testing
                 if (!isRemoteClientOnly || _events >= MaxEvents) return;
 
                 if (Time.unscaledTime < _nextScanTime) return;
-                _nextScanTime = Time.unscaledTime + 0.25f; // 4 checks/sec is plenty for a slow drift
+                _nextScanTime = Time.unscaledTime + ScanIntervalSeconds;
 
                 System.Type nvType = System.Type.GetType("FastAndFractured.Multiplayer.NetworkedVehicle, Assembly-CSharp");
                 if (nvType == null) return;
@@ -89,7 +78,7 @@ namespace FastAndFractured.Multiplayer.Testing
                 sb.AppendLine($"visuals.position   : {visuals.position}");
                 sb.AppendLine($"vertical gap (visuals.y - rb.y): {verticalGap:F4} m");
 
-                bool grounded = Physics.Raycast(rb.position, Vector3.down, out RaycastHit hit, 50f);
+                bool grounded = Physics.Raycast(rb.position, Vector3.down, out RaycastHit hit, GroundRayDistance);
                 sb.AppendLine($"ground under rb.position: {(grounded ? $"{Vector3.Distance(rb.position, hit.point):F3} m below, hit '{hit.collider.name}'" : "no hit within 50m")}");
 
                 System.Type smootherType = System.Type.GetType("FastAndFractured.Multiplayer.VehicleVisualSmoother, Assembly-CSharp");

@@ -3,11 +3,7 @@ using NUnit.Framework;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Who comes back after a host migration. The new host replays the original start (same seed,
-    /// same humans in the same order), then keeps each reconnected human's own car and the
-    /// surviving AIs; the host that left, the dead and whoever did not reconnect are removed.
-    /// </summary>
+    /// <summary>Who comes back after a host migration: reconnected humans keep their car, surviving AIs stay.</summary>
     public class HostMigrationRosterTests
     {
         // Original start: 3 humans (host A, B, C) + 3 AIs = 6 characters.

@@ -22,9 +22,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
         }
 
         /// <summary>
-        /// Humans are the first HumanTokens.Length characters of the replayed start, AIs the rest.
-        /// A human gets its own character back if it is alive in the snapshot; everyone missing
-        /// (the departed host, the dead, anyone who did not reconnect) is left out.
+        /// Humans are the first HumanTokens.Length characters of the replayed start, AIs the rest; a human alive in the
+        /// snapshot gets its character back, anyone missing is left out.
         /// </summary>
         public static Plan Build(MatchSnapshotBroadcast snapshot, IList<string> connectedTokens)
         {

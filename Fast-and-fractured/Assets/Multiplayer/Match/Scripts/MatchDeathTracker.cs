@@ -3,13 +3,7 @@ using System.Linq;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Pure death/alive bookkeeping for a networked match. Extracted from
-    /// NetworkedLevelControllerManager so the win-condition logic has zero UnityEngine/FishNet
-    /// dependencies and EditMode tests can cover every branch — the original inline version
-    /// failed silently (unknown victim ids were ignored, and a null winner lookup meant the
-    /// match never ended and the server never shut down).
-    /// </summary>
+    /// <summary>Death and alive bookkeeping of a networked match, free of Unity and FishNet so it can be unit tested.</summary>
     public class MatchDeathTracker
     {
         public enum Outcome
@@ -54,11 +48,7 @@ namespace FastAndFractured.Multiplayer
             AliveCount = 0;
         }
 
-        /// <summary>
-        /// Registers a character. Pass the owning client id for player characters so
-        /// disconnects can be mapped back to their character; omit it for AI.
-        /// Re-registering the same objectId is idempotent.
-        /// </summary>
+        /// <summary>Registers a character (idempotent); pass the owning client id for players, none for AI.</summary>
         public void RegisterCharacter(int objectId, int? ownerClientId = null)
         {
             if (!_aliveById.ContainsKey(objectId))
@@ -81,10 +71,7 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Drops the client→character mapping (character tracking is unaffected).</summary>
         public void ForgetClient(int clientId) => _characterByClient.Remove(clientId);
 
-        /// <summary>
-        /// Marks the victim dead and reports the resulting match state. Deaths of unknown or
-        /// already-dead characters return Applied == false and change nothing (dedup guard).
-        /// </summary>
+        /// <summary>Marks the victim dead; unknown or already dead victims change nothing (Applied false).</summary>
         public DeathResult ReportDeath(int victimObjectId)
         {
             if (!IsAlive(victimObjectId))

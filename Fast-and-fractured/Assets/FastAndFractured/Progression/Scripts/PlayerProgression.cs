@@ -5,11 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Progression
 {
     /// <summary>
-    /// The local player's profile: total XP (and so the level), the rewards unlocked so far and
-    /// the accessory equipped per character and slot. Saved in PlayerPrefs as JSON.
-    ///
-    /// XP comes from multiplayer matches (AwardMatch, from the match results); every level
-    /// reached unlocks the rewards of ProgressionRewards for that level.
+    /// The local player's profile, saved in PlayerPrefs as JSON: total XP (and level), unlocked rewards and the
+    /// accessory equipped per character and slot. XP comes from multiplayer matches.
     /// </summary>
     public static class PlayerProgression
     {
@@ -80,10 +77,7 @@ namespace FastAndFractured.Progression
         public static IReadOnlyList<string> UnlockedIds => Data.unlocked;
         public static IReadOnlyList<string> EquippedEntries => Data.equipped;
 
-        /// <summary>
-        /// Grants the XP of one finished match, once (the same results are not counted twice),
-        /// and unlocks the rewards of every level reached.
-        /// </summary>
+        /// <summary>Grants a finished match's XP once and unlocks the rewards of every level reached.</summary>
         public static Award? AwardMatch(string matchKey, int xp)
         {
             if (xp <= 0 || (!string.IsNullOrEmpty(matchKey) && matchKey == Data.lastAwardedMatch)) return null;
@@ -105,7 +99,6 @@ namespace FastAndFractured.Progression
             return LastAward;
         }
 
-        // -- Accessories ------------------------------------------------------------------
         public static string Equipped(string character, AccessorySlot slot)
         {
             string prefix = $"{character}|{slot}|";

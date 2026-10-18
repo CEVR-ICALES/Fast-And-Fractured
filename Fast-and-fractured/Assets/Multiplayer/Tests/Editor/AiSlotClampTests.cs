@@ -3,10 +3,6 @@ using FastAndFractured.Multiplayer;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Tests for AI slot clamping logic without FishNet runtime (pure logic extracted into a helper).
-    /// The actual FishNet SyncVar behaviour is verified at runtime; these tests cover the clamping math.
-    /// </summary>
     [TestFixture]
     public class AiSlotClampTests
     {

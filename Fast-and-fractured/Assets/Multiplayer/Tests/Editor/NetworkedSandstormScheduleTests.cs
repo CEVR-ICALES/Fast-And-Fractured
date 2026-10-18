@@ -2,12 +2,7 @@ using NUnit.Framework;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// The multiplayer storm schedule: the server publishes the tick the storm starts at, every peer's
-    /// HUD counts down to it, and each death brings it forward (GameLoopManager.OnCharacterDied in
-    /// singleplayer). Until 2026-09-30 nothing started the storm in multiplayer at all and the HUD
-    /// storm timer sat at 00:00.
-    /// </summary>
+    /// <summary>The multiplayer storm schedule: a synced start tick every HUD counts down to, brought forward by deaths.</summary>
     public class NetworkedSandstormScheduleTests
     {
         [TestCase(190f, ExpectedResult = "03:10")]

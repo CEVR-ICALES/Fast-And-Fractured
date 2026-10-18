@@ -74,7 +74,6 @@ namespace FastAndFractured
             if (_isClimbing)
             {
                 // Climbing is handled by DOTween (kinematic), so we don't apply manual movement/gravity here.
-                // TODO: Add particle effects or sound effects for climbing if needed.
             }
             else
             {

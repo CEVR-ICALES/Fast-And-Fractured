@@ -8,30 +8,9 @@ using Utilities.Managers.PauseSystem;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-authoritative wrapper for the Mega Chicken Boss
-    /// (ChickenBrain + ChickenKillZone + ChickenPushZone).
-    ///
-    /// ChickenKillZone.OnTriggerEnter calls statsController.Dead() directly — bypassing
-    /// NetworkedStatsController's death pipeline (no kill feed, no spectator transition, no
-    /// character-count tracking). ChickenPushZone applies AddForce without FishNet reconcile.
-    ///
-    /// KILL ZONE:
-    ///   This wrapper replaces ChickenKillZone on ALL peers with a relay installed on the exact
-    ///   child hitbox. The legacy component is destroyed after its visual references are copied,
-    ///   so its StatsController.Dead() callback cannot run even though Unity invokes trigger
-    ///   messages on disabled MonoBehaviours in some configurations.
-    ///
-    /// PUSH ZONE:
-    ///   ChickenPushZone and its collider are removed on non-server clients. The server runs it;
-    ///   FishNet rigidbody reconcile propagates the resulting impulses to clients.
-    ///
-    /// ANIMATOR SYNC:
-    ///   IsJumping / IsLayingEgg booleans are synced via SyncVars so client chickens
-    ///   animate correctly without running the AI locally.
-    ///
-    /// Setup: add this component and a NetworkObject to the MegaChicken Boss root GameObject.
-    /// ChickenKillZone and ChickenPushZone live on child GameObjects. The kill-zone relay is
-    /// installed automatically at runtime; no singleplayer prefab or script changes are needed.
+    /// Server-authoritative Mega Chicken boss. ChickenKillZone (which calls Dead() directly) is replaced on every
+    /// peer by a relay on its hitbox; the push zone and the AI only run on the server, and clients mirror the
+    /// animation and the eggs.
     /// </summary>
     [RequireComponent(typeof(ChickenBrain))]
     [RequireComponent(typeof(NetworkObject))]
@@ -47,7 +26,7 @@ namespace FastAndFractured.Multiplayer
         public readonly SyncVar<bool> SyncedIsJumping   = new SyncVar<bool>();
         public readonly SyncVar<bool> SyncedIsLayingEgg = new SyncVar<bool>();
 
-        // Mirrored constants from ChickenKillZone (kept in sync manually if the original changes).
+        // Mirrored from ChickenKillZone.
         private const float ANIMATION_JUMP_HIT_TIME        = 0.5f;
         private const float ANIMATION_LAYING_EGG_KILL_TIME = 0.4f;
         private const string ANIM_JUMP       = "Jump";
@@ -74,16 +53,11 @@ namespace FastAndFractured.Multiplayer
             base.OnStartNetwork();
             RestoreRelayedColliders();
 
-            // Pure clients never apply local push physics. Destroy both the legacy callback and
-            // its private hitbox; the server's authoritative impulse is reconciled by FishNet.
+            // Pure clients apply no push: the server's impulse reaches them through reconcile.
             if (!base.IsServerInitialized && _pushZone != null)
                 RemoveClientPushZone();
 
-            // The chicken's AI picks a random action every cooldown on whichever peer runs it,
-            // and its lay-egg action spawns a local pooled egg that rolls to a random point and
-            // pushes cars. Left running on clients, every client had its own chicken timing and its
-            // own phantom eggs pushing its own car where the server had none. Clients only mirror
-            // the server's animation through the SyncVars below.
+            // The AI only runs on the server: on clients it laid local eggs that pushed cars the server never saw.
             if (!base.IsServerInitialized)
                 DisableClientAi();
         }
@@ -138,14 +112,11 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // ── Eggs ─────────────────────────────────────────────────────────────────
-        // The eggs are pooled objects that only the server's chicken lays, rolls and explodes, and
-        // they push cars on the server - so a client got pushed by eggs it could not see. Both
-        // peers build the same egg pool in the same order when the map loads, so the server sends
-        // each egg's state by its index in that pool and the client moves its own copy, with the
-        // egg's logic, agent and physics removed: a picture of the server's egg, nothing more.
+        // Eggs: only the server's chicken lays them. Both peers build the same pool in the same order, so the
+        // server sends each egg's state by pool index and the client moves a logic-less copy.
         private const float EGG_SYNC_INTERVAL = 0.1f;
         private const float EGG_FOLLOW_SHARPNESS = 12f;
+        private const float MIN_ROLL_SQR_DISTANCE = 1e-8f;
         private const byte EGG_OFF = 0, EGG_ROLLING = 1, EGG_EXPLODING = 2;
 
         private float _eggSyncTimer;
@@ -265,10 +236,9 @@ namespace FastAndFractured.Multiplayer
                 Vector3 before = egg.position;
                 egg.position = Vector3.Lerp(before, mirror.Target, blend);
 
-                // Roll the model the way MegaChickenEgg does.
                 Vector3 movement = egg.position - before;
                 movement.y = 0f;
-                if (mirror.Model != null && movement.sqrMagnitude > 1e-8f && mirror.Radius > 0f)
+                if (mirror.Model != null && movement.sqrMagnitude > MIN_ROLL_SQR_DISTANCE && mirror.Radius > 0f)
                     mirror.Model.Rotate(Vector3.Cross(Vector3.up, movement.normalized),
                                         movement.magnitude / mirror.Radius * Mathf.Rad2Deg, Space.World);
             }
@@ -285,8 +255,7 @@ namespace FastAndFractured.Multiplayer
                 _killZoneRelay = _killZone.gameObject.AddComponent<NetworkedChickenKillZoneRelay>();
             _killZoneRelay.Configure(this);
 
-            // Destroy() is deferred until the end of the frame. Quarantine the exact hitbox
-            // during that window so the legacy callback cannot race the relay's installation.
+            // Destroy() is deferred: quarantine the hitbox so the legacy callback cannot race the relay.
             Collider[] colliders = _killZone.GetComponents<Collider>();
             bool[] enabledStates = new bool[colliders.Length];
             for (int i = 0; i < colliders.Length; i++)
@@ -316,11 +285,7 @@ namespace FastAndFractured.Multiplayer
             RestoreRelayedColliders();
         }
 
-        /// <summary>
-        /// Also run from OnStartNetwork: FishNet deactivates scene objects between Awake and their
-        /// spawn, which stops the coroutine above, and the kill zone stayed without colliders for
-        /// the whole match (same as the dead walls and the TNT).
-        /// </summary>
+        /// <summary>Also run from OnStartNetwork: FishNet deactivates scene objects before spawn, which stops the coroutine.</summary>
         private void RestoreRelayedColliders()
         {
             if (_quarantined == null) return;
@@ -352,7 +317,6 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServerInitialized || _brain == null) return;
 
-            // Activate push zone when chicken lands (matches ChickenKillZone ground-hit logic).
             if (other.gameObject.layer == LayerMask.NameToLayer(GROUND_LAYER) && _brain.IsJumping)
             {
                 if (_groundImpactCooldown > 0f) return;
@@ -363,10 +327,9 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Kill a vehicle when the jump or egg-laying hitbox connects.
             if (!_brain.IsJumping && !_brain.IsLayingEgg) return;
 
-            // Same filter as the singleplayer ChickenKillZone: only the car body collider.
+            // Same filter as ChickenKillZone: only the car body collider.
             if (!other.TryGetComponent(out StatsController _)) return;
 
             var stats = other.GetComponentInParent<NetworkedStatsController>();
@@ -393,7 +356,6 @@ namespace FastAndFractured.Multiplayer
                 _groundImpactEffect.Play();
         }
 
-        // ── Animator sync ────────────────────────────────────────────────────────
         private void OnJumpingChanged(bool prev, bool next, bool asServer)
         {
             if (asServer || _animator == null) return;

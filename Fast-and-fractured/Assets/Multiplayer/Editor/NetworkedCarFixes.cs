@@ -5,11 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// The fixes every networked car needs on top of NetworkedVehicleSetupTool's components,
-    /// found one car at a time while tuning the multiplayer (each tool documents its bug). They
-    /// run together, on every networked car, whenever the vehicle tool creates or updates one -
-    /// so a new character's car gets all of them - and from the vehicle tool's window.
-    /// All of them are idempotent: a car that already has a fix is left as it is.
+    /// The idempotent fixes every networked car needs on top of NetworkedVehicleSetupTool's components, run whenever
+    /// that tool creates or updates a car.
     /// </summary>
     public static class NetworkedCarFixes
     {

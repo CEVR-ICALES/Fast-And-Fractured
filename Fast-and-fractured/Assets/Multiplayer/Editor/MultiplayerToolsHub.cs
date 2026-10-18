@@ -11,6 +11,13 @@ namespace FastAndFractured.Multiplayer.Editor
     /// </summary>
     public class MultiplayerToolsHub : EditorWindow
     {
+        private const float SECTION_SPACING = 8f;
+        private const float SMALL_SPACING = 4f;
+        private const float PRIMARY_BUTTON_HEIGHT = 32f;
+        private const float BUTTON_HEIGHT = 28f;
+        private const float SMALL_BUTTON_HEIGHT = 24f;
+        private static readonly Vector2 MIN_WINDOW_SIZE = new Vector2(480f, 420f);
+
         private enum StressPreset
         {
             Disabled,
@@ -29,7 +36,7 @@ namespace FastAndFractured.Multiplayer.Editor
         public static void ShowWindow()
         {
             var window = GetWindow<MultiplayerToolsHub>("MP Tools Hub");
-            window.minSize = new Vector2(480f, 420f);
+            window.minSize = MIN_WINDOW_SIZE;
             window.Show();
         }
 
@@ -41,9 +48,9 @@ namespace FastAndFractured.Multiplayer.Editor
         private void OnGUI()
         {
             DrawSetupSection();
-            EditorGUILayout.Space(8f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawValidationAndTestingSection();
-            EditorGUILayout.Space(8f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawStressSection();
         }
 
@@ -52,26 +59,26 @@ namespace FastAndFractured.Multiplayer.Editor
             EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                if (GUILayout.Button("Lobby Setup Wizard  (MapCatalog + MenuScreens)", GUILayout.Height(32f)))
+                if (GUILayout.Button("Lobby Setup Wizard  (MapCatalog + MenuScreens)", GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
                 {
                     LobbySetupWizard.ShowWindow();
                 }
 
-                if (GUILayout.Button("Map Registration Tool  (register scenes as network maps)", GUILayout.Height(28f)))
+                if (GUILayout.Button("Map Registration Tool  (register scenes as network maps)", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     NetworkedMapRegistrationTool.ShowWindow();
                 }
 
-                EditorGUILayout.Space(4f);
+                EditorGUILayout.Space(SMALL_SPACING);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Vehicle Setup Tool", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Vehicle Setup Tool", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         NetworkedVehicleSetupTool.ShowWindow();
                     }
 
-                    if (GUILayout.Button("Bullet Converter", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Bullet Converter", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         NetworkedBulletConverter.ShowWindow();
                     }
@@ -79,23 +86,23 @@ namespace FastAndFractured.Multiplayer.Editor
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("AI Setup Tool", GUILayout.Height(28f)))
+                    if (GUILayout.Button("AI Setup Tool", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         NetworkedAISetupTool.ShowWindow();
                     }
 
-                    if (GUILayout.Button("Main Menu: Singleplayer / Multiplayer", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Main Menu: Singleplayer / Multiplayer", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         MainMenuPlayModesTool.Apply();
                     }
                 }
 
-                if (GUILayout.Button("Networked Prop Setup  (hazard prefab variants)", GUILayout.Height(28f)))
+                if (GUILayout.Button("Networked Prop Setup  (hazard prefab variants)", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     NetworkedPropSetupTool.ShowWindow();
                 }
 
-                if (GUILayout.Button("Scene Migration  (duplicate map + swap props)", GUILayout.Height(28f)))
+                if (GUILayout.Button("Scene Migration  (duplicate map + swap props)", GUILayout.Height(BUTTON_HEIGHT)))
                 {
                     NetworkedSceneMigrationTool.ShowWindow();
                 }
@@ -109,12 +116,12 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Validate Multiplayer Scene", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Validate Multiplayer Scene", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         MultiplayerSceneValidator.ShowWindow();
                     }
 
-                    if (GUILayout.Button("Multiplayer Log Filter", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Multiplayer Log Filter", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         MultiplayerLogFilterWindow.ShowWindow();
                     }
@@ -128,7 +135,7 @@ namespace FastAndFractured.Multiplayer.Editor
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 _preset = (StressPreset)EditorGUILayout.EnumPopup("Preset", _preset);
-                if (GUILayout.Button("Load Preset Values", GUILayout.Height(24f)))
+                if (GUILayout.Button("Load Preset Values", GUILayout.Height(SMALL_BUTTON_HEIGHT)))
                 {
                     ApplyPresetValues(_preset);
                 }
@@ -139,12 +146,12 @@ namespace FastAndFractured.Multiplayer.Editor
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Apply Runtime Settings", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Apply Runtime Settings", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         ApplyRuntimeStressSettings(enable: true);
                     }
 
-                    if (GUILayout.Button("Disable Simulation", GUILayout.Height(28f)))
+                    if (GUILayout.Button("Disable Simulation", GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         DisableRuntimeStressSettings();
                     }

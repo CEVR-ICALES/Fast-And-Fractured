@@ -3,11 +3,6 @@ using FastAndFractured.Multiplayer.Abstractions;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Contract tests that verify ILobbyTransport and IPlayerIdentityProvider structural requirements.
-    /// These are compile-time / reflection checks — no actual network calls are made in EditMode.
-    /// Play-mode integration tests for the actual Tugboat round-trip are manual (see plan §14).
-    /// </summary>
     [TestFixture]
     public class LobbyTransportContractTests
     {

@@ -4,15 +4,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Drives the singleplayer state machine Controller from the FishNet network tick instead of
-    /// Unity's Update. This decouples the state machine from frame rate so all state-machine-driven
-    /// physics (ApplyMovementAction, HandleAutoDeceleration, dash transitions, etc.) run inside
-    /// the same tick boundary as NetworkedVehicle.Replicate.
-    ///
-    /// Without this driver, Controller.Update fires at frame rate (60Hz+) while Replicate fires at
-    /// the network tick rate, causing duplicate ProcessMovementInput calls and physics applied
-    /// outside the prediction snapshot. With it, the state machine becomes part of the deterministic
-    /// tick loop and replays during reconcile re-execute its logic correctly.
+    /// Runs the singleplayer state machine Controller from NetworkedVehicle.Replicate instead of Update, so its
+    /// physics happens inside the tick and replays with it.
     /// </summary>
     [RequireComponent(typeof(Controller))]
     public class NetworkedStateMachineDriver : MonoBehaviour
@@ -39,10 +32,6 @@ namespace FastAndFractured.Multiplayer
         private bool _takenOver;
         private bool _loggedReassert;
 
-        /// <summary>
-        /// Suppresses Controller.Update by disabling the component. The state machine's Awake/Start
-        /// has already run by this point so its current state is initialized.
-        /// </summary>
         public void TakeOverFromUpdate()
         {
             _takenOver = true;
@@ -50,12 +39,7 @@ namespace FastAndFractured.Multiplayer
                 _controller.enabled = false;
         }
 
-        /// <summary>
-        /// Undoes TakeOverFromUpdate: the Controller runs from Unity's Update again and the
-        /// LateUpdate re-assert stops. Used for the owner's child state machines (the shooting
-        /// Controller), which must run at frame rate exactly like singleplayer — nothing ticks
-        /// them from the network loop.
-        /// </summary>
+        /// <summary>Undoes TakeOverFromUpdate for the owner's frame-rate state machines (shooting).</summary>
         public void ReleaseToUpdate()
         {
             _takenOver = false;
@@ -63,14 +47,7 @@ namespace FastAndFractured.Multiplayer
                 _controller.enabled = true;
         }
 
-        /// <summary>
-        /// GameLoopManager.ActivateCharacterControls (SP flow) re-enables every character's
-        /// Controller when the match countdown ends, which silently undoes TakeOverFromUpdate.
-        /// The state machine then runs at frame rate (Controller.Update) AND per network tick
-        /// (NetworkedVehicle.Replicate) simultaneously: forces double-apply, cars end up faster
-        /// than singleplayer and remote cars jitter as the local frame-rate simulation fights
-        /// the replicated one. Re-assert the takeover every frame — it's a single bool check.
-        /// </summary>
+        /// <summary>GameLoopManager re-enables every Controller when the countdown ends: re-assert the takeover each frame.</summary>
         private void LateUpdate()
         {
             if (!_takenOver || _controller == null || !_controller.enabled)
@@ -86,10 +63,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Tick the state machine: run current state's actions and evaluate transitions.
-        /// Called from NetworkedVehicle.Replicate on every tick (including replays during reconcile).
-        /// </summary>
+        /// <summary>Runs the current state's actions and transitions; every tick, replays included.</summary>
         public void TickStateMachine(uint tick)
         {
             if (!_ready || _controller == null) return;
@@ -98,9 +72,7 @@ namespace FastAndFractured.Multiplayer
             var state = _controller.GetCurrentState();
             if (state == null) return;
 
-            // Diagnostic: the canary file is the only record that survives a main-thread hang, and
-            // state transitions are rare enough to log every one. The last state written before the
-            // log stops is the state whose actions or transitions are hanging.
+            // State transitions go to the canary: the last one before the log stops is the hanging state.
             if (!ReferenceEquals(state, _lastLoggedState))
             {
                 _lastLoggedState = state;

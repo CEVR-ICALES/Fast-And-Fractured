@@ -17,11 +17,8 @@ namespace FastAndFractured
         public float ingameEventTimeOnScreen = 2f;
 
         /// <summary>
-        /// Optional hook for deciding who gets told about this pickup. Null in singleplayer, where
-        /// the only player is the local one. Multiplayer sets it because the pickup is resolved on
-        /// the server for every player, so "was it me?" cannot be answered by looking at the local
-        /// LevelController - it is always the server's own car there. Returning true means the hook
-        /// has taken care of showing the message.
+        /// Optional hook (multiplayer) deciding who is told about this pickup; true when it showed the message. Null in
+        /// singleplayer.
         /// </summary>
         public System.Func<GameObject, bool> IngameEventRouter;
 

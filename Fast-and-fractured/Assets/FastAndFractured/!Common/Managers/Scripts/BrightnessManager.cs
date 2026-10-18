@@ -44,11 +44,8 @@ public class BrightnessManager : AbstractSingleton<BrightnessManager>
     }
 
     /// <summary>
-    /// Finds the exposure of the current volume. The VolumeManager may not have picked a volume
-    /// yet when this initializes (OnEnable order is not guaranteed; online its start is held
-    /// until the match data arrives) - reading it then threw UnassignedReferenceException on
-    /// currentVolumeObject. Binding is retried whenever the brightness is applied, and again
-    /// whenever the VolumeManager switches volume (Update).
+    /// Binds the current volume's exposure; the VolumeManager may not have picked a volume yet, so this is retried
+    /// on every apply and volume change.
     /// </summary>
     private bool TryBindVolume()
     {

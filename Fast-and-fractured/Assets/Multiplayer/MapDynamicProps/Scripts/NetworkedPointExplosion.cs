@@ -7,27 +7,14 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-authoritative wrapper for PointExplosion (TNT crates and similar map hazards).
-    ///
-    /// PointExplosion.OnCollisionEnter runs on all clients because physics collision events
-    /// fire everywhere. It calls StatsController.TakeEndurance directly (bypassing the
-    /// networked damage pipeline) and activates ExplosionForce (applying AddForce to all
-    /// rigidbodies in range). In multiplayer this produces double-damage and force desync.
-    ///
-    /// This wrapper snapshots PointExplosion's serialized configuration, removes the legacy
-    /// component on every peer, and owns the collision path. The server-only
-    /// OnCollisionEnter:
-    ///   1. Activates ExplosionForce on the server — FishNet Rigidbody prediction reconcile
-    ///      propagates the resulting velocities to all clients automatically.
-    ///   2. Routes damage through DealDamageServerRpc after the original endingTime delay.
-    ///   3. Broadcasts RpcExplosionTriggered to hide the mesh and deactivate the object on
-    ///      all peers simultaneously.
-    ///
-    /// Setup: add this component and a NetworkObject to each TNT/explosive GameObject.
+    /// Server-authoritative TNT (PointExplosion): the legacy component is removed on every peer after its settings
+    /// are copied, and only the server explodes it, damaging through the networked pipeline.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
     public class NetworkedPointExplosion : NetworkBehaviour
     {
+        private const float DAMAGE_SCAN_INTERVAL = 0.1f;
+
         private PointExplosion _wrapped;
         private bool _exploded;
 
@@ -41,7 +28,6 @@ namespace FastAndFractured.Multiplayer
         private float _startHitTime = 0.2f;
         private float _endHitTime = 1f;
 
-        // Reflection handles — PointExplosion fields are [SerializeField] private.
         private static readonly FieldInfo _explosionHitboxField =
             typeof(PointExplosion).GetField("explosionHitbox",      BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo _explosionRadiusField =
@@ -56,8 +42,7 @@ namespace FastAndFractured.Multiplayer
             typeof(PointExplosion).GetField("visuals",              BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo _endingTimeField =
             typeof(PointExplosion).GetField("endingTime",          BindingFlags.NonPublic | BindingFlags.Instance);
-        // Added by dev (turret/explosion timing): ExplosionForce.ActivateExplosionHitbox now
-        // takes startHitTime + endHitTime. Mirror those serialized PointExplosion fields.
+        // ExplosionForce.ActivateExplosionHitbox takes these PointExplosion timings.
         private static readonly FieldInfo _startHitTimeField =
             typeof(PointExplosion).GetField("startHitTime",        BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo _endHitTimeField =
@@ -81,8 +66,7 @@ namespace FastAndFractured.Multiplayer
             _startHitTime = ReadFloat(_startHitTimeField, _startHitTime);
             _endHitTime = ReadFloat(_endHitTimeField, _endHitTime);
 
-            // PointExplosion.Start used to perform this initialization. Preserve it before
-            // removing the component so the network wrapper is self-contained.
+            // PointExplosion.Start's initialization, kept before the component is removed.
             if (_explosionHitbox != null)
                 _explosionHitbox.ExplosionCollider = _explosionHitbox.GetComponent<SphereCollider>();
 
@@ -116,9 +100,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
-            // FishNet deactivates scene objects between Awake and their spawn, which stops the
-            // coroutine above: every TNT kept its collider off for the whole match, so nothing
-            // could touch it and it never went off. Restore here too (like the dead walls).
+            // FishNet deactivates scene objects before spawn, which stops the restore coroutine: restore here too.
             RestoreColliders();
         }
 
@@ -135,27 +117,20 @@ namespace FastAndFractured.Multiplayer
         private void OnCollisionEnter(Collision collision)
         {
             if (!base.IsServerInitialized || _exploded) return;
-            // Like dev's PointExplosion: anything with physics sets it off (golf balls too).
+            // As PointExplosion: anything with physics sets it off.
             if (!collision.gameObject.TryGetComponent(out PhysicsBehaviour physics)) return;
 
             _exploded = true;
 
-            // Activate the explosion hitbox on the server.
-            // The resulting impulse forces propagate to clients via FishNet rigidbody reconcile.
             if (_explosionHitbox != null)
             {
-                // No damage percentage here: damage goes through the networked pipeline below.
-                // The TNT is the author (dev credits it as the last thing that pushed the victim).
+                // No damage here (it goes through the networked pipeline below); the TNT is the author.
                 _explosionHitbox.ActivateExplosionHitbox(
                     _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime, gameObject);
             }
 
-            // Damage every car the blast reaches while its hitbox is live (dev moved the damage
-            // from the car that touched the TNT to ExplosionForce, i.e. everyone in the radius),
-            // through the networked pipeline.
             StartCoroutine(ServerRadiusDamage());
 
-            // Hide visuals and deactivate on all clients.
             RpcExplosionTriggered();
         }
 
@@ -180,16 +155,14 @@ namespace FastAndFractured.Multiplayer
                     if (stats == null || !damaged.Add(stats)) continue;
                     stats.DealEnvironmentDamageServer(core.MaxEndurance * _damagePercentage);
                 }
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(DAMAGE_SCAN_INTERVAL);
             } while (Time.time < until);
         }
 
         [ObserversRpc(RunLocally = true)]
         private void RpcExplosionTriggered()
         {
-            // The TNT's ExplosionForce (which raises the Explosion shake profile) is only activated
-            // on the server, so remote clients would never feel the blast. Emit it locally on each
-            // peer at the TNT position; Cinemachine attenuates it by distance.
+            // The hitbox that raises the shake only runs on the server: shake every peer here.
             NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, transform.position);
 
             if (_visuals != null) _visuals.SetActive(false);
@@ -201,11 +174,7 @@ namespace FastAndFractured.Multiplayer
         private static readonly FieldInfo _explosionVfxField =
             typeof(ExplosionForce).GetField("_explosionVFX", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        /// <summary>
-        /// The blast's VFX lives on the hitbox, which only the server activates: clients saw the
-        /// crate vanish without an explosion. Show it here with its colliders off - the push and
-        /// the damage are the server's.
-        /// </summary>
+        /// <summary>Clients: the blast VFX lives on the server-only hitbox, so show it here with its colliders off.</summary>
         private void ShowClientBlast()
         {
             if (_explosionHitbox == null) return;

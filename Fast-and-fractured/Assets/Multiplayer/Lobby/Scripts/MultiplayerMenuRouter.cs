@@ -9,29 +9,16 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer.Lobby
 {
     /// <summary>
-    /// Routes the existing singleplayer character + map selection flow into the multiplayer lobby
-    /// without duplicating those screens.
-    ///
-    /// Flow when active (started by clicking SELECT CHARACTER &amp; MAP in LOBBY_ROOM):
-    ///   1. Transition to CHARACTER_SELECTION screen — singleplayer UI runs unchanged.
-    ///   2. While the flow is active, CharacterSelectorManager.OnCharacterCodeChanged is forwarded
-    ///      to lobby.ServerSelectCharacter so other players see live updates as the user cycles.
-    ///   3. Transition to MAP_SELECTION screen — same prefab buttons as singleplayer.
-    ///   4. When a map button click reaches LoadingManager.LoadScene(idx), the registered
-    ///      SceneLoadOverride intercepts: lookup mapId via MapCatalog, ServerVoteMap, transition
-    ///      back to LOBBY_ROOM, end flow.
-    ///
-    /// Singleplayer is unaffected — when no flow is active the override returns false and
-    /// LoadingManager loads the scene normally.
+    /// Reuses the singleplayer character and map screens for the lobby: character changes are forwarded live and
+    /// the map button's scene load is intercepted as a map vote. Singleplayer is unaffected.
     /// </summary>
     public static class MultiplayerMenuRouter
     {
         public static bool IsRoutingForLobby { get; private set; }
 
-        // Name of the canvas GameObject hardcoded into the map button OnClick (SetActive(true) is
-        // executed before our override fires). We hunt it down by name after intercepting and
-        // disable it so the user doesn't see a brief loading flash before the lobby fades back in.
+        // The map button activates this loading canvas before our override runs: it is hidden again.
         private const string LOADING_CANVAS_NAME = "LosingScreenCanvas";
+        private const float SCREEN_TRANSITION_SECONDS = 0.5f;
 
         public static void BeginLobbyFlow()
         {
@@ -42,7 +29,6 @@ namespace FastAndFractured.Multiplayer.Lobby
 
             if (CharacterSelectorManager.HasInstance)
             {
-                // Push the current character to the lobby immediately, then keep streaming updates.
                 var inst = CharacterSelectorManager.Instance;
                 string current = inst.CurrentCharacterCode;
                 if (!string.IsNullOrEmpty(current)) ForwardCharacter(current);
@@ -65,23 +51,13 @@ namespace FastAndFractured.Multiplayer.Lobby
         private static void ForwardCharacter(string code)
         {
             if (string.IsNullOrEmpty(code)) return;
-            // Persist to the MP-dedicated key so the lobby's "default on join" picks up this
-            // choice next session instead of falling back to Josefino.
+            // The MP key, so the lobby uses this pick next session.
             NetworkedLobbyManager.SavePreferredCharacterCode(code);
             var lobby = LobbyLocator.GetLobbyManager();
             if (lobby != null) lobby.ServerSelectCharacter(code);
         }
 
-        /// <summary>
-        /// Hook for LoadingManager.SceneLoadOverride.
-        /// Returns true to swallow the scene load. We:
-        ///   - look up the map ID for this scene index
-        ///   - vote on the lobby
-        ///   - commit the current character (in case the player skipped CHARACTER_SELECTION)
-        ///   - transition back to LOBBY_ROOM
-        ///   - hide the hardcoded loading canvas
-        /// Returns false if no map could be resolved (lets singleplayer-style replay through).
-        /// </summary>
+        /// <summary>LoadingManager.SceneLoadOverride: turns a map load into a lobby vote; false when the scene is not a map.</summary>
         private static bool HandleSceneLoadAttempt(int sceneBuildIndex)
         {
             if (!IsRoutingForLobby) return false;
@@ -89,7 +65,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             int mapId = ResolveMapIdFromBuildIndex(sceneBuildIndex);
             if (mapId < 0)
             {
-                // Couldn't map this scene to a catalog entry — likely not a map scene; allow load.
                 Debug.LogWarning($"[MultiplayerMenuRouter] LoadScene({sceneBuildIndex}) intercepted but " +
                                  "scene is not in MapCatalog — letting the load through.");
                 return false;
@@ -137,13 +112,9 @@ namespace FastAndFractured.Multiplayer.Lobby
 
         private static void HideLoadingCanvas()
         {
-            // The map button prefab hardcodes SetActive(true) on a loading screen canvas before
-            // calling LoadScene. We search the live scene for it and disable it again.
-            // Tries common names first.
             var byName = GameObject.Find(LOADING_CANVAS_NAME);
             if (byName != null) { byName.SetActive(false); return; }
 
-            // Fallback: scan inactive roots in active scene for anything looking like a loading screen.
             var active = SceneManager.GetActiveScene();
             foreach (var root in active.GetRootGameObjects())
             {
@@ -175,7 +146,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 Debug.LogWarning("[MultiplayerMenuRouter] No MainMenuManager — cannot transition back to LOBBY_ROOM.");
                 return;
             }
-            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, 0.5f);
+            MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, SCREEN_TRANSITION_SECONDS);
         }
     }
 }

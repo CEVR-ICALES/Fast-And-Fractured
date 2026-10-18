@@ -7,22 +7,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// Points every NetworkTickSmoother of a networked car at a transform of that same car.
-    ///
-    /// Carme's variant was built from Pepe's: both of its smoothers (Visuals, Turret) targeted the
-    /// root of NetworkedPepeGameplayCar Variant, a transform inside ANOTHER prefab asset. FishNet
-    /// starts the smoother in OnStartClient and parents a tracker to that target, so every peer
-    /// that spawned Carme's car logged "Setting the parent of a transform which resides in a
-    /// Prefab Asset is disabled to prevent data corruption" twice (measured 2026-09-30, host and
-    /// client). The other cars target their own root; a foreign target is replaced by the
-    /// transform at the same path in the car itself.
-    ///
-    /// The copied smoothers also still named Pepe's NetworkObject as theirs (_addedNetworkObject,
-    /// _networkObjectCache). FishNet re-caches the latter when it registers the prefab, so that only
-    /// misled the editor, but they are repointed to the car's own NetworkObject as well.
-    ///
-    /// Run from Tools ▸ Fast And Fractured ▸ Vehicle Setup - Tick Smoother Targets (Headless).
-    /// NetworkedVehicleSetupTests asserts the result.
+    /// Points every NetworkTickSmoother of a networked car at a transform of that same car (Carme's targeted Pepe's
+    /// prefab asset, which logged a parenting error on every spawn). NetworkedVehicleSetupTests asserts it.
     /// </summary>
     public static class VehicleTickSmootherTargetSetupTool
     {

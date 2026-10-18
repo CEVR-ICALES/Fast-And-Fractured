@@ -3,11 +3,6 @@ using FastAndFractured.Multiplayer;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Covers the match win-condition bookkeeping that previously lived inline in
-    /// NetworkedLevelControllerManager and failed silently (issue: one player dies in a
-    /// 2-player match and the other never reaches the win screen; server stays open).
-    /// </summary>
     public class MatchDeathTrackerTests
     {
         private MatchDeathTracker _tracker;
@@ -21,7 +16,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void Only_AI_left_once_every_human_is_dead()
         {
-            // The host may skip the rest of the match once no human is alive (feedback 2026-09-30).
+            // The host may skip the rest of the match once no human is alive.
             _tracker.RegisterCharacter(10, ownerClientId: 0);
             _tracker.RegisterCharacter(20, ownerClientId: 1);
             _tracker.RegisterCharacter(30);
@@ -99,8 +94,7 @@ namespace FastAndFractured.Multiplayer.Tests
             _tracker.RegisterCharacter(20);
 
             _tracker.ReportDeath(10);
-            // AliveCount is now 1 → Winner outcome fired for 20. If 20 then also dies
-            // (e.g. simultaneous kill processed after), it must resolve as a draw.
+            // 20 already won; if it then dies too (a simultaneous kill) it is a draw.
             var result = _tracker.ReportDeath(20);
 
             Assert.IsTrue(result.Applied);

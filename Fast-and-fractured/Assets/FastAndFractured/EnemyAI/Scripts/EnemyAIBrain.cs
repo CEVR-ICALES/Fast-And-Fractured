@@ -67,13 +67,24 @@ namespace FastAndFractured
         const float AIM_ERROR_DISTANCE = 30f;
         // Targeting: stick with a target a while instead of switching every frame.
         const float TARGET_COMMIT_SECONDS = 3f;
+        const float MIN_LEAD_BULLET_SPEED = 1f;
+        const float SEED_POSITION_SCALE = 10f;
+        const int SEED_PRIME_X = 73856093;
+        const int SEED_PRIME_Z = 19349663;
+        const float MIN_AIM_ERROR_SCALE = 0.6f;
+        const float MAX_AIM_ERROR_SCALE = 1.8f;
+        const float MIN_REACTION_TIME = 0.15f;
+        const float MAX_REACTION_TIME = 0.5f;
+        const float MIN_CORNER_CAUTION = 0.7f;
+        const float MAX_CORNER_CAUTION = 1.3f;
+        const float THRESHOLD_JITTER = 10f;
+        const float MIN_THRESHOLD = 5f;
+        const float MAX_THRESHOLD = 95f;
         const float SCORE_HUMAN_BONUS = 10f;
         const float SCORE_DAMAGED_ME_BONUS = 15f;
         const float SCORE_LOW_HEALTH_BONUS = 20f;
 
-        // Personality, stable per AI and identical on every peer (seeded from its spawn point,
-        // no shared random stream consumed): how well it aims, how fast it reacts, how
-        // carefully it corners.
+        // Personality, seeded from the spawn point so every peer rolls the same.
         private float _aimErrorScale = 1f;
         private float _reactionTime = 0.3f;
         private float _cornerCaution = 1f;
@@ -282,9 +293,7 @@ namespace FastAndFractured
             startRotation = carMovementController.transform.rotation;
             _startingPercentageHealth = decisionPercentageHealth;
             
-            // Subscriptions are handled in OnEnable/OnDisable. 
-            // If statsController was null during OnEnable, we subscribe here.
-            // If it was already subscribed, RemoveListener ensures we don't double-subscribe.
+            // Subscribes here if statsController was still null in OnEnable; RemoveListener avoids doubles.
             if (statsController)
             {
                 statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
@@ -301,16 +310,16 @@ namespace FastAndFractured
 
         private void RollPersonality()
         {
-            int seed = unchecked(Mathf.RoundToInt(startPosition.x * 10f) * 73856093 ^ Mathf.RoundToInt(startPosition.z * 10f) * 19349663);
+            int seed = unchecked(Mathf.RoundToInt(startPosition.x * SEED_POSITION_SCALE) * SEED_PRIME_X ^ Mathf.RoundToInt(startPosition.z * SEED_POSITION_SCALE) * SEED_PRIME_Z);
             var rng = new System.Random(seed);
             float Roll(float min, float max) => Mathf.Lerp(min, max, (float)rng.NextDouble());
 
-            _aimErrorScale = Roll(0.6f, 1.8f);
-            _reactionTime = Roll(0.15f, 0.5f);
-            _cornerCaution = Roll(0.7f, 1.3f);
+            _aimErrorScale = Roll(MIN_AIM_ERROR_SCALE, MAX_AIM_ERROR_SCALE);
+            _reactionTime = Roll(MIN_REACTION_TIME, MAX_REACTION_TIME);
+            _cornerCaution = Roll(MIN_CORNER_CAUTION, MAX_CORNER_CAUTION);
             // Some are bolder, some flee sooner.
-            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-10f, 10f), 5f, 95f);
-            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-10f, 10f), 5f, 95f);
+            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-THRESHOLD_JITTER, THRESHOLD_JITTER), MIN_THRESHOLD, MAX_THRESHOLD);
+            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-THRESHOLD_JITTER, THRESHOLD_JITTER), MIN_THRESHOLD, MAX_THRESHOLD);
         }
         public void ReturnToStartPosition()
         {
@@ -343,7 +352,6 @@ namespace FastAndFractured
             }
             else
             {
-                // Lift off into a tight turn, like a driver would, rather than flat out always.
                 float slowFrom = CORNER_SLOWDOWN_START_ANGLE / _cornerCaution;
                 inputY = Mathf.Lerp(MAX_INPUT_VALUE, MIN_CORNER_THROTTLE, Mathf.InverseLerp(slowFrom, ANGLE_90, Mathf.Abs(angle)));
             }
@@ -394,9 +402,7 @@ namespace FastAndFractured
         #region SearchState
         public void ChoosePlayer()
         {
-            // Online every AI used to hunt the same car - the host's, LevelController's
-            // LocalPlayer. Go for the best human target instead (in singleplayer the only human
-            // is the player, so nothing changes there).
+            // Online, the best human target rather than the host's car (LevelController.LocalPlayer).
             GameObject target = ChooseBestTarget(humansOnly: true);
             if (target == null) target = _player;
             if (target != null)
@@ -407,8 +413,7 @@ namespace FastAndFractured
 
         public void ChooseItemFromType()
         {
-            // With no stat item left on the map the loop below could never find one and never
-            // end (the empty-list exception further down used to be what broke out of it).
+            // With no stat item left on the map the loop below would never end.
             var allItems = InteractableHandler.Instance.GetStatBoostItems();
             if (allItems == null || allItems.Count == 0) return;
             int attempts = 0;
@@ -486,17 +491,14 @@ namespace FastAndFractured
 
         public void ChooseNearestCharacter()
         {
-            // Not strictly the nearest any more: nearby, weakened, or the one that hurt me -
-            // and keep the current target for a while unless it is gone.
             GameObject target = ChooseBestTarget(humansOnly: false);
             if (target == null) target = CalcNearestCharacter();
             ChangeTargetToShoot(target);
         }
 
         /// <summary>
-        /// Lowest score wins: distance in metres, minus bonuses for humans, for whoever damaged
-        /// this AI recently and for low health. Keeps the current target while it is alive and
-        /// was picked less than TARGET_COMMIT_SECONDS ago.
+        /// Lowest score wins: distance minus bonuses for humans, for whoever hurt this AI recently and for low health.
+        /// The current target is kept for TARGET_COMMIT_SECONDS while alive.
         /// </summary>
         private GameObject ChooseBestTarget(bool humansOnly)
         {
@@ -970,14 +972,13 @@ namespace FastAndFractured
 
         public Vector3 GetShootingDirectionWithError()
         {
-            // Aim where the target will be when the bullet arrives, not where it is now.
             Vector3 shootFrom = normalShootHandle.ShootPoint.position;
             Vector3 aimPoint = _currentTarget.transform.position;
             float distance = Vector3.Distance(shootFrom, aimPoint);
             Rigidbody targetBody = _currentTarget.GetComponentInParent<Rigidbody>();
             if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<Rigidbody>();
             float bulletSpeed = statsController.NormalShootSpeed;
-            if (targetBody != null && bulletSpeed > 1f)
+            if (targetBody != null && bulletSpeed > MIN_LEAD_BULLET_SPEED)
                 aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, MAX_LEAD_SECONDS);
 
             Vector3 shootingDirection = (aimPoint - shootFrom).normalized;

@@ -9,13 +9,8 @@ using UnityEngine.UI;
 namespace FastAndFractured
 {
     /// <summary>
-    /// Tooltips for the settings: hovering a row (or selecting it with the gamepad / keyboard)
-    /// shows what that setting does, next to the pointer or under the row. Works for every settings
-    /// menu - main menu, pause menu, tabs added at runtime - without touching them: a row is any
-    /// child of "SettingsContainer/&lt;tab&gt;/Viewport/Content", and its name gives the text key.
-    ///
-    /// Texts: the "Settings" localization sheet, keys "Settings.Tooltip.&lt;RowName&gt;" (see KeyFor).
-    /// The remapping rows reuse the controls' descriptions (Controls sheet).
+    /// Settings tooltips on hover or gamepad selection, for every settings menu: a row is any child of
+    /// "SettingsContainer/&lt;tab&gt;/Viewport/Content" and its name gives the key "Settings.Tooltip.&lt;RowName&gt;".
     /// </summary>
     public sealed class SettingsTooltips : MonoBehaviour
     {
@@ -26,6 +21,11 @@ namespace FastAndFractured
         private const float FADE_TIME = 0.12f;
         private const float MAX_WIDTH = 460f;
         private const float FONT_SIZE = 28f;
+        private const float MIN_MOUSE_MOVE_SQR = 1f;
+        private static readonly Vector2 ROW_OFFSET = new Vector2(24f, -4f);
+        private static readonly Vector2 OUTLINE_OFFSET = new Vector2(2f, -2f);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.09f, 0.07f, 0.06f, 0.94f);
+        private static readonly Color OUTLINE_COLOR = new Color(1f, 0.78f, 0.35f, 0.55f);
         private const float CHECK_SETTINGS_EVERY = 0.5f;
         private static readonly Vector2 PointerOffset = new Vector2(24f, -24f);
 
@@ -80,7 +80,7 @@ namespace FastAndFractured
 
             // Mouse moved → pointer mode; selection changed without the mouse → navigation mode.
             Vector2 mouse = Mouse.current != null ? Mouse.current.position.ReadValue() : _lastMouse;
-            if ((mouse - _lastMouse).sqrMagnitude > 1f) _navigating = false;
+            if ((mouse - _lastMouse).sqrMagnitude > MIN_MOUSE_MOVE_SQR) _navigating = false;
             _lastMouse = mouse;
             var selected = events.currentSelectedGameObject;
             if (selected != _lastSelected)
@@ -111,7 +111,6 @@ namespace FastAndFractured
             }
         }
 
-        // ── Which row ───────────────────────────────────────────────────────────────────
         private static bool AnySettingsOpen()
         {
             foreach (var settings in FindObjectsByType<SettingsMenuBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -150,7 +149,6 @@ namespace FastAndFractured
             Hide();
         }
 
-        // ── Text ────────────────────────────────────────────────────────────────────────
         /// <summary>The tooltip of a row, in the current language; null when it has none.</summary>
         public static string TextFor(string rowName)
         {
@@ -189,7 +187,6 @@ namespace FastAndFractured
             catch { return null; }   // localization not ready: no tooltip rather than an error
         }
 
-        // ── Box ─────────────────────────────────────────────────────────────────────────
         private void Show()
         {
             string text = TextFor(_row.name);
@@ -223,11 +220,11 @@ namespace FastAndFractured
             _box.pivot = new Vector2(0f, 1f);
             _box.anchorMin = _box.anchorMax = new Vector2(0.5f, 0.5f);
             var background = go.AddComponent<Image>();
-            background.color = new Color(0.09f, 0.07f, 0.06f, 0.94f);
+            background.color = BACKGROUND_COLOR;
             background.raycastTarget = false;
             var outline = go.AddComponent<Outline>();
-            outline.effectColor = new Color(1f, 0.78f, 0.35f, 0.55f);
-            outline.effectDistance = new Vector2(2f, -2f);
+            outline.effectColor = OUTLINE_COLOR;
+            outline.effectDistance = OUTLINE_OFFSET;
             var layout = go.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(16, 16, 12, 12);
             layout.childControlWidth = layout.childControlHeight = true;
@@ -258,12 +255,12 @@ namespace FastAndFractured
             Vector2 local;
             if (_rowFromSelection)
             {
-                // Under the row, from its left edge: beside it the box would cover the control.
+                // Under the row: beside it the box would cover the control.
                 var corners = new Vector3[4];
                 ((RectTransform)_row).GetWorldCorners(corners);   // 0 = bottom left
                 Vector2 screen = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, camera, out local);
-                local += new Vector2(24f, -4f);
+                local += ROW_OFFSET;
             }
             else
             {

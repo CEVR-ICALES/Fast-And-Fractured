@@ -3,11 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.GameTelemetry
 {
-    /// <summary>
-    /// The tutorial (training scene): who starts it, each exercise passed, who finishes it and
-    /// where the rest leave. Listens to the exercises' own events (TrainingInputSucceded), the
-    /// same ones TrainingHandle counts.
-    /// </summary>
+    /// <summary>Tutorial events: start, each exercise passed, finish, and where players leave.</summary>
     public static class TutorialCollector
     {
         private const string SCENE_MARK = "Training";

@@ -9,18 +9,21 @@ using UnityEngine.UI;
 namespace FastAndFractured.Progression
 {
     /// <summary>
-    /// ACCESSORIES screen: per character, what is equipped in each slot (head, face, car), cycled
-    /// through the accessories unlocked for that character. The choice is saved in the profile
-    /// and AccessoryApplier puts it on every model of that character.
-    ///
-    /// For now a list: the 3D presentation is still to decide (zooming on the characters at the
-    /// bar, or the other side of the character selector building with the characters posed as in
-    /// the trailer). The test accessories have no model, so equipping shows nothing yet.
-    /// Opened from the singleplayer modes, the multiplayer hub and Progress; Back returns to where it came from.
+    /// ACCESSORIES screen: per character, the accessory equipped in each slot, cycled through the unlocked ones and
+    /// saved in the profile. Back returns to the screen that opened it.
     /// </summary>
     [RequireComponent(typeof(MenuScreen))]
     public sealed class AccessoriesScreen : MonoBehaviour
     {
+        private const float SCREEN_TRANSITION_SECONDS = 0.25f;
+        private const float WIDE_BUTTON_WIDTH = 300f;
+        private const float TAB_BUTTON_HEIGHT = 68f;
+        private const float BACK_BUTTON_HEIGHT = 72f;
+        private const float CYCLE_BUTTON_WIDTH = 72f;
+        private const float CYCLE_BUTTON_HEIGHT = 64f;
+        private const float SLOT_FONT_SIZE = 30f;
+        private const float NOTE_FONT_SIZE = 22f;
+
         /// <summary>Screen the Back button returns to (set by whoever opens this one).</summary>
         public static ScreensType ReturnTo = ScreensType.PROGRESSION;
 
@@ -63,14 +66,14 @@ namespace FastAndFractured.Progression
             foreach (var character in Characters)
             {
                 string c = character;
-                _tabs.Add(MenuUiKit.Button(tabs, MatchResults.CharacterName(c + "_0"), () => { _character = c; Refresh(); }, _font, 300f, 68f));
+                _tabs.Add(MenuUiKit.Button(tabs, MatchResults.CharacterName(c + "_0"), () => { _character = c; Refresh(); }, _font, WIDE_BUTTON_WIDTH, TAB_BUTTON_HEIGHT));
             }
 
             _slots = MenuUiKit.Column(column, "Slots", 10f);
             _slots.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1f;
 
             var note = MenuUiKit.Text(column, "",
-                22f, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
+                NOTE_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.Center, _font);
             MenuUiKit.Localized(note, "MP.Progress.AccessoriesNote");
             note.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
 
@@ -78,8 +81,8 @@ namespace FastAndFractured.Progression
             buttons.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
             var back = MenuUiKit.Button(buttons, "", () =>
             {
-                if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(ReturnTo, 0.25f);
-            }, _font, 300f, 72f, MenuUiKit.ButtonDim);
+                if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(ReturnTo, SCREEN_TRANSITION_SECONDS);
+            }, _font, WIDE_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, MenuUiKit.ButtonDim);
 
             MenuUiKit.Localized(back, "MP.Back");
 
@@ -109,14 +112,14 @@ namespace FastAndFractured.Progression
 
                 var row = MenuUiKit.RowOf(_slots, slot.ToString(), 84f, 20f);
                 MenuUiKit.Background(row, MenuUiKit.Row);
-                MenuUiKit.Fixed(MenuUiKit.Text(row, ProgressionScreen.SlotName(slot).ToUpperInvariant(), 30f, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 160f);
+                MenuUiKit.Fixed(MenuUiKit.Text(row, ProgressionScreen.SlotName(slot).ToUpperInvariant(), SLOT_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.MidlineLeft, _font), 160f);
                 AccessorySlot s = slot;
-                MenuUiKit.Button(row, "<", () => Cycle(s, options, index - 1), _font, 72f, 64f, MenuUiKit.ButtonDim);
+                MenuUiKit.Button(row, "<", () => Cycle(s, options, index - 1), _font, CYCLE_BUTTON_WIDTH, CYCLE_BUTTON_HEIGHT, MenuUiKit.ButtonDim);
                 string name = options[index] != null ? options[index].displayName : LocalizationManager.Localize("MP.Progress.None");
-                MenuUiKit.Flexible(MenuUiKit.Text(row, name, 30f, options[index] != null ? MenuUiKit.Accent : Color.white, TextAlignmentOptions.Center, _font));
-                MenuUiKit.Button(row, ">", () => Cycle(s, options, index + 1), _font, 72f, 64f, MenuUiKit.ButtonDim);
+                MenuUiKit.Flexible(MenuUiKit.Text(row, name, SLOT_FONT_SIZE, options[index] != null ? MenuUiKit.Accent : Color.white, TextAlignmentOptions.Center, _font));
+                MenuUiKit.Button(row, ">", () => Cycle(s, options, index + 1), _font, CYCLE_BUTTON_WIDTH, CYCLE_BUTTON_HEIGHT, MenuUiKit.ButtonDim);
                 MenuUiKit.Fixed(MenuUiKit.Text(row, options.Count > 1 ? LocalizationManager.Localize("MP.Progress.UnlockedCount", options.Count - 1) : LocalizationManager.Localize("MP.Progress.NoneUnlocked"),
-                    22f, MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 220f);
+                    NOTE_FONT_SIZE, MenuUiKit.Muted, TextAlignmentOptions.MidlineRight, _font), 220f);
             }
         }
 

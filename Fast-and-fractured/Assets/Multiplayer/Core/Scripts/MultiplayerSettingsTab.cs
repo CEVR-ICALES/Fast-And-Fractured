@@ -9,11 +9,8 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Settings ▸ Multiplayer: a fourth tab next to Audio / Graphics / Accessibility with the
-    /// online preferences (MultiplayerSettings). Built at runtime by copying the menu's own tab
-    /// button, scroll panel and rows (toggle row, slider row, separator), so it looks like the
-    /// rest of the settings and needs no prefab or scene edit; it appears in the main menu and in
-    /// the pause menu alike.
+    /// Settings > Multiplayer tab, built at runtime from copies of the menu's own tab, panel and rows, in the main
+    /// and pause menus alike.
     /// </summary>
     public sealed class MultiplayerSettingsTab : MonoBehaviour
     {
@@ -78,7 +75,6 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Tab button.
             var tabGo = Instantiate(tabTemplate.gameObject, tabTemplate.parent);
             tabGo.name = "MultiplayerButton";
             _tab = tabGo.GetComponent<Button>();
@@ -135,7 +131,6 @@ namespace FastAndFractured.Multiplayer
             if (_panel != null) _panel.SetActive(false);
         }
 
-        // -- Rows --------------------------------------------------------------------------
         /// <param name="rowName">English name of the row: also its tooltip key (SettingsTooltips).</param>
         /// <param name="labelKey">Localization key of the label (Multiplayer sheet).</param>
         private static void AddToggle(Transform content, Transform template, Transform separator, string rowName, string labelKey,

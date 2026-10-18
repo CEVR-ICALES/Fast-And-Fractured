@@ -14,15 +14,8 @@ using UnityEngine.UI;
 namespace FastAndFractured.EditorTools
 {
     /// <summary>
-    /// Restructures the main menu scene (open it first) - and can put it back:
-    ///  - the main screen's MULTIPLAYER button is hidden;
-    ///  - Play opens a new screen, a copy of the mode screen, with SINGLEPLAYER and MULTIPLAYER;
-    ///  - SINGLEPLAYER opens the old mode screen, now a 2×2 grid: Tutorial, Showdown, a
-    ///    "Coming soon" placeholder and ACCESSORIES;
-    ///  - MULTIPLAYER opens the multiplayer hub, which gains PROGRESS and ACCESSORIES buttons;
-    ///  - the PROGRESSION and ACCESSORIES screens are created (their content is built at runtime
-    ///    by ProgressionScreen / AccessoriesScreen).
-    /// Every change is undoable (Edit ▸ Undo) and "Revert" undoes them all in a saved scene.
+    /// Restructures the main menu scene into Play > Singleplayer / Multiplayer screens and adds the progression and
+    /// accessories screens. Every change is undoable, and Revert undoes them in a saved scene.
     /// </summary>
     public static class MainMenuPlayModesTool
     {
@@ -33,6 +26,11 @@ namespace FastAndFractured.EditorTools
         private const string PROGRESS_BUTTON = "ProgressButton";
         private const string ACCESSORIES_BUTTON = "Accessories_Button";
         private const string COMING_SOON = "ComingSoon_Button";
+        private const float BUTTON_GAP_RATIO = 0.02f;
+        private const float MIN_AUTO_FONT_SIZE = 10f;
+        private const float MIN_AUTO_FONT_RATIO = 0.4f;
+        private const float DEFAULT_ROW_SPACING = 60f;
+        private static readonly Vector2 DEFAULT_ROW_STEP = new Vector2(0f, -0.15f);
         private const string GAMEMODE_CAMERA = "GameModeScreenCamera";
 
         [MenuItem(MENU + "Apply Singleplayer / Multiplayer menu")]
@@ -70,8 +68,7 @@ namespace FastAndFractured.EditorTools
             var playScreen = playModes.GetComponent<MenuScreen>();
             playScreen.screenType = ScreensType.PLAY_MODE_SELECTION;
 
-            // Both screens bring their camera with them: they can be reached without the main
-            // screen's Play button (which switches the cameras), e.g. Back from the hub after a match.
+            // Both screens bring their camera: they can be reached without the main screen's Play button.
             var modesCamera = FindCamera(scene, GAMEMODE_CAMERA);
             if (modesCamera != null)
             {
@@ -102,8 +99,7 @@ namespace FastAndFractured.EditorTools
                 UnityEventTools.AddPersistentListener(button.onClick, open.OpenScreen);
             }
 
-            // 3. The old mode screen is now Singleplayer: back to the new screen (same camera),
-            //    and room for four modes.
+            // 3. The old mode screen becomes Singleplayer, with room for four modes.
             var back = FindChild(modes.transform, "BackToMain_Btn");
             if (back != null)
             {
@@ -124,7 +120,6 @@ namespace FastAndFractured.EditorTools
                 soonButton.interactable = false;
                 Object.DestroyImmediate(soon.GetComponent<MenuTransitionButton>());
 
-                // Accessories, the fourth cell (also in the multiplayer hub).
                 var accessories = Object.Instantiate(showdown.gameObject, layoutRoot);
                 Undo.RegisterCreatedObjectUndo(accessories, "Accessories button");
                 accessories.name = ACCESSORIES_BUTTON;
@@ -143,9 +138,9 @@ namespace FastAndFractured.EditorTools
             if (direct != null)
             {
                 var directRect = (RectTransform)direct;
-                Vector2 step = browse != null ? directRect.anchorMin - ((RectTransform)browse).anchorMin : new Vector2(0f, -0.15f);
+                Vector2 step = browse != null ? directRect.anchorMin - ((RectTransform)browse).anchorMin : DEFAULT_ROW_STEP;
                 Vector2 min = directRect.anchorMin + step, max = directRect.anchorMax + step;
-                float gap = (max.x - min.x) * 0.02f, middle = (min.x + max.x) / 2f;
+                float gap = (max.x - min.x) * BUTTON_GAP_RATIO, middle = (min.x + max.x) / 2f;
 
                 var progress = Object.Instantiate(direct.gameObject, hub.transform);
                 Undo.RegisterCreatedObjectUndo(progress, "Progress button");
@@ -239,7 +234,6 @@ namespace FastAndFractured.EditorTools
             Debug.Log("[MainMenuPlayModesTool] Reverted. Save the scene to keep it.");
         }
 
-        // -- Helpers ---------------------------------------------------------------------------
         private static MenuScreen FindScreen(Scene scene, ScreensType type)
         {
             foreach (var root in scene.GetRootGameObjects())
@@ -309,7 +303,7 @@ namespace FastAndFractured.EditorTools
             if (!label.enableAutoSizing)
             {
                 label.fontSizeMax = label.fontSize;
-                label.fontSizeMin = Mathf.Max(10f, label.fontSize * 0.4f);
+                label.fontSizeMin = Mathf.Max(MIN_AUTO_FONT_SIZE, label.fontSize * MIN_AUTO_FONT_RATIO);
                 label.enableAutoSizing = true;
             }
         }
@@ -323,7 +317,6 @@ namespace FastAndFractured.EditorTools
                 UnityEventTools.RemovePersistentListener(button.onClick, i);
         }
 
-        /// <summary>The camera switches (GameObject.SetActive) of a button, on or off.</summary>
         private static void SetCameraCalls(Button button, bool on)
         {
             if (button == null) return;
@@ -338,7 +331,7 @@ namespace FastAndFractured.EditorTools
         {
             var row = layoutRoot.GetComponent<HorizontalLayoutGroup>();
             var rect = (RectTransform)layoutRoot;
-            float spacingX = row != null ? row.spacing : 60f;
+            float spacingX = row != null ? row.spacing : DEFAULT_ROW_SPACING;
             if (row != null) Undo.DestroyObjectImmediate(row);
             var grid = Undo.AddComponent<GridLayoutGroup>(layoutRoot.gameObject);
             const float spacingY = 20f;

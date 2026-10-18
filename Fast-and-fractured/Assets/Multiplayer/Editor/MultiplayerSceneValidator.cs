@@ -10,15 +10,10 @@ using Utilities;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// Validates that the current scene has all required components for multiplayer.
-    /// Checks: NetworkManager, player spawner, level controller, spawnable prefabs,
-    /// vehicle components, and common configuration issues.
-    /// 
-    /// Usage: Tools ->Fast And Fractured ->Validate Multiplayer Scene
-    /// </summary>
     public class MultiplayerSceneValidator : EditorWindow
     {
+        private const float BUTTON_HEIGHT = 30f;
+
         private Vector2 _scrollPosition;
         private List<ValidationResult> _results = new List<ValidationResult>();
         private bool _hasRun = false;
@@ -41,7 +36,7 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             GUILayout.Label("Multiplayer Scene Validator", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("Run Validation", GUILayout.Height(30)))
+            if (GUILayout.Button("Run Validation", GUILayout.Height(BUTTON_HEIGHT)))
             {
                 RunValidation();
             }
@@ -103,7 +98,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
             AddResult(cat, "NetworkManager found.", MessageType.Info);
 
-            // Check transport
             if (nm.TransportManager == null || nm.TransportManager.Transport == null)
             {
                 AddResult(cat, "NetworkManager has no transport configured!", MessageType.Error);
@@ -113,7 +107,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 AddResult(cat, $"Transport: {nm.TransportManager.Transport.GetType().Name}", MessageType.Info);
             }
 
-            // Check spawnable prefabs
             var spawnables = nm.SpawnablePrefabs;
             if (spawnables == null)
             {
@@ -160,7 +153,6 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             string cat = "Vehicle Prefabs";
 
-            // Check networked vehicle prefabs in the project
             string[] guids = AssetDatabase.FindAssets("t:GameObject Networked", new[] { "Assets/Multiplayer" });
             int vehicleCount = 0;
 
@@ -191,7 +183,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 else
                 {
-                    // Check bullet prefab assignments
                     var so = new SerializedObject(shoot);
                     bool normalSet = so.FindProperty("_networkedNormalBulletPrefab")?.objectReferenceValue != null;
                     bool pushSet = so.FindProperty("_networkedPushBulletPrefab")?.objectReferenceValue != null;
@@ -257,25 +248,21 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             string cat = "Scene Objects";
 
-            // Check for TimerSystem
             var timerSystem = Object.FindFirstObjectByType<TimerSystem>(FindObjectsInactive.Include);
             if (timerSystem == null)
             {
                 AddResult(cat, "No TimerSystem found. Game timers won't work.", MessageType.Warning);
             }
 
-            // Check for MultiplayerSingletonGuard
             var guard = Object.FindFirstObjectByType<MultiplayerSingletonGuard>();
             if (guard == null)
             {
                 AddResult(cat, "No MultiplayerSingletonGuard found. Singleton lifecycle may break.", MessageType.Warning);
             }
 
-            // Check spawn points
             var spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
             if (spawnPoints == null || spawnPoints.Length == 0)
             {
-                // Try finding by name
                 var byName = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
                 int spawnCount = 0;
                 foreach (var t in byName)

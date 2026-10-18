@@ -7,19 +7,8 @@ using FishNet;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-authoritative handler for Carme's unique ability (the McChicken creature).
-    ///
-    /// The singleplayer CarmeUniqueAbility Instantiates a local McChicken with an aim direction
-    /// and landing point only the owner computes, so remote peers never see the chicken and the
-    /// host never simulates it authoritatively. Mirrors the NetworkedPepeUniqueAbility pattern:
-    ///
-    /// 1. Owner activates the ability (SP flow runs: VFX, cooldown, local chicken spawn).
-    /// 2. This hook recomputes the same aim/landing raycast the SP code just ran (reading the
-    ///    serialized config via reflection), destroys the owner's local cosmetic chicken and
-    ///    asks the server to spawn the networked variant instead.
-    /// 3. NetworkedMcChickenBehaviour on the spawned prefab syncs position/state to all clients
-    ///    and RpcInitializeChicken launches it everywhere.
-    /// 4. The server despawns it after AbilityData.Duration (same lifetime as SP).
+    /// Networks Carme's ultimate: the owner's local chicken is replaced by a server-spawned NetworkedMcChicken at
+    /// the landing point the owner computed, despawned after AbilityData.Duration.
     /// </summary>
     public class NetworkedCarmeUniqueAbility : NetworkBehaviour
     {
@@ -69,10 +58,7 @@ namespace FastAndFractured.Multiplayer
             StartCoroutine(InterceptLocalChicken());
         }
 
-        /// <summary>
-        /// Runs one frame after activation so the SP flow has finished its raycasts and (maybe)
-        /// spawned its local chicken.
-        /// </summary>
+        /// <summary>One frame after activation, once the SP flow has run its raycasts and maybe spawned its chicken.</summary>
         private IEnumerator InterceptLocalChicken()
         {
             yield return null;
@@ -81,28 +67,25 @@ namespace FastAndFractured.Multiplayer
                 ? _localAbility.uniqueAbilityShootPoint
                 : _localAbility.transform;
 
-            // Destroy the owner's local cosmetic chicken: the networked one replaces it for
-            // everyone. (Replicas never spawn one — Carme keeps the events-only RPC path.)
+            // The networked chicken replaces the owner's local one.
             bool localChickenSpawned = false;
             foreach (var chicken in FindObjectsByType<McChicken>(FindObjectsSortMode.None))
             {
                 if (chicken.GetComponent<NetworkObject>() != null) continue;
-                if ((chicken.transform.position - shootPoint.position).sqrMagnitude > 400f) continue;
+                if ((chicken.transform.position - shootPoint.position).sqrMagnitude > MAX_LOCAL_CHICKEN_SQR_DISTANCE) continue;
                 localChickenSpawned = true;
                 Destroy(chicken.gameObject);
             }
 
-            // No local chicken: the SP flow found no landing point and refunded the cooldown.
-            // Re-running the raycasts a frame later could still find ground and launch a free one.
+            // No local chicken: the SP flow found no landing point and refunded the cooldown; do not launch a free one.
             if (!localChickenSpawned)
                 yield break;
 
-            // Reproduce CarmeUniqueAbility.CalculateLandingPoint with the same serialized config.
+            // As CarmeUniqueAbility.CalculateLandingPoint.
             if (!TryComputeAim(out Vector3 aimDirection, out Vector3 landPoint, shootPoint))
                 yield break;
 
-            // HOST: [ServerRpc] from a server context never delivers (FishNet pitfall,
-            // live-debugged on Pepe's tomato 2026-07-11). Call the server logic directly.
+            // A [ServerRpc] called from the host never runs its logic.
             if (base.IsServerInitialized)
                 SpawnChickenOnServer(shootPoint.position, landPoint, aimDirection);
             else
@@ -113,7 +96,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (_networkedChickenPrefab == null) return;
             var go = Instantiate(_networkedChickenPrefab, spawnPosition,
-                aimDirection.sqrMagnitude > 0.001f ? Quaternion.LookRotation(aimDirection) : Quaternion.identity);
+                aimDirection.sqrMagnitude > MIN_AIM_SQR_MAGNITUDE ? Quaternion.LookRotation(aimDirection) : Quaternion.identity);
             var payload = go.GetComponent<NetworkedPredictedAbilitySpawn>();
             if (payload == null) { Destroy(go); return; }
             payload.ConfigureCarme(base.NetworkObject, landPoint, aimDirection);
@@ -132,10 +115,10 @@ namespace FastAndFractured.Multiplayer
             aimDirection = shootingHandle.CurrentShootDirection + physicsBehaviour.Rb.linearVelocity;
             aimDirection = Vector3.ProjectOnPlane(aimDirection, Vector3.up).normalized;
 
-            float rayDistance = _rayCastDistanceField != null ? (float)_rayCastDistanceField.GetValue(_localAbility) : 50f;
+            float rayDistance = _rayCastDistanceField != null ? (float)_rayCastDistanceField.GetValue(_localAbility) : DEFAULT_RAYCAST_DISTANCE;
             LayerMask obstacleMask = _obstacleMaskField != null ? (LayerMask)_obstacleMaskField.GetValue(_localAbility) : default;
             LayerMask groundMask = _groundMaskField != null ? (LayerMask)_groundMaskField.GetValue(_localAbility) : default;
-            float groundCheckDistance = _groundCheckDistanceField != null ? (float)_groundCheckDistanceField.GetValue(_localAbility) : 100f;
+            float groundCheckDistance = _groundCheckDistanceField != null ? (float)_groundCheckDistanceField.GetValue(_localAbility) : DEFAULT_GROUND_CHECK_DISTANCE;
             float yOffset = _landPointYOffsetField != null ? (float)_landPointYOffsetField.GetValue(_localAbility) : 0f;
 
             bool hitObstacle = Physics.Raycast(shootPoint.position, aimDirection, out RaycastHit primaryHit, rayDistance, obstacleMask);
@@ -166,7 +149,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             var go = Instantiate(_networkedChickenPrefab, spawnPosition,
-                aimDirection.sqrMagnitude > 0.001f ? Quaternion.LookRotation(aimDirection) : Quaternion.identity);
+                aimDirection.sqrMagnitude > MIN_AIM_SQR_MAGNITUDE ? Quaternion.LookRotation(aimDirection) : Quaternion.identity);
             base.ServerManager.Spawn(go, base.Owner);
 
             var networkedChicken = go.GetComponent<NetworkedMcChickenBehaviour>();
@@ -176,22 +159,23 @@ namespace FastAndFractured.Multiplayer
             var abilityData = _localAbility != null
                 ? SingleplayerReflectionCache.BaseUniqueAbility_AbilityData?.GetValue(_localAbility) as AbilityData
                 : null;
-            float lifetime = abilityData != null && abilityData.Duration > 0f ? abilityData.Duration : 15f;
+            float lifetime = abilityData != null && abilityData.Duration > 0f ? abilityData.Duration : DEFAULT_LIFETIME_SECONDS;
             StartCoroutine(DespawnAfter(go, lifetime));
         }
 
-        // How far past the ability's own raycast a requested landing point may be: the owner's car
-        // keeps moving between aiming and the server receiving the spawn.
+        // The owner's car keeps moving between aiming and the server receiving the spawn.
         private const float LANDING_RANGE_SLACK = 20f;
+        private const float MAX_LOCAL_CHICKEN_SQR_DISTANCE = 400f;
+        private const float MIN_AIM_SQR_MAGNITUDE = 0.001f;
+        private const float DEFAULT_RAYCAST_DISTANCE = 50f;
+        private const float DEFAULT_GROUND_CHECK_DISTANCE = 100f;
+        private const float GROUND_CHECK_HEIGHT = 5f;
+        private const float GROUND_CHECK_SLACK = 10f;
+        private const float DEFAULT_LIFETIME_SECONDS = 15f;
 
         /// <summary>
-        /// Accepts the owner's landing point when it is one the ability could have produced from this
-        /// car: within the ability's reach, with ground under it.
-        ///
-        /// The server used to recompute the whole aim itself and compare, but that aim is the OWNER's
-        /// camera direction plus its car velocity - neither of which the server has - so the recomputed
-        /// point was elsewhere and every predicted chicken was rejected (ShootingProbe 2026-09-30:
-        /// "PredictedAbility REJECT payload", the chicken vanished on Carme's screen after 70 ms).
+        /// Accepts the owner's landing point if this car could have produced it: within reach, with ground under it.
+        /// The server cannot recompute the aim (the owner's camera and velocity).
         /// </summary>
         internal bool InitializeValidatedPredictedChicken(NetworkedMcChickenBehaviour chicken,
             Vector3 requestedLandPoint, Vector3 requestedAim)
@@ -202,27 +186,25 @@ namespace FastAndFractured.Multiplayer
 
             if (!IsFinite(requestedLandPoint) || !IsFinite(requestedAim)) return false;
 
-            float rayDistance = _rayCastDistanceField != null ? (float)_rayCastDistanceField.GetValue(_localAbility) : 50f;
+            float rayDistance = _rayCastDistanceField != null ? (float)_rayCastDistanceField.GetValue(_localAbility) : DEFAULT_RAYCAST_DISTANCE;
             Vector3 flatOffset = Vector3.ProjectOnPlane(requestedLandPoint - shootPoint.position, Vector3.up);
             if (flatOffset.magnitude > rayDistance + LANDING_RANGE_SLACK) return false;
 
             LayerMask groundMask = _groundMaskField != null ? (LayerMask)_groundMaskField.GetValue(_localAbility) : ~0;
-            float groundCheckDistance = _groundCheckDistanceField != null ? (float)_groundCheckDistanceField.GetValue(_localAbility) : 100f;
-            if (!Physics.Raycast(requestedLandPoint + Vector3.up * 5f, Vector3.down, groundCheckDistance + 10f, groundMask))
+            float groundCheckDistance = _groundCheckDistanceField != null ? (float)_groundCheckDistanceField.GetValue(_localAbility) : DEFAULT_GROUND_CHECK_DISTANCE;
+            if (!Physics.Raycast(requestedLandPoint + Vector3.up * GROUND_CHECK_HEIGHT, Vector3.down, groundCheckDistance + GROUND_CHECK_SLACK, groundMask))
                 return false;
 
             Vector3 aim = Vector3.ProjectOnPlane(requestedAim, Vector3.up);
-            aim = aim.sqrMagnitude > 0.001f ? aim.normalized : flatOffset.normalized;
+            aim = aim.sqrMagnitude > MIN_AIM_SQR_MAGNITUDE ? aim.normalized : flatOffset.normalized;
             Vector3 landPoint = requestedLandPoint;
 
             chicken.transform.SetPositionAndRotation(shootPoint.position,
-                aim.sqrMagnitude > 0.001f ? Quaternion.LookRotation(aim) : Quaternion.identity);
-            // Launched once the object is really spawned (OnStartServer). Started in here - before
-            // the spawn - the server's jump never ran: the server chicken sat at Carme's gun for its
-            // whole life while only her own screen saw it jump (ShootingProbe 2026-09-30).
+                aim.sqrMagnitude > MIN_AIM_SQR_MAGNITUDE ? Quaternion.LookRotation(aim) : Quaternion.identity);
+            // Launched in OnStartServer: started before the spawn, the server's jump never ran.
             chicken.QueueServerLaunch(landPoint, aim);
             var abilityData = SingleplayerReflectionCache.BaseUniqueAbility_AbilityData?.GetValue(_localAbility) as AbilityData;
-            float lifetime = abilityData != null && abilityData.Duration > 0f ? abilityData.Duration : 15f;
+            float lifetime = abilityData != null && abilityData.Duration > 0f ? abilityData.Duration : DEFAULT_LIFETIME_SECONDS;
             StartCoroutine(DespawnAfter(chicken.gameObject, lifetime));
             return true;
         }

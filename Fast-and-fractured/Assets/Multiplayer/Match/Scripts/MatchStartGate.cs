@@ -1,14 +1,8 @@
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Holds every car (players and AI) still until the countdown says "Start".
-    ///
-    /// The cars are spawned after the singleplayer start timer has already run on the host, so the
-    /// server gave control the moment each car's state machine bound - on the host the cars could
-    /// drive and the AI shoot while the 3-2-1 was still on screen, and a remote client saw its own
-    /// countdown at a different time (playtest feedback 2026-09-30). The server publishes the tick
-    /// the countdown starts on (NetworkedLevelControllerManager); the state machines only tick from
-    /// the "Start" tick on, evaluated on the replicated tick so reconcile replays agree.
+    /// Holds every car still until the countdown says "Start": the server publishes the countdown's start tick and
+    /// the state machines only tick from the Start tick on, on the replicated tick so replays agree.
     /// </summary>
     public static class MatchStartGate
     {

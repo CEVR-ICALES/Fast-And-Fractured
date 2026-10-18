@@ -2,10 +2,7 @@ using NUnit.Framework;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Cars must not act before the synced "Start" of the countdown (playtest feedback 2026-09-30:
-    /// on the host the cars and the AI moved during the 3-2-1).
-    /// </summary>
+    /// <summary>Cars must not act before the synced "Start" of the countdown.</summary>
     public class MatchStartGateTests
     {
         [TearDown]

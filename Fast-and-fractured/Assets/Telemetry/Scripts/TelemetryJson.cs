@@ -13,8 +13,8 @@ namespace FastAndFractured.GameTelemetry
         private const int GA_MAX_PARAMS = 25;
         private const int GA_MAX_NAME = 40;
         private const int GA_MAX_STRING = 100;
+        private const int ENGAGEMENT_TIME_MS = 100;
 
-        // ── Firestore ────────────────────────────────────────────────────────────────
         /// <summary>A value in Firestore's typed JSON ({"stringValue": ...}, {"mapValue": ...}...).</summary>
         public static JObject FirestoreValue(object value)
         {
@@ -71,11 +71,8 @@ namespace FastAndFractured.GameTelemetry
             };
         }
 
-        // ── GA4 Measurement Protocol ─────────────────────────────────────────────────
-        /// <summary>
-        /// Request bodies for /mp/collect, at most 25 events each. GA4 only takes flat string or
-        /// number parameters: booleans become 0/1, maps and lists are left out.
-        /// </summary>
+        // GA4 Measurement Protocol
+        /// <summary>Request bodies for /mp/collect: flat string or number parameters only (booleans as 0/1).</summary>
         public static List<JObject> Ga4Requests(string clientId, string userId, long sessionId, string version, bool dev, IList<TelemetryEvent> events)
         {
             var requests = new List<JObject>();
@@ -105,7 +102,7 @@ namespace FastAndFractured.GameTelemetry
             var parameters = new JObject
             {
                 ["session_id"] = sessionId,
-                ["engagement_time_msec"] = 100,   // without it GA4 does not count the user as active
+                ["engagement_time_msec"] = ENGAGEMENT_TIME_MS,   // without it GA4 does not count the user as active
             };
             if (dev) parameters["debug_mode"] = 1;   // shows up in GA4's DebugView
             if (e.data != null)

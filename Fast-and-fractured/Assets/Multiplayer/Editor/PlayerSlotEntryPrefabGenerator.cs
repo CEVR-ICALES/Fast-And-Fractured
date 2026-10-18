@@ -10,6 +10,11 @@ namespace FastAndFractured.Multiplayer.Editor
     {
         private const string PREFAB_PATH = "Assets/Multiplayer/Lobby/Prefabs/PlayerSlotEntry.prefab";
         private const string PREFABS_DIR = "Assets/Multiplayer/Lobby/Prefabs";
+        private static readonly Vector2 SLOT_SIZE = new Vector2(400f, 120f);
+        private static readonly Vector2 LABEL_PADDING = new Vector2(4f, 0f);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.15f, 0.15f, 0.15f, 0.8f);
+        private static readonly Color READY_BADGE_COLOR = new Color(0.20f, 0.60f, 0.20f, 1f);
+        private static readonly Color SELECT_BUTTON_COLOR = new Color(0.20f, 0.50f, 0.90f, 1f);
 
         public static PlayerSlotUI Generate()
         {
@@ -21,16 +26,13 @@ namespace FastAndFractured.Multiplayer.Editor
 
             var root = new GameObject("PlayerSlotEntry");
             var rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(400f, 120f);
+            rootRT.sizeDelta = SLOT_SIZE;
 
-            // Background tint — slot color reflects ready state.
             var bg = root.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.15f, 0.15f, 0.8f);
+            bg.color = BACKGROUND_COLOR;
 
             var slot = root.AddComponent<PlayerSlotUI>();
 
-            // Character icon — left, vertically centered (icon is square; the wider slot now
-            // makes room for a larger icon).
             var iconGO = new GameObject("CharIcon");
             iconGO.transform.SetParent(root.transform, false);
             var iconRT = iconGO.AddComponent<RectTransform>();
@@ -43,12 +45,10 @@ namespace FastAndFractured.Multiplayer.Editor
             icon.color           = Color.white;
             icon.preserveAspect  = true;
 
-            // Player name (and character code) — top center band.
             var nameGO = CreateLabel(root.transform, "NameLabel", "Player ?",
                 new Vector2(0.28f, 0.55f), new Vector2(0.78f, 0.95f),
                 fontSize: 22f, align: TextAlignmentOptions.MidlineLeft);
 
-            // READY badge — small pill below the name.
             var readyBadgeGO = new GameObject("ReadyBadge");
             readyBadgeGO.transform.SetParent(root.transform, false);
             var rbRT = readyBadgeGO.AddComponent<RectTransform>();
@@ -56,12 +56,11 @@ namespace FastAndFractured.Multiplayer.Editor
             rbRT.anchorMax = new Vector2(0.44f, 0.45f);
             rbRT.offsetMin = rbRT.offsetMax = Vector2.zero;
             var rbImg = readyBadgeGO.AddComponent<Image>();
-            rbImg.color = new Color(0.20f, 0.60f, 0.20f, 1f);
+            rbImg.color = READY_BADGE_COLOR;
             var readyLblGO = CreateLabel(readyBadgeGO.transform, "Label", "READY",
                 Vector2.zero, Vector2.one, fontSize: 18f, align: TextAlignmentOptions.Center);
 
-            // SELECT button container — sits between the name and the map vote.
-            // Hidden on remote slots via PlayerSlotUI.SetData.
+            // SELECT button, hidden on remote slots by PlayerSlotUI.SetData.
             var selectContainerGO = new GameObject("SelectButtonRoot");
             selectContainerGO.transform.SetParent(root.transform, false);
             var scRT = selectContainerGO.AddComponent<RectTransform>();
@@ -74,12 +73,11 @@ namespace FastAndFractured.Multiplayer.Editor
             sbRT.anchorMin = Vector2.zero; sbRT.anchorMax = Vector2.one;
             sbRT.offsetMin = sbRT.offsetMax = Vector2.zero;
             var sbImg = selectBtnGO.AddComponent<Image>();
-            sbImg.color = new Color(0.20f, 0.50f, 0.90f, 1f);
+            sbImg.color = SELECT_BUTTON_COLOR;
             var selectButton = selectBtnGO.AddComponent<Button>();
             CreateLabel(selectBtnGO.transform, "Label", "SELECT CHARACTER & MAP",
                 Vector2.zero, Vector2.one, fontSize: 16f, align: TextAlignmentOptions.Center);
 
-            // Map vote thumbnail container — right side.
             var voteContainerGO = new GameObject("MapVoteContainer");
             voteContainerGO.transform.SetParent(root.transform, false);
             var vcRT = voteContainerGO.AddComponent<RectTransform>();
@@ -91,7 +89,6 @@ namespace FastAndFractured.Multiplayer.Editor
             voteImg.color          = Color.white;
             voteImg.preserveAspect = true;
 
-            // Wire all SerializedFields on PlayerSlotUI.
             var so = new SerializedObject(slot);
             so.FindProperty("_charIcon").objectReferenceValue          = icon;
             so.FindProperty("_nameLabel").objectReferenceValue         = nameGO.GetComponent<TextMeshProUGUI>();
@@ -126,8 +123,8 @@ namespace FastAndFractured.Multiplayer.Editor
             var rt = go.AddComponent<RectTransform>();
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
-            rt.offsetMin = new Vector2(4f, 0f);
-            rt.offsetMax = new Vector2(-4f, 0f);
+            rt.offsetMin = LABEL_PADDING;
+            rt.offsetMax = -LABEL_PADDING;
             var tmp = go.AddComponent<TextMeshProUGUI>();
             tmp.text      = text;
             tmp.fontSize  = fontSize;

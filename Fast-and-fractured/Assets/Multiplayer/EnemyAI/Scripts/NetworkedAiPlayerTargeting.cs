@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Server-only. EnemyAIBrain's "go for the player" decision targets
-    /// LevelController.LocalPlayer, which on the server is always the host's car - so in a match
-    /// every AI focused the host and never treated a client as "the player". Keeps the brain's
-    /// Player pointed at the nearest human-controlled car still in the match instead.
-    /// </summary>
+    /// <summary>Server: points EnemyAIBrain's Player at the nearest human car (LocalPlayer is always the host's).</summary>
     [DisallowMultipleComponent]
     public class NetworkedAiPlayerTargeting : MonoBehaviour
     {

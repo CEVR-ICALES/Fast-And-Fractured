@@ -2,10 +2,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Forwards trigger callbacks from one legacy dead-wall collider to the single
-    /// server-authoritative NetworkedDeadWallsBehaviour on the prefab instance.
-    /// </summary>
+    /// <summary>Forwards one legacy dead-wall collider's triggers to the server-authoritative NetworkedDeadWallsBehaviour.</summary>
     [DisallowMultipleComponent]
     internal sealed class NetworkedDeadWallRelay : MonoBehaviour
     {
@@ -25,9 +22,7 @@ namespace FastAndFractured.Multiplayer
             if (wall == null)
                 return;
 
-            // Snapshot everything the multiplayer path needs before the legacy component is
-            // destroyed. Disabled MonoBehaviours still receive trigger callbacks in Unity, so
-            // keeping the single-player component around is not sufficient isolation.
+            // Copied before the legacy component is destroyed (disabled components still get trigger callbacks).
             _killTime = wall.KillTime;
             if (FrontAngleField != null)
                 _frontAngle = (float)FrontAngleField.GetValue(wall);

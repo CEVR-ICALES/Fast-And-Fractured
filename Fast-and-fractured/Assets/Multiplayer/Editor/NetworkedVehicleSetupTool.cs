@@ -6,17 +6,6 @@ using FastAndFractured;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// 1-click Editor tool to convert a singleplayer gameplay car prefab into a
-    /// multiplayer-ready variant, OR update an existing networked variant with
-    /// any missing multiplayer components.
-    /// 
-    /// Adds: NetworkObject, NetworkedVehicle, MultiplayerRigidbodyAdapter,
-    /// NetworkedShoot, NetworkedStatsController, NetworkedUniqueAbility.
-    /// 
-    /// Usage: Tools > Fast And Fractured > Networked Vehicle Setup
-    /// Or right-click a car prefab > Fast And Fractured > Setup Networked Vehicle
-    /// </summary>
     public class NetworkedVehicleSetupTool : EditorWindow
     {
         private enum Mode { CreateVariant, UpdateExisting, BatchFromCharacterData }
@@ -28,12 +17,13 @@ namespace FastAndFractured.Multiplayer.Editor
 
         private GameObject _existingPrefab;
         private DefaultAsset _characterDataFolder;
-        // Off: singleplayer must keep its own cars; online the networked variants are swapped in at runtime (NetworkedLevelControllerWrapper.NetworkedRoster).
+        // Off: singleplayer keeps its cars; online the networked variants are swapped in at runtime.
         private bool _updateCharacterDataPrefabReference = false;
 
-        // Where the project keeps CharacterData ScriptableObjects. Used to auto-fill the batch
-        // folder so the user can hit the button without manually pointing at it.
         private const string DEFAULT_CHARACTER_DATA_FOLDER = "Assets/FastAndFractured/Characters";
+        private const float SECTION_SPACING = 10f;
+        private const float BUTTON_HEIGHT = 28f;
+        private const float PRIMARY_BUTTON_HEIGHT = 35f;
 
         [Header("Networked Bullet Prefabs")]
         private GameObject _normalBulletPrefab;
@@ -66,7 +56,6 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             GUILayout.Label("Networked Vehicle Setup", EditorStyles.boldLabel);
 
-            // Mode selector
             _mode = (Mode)GUILayout.Toolbar((int)_mode, new[] { "Create New Variant", "Update Existing Prefab", "Batch From CharacterData" });
             EditorGUILayout.Space(5);
 
@@ -83,9 +72,9 @@ namespace FastAndFractured.Multiplayer.Editor
                 DrawBatchGUI();
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
             EditorGUILayout.HelpBox("Car fixes (rigidbody adapter, smoother targets, turret smoother, motion smoothing) run on every networked car after creating or updating one. Run them again here after editing a car by hand.", MessageType.None);
-            if (GUILayout.Button("Apply Car Fixes To All Networked Cars", GUILayout.Height(28)))
+            if (GUILayout.Button("Apply Car Fixes To All Networked Cars", GUILayout.Height(BUTTON_HEIGHT)))
             {
                 NetworkedCarFixes.ApplyToAllCars();
             }
@@ -98,7 +87,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 "The original prefab is NOT modified.",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             _sourceCarPrefab = (GameObject)EditorGUILayout.ObjectField("Source Car Prefab", _sourceCarPrefab, typeof(GameObject), false);
 
@@ -112,16 +101,16 @@ namespace FastAndFractured.Multiplayer.Editor
 
             if (_sourceCarPrefab != null)
             {
-                EditorGUILayout.Space(10);
+                EditorGUILayout.Space(SECTION_SPACING);
                 DrawPreview(_sourceCarPrefab);
                 string outputPath = $"{_outputFolder}/{_variantName}.prefab";
                 EditorGUILayout.LabelField($"  Output: {outputPath}");
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             GUI.enabled = _sourceCarPrefab != null && !string.IsNullOrEmpty(_variantName);
-            if (GUILayout.Button("Create Networked Vehicle Variant", GUILayout.Height(35)))
+            if (GUILayout.Button("Create Networked Vehicle Variant", GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
             {
                 CreateNetworkedVariant();
             }
@@ -135,7 +124,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 "Use this for prefabs like NetworkedJosefinoGameplayCar Variant that were set up manually.",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             _existingPrefab = (GameObject)EditorGUILayout.ObjectField("Existing Networked Prefab", _existingPrefab, typeof(GameObject), false);
 
@@ -143,14 +132,14 @@ namespace FastAndFractured.Multiplayer.Editor
 
             if (_existingPrefab != null)
             {
-                EditorGUILayout.Space(10);
+                EditorGUILayout.Space(SECTION_SPACING);
                 DrawPreview(_existingPrefab);
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             GUI.enabled = _existingPrefab != null;
-            if (GUILayout.Button("Update Existing Prefab", GUILayout.Height(35)))
+            if (GUILayout.Button("Update Existing Prefab", GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
             {
                 UpdateExistingPrefab();
             }
@@ -164,9 +153,8 @@ namespace FastAndFractured.Multiplayer.Editor
                 "Useful when adding many new characters/cars.",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
-            // Auto-fill on first paint so the user can just hit the button.
             if (_characterDataFolder == null && AssetDatabase.IsValidFolder(DEFAULT_CHARACTER_DATA_FOLDER))
                 _characterDataFolder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(DEFAULT_CHARACTER_DATA_FOLDER);
 
@@ -191,7 +179,7 @@ namespace FastAndFractured.Multiplayer.Editor
             EditorGUILayout.LabelField($"CharacterData assets found: {dataCount}");
 
             GUI.enabled = _characterDataFolder != null && dataCount > 0;
-            if (GUILayout.Button("Generate / Update Networked Variants", GUILayout.Height(35)))
+            if (GUILayout.Button("Generate / Update Networked Variants", GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
             {
                 GenerateBatchFromCharacterData();
             }
@@ -219,7 +207,6 @@ namespace FastAndFractured.Multiplayer.Editor
             bool hasUniqueAbility = prefab.GetComponentInChildren<BaseUniqueAbility>() != null;
             bool hasLocalShoot = prefab.GetComponentInChildren<LocalShootController>() != null;
 
-            // Already present multiplayer components
             bool hasNob = prefab.GetComponent<NetworkObject>() != null;
             bool hasNV = prefab.GetComponent<NetworkedVehicle>() != null;
             bool hasMRA = prefab.GetComponent<MultiplayerRigidbodyAdapter>() != null;
@@ -293,7 +280,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 return;
             }
 
-            // Open prefab contents for editing
             GameObject contents = PrefabUtility.LoadPrefabContents(assetPath);
             try
             {
@@ -451,15 +437,10 @@ namespace FastAndFractured.Multiplayer.Editor
             EditorUtility.DisplayDialog("Batch Complete", summary, "OK");
         }
 
-        /// <summary>
-        /// Adds all missing multiplayer components to a car GameObject. Returns the count of added components.
-        /// Safe to call on prefabs that already have some/all components - skips existing ones.
-        /// </summary>
         private int AddMissingComponents(GameObject instance)
         {
             int added = 0;
 
-            // 1. MultiplayerRigidbodyAdapter (wraps Rigidbody for FishNet prediction)
             if (instance.GetComponent<MultiplayerRigidbodyAdapter>() == null)
             {
                 instance.AddComponent<MultiplayerRigidbodyAdapter>();
@@ -467,7 +448,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 added++;
             }
 
-            // 2. NetworkObject (FishNet core)
             var networkObject = instance.GetComponent<NetworkObject>();
             if (networkObject == null)
             {
@@ -475,13 +455,11 @@ namespace FastAndFractured.Multiplayer.Editor
                 Debug.Log("[VehicleSetup] Added NetworkObject");
                 added++;
             }
-            // Enable prediction
             var enablePredField = typeof(NetworkObject).GetField("_enablePrediction",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (enablePredField != null)
                 enablePredField.SetValue(networkObject, true);
 
-            // 3. NetworkedVehicle (movement prediction/reconcile)
             if (instance.GetComponent<NetworkedVehicle>() == null)
             {
                 instance.AddComponent<NetworkedVehicle>();
@@ -489,7 +467,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 added++;
             }
 
-            // 4. NetworkedStatsController (health/damage sync)
             if (instance.GetComponent<StatsController>() != null && instance.GetComponent<NetworkedStatsController>() == null)
             {
                 instance.AddComponent<NetworkedStatsController>();
@@ -497,7 +474,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 added++;
             }
 
-            // 5. NetworkedShoot (server-auth shooting)
             if (instance.GetComponentInChildren<NormalShootHandle>() != null)
             {
                 var shoot = instance.GetComponent<NetworkedShoot>();
@@ -511,7 +487,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 WireBulletPrefabs(shoot);
             }
 
-            // 6. NetworkedUniqueAbility (ability sync)
             if (instance.GetComponentInChildren<BaseUniqueAbility>() != null && instance.GetComponent<NetworkedUniqueAbility>() == null)
             {
                 instance.AddComponent<NetworkedUniqueAbility>();

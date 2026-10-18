@@ -1,11 +1,6 @@
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Process-wide counters for the server's verdicts on predicted shots and ultimates. A rejected
-    /// predicted spawn is a projectile the shooter already saw fly and then saw vanish, so these are
-    /// the numbers that say whether client-side prediction is actually holding (see
-    /// Testing/ShootingProbe). Plain increments on the server path; nothing is networked.
-    /// </summary>
+    /// <summary>Counters of the server's verdicts on predicted shots and ultimates (a rejection is a shot that vanished).</summary>
     public static class ShootingNetworkStats
     {
         public static int ProjectilesAccepted;

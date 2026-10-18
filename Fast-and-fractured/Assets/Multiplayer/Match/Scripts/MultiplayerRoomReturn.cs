@@ -9,18 +9,13 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// The room outlives the match. Every way out of a match leads back to it, still connected:
-    ///  - the match ends: win/lose screen, whose buttons then lead to the room
-    ///    (MultiplayerPostMatchFlow);
-    ///  - a player leaves early (pause menu exit, Escape while spectating): that player goes to
-    ///    the room and waits there; the match goes on without them;
-    ///  - the host leaves early: the map runs on the host, so the match ends for everyone and
-    ///    they all go back to the room.
-    /// Leaving the room itself (its Back button) is what disconnects. Out of a match with no room
-    /// left to go back to, the player lands on the main menu.
+    /// The room outlives the match: every way out of one leads back to it, still connected. A player leaving early
+    /// waits there; the host leaving ends the match for everyone. Only the room's Back button disconnects.
     /// </summary>
     public static class MultiplayerRoomReturn
     {
+        private const float MENU_START_TIMEOUT = 10f;
+
         private static Runner _runner;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -31,30 +26,26 @@ namespace FastAndFractured.Multiplayer
         private static bool InMenuScene =>
             SceneManager.GetActiveScene().buildIndex == LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX;
 
-        /// <summary>Local player leaves the match in progress for the room.</summary>
         public static void LeaveMatchToRoom()
         {
             HostDisconnectWatchdog.NotifyMatchEnded();
             var lobby = LobbyLocator.GetLobbyManager();
             if (!Online || lobby == null)
             {
-                // No room to go back to (connection already gone): plain exit to the main menu.
                 MultiplayerSceneTeardown.LoadMainMenu(ScreensType.MAIN_MENU);
                 return;
             }
 
             if (InstanceFinder.IsServerStarted)
             {
-                // Everyone's curtain starts now; the host's map (and with it everybody's view of
-                // the match) only goes once its own curtain has shut, by then theirs too.
+                // The host's map only goes once its curtain has shut, by then everyone's too.
                 MpCanary.Mark("Host left the match - ending it for everyone");
                 lobby.ServerAbortMatch();
                 MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
                 return;
             }
 
-            // Tell the server only once the curtain hides the map: leaving makes it take the
-            // match's objects away from this player at once.
+            // Tell the server once the curtain hides the map: it removes the match's objects at once.
             MpCanary.Mark("Left the match for the room");
             SceneCurtain.Close(() =>
             {
@@ -74,10 +65,7 @@ namespace FastAndFractured.Multiplayer
             MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
         }
 
-        /// <summary>
-        /// Opens a menu screen once the freshly loaded main menu has started, skipping its intro
-        /// cutscene (it plays when the menu is entered from nowhere, not on the way back).
-        /// </summary>
+        /// <summary>Opens a menu screen once the main menu has started, skipping its intro cutscene.</summary>
         internal static void OpenScreenWhenMenuReady(ScreensType screen)
         {
             if (_runner == null)
@@ -93,7 +81,7 @@ namespace FastAndFractured.Multiplayer
         private static IEnumerator OpenScreen(ScreensType screen)
         {
             float waited = 0f;
-            while (!MainMenuManager.HasInstance && waited < 10f)
+            while (!MainMenuManager.HasInstance && waited < MENU_START_TIMEOUT)
             {
                 waited += Time.unscaledDeltaTime;
                 yield return null;

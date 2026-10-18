@@ -6,14 +6,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// The driver's name floating above each car in a multiplayer match: the player's name, or
-    /// the bot's (MatchNames). Not shown above your own car, nor above dead cars; fades out with
-    /// distance. Added to every car of the match at start (NetworkedLevelControllerWrapper), so
-    /// every networked car prefab gets it without being edited.
-    ///
-    /// It follows the car's model smoothed per frame, like the camera (CameraTargetSmoother):
-    /// cars move on simulation ticks, so pinning the name to the car made it jump every tick.
-    /// Runs after CinemachineBrain so it is placed with this frame's camera.
+    /// The driver's name above each other alive car in a multiplayer match, fading with distance. It follows the
+    /// car's model smoothed per frame (cars move on ticks) and runs after CinemachineBrain.
     /// </summary>
     [DefaultExecutionOrder(1000)]
     public sealed class CarNameplate : MonoBehaviour
@@ -22,13 +16,17 @@ namespace FastAndFractured.Multiplayer
         private const float CLEARANCE = 0.7f;
         private const float MIN_HEIGHT = 2f;
         private const float MAX_HEIGHT = 7f;
-        // Drawn on a screen overlay above the car's projected position, so the car, effects and
-        // scenery never cover it; a little smaller far away, for depth.
+        // On a screen overlay so nothing covers it; a little smaller far away.
         private const float NEAR_FONT_SIZE = 34f;
         private const float FAR_FONT_SIZE = 22f;
         private const float NEAR_DISTANCE = 15f;
         private const int SORTING_ORDER = -10;   // under the match HUD
-        // Fades out towards Settings ▸ Multiplayer ▸ name distance.
+        private const float OUTLINE_WIDTH = 0.25f;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private static readonly Vector2 NAMEPLATE_SIZE = new Vector2(420f, 50f);
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
+        private static readonly Color32 OUTLINE_COLOR = new Color32(20, 16, 24, 255);
+        // Fades out towards Settings > Multiplayer > name distance.
         private const float FADE_START_FRACTION = 0.65f;
         private const float NAME_REFRESH_SECONDS = 2f;
         private static readonly Color HumanColor = Color.white;
@@ -69,7 +67,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>Marks a car that already has its nameplate.</summary>
         private sealed class CarNameplateLink : MonoBehaviour { }
 
         private void Bind(StatsController stats)
@@ -86,7 +83,7 @@ namespace FastAndFractured.Multiplayer
             rect.SetParent(SharedCanvas(stats.gameObject.scene), false);
             rect.anchorMin = rect.anchorMax = Vector2.zero;
             rect.pivot = new Vector2(0.5f, 0f);
-            rect.sizeDelta = new Vector2(420f, 50f);
+            rect.sizeDelta = NAMEPLATE_SIZE;
             _group = gameObject.AddComponent<CanvasGroup>();
             _group.blocksRaycasts = false;
             _group.interactable = false;
@@ -105,8 +102,8 @@ namespace FastAndFractured.Multiplayer
             _text.enableWordWrapping = false;
             _text.overflowMode = TextOverflowModes.Ellipsis;
             _text.raycastTarget = false;
-            _text.outlineWidth = 0.25f;
-            _text.outlineColor = new Color32(20, 16, 24, 255);
+            _text.outlineWidth = OUTLINE_WIDTH;
+            _text.outlineColor = OUTLINE_COLOR;
             RefreshName();
         }
 
@@ -138,8 +135,8 @@ namespace FastAndFractured.Multiplayer
             _canvas.sortingOrder = SORTING_ORDER;
             var scaler = go.AddComponent<UnityEngine.UI.CanvasScaler>();
             scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
             return go.transform;
         }
 

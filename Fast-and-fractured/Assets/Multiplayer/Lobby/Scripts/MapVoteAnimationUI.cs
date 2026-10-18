@@ -9,19 +9,9 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer.Lobby
 {
     /// <summary>
-    /// The map pick before a match, the multiplayer take on singleplayer's random map button
-    /// (MapSelection.RandomMap, which hops the highlight from map to map until it stops).
-    ///
-    /// A strip with the candidate maps and a highlight that hops between them, fast at first and
-    /// slowing down, while the big picture shows the map under it; it stops on the chosen one.
-    /// - Votes cast: the candidates are the voted maps (with their votes) and the highlight goes
-    ///   round them in order, like a wheel.
-    /// - Nobody voted: every map is a candidate and the highlight jumps between them at random.
-    ///
-    /// The server decides the whole sequence (NetworkedLobbyManager.BuildMapPickSequence) and
-    /// sends it, so every peer shows the same hops; it waits <see cref="DurationFor"/> before
-    /// loading the map. The panel is built in code over the overlay the Lobby Setup Wizard
-    /// places in the room screen.
+    /// The map pick before a match: a highlight hops along the candidate maps, slowing down, and stops on the chosen
+    /// one (voted maps in order, or every map at random). The server sends the sequence, so every peer shows the
+    /// same hops.
     /// </summary>
     public sealed class MapVoteAnimationUI : MonoBehaviour
     {
@@ -42,6 +32,21 @@ namespace FastAndFractured.Multiplayer.Lobby
 
         private const float CARD_WIDTH = 300f;
         private const float CARD_HEIGHT = 200f;
+        private const float CARD_SPACING = 36f;
+        private const float TITLE_FONT_SIZE = 64f;
+        private const float MAP_NAME_FONT_SIZE = 46f;
+        private const float CARD_LABEL_FONT_SIZE = 26f;
+        private const float TITLE_POP_START_SCALE = 0.6f;
+        private const float TITLE_POP_SECONDS = 0.35f;
+        private const float HIGHLIGHT_CARD_SCALE = 1.1f;
+        private const float FINAL_CARD_SCALE = 1.18f;
+        private const float CARD_IN_SECONDS = 0.08f;
+        private const float CARD_OUT_SECONDS = 0.12f;
+        private const float HOP_IMAGE_START_SCALE = 0.97f;
+        private const float FINAL_IMAGE_START_SCALE = 0.92f;
+        private const float HOP_IMAGE_SECONDS = 0.1f;
+        private const float FINAL_IMAGE_SECONDS = 0.4f;
+        private static readonly Vector2 GLOW_OFFSET = new Vector2(5f, -5f);
 
         private Sequence _activeSeq;
         private TMP_Text _title;
@@ -58,9 +63,7 @@ namespace FastAndFractured.Multiplayer.Lobby
         private void Awake()
         {
             if (_canvasGroup == null && _root != null) _canvasGroup = _root.GetComponent<CanvasGroup>();
-            // The overlay starts inactive and this component sits on it, so Awake only runs when
-            // Play activates it - hiding it here used to switch the animation off on its first
-            // (and only) run.
+            // Awake only runs when Play activates the overlay: hiding it here switched off the first run.
             if (_root != null && _root != gameObject) _root.SetActive(false);
         }
 
@@ -80,12 +83,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             return total;
         }
 
-        /// <summary>
-        /// Plays the pick. <paramref name="candidates"/>: map ids on the strip;
-        /// <paramref name="votes"/>: votes of each candidate (null when nobody voted);
-        /// <paramref name="hops"/>: index into candidates of every hop, the last one being the
-        /// chosen map.
-        /// </summary>
+        /// <summary>Plays the pick: <paramref name="hops"/> index <paramref name="candidates"/>, the last one is the chosen map; <paramref name="votes"/> is null when nobody voted.</summary>
         public void Play(int[] candidates, int[] votes, int[] hops, bool random)
         {
             var catalog = MapCatalogLoader.Get();
@@ -131,8 +129,8 @@ namespace FastAndFractured.Multiplayer.Lobby
                 Highlight(winner, entries[winner], final: true);
                 MenuUiKit.Localized(_title, "MP.MapVote.Winner");
                 _title.color = MenuUiKit.Accent;
-                _title.transform.localScale = Vector3.one * 0.6f;
-                _title.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetUpdate(true);
+                _title.transform.localScale = Vector3.one * TITLE_POP_START_SCALE;
+                _title.transform.DOScale(1f, TITLE_POP_SECONDS).SetEase(Ease.OutBack).SetUpdate(true);
             });
             seq.AppendInterval(REVEAL_HOLD);
             // No fade out: the loading curtain takes over from here.
@@ -148,15 +146,15 @@ namespace FastAndFractured.Multiplayer.Lobby
                 card.Frame.color = on ? MenuUiKit.Accent : MenuUiKit.ButtonDim;
                 card.Glow.enabled = on;
                 card.Rect.DOKill();
-                card.Rect.DOScale(on ? (final ? 1.18f : 1.1f) : 1f, on ? 0.08f : 0.12f).SetUpdate(true);
+                card.Rect.DOScale(on ? (final ? FINAL_CARD_SCALE : HIGHLIGHT_CARD_SCALE) : 1f, on ? CARD_IN_SECONDS : CARD_OUT_SECONDS).SetUpdate(true);
             }
             if (_mapImage != null)
             {
                 _mapImage.sprite = entry.Thumbnail;
                 _mapImage.enabled = entry.Thumbnail != null;
                 _mapImage.rectTransform.DOKill();
-                _mapImage.rectTransform.localScale = Vector3.one * (final ? 0.92f : 0.97f);
-                _mapImage.rectTransform.DOScale(1f, final ? 0.4f : 0.1f).SetEase(final ? Ease.OutBack : Ease.OutQuad).SetUpdate(true);
+                _mapImage.rectTransform.localScale = Vector3.one * (final ? FINAL_IMAGE_START_SCALE : HOP_IMAGE_START_SCALE);
+                _mapImage.rectTransform.DOScale(1f, final ? FINAL_IMAGE_SECONDS : HOP_IMAGE_SECONDS).SetEase(final ? Ease.OutBack : Ease.OutQuad).SetUpdate(true);
             }
             if (_mapNameLabel != null)
             {
@@ -165,14 +163,13 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
         }
 
-        // ── Layout ───────────────────────────────────────────────────────────────────────
         private void EnsureLayout()
         {
             if (_title != null) return;
             Transform root = _root != null ? _root.transform : transform;
             TMP_FontAsset font = MenuUiKit.FontNear(root.parent != null ? root.parent : root);
 
-            _title = MenuUiKit.Text(root, string.Empty, 64f, Color.white, TextAlignmentOptions.Center, font);
+            _title = MenuUiKit.Text(root, string.Empty, TITLE_FONT_SIZE, Color.white, TextAlignmentOptions.Center, font);
             _title.name = "Title";
             _title.fontStyle = FontStyles.Bold;
             Anchor(_title.rectTransform, 0.05f, 0.84f, 0.95f, 0.96f);
@@ -185,14 +182,14 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_mapNameLabel != null)
             {
                 if (font != null) _mapNameLabel.font = font;
-                _mapNameLabel.fontSize = 46f;
+                _mapNameLabel.fontSize = MAP_NAME_FONT_SIZE;
                 Anchor(_mapNameLabel.rectTransform, 0.10f, 0.32f, 0.90f, 0.40f);
             }
 
             _strip = MenuUiKit.Rect("Candidates", root);
             Anchor(_strip, 0.02f, 0.06f, 0.98f, 0.30f);
             var row = _strip.gameObject.AddComponent<HorizontalLayoutGroup>();
-            row.spacing = 36f;
+            row.spacing = CARD_SPACING;
             row.childAlignment = TextAnchor.MiddleCenter;
             row.childControlWidth = row.childControlHeight = false;
             row.childForceExpandWidth = row.childForceExpandHeight = false;
@@ -210,7 +207,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 var frame = MenuUiKit.Background(rect, MenuUiKit.ButtonDim);
                 var glow = rect.gameObject.AddComponent<Outline>();
                 glow.effectColor = MenuUiKit.Accent;
-                glow.effectDistance = new Vector2(5f, -5f);
+                glow.effectDistance = GLOW_OFFSET;
                 glow.enabled = false;
 
                 var picture = MenuUiKit.Rect("Picture", rect);
@@ -224,7 +221,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 string caption = MapCatalog.DisplayName(entries[i]);
                 if (votes != null && i < votes.Length)
                     caption += "  <color=#FFC85A>" + LocalizationManager.Localize("MP.MapVote.Votes", votes[i]) + "</color>";
-                var label = MenuUiKit.Text(rect, caption, 26f, Color.white, TextAlignmentOptions.Center, font);
+                var label = MenuUiKit.Text(rect, caption, CARD_LABEL_FONT_SIZE, Color.white, TextAlignmentOptions.Center, font);
                 label.richText = true;
                 label.enableWordWrapping = false;
                 label.overflowMode = TextOverflowModes.Ellipsis;
@@ -246,7 +243,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             rect.offsetMin = rect.offsetMax = Vector2.zero;
         }
 
-        /// <summary>Hides the panel (back in the room after the match).</summary>
         public void Hide()
         {
             _activeSeq?.Kill();

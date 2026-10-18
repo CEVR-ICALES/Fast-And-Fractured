@@ -6,7 +6,6 @@ namespace FastAndFractured.Progression
 {
     public enum RewardType { Cap, Accessory, Title }
 
-    /// <summary>Where an accessory goes on a character.</summary>
     public enum AccessorySlot { Head, Face, Car }
 
     [Serializable]

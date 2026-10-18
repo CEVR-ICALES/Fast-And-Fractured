@@ -13,28 +13,14 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Spectator camera controller activated when the local player dies. Cycles the existing
-    /// CinemachineFreeLook camera between alive vehicles. Also supports free-camera flight
-    /// (F key) and explicit "leave match" (ESC). Deactivates automatically when the match
-    /// ends (EndGameRpc) or when only one player remains.
-    ///
-    /// Lives on the local client only; never spawned on remote/server unless host. Driven by
-    /// NetworkedStatsController.OnPlayerDeathRpc and NetworkedLevelControllerManager.EndGameRpc.
-    ///
-    /// Controls (when active):
-    ///   TAB / Click  - cycle to next alive player
-    ///   F            - toggle free camera flight
-    ///   H / button   - hide or show the watched car's HUD (SpectatedHud)
-    ///   ESC          - back to the room (the host: end the match for everyone)
-    ///   (free-cam)   - WASD/Arrows: pan | E/Q: up/down | Shift: faster
+    /// Local spectator camera after the local player dies: cycles the FreeLook between alive cars, free flight,
+    /// HUD toggle and leaving to the room. Controls: TAB/click cycle, F free camera, H HUD, ESC leave.
     /// </summary>
     public class NetworkedSpectatorController : MonoBehaviour
     {
-        // ── Singleton ────────────────────────────────────────────────────────────
         private static NetworkedSpectatorController _instance;
         public static NetworkedSpectatorController Instance => _instance;
 
-        // ── State ────────────────────────────────────────────────────────────────
         private CinemachineFreeLook _camera;
         private CinemachineBrain _brain;
         private Camera _mainCamera;
@@ -49,27 +35,34 @@ namespace FastAndFractured.Multiplayer
         private float _freeCamYaw;
         private float _freeCamPitch;
 
-        // Track the local player's car (the one that just died) so we never spectate ourselves
-        // and so we can re-enable HUD on it after deactivating. AIs and other players are valid
-        // spectate targets.
+        // Our own dead car: never spectated, and its HUD is restored on deactivation.
         private Transform _localPlayerCar;
-        // Disabled HUDs to restore on deactivation
         private readonly List<Behaviour> _hiddenHudComponents = new List<Behaviour>();
 
         public bool IsActive => _active;
 
-        // The match HUD shows the car being watched.
         private readonly SpectatedHud _hud = new SpectatedHud();
 
-        // ── UI ───────────────────────────────────────────────────────────────────
         private Canvas _uiCanvas;
         private TMP_Text _statusLabel;
         private TMP_Text _controlsLabel;
 
-        // ── Tuning ───────────────────────────────────────────────────────────────
         private const float FREE_CAM_BASE_SPEED = 20f;
         private const float FREE_CAM_SHIFT_MULT = 3.5f;
         private const float FREE_CAM_MOUSE_SENS = 0.15f;
+        private const float MAX_FREE_CAM_PITCH = 85f;
+        private const float MIN_FREE_CAM_MOVE_SQR = 0.001f;
+        private const int CAMERA_PRIORITY = 10000;
+        private const int CANVAS_SORTING_ORDER = 32600;
+        private const float STATUS_FONT_SIZE = 38f;
+        private const float SKIP_FONT_SIZE = 30f;
+        private const float SMALL_FONT_SIZE = 26f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920, 1080);
+        private static readonly Vector2 LABEL_PADDING = new Vector2(30f, 5f);
+        private static readonly Color BAR_COLOR = new Color(0f, 0f, 0f, 0.65f);
+        private static readonly Color SKIP_BUTTON_COLOR = new Color(0.85f, 0.3f, 0.15f, 0.95f);
+        private static readonly Color STATUS_TEXT_COLOR = new Color(1f, 0.9f, 0.5f, 1f);
+        private static readonly Color CONTROLS_TEXT_COLOR = new Color(0.85f, 0.85f, 0.85f, 1f);
 
         private void Awake()
         {
@@ -83,8 +76,7 @@ namespace FastAndFractured.Multiplayer
 
         private void OnDestroy()
         {
-            // If we're being destroyed mid-spectator (e.g. scene change), make sure Cinemachine
-            // gets control of the camera back so the next scene doesn't show a frozen black view.
+            // Destroyed mid-spectate (scene change): give the camera back to Cinemachine.
             if (_brain != null && !_brain.enabled) _brain.enabled = true;
             if (_instance == this) _instance = null;
             if (_uiCanvas != null) Destroy(_uiCanvas.gameObject);
@@ -105,14 +97,12 @@ namespace FastAndFractured.Multiplayer
             }
             if (kb == null) return;
 
-            // Exit key — leave the match cleanly.
             if (kb.escapeKey.wasPressedThisFrame)
             {
                 LeaveMatch();
                 return;
             }
 
-            // Toggle free-cam mode.
             if (kb.fKey.wasPressedThisFrame)
             {
                 if (_freeCam) DisableFreeCam();
@@ -144,7 +134,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // ── Activation ───────────────────────────────────────────────────────────
         public void ActivateSpectator()
         {
             if (_active) return;
@@ -199,12 +188,7 @@ namespace FastAndFractured.Multiplayer
             if (_uiCanvas != null) _uiCanvas.gameObject.SetActive(false);
         }
 
-        /// <summary>
-        /// HUD elements that are player-specific. While spectating, those in SpectatedHud.Mirrored
-        /// show the watched car instead and the others disappear. The rest
-        /// (EVENT_TEXT, TIMER_TEXT, PLAYER_ICONS) are global and must stay visible so the user
-        /// can still see kill feed, match timer and "X alive" indicator.
-        /// </summary>
+        /// <summary>Player-specific HUD elements; while spectating the mirrored ones show the watched car, the rest hide.</summary>
         private static readonly UIDynamicElementType[] PlayerHudElementsToHide = new[]
         {
             UIDynamicElementType.HEALTH_BAR,
@@ -230,22 +214,15 @@ namespace FastAndFractured.Multiplayer
             UIDynamicElementType.EFFECT_ICONS_CONTAINER,
         };
 
-        // Track which elements WE turned off so we restore exactly those (and don't accidentally
-        // re-enable something the game had legitimately set inactive).
+        // Only what we turned off is restored.
         private readonly List<UIDynamicElementType> _disabledHudElements = new List<UIDynamicElementType>();
 
-        /// <summary>
-        /// Hide ONLY the local-player-specific HUD elements (endurance, ability cooldowns,
-        /// crosshair, speed, etc.) while keeping global UI alive (kill feed, timer, player icons
-        /// strip — the "X alive" indicator). Also disables the PlayerHUD MonoBehaviour so it
-        /// stops re-pushing values that we just hid.
-        /// </summary>
+        /// <summary>Hides the local player's HUD elements (global ones stay) and stops PlayerHUD re-showing them.</summary>
         private void HideLocalPlayerHud()
         {
             _hiddenHudComponents.Clear();
             _disabledHudElements.Clear();
 
-            // Disable the per-element GameObjects via HUDManager's existing toggle API.
             if (HUDManager.HasInstance)
             {
                 foreach (var t in PlayerHudElementsToHide)
@@ -259,8 +236,7 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // Disable the PlayerHUD component(s) under the owned player root so the cooldown /
-            // health timer callbacks stop firing UI updates (which would re-enable hidden bars).
+            // Stop PlayerHUD's timer callbacks re-enabling the hidden bars.
             if (_localPlayerCar != null)
             {
                 var rootNob = _localPlayerCar.GetComponentInParent<NetworkObject>(true);
@@ -290,7 +266,6 @@ namespace FastAndFractured.Multiplayer
             _hiddenHudComponents.Clear();
         }
 
-        // ── Death propagation ────────────────────────────────────────────────────
         public void OnAnyCharacterDied(NetworkObject victim)
         {
             if (!_active || victim == null || _camera == null) return;
@@ -318,7 +293,6 @@ namespace FastAndFractured.Multiplayer
             UpdateUiText();
         }
 
-        // ── Target cycling ───────────────────────────────────────────────────────
         private void CycleToNextTarget()
         {
             RebuildAliveTargets();
@@ -338,10 +312,7 @@ namespace FastAndFractured.Multiplayer
             var target = _aliveTargets[_currentTargetIndex];
             if (target == null) return;
 
-            // The car's Visuals, drawn interpolated by VehicleVisualSmoother, through the rig's
-            // CameraTargetSmoother proxy - the same path the player's own camera uses. Following
-            // the car root showed every physics step: without input prediction for other cars
-            // the body only moves on ticks, so the view jerked.
+            // Follow the interpolated Visuals through the smoother proxy: the car root only moves on ticks.
             Transform point = SmoothedPointOf(target);
             if (_active) BindHudToCurrentTarget();
             if (_smoother != null && _smoother.isActiveAndEnabled)
@@ -382,7 +353,6 @@ namespace FastAndFractured.Multiplayer
 
         private bool CacheCamera()
         {
-            // Always (re)find Camera.main and its Brain — Camera.main can change between scenes.
             if (_mainCamera == null) _mainCamera = Camera.main;
             if (_mainCamera == null)
             {
@@ -393,10 +363,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_camera != null) return true;
 
-            // We want the LOCAL PLAYER's CinemachineFreeLook (the one whose Brain on Camera.main
-            // is actually being driven by us). Each NetworkedPlayer instance has its own FreeLook
-            // child; if we just pick the first one found, we may end up driving a remote player's
-            // camera and our visible camera (which is following our dead car's vchcam) never moves.
+            // The local player's FreeLook: every NetworkedPlayer has one, and driving a remote one moves nothing visible.
             var allCams = FindObjectsByType<CinemachineFreeLook>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             CinemachineFreeLook owned = null;
             CinemachineFreeLook anyAlive = null;
@@ -419,20 +386,16 @@ namespace FastAndFractured.Multiplayer
                 return false;
             }
 
-            // Cache our owned car so we can skip it (and only it) when listing targets, and so we
-            // know which HUD to hide / re-show on deactivation.
             if (owned != null)
             {
                 var nob = owned.GetComponentInParent<NetworkObject>(true);
                 if (nob != null) _localPlayerCar = nob.transform;
             }
 
-            // Defensive: make sure the camera is enabled and has high priority. When our car was
-            // destroyed, the cinemachine brain may have switched to whatever vchcam is left; we
-            // need this one to win the priority race so the visible camera is the one we drive.
+            // Win the priority race against whatever camera is left after our car died.
             if (!_camera.gameObject.activeSelf) _camera.gameObject.SetActive(true);
             if (!_camera.enabled) _camera.enabled = true;
-            _camera.Priority = 10000;
+            _camera.Priority = CAMERA_PRIORITY;
 
             Debug.Log($"[NetworkedSpectatorController] Cached camera '{_camera.gameObject.name}' " +
                       $"(owned={owned != null}). Priority forced to {_camera.Priority}. " +
@@ -448,12 +411,7 @@ namespace FastAndFractured.Multiplayer
             foreach (var character in LevelController.Instance.InGameCharacters)
             {
                 if (character == null) continue;
-                // InGameCharacters entries are not uniform: AI and host cars register the car
-                // GameObject itself, but remote players can be registered as their NetworkedPlayer
-                // ROOT (whose StatsController lives on the nested car). GetComponent on the root
-                // returned null and silently dropped every remote player from the spectate list —
-                // that's why spectators could only cycle through AIs. Search the children too and
-                // follow the car (the stats' transform), not the list entry.
+                // Remote players can be registered by their root; the stats live on the nested car, which is what to follow.
                 var stats = character.GetComponent<StatsController>();
                 if (stats == null) stats = character.GetComponentInChildren<StatsController>(true);
                 if (stats == null) continue;
@@ -461,9 +419,7 @@ namespace FastAndFractured.Multiplayer
 
                 Transform target = stats.transform;
 
-                // Skip ONLY our own dead car. Server-owned AIs and other player vehicles are
-                // valid spectate targets — the old IsOwner check filtered out AIs on the host
-                // (server owns them) which is exactly the opposite of what we want.
+                // Skip only our own car; server-owned AIs are valid targets.
                 if (_localPlayerCar != null)
                 {
                     if (target == _localPlayerCar) continue;
@@ -475,23 +431,17 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // ── Free camera ──────────────────────────────────────────────────────────
-        // Strategy: disable the CinemachineBrain so we get direct control of Camera.main's
-        // transform, and drive position+rotation each frame. Movement vectors come from the
-        // camera's own forward/right, so input feels exactly relative to what you see (no
-        // cinemachine orbit offset getting in the way).
+        // Free camera: the Brain is disabled and Camera.main driven directly, relative to its own forward/right.
         private void EnableFreeCam()
         {
             if (_mainCamera == null) _mainCamera = Camera.main;
             if (_mainCamera == null) return;
 
-            // Snapshot current pose
             Transform camT = _mainCamera.transform;
             var e = camT.rotation.eulerAngles;
             _freeCamYaw = e.y;
             _freeCamPitch = NormalizePitch(e.x);
 
-            // Take over: disable the Brain. Cinemachine stops driving Camera.main; we drive it.
             if (_brain != null) _brain.enabled = false;
 
             _freeCam = true;
@@ -500,9 +450,7 @@ namespace FastAndFractured.Multiplayer
         private void DisableFreeCam()
         {
             _freeCam = false;
-            // Hand control back to Cinemachine.
             if (_brain != null) _brain.enabled = true;
-            // Snap back to whatever target we were spectating last.
             ApplyCurrentTarget();
         }
 
@@ -510,19 +458,18 @@ namespace FastAndFractured.Multiplayer
         {
             if (_mainCamera == null) return;
 
-            // Mouse look (only when right mouse held — keeps cursor free for other UI work)
+            // Mouse look only with the right button held, so the cursor stays free for the UI.
             var mouse = Mouse.current;
             bool look = mouse != null && mouse.rightButton.isPressed;
             if (look)
             {
                 Vector2 delta = mouse.delta.ReadValue();
                 _freeCamYaw += delta.x * FREE_CAM_MOUSE_SENS;
-                _freeCamPitch = Mathf.Clamp(_freeCamPitch - delta.y * FREE_CAM_MOUSE_SENS, -85f, 85f);
+                _freeCamPitch = Mathf.Clamp(_freeCamPitch - delta.y * FREE_CAM_MOUSE_SENS, -MAX_FREE_CAM_PITCH, MAX_FREE_CAM_PITCH);
             }
             Quaternion rot = Quaternion.Euler(_freeCamPitch, _freeCamYaw, 0f);
             _mainCamera.transform.rotation = rot;
 
-            // WASD/QE movement relative to camera forward/right (what you see is what you move along)
             float speed = FREE_CAM_BASE_SPEED * (kb.shiftKey.isPressed ? FREE_CAM_SHIFT_MULT : 1f);
             Vector3 fwd = _mainCamera.transform.forward;
             Vector3 right = _mainCamera.transform.right;
@@ -534,32 +481,28 @@ namespace FastAndFractured.Multiplayer
             if (kb.eKey.isPressed || kb.spaceKey.isPressed) move += Vector3.up;
             if (kb.qKey.isPressed || kb.leftCtrlKey.isPressed) move -= Vector3.up;
 
-            if (move.sqrMagnitude > 0.001f)
+            if (move.sqrMagnitude > MIN_FREE_CAM_MOVE_SQR)
                 _mainCamera.transform.position += move.normalized * (speed * Time.deltaTime);
         }
 
         private static float NormalizePitch(float eulerX)
         {
-            // Unity euler X comes back as 0..360; convert to -180..180
+            // Euler X comes back as 0..360.
             if (eulerX > 180f) eulerX -= 360f;
-            return Mathf.Clamp(eulerX, -85f, 85f);
+            return Mathf.Clamp(eulerX, -MAX_FREE_CAM_PITCH, MAX_FREE_CAM_PITCH);
         }
 
-        // ── Exit ─────────────────────────────────────────────────────────────────
         private void LeaveMatch()
         {
             Debug.Log("[NetworkedSpectatorController] User pressed ESC — back to the room.");
             DeactivateSpectator();
 
-            // The room outlives the match: a spectating player goes back to it and waits for the
-            // next match. The host cannot leave a match running on it, so for the host this
-            // ends the match for everyone, who all go back to the room.
+            // The room outlives the match; the host cannot leave one running, so for the host this ends it for everyone.
             MultiplayerRoomReturn.LeaveMatchToRoom();
         }
 
         private static string LeaveHint => InstanceFinder.IsServerStarted ? LocalizationManager.Localize("MP.Spectator.EndMatch") : LocalizationManager.Localize("MP.Spectator.BackToRoom");
 
-        // ── Skip (host, only AIs left) ───────────────────────────────────────────
         private GameObject _skipButton;
         private NetworkedLevelControllerManager _manager;
 
@@ -587,42 +530,38 @@ namespace FastAndFractured.Multiplayer
             rt.anchoredPosition = new Vector2(-40f, 190f);   // above the ability icons
             rt.sizeDelta = new Vector2(420f, 80f);
             var bg = _skipButton.AddComponent<Image>();
-            bg.color = new Color(0.85f, 0.3f, 0.15f, 0.95f);
+            bg.color = SKIP_BUTTON_COLOR;
             _skipButton.AddComponent<Button>().onClick.AddListener(SkipAiOnlyMatch);
-            var label = MakeLabel(_skipButton.transform, 30, TextAlignmentOptions.Center, Color.white);
+            var label = MakeLabel(_skipButton.transform, SKIP_FONT_SIZE, TextAlignmentOptions.Center, Color.white);
             label.text = LocalizationManager.Localize("MP.Spectator.SkipAi");
             _skipButton.SetActive(false);
         }
 
-        // ── UI (built in code, zero scene wiring) ────────────────────────────────
         private void EnsureUi()
         {
             if (_uiCanvas != null) return;
 
             var rootGO = new GameObject("[SpectatorOverlay]");
-            // Lifetime is tied to this component; do NOT DontDestroyOnLoad so it dies with the scene.
+            // Not DontDestroyOnLoad: dies with the scene.
 
             _uiCanvas = rootGO.AddComponent<Canvas>();
             _uiCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _uiCanvas.sortingOrder = 32600;
+            _uiCanvas.sortingOrder = CANVAS_SORTING_ORDER;
             var scaler = rootGO.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
             rootGO.AddComponent<GraphicRaycaster>();
 
-            // Top status bar
             var topBar = MakeBar(rootGO.transform, anchorY: 1f, pivotY: 1f, anchoredY: -20f, height: 70f);
-            _statusLabel = MakeLabel(topBar.transform, 38, TextAlignmentOptions.Center, new Color(1f, 0.9f, 0.5f, 1f));
+            _statusLabel = MakeLabel(topBar.transform, STATUS_FONT_SIZE, TextAlignmentOptions.Center, STATUS_TEXT_COLOR);
 
-            // Bottom controls bar
             var bottomBar = MakeBar(rootGO.transform, anchorY: 0f, pivotY: 0f, anchoredY: 20f, height: 50f);
-            _controlsLabel = MakeLabel(bottomBar.transform, 26, TextAlignmentOptions.Center, new Color(0.85f, 0.85f, 0.85f, 1f));
+            _controlsLabel = MakeLabel(bottomBar.transform, SMALL_FONT_SIZE, TextAlignmentOptions.Center, CONTROLS_TEXT_COLOR);
 
             BuildSkipButton(rootGO.transform);
             BuildHudButton(rootGO.transform);
         }
 
-        // ── HUD toggle button ────────────────────────────────────────────────────
         private TMP_Text _hudButtonLabel;
 
         private void BuildHudButton(Transform parent)
@@ -635,9 +574,9 @@ namespace FastAndFractured.Multiplayer
             rt.anchoredPosition = new Vector2(30f, -110f);
             rt.sizeDelta = new Vector2(300f, 60f);
             var bg = go.AddComponent<Image>();
-            bg.color = new Color(0f, 0f, 0f, 0.65f);
+            bg.color = BAR_COLOR;
             go.AddComponent<Button>().onClick.AddListener(ToggleHud);
-            _hudButtonLabel = MakeLabel(go.transform, 26, TextAlignmentOptions.Center, Color.white);
+            _hudButtonLabel = MakeLabel(go.transform, SMALL_FONT_SIZE, TextAlignmentOptions.Center, Color.white);
             UpdateHudButton();
         }
 
@@ -658,7 +597,7 @@ namespace FastAndFractured.Multiplayer
             rt.anchoredPosition = new Vector2(0f, anchoredY);
             rt.sizeDelta = new Vector2(0f, height);
             var bg = barGO.AddComponent<Image>();
-            bg.color = new Color(0f, 0f, 0f, 0.65f);
+            bg.color = BAR_COLOR;
             return barGO;
         }
 
@@ -669,8 +608,8 @@ namespace FastAndFractured.Multiplayer
             var rt = go.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
-            rt.offsetMin = new Vector2(30f, 5f);
-            rt.offsetMax = new Vector2(-30f, -5f);
+            rt.offsetMin = LABEL_PADDING;
+            rt.offsetMax = -LABEL_PADDING;
             var txt = go.AddComponent<TextMeshProUGUI>();
             txt.fontSize = fontSize;
             txt.alignment = align;

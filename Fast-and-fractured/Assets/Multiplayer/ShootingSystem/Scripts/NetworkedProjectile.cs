@@ -11,24 +11,9 @@ using FishNet.Component.Transforming.Beta;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// A networked shot: normal bullet, push shot or mine.
-    ///
-    /// Every peer flies the shot itself from the same launch state (spawn payload), one step per
-    /// network tick, and draws it interpolated between the last two ticks. The server alone decides
-    /// what the shot did - damage, push, when a mine goes off - and its despawn removes the shot
-    /// everywhere. A shot has no input to predict or correct, so it deliberately does not use
-    /// Replicate/Reconcile.
-    ///
-    /// Measured before this design (ShootingProbe, 2026-09-30, all four characters):
-    ///   * Carme's push shot and mine teleported 47 km / 12 km in one frame after their first bounce:
-    ///     the bounce multiplied the reflected velocity by PushShootBounceForce (50), a value the
-    ///     singleplayer PushBulletBehaviour ADDS along the surface normal.
-    ///   * Push shots and mines exploded in mid-air: they were despawned after Range / speed, a
-    ///     straight-bullet rule. Singleplayer push shots have no range; they fly until they hit.
-    ///     Mines therefore never rested their MineExplosionTime.
-    ///   * Owners of prediction-enabled prefabs (Carme, Maria, Josefino's bat) were reconciled to the
-    ///     server's older state and could not re-simulate the gap, so eggs stood still and vanished.
-    ///   * Every bullet was drawn in 50 Hz steps: 1.7-1.9 m off a smooth path at 120 m/s.
+    /// A networked shot (bullet, push shot or mine). Every peer flies it from the same launch state, one step
+    /// per tick, drawn interpolated; only the server decides what it did, and its despawn removes it everywhere.
+    /// No input to predict, so no Replicate/Reconcile.
     /// </summary>
     [RequireComponent(typeof(ICustomRigidbody), typeof(Collider))]
     public class NetworkedProjectile : NetworkBehaviour
@@ -37,8 +22,6 @@ namespace FastAndFractured.Multiplayer
         private ICustomRigidbody _customRigidbody;
         private Collider _ownCollider;
 
-        // FishNet-internal reflection (not centralized in SingleplayerReflectionCache because
-        // these are FishNet types, not singleplayer types).
         private static FieldInfo _networkObjectEnablePredictionField;
         private static FieldInfo _networkObjectGraphicalObjectField;
         private static FieldInfo _networkObjectPredictionTypeField;
@@ -60,9 +43,7 @@ namespace FastAndFractured.Multiplayer
         private float _pushForce;
         private float _explosionRadius;
 
-        // How the singleplayer ExplosionForce on this prefab hands its push to the car
-        // (PhysicsBehaviour.ApplyImpulse). Read before that component is destroyed; the defaults
-        // are ExplosionForce's own.
+        // Read from the prefab's ExplosionForce before it is destroyed; defaults are ExplosionForce's own.
         private ForceMode _impulseForceMode = ForceMode.Impulse;
         private bool _impulseLimitRbSpeed;
         private float _impulseTime = 1f;
@@ -77,8 +58,7 @@ namespace FastAndFractured.Multiplayer
         private float _timeToExplode;
         private bool _isMine;
 
-        // Simulation: one step per network tick. _previousTickPosition is where the shot was one
-        // tick ago; the drawn position is interpolated between the two (see LateUpdate).
+        // One step per tick; the drawn position is interpolated from the previous tick's (see LateUpdate).
         private Vector3 _simulatedPosition;
         private Vector3 _previousTickPosition;
         private Vector3 _simulatedVelocity;
@@ -91,15 +71,13 @@ namespace FastAndFractured.Multiplayer
         private uint _despawnTick;
         private uint _mineExplodeTick;
 
-        // The prefab's NetworkTickSmoother starts itself in its own OnStartClient (see StopTickSmoothers).
         private bool _tickSmoothersStopped;
         private Vector3 _visualsLocalPosition;
         private Quaternion _visualsLocalRotation;
 
-        // Tunables
         private const float DEFAULT_LIFETIME_SECONDS = 5f;
-        // A lobbed shot (push or mine) has no range: like the singleplayer PushBulletBehaviour it flies
-        // until it hits something. This is only the safety net for one that never does.
+        private const float MIN_FLIGHT_SPEED = 0.1f;
+        // Lobbed shots (push, mine) have no range; this only catches one that never hits anything.
         private const float MAX_LOBBED_FLIGHT_SECONDS = 8f;
         private const float SPHERE_CAST_RADIUS = 0.15f;
         private const float BOUNCE_OFFSET_FROM_SURFACE = 0.15f;
@@ -107,10 +85,10 @@ namespace FastAndFractured.Multiplayer
         private const float NON_VEHICLE_PUSH_FORCE_MULTIPLIER = 0.5f;
         private const float MIN_DIRECTION_SQR_MAG = 0.001f;
 
-        // One mask per projectile layer, mirroring the Unity layer collision matrix. Cached because
-        // the matrix cannot change at runtime.
-        private static readonly int[] _collisionMaskByLayer = new int[32];
-        private static readonly bool[] _collisionMaskByLayerCached = new bool[32];
+        // One mask per layer, from the layer collision matrix (fixed at runtime).
+        private const int LAYER_COUNT = 32;
+        private static readonly int[] _collisionMaskByLayer = new int[LAYER_COUNT];
+        private static readonly bool[] _collisionMaskByLayerCached = new bool[LAYER_COUNT];
         private static int _cachedCharactersLayer = -1;
         private static int _cachedDefaultLayer = -1;
 
@@ -132,23 +110,14 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// The set of layers a collider on <paramref name="layer"/> would actually collide with,
-        /// taken from the project's layer collision matrix. This sweep stands in for a real
-        /// Rigidbody collision, so it has to agree with the matrix or the networked bullet behaves
-        /// differently from the singleplayer one. Naming the layers by hand does not work:
-        /// LayerMask.GetMask contributes nothing, silently, for a name that does not exist, which is
-        /// how "Obstacles" (never a layer in this project) hid the fact that Static was missing -
-        /// and Static carries most of the map, so bullets and mines fell straight through the world.
-        /// </summary>
-        // Public for the regression test: this is the invariant that "Obstacles" broke.
+        /// <summary>The layers <paramref name="layer"/> collides with, from the collision matrix (hand-written masks missed Static).</summary>
         public static int GetCollisionMaskForLayer(int layer)
         {
-            if (layer < 0 || layer > 31) layer = 0;
+            if (layer < 0 || layer >= LAYER_COUNT) layer = 0;
             if (!_collisionMaskByLayerCached[layer])
             {
                 int mask = 0;
-                for (int other = 0; other < 32; other++)
+                for (int other = 0; other < LAYER_COUNT; other++)
                 {
                     if (!Physics.GetIgnoreLayerCollision(layer, other))
                         mask |= 1 << other;
@@ -163,12 +132,7 @@ namespace FastAndFractured.Multiplayer
         #region FLIGHT_RULES
         internal enum SurfaceHitOutcome { Bounce, Rest, Explode }
 
-        /// <summary>
-        /// What a contact with anything that is not a character does to the shot, mirroring
-        /// PushBulletBehaviour.BouncingHandle: each contact spends a bounce while any are left, and
-        /// the contact that spends the last one (or the first one, when none are configured) ends
-        /// the flight - a mine settles and waits for its timer, anything else explodes.
-        /// </summary>
+        /// <summary>A non-character contact spends a bounce; the last one ends the flight (a mine rests, anything else explodes).</summary>
         internal static SurfaceHitOutcome ResolveSurfaceHit(ref int bouncesUsed, int maxBounces, float timeToExplode)
         {
             if (bouncesUsed < maxBounces) bouncesUsed++;
@@ -176,26 +140,18 @@ namespace FastAndFractured.Multiplayer
             return timeToExplode > 0f ? SurfaceHitOutcome.Rest : SurfaceHitOutcome.Explode;
         }
 
-        /// <summary>
-        /// Velocity after a bounce, mirroring singleplayer: the contact stops the motion into the
-        /// surface and PushBulletBehaviour then ADDS normal * strength (its decay factor uses integer
-        /// division, so it stays 1 on every bounce that does not end the flight). Using the strength
-        /// as a multiplier instead - the old networked rule - launched shots at ~1500 m/s.
-        /// </summary>
+        /// <summary>Velocity after a bounce: stop the motion into the surface and add normal * strength, as PushBulletBehaviour does.</summary>
         internal static Vector3 BounceVelocity(Vector3 velocity, Vector3 surfaceNormal, float bounceStrength)
         {
             return Vector3.ProjectOnPlane(velocity, surfaceNormal) + surfaceNormal * bounceStrength;
         }
 
-        /// <summary>
-        /// How long the shot may fly. A straight bullet ends at its range, like NormalBulletBehaviour;
-        /// a lobbed one (custom gravity: push shot, mine) has no range and ends when it hits.
-        /// </summary>
+        /// <summary>Flight time: a straight bullet ends at its range; a lobbed one only when it hits.</summary>
         internal static float FlightLifetimeSeconds(Vector3 initialVelocity, float range, bool lobbed)
         {
             if (lobbed) return MAX_LOBBED_FLIGHT_SECONDS;
             float speed = initialVelocity.magnitude;
-            return speed > 0.1f && range > 0f ? range / speed : DEFAULT_LIFETIME_SECONDS;
+            return speed > MIN_FLIGHT_SPEED && range > 0f ? range / speed : DEFAULT_LIFETIME_SECONDS;
         }
         #endregion
 
@@ -210,22 +166,16 @@ namespace FastAndFractured.Multiplayer
                 adapter.InitializeAdapter();
             }
 
-            // DestroyImmediate LocalEventRunner: NetworkedProjectile handles all physics.
-            // Must be Immediate because Physics.Simulate() can fire OnTriggerEnter within the SAME
-            // frame before a deferred Destroy() takes effect.
+            // Immediate: Physics.Simulate can fire OnTriggerEnter before a deferred Destroy takes effect.
             var localEventRunner = GetComponent<FastAndFractured.Utilities.LocalEventRunner>();
             if (localEventRunner != null)
                 DestroyImmediate(localEventRunner);
 
-            // Also DestroyImmediate the original BulletBehaviour to prevent NullRef
-            // from uninitialized _ignoreCollider during physics.
             var bulletBehaviour = GetComponent<BulletBehaviour>();
             if (bulletBehaviour != null)
                 DestroyImmediate(bulletBehaviour);
 
-            // Singleplayer ExplosionForce components (on the ExplosionHitbox child) would fire
-            // OnTriggerEnter with a null _explosionCollider; ApplyExplosionForce does their job with an
-            // OverlapSphere instead.
+            // ApplyExplosionForce does ExplosionForce's job with an OverlapSphere.
             foreach (var ef in GetComponentsInChildren<ExplosionForce>(true))
             {
                 ReadImpulseSettings(ef);
@@ -264,8 +214,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // Kept for older call sites; the spawn payload (NetworkedPredictedProjectileSpawn) is the
-        // normal way a shot gets its launch state, atomically with the spawn itself.
+        // Older call sites; shots normally get their launch state from the spawn payload.
         [ObserversRpc(RunLocally = true)]
         public void RpcInitialize(NetworkShootParams data, NetworkObject ignorer, Vector3 spawnPosition, Quaternion spawnRotation)
         {
@@ -283,8 +232,7 @@ namespace FastAndFractured.Multiplayer
             transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             if (_customRigidbody != null)
             {
-                // Zero velocities BEFORE marking kinematic. Setting linear/angular velocity on
-                // an already-kinematic body logs a Unity warning and is silently dropped.
+                // Before marking kinematic: velocities set on a kinematic body are dropped with a warning.
                 _customRigidbody.linearVelocity = Vector3.zero;
                 _customRigidbody.angularVelocity = Vector3.zero;
                 _customRigidbody.position = spawnPosition;
@@ -306,7 +254,6 @@ namespace FastAndFractured.Multiplayer
 
             if (ignorer != null)
             {
-                // Ignore ALL colliders on the shooter's vehicle hierarchy (vehicles have multiple colliders)
                 var shooterColliders = ignorer.GetComponentsInChildren<Collider>(true);
                 if (shooterColliders.Length > 0)
                 {
@@ -334,9 +281,7 @@ namespace FastAndFractured.Multiplayer
             float lifetime = FlightLifetimeSeconds(data.InitialVelocity, data.Range, _useCustomGravity);
             _despawnTick = _spawnTick + base.TimeManager.TimeToTicks(lifetime);
 
-            // A shot that reached this peer late (the server receiving a predicted shot, or an
-            // observer) catches up to where the shooter already sees it, so all peers fly it on the
-            // same timeline instead of this one running behind.
+            // A late shot catches up to where the shooter already sees it.
             float tickDelta = (float)base.TimeManager.TickDelta;
             for (uint i = 0; i < ticksAlreadyFlown && _isInitialized && !_hasEnded; i++)
             {
@@ -393,9 +338,7 @@ namespace FastAndFractured.Multiplayer
             float distance = _simulatedVelocity.magnitude * delta;
             if (distance < MIN_VELOCITY_FOR_RAYCAST) return false;
 
-            // QueryTriggerInteraction.Ignore because this sweep stands in for OnCollisionEnter, which
-            // never fires against a trigger. Without it the projectile stops dead inside invisible
-            // volumes (interactable pickups, safe zones, the shield bubble).
+            // Ignore triggers: this sweep stands in for OnCollisionEnter, which never fires against one.
             if (!Physics.SphereCast(_simulatedPosition, SPHERE_CAST_RADIUS, _simulatedVelocity.normalized, out RaycastHit hit,
                     distance, _collisionMask, QueryTriggerInteraction.Ignore))
                 return false;
@@ -404,7 +347,6 @@ namespace FastAndFractured.Multiplayer
 
             if (hit.collider.gameObject.layer == CharactersLayer)
             {
-                // Hit a character -> explode / damage immediately (mirrors singleplayer).
                 _simulatedPosition = hit.point;
                 EndFlight(hit.point, hit.normal, hit.collider.gameObject);
                 return true;
@@ -418,8 +360,7 @@ namespace FastAndFractured.Multiplayer
                     return true;
 
                 case SurfaceHitOutcome.Rest:
-                    // Mine: rest on the surface it hit, wait _timeToExplode, then explode. Every peer
-                    // settles it so it stays visible where it landed; only the server owns the timer.
+                    // Every peer rests the mine where it landed; only the server owns its timer.
                     _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
                     _simulatedVelocity = Vector3.zero;
                     _useCustomGravity = false;
@@ -455,10 +396,7 @@ namespace FastAndFractured.Multiplayer
             return false;
         }
 
-        /// <summary>
-        /// The shot reached its end on this peer. Clients stop drawing it (their prediction of the
-        /// impact); the server applies the damage or push and despawns it for everyone.
-        /// </summary>
+        /// <summary>Clients stop drawing the shot; the server applies its effect and despawns it.</summary>
         private void EndFlight(Vector3 point, Vector3 normal, GameObject hitObject)
         {
             if (_hasEnded) return;
@@ -470,9 +408,7 @@ namespace FastAndFractured.Multiplayer
             if (_visuals != null) _visuals.SetActive(false);
             if (_ownCollider != null) _ownCollider.enabled = false;
 
-            // The server's part runs on the next tick, never inside the caller: an end can happen
-            // while the shot is still being initialised (catching up in OnStartNetwork), where
-            // despawning the object that is being spawned is not safe.
+            // Next tick: the end can happen during spawn (catching up), where despawning is not safe.
             _endPoint = point;
             _endNormal = normal;
             _endHitObject = hitObject;
@@ -486,13 +422,11 @@ namespace FastAndFractured.Multiplayer
 
             if (_explosionRadius > 0f)
             {
-                // Push bullet / mine: area-of-effect push force
                 ApplyExplosionForce(_endPoint);
                 RpcSpawnExplosionVFX(_endPoint, _endNormal);
             }
             else
             {
-                // Normal bullet: point damage to single target
                 if (_endHitObject != null) ApplyPointDamage(_endHitObject);
                 RpcSpawnImpactVFX(_endPoint, _endNormal);
             }
@@ -502,11 +436,7 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region RENDERING
-        /// <summary>
-        /// Draws the shot between its last two simulated positions, by how far the network clock is
-        /// into the current tick. The simulation (and the collider) stay on the tick grid; only the
-        /// drawn transform is smoothed, one tick (20 ms) behind.
-        /// </summary>
+        /// <summary>Draws the shot between its last two simulated positions; the simulation stays on the tick grid.</summary>
         private void LateUpdate()
         {
             if (!_isInitialized || _hasEnded || base.TimeManager == null) return;
@@ -520,12 +450,7 @@ namespace FastAndFractured.Multiplayer
                 transform.position = position;
         }
 
-        /// <summary>
-        /// Every peer runs the same simulation, so FishNet's prediction machinery must stay out of the
-        /// way on all projectile prefabs, whatever each one ships with: several had prediction enabled
-        /// (one as a Rigidbody type), which registered them for reconciliation and graphical smoothing
-        /// the others did not get. Applied in Awake, before network initialisation, on every peer.
-        /// </summary>
+        /// <summary>Turns FishNet prediction off on every projectile prefab: every peer runs the same simulation.</summary>
         private void NormalizeRuntimeNetworkSettings()
         {
             NetworkObject nob = GetComponent<NetworkObject>();
@@ -544,12 +469,7 @@ namespace FastAndFractured.Multiplayer
             _networkObjectGraphicalObjectField?.SetValue(nob, null);
         }
 
-        /// <summary>
-        /// The prefabs carry a NetworkTickSmoother on the root. It starts itself in its own
-        /// OnStartClient - also when disabled - and, with no target configured, logs "Target
-        /// transform cannot be the same as graphical transform" for every shot. Give it a valid
-        /// target so it starts quietly; StopTickSmoothers then stops it on the first tick.
-        /// </summary>
+        /// <summary>Gives the prefab's NetworkTickSmoother a valid target so it starts quietly; StopTickSmoothers stops it.</summary>
         private void PrepareTickSmoothers()
         {
             _tickSmootherInitSettingsField ??= typeof(NetworkTickSmoother).GetField("_initializationSettings",
@@ -566,13 +486,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Stops the smoother once its controller exists. Its controller subscribes to the
-        /// TimeManager by itself, so disabling the component is not enough (same finding as on the
-        /// cars); left running it would move the shot as a second writer next to LateUpdate. The
-        /// component stays on the object - removing a NetworkBehaviour at runtime shifts FishNet's RPC
-        /// link indices.
-        /// </summary>
+        /// <summary>Stops the smoother's controller (it subscribes to the TimeManager itself). Not removed: that shifts RPC indices.</summary>
         private void StopTickSmoothers()
         {
             bool allStopped = true;
@@ -603,12 +517,7 @@ namespace FastAndFractured.Multiplayer
             if (type.GetField("limitRbSpeedLimit", flags)?.GetValue(source) is float speedLimit) _impulseSpeedLimit = speedLimit;
         }
 
-        /// <summary>
-        /// Singleplayer's push direction (ExplosionForce.OnTriggerEnter): from the explosion
-        /// towards the car's upper corner, clamped to the blast's box. The old networked version
-        /// aimed at the closest point of the car to the blast centre, which on a direct hit is the
-        /// centre itself - a zero vector, replaced by straight up: the car shot vertically.
-        /// </summary>
+        /// <summary>Singleplayer's push direction: towards the car's upper corner, clamped to the blast box.</summary>
         public static Vector3 PushDirection(Vector3 impactPoint, Vector3 blastCenter, float blastRadius, Bounds carBounds)
         {
             var blast = new Bounds(blastCenter, Vector3.one * (blastRadius * 2f));
@@ -618,10 +527,7 @@ namespace FastAndFractured.Multiplayer
             return direction.normalized;
         }
 
-        /// <summary>
-        /// Server-side: find all vehicles in explosion radius and apply push force.
-        /// Mirrors singleplayer ExplosionForce.OnTriggerEnter() logic.
-        /// </summary>
+        /// <summary>Server: pushes every vehicle in the blast, as ExplosionForce.OnTriggerEnter does.</summary>
         private void ApplyExplosionForce(Vector3 center)
         {
             Vector3 explosionCenter = center + _explosionCenterOffset;
@@ -632,7 +538,6 @@ namespace FastAndFractured.Multiplayer
 
             foreach (var hit in hits)
             {
-                // Skip shooter's own colliders
                 if (_ignoredColliders != null)
                 {
                     bool skip = false;
@@ -661,8 +566,7 @@ namespace FastAndFractured.Multiplayer
                     float weight = stats.Weight;
                     float enduranceImportance = stats.EnduranceImportanceWhenColliding;
 
-                    // The car body's collider, like singleplayer's trigger sees it; not whichever
-                    // child collider (a wheel) the overlap happened to return first.
+                    // The car body's collider, not whichever child collider the overlap returned first.
                     Collider body = physicsBehaviour.GetComponent<Collider>();
                     Bounds carBounds = body != null ? body.bounds : hit.bounds;
                     var blast = new Bounds(explosionCenter, Vector3.one * (_explosionRadius * 2f));
@@ -674,9 +578,7 @@ namespace FastAndFractured.Multiplayer
 
                     if (!physicsBehaviour.HasBeenPushed)
                     {
-                        // ApplyImpulse, as singleplayer: it also lifts the car's speed cap and marks
-                        // it impulsed for a moment (both replicated in the reconcile), otherwise
-                        // the cap cut the sideways part of the push and left mostly the vertical.
+                        // ApplyImpulse, as singleplayer: it lifts the speed cap, which would otherwise cut the sideways push.
                         physicsBehaviour.ApplyImpulse(direction, closestPoint, forceToApply, _impulseForceMode,
                             _impulseLimitRbSpeed, _impulseTime, _impulseStopMomentum, _impulseSpeedLimit);
                         if (carImpact != null) carImpact.OnHasBeenPushed(physicsBehaviour);
@@ -688,7 +590,6 @@ namespace FastAndFractured.Multiplayer
                 }
                 else if (physicsBehaviour == null)
                 {
-                    // Non-vehicle rigidbody: generic push
                     var rb = hit.GetComponentInParent<Rigidbody>();
                     if (rb != null)
                     {
@@ -701,9 +602,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Server-side: apply point damage to a single hit target (normal bullets).
-        /// </summary>
         private void ApplyPointDamage(GameObject hitObject)
         {
             var networkedStats = hitObject.GetComponentInParent<NetworkedStatsController>();
@@ -748,9 +646,7 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         private void RpcSpawnExplosionVFX(Vector3 point, Vector3 normal)
         {
-            // Screen shake for everyone near the blast. The singleplayer ExplosionForce (which is
-            // what normally triggers the Explosion profile) is stripped from networked projectiles,
-            // so without this no peer — not even the shooter — feels an explosion.
+            // The singleplayer ExplosionForce that triggers the shake is stripped from networked shots.
             NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, point);
 
             if (_explosionPrefab != null)

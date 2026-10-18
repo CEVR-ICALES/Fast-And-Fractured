@@ -16,10 +16,7 @@ using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.Multiplayer.HostMigration
 {
-    /// <summary>
-    /// Server → clients, once a second: what the players need to rebuild the room if the host
-    /// goes away - its name and AI slots, and who takes over in order, with their addresses.
-    /// </summary>
+    /// <summary>Server to clients, once a second: the room's name, AI slots and successors with their addresses.</summary>
     public struct RoomSnapshotBroadcast : IBroadcast
     {
         public bool Enabled;
@@ -33,17 +30,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
     }
 
     /// <summary>
-    /// Room host migration: when the host leaves the room (or crashes), the room carries on
-    /// under another player instead of sending everyone back to the hub. The first successor
-    /// opens a room with the same name, port and AI slots; the others reconnect to it and
-    /// land in it again (their character choice comes back with them, it is saved locally).
-    ///
-    /// Also covers a host lost during a match when match migration is off: the match is over,
-    /// but everyone meets again in the room under the new host.
-    ///
-    /// Same mechanism as the match migration (HostMigrationNetwork): Tugboat to the successor's
-    /// address, players identified by their migration token. Switch: HostMigrationConfig ▸
-    /// Room Migration (on by default).
+    /// Room host migration (HostMigrationConfig > Room Migration): when the host is lost the first successor opens
+    /// a room with the same name, port and AI slots and the others reconnect to it. A match lost without match
+    /// migration also ends up there.
     /// </summary>
     public sealed class RoomMigration : MonoBehaviour
     {
@@ -51,6 +40,13 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private const float MAX_SNAPSHOT_AGE = 6f;
         private const float RECONNECT_TIMEOUT = 15f;
         private const float SUCCESSOR_HEAD_START = 0.75f;
+        private const ushort DEFAULT_PORT = 7777;
+        private const float LOBBY_WAIT_TIMEOUT = 5f;
+        private const float CLIENT_START_TIMEOUT = 3f;
+        private const float RECONNECT_RETRY_INTERVAL = 0.5f;
+        private const float MENU_LOAD_TIMEOUT = 15f;
+        private const float ROOM_TRANSITION_SECONDS = 0.25f;
+        private const float HUB_TRANSITION_SECONDS = 0.5f;
 
         public static bool Migrating { get; private set; }
 
@@ -119,7 +115,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 Enabled = HostMigrationSettings.RoomMigrationEnabled,
                 RoomName = lobby.RoomName.Value,
                 AiSlots = lobby.AiSlotCount.Value,
-                Port = nm.TransportManager.Transport != null ? nm.TransportManager.Transport.GetPort() : (ushort)7777,
+                Port = nm.TransportManager.Transport != null ? nm.TransportManager.Transport.GetPort() : DEFAULT_PORT,
                 MatchMigrationTakesOver = lobby.GameStarted.Value && HostMigrationSettings.Enabled,
                 SuccessorTokens = tokens.ToArray(),
                 SuccessorAddresses = addresses.ToArray(),
@@ -132,11 +128,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             _latestTime = Time.unscaledTime;
         }
 
-        // ── Host lost ──────────────────────────────────────────────────────────────────
-        /// <summary>
-        /// Called by HostDisconnectWatchdog when the connection to the host dropped without the
-        /// local player asking for it. True when this peer rebuilds / rejoins the room.
-        /// </summary>
+        /// <summary>HostDisconnectWatchdog, unexpected host loss: true when this peer rebuilds or rejoins the room.</summary>
         public static bool TryHandleHostLoss()
         {
             if (Migrating || _instance == null || InstanceFinder.IsServerStarted) return false;
@@ -176,7 +168,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             }
 
             NetworkedLobbyManager lobby = null;
-            for (float waited = 0f; waited < 5f; waited += Time.unscaledDeltaTime)
+            for (float waited = 0f; waited < LOBBY_WAIT_TIMEOUT; waited += Time.unscaledDeltaTime)
             {
                 lobby = LobbyLocator.GetLobbyManager();
                 if (lobby != null && lobby.IsServerInitialized) break;
@@ -209,7 +201,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 if (nm.ClientManager.Started) nm.ClientManager.StopConnection();
                 if (tugboat != null) { tugboat.SetClientAddress(address); tugboat.SetPort(snapshot.Port); }
                 nm.ClientManager.StartConnection();
-                for (float attempt = 0f; attempt < 3f && !nm.ClientManager.Started; attempt += Time.unscaledDeltaTime)
+                for (float attempt = 0f; attempt < CLIENT_START_TIMEOUT && !nm.ClientManager.Started; attempt += Time.unscaledDeltaTime)
                     yield return null;
                 if (nm.ClientManager.Started)
                 {
@@ -218,7 +210,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                     Migrating = false;
                     yield break;
                 }
-                yield return new WaitForSecondsRealtime(0.5f);
+                yield return new WaitForSecondsRealtime(RECONNECT_RETRY_INTERVAL);
             }
             Fail("the new host did not answer");
         }
@@ -229,7 +221,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (SceneManager.GetActiveScene().buildIndex != LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX)
             {
                 MultiplayerSceneTeardown.LoadMainMenu();
-                for (float waited = 0f; waited < 15f; waited += Time.unscaledDeltaTime)
+                for (float waited = 0f; waited < MENU_LOAD_TIMEOUT; waited += Time.unscaledDeltaTime)
                 {
                     if (SceneManager.GetActiveScene().buildIndex == LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX && MainMenuManager.HasInstance)
                         break;
@@ -250,7 +242,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (!MainMenuManager.HasInstance) return;
             var menu = MainMenuManager.Instance;
             if (menu.CurrentScreen == null || menu.CurrentScreen.screenType != ScreensType.LOBBY_ROOM)
-                menu.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, 0.25f);
+                menu.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, ROOM_TRANSITION_SECONDS);
         }
 
         private static void Fail(string reason)
@@ -266,7 +258,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 if (nm.ServerManager.Started) nm.ServerManager.StopConnection(true);
             }
             if (MainMenuManager.HasInstance)
-                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MULTIPLAYER_HUB, 0.5f);
+                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MULTIPLAYER_HUB, HUB_TRANSITION_SECONDS);
         }
     }
 
@@ -274,10 +266,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
     public static class RoomSuccession
     {
         /// <summary>
-        /// Remote players in take-over order: those willing to host before those who said no in
-        /// their settings (they still take over if nobody else is left); among them the match's
-        /// players first (a lost match host then hands the room to someone who was playing), then
-        /// the rest, each by connection order.
+        /// Remote players in take-over order: willing hosts first, then match players, then the rest, each by
+        /// connection order.
         /// </summary>
         public static List<int> Order(IEnumerable<int> remoteClientIds, IEnumerable<int> matchParticipants,
                                       IEnumerable<int> unwillingToHost = null)

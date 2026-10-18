@@ -4,17 +4,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Tests
 {
     /// <summary>
-    /// Pins the collision-mask derivation in NetworkedProjectile, which exists because of the
-    /// mine-through-the-floor bug (fixed 2026-08-25).
-    ///
-    /// The sweep used to name its layers by hand:
-    ///     LayerMask.GetMask("Default", "Characters", "Ground", "Obstacles")
-    /// No layer called "Obstacles" exists in this project, and GetMask contributes nothing,
-    /// silently, for an unknown name — which hid that Static was missing. Static holds most of
-    /// every map (722 colliders on NetworkedMountainVillageMap against Ground's 3), so mines and
-    /// push bullets swept straight through the level.
-    ///
-    /// These tests exist so that cannot happen again, whatever way the mask is built in the future.
+    /// Pins NetworkedProjectile's collision mask: a hand-written list once named a non-existent layer and missed
+    /// Static, so mines and push bullets went through the level.
     /// </summary>
     public class NetworkedProjectileCollisionMaskTests
     {
@@ -32,8 +23,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void GetMask_WithUnknownLayerName_IsSilentlyZero()
         {
-            // The trap that caused the bug, kept as an executable warning: a typo'd layer name
-            // returns 0 with no error, so a hand-written mask list fails invisibly.
+            // GetMask returns 0 for a typo'd layer name without any error.
             Assert.AreEqual(0, LayerMask.GetMask("Obstacles"));
             Assert.AreEqual(0, LayerMask.GetMask("This Layer Does Not Exist"));
         }
@@ -54,9 +44,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void Mask_EqualsTheLayerCollisionMatrix_ForEveryLayer()
         {
-            // The contract, not the implementation: whatever the projectile's layer is, the sweep
-            // must see exactly what a real Rigidbody collision on that layer would touch. Derived
-            // from the matrix, a renamed or newly relevant layer can never be lost to a typo.
+            // The sweep must see exactly what a Rigidbody collision on that layer would touch.
             for (int layer = 0; layer < 32; layer++)
             {
                 if (System.String.IsNullOrEmpty(LayerMask.LayerToName(layer))) continue;
@@ -76,8 +64,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void Mask_OutOfRangeLayer_FallsBackToDefaultSafely()
         {
-            // The guard exists so a corrupt layer value cannot index out of bounds; it should
-            // produce the Default layer's mask (layer 0 always exists).
+            // A corrupt layer value gets the Default layer's mask.
             Assert.AreEqual(NetworkedProjectile.GetCollisionMaskForLayer(0),
                 NetworkedProjectile.GetCollisionMaskForLayer(-1));
             Assert.AreEqual(NetworkedProjectile.GetCollisionMaskForLayer(0),

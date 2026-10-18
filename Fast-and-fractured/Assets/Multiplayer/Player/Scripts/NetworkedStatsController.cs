@@ -10,10 +10,7 @@ using Utilities;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Wrapper para StatsController que sincroniza vida, daño y muerte por red.
-    /// NO modifica StatsController original - Solo envuelve funcionalidad crítica.
-    /// </summary>
+    /// <summary>Networks a car's StatsController: endurance, invulnerability, skin and death.</summary>
     [RequireComponent(typeof(StatsController))]
     public class NetworkedStatsController : NetworkBehaviour
     {
@@ -37,44 +34,20 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SYNCED_STATE
-        /// <summary>
-        /// SyncVar para vida actual (FishNet 4.x syntax).
-        /// Se sincroniza automáticamente a todos los clientes.
-        /// </summary>
         private readonly SyncVar<float> _syncedEndurance = new();
         
-        /// <summary>
-        /// SyncVar para invulnerabilidad (FishNet 4.x syntax).
-        /// Usado para power-ups temporales.
-        /// </summary>
         private readonly SyncVar<bool> _syncedInvulnerable = new();
 
-        /// <summary>
-        /// The character name code (e.g. "Pepe_2") this car was spawned with. The visible skin is a
-        /// runtime material swap (CharacterDataProvider.SetCharacterSkin) that the singleplayer
-        /// spawner only ever applies to the SERVER's instance — FishNet re-instantiates the prefab
-        /// on remote clients with its DEFAULT materials and nothing re-applies the skin there. That
-        /// is why the host and a remote client saw the same AI with different skins. Replicating the
-        /// name code lets every peer apply the same skin locally.
-        /// </summary>
+        /// <summary>Spawn character code (e.g. "Pepe_2"): the skin is a material swap only the server applies, so every peer re-applies it.</summary>
         private readonly SyncVar<string> _skinNameCode = new();
         
-        /// <summary>
-        /// Flag para prevenir loops infinitos: Server cambia SyncVar -> OnChange -> No volver a cambiar SyncVar
-        /// </summary>
+        /// <summary>Stops the OnChange -> SyncVar write loop.</summary>
         private bool _isUpdatingFromNetwork = false;
 
-        /// <summary>
-        /// Guard: only fire HandleServerSideDeath once per character per match. Damage-based
-        /// (DealDamageServerRpc) and environment-based (StatsController.onDead from DeadWall,
-        /// sandstorm, etc.) paths both flow through HandleServerSideDeath; without this they
-        /// could double-count or double-fire OnPlayerDeathRpc.
-        /// </summary>
+        /// <summary>Each death is reported once: the damage and environment paths both reach HandleServerSideDeath.</summary>
         private bool _serverDeathReported = false;
         
-        // Reflection accessors for private singleplayer fields. Sourced from
-        // SingleplayerReflectionCache so any rename on the singleplayer side fails here loudly
-        // (and centralized) instead of silently across the codebase.
+        // From SingleplayerReflectionCache, so a singleplayer rename fails loudly in one place.
         private static FieldInfo EnduranceField => SingleplayerReflectionCache.StatsController_CurrentEndurance;
         private static FieldInfo IsPlayerField => SingleplayerReflectionCache.StatsController_IsPlayer;
         private static FieldInfo DeadTimerField => SingleplayerReflectionCache.StatsController_DeadTimer;
@@ -92,17 +65,12 @@ namespace FastAndFractured.Multiplayer
                 enabled = false;
             }
 
-            // Setup SyncVar callbacks (FishNet 4.x)
             _syncedEndurance.OnChange += OnEnduranceChanged;
             _syncedInvulnerable.OnChange += OnInvulnerabilityChanged;
             _skinNameCode.OnChange += OnSkinNameCodeChanged;
         }
 
-        /// <summary>
-        /// Server: records the character name code this car uses so every client can reproduce its
-        /// skin locally. Must be called AFTER the object is network-spawned (SyncVars only replicate
-        /// once the NetworkObject is initialized on the server).
-        /// </summary>
+        /// <summary>Server: records the car's character code so clients reproduce its skin; call after Spawn.</summary>
         [Server]
         public void SetSkinNameCode(string nameCode)
         {
@@ -112,17 +80,10 @@ namespace FastAndFractured.Multiplayer
 
         private void OnSkinNameCodeChanged(string prev, string next, bool asServer)
         {
-            // The host already carries the singleplayer-applied skin on its own instance, but
-            // re-applying the same code is idempotent, so we do not special-case it. Applying on
-            // every peer (including late joiners, via the buffered SyncVar) guarantees consistency.
             ApplySkinFromNameCode(next);
         }
 
-        /// <summary>
-        /// Re-runs the singleplayer material-swap skin logic locally for this car's name code.
-        /// CharacterDataProvider.SetCharacterSkin only reads the name code and this GameObject's
-        /// Visuals hierarchy (never the provider's data list), so a throwaway provider is fine.
-        /// </summary>
+        /// <summary>Re-runs the singleplayer skin swap locally; a throwaway provider is enough.</summary>
         private void ApplySkinFromNameCode(string nameCode)
         {
             if (string.IsNullOrEmpty(nameCode)) return;
@@ -141,7 +102,6 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartServer();
 
-            // Inicializar SyncVars con valores del StatsController
             _syncedEndurance.Value = _coreStats.Endurance;
             _syncedInvulnerable.Value = _coreStats.IsInvulnerable;
 
@@ -166,25 +126,17 @@ namespace FastAndFractured.Multiplayer
             CancelPendingSingleplayerDeath();
         }
 
-        /// <summary>
-        /// Mirror of the server-side strip on the client. Without this, when a local client's car
-        /// dies via local DeadWall trigger, the singleplayer LC flow runs locally and calls
-        /// LoadScene(MAIN_MENU), yanking the client out of the map scene before the server's
-        /// authoritative OnPlayerDeathRpc can show the spectator UI.
-        /// </summary>
+        /// <summary>Client mirror of the server-side strip: a local dead-wall death must not load the main menu.</summary>
         public override void OnStartClient()
         {
             base.OnStartClient();
 
-            // Cliente sincroniza estado inicial
             if (!IsServerInitialized)
             {
                 OnEnduranceChanged(0f, _syncedEndurance.Value, false);
                 OnInvulnerabilityChanged(false, _syncedInvulnerable.Value, false);
 
-                // Apply the replicated skin. If the car spawned before the name code was set,
-                // OnSkinNameCodeChanged handles it when it arrives; if it was already buffered,
-                // apply it now (OnChange does not fire for the initial buffered value here).
+                // OnChange does not fire for the buffered initial value: apply it now.
                 ApplySkinFromNameCode(_skinNameCode.Value);
 
                 InstallNetworkDeathListener();
@@ -194,11 +146,7 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"<color=cyan>[NetworkedStatsController] Client initialized. Endurance: {_syncedEndurance.Value}</color>");
         }
 
-        /// <summary>
-        /// Installs the multiplayer death listener without disturbing unrelated listeners.
-        /// NetworkedLevelControllerWrapper removes LevelController.ReportCharacterDeath one frame
-        /// after the single-player startup event adds it.
-        /// </summary>
+        /// <summary>Installs the multiplayer death listener; the wrapper removes LevelController's own a frame later.</summary>
         private void InstallNetworkDeathListener()
         {
             if (_coreStats == null || _coreStats.onDead == null) return;
@@ -223,11 +171,7 @@ namespace FastAndFractured.Multiplayer
             InstallNetworkDeathListener();
         }
 
-        /// <summary>
-        /// Server-side listener on StatsController.onDead. Forwards environment / local-source
-        /// deaths into the same flow as bullet-damage deaths so the match tracking and clients
-        /// learn about them. Idempotent via _serverDeathReported.
-        /// </summary>
+        /// <summary>Server: routes environment deaths (StatsController.onDead) into the networked death flow.</summary>
         private void OnLocalStatsDeath(float delay, GameObject character, bool isPlayer)
         {
             if (!IsServerInitialized) return;
@@ -246,8 +190,7 @@ namespace FastAndFractured.Multiplayer
             if (IsServerInitialized)
             {
                 float dist = Vector3.Distance(transform.position, _lastPosition);
-                // Filter out small movements/jitter
-                if (dist > 0.01f)
+                if (dist > MIN_DISTANCE_STEP)
                 {
                     TotalDistanceTraveled.Value += dist;
                     _lastPosition = transform.position;
@@ -258,20 +201,11 @@ namespace FastAndFractured.Multiplayer
         #endregion
         
         #region SYNCVAR_CALLBACKS
-        /// <summary>
-        /// Callback cuando la vida cambia en el servidor. Actualiza el StatsController local.
-        /// </summary>
-        /// <param name="prev">Valor anterior</param>
-        /// <param name="next">Nuevo valor</param>
-        /// <param name="asServer">True si se ejecuta en el servidor</param>
         private void OnEnduranceChanged(float prev, float next, bool asServer)
         {
             if (_coreStats == null) return;
 
-            // On server (including host-as-server), DealDamageServerRpc already applied damage
-            // to StatsController and updated the SyncVar. Skip the endurance field write to
-            // avoid double-processing, but still update VFX on non-owner vehicles so that
-            // host sees damage visuals on remote cars.
+            // The server already applied the damage: only refresh the VFX of remote cars.
             if (IsServerInitialized)
             {
                 if (!IsOwner)
@@ -284,11 +218,7 @@ namespace FastAndFractured.Multiplayer
                 }
                 else
                 {
-                    // Host's own car: bullet damage flows through SP TakeEndurance which updates
-                    // the HUD itself, but server-side writes that set the SyncVar directly —
-                    // HandleServerSideDeath forcing 0 on environment kills (map holes, dead walls)
-                    // — bypass it, leaving the host's health bar full while he's dead. Mirror the
-                    // synced value to the HUD (idempotent when TakeEndurance already did it).
+                    // Server-side writes (an environment kill sets 0) skip TakeEndurance: mirror the synced value to the host's HUD.
                     if (HUDManager.HasInstance && _coreStats.MaxEndurance > 0)
                     {
                         HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, next, _coreStats.MaxEndurance);
@@ -307,7 +237,6 @@ namespace FastAndFractured.Multiplayer
 
             if (IsOwner)
             {
-                // Owner (client-only, NOT host): set endurance via reflection and update HUD directly.
                 if (EnduranceField != null)
                 {
                     EnduranceField.SetValue(_coreStats, next);
@@ -326,7 +255,6 @@ namespace FastAndFractured.Multiplayer
             }
             else
             {
-                // Non-owner: set currentEndurance directly via reflection.
                 if (EnduranceField != null)
                 {
                     EnduranceField.SetValue(_coreStats, next);
@@ -367,19 +295,17 @@ namespace FastAndFractured.Multiplayer
         #endregion
         
         #region DAMAGE_SYSTEM
-        /// <summary>
-        /// ServerRpc para aplicar daño. Cualquier cliente puede llamarlo (RequireOwnership = false).
-        /// El servidor valida y aplica el daño, luego actualiza el SyncVar.
-        /// </summary>
-        /// <param name="damage">Cantidad de daño</param>
-        /// <param name="attacker">NetworkConnection del atacante (para stats y kill tracking)</param>
-        // Sanity cap on damage per RPC call. Anti-cheat: a malicious client could call
-        // DealDamageServerRpc directly with absurd values since RequireOwnership=false.
-        // Real bullets do at most a few hundred damage, so 500 is a generous upper bound.
+        // Anti-cheat caps for the client-callable RPCs (real bullets do a few hundred at most).
         private const float MAX_DAMAGE_PER_CALL = 500f;
-        // Same idea for healing.
         private const float MAX_HEAL_PER_CALL = 500f;
-
+        private const float MIN_DISTANCE_STEP = 0.01f;
+        private const float DEATH_VFX_LIFETIME_SECONDS = 5f;
+        private const float DEBUG_AMOUNT = 50f;
+        // Skips DeathCaller and HandleServerSideDeath.
+        private const int DEATH_CALLER_SKIPPED_FRAMES = 2;
+        private const int DEATH_CALLER_FRAMES = 4;
+        
+        /// <summary>Any client may call it; the server validates, applies and syncs the damage.</summary>
         [ServerRpc(RequireOwnership = false)]
         public void DealDamageServerRpc(float damage, NetworkConnection attacker)
         {
@@ -405,11 +331,7 @@ namespace FastAndFractured.Multiplayer
             ApplyDamageOnServer(damage, attacker);
         }
 
-        /// <summary>
-        /// Server: damage from the map itself (TNT, explosions). Not callable by clients, so the
-        /// anti-cheat cap of DealDamageServerRpc does not apply - a TNT takes half of a car's max
-        /// endurance, which is more than the cap for most cars.
-        /// </summary>
+        /// <summary>Server: map damage (TNT, explosions); not client-callable, so uncapped.</summary>
         [Server]
         public void DealEnvironmentDamageServer(float damage, NetworkConnection attacker = null)
         {
@@ -417,10 +339,7 @@ namespace FastAndFractured.Multiplayer
             ApplyDamageOnServer(damage, attacker);
         }
 
-        /// <summary>
-        /// Server: damage dealt by a car that may have no connection - an AI's bullets. They
-        /// used to bypass the networked pipeline, so the kill went uncredited ("Unknown").
-        /// </summary>
+        /// <summary>Server: damage from a car that may have no connection (AI bullets), credited to that car.</summary>
         [Server]
         public void DealDamageFromCarServer(float damage, NetworkObject attackerCar)
         {
@@ -429,9 +348,7 @@ namespace FastAndFractured.Multiplayer
             ApplyDamageOnServer(damage, owner, attackerCar);
         }
 
-        // -- Kill credit -----------------------------------------------------------------
-        // Who hit this car last, and when. A car pushed into a pit or the storm a few seconds
-        // after a hit counts as killed by whoever hit it, as in other battle royales.
+        // Kill credit: a car pushed into a pit or the storm shortly after a hit counts as killed by the hitter.
         private NetworkObject _lastAttacker;
         private float _lastAttackerTime;
         private const float LAST_HIT_CREDIT_SECONDS = 8f;
@@ -459,7 +376,6 @@ namespace FastAndFractured.Multiplayer
                 attackerCar = attacker.FirstObject;
             ServerNoteAttacker(attackerCar);
             
-            // Obtener GameObject del atacante para el sistema de stats
             GameObject attackerObject = attackerCar != null ? attackerCar.gameObject : null;
             
             if (verboseLogging)
@@ -475,18 +391,13 @@ namespace FastAndFractured.Multiplayer
             if (ultimate != null && ultimate.ServerConsumeJosefinoShield())
                 return;
 
-            // Apply damage. StatsController.TakeEndurance() calls HUDManager.Instance.UpdateUIElement()
-            // when _isPlayer is true. Since HUDManager.Instance is a singleton, non-owner vehicles
-            // would incorrectly update the local player's HUD. Temporarily suppress _isPlayer for non-owner.
+            // Non-owner cars must not update the local HUD singleton.
             ApplyEnduranceDamage(damage, attackerObject ?? gameObject);
             
-            // Actualizar SyncVar (esto propagará a todos los clientes via OnEnduranceChanged)
             _syncedEndurance.Value = _coreStats.Endurance;
             
-            // Track stats
             TotalDamageTaken.Value += damage;
             
-            // Track attacker stats (players and AIs alike)
             if (attackerCar != null)
             {
                 var attackerStats = attackerCar.GetComponentInChildren<NetworkedStatsController>();
@@ -495,19 +406,13 @@ namespace FastAndFractured.Multiplayer
                     attackerStats.TotalDamageDealt.Value += damage;
             }
 
-            // Verificar muerte
             if (_coreStats.Endurance <= 0f && IsServerInitialized)
             {
                 HandleServerSideDeath(attacker);
             }
         }
         
-        /// <summary>
-        /// Apply endurance damage to StatsController, suppressing HUD updates for non-owner vehicles.
-        /// StatsController.TakeEndurance() calls HUDManager.Instance.UpdateUIElement() when _isPlayer=true,
-        /// but HUDManager is a singleton - all vehicles would update the SAME (local player's) HUD.
-        /// For non-owner vehicles, temporarily set _isPlayer=false to skip HUD update, then restore.
-        /// </summary>
+        /// <summary>TakeEndurance with HUD updates suppressed for non-owner cars (HUDManager is a singleton).</summary>
         private void ApplyEnduranceDamage(float damage, GameObject attacker)
         {
             bool needsSuppress = !IsOwner && IsPlayerField != null;
@@ -524,9 +429,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        /// <summary>
-        /// ServerRpc para curación. Solo el owner o server pueden curarse.
-        /// </summary>
         [ServerRpc]
         public void HealServerRpc(float amount)
         {
@@ -557,18 +459,12 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"<color=green>[NetworkedStatsController] {gameObject.name} healed {amount:F1}. New endurance: {_syncedEndurance.Value:F1}</color>");
         }
         
-        /// <summary>
-        /// ServerRpc para activar invulnerabilidad temporal (power-ups, abilities).
-        /// </summary>
         [ServerRpc]
         public void SetInvulnerabilityServerRpc(bool invulnerable, float duration = 0f)
         {
             SetInvulnerabilityServer(invulnerable, duration);
         }
 
-        /// <summary>
-        /// Server-only helper for invulnerability sync. Use this when already executing on server.
-        /// </summary>
         public void SetInvulnerabilityServer(bool invulnerable, float duration = 0f)
         {
             if (!IsServerInitialized) return;
@@ -578,7 +474,6 @@ namespace FastAndFractured.Multiplayer
 
             if (invulnerable && duration > 0f)
             {
-                // Programar desactivación automática
                 Invoke(nameof(RemoveInvulnerabilityInternal), duration);
             }
 
@@ -596,16 +491,10 @@ namespace FastAndFractured.Multiplayer
         #endregion
         
         #region DEATH_HANDLING
-        /// <summary>
-        /// Server-side death handler. Called from DealDamageServerRpc when endurance reaches 0.
-        /// Was previously a [ServerRpc] but it's invoked from code already running on the server,
-        /// so the RPC roundtrip was redundant and added a frame of latency.
-        /// </summary>
-        /// <param name="killer">The NetworkConnection that dealt the final blow.</param>
-        // The frames above HandleServerSideDeath: which hazard or damage path reported the death.
+        // Caller frames for the death canary mark.
         private static string DeathCaller()
         {
-            var frames = new System.Diagnostics.StackTrace(2, false).GetFrames();
+            var frames = new System.Diagnostics.StackTrace(DEATH_CALLER_SKIPPED_FRAMES, false).GetFrames();
             if (frames == null) return "?";
             var names = new System.Collections.Generic.List<string>();
             foreach (var f in frames)
@@ -613,34 +502,27 @@ namespace FastAndFractured.Multiplayer
                 var m = f.GetMethod();
                 if (m?.DeclaringType == null) continue;
                 names.Add(m.DeclaringType.Name + "." + m.Name);
-                if (names.Count == 4) break;
+                if (names.Count == DEATH_CALLER_FRAMES) break;
             }
             return string.Join(" < ", names);
         }
 
+        /// <summary>Server: reports a death once, with its killer.</summary>
         [Server]
         private void HandleServerSideDeath(NetworkConnection killer)
         {
             if (!IsServerInitialized) return;
 
-            // A map hazard may still own StatsController's singleplayer countdown when another
-            // authoritative source reports the death. Stop that countdown before notifying peers
-            // so its completion callback cannot emit a second local death later.
+            // Stop a pending singleplayer hazard countdown so it cannot report a second death.
             CancelPendingSingleplayerDeath();
 
-            // Guard: a single victim may be reported via both damage-overflow AND the
-            // StatsController.onDead listener. Only count the first one.
             if (_serverDeathReported) return;
             _serverDeathReported = true;
 
-            // Force endurance to 0 in the synced state. Bullet damage already does this via
-            // DealDamageServerRpc, but environment kills (DeadWall / hole) don't drain endurance
-            // — the corpse would otherwise still be `Endurance > 0` on clients and our spectator
-            // would let you cycle to a "dead" target.
+            // Environment kills do not drain endurance: force 0 so clients see a dead car.
             _syncedEndurance.Value = 0f;
 
-            // Find killer's NetworkObject for more robust identification (works for Players and AI):
-            // the killing connection's car, else whoever hit or pushed this car last.
+            // Killer: the connection's car, else whoever last hit or pushed this one.
             NetworkObject killerNob = (killer != null && killer.FirstObject != null)
                 ? killer.FirstObject.GetComponent<NetworkObject>()
                 : null;
@@ -652,10 +534,8 @@ namespace FastAndFractured.Multiplayer
             if (verboseLogging)
                 Debug.Log($"<color=red>[NetworkedStatsController] {gameObject.name} killed by {killerName}</color>");
             
-            // Notify all clients about the death
             OnPlayerDeathRpc(base.NetworkObject, killerNob);
             
-            // Notify the manager for game loop tracking
             if (_cachedLevelControllerManager == null)
                 _cachedLevelControllerManager = FindFirstObjectByType<NetworkedLevelControllerManager>();
             if (_cachedLevelControllerManager != null)
@@ -679,27 +559,21 @@ namespace FastAndFractured.Multiplayer
             HandleServerSideDeath(null);
         }
         
-        /// <summary>
-        /// ObserversRpc notifying all clients about a death.
-        /// </summary>
         [ObserversRpc]
         private void OnPlayerDeathRpc(NetworkObject victim, NetworkObject killer)
         {
-            // Pure clients can also have entered a local hazard before the authoritative report
-            // arrived. Quiesce their singleplayer countdown as soon as the death is replicated.
+            // A client may have entered a local hazard before the report arrived: stop its countdown.
             CancelPendingSingleplayerDeath();
 
             string victimName = victim != null ? MatchNames.Of(victim.gameObject) : null;
             string killerName = killer != null ? MatchNames.Of(killer.gameObject) : null;
                         
-            // Instantiate death VFX with auto-destroy to prevent memory leak
             if (dieExplosionVfx != null)
             {
                 var vfx = Instantiate(dieExplosionVfx, transform.position, Quaternion.identity);
-                Destroy(vfx, 5f);
+                Destroy(vfx, DEATH_VFX_LIFETIME_SECONDS);
             }
 
-            // Show kill feed message
             if (HUDManager.HasInstance)
             {
                 HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, string.IsNullOrEmpty(killerName)
@@ -707,13 +581,9 @@ namespace FastAndFractured.Multiplayer
                     : LocalizationManager.Localize("MP.Feed.Kill", killerName, victimName));
             }
 
-            // Gray out the victim's icon in the top HUD strip. The singleplayer path that does this
-            // (GameLoopManager.ProcessCharacterDeathAfterDelay) is detached in multiplayer — the
-            // wrapper removes LevelController's death listener because the authoritative death flow
-            // lives here — so this RPC is the only client-side place that knows a character died.
+            // The singleplayer path that greys the icon is detached in multiplayer.
             MarkCharacterIconDead(victim);
 
-            // If I am the victim, show death feedback and activate spectator mode
             if (IsOwner)
             {
                 if (HUDManager.HasInstance)
@@ -721,10 +591,6 @@ namespace FastAndFractured.Multiplayer
                     HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, LocalizationManager.Localize("MP.YouDied"));
                 }
 
-                // Cut off input on the dead car: PlayerInputController, NetworkedShoot,
-                // NetworkedUniqueAbility, and the local PlayerInputProvider. Without this the
-                // ghost car keeps responding to mouse clicks and Q/E ability presses, shooting
-                // bullets and triggering abilities while the player is supposed to be spectating.
                 DisableLocalInputsAndOffensiveActions();
 
                 EnsureSpectatorInstance();
@@ -737,11 +603,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Activates the "dead" overlay on the victim's CharacterIcon in the top HUD strip.
-        /// Mirrors the icon-matching logic of NetworkedLevelControllerManager.DisconnectDeathRpc:
-        /// icons reference the car GameObject, so resolve each icon's NetworkObject and compare ids.
-        /// </summary>
+        /// <summary>Greys the victim's icon (icons reference the car: compare NetworkObject ids).</summary>
         private static void MarkCharacterIconDead(NetworkObject victim)
         {
             if (victim == null) return;
@@ -776,11 +638,6 @@ namespace FastAndFractured.Multiplayer
             CurrentKillerField?.SetValue(_coreStats, null);
         }
 
-        /// <summary>
-        /// Owner-side: silence everything that could let a "dead" car still attack or accept
-        /// movement input. Components are disabled (not destroyed) — defensive in case the
-        /// match has any continuation path that re-spawns the player.
-        /// </summary>
         private void DisableLocalInputsAndOffensiveActions()
         {
             // Walk up to the NetworkedPlayer root so we catch components on the shell + the car.
@@ -799,8 +656,7 @@ namespace FastAndFractured.Multiplayer
             foreach (var ult in root.GetComponentsInChildren<NetworkedUniqueAbility>(true))
                 if (ult != null) ult.enabled = false;
 
-            // Belt-and-braces: also disable the singleplayer abilities (BaseUniqueAbility) and
-            // shoot handles so any local-only firing path is also blocked.
+            // Also the singleplayer abilities and shoot handles.
             foreach (var ab in root.GetComponentsInChildren<BaseUniqueAbility>(true))
                 if (ab != null) ab.enabled = false;
             foreach (var sh in root.GetComponentsInChildren<NormalShootHandle>(true))
@@ -812,10 +668,6 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"[NetworkedStatsController] Disabled inputs + offensive actions on '{gameObject.name}' (dead).");
         }
 
-        /// <summary>
-        /// Lazily creates the local spectator controller singleton on first death event.
-        /// Lives on its own GameObject so it survives between scene reloads if needed.
-        /// </summary>
         private static void EnsureSpectatorInstance()
         {
             if (NetworkedSpectatorController.Instance != null) return;
@@ -825,30 +677,15 @@ namespace FastAndFractured.Multiplayer
         #endregion
         
         #region PUBLIC_API
-        /// <summary>
-        /// Obtiene la vida actual sincronizada. Seguro de usar desde cualquier cliente.
-        /// </summary>
         public float GetSyncedEndurance() => _syncedEndurance.Value;
         
-        /// <summary>
-        /// Obtiene la vida máxima del StatsController base.
-        /// </summary>
         public float GetMaxEndurance() => _coreStats != null ? _coreStats.MaxEndurance : 0f;
         
-        /// <summary>
-        /// Verifica si el jugador está invulnerable.
-        /// </summary>
         public bool IsInvulnerable() => _syncedInvulnerable.Value;
         
-        /// <summary>
-        /// Verifica si el jugador está vivo.
-        /// </summary>
         public bool IsAlive() => _syncedEndurance.Value > 0f;
         
-        /// <summary>
-        /// Forces the SyncVar endurance to re-read from StatsController. Called from 
-        /// NetworkedUniqueAbility after server-side heal is applied directly to StatsController.
-        /// </summary>
+        /// <summary>Re-reads the endurance into the SyncVar after a direct server-side heal.</summary>
         public void ForceEnduranceSync()
         {
             if (!IsServerInitialized) return;
@@ -862,7 +699,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (IsServerInitialized)
             {
-                DealDamageServerRpc(50f, null);
+                DealDamageServerRpc(DEBUG_AMOUNT, null);
             }
         }
         
@@ -871,7 +708,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (IsOwner)
             {
-                HealServerRpc(50f);
+                HealServerRpc(DEBUG_AMOUNT);
             }
         }
         

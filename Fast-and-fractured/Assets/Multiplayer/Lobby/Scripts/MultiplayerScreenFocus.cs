@@ -6,24 +6,13 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Keyboard / gamepad focus for the multiplayer menu screens.
-    ///
-    /// Every multiplayer MenuScreen had its Back button as default interactable, so with a gamepad
-    /// the focus started on "Back" (A left the screen) and the lobby / map entries created at
-    /// runtime were never focused (playtest feedback 2026-09-30). On each screen this focuses the
-    /// main action instead - Host, Start, Join, Ready, or the first room / map entry - and puts the
-    /// focus back when it is lost (a clicked-away mouse, an entry list rebuilt under it).
-    ///
-    /// Added at runtime to the screens under the MultiplayerUICanvas; no scene wiring.
-    ///
-    /// Since dev's controller-menu work (RecoverSelectedMenuController, 2026-10) the menu itself
-    /// clears the selection while the mouse/keyboard is in use and, with a gamepad, restores the
-    /// last button or the current screen's defaultInteractable. So this keeps defaultInteractable
-    /// pointing at the main action and only selects on its own when a screen opens with a
-    /// gamepad in use - selecting every frame fought dev's clearing (a flickering highlight).
+    /// Gamepad focus for the multiplayer screens: keeps defaultInteractable on the main action (Host, Start, Join,
+    /// Ready, first entry) instead of Back, and selects it when a screen opens with a gamepad in use.
     /// </summary>
     public sealed class MultiplayerScreenFocus : MonoBehaviour
     {
+        private const float VISIBLE_ALPHA = 0.5f;
+
         private static readonly string[] PrimaryActions =
             { "ReadyButton", "HostButton", "StartButton", "JoinButton" };
 
@@ -59,7 +48,7 @@ namespace FastAndFractured.Multiplayer
         }
 
         // Screens stay active and fade through their CanvasGroup; the interactable one is current.
-        private bool IsCurrent => _group != null ? _group.interactable && _group.alpha > 0.5f : isActiveAndEnabled;
+        private bool IsCurrent => _group != null ? _group.interactable && _group.alpha > VISIBLE_ALPHA : isActiveAndEnabled;
 
         private void LateUpdate()
         {

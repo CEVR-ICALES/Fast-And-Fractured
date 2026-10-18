@@ -17,11 +17,7 @@ namespace FastAndFractured
         [SerializeField] List<GameObject> visuals;
 
         /// <summary>
-        /// Optional hook for crediting the unlock and showing the toast. Null in singleplayer.
-        /// Multiplayer sets it because OnInteract only ever runs on the server once this component
-        /// is server-authoritative (see NetworkedSkinUnlockerInteractable) - PlayerPrefs.SetInt
-        /// would otherwise write to the SERVER's own save file no matter which player picked the
-        /// item up. Returning true means the hook already credited the unlock and shown the toast.
+        /// Optional hook (multiplayer) that credits the unlock and shows the toast; true when it did. Null in singleplayer.
         /// </summary>
         public System.Func<GameObject, bool> InteractionRouter;
 

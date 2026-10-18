@@ -7,10 +7,8 @@ using UnityEngine.UI;
 namespace FastAndFractured.GameTelemetry
 {
     /// <summary>
-    /// Settings ▸ Accessibility ▸ "Share gameplay statistics" (Telemetry.Sharing), in every
-    /// settings menu - main menu and pause menus, singleplayer and multiplayer. Built at runtime
-    /// by copying the tab's own toggle row, so no prefab or scene is edited. The row is named
-    /// like its label, which is also its tooltip key (SettingsTooltips).
+    /// Settings > Accessibility > "Share gameplay statistics", added at runtime to every settings menu from a copy of
+    /// the tab's own toggle row; the row's name is its tooltip key.
     /// </summary>
     public sealed class TelemetrySettingRow : MonoBehaviour
     {

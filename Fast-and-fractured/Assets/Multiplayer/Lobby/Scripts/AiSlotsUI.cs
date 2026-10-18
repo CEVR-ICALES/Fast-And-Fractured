@@ -1,9 +1,3 @@
-// SCENE SETUP:
-//   - Place anywhere inside the LOBBY_ROOM MenuScreen.
-//   - Wire _countLabel  (TMP_Text)
-//   - Wire _decButton   (Button, −)
-//   - Wire _incButton   (Button, +)
-//   - Panel is shown to all but buttons are only interactable for the host.
 using Assets.SimpleLocalization.Scripts;
 using FastAndFractured.Multiplayer.Abstractions;
 using FishNet;
@@ -27,8 +21,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_lobby == null) return;
 
             _lobby.AiSlotCount.OnChange += OnAiCountChanged;
-            // Also refresh when a human joins/leaves — otherwise the "Total: X/8" label
-            // stays stale until someone touches the AI counter.
+            // Humans joining or leaving change the total too.
             _lobby.PlayerReadyStates.OnChange += OnReadyStatesChanged;
             _decButton?.onClick.AddListener(() => ChangeAi(-1));
             _incButton?.onClick.AddListener(() => ChangeAi(+1));
@@ -48,10 +41,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             _incButton?.onClick.RemoveAllListeners();
         }
 
-        /// <summary>
-        /// The room is a new object after a host migration (the new host spawns its own), and
-        /// this peer may now be the host: bind again as soon as it appears.
-        /// </summary>
+        /// <summary>A host migration spawns a new room object, and this peer may now host: bind to it when it appears.</summary>
         private void Update()
         {
             if (_lobby != null || LobbyLocator.GetLobbyManager() == null) return;

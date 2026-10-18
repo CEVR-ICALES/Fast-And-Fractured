@@ -6,24 +6,15 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-authoritative wrapper for DeadWallsBehaivour (map boundary kill zones).
-    ///
-    /// The singleplayer component calls StatsController.GetKilledNotify which runs a kill
-    /// countdown coroutine locally — bypassing the networked death pipeline entirely.
-    /// In multiplayer each client would independently kill its own view of the vehicle,
-    /// producing desync and double-deaths.
-    ///
-    /// This wrapper removes the singleplayer component on ALL peers and replicates
-    /// the KillTime countdown exclusively on the server, applying lethal damage through
-    /// DealDamageServerRpc so the full networked death pipeline fires (kill feed, spectator
-    /// transition, character-count tracking). The "OutsideMap" UI event is broadcast to the
-    /// affected client via RpcNotifyOutsideMap.
-    ///
-    /// Setup: add this component and a NetworkObject to the DeadWalls GameObject in the scene.
+    /// Server-authoritative map boundary walls: the singleplayer DeadWallsBehaivour is removed on every peer and
+    /// the server runs the kill countdown, killing through the networked death pipeline.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
     public class NetworkedDeadWallsBehaviour : NetworkBehaviour
     {
+        private const float DEFAULT_KILL_TIME = 1.5f;
+        private const float OUTSIDE_MAP_EVENT_SECONDS = 2f;
+
         private DeadWallsBehaivour[] _walls;
         private readonly List<Collider> _collidersToRestore = new List<Collider>();
 
@@ -34,9 +25,7 @@ namespace FastAndFractured.Multiplayer
 
         private void Awake()
         {
-            // The networked variants wrap groups (Construction has 63 wall colliders) while
-            // the NetworkObject lives on only one child. Install a lightweight relay on every
-            // legacy wall beneath the prefab root so none keep running local kill timers.
+            // The NetworkObject is on one child of a wall group: relay every legacy wall under the root.
             Transform wallsRoot = transform.parent != null ? transform.parent : transform;
             _walls = wallsRoot.GetComponentsInChildren<DeadWallsBehaivour>(true);
 
@@ -48,9 +37,7 @@ namespace FastAndFractured.Multiplayer
                     relay = wall.gameObject.AddComponent<NetworkedDeadWallRelay>();
                 relay.Configure(this, wall);
 
-                // Unity invokes physics callbacks on disabled MonoBehaviours. Temporarily turn
-                // off the wall collider, destroy the legacy component, then restore the collider
-                // for the relay on the next frame. This keeps the fix entirely in Multiplayer.
+                // Unity calls physics callbacks on disabled components: collider off, destroy, collider back next frame.
                 foreach (var wallCollider in wall.GetComponents<Collider>())
                 {
                     if (wallCollider == null || !wallCollider.enabled || _collidersToRestore.Contains(wallCollider))
@@ -70,13 +57,7 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartNetwork();
 
-            // Safety net for the collider restore. FishNet deactivates networked scene objects
-            // between Awake and their spawn, which kills the RestoreWallCollidersNextFrame
-            // coroutine started in Awake (a coroutine on a deactivated GameObject is stopped, not
-            // paused, and Awake never runs again to restart it). When that happens the wall
-            // trigger colliders stay disabled for the whole match and NOTHING can die to the map
-            // boundary or pits. OnStartNetwork runs after the object is spawned and active again,
-            // so restoring here guarantees the relays receive their trigger callbacks.
+            // FishNet deactivates scene objects before spawn, which stops the restore coroutine: restore here too.
             RestoreWallColliders();
         }
 
@@ -102,11 +83,7 @@ namespace FastAndFractured.Multiplayer
             if (!base.IsServerInitialized || other == null) return;
             if (HandleGolfBall(other, entered: true)) return;
 
-            // Same filter as the singleplayer wall (DeadWallsBehaivour.OnTriggerEnter): only the
-            // car body collider - the one carrying the StatsController - and never while its body
-            // is kinematic, which is how a car being placed or teleported (spawn, respawn) avoids
-            // starting a kill timer. Without it any child collider of the car counted, kinematic
-            // or not.
+            // As DeadWallsBehaivour: only the car body collider, never while kinematic (placing or respawning).
             if (!other.TryGetComponent(out StatsController _)) return;
 
             var stats = FindNetworkedStats(other);
@@ -129,11 +106,10 @@ namespace FastAndFractured.Multiplayer
             if (!contacts.Add(contactKey)) return;
             if (_activeKillCountdowns.ContainsKey(stats)) return;
 
-            float killTime = wall != null ? wall.KillTime : 1.5f;
+            float killTime = wall != null ? wall.KillTime : DEFAULT_KILL_TIME;
             var coroutine = StartCoroutine(KillCountdown(stats, killTime));
             _activeKillCountdowns[stats] = coroutine;
 
-            // Notify the owner client to show the "outside map" warning UI.
             if (stats.Owner != null && stats.Owner.IsValid)
                 RpcNotifyOutsideMap(stats.Owner, true);
         }
@@ -159,8 +135,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Only cancel the countdown if the car is escaping toward the play area.
-            // IsCharacterInFront checks the wall's captured orientation against the exit direction.
+            // Only cancel when the car escapes toward the play area.
             if (wall != null && !wall.IsCharacterInFront(stats.transform)) return;
 
             CancelCountdown(stats);
@@ -169,11 +144,7 @@ namespace FastAndFractured.Multiplayer
                 RpcNotifyOutsideMap(stats.Owner, false);
         }
 
-        /// <summary>
-        /// Dev's walls also send golf balls that leave the map back to their start
-        /// (GolfBallSpawnHandle). The legacy wall component is gone on every peer here, so do the
-        /// same on the server; NetworkedGolfBall shows the move to the clients.
-        /// </summary>
+        /// <summary>Server: golf balls leaving the map go back to their start, as the legacy walls do.</summary>
         private static bool HandleGolfBall(Collider other, bool entered)
         {
             if (!other.TryGetComponent(out GolfBallBehaviour ball)) return false;
@@ -186,8 +157,7 @@ namespace FastAndFractured.Multiplayer
             }
             catch (KeyNotFoundException)
             {
-                // GolfBallSpawnHandle throws when a ball leaves a wall it was already moved away
-                // from (same in singleplayer); nothing to cancel.
+                // GolfBallSpawnHandle throws for a ball already moved away (same in singleplayer).
             }
             return true;
         }
@@ -216,13 +186,12 @@ namespace FastAndFractured.Multiplayer
             return ((long)(uint)relayId << 32) | (uint)colliderId;
         }
 
-        // Sends the "outside map" UI notification to the specific player client only.
         [TargetRpc]
         private void RpcNotifyOutsideMap(FishNet.Connection.NetworkConnection conn, bool entered)
         {
             var eventsManager = IngameEventsManager.ExistingInstance;
             if (entered && eventsManager != null)
-                eventsManager.CreateEvent("Events.OutsideMap", 2f);
+                eventsManager.CreateEvent("Events.OutsideMap", OUTSIDE_MAP_EVENT_SECONDS);
         }
 
         public override void OnStopNetwork()

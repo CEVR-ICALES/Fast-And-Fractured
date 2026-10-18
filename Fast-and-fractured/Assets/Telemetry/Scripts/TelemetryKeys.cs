@@ -1,10 +1,6 @@
 namespace FastAndFractured.GameTelemetry
 {
-    /// <summary>
-    /// Every event the game can send. The key is the event name in GA4 and in Firestore:
-    /// lowercase, words joined by '_', at most 40 characters (GA4's limit). Adding one here and
-    /// calling Telemetry.Track with it is all a new statistic needs.
-    /// </summary>
+    /// <summary>Every event the game sends; the key is its GA4 and Firestore name (lowercase_with_underscores, 40 chars max).</summary>
     public static class TelemetryKeys
     {
         // Session

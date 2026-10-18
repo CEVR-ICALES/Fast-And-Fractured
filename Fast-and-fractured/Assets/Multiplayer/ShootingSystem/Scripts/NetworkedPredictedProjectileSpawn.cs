@@ -8,20 +8,9 @@ using Enums;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Launch state of a shot, carried in its spawn message so every peer starts the flight from the
-    /// same data at the same moment the object appears - both for shots a client predicts (FishNet Pro
-    /// predicted spawn, validated here by the server) and for shots the server spawns itself.
-    ///
-    /// LaunchTick is when the shot left the gun on the server's tick clock (a client's
-    /// TimeManager.Tick is its estimate of the server tick). Peers that receive the spawn later - the
-    /// server for a predicted shot, every observer - fly it forward by the difference, so the shot is
-    /// at the same place on every screen instead of trailing by the latency.
-    ///
-    /// LaunchLocalTick is the same moment on the shooter's OWN clock (TimeManager.LocalTick), which is
-    /// what the server validates against (its PacketTick for the connection is on that clock). The
-    /// server-tick estimate is not safe for validation: measured 2026-09-30, a client's estimate sat
-    /// ~49 ticks (1 s) behind the real server tick after a one-second editor hitch, and a push shot
-    /// fired right then was rejected as "too old".
+    /// A shot's launch state, carried in its spawn message for predicted and server spawns alike. Late peers fly
+    /// it forward from LaunchTick (server clock); the server validates against LaunchLocalTick, the shooter's own
+    /// clock, because a client's server-tick estimate lags far behind after a hitch.
     /// </summary>
     [RequireComponent(typeof(NetworkedProjectile))]
     public sealed class NetworkedPredictedProjectileSpawn : PredictedSpawn
@@ -73,7 +62,7 @@ namespace FastAndFractured.Multiplayer
             _launchLocalTick = reader.ReadUInt32();
         }
 
-        // Kept separate so the round trip can be unit tested without a NetworkObject.
+        // Separate so the round trip can be unit tested.
         internal static void WriteParams(Writer writer, NetworkShootParams data)
         {
             writer.WriteInt32((int)data.Pooltype);
@@ -115,10 +104,7 @@ namespace FastAndFractured.Multiplayer
                 ShootingNetworkStats.ProjectilesRejected++;
                 return false;
             }
-            // Only the validated launch state is stored here; the flight starts in OnStartNetwork. This
-            // callback runs BEFORE the object is spawned on the server, and a shot that hit something
-            // while catching up in here ended without its server-side end (damage, despawn), so it was
-            // never removed on any peer (measured: 3 of Carme's 5 eggs lingered for the whole match).
+            // Only store the validated state: this runs before the server spawn, and a shot ending here was never removed.
             transform.SetPositionAndRotation(_spawnPosition, _spawnRotation);
             MpCanary.Mark($"PredictedProjectile ACCEPT spawner={spawner.ClientId} prefabId={NetworkObject.PrefabId} mine={_data.IsMine} catchUp={TicksSinceLaunch()}");
             ShootingNetworkStats.ProjectilesAccepted++;

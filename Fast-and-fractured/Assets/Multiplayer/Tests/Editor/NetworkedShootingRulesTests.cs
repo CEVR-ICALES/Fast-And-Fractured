@@ -11,24 +11,14 @@ using Outcome = FastAndFractured.Multiplayer.NetworkedProjectile.SurfaceHitOutco
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// The rules a networked shot follows, pinned against the values that broke them (ShootingProbe
-    /// measurements, 2026-09-30):
-    ///   * bounce strength multiplied the reflected velocity (50x): push shots and mines left at
-    ///     ~1500 m/s after their first bounce and "teleported" 12-47 km in one frame;
-    ///   * lobbed shots were given a straight-bullet lifetime (Range / speed) and exploded in the air
-    ///     before landing, so mines never rested;
-    ///   * the server checked the cadence against its own timer, one latency late, and rejected up to
-    ///     half of the shots of a client firing exactly on cadence.
-    /// </summary>
+    /// <summary>The rules a networked shot follows, pinned against the values that broke them.</summary>
     public class NetworkedShootingRulesTests
     {
-        // Values of the shipped characters (CharacterData): all four share them.
+        // Shared by the four shipped characters (CharacterData).
         private const float PushRange = 15f, PushAngle = 40f, MineRange = 10f, MineAngle = 40f;
         private const float GravityMultiplier = 30f, BounceForce = 50f;
         private const int PushBounces = 2;
 
-        // ---------------------------------------------------------------- bounces and contacts
 
         [Test]
         public void Push_shot_bounces_until_its_last_bounce_then_explodes()
@@ -65,7 +55,6 @@ namespace FastAndFractured.Multiplayer.Tests
                 "a bounce can never multiply the speed (the old rule left at ~1500 m/s)");
         }
 
-        // ---------------------------------------------------------------- lifetime
 
         [Test]
         public void Straight_bullet_lives_for_its_range()
@@ -78,7 +67,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCase(MineRange, MineAngle)]
         public void Lobbed_shot_outlives_its_whole_arc(float range, float angleDegrees)
         {
-            // The launch PushShootHandle computes, and the time that arc takes to come back down.
+            // PushShootHandle's launch and the time its arc takes to land.
             float gravity = Mathf.Abs(Physics.gravity.y * GravityMultiplier);
             float speed = Mathf.Sqrt(range * gravity / Mathf.Sin(2f * angleDegrees * Mathf.Deg2Rad));
             float flightTime = 2f * speed * Mathf.Sin(angleDegrees * Mathf.Deg2Rad) / gravity;
@@ -92,9 +81,7 @@ namespace FastAndFractured.Multiplayer.Tests
                 "a lobbed shot must be able to land and use its bounces before any timeout");
         }
 
-        // ---------------------------------------------------------------- server validation
 
-        // Server-side cadence: a rate limit on the server's real-time clock (TryTakeShotCredit).
 
         private static int AcceptedShots(float cooldownSeconds, params double[] arrivalTimes)
         {
@@ -130,8 +117,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void A_client_hitch_between_shots_does_not_reject_the_next_one()
         {
-            // The 2026-09-30 case: 4 shots 0.5 s apart, a 197 ms client hitch between the 3rd and
-            // the 4th. The shooter's tick clock dropped ticks there; real arrival times did not.
+            // 4 shots 0.5 s apart with a 197 ms client hitch before the 4th: arrival times are unaffected.
             Assert.AreEqual(4, AcceptedShots(0.5f, 31.717, 32.196, 32.727, 33.238));
         }
 
@@ -157,8 +143,6 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void Launch_tick_must_be_recent_and_not_in_the_future()
         {
-            // Both on the shooter's own clock: its LocalTick when it fired, and the LocalTick
-            // stamped on the packet that carried the shot.
             Assert.IsTrue(NetworkedShoot.IsPlausibleLaunchTick(995u, 1000u, out _), "sent a few ticks after firing: fine");
             Assert.IsTrue(NetworkedShoot.IsPlausibleLaunchTick(1000u, 1000u, out _), "sent the tick it was fired: fine");
             Assert.IsFalse(NetworkedShoot.IsPlausibleLaunchTick(1011u, 1000u, out _), "from the future");
@@ -210,12 +194,8 @@ namespace FastAndFractured.Multiplayer.Tests
     }
 
     /// <summary>
-    /// Every character's weapons must be wired for networked, client-predicted shots: the prefab
-    /// each weapon spawns exists, is a NetworkedProjectile with its visuals assigned, can be spawned
-    /// by a client, and is registered with the NetworkManager. And whatever prediction settings a
-    /// projectile prefab ships with, the runtime normalisation must leave every one of them the same
-    /// - the drift between them (prediction on for some, off or Rigidbody-typed for others) is what
-    /// made each character's shots behave differently.
+    /// Every character's weapons spawn a registered, client-spawnable NetworkedProjectile with visuals, and the
+    /// runtime normalisation leaves every projectile prefab with the same prediction settings.
     /// </summary>
     public class NetworkedWeaponSetupTests
     {
@@ -226,8 +206,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void Josefino_heal_amount_is_readable_by_the_server()
         {
-            // The server applies Josefino's heal from this field (the owner's reported endurance
-            // is read before the heal runs). A rename would silently drop the heal in multiplayer.
+            // The server applies Josefino's heal from this field: a rename would silently drop it.
             FieldInfo field = typeof(JosefinoUniqueAbility).GetField("enduranceRecoveryAmount", Private);
             Assert.That(field, Is.Not.Null);
             Assert.That(field.FieldType, Is.EqualTo(typeof(float)));

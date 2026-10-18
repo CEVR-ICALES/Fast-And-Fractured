@@ -12,11 +12,8 @@ namespace FastAndFractured.Multiplayer
     }
 
     /// <summary>
-    /// Unified input provider for multiplayer. 
-    /// Owner: delegates to the local PlayerInputProvider.
-    /// Non-owner: reads replicated input set by NetworkedVehicle/NetworkedShoot.
-    /// Exposes ALL properties that PlayerInputProvider has so multiplayer code
-    /// doesn't need to cast to PlayerInputProvider (which may not exist or may get overwritten).
+    /// Multiplayer input provider: the owner reads the local PlayerInputProvider, other peers the replicated input.
+    /// Exposes everything PlayerInputProvider does, so no cast is needed.
     /// </summary>
     public class NetworkInputProvider : MonoBehaviour, IInputProvider
     {
@@ -56,7 +53,6 @@ namespace FastAndFractured.Multiplayer
         public bool IsBraking => _localProvider != null ? _localProvider.IsBraking : _currentInput.HandbrakeInput;
         public bool IsDashing => _localProvider != null ? _localProvider.IsDashing : _currentInput.DashInput;
 
-        // Extended properties matching PlayerInputProvider
         public float IsAccelerating => _localProvider != null ? _localProvider.IsAccelerating : Mathf.Max(0f, _currentInput.AccelerateInput);
         public float IsReversing => _localProvider != null ? _localProvider.IsReversing : Mathf.Max(0f, -_currentInput.AccelerateInput);
         public bool IsNormalShooting => _localProvider != null ? _localProvider.IsNormalShooting : _networkNormalShooting;

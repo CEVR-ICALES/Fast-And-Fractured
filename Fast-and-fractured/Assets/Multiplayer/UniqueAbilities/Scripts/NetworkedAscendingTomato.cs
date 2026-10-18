@@ -6,21 +6,16 @@ using System.Collections.Generic;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Networked version of Pepe's ascending tomato.
-    ///
-    /// It only rises straight up at a constant speed from where it was launched, so every peer flies
-    /// it itself from that origin (launch data in NetworkedPredictedAbilitySpawn's payload). The server
-    /// alone times the burst and spawns the descending tomatoes. Its NetworkTransform used to move it
-    /// as well: client-authoritative by default, so with a predicted spawn the owner's updates fought
-    /// the server's own motion - 12 snap-backs and 25 m single-frame jumps measured on the host
-    /// (ShootingProbe, 2026-09-30). Position sync is switched off on every peer.
+    /// Pepe's ascending tomato: every peer flies it straight up from its launch point; the server times the burst
+    /// and spawns the descending tomatoes. NetworkTransform position sync is off (it fought the predicted spawn).
     /// </summary>
     public class NetworkedAscendingTomato : NetworkBehaviour
     {
+        private const float DESPAWN_DELAY_SECONDS = 0.5f;
+
         [Header("Visual Settings")]
         [SerializeField] private Vector3 _rotationSpeed = new Vector3(30f, 60f, 45f);
         
-        // Synced state
         private NetworkConnection _ownerConnection;
         private GameObject _casterVehicle;
         private Vector3 _originPosition;
@@ -37,9 +32,7 @@ namespace FastAndFractured.Multiplayer
 
         private void Awake()
         {
-            // The network prefab is a variant of the singleplayer pooled tomato. Remove its
-            // local Update/timer path on every peer; disabling it would still leave lifecycle
-            // callbacks and pooled registrations alive.
+            // Remove the pooled singleplayer tomato's own timer path on every peer.
             var legacy = GetComponent<AscendingTomatoBehaviour>();
             if (legacy != null)
             {
@@ -56,9 +49,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        /// <summary>
-        /// Called by NetworkedPepeUniqueAbility on the server after spawning.
-        /// </summary>
         public void Initialize(
             NetworkConnection owner,
             GameObject casterVehicle,
@@ -109,9 +99,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        /// <summary>
-        /// Server-side: Find all targets in range and spawn descending tomatoes for them.
-        /// </summary>
         private void ExplodeAndSpawnDescendingTomatoes()
         {
             MpCanary.Mark("ExplodeAndSpawnDescendingTomatoes ENTER");
@@ -122,13 +109,11 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             
-            // Find all vehicles in range
             var allVehicles = FindObjectsByType<NetworkedVehicle>(FindObjectsSortMode.None);
             List<NetworkedVehicle> targets = new List<NetworkedVehicle>();
             
             foreach (var vehicle in allVehicles)
             {
-                // Skip the caster
                 if (_casterVehicle != null && vehicle.gameObject == _casterVehicle) continue;
                 if (_casterVehicle != null && vehicle.transform.IsChildOf(_casterVehicle.transform)) continue;
                 
@@ -139,17 +124,14 @@ namespace FastAndFractured.Multiplayer
                 }
             }
             
-            // Spawn descending tomato for each target
             foreach (var target in targets)
             {
                 SpawnDescendingTomato(target.gameObject);
             }
             
-            // Broadcast explosion VFX
             OnExplodeRpc();
             
-            // Despawn after a short delay for VFX
-            Invoke(nameof(DespawnTomato), 0.5f);
+            Invoke(nameof(DespawnTomato), DESPAWN_DELAY_SECONDS);
         }
         
         private void SpawnDescendingTomato(GameObject target)
@@ -171,8 +153,6 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         private void OnExplodeRpc()
         {
-            // Play explosion VFX on all clients
-            // The ascending tomato visual can have particle effects that auto-play
             var particles = GetComponentsInChildren<ParticleSystem>();
             foreach (var ps in particles)
             {

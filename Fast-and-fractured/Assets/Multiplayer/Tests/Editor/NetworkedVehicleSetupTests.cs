@@ -7,18 +7,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// Guards the network configuration of the player vehicles.
-    ///
-    /// Every bug we chased in the vehicle motion work came from a SETTING silently drifting, not
-    /// from an algorithm being wrong: a second smoother switching itself on because a field was
-    /// populated, prediction being disabled on one variant, a prefab shipping without the smoother
-    /// its siblings have. Those are invisible in code review and only show up as "it feels bad",
-    /// which is exactly the kind of regression that survives for weeks.
-    ///
-    /// These tests assert the intended setup on every networked car prefab so a drifting field
-    /// fails CI instead of shipping.
-    /// </summary>
+    /// <summary>Asserts the intended network setup on every networked car prefab: drifted settings caused every motion bug.</summary>
     public class NetworkedVehicleSetupTests
     {
         private const string CarPrefabFolder = "Assets/Multiplayer";
@@ -52,9 +41,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(CarPrefabCases))]
         public void Car_resolves_to_the_multiplayer_rigidbody_adapter(GameObject prefab)
         {
-            // Carme's variant kept the singleplayer UnityRigidbodyAdapter next to the multiplayer
-            // one, GetComponent<ICustomRigidbody>() returned the singleplayer adapter, and her car
-            // was never reconciled (2026-09-30). Fix: VehicleRigidbodyAdapterSetupTool.
+            // A leftover singleplayer UnityRigidbodyAdapter is found first and the car is never reconciled.
             Assert.That(prefab.GetComponent<UnityRigidbodyAdapter>(), Is.Null,
                 $"{prefab.name} still has the singleplayer UnityRigidbodyAdapter.");
             Assert.That(prefab.GetComponent<FastAndFractured.Utilities.ICustomRigidbody>(), Is.InstanceOf<MultiplayerRigidbodyAdapter>(),
@@ -70,7 +57,6 @@ namespace FastAndFractured.Multiplayer.Tests
             Assert.That((bool)GetPrivateObject(nob, "_enablePrediction"), Is.True,
                 $"{prefab.name}: prediction is off, so the owner would not simulate locally.");
 
-            // PredictionType.Rigidbody — the car is a physics body, not a transform mover.
             Assert.That(System.Convert.ToInt32(GetPrivateObject(nob, "_predictionType")), Is.EqualTo(1),
                 $"{prefab.name}: prediction type must be Rigidbody.");
         }
@@ -85,9 +71,7 @@ namespace FastAndFractured.Multiplayer.Tests
             Assert.That(smoothers, Is.Not.Empty,
                 $"{prefab.name}: no NetworkTickSmoother, so nothing smooths the visuals between ticks.");
 
-            // Both systems interpolate the same visuals; running them together is what produced the
-            // visible tremble. _graphicalObject is what switches FishNet's built-in PredictionSmoother
-            // on, so with a NetworkTickSmoother present it must stay empty.
+            // _graphicalObject turns on FishNet's PredictionSmoother: a second smoother over the same visuals.
             Assert.That(graphical, Is.Null,
                 $"{prefab.name}: _graphicalObject is set ('{(graphical == null ? "" : graphical.name)}') while " +
                 $"{smoothers.Length} NetworkTickSmoother(s) exist — two smoothers fight over the same transforms.");
@@ -96,8 +80,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(CarPrefabCases))]
         public void Car_visuals_and_turret_are_smoothed(GameObject prefab)
         {
-            // The body and the turret are separate transforms; smoothing only one leaves the other
-            // stepping at tick rate, which reads as the turret shaking against a smooth car.
+            // Smoothing only the body leaves the turret stepping at tick rate.
             AssertChildSmoothed(prefab, "Visuals");
 
             if (prefab.transform.Find("Turret") != null)
@@ -121,8 +104,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(CarPrefabCases))]
         public void Car_has_the_multiplayer_rigidbody_adapter(GameObject prefab)
         {
-            // NetworkedVehicle drives physics through this adapter's PredictionRigidbody; without it
-            // reconcile has nothing to restore and the car desyncs from the server.
+            // NetworkedVehicle drives physics through this adapter's PredictionRigidbody.
             Assert.That(prefab.GetComponent<MultiplayerRigidbodyAdapter>(), Is.Not.Null,
                 $"{prefab.name}: missing MultiplayerRigidbodyAdapter.");
         }
@@ -130,9 +112,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(CarPrefabCases))]
         public void Car_tick_smoothers_target_their_own_car(GameObject prefab)
         {
-            // Carme's smoothers targeted the root of Pepe's prefab asset, and every spawn of her
-            // car logged "Setting the parent of a transform which resides in a Prefab Asset" twice
-            // (2026-09-30). Fix: VehicleTickSmootherTargetSetupTool.
+            // Smoothers targeting another prefab asset log a parenting error on every spawn.
             foreach (var smoother in prefab.GetComponentsInChildren<NetworkTickSmoother>(true))
             {
                 var target = new SerializedObject(smoother)

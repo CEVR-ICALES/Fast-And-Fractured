@@ -4,14 +4,17 @@ using UnityEngine.UI;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Small "[wifi/cable icon] ▂▄▆█ 45 ms" widget used by the room browser, the room's player
-    /// slots and the match HUD. Built from code (no prefab): the icons are drawn once into
-    /// textures, the bars are plain Images, the number copies the font of a label it sits beside.
-    /// </summary>
+    /// <summary>"[link icon] bars 45 ms" widget for the room browser, room slots and match HUD, built in code.</summary>
     public sealed class NetworkSignalIndicator : MonoBehaviour
     {
         private static readonly Color Empty = new Color(1f, 1f, 1f, 0.22f);
+        private const int BAR_COUNT = 4;
+        private const float ICON_SPACING_RATIO = 0.25f;
+        private const float BAR_SPACING_RATIO = 0.08f;
+        private const float BAR_WIDTH_RATIO = 0.18f;
+        private const float MIN_BAR_WIDTH = 2f;
+        private const float MIN_BAR_HEIGHT_RATIO = 0.3f;
+        private const float FONT_SIZE_RATIO = 0.85f;
         private static readonly Color[] BarColors =
         {
             new Color(0.92f, 0.30f, 0.26f),   // 1 bar
@@ -23,17 +26,16 @@ namespace FastAndFractured.Multiplayer
         private static Sprite _wifiSprite, _cableSprite, _unknownSprite;
 
         private Image _icon;
-        private readonly Image[] _bars = new Image[4];
+        private readonly Image[] _bars = new Image[BAR_COUNT];
         private TMP_Text _label;
 
-        /// <summary>Creates the widget under <paramref name="parent"/>, sized to <paramref name="height"/>.</summary>
         public static NetworkSignalIndicator Create(Transform parent, TMP_Text styleSource, float height)
         {
             var root = new GameObject("NetworkSignal", typeof(RectTransform));
             root.transform.SetParent(parent, false);
             var layout = root.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.spacing = height * 0.25f;
+            layout.spacing = height * ICON_SPACING_RATIO;
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandWidth = layout.childForceExpandHeight = false;
             var fitter = root.AddComponent<ContentSizeFitter>();
@@ -47,13 +49,14 @@ namespace FastAndFractured.Multiplayer
             barsRoot.transform.SetParent(root.transform, false);
             var barsLayout = barsRoot.AddComponent<HorizontalLayoutGroup>();
             barsLayout.childAlignment = TextAnchor.LowerLeft;
-            barsLayout.spacing = Mathf.Max(1f, height * 0.08f);
+            barsLayout.spacing = Mathf.Max(1f, height * BAR_SPACING_RATIO);
             barsLayout.childControlWidth = barsLayout.childControlHeight = true;
             barsLayout.childForceExpandWidth = barsLayout.childForceExpandHeight = false;
             var barsElement = barsRoot.AddComponent<LayoutElement>();
             barsElement.preferredHeight = height;
-            for (int i = 0; i < 4; i++)
-                indicator._bars[i] = NewImage(barsRoot.transform, "Bar" + i, Mathf.Max(2f, height * 0.18f), height * (0.3f + 0.7f * (i + 1) / 4f));
+            for (int i = 0; i < BAR_COUNT; i++)
+                indicator._bars[i] = NewImage(barsRoot.transform, "Bar" + i, Mathf.Max(MIN_BAR_WIDTH, height * BAR_WIDTH_RATIO),
+                    height * (MIN_BAR_HEIGHT_RATIO + (1f - MIN_BAR_HEIGHT_RATIO) * (i + 1) / BAR_COUNT));
 
             var labelGo = new GameObject("Ping", typeof(RectTransform));
             labelGo.transform.SetParent(root.transform, false);
@@ -63,7 +66,7 @@ namespace FastAndFractured.Multiplayer
                 label.font = styleSource.font;
                 label.fontSharedMaterial = styleSource.fontSharedMaterial;
             }
-            label.fontSize = height * 0.85f;
+            label.fontSize = height * FONT_SIZE_RATIO;
             label.enableWordWrapping = false;
             label.alignment = TextAlignmentOptions.MidlineLeft;
             label.raycastTarget = false;
@@ -99,7 +102,7 @@ namespace FastAndFractured.Multiplayer
             return image;
         }
 
-        // ── Icons, drawn once (4x supersampled) ───────────────────────────────────────
+        // Icons, drawn once (4x supersampled)
         private const int SIZE = 32;
 
         private static Sprite WifiSprite => _wifiSprite != null ? _wifiSprite : _wifiSprite = Draw("Wifi", WifiShape);

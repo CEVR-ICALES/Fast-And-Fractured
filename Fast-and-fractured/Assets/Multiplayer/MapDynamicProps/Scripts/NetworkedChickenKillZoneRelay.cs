@@ -2,11 +2,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Runtime-only relay installed on the exact GameObject that owns the Mega Chicken
-    /// kill trigger. Keeping the callback on the collider object prevents unrelated boss
-    /// colliders from being interpreted as kill-zone contacts.
-    /// </summary>
+    /// <summary>Relay on the exact kill-trigger object of the Mega Chicken, so other boss colliders never count as kills.</summary>
     [AddComponentMenu("")]
     public sealed class NetworkedChickenKillZoneRelay : MonoBehaviour
     {

@@ -41,8 +41,7 @@ namespace FastAndFractured
         }
         void OnDisable()
         {
-            // The scene that owned the event system may already be gone (multiplayer keeps this
-            // screen up across the map load and destroys it afterwards).
+            // The scene that owned the event system may be gone (multiplayer keeps this screen across the map load).
             if (inputModule != null) inputModule.enabled = true;
             if (_timerReference != null)
             {
@@ -75,12 +74,7 @@ namespace FastAndFractured
             }
         }
 
-        /// <summary>
-        /// Optional override hook. When non-null, LoadScene calls this first; if it returns true the
-        /// scene load is skipped. Used by the multiplayer flow to convert "load map scene" clicks
-        /// into "vote for map + return to lobby" without modifying the singleplayer map prefab buttons.
-        /// Singleplayer is unaffected when this is null.
-        /// </summary>
+        /// <summary>Optional hook: when it returns true, LoadScene skips the load (the multiplayer map vote). Null in singleplayer.</summary>
         public static System.Func<int, bool> SceneLoadOverride;
 
         public void LoadScene(int sceneBuildIndex)

@@ -5,16 +5,14 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured
 {
     /// <summary>
-    /// The menu canvas draws through "Main Camera" (depth -1), but the win/lose cutscene brings
-    /// its own camera (depth 0, e.g. CameraPepeVictory) that stays on after the cutscene ends and
-    /// is drawn on top: the whole WIN_LOSE screen was invisible behind the final shot, in
-    /// singleplayer and multiplayer alike. While that screen shows, the canvas draws through the
-    /// top camera instead, over the final shot; it goes back when the screen closes.
-    ///
-    /// Added at runtime to the WIN_LOSE screen of the main menu; no scene edits.
+    /// The win/lose cutscene camera stays on top of the menu camera after the cutscene: while WIN_LOSE shows, the
+    /// menu canvas draws through the top camera instead.
     /// </summary>
     public sealed class WinLoseScreenCameraFix : MonoBehaviour
     {
+        private const float NEAR_CLIP_MARGIN = 0.05f;
+        private const float MIN_PLANE_DISTANCE = 0.5f;
+
         private Canvas _rootCanvas;
         private Camera _originalCamera;
         private float _originalPlaneDistance;
@@ -55,7 +53,7 @@ namespace FastAndFractured
             if (top != null && _rootCanvas.worldCamera != top)
             {
                 _rootCanvas.worldCamera = top;
-                _rootCanvas.planeDistance = Mathf.Max(top.nearClipPlane + 0.05f, 0.5f);
+                _rootCanvas.planeDistance = Mathf.Max(top.nearClipPlane + NEAR_CLIP_MARGIN, MIN_PLANE_DISTANCE);
             }
         }
 

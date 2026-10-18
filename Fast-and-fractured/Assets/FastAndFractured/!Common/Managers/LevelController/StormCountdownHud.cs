@@ -4,9 +4,8 @@ using UnityEngine;
 namespace FastAndFractured
 {
     /// <summary>
-    /// The HUD storm timer (TIMER_TEXT, "Tmp_StormTimer") in singleplayer: the time left until the
-    /// level calls the storm, then 00:00. Nothing wrote it before, so it always showed 00:00.
-    /// Online the networked storm writes the same element from its synced clock instead.
+    /// The HUD storm timer in singleplayer: time until the level calls the storm, then 00:00. Online the networked
+    /// storm writes it instead.
     /// </summary>
     public sealed class StormCountdownHud : MonoBehaviour
     {

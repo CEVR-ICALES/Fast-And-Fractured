@@ -52,8 +52,6 @@ namespace FastAndFractured
                     HandleWallCollision(collision);
                 } else
                 {
-                    // Handle collision when climbing/on ceiling
-                    // If we hit a wall while on the ceiling, we should probably bounce off and fall
                     _movementHandler.StopIsOnCeiling();
                     HandleWallCollision(collision);
                 }

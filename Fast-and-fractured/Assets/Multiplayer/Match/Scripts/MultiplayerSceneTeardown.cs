@@ -7,13 +7,8 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Single exit gate for multiplayer map -> MainMenu transitions. It closes the scene curtain,
-    /// prepares networked abilities, gives Unity one frame to execute their deferred
-    /// Destroy/OnDestroy callbacks, and only then unloads the map and its scene services.
-    ///
-    /// The connection is NOT touched here: after a match everyone stays in the room
-    /// (<see cref="MultiplayerRoomReturn"/>). On the host, the remote players are taken out of
-    /// the map scene first, so the server stops sending them its objects.
+    /// Single exit from a multiplayer map to MainMenu: closes the curtain, prepares the abilities, waits a frame for
+    /// their deferred destroys, then unloads. The connection stays (MultiplayerRoomReturn).
     /// </summary>
     internal static class MultiplayerSceneTeardown
     {
@@ -28,11 +23,7 @@ namespace FastAndFractured.Multiplayer
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        /// <summary>
-        /// Loads the main menu behind the curtain. <paramref name="openScreen"/>: menu screen to
-        /// show instead of the menu's own start (the win/lose screen opens by itself through
-        /// GameEndData).
-        /// </summary>
+        /// <summary>Loads the main menu behind the curtain, opening <paramref name="openScreen"/> if given.</summary>
         public static void LoadMainMenu(ScreensType? openScreen = null)
         {
             if (_mainMenuLoadPending) return;
@@ -48,12 +39,7 @@ namespace FastAndFractured.Multiplayer
             });
         }
 
-        /// <summary>
-        /// Host: remote players leave the map scene before it is unloaded. Unity unloading the
-        /// scene under FishNet clears the scene's observers but leaves the stale scene in each
-        /// connection's scene list, which would make the next match think they had already
-        /// loaded its map.
-        /// </summary>
+        /// <summary>Host: remote players leave the map scene first, or FishNet keeps it in their scene list.</summary>
         private static void DetachClientsFromMapScenes()
         {
             var nm = InstanceFinder.NetworkManager;
@@ -82,9 +68,7 @@ namespace FastAndFractured.Multiplayer
 
             private IEnumerator LoadMainMenuAfterAbilityDestroy()
             {
-                // Object.Destroy executes at the end of the current frame. Waiting one frame
-                // guarantees MariaAntoniaUniqueAbility.OnDestroy sees the map SoundManager,
-                // instead of running amid unordered scene destruction.
+                // Destroy runs at the end of the frame: Maria's OnDestroy still finds the map's SoundManager.
                 yield return null;
 
                 DetachClientsFromMapScenes();
@@ -97,8 +81,7 @@ namespace FastAndFractured.Multiplayer
                 yield return null;
                 _mainMenuLoadPending = false;
 
-                // The menu has loaded; give its first heavy frames time before the short
-                // host-migration timeout applies again.
+                // Let the menu's first heavy frames pass before the short migration timeout applies again.
                 yield return new WaitForSecondsRealtime(TIMEOUT_GRACE_SECONDS);
                 RestoreClientTimeout();
                 Destroy(gameObject);
@@ -107,10 +90,8 @@ namespace FastAndFractured.Multiplayer
             private const float TIMEOUT_GRACE_SECONDS = 5f;
 
             /// <summary>
-            /// Loading the menu blocks the main thread for seconds (12 s in the editor), while the
-            /// transport keeps counting on its own thread. With host migration on, clients time out
-            /// after 5 s (HostMigrationNetwork.CLIENT_TIMEOUT_SECONDS) - the player who stays in
-            /// the room after the match lost its connection on the way there.
+            /// Loading the menu blocks the main thread for seconds while the transport keeps counting: with host migration
+            /// on, the 5 s client timeout would drop the player on the way to the room.
             /// </summary>
             private static void RelaxClientTimeout()
             {

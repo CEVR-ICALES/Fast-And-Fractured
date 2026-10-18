@@ -5,25 +5,13 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Self-installs NetworkedVehicleDiagnostics and periodically dumps its Report() to a log file,
-    /// but ONLY on a non-host client - i.e. only on a machine that actually predicts and reconciles
-    /// its own car over a real connection, which the host never does (server and client are the
-    /// same process there, so its "owned" car has nothing to reconcile against).
-    ///
-    /// Written so this can be read after the fact from disk (like MpAutoRecorder), instead of
-    /// requiring anyone to inject code into that peer's live process. Exists specifically to
-    /// measure whether the "client's own car still trembles while the host's is smooth" report
-    /// (2026-09-11) is reconciliation snapping the predicted rigidbody, since that is real per-tick
-    /// motion and no render-side smoother can hide it - VehicleVisualSmoother only reproduces
-    /// faithfully whatever the physics body actually did.
-    ///
-    /// Output: <project>/../VehicleDiagnosticsAutoRun.log
-    ///
-    /// To remove it, delete this file. It writes nothing on a host or a dedicated server.
+    /// Dumps NetworkedVehicleDiagnostics.Report() periodically to &lt;project&gt;/../VehicleDiagnosticsAutoRun.log, only
+    /// on a non-host client (the one that reconciles its own car).
     /// </summary>
     public static class VehicleDiagnosticsAutoRunner
     {
         private const float ReportIntervalSeconds = 5f;
+        private const float RetryIntervalSeconds = 1f;
 
         private static Runner _runner;
 
@@ -48,9 +36,7 @@ namespace FastAndFractured.Multiplayer.Testing
 
             private void Update()
             {
-                // Only a real (non-host) client reconciles its own predictions against the server;
-                // a host's ServerManager and ClientManager are the same process, so IsServerStarted
-                // is true there too and this correctly stays silent on it.
+                // A host is also a server: only a real client reconciles.
                 bool isRemoteClientOnly = InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted;
                 if (!isRemoteClientOnly)
                 {
@@ -65,7 +51,7 @@ namespace FastAndFractured.Multiplayer.Testing
                 if (!_sampling)
                 {
                     if (Time.unscaledTime < _nextRetryTime) return;
-                    _nextRetryTime = Time.unscaledTime + 1f;
+                    _nextRetryTime = Time.unscaledTime + RetryIntervalSeconds;
 
                     string startResult = NetworkedVehicleDiagnostics.StartSampling();
                     if (!NetworkedVehicleDiagnostics.IsSampling) return; // no car spawned yet; retry

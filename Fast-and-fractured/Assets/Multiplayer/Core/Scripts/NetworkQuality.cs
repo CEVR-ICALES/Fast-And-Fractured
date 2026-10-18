@@ -28,20 +28,9 @@ namespace FastAndFractured.Multiplayer
     }
 
     /// <summary>
-    /// Per-player connection quality for the room list and the match HUD: Wi-Fi or cable, ping
-    /// to the host, and the prediction numbers - input delay and rollback frames.
-    ///
-    /// Each peer measures itself (the client is the one that knows its round trip and how far
-    /// its reconciles roll back) and reports once a second; the server collects the reports and
-    /// sends the whole table back. Broadcasts rather than a NetworkObject, so it works the same in
-    /// the lobby scene and in the match, and keeps working across a host migration (the hook is
-    /// re-armed whenever the NetworkManager changes).
-    ///
-    /// Frames are network ticks (TimeManager.TickDelta, 20 ms at the project's 50 Hz):
-    ///  - delay: ticks between pressing a key and the server applying it, half the round trip.
-    ///    The owner's own car reacts at once (prediction); this is how late everybody else sees it.
-    ///  - rollback: ticks re-simulated by each reconcile, i.e. how far back a server correction
-    ///    reaches; averaged and maxed over the last second. The host never reconciles: 0.
+    /// Per-player connection quality (Wi-Fi or cable, ping, input delay and rollback frames) for the room and the
+    /// match HUD. Each peer reports itself once a second and the server sends the table back, via broadcasts so it
+    /// survives scene changes and host migration. Frames are network ticks.
     /// </summary>
     public sealed class NetworkQuality : MonoBehaviour
     {
@@ -98,7 +87,6 @@ namespace FastAndFractured.Multiplayer
             if (_hooked.IsServerStarted) SendTable();
         }
 
-        // ── Hooking ────────────────────────────────────────────────────────────────────
         private void Hook(NetworkManager nm)
         {
             if (nm == _hooked) return;
@@ -140,7 +128,6 @@ namespace FastAndFractured.Multiplayer
 
         private void OnDestroy() => Unhook();
 
-        // ── Rollback counting ──────────────────────────────────────────────────────────
         private void OnPreReconcile(uint clientTick, uint serverTick) => _replaysThisReconcile = 0;
         private void OnPostReplay(uint clientTick, uint serverTick) => _replaysThisReconcile++;
 
@@ -151,7 +138,6 @@ namespace FastAndFractured.Multiplayer
             if (_replaysThisReconcile > _replaysMax) _replaysMax = _replaysThisReconcile;
         }
 
-        // ── Client ─────────────────────────────────────────────────────────────────────
         private void SendReport()
         {
             var tm = _hooked.TimeManager;
@@ -165,9 +151,9 @@ namespace FastAndFractured.Multiplayer
                 IsHost = isHost,
                 Link = (byte)NetworkLink.Local,
                 PingMs = (ushort)Mathf.Clamp(rtt, 0, ushort.MaxValue),
-                DelayFrames = (byte)(tickMs > 0 ? Mathf.Clamp(Mathf.CeilToInt((float)(rtt / 2d / tickMs)), 0, 255) : 0),
-                RollbackFrames = (byte)(_reconciles > 0 ? Mathf.Clamp(Mathf.RoundToInt(_replaysTotal / (float)_reconciles), 0, 255) : 0),
-                RollbackMaxFrames = (byte)Mathf.Clamp(_replaysMax, 0, 255),
+                DelayFrames = (byte)(tickMs > 0 ? Mathf.Clamp(Mathf.CeilToInt((float)(rtt / 2d / tickMs)), 0, byte.MaxValue) : 0),
+                RollbackFrames = (byte)(_reconciles > 0 ? Mathf.Clamp(Mathf.RoundToInt(_replaysTotal / (float)_reconciles), 0, byte.MaxValue) : 0),
+                RollbackMaxFrames = (byte)Mathf.Clamp(_replaysMax, 0, byte.MaxValue),
             };
             _reconciles = _replaysTotal = _replaysMax = 0;
 
@@ -191,7 +177,6 @@ namespace FastAndFractured.Multiplayer
             Version++;
         }
 
-        // ── Server ─────────────────────────────────────────────────────────────────────
         private static void OnReport(NetworkConnection conn, NetworkQualityReport report, Channel channel)
         {
             if (conn == null) return;

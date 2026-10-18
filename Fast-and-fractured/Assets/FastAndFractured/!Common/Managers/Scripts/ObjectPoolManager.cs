@@ -66,19 +66,16 @@ namespace Utilities
             for (int i = 0; i < num; i++)
             {
                 GameObject gameObjectPooled = null;
-                // Calculate cycle index: 0 is base, 1..variantMaxCount are variants
-                // Total options = 1 (base) + variantMaxCount
+                // Index 0 of the cycle is the base object, 1..variantMaxCount the variants.
                 int cycleSize = variantMaxCount + 1;
                 int cycleIndex = i % cycleSize;
 
                 if (cycleIndex != 0 && variantMaxCount > 0)
                 {
-                    // Use variant (index in prefabVariants is cycleIndex - 1)
                     gameObjectPooled = Instantiate(prefabVariants[cycleIndex - 1], parent);
                 }
                 else
                 {
-                    // Use base object (index 0 in cycle)
                     gameObjectPooled = Instantiate(gameobjectToPool, parent);
                 }
                 if (gameObjectPooled.TryGetComponent<IPooledObject>(out var pooledObject))

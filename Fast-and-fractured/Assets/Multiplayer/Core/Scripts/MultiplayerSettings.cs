@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Player preferences for online play (Settings ▸ Multiplayer, MultiplayerSettingsTab).
-    /// Stored in PlayerPrefs; read live by the systems they drive.
-    /// </summary>
     public static class MultiplayerSettings
     {
         private const string KEY_PLAYER_NAMES = "MP_ShowPlayerNames";
@@ -20,20 +16,17 @@ namespace FastAndFractured.Multiplayer
         public const float MAX_NAME_DISTANCE = 200f;
         private const float DEFAULT_NAME_DISTANCE = 110f;
 
-        /// <summary>Raised whenever one of the settings changes.</summary>
         public static event Action Changed;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => Changed = null;
 
-        /// <summary>Other players' names above their cars.</summary>
         public static bool ShowPlayerNames
         {
             get => GetBool(KEY_PLAYER_NAMES, true);
             set => SetBool(KEY_PLAYER_NAMES, value);
         }
 
-        /// <summary>Bots' names above their cars.</summary>
         public static bool ShowBotNames
         {
             get => GetBool(KEY_BOT_NAMES, true);

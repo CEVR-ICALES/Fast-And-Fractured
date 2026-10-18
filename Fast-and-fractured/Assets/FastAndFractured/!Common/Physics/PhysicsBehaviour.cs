@@ -12,41 +12,13 @@ namespace FastAndFractured
     {
         [SerializeField] private float isMovingThreshold;
 
-        // Hysteresis band around isMovingThreshold (2026-09-16). IsVehicleMoving() used to be a
-        // single-threshold check, and IsMovingDecision is wired as the SAME decision on BOTH
-        // PlayerIdleState (exit when true) and GroundedState (exit when false) - so a car whose
-        // speed sits anywhere near isMovingThreshold (0.5 m/s on every car prefab) chatters between
-        // the two states every time ordinary physics noise nudges it across that one line. Measured
-        // live at rest: velocity swings of 0.2-0.5 m/s from gravity settling and reconcile
-        // corrections alone - comfortably enough to cross a bare 0.5 m/s line many times a second.
-        // Confirmed in mp_canary.log across many sessions: dozens of Grounded<->Idle transitions
-        // per second, independent of networking (this is pure singleplayer state-machine logic).
-        //
-        // Since only GroundedState's ApplyMovementAction applies motor torque, each Idle flicker
-        // means one tick with zero throttle - i.e. exactly a stutter, not just a label flapping.
-        // This is a strong root-cause candidate for "tiembla, cuesta que se mueva" reports that
-        // predate and are independent of every network-reconcile theory chased so far.
-        //
-        // Standard Schmitt-trigger fix: remember the last decision and require crossing OPPOSITE
-        // sides of a dead band to flip it, so a value hovering near isMovingThreshold cannot
-        // chatter. Half-width chosen generously above the measured noise floor.
+        // Hysteresis around isMovingThreshold: IsMovingDecision gates both Idle and Grounded, and speed noise at rest
+        // crossed a single threshold many times a second, dropping the throttle for a tick each time.
         private const float MovingHysteresisHalfWidth = 0.25f;
         private bool _wasMoving;
 
-        // See IsVehicleMoving()'s debounce comment. This is measured in calls to this method, not
-        // wall-clock time: ~100ms in multiplayer (50Hz network tick, Assets/Multiplayer/
-        // MultiplayerTimingBootstrap.cs) and roughly one to a few frames in singleplayer (Update-
-        // driven).
-        //
-        // CORRECTED (same day): the first version of this required MovingDebounceTicks CONSECUTIVE
-        // calls to agree with the new value before flipping - a confirmation filter. A unit test
-        // added right after caught what live testing had not: that design delays EVERY transition
-        // by the full window, including a clean, one-time "starts moving from a dead stop" - i.e.
-        // it added a real ~100ms of input lag to normal driving, not just to noise. Switched to a
-        // cooldown instead: a flip is allowed to happen immediately, but then blocks any FURTHER
-        // flip for MovingDebounceTicks calls. A genuine transition still lands on the very next
-        // call (zero added lag); a value dithering on the hysteresis edge is capped at one flip per
-        // window instead of chattering every call.
+        // Cooldown counted in calls: a flip happens at once but blocks the next one for this many calls
+        // (a confirmation filter would delay every real transition).
         private const int MovingDebounceTicks = 5;
         private int _ticksSinceLastFlip = MovingDebounceTicks;
 
@@ -475,24 +447,12 @@ namespace FastAndFractured
         }
         public bool IsVehicleMoving()
         {
-            // See the field doc on MovingHysteresisHalfWidth: while already "moving" the bar to
-            // fall back to "idle" is LOWER than the bar to start being considered "moving" in the
-            // first place, so a speed hovering around isMovingThreshold cannot flip the result
-            // every frame - it has to actually cross to the far side of the dead band first.
             float threshold = _wasMoving
                 ? isMovingThreshold - MovingHysteresisHalfWidth
                 : isMovingThreshold + MovingHysteresisHalfWidth;
             threshold = Mathf.Max(0f, threshold);
 
-            // COOLDOWN (2026-09-16): the hysteresis band alone was not enough. Confirmed live in a
-            // real match on NetworkedMountainVillageMap (mp_canary.log): Grounded<->Idle kept
-            // flapping every 20-100ms for the whole session even with the dead band above, because
-            // real driving speed can DWELL right at one edge of that band for a while (climbing a
-            // slope, easing off the throttle) rather than just noise flicking past it once - and a
-            // pure hysteresis band has no defense against a value that lingers exactly on its edge.
-            // See the field doc on _ticksSinceLastFlip for why this is a cooldown (flip immediately,
-            // then hold) and not a confirmation filter (wait, then flip) - a confirmation filter
-            // delays every transition, including a clean one-time start/stop, by the whole window.
+            // The band alone fails when the speed dwells on its edge: the cooldown caps the flips.
             bool candidateMoving = _currentSpeed > threshold;
             _ticksSinceLastFlip++;
 

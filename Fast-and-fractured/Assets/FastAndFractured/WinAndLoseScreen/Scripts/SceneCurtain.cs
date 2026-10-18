@@ -7,17 +7,9 @@ using UnityEngine.UI;
 namespace FastAndFractured
 {
     /// <summary>
-    /// Curtain transition between a match and the win/lose screen. Two halves slam shut from
-    /// the sides (red from the left, blue from the right, each edged with the chalky yellow of
-    /// the pause menu's button frames, meeting on a slanted seam like the logo's italics), the
-    /// logo pops in the middle, the scene changes behind them, and they slide open again on the
-    /// new scene.
-    ///
-    /// Usage: <c>SceneCurtain.Close(() => SceneManager.LoadScene(index));</c> - the callback runs
-    /// once the curtain is shut, and the curtain opens by itself shortly after the next scene
-    /// has loaded (or on <see cref="Open"/>). Code-built overlay on its own DontDestroyOnLoad
-    /// canvas, no scene wiring; DOTween on unscaled time, so a slowed or paused game does not
-    /// stall it.
+    /// Curtain between a match and the win/lose screen: two slanted halves close, the logo pops, the scene changes
+    /// behind them and they open on the new scene. <c>SceneCurtain.Close(() => SceneManager.LoadScene(index));</c>
+    /// Code-built on its own DontDestroyOnLoad canvas, on unscaled time.
     /// </summary>
     public sealed class SceneCurtain : MonoBehaviour
     {
@@ -38,6 +30,20 @@ namespace FastAndFractured
         private static readonly Vector2 ShakeStrength = new Vector2(12f, 6f);
         private const float LOGO_WIDTH = 1000f;
         private const int SORTING_ORDER = 32000;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private const float EDGE_CLEARANCE = 60f;
+        private const float LOGO_START_SCALE = 0.35f;
+        private const float LOGO_START_TILT_DEGREES = -7f;
+        private const float LOGO_OUT_SCALE = 0.85f;
+        private const float STRIPES_TILE_PIXELS = 96f;
+        private const float SEAM_SHADOW_WIDTH = 22f;
+        private const float SEAM_SHADOW_OVERLAP = 6f;
+        private const int CHALK_SEED = 1337;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
+        private static readonly Vector2 LOGO_SHADOW_OFFSET = new Vector2(9f, -9f);
+        private static readonly Color STRIPES_COLOR = new Color(1f, 1f, 1f, 0.07f);
+        private static readonly Color SEAM_SHADOW_COLOR = new Color(0f, 0f, 0f, 0.18f);
+        private static readonly Color LOGO_SHADOW_COLOR = new Color(0f, 0f, 0f, 0.45f);
 
         private enum State { Hidden, Closing, Closed, Opening }
 
@@ -115,7 +121,6 @@ namespace FastAndFractured
                 PlayOpen();
         }
 
-        // ── Animation ──────────────────────────────────────────────────────────────────
         private void PlayClose()
         {
             if (_state == State.Hidden) PlaceHalves(OpenOffset());   // the screen size may have changed
@@ -145,7 +150,6 @@ namespace FastAndFractured
             _state = State.Closed;
             _closedAt = Time.unscaledTime;
 
-            // The thump of the two halves meeting.
             _shake?.Kill();
             _root.anchoredPosition = Vector2.zero;
             _shake = _root.DOShakeAnchorPos(SHAKE_SECONDS, ShakeStrength, vibrato: 30)
@@ -155,8 +159,8 @@ namespace FastAndFractured
             if (_logo == null) return;
             _logoPop?.Kill();
             _logoGroup.alpha = 0f;
-            _logo.localScale = Vector3.one * 0.35f;
-            _logo.localRotation = Quaternion.Euler(0f, 0f, -7f);
+            _logo.localScale = Vector3.one * LOGO_START_SCALE;
+            _logo.localRotation = Quaternion.Euler(0f, 0f, LOGO_START_TILT_DEGREES);
             _logoPop = DOTween.Sequence().SetUpdate(true)
                 .Append(_logoGroup.DOFade(1f, POP_SECONDS / 3f))
                 .Join(_logo.DOScale(1f, POP_SECONDS).SetEase(Ease.OutBack))
@@ -173,7 +177,7 @@ namespace FastAndFractured
             _halves = DOTween.Sequence().SetUpdate(true);
             if (_logo != null)
                 _halves.Append(_logoGroup.DOFade(0f, LOGO_OUT_SECONDS))
-                       .Join(_logo.DOScale(0.85f, LOGO_OUT_SECONDS));
+                       .Join(_logo.DOScale(LOGO_OUT_SCALE, LOGO_OUT_SECONDS));
             _halves.Append(_left.DOAnchorPosX(-to, OPEN_SECONDS).SetEase(Ease.InOutCubic))
                    .Join(_right.DOAnchorPosX(to, OPEN_SECONDS).SetEase(Ease.InOutCubic))
                    .OnComplete(() =>
@@ -189,7 +193,6 @@ namespace FastAndFractured
             catch (Exception e) { Debug.LogException(e); }
         }
 
-        /// <summary>Both halves <paramref name="offset"/> away from the closed position.</summary>
         private void PlaceHalves(float offset)
         {
             _left.anchoredPosition = new Vector2(-offset, 0f);
@@ -200,16 +203,15 @@ namespace FastAndFractured
         private float OpenOffset()
         {
             Vector2 size = CanvasSize();
-            return size.x * 0.5f + size.y * 0.5f * Mathf.Tan(SLANT_DEGREES * Mathf.Deg2Rad) + SEAM_WIDTH + 60f;
+            return size.x * 0.5f + size.y * 0.5f * Mathf.Tan(SLANT_DEGREES * Mathf.Deg2Rad) + SEAM_WIDTH + EDGE_CLEARANCE;
         }
 
         private Vector2 CanvasSize()
         {
             Vector2 size = ((RectTransform)_canvas.transform).rect.size;
-            return size.x > 1f && size.y > 1f ? size : new Vector2(1920f, 1080f);
+            return size.x > 1f && size.y > 1f ? size : REFERENCE_RESOLUTION;
         }
 
-        // ── Building ───────────────────────────────────────────────────────────────────
         private void Build()
         {
             var style = Resources.Load<SceneCurtainStyle>(STYLE_RESOURCES_PATH);
@@ -220,8 +222,8 @@ namespace FastAndFractured
             _canvas.sortingOrder = SORTING_ORDER;
             var scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
             gameObject.AddComponent<GraphicRaycaster>();   // swallow clicks while it covers the screen
 
             _root = NewRect("Root", transform);
@@ -238,11 +240,7 @@ namespace FastAndFractured
             PlaceHalves(OpenOffset());
         }
 
-        /// <summary>
-        /// One half: a huge slanted panel whose pivot sits on the seam, so both halves share the
-        /// same edge line through the centre of the screen. Its size is generous so no aspect
-        /// ratio shows a corner.
-        /// </summary>
+        /// <summary>One half: a large slanted panel pivoted on the seam, so both halves share one edge line.</summary>
         private RectTransform BuildHalf(string name, Color color, Color seamColor, Texture2D chalk, Texture2D stripes, bool leftSide)
         {
             const float SIZE = 5000f;
@@ -254,20 +252,18 @@ namespace FastAndFractured
             var body = half.gameObject.AddComponent<Image>();
             body.color = color;
 
-            // Speed lines.
             var lines = NewRect("Stripes", half);
             Stretch(lines);
             var linesImage = lines.gameObject.AddComponent<RawImage>();
             linesImage.texture = stripes;
-            linesImage.color = new Color(1f, 1f, 1f, 0.07f);
-            linesImage.uvRect = new Rect(0f, 0f, SIZE / 96f, SIZE / 96f);
+            linesImage.color = STRIPES_COLOR;
+            linesImage.uvRect = new Rect(0f, 0f, SIZE / STRIPES_TILE_PIXELS, SIZE / STRIPES_TILE_PIXELS);
             linesImage.raycastTarget = false;
 
-            // A soft shadow under the seam, then the chalky seam itself.
             var shadow = NewRect("SeamShadow", half);
-            EdgeAnchor(shadow, leftSide, SEAM_INSET + SEAM_WIDTH - 6f, 22f);
+            EdgeAnchor(shadow, leftSide, SEAM_INSET + SEAM_WIDTH - SEAM_SHADOW_OVERLAP, SEAM_SHADOW_WIDTH);
             var shadowImage = shadow.gameObject.AddComponent<Image>();
-            shadowImage.color = new Color(0f, 0f, 0f, 0.18f);
+            shadowImage.color = SEAM_SHADOW_COLOR;
             shadowImage.raycastTarget = false;
 
             var seam = NewRect("Seam", half);
@@ -308,11 +304,11 @@ namespace FastAndFractured
 
             var shadow = NewRect("Shadow", _logo);
             Stretch(shadow);
-            shadow.anchoredPosition = new Vector2(9f, -9f);
+            shadow.anchoredPosition = LOGO_SHADOW_OFFSET;
             var shadowImage = shadow.gameObject.AddComponent<RawImage>();
             shadowImage.texture = style.logo;
             shadowImage.uvRect = uv;
-            shadowImage.color = new Color(0f, 0f, 0f, 0.45f);
+            shadowImage.color = LOGO_SHADOW_COLOR;
 
             var art = NewRect("Art", _logo);
             Stretch(art);
@@ -335,14 +331,11 @@ namespace FastAndFractured
             rect.offsetMin = rect.offsetMax = Vector2.zero;
         }
 
-        /// <summary>
-        /// A vertical chalk stroke that tiles top to bottom: ragged edges (sums of whole-period
-        /// sines, so the tile wraps cleanly), a dry-chalk grain and a few gaps.
-        /// </summary>
+        /// <summary>A vertical chalk stroke that tiles top to bottom (whole-period sines for the ragged edges).</summary>
         private static Texture2D BuildChalkTexture()
         {
             const int W = 64, H = 512;
-            var rng = new System.Random(1337);
+            var rng = new System.Random(CHALK_SEED);
             var pixels = new Color32[W * H];
             for (int y = 0; y < H; y++)
             {

@@ -5,14 +5,8 @@ using UnityEngine.Events;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// The match HUD while spectating shows the car being watched instead of your dead one:
-    /// its endurance bar, speed, character portrait and ability icons, and its cooldowns when
-    /// this peer sees them run.
-    ///
-    /// It drives the same HUDManager elements the player's own HUD uses (PlayerHUD is switched
-    /// off meanwhile by NetworkedSpectatorController). The viewer can hide it (H or the overlay
-    /// button); elements that only make sense for your own car (key bindings, crosshair, effect
-    /// icons) stay hidden.
+    /// While spectating, the match HUD shows the watched car (endurance, speed, portrait, abilities, cooldowns seen
+    /// here) through the same HUDManager elements. Own-car-only elements stay hidden.
     /// </summary>
     public sealed class SpectatedHud
     {
@@ -130,11 +124,7 @@ namespace FastAndFractured.Multiplayer
             _visible = true;
         }
 
-        // ── Character art ────────────────────────────────────────────────────────────────
-        /// <summary>
-        /// The car's character code ("Pepe_0"): the icon the match's player strip gives it, or
-        /// its character with the default skin.
-        /// </summary>
+        /// <summary>The car's character code ("Pepe_0"): its player-strip icon, or the default skin.</summary>
         public static string CharacterCodeOf(Transform root, StatsController stats)
         {
             foreach (var icon in Object.FindObjectsByType<CharacterIcon>(FindObjectsInactive.Include, FindObjectsSortMode.None))
@@ -169,7 +159,6 @@ namespace FastAndFractured.Multiplayer
             if (sprite != null) hud.UpdateUIElement(type, sprite);
         }
 
-        // ── Cooldowns ────────────────────────────────────────────────────────────────────
         private void OnShoot(float current, float max) => Fill(UIDynamicElementType.SHOOT_COOLDOWN, current, max);
         private void OnPush(float current, float max) => Fill(UIDynamicElementType.PUSH_COOLDOWN, current, max);
         private void OnDash(float current, float max) => Fill(UIDynamicElementType.DASH_COOLDOWN, current, max);

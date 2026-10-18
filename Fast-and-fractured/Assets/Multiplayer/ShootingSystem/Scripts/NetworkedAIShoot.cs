@@ -8,15 +8,13 @@ using FastAndFractured;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Server-only networked shooting for AI vehicles.
-    /// AI runs entirely on the server - no prediction/replication needed.
-    /// Subscribes to OnShootRequest on NormalShootHandle/PushShootHandle,
-    /// spawns networked projectiles that replicate to all clients.
-    /// Also replicates the turret aim direction (set server-side by EnemyAIBrain)
-    /// so client-side AI turrets rotate instead of staying frozen.
+    /// Server-only shooting for AI cars: spawns networked projectiles from the shoot handles' requests and
+    /// replicates the turret aim so clients see AI turrets rotate.
     /// </summary>
     public class NetworkedAIShoot : NetworkBehaviour
     {
+        private const float AIM_SEND_INTERVAL = 0.1f;
+
         [Header("Networked Projectile Prefabs")]
         [SerializeField] private GameObject _networkedNormalBulletPrefab;
         [SerializeField] private GameObject _networkedPushBulletPrefab;
@@ -26,7 +24,7 @@ namespace FastAndFractured.Multiplayer
         private PushShootHandle _pushShootHandle;
         private TurretRotationMovement _turretRotation;
 
-        private readonly SyncVar<Vector3> _syncedTurretAim = new(new SyncTypeSettings(0.1f, Channel.Unreliable));
+        private readonly SyncVar<Vector3> _syncedTurretAim = new(new SyncTypeSettings(AIM_SEND_INTERVAL, Channel.Unreliable));
 
         private void Awake()
         {
@@ -36,9 +34,7 @@ namespace FastAndFractured.Multiplayer
 
         private void Update()
         {
-            // NetworkBehaviour may remain alive for a frame while its NetworkManager is
-            // being torn down. FishNet's IsServerInitialized/IsClientInitialized accessors
-            // require a valid manager, so guard that lifecycle window explicitly.
+            // FishNet's Is*Initialized need a manager, which can be gone while this lives on a frame.
             if (_turretRotation == null || base.NetworkManager == null) return;
 
             if (base.IsServerInitialized)

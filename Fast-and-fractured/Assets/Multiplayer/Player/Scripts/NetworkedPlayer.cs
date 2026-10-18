@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Marker component placed on the player root NetworkObject. Toggles the local
-    /// PlayerInputController based on ownership so only the owner reads input.
-    /// Vehicle spawning and lifecycle are handled by NetworkedLevelControllerManager,
-    /// not by this component.
-    /// </summary>
+    /// <summary>Marker on the player root: enables PlayerInputController only for the owner.</summary>
     public class NetworkedPlayer : NetworkBehaviour
     {
         public override void OnStartServer()

@@ -19,8 +19,7 @@ namespace FastAndFractured
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
         [SerializeField] private int maxCharactersInGame = 8;
 
-        // The setter exists for the multiplayer client path: the wrapper assigns the
-        // server-authoritative name-code list before initializing the client level state.
+        // Set by the multiplayer wrapper with the server's name-code list.
         public List<string> InGameCharactersNameCodes { get => _characterSpawner?.InGameCharactersNameCodes ?? new List<string>(); set { if (_characterSpawner != null) _characterSpawner.InGameCharactersNameCodes = value; } }
 
 
@@ -68,7 +67,6 @@ namespace FastAndFractured
         public bool HasPlayerWon => _gameLoopManager?.HasPlayerWon ?? false;
         /// <summary>Seconds until the storm is called; null when no countdown is running (StormCountdownHud).</summary>
         public float? StormSecondsLeft => _gameLoopManager?.StormSecondsLeft;
-        // Exposed for the multiplayer wrapper, which reads the debug flag off the real controller.
         public bool DebugMode { get => debugMode; set => debugMode = value; }
         public bool HasGameStarted { get; private set; }
         private bool _isStormActive = false;
@@ -171,15 +169,13 @@ namespace FastAndFractured
             InitializeAfterSpawn(foundCharacters);
         }
 
-        // Extracted so the multiplayer wrapper can initialize the level with server-spawned
-        // characters. Order matters: onLevelPreStart fires immediately, then
-        // StartGameInitializationDelay -> OnGameStartDelayComplete activates the controls.
+        // Separate so the multiplayer wrapper can start the level with server-spawned characters.
         public void InitializeAfterSpawn(List<GameObject> injectedCharacters = null)
         {
             Cursor.lockState = CursorLockMode.Locked;
             _isStormActive = false;
 
-            // Null-safe: In multiplayer, remote clients may not have PlayerInputController yet
+            // Remote clients may not have a PlayerInputController yet.
             if (PlayerInputController.Instance != null && PlayerInputController.Instance.GetComponentInChildren<CarMovementController>() != null)
             {
                 _localPlayer = PlayerInputController.Instance.GetComponentInChildren<CarMovementController>().gameObject;
@@ -344,9 +340,7 @@ namespace FastAndFractured
 
         public GameObject GetARandomPlayer()
         {
-            // GetRandomValueFromList has both an (IRandom) and a (T defaultValue) overload, so a
-            // no-arg call is ambiguous. The deterministic generator is also what the rest of the
-            // spawning uses, so every peer picks the same character.
+            // The deterministic generator, as the rest of the spawning, so every peer picks the same character.
             return availablePlayer.GetRandomValueFromList(DeterministicRandom.Instance);
         }
         public void AddCharacterToListOfSelectedCharacters(int id, string character)
@@ -371,10 +365,7 @@ namespace FastAndFractured
             _playersCharacterNameCodes[id] = character;
         }
 
-        /// <summary>
-        /// Clears stale character selections for disconnected clientIds while preserving
-        /// index-by-clientId semantics for active players.
-        /// </summary>
+        /// <summary>Clears the selections of disconnected clients, keeping the list indexed by clientId.</summary>
         public void PruneSelectedCharactersToActiveClientIds(IReadOnlyCollection<int> activeClientIds)
         {
             if (_playersCharacterNameCodes == null || _playersCharacterNameCodes.Count == 0)

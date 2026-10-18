@@ -3,9 +3,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Runtime-only physics endpoint for the networked sandstorm. The relay lives on a
-    /// dedicated child GameObject, so Unity never sends its trigger messages to the legacy
-    /// SandstormController that remains on the parent for geometry and visual updates.
+    /// The networked sandstorm's trigger endpoint, on its own child so the legacy SandstormController on the parent
+    /// never gets the trigger messages.
     /// </summary>
     [AddComponentMenu("")]
     public sealed class NetworkedSandstormHitboxRelay : MonoBehaviour

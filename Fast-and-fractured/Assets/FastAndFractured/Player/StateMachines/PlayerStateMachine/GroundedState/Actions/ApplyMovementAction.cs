@@ -7,6 +7,9 @@ namespace StateMachine
 
     public class ApplyMovementAction : Action
     {
+        private const float STOP_SPEED = 0.1f;
+        private const float AUTO_DECELERATION = 10f;
+
         CarMovementController carMovementController;
         PhysicsBehaviour physicsBehaviour;
        
@@ -26,13 +29,10 @@ namespace StateMachine
         void HandleAutoDeceleration()
         {
             float speed = physicsBehaviour.Rb.linearVelocity.magnitude;
-            if (speed > 0.1f)
+            if (speed > STOP_SPEED)
             {
-                // Never more than would stop the car within one physics step. A flat 10 m/s^2
-                // removes 0.2 m/s per 50 Hz step - more than the 0.1 m/s stop threshold - so a car
-                // at rest with a little suspension motion overshot zero every step and vibrated
-                // (measured in multiplayer: a parked car oscillating at 0.3-1 m/s).
-                float deceleration = Mathf.Min(10f, speed / Time.fixedDeltaTime);
+                // Never more than would stop the car within one physics step, or a car at rest overshoots zero and vibrates.
+                float deceleration = Mathf.Min(AUTO_DECELERATION, speed / Time.fixedDeltaTime);
                 Vector3 decelerationForce = -physicsBehaviour.Rb.linearVelocity.normalized * deceleration;
                 physicsBehaviour.Rb.AddForce(decelerationForce, ForceMode.Acceleration);
             }

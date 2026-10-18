@@ -13,8 +13,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 {
     /// <summary>
-    /// LAN implementation of ILobbyTransport using FishNet Tugboat + UDP broadcast on port 47777.
-    /// Broadcast payload format: RoomName|Port|CurrentPlayers|GameVersion|MaxPlayers|HostLink|InMatch
+    /// LAN ILobbyTransport: FishNet Tugboat plus UDP broadcast on port 47777.
+    /// Payload: RoomName|Port|CurrentPlayers|GameVersion|MaxPlayers|HostLink|InMatch
     /// </summary>
     public sealed class TugboatLobbyTransport : ILobbyTransport, IDisposable
     {
@@ -22,6 +22,10 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         private const int BROADCAST_INTERVAL_MS = 1000;
         private const int LIST_SCAN_DURATION_MS = 1500;
         private const char SEPARATOR = '|';
+        private const int RECEIVE_TIMEOUT_MS = 200;
+        // Any public address: connecting a UDP socket only picks the outgoing interface.
+        private const string ROUTE_PROBE_ADDRESS = "8.8.8.8";
+        private const int ROUTE_PROBE_PORT = 65530;
 
         private string _roomName;
         private ushort _gamePort;
@@ -51,10 +55,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
             ConfigurePort(nm, _gamePort);
 
-            // Subscribe before starting so we don't miss early events
             nm.ServerManager.OnRemoteConnectionState += HandleRemoteState;
 
-            // Await server start
             var tcs = new TaskCompletionSource<bool>();
             void OnServerState(ServerConnectionStateArgs args)
             {
@@ -76,7 +78,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
             if (!options.HostAsServer)
             {
-                // Host mode: also start local client
                 ConfigureAddress(nm, "localhost", _gamePort);
                 nm.ClientManager.StartConnection();
             }
@@ -87,9 +88,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
             if (options.IsPublic)
                 StartBroadcasting();
 
-            // The match teardown stops the server directly, not through LeaveLobbyAsync; without
-            // this the room kept being broadcast after its server was gone - empty rooms in the
-            // browser after a match (playtest feedback 2026-09-30).
+            // The match teardown stops the server directly: without this the room was still broadcast after it.
             nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
             nm.ServerManager.OnServerConnectionState += HandleServerStopped;
 
@@ -158,7 +157,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                     try
                     {
                         var receiveTask = udp.ReceiveAsync();
-                        var timeout     = Task.Delay(200, ct);
+                        var timeout     = Task.Delay(RECEIVE_TIMEOUT_MS, ct);
                         if (await Task.WhenAny(receiveTask, timeout) != receiveTask) continue;
 
                         var packet  = receiveTask.Result;
@@ -284,7 +283,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
             try
             {
                 using var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                s.Connect("8.8.8.8", 65530);
+                s.Connect(ROUTE_PROBE_ADDRESS, ROUTE_PROBE_PORT);
                 return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
             }
             catch { return "127.0.0.1"; }

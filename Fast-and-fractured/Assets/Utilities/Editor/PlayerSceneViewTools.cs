@@ -3,6 +3,8 @@ using UnityEditor;
 using FastAndFractured;  
 public static class PlayerSceneViewTools
 { 
+    private const float MAX_RAYCAST_DISTANCE = 10000f;
+
     [MenuItem("Tools/Player/Move Player to Scene View")]
     private static void MenuMovePlayerToSceneView()
     {
@@ -45,7 +47,7 @@ public static class PlayerSceneViewTools
         Transform camTransform = sceneView.camera.transform;
         Ray worldRay = new Ray(camTransform.position, camTransform.forward);
   
-        if (Physics.Raycast(worldRay, out RaycastHit hit, 10000f))  
+        if (Physics.Raycast(worldRay, out RaycastHit hit, MAX_RAYCAST_DISTANCE))  
         { 
             Undo.RecordObject(playerRb, "Move Player to Point");
             Undo.RecordObject(playerRb.transform, "Move Player to Point");

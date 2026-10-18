@@ -8,6 +8,8 @@ namespace FastAndFractured.Progression
     [RequireComponent(typeof(Button))]
     public sealed class AccessoriesEntryButton : MonoBehaviour
     {
+        private const float SCREEN_TRANSITION_SECONDS = 0.25f;
+
         public ScreensType returnTo = ScreensType.PLAY_MODE_SELECTION;
 
         private void Awake() => GetComponent<Button>().onClick.AddListener(Open);
@@ -15,7 +17,7 @@ namespace FastAndFractured.Progression
         private void Open()
         {
             AccessoriesScreen.ReturnTo = returnTo;
-            if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.ACCESSORIES, 0.25f);
+            if (MainMenuManager.HasInstance) MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.ACCESSORIES, SCREEN_TRANSITION_SECONDS);
         }
     }
 }

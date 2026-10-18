@@ -8,13 +8,8 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Multiplayer part of the win/lose screen: your placement ("#2 / 5", who eliminated you)
-    /// and the table of the whole match (placement, player, character, kills, damage), as in
-    /// other battle royales (playtest feedback 2026-09-30, point 8).
-    ///
-    /// Built at runtime on the menu's WIN_LOSE screen, only when a multiplayer match just ended
-    /// (MatchResults.Latest), so the menu scene is not edited and singleplayer is unchanged.
-    /// Reuses that screen's fonts and colours.
+    /// Multiplayer part of the win/lose screen: your placement and the match table. Built at runtime only after a
+    /// multiplayer match (MatchResults.Latest), with the screen's fonts.
     /// </summary>
     public sealed class MultiplayerResultsPanel : MonoBehaviour
     {
@@ -26,6 +21,21 @@ namespace FastAndFractured.Multiplayer
 
         private const float WIDTH = 760f;
         private const float ROW_HEIGHT = 58f;
+        private const float HEADER_ROW_HEIGHT = 40f;
+        private const float PLACEMENT_ROW_HEIGHT = 118f;
+        private const float PLACEMENT_WIDTH = 190f;
+        private const float PLACE_COLUMN_WIDTH = 56f;
+        private const float ICON_COLUMN_WIDTH = 52f;
+        private const float KILLS_COLUMN_WIDTH = 90f;
+        private const float DAMAGE_COLUMN_WIDTH = 130f;
+        private const float PLACEMENT_FONT_SIZE = 104f;
+        private const float HEADLINE_FONT_SIZE = 32f;
+        private const float HEADER_FONT_SIZE = 26f;
+        private const float ICON_HEADER_FONT_SIZE = 22f;
+        private const float PLACE_FONT_SIZE = 34f;
+        private const float NAME_FONT_SIZE = 24f;
+        private const float CELL_FONT_SIZE = 26f;
+        private static readonly Color DEAD_ICON_COLOR = new Color(0.55f, 0.55f, 0.55f, 1f);
 
         private TMP_FontAsset _displayFont, _bodyFont;
 
@@ -60,7 +70,6 @@ namespace FastAndFractured.Multiplayer
 
         // Visibility over the cutscene's camera: WinLoseScreenCameraFix (singleplayer too).
 
-        // ── Layout ─────────────────────────────────────────────────────────────────────
         private void Build(Transform screen, MatchResultEntry[] entries)
         {
             ResolveFonts(screen);
@@ -89,10 +98,10 @@ namespace FastAndFractured.Multiplayer
 
         private void BuildPlacementHeader(MatchResultEntry mine, int total)
         {
-            var row = NewRow(transform, "Placement", 118f, null);
-            var place = Text(row, $"#{mine.Placement}", _displayFont, 104f, mine.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft);
-            Fit(place, 190f);
-            Text(row, $"<size=80%><color=#FFFFFFB0>{LocalizationManager.Localize("MP.Results.OfRacers", total)}</color></size>\n{Headline(mine)}", _bodyFont, 32f, Color.white, TextAlignmentOptions.MidlineLeft);
+            var row = NewRow(transform, "Placement", PLACEMENT_ROW_HEIGHT, null);
+            var place = Text(row, $"#{mine.Placement}", _displayFont, PLACEMENT_FONT_SIZE, mine.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft);
+            Fit(place, PLACEMENT_WIDTH);
+            Text(row, $"<size=80%><color=#FFFFFFB0>{LocalizationManager.Localize("MP.Results.OfRacers", total)}</color></size>\n{Headline(mine)}", _bodyFont, HEADLINE_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineLeft);
             BuildXpLine();
         }
 
@@ -113,31 +122,30 @@ namespace FastAndFractured.Multiplayer
 
         private void BuildTableHeader()
         {
-            var row = NewRow(transform, "Header", 40f, null);
-            Fit(Text(row, "#", _displayFont, 26f, Muted, TextAlignmentOptions.MidlineLeft), 56f);
-            Fit(Text(row, "", _bodyFont, 22f, Muted, TextAlignmentOptions.Midline), 52f);
-            Text(row, LocalizationManager.Localize("MP.Results.Player"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineLeft);
-            Fit(Text(row, LocalizationManager.Localize("MP.Results.Kills"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 90f);
-            Fit(Text(row, LocalizationManager.Localize("MP.Results.Damage"), _displayFont, 26f, Muted, TextAlignmentOptions.MidlineRight), 130f);
+            var row = NewRow(transform, "Header", HEADER_ROW_HEIGHT, null);
+            Fit(Text(row, "#", _displayFont, HEADER_FONT_SIZE, Muted, TextAlignmentOptions.MidlineLeft), PLACE_COLUMN_WIDTH);
+            Fit(Text(row, "", _bodyFont, ICON_HEADER_FONT_SIZE, Muted, TextAlignmentOptions.Midline), ICON_COLUMN_WIDTH);
+            Text(row, LocalizationManager.Localize("MP.Results.Player"), _displayFont, HEADER_FONT_SIZE, Muted, TextAlignmentOptions.MidlineLeft);
+            Fit(Text(row, LocalizationManager.Localize("MP.Results.Kills"), _displayFont, HEADER_FONT_SIZE, Muted, TextAlignmentOptions.MidlineRight), KILLS_COLUMN_WIDTH);
+            Fit(Text(row, LocalizationManager.Localize("MP.Results.Damage"), _displayFont, HEADER_FONT_SIZE, Muted, TextAlignmentOptions.MidlineRight), DAMAGE_COLUMN_WIDTH);
         }
 
         private void BuildRow(MatchResultEntry entry, bool isLocal)
         {
             var row = NewRow(transform, $"Row {entry.Placement}", ROW_HEIGHT, isLocal ? LocalRowColor : RowColor);
-            Fit(Text(row, entry.Placement.ToString(), _displayFont, 34f, entry.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft), 56f);
-            Fit(Icon(row, entry.CharacterCode, entry.Survived), 52f);
+            Fit(Text(row, entry.Placement.ToString(), _displayFont, PLACE_FONT_SIZE, entry.Placement == 1 ? Accent : Color.white, TextAlignmentOptions.MidlineLeft), PLACE_COLUMN_WIDTH);
+            Fit(Icon(row, entry.CharacterCode, entry.Survived), ICON_COLUMN_WIDTH);
 
             string sub = entry.Survived
                 ? (entry.Placement == 1 ? LocalizationManager.Localize("MP.Results.WinnerShort") : LocalizationManager.Localize("MP.Results.Survived"))
                 : string.IsNullOrEmpty(entry.EliminatedBy) ? LocalizationManager.Localize("MP.Results.Eliminated") : LocalizationManager.Localize("MP.Results.EliminatedBy", entry.EliminatedBy);
             string name = entry.DisplayName + (isLocal ? $" <color=#FFC759>{LocalizationManager.Localize("MP.Results.You")}</color>" : string.Empty);
             Text(row, $"{name}\n<size=72%><color=#FFFFFFB0>{MatchResults.CharacterName(entry.CharacterCode)} · {sub}</color></size>",
-                _bodyFont, 24f, Color.white, TextAlignmentOptions.MidlineLeft);
-            Fit(Text(row, entry.Kills.ToString(), _bodyFont, 26f, Color.white, TextAlignmentOptions.MidlineRight), 90f);
-            Fit(Text(row, entry.DamageDealt.ToString(), _bodyFont, 26f, Color.white, TextAlignmentOptions.MidlineRight), 130f);
+                _bodyFont, NAME_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineLeft);
+            Fit(Text(row, entry.Kills.ToString(), _bodyFont, CELL_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineRight), KILLS_COLUMN_WIDTH);
+            Fit(Text(row, entry.DamageDealt.ToString(), _bodyFont, CELL_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineRight), DAMAGE_COLUMN_WIDTH);
         }
 
-        // ── Pieces ─────────────────────────────────────────────────────────────────────
         private static Transform NewRow(Transform parent, string name, float height, Color? background)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -183,7 +191,7 @@ namespace FastAndFractured.Multiplayer
             try { if (ResourcesManager.HasInstance) sprite = ResourcesManager.Instance.GetResourcesSprite(characterCode); }
             catch { /* a missing icon must not hide the table */ }
             image.sprite = sprite;
-            image.color = sprite == null ? new Color(1f, 1f, 1f, 0f) : alive ? Color.white : new Color(0.55f, 0.55f, 0.55f, 1f);
+            image.color = sprite == null ? new Color(1f, 1f, 1f, 0f) : alive ? Color.white : DEAD_ICON_COLOR;
             return image;
         }
 

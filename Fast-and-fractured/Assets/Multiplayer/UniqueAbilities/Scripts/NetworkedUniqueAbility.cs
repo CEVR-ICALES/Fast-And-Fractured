@@ -8,23 +8,13 @@ using Utilities;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Networked wrapper for unique abilities. Subscribes to the singleplayer
-    /// BaseUniqueAbility events and broadcasts activation/deactivation to all clients.
-    /// 
-    /// The singleplayer ability runs normally on the owner for instant feedback.
-    /// This wrapper ensures:
-    /// 1. VFX/sound are played on ALL clients (not just owner)
-    /// 2. Healing goes through NetworkedStatsController (server-authoritative)
-    /// 3. Cooldown state is consistent
-    /// 
-    /// Spawned ability objects (Pepe's tomato, Carme's chicken, Maria's croquettes)
-    /// remain local to the owner. Their damage goes through the local collision system
-    /// which calls NetworkedStatsController.DealDamageServerRpc. For full network
-    /// visibility of ability objects, create NetworkObject variants using the
-    /// Networked Bullet Converter tool.
+    /// Networks a unique ability: the owner runs the singleplayer ability, the server validates it (heal,
+    /// invulnerability, networked spawns) and every replica plays it.
     /// </summary>
     public class NetworkedUniqueAbility : NetworkBehaviour
     {
+        private const float VFX_EXTRA_LIFETIME_SECONDS = 1f;
+
         [Tooltip("Optional: Assign a networked variant of the ability prefab here. If null, it tries to use the one from AbilityData.")]
         [SerializeField] private GameObject _networkedAbilityPrefab;
 
@@ -55,11 +45,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartClient()
         {
             base.OnStartClient();
-            // BaseUniqueAbility's UniqueUIPrefab is a singleplayer-only full-screen overlay. In a
-            // multiplayer car it can recursively create player/UI singletons and lock the editor
-            // before onAbilityActivated is reached (reproduced with Pepe). Multiplayer already
-            // exposes the ultimate through PlayerHUD, so suppress that SP overlay on owners and
-            // replicas. Particle/VFX and the actual ability implementation still run normally.
+            // The singleplayer UniqueUIPrefab overlay can recreate player/UI singletons and hang the editor; PlayerHUD shows the ultimate.
             if (_ability != null)
                 SingleplayerReflectionCache.BaseUniqueAbility_IsAI?.SetValue(_ability, true);
         }
@@ -82,21 +68,12 @@ namespace FastAndFractured.Multiplayer
 
         public override void OnStopNetwork()
         {
-            // A lost connection can despawn the vehicle before HostDisconnectWatchdog gets its
-            // client-stopped callback. Prepare here as well so Maria is quiesced while map
-            // services (especially SoundManager) are still alive. The method is idempotent and
-            // unsubscribes before invoking any singleplayer completion delegate, so it cannot
-            // send through FishNet while the object is stopping.
+            // A lost connection can despawn the car before HostDisconnectWatchdog runs: quiesce while SoundManager is alive.
             PrepareForSceneTeardown(destroyMariaComponent: false);
             base.OnStopNetwork();
         }
 
-        /// <summary>
-        /// Quiesces every networked unique ability before a multiplayer map is unloaded.
-        /// Maria needs an explicit early destroy: her singleplayer OnDestroy accesses
-        /// SoundManager.Instance, which would create an invalid auxiliary singleton if Unity
-        /// happened to destroy SoundManager first during unordered scene teardown.
-        /// </summary>
+        /// <summary>Quiesces every networked ability before a map unloads; Maria's OnDestroy needs SoundManager alive.</summary>
         public static void PrepareAllForSceneTeardown()
         {
             var wrappers = FindObjectsByType<NetworkedUniqueAbility>(
@@ -140,15 +117,11 @@ namespace FastAndFractured.Multiplayer
                 SingleplayerReflectionCache.BaseUniqueAbility_IsOnCooldown?.SetValue(mariaAbility, false);
             }
 
-            // OnStopNetwork may represent a pooled despawn. Quiesce there, but let FishNet own
-            // the component lifetime. The explicit scene-transition path escalates the same
-            // idempotent preparation and schedules the early destroy below.
+            // OnStopNetwork may be a pooled despawn: quiesce, but leave the component's lifetime to FishNet.
             if (!destroyMariaComponent || _mariaDestroyScheduled) return;
             _mariaDestroyScheduled = true;
 
-            // Destroy is intentionally deferred to the end of this frame. All MainMenu entry
-            // points wait one frame through MultiplayerSceneTeardown, so Maria.OnDestroy runs
-            // while the map's real SoundManager is still alive.
+            // End of frame: MultiplayerSceneTeardown waits a frame, so Maria.OnDestroy still finds the map's SoundManager.
             mariaAbility.enabled = false;
             Destroy(mariaAbility);
             _ability = null;
@@ -177,9 +150,7 @@ namespace FastAndFractured.Multiplayer
                 data.OnTimerIncreaseUpdate = null;
             }
 
-            // Maria's duration completion is her canonical cleanup path: it stops VFX/audio,
-            // restores the shared hair material and clears spawned croquettes. Invoke it once
-            // while all scene services still exist, after unsubscribing the network wrapper.
+            // Maria's duration completion is her cleanup path (VFX, audio, hair material, croquettes).
             if (completion != null)
             {
                 try
@@ -214,24 +185,14 @@ namespace FastAndFractured.Multiplayer
 
         #region LOCAL_EVENT_HANDLERS
 
-        /// <summary>
-        /// Called when the singleplayer ability activates on the owner.
-        /// Sends activation to the server for validation and broadcast.
-        /// </summary>
         private void OnLocalAbilityActivated()
         {
             if (_suppressLocalEventForwarding) return;
             if (!base.IsOwner) return;
 
-            // Capture state for server
             float currentEndurance = _statsController != null ? _statsController.Endurance : 0f;
 
-            // HOST: calling a [ServerRpc] from a server context silently never delivers its
-            // logic (live-debugged 2026-07-11 on Pepe's tomato: RpcWriter ran, RpcLogic never
-            // executed). The ability-END path below already used this direct-call pattern —
-            // the ACTIVATE path lacked it, which killed the host's entire ultimate pipeline
-            // (heal, invulnerability, networked spawn, replica broadcast). Same fix as
-            // StartGame / HandleServerSideDeath.
+            // A [ServerRpc] called from the host never runs its logic.
             if (base.IsServerInitialized)
                 HandleAbilityActivatedOnServer(currentEndurance);
             else
@@ -279,13 +240,8 @@ namespace FastAndFractured.Multiplayer
             _predictedObjectSpawnPermit = true;
             SetAbilityActiveStateOnServer(true);
 
-            // Josefino's heal. BaseUniqueAbility raises onAbilityActivated BEFORE the character's
-            // effect runs (JosefinoUniqueAbility heals right after base.ActivateAbility returns),
-            // so the endurance the owner reports here is the pre-heal value: the server healed 0
-            // for a remote Josefino, and a host Josefino's heal stayed local - observers kept
-            // seeing 1024 of 1200 (ShootingProbe 2026-09-30). The server now applies the ability's
-            // own recovery amount for a remote owner; on the host the singleplayer effect heals
-            // the server's stats itself a moment later, so only the sync waits for it.
+            // onAbilityActivated fires before the effect, so the owner reports pre-heal endurance: the server applies the
+            // recovery itself for a remote owner; on the host the singleplayer heal lands a moment later, then syncs.
             if (_networkedStats != null && _statsController != null)
             {
                 if (_isJosefinoAbility && JosefinoRecoveryAmount != null)
@@ -305,22 +261,18 @@ namespace FastAndFractured.Multiplayer
 
                 if (_isJosefinoAbility)
                 {
-                    // Josefino's ultimate grants temporary invulnerability. Sync it server-authoritatively.
                     var josefinoAbilityData = GetAbilityData();
                     float duration = josefinoAbilityData != null ? josefinoAbilityData.Duration : 0f;
                     _networkedStats.SetInvulnerabilityServer(true, duration);
                 }
 
-                // Host path: heal may already be applied on server, resulting in healAmount == 0.
-                // Force sync to propagate current endurance to remote observers in all cases.
+                // On the host the heal may already be applied (healAmount 0): sync anyway.
                 _networkedStats.ForceEnduranceSync();
             }
 
-            // Check if the ability effect is a NetworkObject (needs server spawn)
             var abilityData = GetAbilityData();
             GameObject prefabToSpawn = _networkedAbilityPrefab;
             
-            // If no override, try the one from AbilityData
             if (prefabToSpawn == null && abilityData != null)
             {
                 prefabToSpawn = abilityData.ParticleEffectPrefab;
@@ -330,7 +282,6 @@ namespace FastAndFractured.Multiplayer
             {
                 if (prefabToSpawn.GetComponent<NetworkObject>() != null)
                 {
-                    // Spawn networked ability object
                     var go = Instantiate(prefabToSpawn, 
                         _ability.transform.position, _ability.transform.rotation);
                     
@@ -339,15 +290,12 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // Broadcast VFX activation to all clients (for non-networked visual-only effects)
             OnAbilityActivatedRpc();
         }
 
         internal bool TryConsumePredictedObjectSpawnPermit(NetworkConnection spawner)
         {
-            // One-shot abilities may raise their end event in the same frame as activation.
-            // The permit itself is the server-issued, single-use proof of a valid activation;
-            // tying consumption to the transient active flag races the reliable spawn packet.
+            // One-shot abilities can end in the activation frame: the single-use permit, not the active flag, proves activation.
             if (!base.IsServerInitialized || spawner == null || base.Owner != spawner ||
                 !_predictedObjectSpawnPermit)
                 return false;
@@ -365,30 +313,15 @@ namespace FastAndFractured.Multiplayer
 
         #region OBSERVERS_RPCS
 
-        /// <summary>
-        /// Broadcasts ability activation VFX to all clients.
-        /// Owner already played effects locally; this handles non-owner clients.
-        /// </summary>
         [ObserversRpc(ExcludeOwner = true)]
         private void OnAbilityActivatedRpc()
         {
             if (_ability == null) return;
 
-            // Run the FULL singleplayer ability on this replica instead of only replaying the
-            // configured UnityEvents. Per-character effects live inside ActivateAbility overrides
-            // that the events don't cover: MariaAntonia's temporal stat buffs (which the host's
-            // authoritative StatsController must also carry or her damage/speed desyncs) and her
-            // orbiting croquettes, sounds, hair emission, ParticleEffectPrefab, etc.
-            //
-            // Exceptions that keep the legacy events+VFX-only path:
-            // - Carme: her override Instantiates the local McChicken with an aim direction only
-            //   the owner knows — running it on replicas would spawn junk chickens.
-            // - Josefino: his heal is already applied server-side by ActivateAbilityServerRpc
-            //   (endurance delta + ForceEnduranceSync); a full replica activation on the host
-            //   would heal him twice. His shield visuals are covered by the UnityEvents.
-            // - Pepe: his override pulls a singleplayer ascending tomato from the pool, which then
-            //   drops its own singleplayer descending tomatoes on this peer - a second, local copy of
-            //   the networked ultimate (ShootingProbe 2026-09-30: an extra tomato on every replica).
+            // Replicas run the full singleplayer ability (Maria's stat buffs and croquettes live in ActivateAbility), except:
+            // - Carme: only the owner knows her chicken's aim.
+            // - Josefino: the server already healed him; a replica activation on the host would heal twice.
+            // - Pepe: his singleplayer tomato would drop a second, local set of tomatoes.
             if (_isCarmeAbility || _isJosefinoAbility || _isPepeAbility)
             {
                 SetAbilityActiveStateOnServer(true);
@@ -400,14 +333,12 @@ namespace FastAndFractured.Multiplayer
                     var vfx = Instantiate(carmeData.ParticleEffectPrefab,
                         _ability.transform.position, _ability.transform.rotation, _ability.transform);
                     if (carmeData.Duration > 0f)
-                        Destroy(vfx, carmeData.Duration + 1f);
+                        Destroy(vfx, carmeData.Duration + VFX_EXTRA_LIFETIME_SECONDS);
                 }
                 return;
             }
 
-            // Clear replica-local guards first: the replica keeps its own cooldown timer, and the
-            // owner's cooldown can run faster (COOLDOWN_SPEED buffs), so the replica could still
-            // be "on cooldown" and silently reject an activation the server already validated.
+            // The owner's cooldown can run faster, so the replica would reject an activation the server validated.
             SingleplayerReflectionCache.BaseUniqueAbility_IsAbilityActivePrivate?.SetValue(_ability, false);
             SingleplayerReflectionCache.BaseUniqueAbility_IsAbilityActivePublic?.SetValue(_ability, false);
             SingleplayerReflectionCache.BaseUniqueAbility_IsOnCooldown?.SetValue(_ability, false);
@@ -430,7 +361,6 @@ namespace FastAndFractured.Multiplayer
             SetAbilityActiveStateOnServer(false);
             InvokeAbilityEventSafely(_ability.onAbilityEnded);
 
-            // Non-owner cleanup of spawned particle VFX is handled by the auto-destroy timer.
         }
 
         #endregion
@@ -447,16 +377,12 @@ namespace FastAndFractured.Multiplayer
 
             if (_isJosefinoAbility && _networkedStats != null)
             {
-                // Ensure remote clients lose invulnerability if the ability ends early (eg. first hit consumed shield).
                 _networkedStats.SetInvulnerabilityServer(false, 0f);
             }
 
             OnAbilityEndedRpc();
 
-            // The owner ends its own ultimate by itself - except Josefino's shield, which only ends
-            // when he is hit, and hits are resolved here on the server. OnAbilityEndedRpc skips the
-            // owner, so a remote Josefino kept his shield (and push immunity) for the rest of the
-            // match on his own screen (playtest feedback 2026-09-30).
+            // Josefino's shield ends on a hit, resolved here; OnAbilityEndedRpc skips the owner, so the owner is told too.
             if (_isJosefinoAbility && base.Owner != null && base.Owner.IsValid && !base.Owner.IsLocalClient)
                 TargetEndJosefinoShield(base.Owner);
         }
@@ -470,11 +396,7 @@ namespace FastAndFractured.Multiplayer
             finally { _suppressLocalEventForwarding = false; }
         }
 
-        /// <summary>
-        /// Server: a hit landed on Josefino while his shield was up. The shield absorbs that hit and
-        /// breaks, like a push breaks it in singleplayer (JosefinoCarImpactHandler). Before, shots
-        /// were simply ignored during the multiplayer invulnerability and the shield never broke.
-        /// </summary>
+        /// <summary>Server: a hit broke Josefino's shield, as a push does in singleplayer.</summary>
         [Server]
         internal bool ServerConsumeJosefinoShield()
         {
@@ -486,9 +408,6 @@ namespace FastAndFractured.Multiplayer
             return true;
         }
 
-        /// <summary>
-        /// Gets the AbilityData ScriptableObject via reflection (field is protected in BaseUniqueAbility).
-        /// </summary>
         private AbilityData GetAbilityData()
         {
             if (_ability == null) return null;
@@ -513,10 +432,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Mirrors ability active state on server without re-running the full ability activation flow.
-        /// Needed so JosefinoCarImpactHandler server-side checks remain consistent for remote owners.
-        /// </summary>
+        /// <summary>Server: mirrors the active state so JosefinoCarImpactHandler checks hold for remote owners.</summary>
         private void SetAbilityActiveStateOnServer(bool isActive)
         {
             if (_ability == null) return;

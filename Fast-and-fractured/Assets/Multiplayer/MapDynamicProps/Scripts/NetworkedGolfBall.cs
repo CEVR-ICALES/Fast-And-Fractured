@@ -5,16 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Golf balls (dev, 2026-10) are plain rigidbodies that cars knock around and that push cars
-    /// back. Left alone, every peer would simulate its own copy and the balls would end up in
-    /// different places on each screen.
-    ///
-    /// The server simulates them (GolfBallBehaviour, GolfBallSpawnHandle and the dead walls all
-    /// run there) and streams position, rotation and velocity while a ball moves. Clients show a
-    /// smoothed copy: no physics and no colliders of their own, so a predicted car does not
-    /// bounce off a ball that is somewhere else on the server - the car's collision with the
-    /// real ball arrives through the server's correction of the car.
-    /// Added to the ball by the scene migration tool (HazardDef GolfBallBehaviour).
+    /// Server-simulated golf balls, streamed while they move. Clients show a smoothed copy without physics or
+    /// colliders, so a predicted car never hits a ball that is elsewhere on the server.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
     public sealed class NetworkedGolfBall : NetworkBehaviour
@@ -24,6 +16,7 @@ namespace FastAndFractured.Multiplayer
         private const float TELEPORT_DISTANCE = 8f;         // respawned: snap instead of gliding
         private const float MAX_EXTRAPOLATION = 0.15f;      // seconds
         private const float SMOOTHING = 18f;
+        private const float MIN_SEND_SQR_DISTANCE = 0.0001f;
 
         private Rigidbody _rb;
         private float _nextSend;
@@ -63,14 +56,13 @@ namespace FastAndFractured.Multiplayer
             else if (base.IsClientInitialized) ClientFollow();
         }
 
-        // ── Server ─────────────────────────────────────────────────────────────────────
         private void ServerStream()
         {
             if (_rb == null || Time.time < _nextSend) return;
             _nextSend = Time.time + SEND_INTERVAL;
 
             bool moving = _rb.linearVelocity.sqrMagnitude > MOVING_SPEED * MOVING_SPEED
-                          || (_rb.position - _lastSentPosition).sqrMagnitude > 0.0001f;
+                          || (_rb.position - _lastSentPosition).sqrMagnitude > MIN_SEND_SQR_DISTANCE;
             if (moving)
             {
                 _restSent = false;
@@ -99,7 +91,6 @@ namespace FastAndFractured.Multiplayer
             if (teleported) transform.SetPositionAndRotation(position, rotation);
         }
 
-        // ── Client ─────────────────────────────────────────────────────────────────────
         private void ClientFollow()
         {
             if (!_hasTarget) return;
@@ -111,7 +102,6 @@ namespace FastAndFractured.Multiplayer
                 Quaternion.Slerp(transform.rotation, _targetRotation, t));
         }
 
-        // ── Host migration ─────────────────────────────────────────────────────────────
         private static System.Collections.Generic.List<NetworkedGolfBall> AllInHierarchyOrder()
         {
             var list = new System.Collections.Generic.List<NetworkedGolfBall>(FindObjectsByType<NetworkedGolfBall>(FindObjectsSortMode.None));

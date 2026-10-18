@@ -7,25 +7,15 @@ using FastAndFractured;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Dynamically spawns the multiplayer manager when a networked map scene loads on the server.
-    /// LevelController auto-init is disabled at editor time by NetworkedSceneMigrationTool, so
-    /// LC sits dormant until the wrapper calls PerformConstruct/PerformInitialize via the manager.
-    /// </summary>
+    /// <summary>Spawns the multiplayer manager when a networked map loads on the server (LevelController waits dormant for it).</summary>
     public static class MultiplayerLevelControllerAutoInitGate
     {
         public const string SPAWNER_PREFAB_RESOURCES_PATH = "MultiplayerLevelControllerSpawnable";
 
         private static bool _unityHookRegistered;
 
-        // The FishNet SceneManager is destroyed and recreated every Play session (it lives on the
-        // NetworkManager GameObject, which does not survive stopping Play). A plain "have we ever
-        // subscribed" bool - the previous version of this field - stayed true forever once domain
-        // reload is disabled, so the SECOND Play session in the same editor domain skipped
-        // subscribing to the NEW SceneManager entirely: OnFishNetLoadEnd never fired again, no
-        // NetworkedLevelControllerManager ever spawned, and nothing logged why - exactly the "first
-        // match works, every match after it doesn't" symptom. Tracking the actual instance we are
-        // subscribed to, instead of a bool, re-subscribes whenever that instance changes.
+        // The SceneManager instance we are subscribed to: it is recreated every Play session, and with domain reload
+        // off a plain bool skipped subscribing to the new one, so every match after the first never started.
         private static FishNet.Managing.Scened.SceneManager _subscribedSceneManager;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -33,9 +23,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (_unityHookRegistered) return;
             _unityHookRegistered = true;
-            // Unity's sceneLoaded is a static delegate that keeps firing across Play sessions
-            // without a domain reload, so this subscription itself only needs to happen once ever.
-            // It hooks the FishNet SceneManager, checked fresh on every fire, below.
+            // sceneLoaded survives Play sessions without a domain reload: subscribe once.
             UnitySceneManager.sceneLoaded += OnUnitySceneLoaded;
         }
 
@@ -49,8 +37,6 @@ namespace FastAndFractured.Multiplayer
 
         private static void OnFishNetLoadEnd(SceneLoadEndEventArgs args)
         {
-            // Cheap and permanent: the two guards below used to fail silently in both directions,
-            // which is why a broken match start left zero trace of whether this even ran.
             Debug.Log($"[MultiplayerLevelControllerAutoInitGate] OnLoadEnd fired. " +
                       $"isServerStarted={InstanceFinder.IsServerStarted} asServer={args.QueueData.AsServer}");
             if (!InstanceFinder.IsServerStarted) return;
@@ -67,10 +53,7 @@ namespace FastAndFractured.Multiplayer
             }
             if (lc == null)
             {
-                // This used to return silently, which is exactly why a failed match start looked
-                // identical to "nothing happened yet": zero cars, zero log line, no signal at all
-                // about whether this callback even ran. Log the scene names so a missing/renamed
-                // networked map scene shows up here instead of as a spawn that never happens.
+                // Logged so a missing or renamed networked map shows up here.
                 string sceneNames = (args.LoadedScenes == null || args.LoadedScenes.Length == 0)
                     ? "(none)"
                     : string.Join(", ", System.Array.ConvertAll(args.LoadedScenes, s => s.name));

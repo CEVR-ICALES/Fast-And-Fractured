@@ -1,9 +1,3 @@
-// SCENE SETUP:
-//   - Place anywhere inside the LOBBY_ROOM MenuScreen.
-//   - Wire _mapCardContainer (Transform, horizontal/grid layout)
-//   - Wire _mapCardPrefab    (MapVoteCard prefab — Image for thumbnail + TMP_Text for name + Button)
-//   - Wire _voteCountLabel   (TMP_Text, e.g. "3 votes cast")
-//   - Assign _catalog        (MapCatalog ScriptableObject from Resources/MapCatalog)
 using Assets.SimpleLocalization.Scripts;
 using System.Collections.Generic;
 using FastAndFractured.Multiplayer.Abstractions;
@@ -16,6 +10,8 @@ namespace FastAndFractured.Multiplayer.Lobby
 {
     public sealed class MapVoteUI : MonoBehaviour
     {
+        private static readonly Color MY_VOTE_COLOR = new Color(0.2f, 0.8f, 0.2f, 1f);
+
         [SerializeField] private Transform  _mapCardContainer;
         [SerializeField] private GameObject _mapCardPrefab;
         [SerializeField] private TMP_Text   _voteCountLabel;
@@ -97,10 +93,9 @@ namespace FastAndFractured.Multiplayer.Lobby
                 if (btn == null) continue;
                 bool isMyVote = _localVote == mapId;
                 var colors = btn.colors;
-                colors.normalColor = isMyVote ? new Color(0.2f, 0.8f, 0.2f, 1f) : Color.white;
+                colors.normalColor = isMyVote ? MY_VOTE_COLOR : Color.white;
                 btn.colors = colors;
 
-                // Show vote count via button label if present
                 var countLabel = btn.GetComponentInChildren<TMP_Text>();
                 if (countLabel != null)
                 {

@@ -13,8 +13,7 @@ namespace FastAndFractured.Multiplayer
         {
             base.Awake();
 
-            // This wrapper fully replaces the legacy kill on every peer, including the server.
-            // Remove it during Awake so it cannot receive a trigger before FishNet starts.
+            // Replaces the legacy kill on every peer: removed in Awake, before any trigger.
             RemoveWrappedBehaviour();
         }
 
@@ -22,8 +21,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServerInitialized) return;
 
-            // Same filter as the singleplayer BuildingDeadZone: only the car body collider (the
-            // one carrying the StatsController), not wheels or trigger children like a shield.
+            // As BuildingDeadZone: only the car body collider (the one with the StatsController).
             if (!other.TryGetComponent(out StatsController _)) return;
 
             var stats = other.GetComponentInParent<NetworkedStatsController>();

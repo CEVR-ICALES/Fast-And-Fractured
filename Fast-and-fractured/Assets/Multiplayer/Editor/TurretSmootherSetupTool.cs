@@ -4,15 +4,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// Adds a NetworkTickSmoother to the Turret root of every networked gameplay car prefab.
-    ///
-    /// The car prefabs ship with a NetworkTickSmoother on 'Visuals' only. 'Turret' is a SIBLING of
-    /// 'Visuals' (both direct children of the car root), so on non-owned cars the body interpolates
-    /// smoothly between network ticks while the turret follows the raw rigidbody in tick-sized
-    /// steps — the "trembling turret" effect. The turret needs the exact same smoothing component,
-    /// configured identically to the one on 'Visuals'.
-    /// </summary>
+    /// <summary>Adds a NetworkTickSmoother, configured like the Visuals one, to the Turret of every networked car.</summary>
     public static class TurretSmootherSetupTool
     {
         private static System.Collections.Generic.List<string> CarPrefabPaths => NetworkedCarFixes.FindCarPrefabPaths();
@@ -43,9 +35,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     NetworkTickSmoother template = visuals.GetComponent<NetworkTickSmoother>();
                     if (template == null)
                     {
-                        // Carme's variant shipped without ANY smoother — her whole body jitters on
-                        // remote clients, not just the turret. Borrow the settings from another car
-                        // (they are identical across variants) and fix Visuals too.
+                        // A car without any smoother: borrow another car's settings and fix Visuals too.
                         template = LoadTemplateFromAnyOtherCar(path);
                         if (template == null)
                         {
@@ -62,8 +52,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (existing == null)
                         existing = turret.gameObject.AddComponent<NetworkTickSmoother>();
 
-                    // Copy every serialized setting from the Visuals smoother so both halves of the
-                    // car interpolate identically.
                     EditorUtility.CopySerialized(template, existing);
 
                     PrefabUtility.SaveAsPrefabAsset(root, path);
@@ -80,11 +68,7 @@ namespace FastAndFractured.Multiplayer.Editor
             Debug.Log($"[TurretSmootherSetupTool] Done. {changed}/{carPrefabPaths.Count} prefabs updated.");
         }
 
-        /// <summary>
-        /// Returns the Visuals NetworkTickSmoother from the first car prefab (other than
-        /// <paramref name="excludePath"/>) that has one, to use as a settings template.
-        /// The returned component belongs to a loaded asset — read-only use (CopySerialized source).
-        /// </summary>
+        /// <summary>The Visuals smoother of another car prefab, as a read-only settings template.</summary>
         private static NetworkTickSmoother LoadTemplateFromAnyOtherCar(string excludePath)
         {
             foreach (string otherPath in CarPrefabPaths)

@@ -1,9 +1,3 @@
-// SCENE SETUP:
-//   - Place on the MULTIPLAYER_HUB MenuScreen GameObject.
-//   - Wire _hostButton      → navigates to MULTIPLAYER_HOST_SETUP
-//   - Wire _browseButton    → navigates to MULTIPLAYER_BROWSER
-//   - Wire _directJoinButton → navigates to MULTIPLAYER_DIRECT_JOIN
-//   - Wire _backButton      → navigates to MAIN_MENU
 using Enums;
 using FastAndFractured;
 using UnityEngine;
@@ -27,10 +21,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             _backButton?.onClick.AddListener(()       => Go(BackTarget()));
         }
 
-        /// <summary>
-        /// With the Play ▸ Singleplayer / Multiplayer menu (MainMenuPlayModesTool) the hub is
-        /// reached from that screen, so Back returns there; without it, to the main menu.
-        /// </summary>
+        /// <summary>Back returns to the Play mode screen when there is one (MainMenuPlayModesTool), else the main menu.</summary>
         private static ScreensType BackTarget() =>
             MainMenuManager.HasInstance && MainMenuManager.Instance.menuScreens.ContainsKey(ScreensType.PLAY_MODE_SELECTION)
                 ? ScreensType.PLAY_MODE_SELECTION

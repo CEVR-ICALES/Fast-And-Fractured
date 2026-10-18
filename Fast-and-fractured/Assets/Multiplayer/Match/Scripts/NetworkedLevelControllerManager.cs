@@ -18,12 +18,8 @@ namespace FastAndFractured.Multiplayer
     public class NetworkedLevelControllerManager : NetworkBehaviour
     {
         #region MATCH_COUNTDOWN
-        // The 3-2-1 (GameReadyScript) and the moment the cars get control (GameLoopManager's
-        // delayUntilGameStarts timer) both started on each peer when ITS level finished
-        // initialising, and a remote client finishes later than the host - so the countdowns
-        // did not match, and the host's cars could drive during it (playtest feedback 2026-09-30).
-        // The server publishes the tick the "3" appears on: the on-screen countdown follows its RPC
-        // and MatchStartGate holds every car until "Start".
+        // The server publishes the tick the "3" appears on: every peer's countdown follows it and MatchStartGate
+        // holds every car until "Start".
         private readonly FishNet.Object.Synchronizing.SyncVar<uint> _countdownStartTick = new FishNet.Object.Synchronizing.SyncVar<uint>();
 
         // Time for the slowest client to finish its level init after the cars spawn.
@@ -31,12 +27,15 @@ namespace FastAndFractured.Multiplayer
         // GameReadyScript: "3" at StartEventCountdown, "Start" 3 s later - when the gate opens.
         private const float COUNTDOWN_TO_CONTROLS_SECONDS = 3f;
 
-        // A match resumed after a host migration skips the 3-2-1: the frozen-frame overlay goes
-        // away at the start tick and the cars are released this long after (players see where
-        // they are first).
+        // A resumed (migrated) match skips the 3-2-1; cars are released this long after the overlay drops.
         private readonly FishNet.Object.Synchronizing.SyncVar<bool> _resumedAfterMigration = new FishNet.Object.Synchronizing.SyncVar<bool>();
         private const float MIGRATION_LEAD_SECONDS = 0.75f;
         private const float MIGRATION_RESUME_SECONDS = 1f;
+        private const float LOCAL_CAR_WAIT_SECONDS = 5f;
+        private const float START_DATA_WAIT_SECONDS = 30f;
+        private const float CAST_SPAWN_WAIT_SECONDS = 5f;
+        private const float DEATH_VFX_LIFETIME_SECONDS = 5f;
+        private const ushort FALLBACK_PORT = 7770;
 
         private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent;
         private void LateUpdate()
@@ -46,9 +45,7 @@ namespace FastAndFractured.Multiplayer
             bool resumed = _resumedAfterMigration.Value;
             MatchStartGate.LockUntil(start + base.TimeManager.TimeToTicks(resumed ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
 
-            // The server says when the "3" appears. A remote client's own estimate of the server
-            // tick lagged ~1 s right after loading the map (measured 2026-09-30), so the on-screen
-            // countdown follows the server's RPC, not that estimate.
+            // The on-screen countdown follows the server's RPC: a client's own server-tick estimate lags after loading.
             if (base.IsServerInitialized && !_countdownRpcSent && base.TimeManager.Tick >= start)
             {
                 _countdownRpcSent = true;
@@ -58,11 +55,7 @@ namespace FastAndFractured.Multiplayer
             if (_countdownShown) return;
             if (!_countdownSignalled)
             {
-                // Until the server says so, no 3-2-1 may run anywhere. Each player root's
-                // GameReadyScript schedules one when it initialises, and which one is "ours" is
-                // not settled yet early on (a migrated host only owns its car a few frames after
-                // spawn): cancelling just the one found first left another running behind the
-                // migration overlay, and its "1" showed when the match resumed.
+                // Cancel every root's pending 3-2-1 until the server says so: which one is ours is not settled yet.
                 foreach (var script in FindObjectsByType<GameReadyScript>(FindObjectsSortMode.None))
                     script.CancelInvoke("StartEventCountdown");
             }
@@ -77,7 +70,6 @@ namespace FastAndFractured.Multiplayer
             if (countdown == null) return;
             if (!_countdownSuppressed)
             {
-                // This peer's own init scheduled the countdown at its own time; wait for the server.
                 _countdownSuppressed = true;
                 countdown.CancelInvoke("StartEventCountdown");
             }
@@ -138,12 +130,7 @@ namespace FastAndFractured.Multiplayer
                 if (cars[i] != null) _originalIndexByCar[cars[i]] = i;
         }
 
-        /// <summary>
-        /// Server, migrated match: keep the characters that are still in the match - each
-        /// reconnected human with its own car, the surviving AIs - and remove the rest (the host
-        /// that left, the dead, anyone who did not come back) before anything is network-spawned.
-        /// Returns the connections that get a car, in the order the cars were reordered to.
-        /// </summary>
+        /// <summary>Server, migrated match: keeps the reconnected humans and surviving AIs, removes the rest, and returns the connections that get a car.</summary>
         [Server]
         private List<NetworkConnection> ApplyMigrationRoster(List<NetworkConnection> orderedConns)
         {
@@ -185,8 +172,7 @@ namespace FastAndFractured.Multiplayer
             cars.Clear(); cars.AddRange(keptCars);
             codes.Clear(); codes.AddRange(keptCodes);
 
-            // Put each kept car where it was when the host was lost (moving its root, so the
-            // root-relative pose the spawn code captures stays the authored one).
+            // Move the root, so the root-relative pose the spawn code captures stays the authored one.
             foreach (var car in keptCars)
             {
                 if (!_originalIndexByCar.TryGetValue(car, out int index)) continue;
@@ -202,12 +188,6 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Server, migrated match: restore the saved state once the cars have initialised (when
-        /// the 3-2-1 starts; they are held by MatchStartGate until "Start"). Applying it in the
-        /// spawn frame threw from the cars' endurance VFX, which were not set up yet, and the
-        /// exception also cut the rest of the match start short (playtest 2026-10-04).
-        /// </summary>
-        /// <summary>
         /// Server, migrated match: once this host's own car is started on its client side, make
         /// it the local player (see NetworkedLevelControllerWrapper.RebindLocalPlayerAfterMigration).
         /// </summary>
@@ -215,7 +195,7 @@ namespace FastAndFractured.Multiplayer
         {
             float waited = 0f;
             GameObject localCar = null;
-            while (IsServerInitialized && waited < 5f && (localCar = _levelControllerWrapper.FindLocalPlayerCar()) == null)
+            while (IsServerInitialized && waited < LOCAL_CAR_WAIT_SECONDS && (localCar = _levelControllerWrapper.FindLocalPlayerCar()) == null)
             {
                 waited += Time.unscaledDeltaTime;
                 yield return null;
@@ -240,10 +220,7 @@ namespace FastAndFractured.Multiplayer
             if (IsServerInitialized) ApplyMigratedState();
         }
 
-        /// <summary>
-        /// Server, migrated match: endurance, motion, the storm and the map. Each part is applied
-        /// on its own, so one failing does not leave the others unrestored.
-        /// </summary>
+        /// <summary>Server, migrated match: endurance, motion, storm and map, each applied on its own.</summary>
         [Server]
         private void ApplyMigratedState()
         {
@@ -357,7 +334,7 @@ namespace FastAndFractured.Multiplayer
                 HumanCodes = _replayHumanCodes,
                 SuccessorTokens = successorTokens.ToArray(),
                 SuccessorAddresses = successorAddresses.ToArray(),
-                Port = transport != null ? transport.GetPort() : (ushort)7770,
+                Port = transport != null ? transport.GetPort() : FALLBACK_PORT,
                 Characters = characters.ToArray(),
             };
             NetworkedSandstormController.ServerInstance?.ServerDescribeForMigration(
@@ -419,7 +396,6 @@ namespace FastAndFractured.Multiplayer
 
             if (IsResumingMigratedMatch)
             {
-                // Host migration: this peer took over a match in progress; rebuild it now.
                 if (lobbyManager != null) lobbyManager.GameStarted.Value = true;
                 StartGame();
                 ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
@@ -516,10 +492,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // Server-only — called from OnStartServer and OnLobbyGameStarting (both server contexts).
-        // Was a [ServerRpc] historically but invoking it from OnStartServer on a freshly-spawned
-        // NetworkObject crashes ("Cannot complete action because client is not active") because
-        // FishNet routes the call through the client-side which isn't initialized yet.
+        // Server-only call: a ServerRpc invoked from OnStartServer fails because the client side is not active yet.
         [Server]
         public void StartGame()
         {
@@ -566,9 +539,7 @@ namespace FastAndFractured.Multiplayer
 
             if (IsResumingMigratedMatch)
             {
-                // Replay the original start exactly (same seed, same human characters in the same
-                // order): the singleplayer spawner then rebuilds the same cast in the same order.
-                // ApplyMigrationRoster later keeps only who is still in the match.
+                // Replay the original start exactly (same seed and human order); ApplyMigrationRoster then keeps who is left.
                 var resume = HostMigration.HostMigrationResume.Pending.Value;
                 gameSeed = resume.Seed;
                 _migratedVolumeIndex = resume.VolumeIndex;
@@ -596,13 +567,8 @@ namespace FastAndFractured.Multiplayer
                                "(c) spawn points are wired in LevelController; (d) PlayerPrefs Selected_Player not empty.");
             }
 
-            // Defer the actual networked spawn + RPC until every remote client has finished
-            // loading the map scene. Otherwise FishNet spawns the NetworkObjects on the client
-            // while it's still in the menu scene; Controller.Awake() then calls
-            // LevelController.Instance, which doesn't exist yet, creates a broken auxiliar
-            // singleton, and the auto-init cascade NREs in StartLevelWithSpawnedCharacters.
-            // (FishNet itself warns: "spawned but it's recommended to not spawn objects for
-            // connections until they have loaded start scenes".)
+            // Spawn only once every client has loaded the map: spawned in the menu, Controller.Awake creates an
+            // auxiliar LevelController.
             StartCoroutine(WaitForClientsThenSpawn(orderedConns, orderedClientIds, gameSeed));
         }
 
@@ -619,10 +585,8 @@ namespace FastAndFractured.Multiplayer
                 foreach (var conn in orderedConns)
                 {
                     if (conn == null || !conn.IsActive) continue;
-                    // The host's local connection is already in scene by definition.
                     if (conn == base.LocalConnection) continue;
-                    // This map specifically: a scene left over from the previous match must not
-                    // count as loaded.
+                    // This map specifically: a scene left from the previous match does not count.
                     if (conn.Scenes == null || !conn.Scenes.Contains(gameObject.scene))
                     {
                         allReady = false;
@@ -661,7 +625,6 @@ namespace FastAndFractured.Multiplayer
             _countdownStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_LEAD_SECONDS : COUNTDOWN_LEAD_SECONDS);
             MatchStartGate.LockUntil(_countdownStartTick.Value + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
 
-            // Initialize player tracking
             InitializePlayerTracking();
 
             if (resumingMigration)
@@ -672,10 +635,8 @@ namespace FastAndFractured.Multiplayer
             if (HostMigration.HostMigrationSettings.Enabled)
                 gameObject.AddComponent<HostMigration.HostMigrationSnapshotSender>().Initialize(this);
 
-            // Load the voted map scene (idempotent, skips if already loaded)
             LoadResolvedScene();
 
-            // Send game data to clients
             LevelControllerStartData levelControllerStartData = new LevelControllerStartData()
             {
                 AllCharacters = _levelControllerWrapper.GetSpawnedCharacters(),
@@ -684,11 +645,7 @@ namespace FastAndFractured.Multiplayer
                 OrderedClientIds = orderedClientIds,
                 RandomSeed = gameSeed
             };
-            // Host path runs DIRECTLY, never through the ObserversRpc. The RPC's local execution on
-            // the host depends on the host observer being registered by the time it is sent; in a
-            // solo-host match that race is lost and the RPC body never ran locally, so
-            // InitializeHostHUD (guard registration, state-machine takeover, HUD binding) silently
-            // skipped — the same class of bug as the ServerRpc-from-host no-op on car NOBs.
+            // The host runs it directly: the ObserversRpc's local execution can miss the host observer in a solo match.
             _levelControllerWrapper.InitializeHostHUD(orderedClientIds);
             SentLevelControllerStartData(levelControllerStartData);
             _startData = levelControllerStartData;
@@ -700,12 +657,7 @@ namespace FastAndFractured.Multiplayer
             SpawnInteractableSyncWrapper();
         }
 
-        /// <summary>
-        /// Spawns the NetworkedInteractableHandler as a runtime NetworkObject. Scene-placing it
-        /// (what the migration tool briefly did) leaves the NetworkObject with an unserialized
-        /// SceneId and FishNet refuses to initialize it — same pitfall LobbyServerBootstrapper
-        /// documents for the lobby manager, same Resources-prefab solution.
-        /// </summary>
+        /// <summary>Spawns the NetworkedInteractableHandler at runtime: scene-placed, its SceneId is never serialized.</summary>
         [Server]
         private void SpawnInteractableSyncWrapper()
         {
@@ -726,11 +678,7 @@ namespace FastAndFractured.Multiplayer
         }
 
         #region VOLUME_SYNC
-        // VolumeManager.Initialize picks a volume with DeterministicRandom. The RNG stream order
-        // diverges between peers (the server consumes extra randoms for AI/spawn logic, and a
-        // client that initializes before the networked seed arrives falls back to a random seed
-        // in LevelController), so host and clients end up with different volumes. The server
-        // replicates its chosen index explicitly instead.
+        // The RNG stream differs between peers, so the server replicates its volume index explicitly.
         private const float VOLUME_SYNC_TIMEOUT = 30f;
         private int _serverVolumeIndex = -1;     // for the host migration snapshot
         private int _migratedVolumeIndex = -1;   // set when resuming a migrated match
@@ -751,8 +699,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             int index = vm.VolumeList != null ? vm.VolumeList.IndexOf(vm.CurrentVolumeGameObject) : -1;
-            // A match resumed after a host migration keeps the lighting it had: the new host's
-            // own pick is random and the scene visibly changed colour on resuming.
+            // A resumed match keeps its lighting.
             if (_migratedVolumeIndex >= 0 && vm.VolumeList != null && _migratedVolumeIndex < vm.VolumeList.Count && _migratedVolumeIndex != index)
             {
                 vm.ChangeCurrentVolume(_migratedVolumeIndex);
@@ -766,21 +713,14 @@ namespace FastAndFractured.Multiplayer
             }
             _serverVolumeIndex = index;
 
-            // Brightness auto-initialization is suppressed only by the network-map scene
-            // overrides. Initialize it now that the server's authoritative volume is active,
-            // before publishing that same selection to observers.
+            // Brightness auto-init is suppressed by the networked scene; initialize it once the volume is active.
             InitializeBrightnessForCurrentVolume("server");
 
             Debug.Log($"[NetworkedLevelControllerManager] Server volume index {index} ({vm.CurrentVolumeGameObject.name}). Replicating to clients.");
             RpcApplyVolumeIndex(index);
         }
 
-        /// <summary>
-        /// Finds the game-scene VolumeManager once it has finished its own Initialize (so a later
-        /// auto-init won't overwrite what we apply). Uses FindAnyObjectByType instead of
-        /// VolumeManager.Instance because the singleton getter would create a broken auxiliary
-        /// instance while the scene copy isn't awake yet.
-        /// </summary>
+        /// <summary>The scene's VolumeManager once it has initialized; not .Instance, which would create an auxiliar one.</summary>
         private static VolumeManager FindInitializedSceneVolumeManager()
         {
             var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
@@ -826,9 +766,7 @@ namespace FastAndFractured.Multiplayer
 
         private static void InitializeBrightnessForCurrentVolume(string peer)
         {
-            // Never use BrightnessManager.Instance here: if scene teardown/load ordering is
-            // unusual, the singleton getter creates an auxiliary object and recreates the race
-            // this network-only initialization path is intended to avoid.
+            // Not BrightnessManager.Instance: it can create an auxiliar object.
             var brightnessManager = BrightnessManager.ExistingInstance;
             if (brightnessManager == null)
             {
@@ -842,10 +780,7 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SPECTATORS
-        // Players waiting in the room can watch the match (NetworkedLobbyManager.SpectateMatch).
-        // A spectator loads the map late, so it missed SentLevelControllerStartData: the server
-        // sends it again to that client alone once it is in the scene. Nothing changes for the
-        // players: no car, no input, no state - the spectator only receives what they receive.
+        // A spectator loads the map late and missed SentLevelControllerStartData: send it to that client again.
         private LevelControllerStartData _startData;
         private bool _hasStartData;
 
@@ -860,9 +795,8 @@ namespace FastAndFractured.Multiplayer
         [Server]
         private System.Collections.IEnumerator SendSpectatorStart(NetworkConnection conn)
         {
-            // The match may still be spawning its cars (a spectator who came in during the
-            // countdown); the cars then reach the spectator with the next observer rebuild.
-            for (float waited = 0f; !_hasStartData && waited < 30f; waited += Time.unscaledDeltaTime)
+            // Cars still spawning (spectator during the countdown) reach it with the next observer rebuild.
+            for (float waited = 0f; !_hasStartData && waited < START_DATA_WAIT_SECONDS; waited += Time.unscaledDeltaTime)
                 yield return null;
             yield return new WaitForSeconds(SPECTATOR_SPAWN_GRACE);
             if (!_hasStartData || conn == null || !conn.IsActive || _matchEnded) yield break;
@@ -882,7 +816,7 @@ namespace FastAndFractured.Multiplayer
         private System.Collections.IEnumerator ClientStartSpectating(LevelControllerStartData data)
         {
             // Every car of the cast must exist here before the singleplayer level is set up.
-            for (float waited = 0f; waited < 5f && !AllPresent(data.AllCharacters); waited += Time.unscaledDeltaTime)
+            for (float waited = 0f; waited < CAST_SPAWN_WAIT_SECONDS && !AllPresent(data.AllCharacters); waited += Time.unscaledDeltaTime)
                 yield return null;
             var cast = data.AllCharacters != null ? data.AllCharacters.FindAll(c => c != null) : new List<GameObject>();
             try
@@ -904,8 +838,7 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         void SentLevelControllerStartData(LevelControllerStartData levelControllerStartData)
         {
-            // Host initialization happens directly in WaitForClientsThenSpawn (see the comment
-            // there) — this RPC only initializes remote clients.
+            // The host initializes directly in WaitForClientsThenSpawn; this RPC is for remote clients.
             if (!IsServerInitialized && _levelControllerWrapper != null)
             {
                 _levelControllerWrapper.InitializeClientState(
@@ -924,17 +857,12 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             
-            // Get spawned characters from singleton via wrapper
             List<GameObject> charactersToSpawn = new List<GameObject>(_levelControllerWrapper.GetSpawnedCharacters());
             if (orderedConnections == null)
                 orderedConnections = GetOrderedActivePlayerConnections();
             int assignedPlayers = 0;
 
-            // Map each car GameObject to its character name code so we can replicate the skin.
-            // GetSpawnedCharacters() (InGameCharacters) and GetCharacterNameCodes()
-            // (InGameCharactersNameCodes) are filled in lockstep by CharacterSpawner, so index i
-            // of one matches index i of the other. Keyed by GameObject so it survives the
-            // charactersToSpawn.RemoveRange below.
+            // Car -> character code, to replicate the skin. Both lists are filled in lockstep by CharacterSpawner.
             var skinNameCodeByCar = new Dictionary<GameObject, string>();
             {
                 var originalCars = _levelControllerWrapper.GetSpawnedCharacters();
@@ -952,8 +880,7 @@ namespace FastAndFractured.Multiplayer
             {
                 if (assignedPlayers < charactersToSpawn.Count)
                 {
-                    // Per-car guard: a failure spawning one player's car must NOT abort the loop,
-                    // or every player after the failing one silently gets no car.
+                    // One failing car must not leave every later player without one.
                     try
                     {
                         GameObject playerVehicleGO = charactersToSpawn[assignedPlayers];
@@ -968,14 +895,10 @@ namespace FastAndFractured.Multiplayer
                         Transform parentT = playerVehicleGO.transform.parent;
                         NetworkObject rootPlayer = parentT != null ? parentT.GetComponent<NetworkObject>() : null;
                         var netVehicle = playerVehicleGO.GetComponent<NetworkedVehicle>();
-                        // FishNet detaches nested NetworkObjects while spawning them. Capture the
-                        // authored root-relative pose before either Spawn call can change parenting.
+                        // Capture the authored root-relative pose before Spawn changes the parenting.
                         Vector3 vehicleLocalPosition = playerVehicleGO.transform.localPosition;
                         Quaternion vehicleLocalRotation = playerVehicleGO.transform.localRotation;
-                        // Spawn the two NetworkObjects independently. Leaving the vehicle nested
-                        // makes Spawn(root) recursively spawn it; on a remote owner FishNet then
-                        // initializes the predicted Rigidbody at the prefab origin instead of the
-                        // server world pose. Re-parent through FishNet only after both are spawned.
+                        // Spawn the two NetworkObjects separately: nested, a remote owner initializes the Rigidbody at the prefab origin.
                         playerVehicleGO.transform.SetParent(null, worldPositionStays: true);
 
                         Debug.Log($"[NetworkedLevelControllerManager] clientId={conn.ClientId}: " +
@@ -991,8 +914,7 @@ namespace FastAndFractured.Multiplayer
                                 vehicleLocalRotation);
                         if (netVehicle != null) netVehicle.InjectInputProvider();
 
-                        // Replicate the skin (see NetworkedStatsController._skinNameCode). Must run
-                        // after Spawn so the SyncVar propagates.
+                        // After Spawn, so the SyncVar propagates.
                         ApplyReplicatedSkin(playerVehicleGO, skinNameCodeByCar);
 
                         Debug.Log($"[NetworkedLevelControllerManager] Spawned player car for clientId={conn.ClientId}.");
@@ -1025,7 +947,6 @@ namespace FastAndFractured.Multiplayer
 
                 if (rootPlayer != null)
                 {
-                    // Setup AI networking components before spawn
                     SetupAINetworking(aiVehicleGO);
                     
                     Spawn(rootPlayer);
@@ -1034,7 +955,6 @@ namespace FastAndFractured.Multiplayer
                         vehicleLocalPosition,
                         vehicleLocalRotation);
 
-                    // Replicate the AI's skin so remote clients show the same one as the host.
                     ApplyReplicatedSkin(aiVehicleGO, skinNameCodeByCar);
                 }
                 else
@@ -1044,10 +964,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Server-side: pushes a spawned car's character name code onto its NetworkedStatsController
-        /// so the skin replicates to every client (see NetworkedStatsController._skinNameCode).
-        /// </summary>
         private static void ApplyReplicatedSkin(GameObject carGO, Dictionary<GameObject, string> skinNameCodeByCar)
         {
             if (carGO == null) return;
@@ -1065,8 +981,7 @@ namespace FastAndFractured.Multiplayer
             var ordered = new List<NetworkConnection>();
             var seenClientIds = new HashSet<int>();
 
-            // Only the players the room sent into this match: anyone who joined the room since
-            // waits there for the next one (and never loads this map).
+            // Only the players the room sent into this match.
             var lobby = LobbyLocator.GetLobbyManager();
             bool onlyParticipants = lobby != null && lobby.MatchParticipants.Count > 0 && !IsResumingMigratedMatch;
 
@@ -1090,15 +1005,10 @@ namespace FastAndFractured.Multiplayer
             return ordered;
         }
 
-        /// <summary>
-        /// Dynamically adds NetworkedAIShoot to AI vehicles at spawn time.
-        /// This allows using the same prefabs for players and AI.
-        /// </summary>
+        /// <summary>Adds NetworkedAIShoot to AI vehicles at spawn (players and AI share the prefabs).</summary>
         private void SetupAINetworking(GameObject aiVehicleGO)
         {
-            // The brain lives on the NetworkedEnemyAI wrapper above the vehicle and may be
-            // inactive during setup. Searching only active children made every AI take the
-            // player/local shooting path instead.
+            // The brain sits on the (possibly inactive) wrapper above the vehicle.
             var aiBrain = aiVehicleGO.GetComponentInParent<EnemyAIBrain>(true);
             if (aiBrain == null)
                 aiBrain = aiVehicleGO.GetComponentInChildren<EnemyAIBrain>(true);
@@ -1111,7 +1021,6 @@ namespace FastAndFractured.Multiplayer
 
             var playerShoot = aiVehicleGO.GetComponentInChildren<NetworkedShoot>(true);
             
-            // Add NetworkedAIShoot if not present
             var aiShoot = aiVehicleGO.GetComponent<NetworkedAIShoot>();
             if (aiShoot == null)
             {
@@ -1119,15 +1028,12 @@ namespace FastAndFractured.Multiplayer
                 Debug.Log($"<color=cyan>[NetworkedLevelControllerManager] Added NetworkedAIShoot to AI '{aiVehicleGO.name}'</color>");
             }
             
-            // Reuse the character-specific networked variants already serialized on
-            // NetworkedShoot. ObjectPoolManager contains the single-player prefabs and is not
-            // a valid source for server-spawned NetworkObjects.
+            // Reuse NetworkedShoot's networked projectile variants (the pool holds the singleplayer prefabs).
             if (playerShoot != null)
                 playerShoot.ConfigureAiShoot(aiShoot);
             else
                 Debug.LogError($"[NetworkedLevelControllerManager] AI '{aiVehicleGO.name}' has no NetworkedShoot projectile configuration.", aiVehicleGO);
             
-            // Disable NetworkedShoot if present (player component, not for AI)
             if (playerShoot != null)
                 playerShoot.enabled = false;
 
@@ -1140,11 +1046,7 @@ namespace FastAndFractured.Multiplayer
             Vector3 authoritativeLocalPosition, Quaternion authoritativeLocalRotation)
         {
 
-            // The child NetworkObject is instantiated unparented on observers. Keeping its
-            // temporary world position (the default SetParent behaviour) converts that world
-            // pose into a huge local offset from the correctly spawned NetworkedPlayer root.
-            // Its Rigidbody may advance before this RPC arrives, so the observer's temporary
-            // local pose is unsafe too. Apply the exact local pose captured on the server.
+            // Observers instantiate the child unparented: apply the exact local pose captured on the server.
             child.SetParent(newParent);
             child.transform.SetLocalPositionAndRotation(
                 authoritativeLocalPosition, authoritativeLocalRotation);
@@ -1152,32 +1054,17 @@ namespace FastAndFractured.Multiplayer
         }
         
         #region GAME_LOOP_AND_DEATH_TRACKING
-        /// <summary>
-        /// Total characters (Players + AI) alive. Decrements with each death.
-        /// </summary>
         private int _charactersAlive => _deathTracker.AliveCount;
 
-        /// <summary>
-        /// Death/alive bookkeeping (players + AI, keyed by NetworkObject.ObjectId).
-        /// Pure logic lives in MatchDeathTracker so EditMode tests cover the win condition.
-        /// </summary>
+        /// <summary>Death/alive bookkeeping keyed by ObjectId; the logic lives in MatchDeathTracker (tested).</summary>
         private readonly MatchDeathTracker _deathTracker = new MatchDeathTracker();
 
-        /// <summary>
-        /// Direct NetworkObject references captured at registration. Resolving the winner via
-        /// ServerManager.Objects.Spawned fails when the winning car was despawned in the same
-        /// window (e.g. its owner disconnected right as the match ended) — a live match ended
-        /// as "draw" because of exactly that. Keyed by the same ObjectId the tracker uses.
-        /// </summary>
+        /// <summary>References captured at registration: the winner can be despawned before the match resolves.</summary>
         private readonly Dictionary<int, NetworkObject> _trackedCharacterNobs = new Dictionary<int, NetworkObject>();
 
         private bool _matchEnded;
 
-        /// <summary>
-        /// Server-side match end: notify clients (win/lose screen) once, then open the room for
-        /// the next match - the connection stays up and everyone returns to the room.
-        /// Guarded so multiple near-simultaneous deaths can't double-fire.
-        /// </summary>
+        /// <summary>Server: notifies the result once, then reopens the room for the next match.</summary>
         [Server]
         private void EndMatchOnServer(NetworkObject winner)
         {
@@ -1194,18 +1081,10 @@ namespace FastAndFractured.Multiplayer
             StartCoroutine(RevealThenEndGame(winner));
         }
 
-        /// <summary>
-        /// Seconds between the last decisive death and the win/lose screen. With two players the
-        /// screen used to appear on the same frame as the kill, before the explosion could even be
-        /// seen (playtest feedback 2026-09-30). The map stays loaded meanwhile, so a coroutine on
-        /// this component is safe here.
-        /// </summary>
+        /// <summary>Seconds between the last decisive death and the win/lose screen, so the explosion can be seen.</summary>
         internal const float END_OF_MATCH_REVEAL_DELAY = 3f;
 
-        /// <summary>
-        /// Server: every human is dead but AIs are still fighting. The host can then skip the
-        /// rest (playtest feedback 2026-09-30) instead of watching bots until one is left.
-        /// </summary>
+        /// <summary>Server: every human is dead while AIs still fight; the host can skip the rest.</summary>
         public bool OnlyAiAlive => base.IsServerInitialized && !_matchEnded &&
                                    _deathTracker.AliveCount > 1 && !_deathTracker.AnyPlayerAlive;
 
@@ -1225,16 +1104,13 @@ namespace FastAndFractured.Multiplayer
         {
             yield return new WaitForSeconds(END_OF_MATCH_REVEAL_DELAY);
 
-            // Before EndGameRpc (same reliable channel, so it arrives first): the win/lose screen
-            // reads it when the menu loads.
+            // Sent before EndGameRpc on the same reliable channel; the win/lose screen reads it.
             try { MatchResultsRpc(BuildMatchResults(winner)); }
             catch (Exception e) { Debug.LogException(e); }
             EndGameRpc(winner);
             Debug.Log("<color=magenta>[NetworkedLevelControllerManager] EndGameRpc dispatched. The room stays open for the next match.</color>");
 
-            // The server is no longer stopped after a match: the room outlives it. Everyone
-            // goes to the win/lose screen (the host's own load unloads the map on the server
-            // too) and from there back to the room.
+            // The room outlives the match: everyone goes to the win/lose screen and back to the room.
             LobbyLocator.GetLobbyManager()?.ServerEndMatch();
             MpCanary.Mark("Match over - room open for the next match");
         }
@@ -1310,11 +1186,7 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         
-        /// <summary>
-        /// Server-side death tracking entry point. Called by NetworkedStatsController.HandleServerSideDeath
-        /// when any character (Player or AI) dies. Was previously a [ServerRpc] but the only callers
-        /// already run on the server, so the RPC roundtrip was unnecessary.
-        /// </summary>
+        /// <summary>Server: called by NetworkedStatsController when any character dies.</summary>
         [Server]
         public void ReportDeathOnServer(NetworkObject victim, NetworkObject killer)
         {
@@ -1323,9 +1195,7 @@ namespace FastAndFractured.Multiplayer
             int victimId = ResolveTrackedVictimId(victim);
             if (victimId == -1)
             {
-                // This used to fail silently — a death that doesn't match the tracked set means
-                // the match can never end. Make it loud so a prefab/hierarchy change that moves
-                // the NetworkObject the death is reported through gets caught immediately.
+                // Loud on purpose: an untracked death means the match can never end.
                 Debug.LogError($"[NetworkedLevelControllerManager] ReportDeathOnServer could not map victim " +
                                $"'{(victim != null ? victim.gameObject.name : "null")}' (ObjectId=" +
                                $"{(victim != null ? victim.ObjectId : -1)}) to any tracked character. " +
@@ -1351,13 +1221,7 @@ namespace FastAndFractured.Multiplayer
             HandleDeathOutcome(deathResult);
         }
 
-        /// <summary>
-        /// Maps the NetworkObject a death was reported through to the tracked character id.
-        /// Deaths come from NetworkedStatsController (on the car), while tracking registered
-        /// whatever NetworkObject InGameCharacters resolved to — depending on prefab layout
-        /// these can be the car's nested NOB or the player root's. Try both directions plus
-        /// the owner mapping before giving up.
-        /// </summary>
+        /// <summary>Maps the NetworkObject a death came through (car or player root) to the tracked character id.</summary>
         [Server]
         private int ResolveTrackedVictimId(NetworkObject victim)
         {
@@ -1381,11 +1245,7 @@ namespace FastAndFractured.Multiplayer
             return -1;
         }
 
-        /// <summary>
-        /// Applies a tracker outcome: ends the match with the winner, or — when the winner's
-        /// NetworkObject can't be resolved — still ends it as a draw instead of hanging forever
-        /// with the server open (the old code silently skipped EndMatchOnServer in that case).
-        /// </summary>
+        /// <summary>Ends the match with the winner, or as a draw when the winner cannot be resolved.</summary>
         [Server]
         private void HandleDeathOutcome(MatchDeathTracker.DeathResult deathResult)
         {
@@ -1395,8 +1255,6 @@ namespace FastAndFractured.Multiplayer
                     NetworkObject winner = null;
                     if (deathResult.WinnerObjectId != -1)
                     {
-                        // Registration-time reference first (survives Spawned-dictionary removal
-                        // races); Spawned lookup as fallback.
                         _trackedCharacterNobs.TryGetValue(deathResult.WinnerObjectId, out winner);
                         if (winner == null)
                             base.ServerManager.Objects.Spawned.TryGetValue(deathResult.WinnerObjectId, out winner);
@@ -1416,9 +1274,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Initializes character tracking at start. Includes both players and AI.
-        /// </summary>
         [Server]
         public void InitializePlayerTracking()
         {
@@ -1427,7 +1282,6 @@ namespace FastAndFractured.Multiplayer
             _resultsParticipants.Clear();
             _deathLog.Clear();
 
-            // Use the singleton's InGameCharacters list which contains both Players and AI
             var allCharacters = LevelController.Instance.InGameCharacters;
             var nameCodes = LevelController.Instance.InGameCharactersNameCodes;
 
@@ -1437,12 +1291,10 @@ namespace FastAndFractured.Multiplayer
                 if (charGO == null) continue;
 
                 var nob = charGO.GetComponent<NetworkObject>();
-                // If not found on GO, try parent (vehicles are children of player root)
                 if (nob == null) nob = charGO.GetComponentInParent<NetworkObject>();
 
                 if (nob != null)
                 {
-                    // Map player connections to their character ObjectId for disconnect handling
                     int? ownerClientId = (nob.Owner != null && nob.Owner.IsValid) ? nob.Owner.ClientId : (int?)null;
                     _deathTracker.RegisterCharacter(nob.ObjectId, ownerClientId);
                     _trackedCharacterNobs[nob.ObjectId] = nob;
@@ -1461,10 +1313,7 @@ namespace FastAndFractured.Multiplayer
                       $"{_deathTracker.DescribeTracked()}</color>");
         }
 
-        /// <summary>
-        /// Handles remote client connection state changes. When a client disconnects
-        /// during an active game, their car explodes and counts as a death.
-        /// </summary>
+        /// <summary>A client disconnecting mid-match: its car explodes and counts as a death.</summary>
         private void HandleRemoteConnectionState(NetworkConnection conn, RemoteConnectionStateArgs args)
         {
             if (args.ConnectionState != RemoteConnectionState.Stopped) return;
@@ -1477,9 +1326,7 @@ namespace FastAndFractured.Multiplayer
             if (conn == null) return;
             RemovePlayerFromMatch(conn.ClientId);
 
-            // A disconnect makes FishNet despawn the player's objects; a player who only went
-            // back to the room keeps its connection, and an owner always observes its own
-            // objects - its car would keep streaming to its menu. Despawn them, as a disconnect would.
+            // An owner always observes its own objects: despawn the car, as a disconnect would.
             var owned = new List<NetworkObject>(conn.Objects);
             owned.Sort((a, b) => Depth(a).CompareTo(Depth(b)));   // parents first; they take their nested objects along
             foreach (var nob in owned)
@@ -1502,7 +1349,6 @@ namespace FastAndFractured.Multiplayer
             if (!_deathTracker.TryGetCharacterForClient(clientId, out int characterObjectId))
                 return;
 
-            // Check if this character is still alive (not already dead)
             if (!_deathTracker.IsAlive(characterObjectId))
             {
                 Debug.Log($"[NetworkedLevelControllerManager] Client {clientId} disconnected but their character was already dead.");
@@ -1514,27 +1360,20 @@ namespace FastAndFractured.Multiplayer
             ForceKillDisconnectedPlayer(clientId, characterObjectId);
         }
 
-        /// <summary>
-        /// Forces a disconnected player's character to die: spawns death VFX on all clients,
-        /// marks character icon as dead, and reports the death to game loop tracking.
-        /// </summary>
         [Server]
         private void ForceKillDisconnectedPlayer(int clientId, int characterObjectId)
         {
             _deathTracker.ForgetClient(clientId);
 
-            // The character NetworkObject should still be spawned at this point
-            // (FishNet fires OnRemoteConnectionState before ClientDisconnected despawns objects).
+            // Still spawned: FishNet fires OnRemoteConnectionState before it despawns the owner's objects.
             NetworkObject victimNob = null;
             base.ServerManager.Objects.Spawned.TryGetValue(characterObjectId, out victimNob);
 
             string victimName = LobbyLocator.GetLobbyManager()?.GetPlayerName(clientId) ?? $"Player {clientId}";
 
-            // Notify all clients to play death effects (VFX + icon + killfeed)
             DisconnectDeathRpc(victimNob, victimName);
 
-            // Track the death directly (can't route through ReportDeathServerRpc
-            // because victimNob may become null after FishNet processes the disconnect)
+            // Tracked directly: the victim's NetworkObject may be gone once FishNet processes the disconnect.
             var deathResult = _deathTracker.ReportDeath(characterObjectId);
             if (deathResult.Applied)
             {
@@ -1543,21 +1382,14 @@ namespace FastAndFractured.Multiplayer
                 HandleDeathOutcome(deathResult);
             }
 
-            // Don't manually despawn — FishNet's ClientDisconnected will handle
-            // despawning owned objects after this event returns.
+            // FishNet despawns the owned objects after this event returns.
         }
 
-        /// <summary>
-        /// ObserversRpc to play disconnect death effects on all clients.
-        /// The victim NetworkObject is still valid when this RPC is sent because
-        /// FishNet fires OnRemoteConnectionState before despawning owned objects.
-        /// </summary>
         [ObserversRpc]
         private void DisconnectDeathRpc(NetworkObject victim, string victimName)
         {
             Debug.Log($"<color=magenta>[NetworkedLevelControllerManager] DISCONNECT DEATH: {victimName} has been eliminated (disconnected)</color>");
 
-            // Spawn death VFX using the character's own VFX prefab
             if (victim != null)
             {
                 var statsCtrl = victim.GetComponent<NetworkedStatsController>();
@@ -1573,12 +1405,11 @@ namespace FastAndFractured.Multiplayer
                         if (deathVfxPrefab != null)
                         {
                             var vfx = Instantiate(deathVfxPrefab, victim.transform.position, Quaternion.identity);
-                            Destroy(vfx, 5f);
+                            Destroy(vfx, DEATH_VFX_LIFETIME_SECONDS);
                         }
                     }
                 }
 
-                // Mark character icon as dead
                 if (LevelController.Instance != null && LevelController.Instance.characterIcons != null)
                 {
                     int victimObjectId = victim.ObjectId;
@@ -1596,19 +1427,14 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // Show kill feed message
             if (HUDManager.HasInstance)
             {
                 HUDManager.Instance.UpdateUIElement(UIDynamicElementType.EVENT_TEXT, LocalizationManager.Localize("MP.Feed.Disconnected", victimName));
             }
 
-            // Notify spectator to refresh targets if the disconnected character was being spectated.
             NetworkedSpectatorController.Instance?.OnAnyCharacterDied(victim);
         }
 
-        /// <summary>
-        /// Finds the last character standing.
-        /// </summary>
         private NetworkObject GetLastCharacterAlive()
         {
             foreach (int aliveId in _deathTracker.AliveObjectIds)
@@ -1621,9 +1447,6 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
         
-        /// <summary>
-        /// Notifies all clients that the game has ended.
-        /// </summary>
         [ObserversRpc]
         private void EndGameRpc(NetworkObject winner)
         {
@@ -1640,11 +1463,9 @@ namespace FastAndFractured.Multiplayer
 
             string winnerName = winner != null ? winner.gameObject.name : "DRAW";
 
-            // Tear down spectator camera before showing win/lose screen so the freelook camera
-            // is restored to its original target (avoids the screen showing a spectated vehicle).
+            // Restore the freelook camera before the win/lose screen.
             NetworkedSpectatorController.Instance?.DeactivateSpectator();
 
-            // Check if I am the winner
             bool iWon = winner != null && winner.IsOwner;
             
             if (iWon)
@@ -1665,18 +1486,9 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Shows the end-of-match win/lose screen for the LOCAL client. Rather than trying to
-        /// activate a WinLoseScreenBehaviour on the map scene (there is none — it lives in the
-        /// MainMenu, and touching its .Instance getter spawns a broken "auxiliar" singleton whose
-        /// null serialized fields NRE in OnEnable → nobody sees the screen), we replicate exactly
-        /// what the singleplayer GameEndHandler does:
-        ///   1. Write the shared GameEndData asset (isWin, stats, finalAnimation).
-        ///   2. Load the MainMenu scene locally.
-        /// On MainMenu load, StartMode.ExecuteAfterMainMenuManager() sees a non-null finalAnimation
-        /// and shows the real WinLoseScreen. This is the proven SP path, now reused for MP.
+        /// Shows the local win/lose screen the singleplayer way: fill GameEndData and load the main menu, which
+        /// shows it when finalAnimation is set. Also used by a spectator who leaves early.
         /// </summary>
-        // Public: also invoked by NetworkedSpectatorController.LeaveMatch so a spectating loser
-        // who quits early gets the same defeat screen + MainMenu flow as a normal match end.
         public void ShowWinLoseScreen(bool isWin)
         {
             GameplayEvents.RaiseMatchEnded(isWin);
@@ -1691,7 +1503,6 @@ namespace FastAndFractured.Multiplayer
 
             gameEndData.isWin = isWin;
 
-            // Stats from the local player's networked stats controller.
             var localStats = FindLocalStats();
             if (localStats != null)
             {
@@ -1705,23 +1516,17 @@ namespace FastAndFractured.Multiplayer
                 gameEndData.totalDamageTaken      = "0";
                 gameEndData.totalDistanceTraveled = "0";
             }
-            // Kills were never filled in multiplayer (the screen showed the default): take them
-            // from the match table, which the server sent just before EndGameRpc.
+            // Kills come from the match table, sent just before EndGameRpc.
             gameEndData.killCount = MatchResults.TryGetLocal(out var myResult) ? myResult.Kills.ToString() : "0";
 
-            // finalAnimation drives StartMode: a non-null value makes the MainMenu show the
-            // win/lose stats screen instead of the normal menu. Resolve the character-specific
-            // win or lose object from the local player's StatsController (same source SP uses).
+            // A non-null finalAnimation makes the main menu open on the win/lose screen.
             gameEndData.finalAnimation = ResolveFinalAnimation(localStats, isWin);
 
-            // WIN_LOSE screen buttons are SP defaults; arm the MP override so "retry" routes
-            // back to the multiplayer hub (host recreates the room, clients browse for it).
             MultiplayerPostMatchFlow.ArmAfterMultiplayerMatch(InstanceFinder.IsServerStarted);
 
             LoadMainMenuLocally();
         }
 
-        /// <summary>Reflection into LevelController.gameEndDataScriptableObject (private SP field).</summary>
         private GameEndData ResolveGameEndData()
         {
             var lc = LevelController.HasInstance ? LevelController.Instance : FindObjectOfType<LevelController>(true);
@@ -1730,16 +1535,7 @@ namespace FastAndFractured.Multiplayer
             return field?.GetValue(lc) as GameEndData;
         }
 
-        /// <summary>
-        /// The character-specific win/lose animation prefab, pulled from the local player's
-        /// StatsController the same way GameEndHandler does (GetWinObjectByString / GetLoseObjectByString
-        /// keyed by a character name code). The code comes from the wrapper's LocalPlayerNameCode
-        /// (the character the local player ACTUALLY drove, from authoritative spawn data) — NOT
-        /// from PlayerPrefs, which editor clones share through the registry, so any peer's write
-        /// can clobber the local value mid-match (observed: host played Pepe, read "Josefino_0",
-        /// got null animation → no win screen). Falls back to prefs, then to the first available
-        /// win/lose object so the screen always has SOMETHING to show for the played character.
-        /// </summary>
+        /// <summary>The local character's win/lose animation (code from the spawn data, not the shared PlayerPrefs), else the first one configured.</summary>
         private GameObject ResolveFinalAnimation(NetworkedStatsController localStats, bool isWin)
         {
             var coreStats = localStats != null ? localStats.GetComponent<StatsController>() : null;
@@ -1752,8 +1548,7 @@ namespace FastAndFractured.Multiplayer
             var animation = isWin ? coreStats.GetWinObjectByString(code) : coreStats.GetLoseObjectByString(code);
             if (animation == null)
             {
-                // Exact key miss (e.g. stale/mismatched code): fall back to the first configured
-                // object so StartMode still shows the win/lose screen instead of the plain menu.
+                // Unknown code: any configured object still shows the screen.
                 var candidates = isWin ? coreStats.WinObjects : coreStats.LoseObjects;
                 if (candidates != null)
                 {
@@ -1772,11 +1567,7 @@ namespace FastAndFractured.Multiplayer
             return animation;
         }
 
-        /// <summary>
-        /// Local (non-networked) load of the MainMenu scene. Marks the intentional leave so the
-        /// HostDisconnectWatchdog doesn't also fire its "host disconnected" path when the client
-        /// stops shortly after.
-        /// </summary>
+        /// <summary>Local load of the main menu, marked as an intentional leave for HostDisconnectWatchdog.</summary>
         private void LoadMainMenuLocally()
         {
             HostDisconnectWatchdog.NotifyMatchEnded();
@@ -1801,18 +1592,8 @@ namespace FastAndFractured.Multiplayer
 
             string sceneToLoad = entry.GetSceneNameForMultiplayer();
 
-            // Modern flow: NetworkedLobbyManager.LoadMapSceneAfterAnimation already loaded the
-            // map scene before this manager was even spawned. We must NOT load it again because
-            // ReplaceScenes=All would Destroy the cars we just spawned a few frames ago.
-            //
-            // The old check (sceneToLoad == ActiveScene.name) is unreliable: FishNet's scene
-            // transitions don't always synchronously update Unity's "active scene" before this
-            // runs from OnStartServer, so the comparison can falsely say "different" and trigger
-            // a second load that nukes the freshly-instantiated cars (causing a
-            // MissingReferenceException in LevelController.OnGameStartDelayComplete a few seconds
-            // later when the delay timer iterates InGameCharacters).
-            //
-            // Iterate ALL loaded scenes by name as the authoritative source.
+            // The lobby already loaded the map; loading it again (ReplaceScenes.All) destroys the spawned cars.
+            // Check every loaded scene by name: the active scene is not updated synchronously.
             var unitySm = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
             for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {

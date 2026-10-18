@@ -5,14 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Crash/freeze forensics for multiplayer sessions. Editor console logs are useless when the
-    /// main thread hard-locks (nothing flushes), so this writes flushed one-liners to
-    /// &lt;project&gt;/mp_canary.log — per project folder, so host editor and ParrelSync clone get
-    /// separate files. A ~1Hz heartbeat plus stage markers means the LAST line in the file after
-    /// a freeze tells us exactly which stage the main thread died in.
-    ///
-    /// Cost: one small file append per second plus one per stage marker — negligible.
-    /// Editor and development builds only: a release build must not write next to the game.
+    /// Freeze forensics: flushed one-liners to &lt;project&gt;/mp_canary.log, a ~1 Hz heartbeat plus stage markers, so
+    /// the last line after a hang shows the stage. Editor and development builds only.
     /// </summary>
     public static class MpCanary
     {
@@ -26,7 +20,6 @@ namespace FastAndFractured.Multiplayer
             {
                 if (_path == null)
                 {
-                    // dataPath = <project>/Assets → write next to the project folder root.
                     _path = System.IO.Path.Combine(Application.dataPath, "..", "mp_canary.log");
                 }
                 return _path;
@@ -51,9 +44,9 @@ namespace FastAndFractured.Multiplayer
             go.AddComponent<HeartbeatRunner>();
         }
 
-        // Several builds launched from one folder share the file: a write can collide with another
-        // process's, so only give up after many failures in a row, and tag each line with the process.
+        // Builds launched from one folder share the file: tolerate collisions and tag each line with the process.
         private const int MAX_CONSECUTIVE_FAILURES = 50;
+        private const float HEARTBEAT_SECONDS = 1f;
         private static int _consecutiveFailures;
         private static readonly string ProcessTag = Application.isEditor
             ? string.Empty : $"p={System.Diagnostics.Process.GetCurrentProcess().Id} ";
@@ -81,7 +74,7 @@ namespace FastAndFractured.Multiplayer
             private void Update()
             {
                 if (Time.realtimeSinceStartup < _nextBeatRealtime) return;
-                _nextBeatRealtime = Time.realtimeSinceStartup + 1f;
+                _nextBeatRealtime = Time.realtimeSinceStartup + HEARTBEAT_SECONDS;
                 Mark($"heartbeat dt={Time.deltaTime * 1000f:F0}ms scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             }
         }

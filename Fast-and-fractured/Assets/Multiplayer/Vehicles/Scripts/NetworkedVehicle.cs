@@ -34,15 +34,11 @@ namespace FastAndFractured.Multiplayer
             public PredictionRigidbody PredictionRigidbody;
             public float Speed;
 
-            // Extended vehicle state so post-reconcile ticks resume from the server's exact
-            // gameplay state instead of only its rigidbody state (dash/drift/steer drive forces
-            // on subsequent ticks; without them the owner re-diverges immediately).
             public int DashTicksRemaining;
             public Vector3 DashDirection;
             public float CurrentSteerAngle;
             public float CurrentRbMaxVelocity;
-            // dev (2026-10): while a trampoline/TNT/dash-push impulse lasts the max speed is not
-            // re-clamped. Without it the owner's replays clamped a flying car the server let fly.
+            // Impulse in flight (trampoline/TNT/push): max speed is not re-clamped.
             public bool IsBeenImpulsed;
             public bool IsDrifting;
             public float DriftDirection;
@@ -50,15 +46,13 @@ namespace FastAndFractured.Multiplayer
             public bool DriftIsBackwards;
             public float LinearDamping;
 
-            // World-space snapshot of the server's rigidbody, read straight off the Rigidbody in
-            // CreateReconcile. Used by the owner's soft reconcile instead of
-            // PredictionRigidbody.RigidbodyState, which round-trips in LOCAL space - comparing that
-            // directly against a world-space value was the root cause of the 2026-09-11 levitation
-            // bug. Keeping a separate, unambiguous world-space copy avoids that trap entirely.
+            // World-space copy: RigidbodyState round-trips in local space.
             public Vector3 WorldPosition;
             public Quaternion WorldRotation;
             public Vector3 WorldVelocity;
             public Vector3 WorldAngularVelocity;
+
+            private const float DEFAULT_LINEAR_DAMPING = 0.08f;
 
             public ReconcileData(PredictionRigidbody prb,float speed)
             {
@@ -74,7 +68,7 @@ namespace FastAndFractured.Multiplayer
                 DriftDirection = 1f;
                 InitialSpeedWhenDrifting = 0f;
                 DriftIsBackwards = false;
-                LinearDamping = 0.08f;
+                LinearDamping = DEFAULT_LINEAR_DAMPING;
                 WorldPosition = Vector3.zero;
                 WorldRotation = Quaternion.identity;
                 WorldVelocity = Vector3.zero;
@@ -95,17 +89,13 @@ namespace FastAndFractured.Multiplayer
         private VehicleVisualSmoother _visualSmoother;
         private bool _subscribedToTimeManager;
 
-        // Server-owned AI vehicles keep their brain-driven provider (see ApplyInputProviderLocally).
         private AiInputProvider _serverDrivenAiProvider;
 
-        // ---- Deterministic dash (see TickDeterministicDash) ----
         private bool _wasSpDashing;
         private int _dashTicksRemaining;
         private Vector3 _dashWorldDirection;
         private float _cachedDashForce = float.NaN;
 
-        // Live ticks left in which a dash can still explain the owner and the server's report being
-        // metres apart (see ApplyServerPose).
         private int _dashSettleTicks;
 
         private bool _cameraTargetChecked;
@@ -120,8 +110,7 @@ namespace FastAndFractured.Multiplayer
         {
             _coreMovementController = GetComponent<CarMovementController>();
             _physicsBehaviour = GetComponent<PhysicsBehaviour>();
-            // The multiplayer adapter explicitly: GetComponent<ICustomRigidbody>() returns whichever
-            // adapter comes first, and a leftover singleplayer one disabled reconciliation (Carme).
+            // Prefer the multiplayer adapter; a leftover singleplayer one breaks reconciliation.
             _customRigidbody = (ICustomRigidbody)GetComponent<MultiplayerRigidbodyAdapter>() ?? GetComponent<ICustomRigidbody>();
             _visualSmoother = GetComponent<VehicleVisualSmoother>();
 
@@ -136,7 +125,6 @@ namespace FastAndFractured.Multiplayer
 
         private static bool _canaryFirstTickLogged;
 
-        // Domain reload is disabled in Enter Play Mode options; statics survive between plays.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticsForDomainReloadDisabled() => _canaryFirstTickLogged = false;
 
@@ -166,7 +154,6 @@ namespace FastAndFractured.Multiplayer
             {
                 InjectInputProvider();
 
-                // Host still needs immediate local provider wiring.
                 if (base.IsClientInitialized)
                     ApplyInputProviderLocally();
             }
@@ -186,24 +173,7 @@ namespace FastAndFractured.Multiplayer
             ApplyVisualSmoothingForOwnership();
         }
 
-        /// <summary>
-        /// Stops the NetworkTickSmoother on this vehicle and restores its graphical children.
-        ///
-        /// The smoother does not converge in this project and leaves the graphics detached from the
-        /// body. Measured on a live host+client match (2026-08-12), with the car body itself
-        /// perfectly replicated — identical world positions on both peers:
-        ///   * remote car: the 'Visuals' child sat 262 m from its body and kept drifting (917 m).
-        ///   * owned car:  'Visuals' floated 1.15 m above the body and the turret 1.1 m above its
-        ///     authored height — the chassis visibly lifting off the ground while un-smoothed
-        ///     children (the *ExtraObjects) stayed on the car, which reads as those objects
-        ///     "going their own way".
-        /// Raising the spectator teleport threshold did not help; the drift kept growing.
-        ///
-        /// Stopping it fixes both: every graphical child returns to its authored local pose and
-        /// stays there. Note that disabling the MonoBehaviour is NOT enough — the controller
-        /// subscribes to TimeManager callbacks itself and keeps moving the graphics — so
-        /// StopSmoother() is the call that matters.
-        /// </summary>
+        /// <summary>Stops the NetworkTickSmoother, which drifts the graphics away from the body, and restores their authored pose.</summary>
         private void ApplyVisualSmoothingForOwnership()
         {
             var smoothers = GetComponentsInChildren<FishNet.Component.Transforming.Beta.NetworkTickSmoother>(true);
@@ -213,9 +183,7 @@ namespace FastAndFractured.Multiplayer
             {
                 if (smoother == null) continue;
 
-                // StopSmoother is the part that matters: the controller subscribes to TimeManager
-                // callbacks of its own, so merely disabling the MonoBehaviour leaves it moving the
-                // graphics (measured — the visual kept drifting with the component disabled).
+                // Disabling the component is not enough: the controller has its own TimeManager callbacks.
                 var controller = smoother.SmootherController;
                 if (controller != null)
                 {
@@ -227,38 +195,15 @@ namespace FastAndFractured.Multiplayer
 
             SnapVisualsToBody();
 
-            // Deliberately NOT touching Rigidbody.interpolation here. Interpolation on the OWNER
-            // looks like the obvious replacement for the smoother, but on a predicting client it
-            // desynchronises the body from its own transform, and the camera rides that gap.
-            //
-            // Measured on a live host+client match (2026-08-12) on the client-owned car, with
-            // interpolation forced to Interpolate:
-            //     transform.position = (771.10, 267.15, 961.40)   <- grounded, correct
-            //     Rigidbody.position = (744.89, 404.14, 894.82)   <- 140 m away, in the air
-            // The two alternated every frame, so the car (and the camera constrained to its
-            // 'Visuals') was thrown 23.7 m per frame on average, 158 m at worst. Setting it back
-            // to None on the same live car closed the gap to 0.02 m and dropped per-frame motion
-            // to 0.009 m. The host did not show it: only a client-owner both predicts and takes
-            // reconcile corrections, and it is that write that interpolation fights.
-            //
-            // The prefabs already ship interpolation None (VehicleSmoothingSetupTool) and
-            // NetworkedVehicleSetupTests asserts it; leaving it alone at runtime keeps the two
-            // in agreement instead of silently overriding the tested setup.
+            // Rigidbody.interpolation stays None: on a predicting client it splits the body from its transform.
 
-            // The smoother starts itself in its own OnStartClient, which may run AFTER ours; keep
-            // re-applying from the tick loop until we have actually stopped a live controller.
+            // The smoother may start after us (its own OnStartClient): retry from the tick loop until stopped.
             _visualPresentationApplied = smoothers.Length == 0 || stoppedALiveController;
         }
 
         private bool _visualPresentationApplied;
 
-        /// <summary>
-        /// Puts the graphical children back where the prefab places them. Disabling the smoother
-        /// stops it moving them, but it does not undo the offset it already introduced, so without
-        /// this a car that had already drifted stays drawn in the wrong place for the rest of the
-        /// match. Restores the authored local pose (the turret sits above the body, so zeroing it
-        /// would be wrong) captured before any smoother could run.
-        /// </summary>
+        /// <summary>Restores the authored local pose; stopping the smoother does not undo its offset.</summary>
         private void SnapVisualsToBody()
         {
             foreach (var pose in _authoredVisualPoses)
@@ -281,10 +226,7 @@ namespace FastAndFractured.Multiplayer
 
         private readonly System.Collections.Generic.Dictionary<Transform, LocalPose> _authoredVisualPoses = new();
 
-        /// <summary>
-        /// Snapshots the prefab-authored local pose of each smoothed child. Taken in Awake, before
-        /// any smoother has had a chance to displace them.
-        /// </summary>
+        /// <summary>Taken in Awake, before any smoother can displace the children.</summary>
         private void CacheAuthoredVisualPoses()
         {
             foreach (var smoother in GetComponentsInChildren<FishNet.Component.Transforming.Beta.NetworkTickSmoother>(true))
@@ -306,58 +248,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // NOTE on the client-only tremble (still OPEN, 2026-08-12).
-        //
-        // Measured live, both peers, cars standing still (NetworkedVehicleDiagnostics):
-        //                       HOST                        CLIENT
-        //   owned car  jump     0.016 m                     0.254 m
-        //   remote car jump     0.058 m                     0.246 m
-        //   body vs transform   0.000 m both cars           0.017/max 0.253 owned,
-        //                                                   0.054/max 0.178 remote
-        //   reconciles          none (is the server)        41/s, mean 0.00 cm, max 0.01 cm
-        //
-        // What this rules OUT:
-        //   * Prediction diverging. Reconcile corrections are ~0 cm, so the local simulation agrees
-        //     with the server; PhysicsMode = TimeManager is NOT needed to fix this.
-        //   * An owner-only cause. The REMOTE car on the client shows the same defect, and remote
-        //     cars never reconcile — so it is a property of the CLIENT peer, not of ownership.
-        //   * Rigidbody interpolation, which is None everywhere (see ApplyVisualSmoothingForOwnership).
-        //
-        // CORRECTION (2026-09-12). The paragraph that used to sit here said a Physics.SyncTransforms()
-        // hook was removed because it syncs "Transform -> physics engine, the opposite of the
-        // direction needed". That reasoning was backwards, and the open question it posed -
-        // "find what writes the Transform without the Rigidbody following" - now has an answer:
-        //
-        //   FishNet's RigidbodyState.SetState writes t.localPosition/t.localRotation plus the
-        //   velocities. It never writes rb.position. So the Transform IS the thing being written,
-        //   and Transform -> physics engine is exactly the direction a sync would need to go.
-        //
-        // FishNet normally does that sync itself, but PredictionManager.cs gates it:
-        //     bool timeManagerPhysics = tm.PhysicsMode == PhysicsMode.TimeManager;   // ~line 662
-        //     if (timeManagerPhysics) { ... Physics.SyncTransforms(); ... }          // ~line 670
-        // This project runs PhysicsMode.Unity, so that sync is skipped every reconcile.
-        //
-        // Do NOT conclude from that that adding Physics.SyncTransforms() here is the fix. It was
-        // considered and rejected on 2026-09-12 for two measured reasons:
-        //   * Unity syncs transforms at the start of every physics step anyway, so the physics
-        //     simulation itself already runs from the corrected pose. Only reads taken between the
-        //     reconcile and the next FixedUpdate see the stale pose.
-        //   * It would NOT fix the grounded flicker. SyncTransforms pushes poses into PhysX; it does
-        //     not re-run WheelCollider suspension queries, and WheelController reads
-        //     wheelCollider.isGrounded / GetGroundHit(), which only update on a simulation step.
-        //
-        // Also note the "body/transform" figure in NetworkedVehicleDiagnostics is measured in
-        // Update - precisely the window where transform and rb differ BY DESIGN under this
-        // project's autoSyncTransforms=false. Treat a nonzero mean there as expected, not as
-        // evidence of two writers.
-        //
-        // Still open: the client's car oscillates ~8 cm vertically while at rest, sampled in
-        // FixedUpdate (so it is real body motion, not a render artifact), while the state machine
-        // flips Grounded <-> Idle a few times a second. Leading hypothesis is that reconciling
-        // rb.linearVelocity ~40x/s never lets a resting body settle. ReconcileRestDiagnostics
-        // exists to confirm or kill that.
-
-
 
         [ObserversRpc(RunLocally = true)]
         public void InjectInputProvider()
@@ -365,28 +255,17 @@ namespace FastAndFractured.Multiplayer
             ApplyInputProviderLocally();
         }
 
-        /// <summary>
-        /// Ownership can arrive after OnStartNetwork ran the wiring — re-run it with the final
-        /// owner so the owner never keeps a non-owner provider setup.
-        /// </summary>
+        /// <summary>Ownership can arrive after OnStartNetwork: re-run the wiring for the final owner.</summary>
         public override void OnOwnershipClient(NetworkConnection prevOwner)
         {
             base.OnOwnershipClient(prevOwner);
             ApplyInputProviderLocally();
-            // Ownership decides whether this car's visuals are smoothed (see the method's notes).
             ApplyVisualSmoothingForOwnership();
         }
 
         private bool _ownerWiringVerified;
 
-        /// <summary>
-        /// A spawn-order race can leave the root's NetworkInputProvider without its
-        /// local PlayerInputProvider (HasLocalProvider == false) on the OWNER. Movement survives
-        /// because CarInjector.Install later assigns the PlayerInputProvider directly to the
-        /// CarMovementController (BuildMoveData's fallback), but NetworkedShoot reads the
-        /// NetworkInputProvider component — which reports every input as false forever.
-        /// Verify once per session on the first owned ticks and rewire if broken.
-        /// </summary>
+        /// <summary>A spawn-order race can leave the owner's NetworkInputProvider without its PlayerInputProvider; rewire it once.</summary>
         private void EnsureOwnerProviderWired()
         {
             if (_ownerWiringVerified) return;
@@ -405,20 +284,12 @@ namespace FastAndFractured.Multiplayer
                 _ownerWiringVerified = true;
         }
 
-        /// <summary>
-        /// Applies the correct InputProvider locally. Can be called directly (e.g., after CarInjector overwrites).
-        /// </summary>
         public void ApplyInputProviderLocally()
         {
             var parentPlayerInputProvider = GetComponentInParent<PlayerInputProvider>();
             var parentNetworkInputProvider = GetComponentInParent<NetworkInputProvider>();
 
-            // Server-owned AI: EnemyAIBrain writes its steering into AiInputProvider. Replacing
-            // it with a NetworkInputProvider would feed the car the replicated MoveData instead —
-            // but for AI the server IS the input source, and the generic server path replicates
-            // default (zeroed) data, so the AI would simply never move. Keep the brain's provider
-            // on the server; TimeManager_OnTick feeds its inputs into Replicate so observers
-            // still receive the real movement data.
+            // Server-owned AI keeps its brain's AiInputProvider; TimeManager_OnTick replicates its inputs.
             var aiProvider = GetComponentInParent<AiInputProvider>();
             bool isServerControlledAi = aiProvider != null && (base.Owner == null || !base.Owner.IsValid);
             if (isServerControlledAi && base.IsServerInitialized)
@@ -428,7 +299,6 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Create NetworkInputProvider if it doesn't exist
             if (parentNetworkInputProvider == null)
             {
                 var parent = transform.parent;
@@ -440,7 +310,6 @@ namespace FastAndFractured.Multiplayer
 
             if (!base.IsOwner)
             {
-                // Non-owner: Use NetworkInputProvider (reads replicated input)
                 _coreMovementController.InputProvider = parentNetworkInputProvider;
                 
                 if (parentPlayerInputProvider != null)
@@ -450,14 +319,11 @@ namespace FastAndFractured.Multiplayer
             }
             else // Owner
             {
-                // Owner: Initialize NetworkInputProvider with the local PlayerInputProvider
                 if (parentNetworkInputProvider != null && parentPlayerInputProvider != null)
                 {
                     parentNetworkInputProvider.Initialize(parentPlayerInputProvider);
                 }
                 
-                // ALWAYS set InputProvider to NetworkInputProvider for consistency
-                // BuildMoveData knows how to read from NetworkInputProvider
                 _coreMovementController.InputProvider = parentNetworkInputProvider ?? (IInputProvider)parentPlayerInputProvider;
                 
                 if (parentPlayerInputProvider != null)
@@ -468,24 +334,14 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Locates the singleplayer MOVEMENT state machine Controller for this vehicle and ensures a
-        /// NetworkedStateMachineDriver is attached to it. The driver disables Controller.Update
-        /// so the state machine only runs from NetworkedVehicle.Replicate (tick rate, deterministic).
-        ///
-        /// Must be retried every tick until it succeeds: at OnStartNetwork the car has not been
-        /// reparented under its NetworkedPlayer shell yet, so the movement Controller is not an
-        /// ancestor and resolution fails. Resolving only once left _stateMachineDriver null while
-        /// NetworkedLevelControllerWrapper still disabled the Controller — the movement state
-        /// machine was then frozen in its first state forever (no ApplyMovementAction, no air
-        /// control, no grounded/air/dash transitions), which is exactly the "slow and clunky,
-        /// nothing like singleplayer" driving feel.
+        /// Attaches the NetworkedStateMachineDriver to the movement Controller. Retried every tick: the
+        /// car is only reparented under its player shell after OnStartNetwork.
         /// </summary>
         private void EnsureStateMachineDriver()
         {
             if (_stateMachineDriver != null) return;
 
-            // Ancestors only. GetComponentInChildren would happily return the SHOOTING Controller
-            // that lives on a child of the player shell, which must keep running from Update.
+            // Ancestors only: the shooting Controller on the shell must keep running from Update.
             var controller = GetComponentInParent<StateMachine.Controller>(true);
             if (controller == null)
             {
@@ -514,20 +370,7 @@ namespace FastAndFractured.Multiplayer
         // Same child CarInjector.Install(null, true) binds the camera to.
         private const string VISUALS_CHILD_NAME = "Visuals";
 
-        /// <summary>
-        /// Points the player shell's camera look-at constraints at this car's 'Visuals' - drawn
-        /// interpolated by VehicleVisualSmoother - instead of at the car root, which only moves on
-        /// a physics step.
-        ///
-        /// The two peers used to build the rig differently: a client runs
-        /// CarInjector.Install(null, true), which binds 'Visuals', but the host spawns the cars
-        /// through the singleplayer CharacterSpawner, whose Install overload binds the car ROOT.
-        /// So the host's camera chased a target stepping at 50 Hz under a 30-100 fps render.
-        /// Measured on the host during a dash (2026-09-29): 290 mm of per-frame jitter on the
-        /// look-at point - exactly the body's - against 22 mm on the interpolated 'Visuals'.
-        /// Only sources that point at this car's root are rebound, so the client's already-correct
-        /// binding and anything else in the shell are left alone.
-        /// </summary>
+        /// <summary>Points the shell's camera constraints at the interpolated 'Visuals' instead of the car root.</summary>
         private void EnsureCameraFollowsVisuals()
         {
             if (_cameraTargetChecked) return;
@@ -551,22 +394,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Binds the NetworkObject's <c>_graphicalObject</c> so FishNet's built-in prediction
-        /// smoother knows which transform to interpolate between ticks — BUT ONLY when the vehicle
-        /// isn't already smoothing itself with a <see cref="NetworkTickSmoother"/> component.
-        ///
-        /// All four car prefabs carry NetworkTickSmoother components on their Visuals (and Turret)
-        /// child. Those are FishNet's newer standalone smoothers and are the intended, sole source
-        /// of between-tick smoothing. Setting <c>_graphicalObject</c> as well spins up the
-        /// NetworkObject's OWN PredictionSmoother on top of them — two independent smoothers writing
-        /// transforms every frame — which is the visible "trembling" the cars and turrets show.
-        /// (The auto-picked target was even the wrong child, PushApplyPoint, a logic anchor.)
-        ///
-        /// So: if a NetworkTickSmoother exists, leave _graphicalObject at its shipped-empty value
-        /// (built-in smoother stays off). Only vehicles WITHOUT one fall back to the auto-bind, which
-        /// mirrors NetworkedProjectile.EnsureNetworkObjectGraphicalBinding.
-        /// </summary>
+        /// <summary>Binds NetworkObject._graphicalObject only when the car has no NetworkTickSmoother (two smoothers make it tremble).</summary>
         private static System.Reflection.FieldInfo _vehicleGraphicalObjectField;
 
         private void EnsureNetworkObjectGraphicalBinding()
@@ -574,7 +402,6 @@ namespace FastAndFractured.Multiplayer
             var nob = GetComponent<FishNet.Object.NetworkObject>();
             if (nob == null) return;
 
-            // The car self-smooths via NetworkTickSmoother — do not add a second, competing smoother.
             if (GetComponentInChildren<FishNet.Component.Transforming.Beta.NetworkTickSmoother>(true) != null)
                 return;
 
@@ -595,7 +422,6 @@ namespace FastAndFractured.Multiplayer
 
         private Transform ResolveGraphicalTarget()
         {
-            // Prefer first child transform (typically the visual mesh root).
             foreach (Transform child in transform)
             {
                 if (child != null) return child;
@@ -603,13 +429,7 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
 
-        /// <summary>
-        /// MariaAntonia/Carme variant prefabs were checked in with empty NetworkBehaviours lists,
-        /// which means FishNet has nothing to register and RPCs/state-replication for components
-        /// attached here will silently no-op. This produces "still desynced" symptoms after the
-        /// rigidbody-prediction-type fix (the rb syncs, but the rest doesn't). Surface this loudly
-        /// at runtime so the regression is caught when prefabs are not re-serialized.
-        /// </summary>
+        /// <summary>Logs loudly when a prefab ships an empty NetworkBehaviours list: its RPCs would silently no-op.</summary>
         private void VerifySerializedNetworkBehaviours()
         {
             var nob = GetComponent<FishNet.Object.NetworkObject>();
@@ -634,12 +454,9 @@ namespace FastAndFractured.Multiplayer
                 MpCanary.Mark($"first NetworkedVehicle tick ('{gameObject.name}')");
             }
 
-            // Retries until the car has been reparented under its player shell (see the method).
             EnsureStateMachineDriver();
             EnsureCameraFollowsVisuals();
 
-            // The NetworkTickSmoother starts itself in its own OnStartClient, which can run after
-            // ours; retry until we have actually stopped a live controller.
             if (!_visualPresentationApplied && base.IsClientInitialized)
                 ApplyVisualSmoothingForOwnership();
 
@@ -655,9 +472,7 @@ namespace FastAndFractured.Multiplayer
             {
                 if (_serverDrivenAiProvider != null)
                 {
-                    // Server-owned AI: the server is the input authority. Replicating the brain's
-                    // real inputs (instead of default/zeroed data) is what makes AI cars move on
-                    // every client.
+                    // Server-owned AI: replicate the brain's real inputs so clients see it move.
                     MoveData aiMd = new MoveData
                     {
                         MoveInput = _serverDrivenAiProvider.MoveInput,
@@ -674,12 +489,7 @@ namespace FastAndFractured.Multiplayer
             }
             else
             {
-                // Spectating client: FishNet only runs the forwarded inputs of a car we don't own
-                // when Replicate is called for it every tick (the data passed here is ignored; the
-                // forwarded input is used). Without this call the car never ran a live tick on
-                // clients - no throttle, brake, auto-deceleration or dash impulse - and just rolled
-                // under raw physics between reconciles, then snapped back: measured 2026-09-24 as
-                // a parked remote car sliding downhill to ~1 m/s and jumping ~30 cm per reconcile.
+                // Spectated car: FishNet only runs its forwarded inputs when Replicate is called every tick.
                 Replicate(default);
             }
         }
@@ -738,7 +548,6 @@ namespace FastAndFractured.Multiplayer
             md = default;
             if (_coreMovementController?.InputProvider == null) return;
             
-            // Try NetworkInputProvider first (set by InjectInputProvider), fallback to PlayerInputProvider
             var netProvider = _coreMovementController.InputProvider as NetworkInputProvider;
             if (netProvider != null)
             {
@@ -763,11 +572,7 @@ namespace FastAndFractured.Multiplayer
         {
             bool isReplaying = state.ContainsReplayed();
 
-            // Under PhysicsMode.Unity a replay never steps physics, and the owner's reconcile does
-            // not rewind the body (see ApplyServerPose): whatever a replayed tick adds - coasting
-            // deceleration, dash impulses - is extra force on top of what the live ticks already
-            // applied, all landing in the next physics step. Measured on the client-owned car: ~12
-            // replayed ticks per reconcile, ~47 reconciles/s. Replays do nothing.
+            // Under PhysicsMode.Unity a replay never steps physics, so anything it adds lands on top of the live ticks.
             if (isReplaying)
                 return;
 
@@ -789,7 +594,6 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            // Drive the full movement state machine (ApplyMovementAction, transitions, auto-deceleration).
             if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
             {
                 _stateMachineDriver.TickStateMachine(md.GetTick());
@@ -804,11 +608,7 @@ namespace FastAndFractured.Multiplayer
 
             _customRigidbody?.Simulate();
 
-            // SP clamps velocity in CarMovementController.FixedUpdate, but with prediction the
-            // rigidbody also integrates inside ticks and replays — steps FixedUpdate never sees.
-            // Without clamping here too, the owner's car bursts past MaxSpeed (>100 km/h from a
-            // small push on Pepe) because several tick/replay simulations accumulate between
-            // FixedUpdate clamps. Same limit, same API, applied at tick cadence.
+            // Clamp at tick cadence too: ticks and replays integrate between the SP FixedUpdate clamps.
             if (_physicsBehaviour != null)
             {
                 float maxVelocity = ReadFloat(SingleplayerReflectionCache.CarMovement_CurrentRbMaxVelocity, -1f);
@@ -821,11 +621,7 @@ namespace FastAndFractured.Multiplayer
         private int _missingInputTicks;
         private const int MAX_CONTINUED_INPUT_TICKS = 5;
 
-        /// <summary>
-        /// When no input arrived for this tick (server or spectating client), FishNet runs the tick
-        /// with default data - zero throttle, so the car brakes for one tick and the owner then gets
-        /// corrected towards that. Keep driving with the last real input for a few ticks instead.
-        /// </summary>
+        /// <summary>No input for this tick: keep the last real input instead of braking for one tick.</summary>
         private MoveData ContinueLastInputIfMissing(MoveData md, ReplicateState state)
         {
             if (state.ContainsCreated())
@@ -843,28 +639,12 @@ namespace FastAndFractured.Multiplayer
             return continued;
         }
 
-        /// <summary>
-        /// Replaces the singleplayer dash's per-frame TimerSystem impulses with per-tick impulses.
-        ///
-        /// The SP dash (CarMovementController.HandleDashWithPhysics) applies
-        /// AddForce(dashForce, Impulse) on every TimerSystem frame update, so total dash strength
-        /// scales with frame rate: a 144fps host dashes ~2.4x harder than a 60fps client, and the
-        /// owner's prediction always diverges from the server mid-dash. We let the SP dash trigger
-        /// normally (VFX, rotation lock, max-speed switch, air-dash limit, initial nudge), then
-        /// immediately stop its impulse timer and apply the same per-impulse force once per tick
-        /// for DashTime seconds — identical on server, owner and observers, and replay-safe.
-        /// </summary>
+        /// <summary>Applies the SP dash impulse once per tick instead of per frame, so its strength no longer depends on frame rate.</summary>
         private void TickDeterministicDash(bool isReplaying)
         {
             if (_coreMovementController == null) return;
 
-            // Replays must neither re-apply the impulse nor count the tick down. The owner's soft
-            // reconcile does not rewind the body, so its live ticks already applied these impulses;
-            // and counting down here let the counter reach 0 inside a replay, where the CancelDash
-            // below is skipped - the SP dash then never ended on the client (_isDashing stuck true,
-            // rotations blocked, _canDash false so no later dash started locally while the server
-            // still dashed): "el dash no avanza, se queda atascado", client only, since the host
-            // never replays.
+            // Replays neither re-apply the impulse nor count down (a replay skips the CancelDash below).
             if (isReplaying) return;
 
             bool spDashing = _coreMovementController.IsDashing;
@@ -876,8 +656,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_dashTicksRemaining <= 0)
             {
-                // A reconcile can restore the server's already-finished count before our own tick
-                // got to 0; end the SP dash here too or it stays on forever.
+                // A reconcile can restore a finished count before our tick reached 0: end the SP dash here too.
                 if (_wasSpDashing && _coreMovementController.IsDashing)
                 {
                     _coreMovementController.CancelDash();
@@ -899,19 +678,13 @@ namespace FastAndFractured.Multiplayer
 
             if (_dashTicksRemaining == 0 && _coreMovementController.IsDashing)
             {
-                // Ends the dash through the SP path (unblock rotations, restore max speed,
-                // stop VFX, start the cooldown timer). Its impulse timer is already stopped,
-                // so CancelDash just runs FinishDash.
+                // Ends the dash through the SP path; its impulse timer is already stopped.
                 _coreMovementController.CancelDash();
                 _wasSpDashing = false;
             }
         }
 
-        /// <summary>
-        /// Keeps the dash window open for DashSettleSeconds after our own dash ends, so the server's
-        /// report of its (later) dash end can land and the gap it leaves can blend out softly.
-        /// Live ticks only - Replicate returns before this on a replay.
-        /// </summary>
+        /// <summary>Keeps the dash window open DashSettleSeconds after our dash ends, until the server's report catches up.</summary>
         private void RefreshDashSettleWindow()
         {
             if (_dashTicksRemaining > 0)
@@ -924,22 +697,16 @@ namespace FastAndFractured.Multiplayer
 
         private void OnSpDashStarted()
         {
-            // Kill the frame-rate-dependent impulse timer before TimerSystem ever updates it
-            // (we are inside the same call stack that created it).
+            // Kill the frame-rate-dependent impulse timer before TimerSystem updates it.
             StopSpDashTimer();
 
             var stats = _physicsBehaviour != null ? _physicsBehaviour.StatsController : null;
-            float dashTime = stats != null ? stats.DashTime : 0.5f;
+            float dashTime = stats != null ? stats.DashTime : DEFAULT_DASH_TIME_SECONDS;
 
             _dashWorldDirection = transform.forward.normalized;
             _dashTicksRemaining = Mathf.Max(1, Mathf.RoundToInt(dashTime * base.TimeManager.TickRate));
         }
 
-        /// <summary>
-        /// Stops CarMovementController's own dash TimerSystem timer, if one is currently running.
-        /// Safe to call every tick: HasTimer is false once a timer has already been stopped, so this
-        /// is a no-op except the ticks where a fresh timer actually exists.
-        /// </summary>
         private void StopSpDashTimer()
         {
             var timerField = SingleplayerReflectionCache.CarMovement_DashTimer;
@@ -969,36 +736,14 @@ namespace FastAndFractured.Multiplayer
                 Vector3 poseBeforeCorrection = rb.position;
                 Quaternion rotationBeforeCorrection = rb.rotation;
 
-                // Soft reconcile only for OUR OWN car - see ApplyServerPose's doc for why and for
-                // the two more elaborate designs already tried and abandoned here. A car we don't
-                // own is simulated live from the forwarded inputs (state forwarding is on), but it
-                // is not ours to predict: it follows the server's state exactly, and its replays are
-                // skipped in Replicate.
+                // Soft reconcile only for our own car; other cars follow the server's state exactly.
                 if (base.IsOwner)
                 {
                     restoreGameplayState = ApplyServerPose(adapter, rb, rd);
                 }
                 else
                 {
-                    // FIX (2026-09-18): FishNet's own PredictionRigidbody.Reconcile() calls
-                    // Rigidbody.SetState(), which writes t.localPosition/t.localRotation -
-                    // RigidbodyState round-trips in LOCAL space. This project runs with
-                    // Physics.autoSyncTransforms disabled, which is EXACTLY the trap that caused
-                    // the 2026-09-11 levitation bug on the OWNER path (see the WorldPosition/
-                    // WorldRotation fields above and the "DO NOT write the Transform" note below) -
-                    // that fix only ever touched the owner's soft-reconcile branch, and this hard
-                    // branch (every non-owned car, every reconcile, ~45/s) was still going through
-                    // FishNet's raw local-space path untouched.
-                    //
-                    // Confirmed live in a real build (2026-09-18): during a dash, a remote
-                    // observer's view of the OTHER player's car read World Y=107.66 while that same
-                    // car's own machine read Y=54.93 at the same moment - a ~53 m local/world
-                    // mismatch, not network latency (it converged back on its own a moment later).
-                    // Matches the report "el dash se queda atascado, solo en el cliente remoto."
-                    //
-                    // Apply the same world-space snapshot the owner path already uses, directly on
-                    // the Rigidbody (not the Transform - see the note below for why that matters),
-                    // instead of routing through FishNet's own Reconcile()/RigidbodyState.
+                    // World-space snapshot on the Rigidbody: FishNet's Reconcile() writes the Transform in local space.
                     rb.position = rd.WorldPosition;
                     rb.rotation = rd.WorldRotation;
                     if (!rb.isKinematic)
@@ -1007,9 +752,7 @@ namespace FastAndFractured.Multiplayer
                         rb.angularVelocity = rd.WorldAngularVelocity;
                     }
 
-                    // Mirrors what FishNet's own Reconcile() would have done: drop pending forces
-                    // (the state is the server's now), and return the incoming pooled
-                    // PredictionRigidbody or it leaks one per reconcile.
+                    // Drop pending forces and return the pooled PredictionRigidbody, as FishNet's Reconcile() would.
                     adapter.PredictionRigidbody.ClearPendingForces();
                     if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
                         GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
@@ -1022,39 +765,11 @@ namespace FastAndFractured.Multiplayer
                     _visualSmoother.AbsorbCorrection(rb.position - poseBeforeCorrection,
                         rb.rotation * Quaternion.Inverse(rotationBeforeCorrection));
 
-                // DO NOT write the Transform from Rigidbody.position here. It looks like it fixes
-                // the transform/rigidbody gap this project's Physics.autoSyncTransforms=false
-                // creates, but it silently destroys every reconcile, and this is now the THIRD
-                // time a "sync the transform" idea has caused a regression here (see the handoff
-                // note about the removed Physics.SyncTransforms hook).
-                //
-                // Why it breaks: FishNet's RigidbodyState round-trips in LOCAL space -
-                // GetState captures rb.transform.localPosition and SetState (called inside
-                // PredictionRigidbody.Reconcile, the hard path above) writes t.localPosition =
-                // state.Position. With autoSyncTransforms disabled, rb.position still reports the
-                // PRE-reconcile world pose at this point, so writing it back onto the transform
-                // reverts the correction that SetState just applied. Velocity survives (it lives on
-                // the Rigidbody, not the Transform), which is exactly what was measured live on a
-                // client (2026-09-11): every reconcile reset vy to ~0 while y never moved, so
-                // gravity could never pull the car down and it hung in the air, drifting upward,
-                // hundreds of metres above where the host correctly showed it on the ground.
+                // Never write the Transform from rb.position here: RigidbodyState is local-space and that reverts the reconcile.
 
             }
 
-            // Restore the gameplay state that drives forces on subsequent ticks so the replay
-            // (and the live ticks after it) start from the server's exact vehicle state.
-            //
-            // ONLY when the body itself was actually rewound (a hard snap, or this is a non-owned
-            // car with no local prediction to begin with) - NOT on every soft reconcile. This used
-            // to run unconditionally, and it is what was actually causing "se mueve solo, tiembla,
-            // velocidad desmedida" during a dash (2026-09-16): rd.DashTicksRemaining is the SERVER's
-            // count as of a round-trip-OLD tick, always somewhat BEHIND the client's own count.
-            // Overwriting the client's live, correctly-decrementing counter with that stale, larger
-            // value every reconcile (~45/s) meant TickDeterministicDash kept re-entering ticks it
-            // had already dashed through and applying their AddForce(Impulse) again - not once per
-            // burst, but on every single reconcile for the whole dash. Measured live: WheelCollider-
-            // driven car speed climbing to 197 m/s against a server-reported ~40 m/s. The physics
-            // body was never wrong here; this gameplay-state block was quietly re-driving it.
+            // Restore gameplay state only after a real rewind: the server's dash count is a round trip old.
             if (restoreGameplayState)
             {
                 _physicsBehaviour.CurrentSpeed = rd.Speed;
@@ -1070,63 +785,19 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // --- Soft reconcile (owner only) --------------------------------------------------------
-        //
-        // History, so the mistakes are not repeated a third time:
-        //   1. FishNet's stock hard reconcile (teleport position/rotation, overwrite both
-        //      velocities, every reconcile) is correct under PhysicsMode.TimeManager, where every
-        //      replayed tick re-simulates physics for real and the trajectory converges back to
-        //      what was already predicted. This project cannot use that mode - tried 2026-09-16,
-        //      confirmed a live catch-up spiral (WheelCollider RPM climbing past 130,000, the
-        //      physics clock falling 12+ seconds behind real time and not recovering) - so under
-        //      PhysicsMode.Unity a hard reconcile never converges and trembles constantly.
-        //   2. The first fix compared the server's report for tick T against OUR OWN recorded
-        //      history for tick T (a 64-entry per-tick pose buffer), specifically to avoid baking
-        //      network round-trip time into the measured error. It worked for steady driving but
-        //      broke on bursts: a client that falls behind delivers its backlog as several
-        //      reconciles processed within one frame, and comparing each one against increasingly
-        //      stale history produced 8 real teleports in 150ms - "se mueve solo, se teleporta".
-        //      Complexity kept begetting new bugs (a retroactive history-rewrite step caused a
-        //      SEPARATE runaway before that was even found).
-        //   3. This version deletes the history buffer entirely and compares against the CURRENT
-        //      body state instead ("now" vs the server's slightly-stale report). That reintroduces
-        //      a small amount of round-trip error into ordinary driving, which is fine - it is
-        //      centimetres at normal speed - EXCEPT immediately after a dash, where a real ~10 m/s
-        //      impulse over a ~100-200ms round trip reads as several real m/s of "error" that isn't
-        //      one. Rather than rebuild per-tick history to fix that one case, the velocity
-        //      correction just skips itself while a dash is in flight (DashTicksRemaining > 0) -
-        //      position still gets corrected, and the velocity gap left behind by skipping is
-        //      inherently small once the dash impulse itself finishes and the next few ordinary
-        //      reconciles catch it up at normal driving error magnitude.
-        //
-        // On a host this is a no-op by construction: CreateReconcile reads rd straight off this
-        // same rigidbody moments before Reconcile() runs on it (a direct call, not a network round
-        // trip), so the error is ~0 either way.
+        // Soft reconcile (owner only): compare against the current body; no velocity correction during a dash.
         private const float SnapDistance = 3f;
         private const float SnapAngleDegrees = 60f;
         private const float VelocityBlend = 0.15f;
         private const float RotationBlend = 0.15f;
         private const float PositionBlend = 0.15f;
 
-        // While a dash is in flight (ours or the server's, plus DashSettleSeconds after) only a gap
-        // this large is a real desync. See ApplyServerPose.
+        // Snap distance while a dash is in flight (ours or the server's).
         private const float DashSnapDistance = 15f;
         private const float DashSettleSeconds = 0.5f;
+        private const float DEFAULT_DASH_TIME_SECONDS = 0.5f;
 
-        /// <summary>
-        /// Returns true if a hard snap (real rewind) happened - see the call site for why that matters.
-        ///
-        /// The snap distance is relaxed while a dash is in flight. We dash the moment the button is
-        /// pressed; the server only does once the input arrives, and the report compared here is
-        /// older still, so for that whole window the report trails the car by metres without
-        /// anything being wrong. With the flat 3 m limit, measured on the client (2026-09-29, same
-        /// scripted dash): 10 ticks into the dash the pre-dash report snapped the car back 1.7 m
-        /// (44 -> 7 m/s), the restore copied the server's DashTicksRemaining = 0 and cancelled our
-        /// dash, and while the server then dashed at 63.9 m/s the un-dashing client sat at its
-        /// 43.1 m/s cap, falling 3 m behind every few ticks: 4 more snaps of 4-6 m in one dash -
-        /// the "tirones". The soft correction below still runs during the window (and the visual
-        /// smoother blends it out), so the car cannot drift away; a real desync still snaps.
-        /// </summary>
+        /// <summary>Returns true if it hard-snapped. During a dash the report trails the car without a real desync, so the snap distance is relaxed.</summary>
         private bool ApplyServerPose(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd)
         {
             Vector3 positionError = rd.WorldPosition - rb.position;
@@ -1139,10 +810,7 @@ namespace FastAndFractured.Multiplayer
 
             if (positionError.sqrMagnitude > snapDistance * snapDistance || angleError > SnapAngleDegrees)
             {
-                // Real desync (dropped connection, respawn, teleport pad). Snap in WORLD space:
-                // FishNet's own Reconcile() goes through RigidbodyState, which is LOCAL to the
-                // player root, and the roots are not at the same place on server and client - the
-                // snap then put the car somewhere else entirely (measured 2026-09-24: a 235 m jump).
+                // Real desync: snap in world space (RigidbodyState is local to the player root).
                 rb.position = rd.WorldPosition;
                 rb.rotation = rd.WorldRotation;
                 if (!rb.isKinematic)
@@ -1156,18 +824,13 @@ namespace FastAndFractured.Multiplayer
                 return true;
             }
 
-            // FishNet's Reconcile() would have returned this pooled object to the cache; on the
-            // soft path we must do it ourselves or one PredictionRigidbody leaks per reconcile.
+            // Return the pooled PredictionRigidbody ourselves on the soft path.
             if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
                 GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
 
             if (rb.isKinematic)
                 return false;
 
-            // See the class doc above: comparing "now" against the server's slightly-stale report
-            // over-corrects specifically during a dash impulse, so the velocity blend sits out
-            // while one is in flight. Position correction is unaffected - a dash's positional error
-            // stays small over one round trip regardless of the speed involved.
             if (rd.DashTicksRemaining <= 0 && _dashTicksRemaining <= 0)
             {
                 rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, rd.WorldVelocity, VelocityBlend);
@@ -1203,27 +866,16 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Applies an external force to the vehicle. Server-authoritative, synced to clients.
-        /// Used for environmental pushes (McChicken, explosions, etc.)
-        /// </summary>
-        /// <param name="force">Force vector to apply</param>
-        /// <param name="mode">Force mode (default Impulse)</param>
         [Server]
         public void ApplyExternalForce(Vector3 force, ForceMode mode = ForceMode.Impulse)
         {
             if (_customRigidbody == null) return;
             
-            // Apply on server through the adapter (applies directly to Rigidbody)
             _customRigidbody.AddForce(force, mode);
             
-            // Notify clients for visual feedback
             RpcApplyExternalForce(force, mode);
         }
 
-        /// <summary>
-        /// Client-side external force application for visual sync.
-        /// </summary>
         [ObserversRpc(ExcludeServer = true)]
         private void RpcApplyExternalForce(Vector3 force, ForceMode mode)
         {

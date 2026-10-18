@@ -10,16 +10,9 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Only the players of a match see its objects. The map is loaded for the match's players
-    /// alone (NetworkedLobbyManager loads it as a connection scene), while others wait in the
-    /// room: someone who joined mid-match, or left it early. Without a visibility rule FishNet
-    /// shows every spawned object to every client, so the cars, bullets and props of the
-    /// match would be sent to - and spawned into - the menu of the players in the room.
-    ///
-    /// The rule: an object that lives in a scene is visible to the connections that have that
-    /// scene loaded. Objects outside any match scene (the room itself is a global object,
-    /// which FishNet never filters) stay visible to everyone. Added at runtime as a default
-    /// condition of the ObserverManager, so no prefab or map is edited.
+    /// Only a match's players see its objects: an object in a scene is visible to the connections that have that
+    /// scene loaded; objects outside match scenes stay visible to everyone. Installed as a default ObserverManager
+    /// condition.
     /// </summary>
     [CreateAssetMenu(menuName = "Fast And Fractured/Multiplayer/Match Scene Condition", fileName = "MatchSceneCondition")]
     public sealed class MatchSceneVisibility : ObserverCondition
@@ -48,11 +41,7 @@ namespace FastAndFractured.Multiplayer
 
         public override ObserverConditionType GetConditionType() => ObserverConditionType.Normal;
 
-        /// <summary>
-        /// Adds the rule to the ObserverManager before the server spawns anything. Default
-        /// conditions are copied onto each object when it is spawned, so it must be in place
-        /// first; the server start is early enough (the room itself is global and unaffected).
-        /// </summary>
+        /// <summary>Adds the rule before the server spawns anything: default conditions are copied on spawn.</summary>
         internal static void Install(NetworkManager nm)
         {
             if (nm == null || nm == _installedOn) return;

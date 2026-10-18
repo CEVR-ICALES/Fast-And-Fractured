@@ -5,25 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Network adapter for the singleplayer screen-shake system.
-    ///
-    /// The singleplayer design (ScreenShakeSourceController + CameraBehaviours + Cinemachine
-    /// Impulse) is already multiplayer-friendly: an impulse is emitted at a WORLD POSITION and the
-    /// camera's CinemachineImpulseListener attenuates it by distance, so every peer that is close
-    /// enough naturally feels a nearby blast. What it cannot do on its own is cross the network —
-    /// <c>GenerateImpulse</c> only fires on the machine that calls it.
-    ///
-    /// That leaves two gaps in multiplayer:
-    ///   * Weapon fire shakes only the shooter (correct — each owner runs its own shoot handle).
-    ///   * EXPLOSIONS shake nobody. NetworkedProjectile deletes the singleplayer ExplosionForce
-    ///     components (it does damage/knockback itself via OverlapSphere), and the TNT wrapper only
-    ///     activates the hitbox on the server, so the profile call that would shake the screen
-    ///     never runs on any client.
-    ///
-    /// This helper closes that gap without touching singleplayer code: the multiplayer wrappers
-    /// already broadcast the explosion to every observer (RpcSpawnExplosionVFX / RpcExplosionTriggered),
-    /// so they call in here and each peer emits the impulse locally at the blast position. Cinemachine
-    /// then does the distance falloff exactly as it does in singleplayer.
+    /// Replicates explosion screen shake: the multiplayer wrappers already broadcast each explosion, so every peer
+    /// emits the Cinemachine impulse locally at the blast and the listener attenuates it by distance.
     /// </summary>
     public static class NetworkedScreenShake
     {
@@ -34,16 +17,13 @@ namespace FastAndFractured.Multiplayer
         private static readonly FieldInfo SourceField = typeof(ScreenShakeSourceController)
             .GetField("cinemachineImpulseSource", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        // Profiles are authored per-emitter (the ExplosionHitbox objects carry the Explosion profile,
-        // the PushShoot object carries PushShoot, …) and the assets do NOT live under Resources, so
-        // the only runtime way to obtain one is to scan the emitters present in the loaded map.
+        // Profiles are per emitter and not under Resources: scan the emitters in the loaded map.
         private static readonly System.Collections.Generic.Dictionary<ScreenShakeProfileType, ScreenShakeProfile> ProfileCache = new();
 
         private static ScreenShakeSourceController _referenceController;
         private static bool _loggedMissingSetup;
 
-        // Domain reload is disabled in this project's Enter Play Mode options, so statics survive
-        // between play sessions and would keep pointing at destroyed objects.
+        // Domain reload is off: statics would keep pointing at destroyed objects.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
@@ -52,15 +32,10 @@ namespace FastAndFractured.Multiplayer
             ProfileCache.Clear();
         }
 
-        /// <summary>
-        /// Emits a screen-shake impulse at a world position on THIS peer. Safe to call from an
-        /// ObserversRpc: every client runs it locally and Cinemachine attenuates by distance, so
-        /// players far from the blast feel little or nothing.
-        /// </summary>
+        /// <summary>Emits a shake impulse at a world position on this peer; safe from an ObserversRpc.</summary>
         public static void PlayAtPosition(ScreenShakeProfileType profileType, Vector3 worldPosition)
         {
-            // Never use CameraBehaviours.Instance: the singleton accessor creates a phantom
-            // instance when none exists, which then disables the real camera controller.
+            // Not CameraBehaviours.Instance: it creates a phantom that disables the real camera controller.
             var cameraBehaviours = CameraBehaviours.ExistingInstance;
             if (cameraBehaviours == null)
                 return; // no local camera yet (still loading, or a dedicated server) — nothing to shake
@@ -73,18 +48,12 @@ namespace FastAndFractured.Multiplayer
             if (source == null)
                 return;
 
-            // Reuse the singleplayer path so listener settings and impulse shaping stay identical;
-            // the only difference is that our source sits at the blast position instead of on a car.
             cameraBehaviours.ShakeCameraFromProfile(profile, source);
 
             Object.Destroy(source.gameObject, TEMP_SOURCE_LIFETIME);
         }
 
-        /// <summary>
-        /// Borrows any live ScreenShakeSourceController (the local car always has one) purely to
-        /// read the configured profiles and the authored impulse shaping. Re-resolved whenever the
-        /// cached one dies, e.g. after a match ends and the cars are destroyed.
-        /// </summary>
+        /// <summary>Any live ScreenShakeSourceController, borrowed for its profiles and impulse shaping.</summary>
         private static ScreenShakeSourceController ResolveReferenceController()
         {
             if (_referenceController != null)
@@ -102,12 +71,7 @@ namespace FastAndFractured.Multiplayer
             return _referenceController;
         }
 
-        /// <summary>
-        /// Finds the authored profile for a shake type by scanning every emitter in the loaded map.
-        /// Each ScreenShakeSourceController only carries the profile(s) it needs — the Explosion
-        /// profile lives on the ExplosionHitbox objects, not on the car — so looking at just one
-        /// controller finds nothing. Cached per type after the first lookup.
-        /// </summary>
+        /// <summary>The profile for a shake type from any emitter in the map (each carries only its own); cached per type.</summary>
         private static ScreenShakeProfile ResolveProfile(ScreenShakeProfileType profileType)
         {
             if (ProfileCache.TryGetValue(profileType, out ScreenShakeProfile cached) && cached != null)
@@ -134,11 +98,7 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
 
-        /// <summary>
-        /// Builds a throwaway impulse source at the blast position, inheriting the authored
-        /// ImpulseDefinition (dissipation distance, propagation speed, shape…) from the reference
-        /// source so a networked explosion travels through the world exactly like a local one.
-        /// </summary>
+        /// <summary>A throwaway impulse source at the blast, with the reference source's ImpulseDefinition.</summary>
         private static CinemachineImpulseSource CreateTemporarySource(ScreenShakeSourceController reference, Vector3 worldPosition)
         {
             var go = new GameObject("[NetworkedScreenShake]");

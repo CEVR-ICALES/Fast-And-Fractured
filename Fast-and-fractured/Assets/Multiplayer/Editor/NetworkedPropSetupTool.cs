@@ -8,36 +8,31 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// Scans the project for singleplayer hazard prefabs that have no networked variant yet,
-    /// and creates prefab variants in Assets/Multiplayer/Props/ with the NetworkObject +
-    /// the appropriate server-authoritative wrapper component.
-    ///
-    /// Scene-only objects (e.g. boundary walls placed directly in a scene without a prefab)
-    /// are out of scope — handle them via the scene migration tool.
-    ///
-    /// After creating variants, run Tools > Fish-Networking > Refresh Default Prefabs and
-    /// Tools > Fish-Networking > Refresh All NetworkObjects so FishNet registers the new
-    /// prefabs and populates their NetworkBehaviours lists.
-    ///
-    /// Open via: Tools > Fast And Fractured > Networked Prop Setup
+    /// Creates the networked prefab variants (NetworkObject + server wrapper) of singleplayer hazard prefabs in
+    /// Assets/Multiplayer/Props. Run FishNet's Refresh Default Prefabs afterwards.
     /// </summary>
     public class NetworkedPropSetupTool : EditorWindow
     {
         private const string OUTPUT_FOLDER     = "Assets/Multiplayer/Props";
         private const string OUTPUT_FOLDER_PARENT = "Assets/Multiplayer";
         private const string OUTPUT_SUBFOLDER     = "Props";
+        private const float SMALL_SPACING = 2f;
+        private const float SPACING = 4f;
+        private const float SECTION_SPACING = 6f;
+        private const float PRIMARY_BUTTON_HEIGHT = 30f;
+        private const float ROW_BUTTON_WIDTH = 72f;
+        private const float ROW_BUTTON_HEIGHT = 40f;
+        private static readonly Vector2 MIN_WINDOW_SIZE = new Vector2(620f, 480f);
+        private static readonly Color ROW_DONE_COLOR = new Color(0.2f, 0.4f, 0.2f, 0.3f);
+        private static readonly Color ROW_MISSING_COLOR = new Color(0.35f, 0.15f, 0.15f, 0.3f);
 
-        // ── Hazard component → wrapper mapping ─────────────────────────────────
         private sealed class HazardDef
         {
             public string DisplayName;
             public Type   SingleplayerType;
             public Type   WrapperType;
             public string SceneOnlyNote;     // non-null if this may not exist as a prefab
-            // A prefab variant of this hazard gets its own networked variant. For pickups the
-            // variant IS the pickup (RecoverHealth Variant is ShootingDamage with the health
-            // model, icon, colours and sound); without its own networked variant the maps
-            // placed NetworkedShootingDamage and health pickups looked like damage boosts.
+            // A prefab variant gets its own networked variant: a pickup variant (RecoverHealth) is a different pickup.
             public bool   VariantsGetOwnPrefab;
         }
 
@@ -72,18 +67,10 @@ namespace FastAndFractured.Multiplayer.Editor
             },
             new HazardDef
             {
-                // ParabolicImpulse is the trampoline brain. NetworkedTrampoline is a thin
-                // server-authoritative wrapper that disables non-server impulse logic and
-                // broadcasts the release animation. Trampoline.prefab GUID is
-                // b7b7d367759108a47b95ebd71043b191 — but the scan finds it by component, no
-                // GUID hardcoding needed here.
                 DisplayName      = "Trampoline  (ParabolicImpulse)",
                 SingleplayerType = typeof(ParabolicImpulse),
                 WrapperType      = typeof(NetworkedTrampoline),
             },
-            // World systems added in the 2026-06 sync audit. Wrappers existed but nothing
-            // generated their prefab variants, so the scene migration swap silently skipped
-            // them (SandstormParent.prefab instance in every map had no networked variant).
             new HazardDef
             {
                 DisplayName      = "Sandstorm  (SandstormController)",
@@ -118,14 +105,12 @@ namespace FastAndFractured.Multiplayer.Editor
             },
             new HazardDef
             {
-                // Golf balls (dev, 2026-10): server-simulated, streamed to clients.
                 DisplayName      = "Golf Ball",
                 SingleplayerType = typeof(GolfBallBehaviour),
                 WrapperType      = typeof(NetworkedGolfBall),
             },
         };
 
-        // ── State ──────────────────────────────────────────────────────────────
         private sealed class PrefabEntry
         {
             public HazardDef   Def;
@@ -146,14 +131,13 @@ namespace FastAndFractured.Multiplayer.Editor
         public static void ShowWindow()
         {
             var w = GetWindow<NetworkedPropSetupTool>("Networked Props");
-            w.minSize = new Vector2(620f, 480f);
+            w.minSize = MIN_WINDOW_SIZE;
             w.Refresh();
             w.Show();
         }
 
         private void OnEnable() => Refresh();
 
-        // ── Scan ──────────────────────────────────────────────────────────────
         private void Refresh()
         {
             _byDef.Clear();
@@ -162,10 +146,7 @@ namespace FastAndFractured.Multiplayer.Editor
             Repaint();
         }
 
-        /// <summary>
-        /// Static scan shared by the window and the headless menu item. Fills the map with one
-        /// PrefabEntry per (hazard def, source prefab) pair found in the project.
-        /// </summary>
+        /// <summary>Fills the map with one entry per (hazard, source prefab); shared with the headless menu item.</summary>
         private static void ScanPrefabs(Dictionary<HazardDef, List<PrefabEntry>> byDef)
         {
             EnsureOutputFolder();
@@ -187,19 +168,13 @@ namespace FastAndFractured.Multiplayer.Editor
 
                 foreach (var def in HAZARD_DEFS)
                 {
-                    // Scan the entire prefab tree (Trampoline.prefab has ParabolicImpulse on
-                    // its TrampolineParabolicLogic child, so root-only scans miss it). BUT we
-                    // must filter out CONTAINER prefabs that hold the hazard via nested prefab
-                    // instances — e.g. Trampolines.prefab and TrampolineMountainVillage.prefab
-                    // contain Trampoline.prefab instances. For those, the swap should be done
-                    // on the nested Trampoline instance at scene-migration time, not by creating
-                    // a NetworkedTrampolines.prefab variant.
+                    // Scan the whole tree (the trampoline logic is on a child) but skip containers that only hold
+                    // the hazard through nested prefab instances.
                     var spComponent = FindOwnedComponentInPrefab(prefab, def.SingleplayerType);
                     if (spComponent == null && def.VariantsGetOwnPrefab)
                         spComponent = FindVariantRootComponent(prefab, def.SingleplayerType);
                     if (spComponent == null) continue;
 
-                    // Skip if any GO in the tree already carries the wrapper.
                     if (prefab.GetComponentInChildren(def.WrapperType, includeInactive: true) != null) continue;
 
                     string variantName = $"Networked{prefab.name}.prefab";
@@ -219,11 +194,7 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        /// <summary>
-        /// Headless "Create All Missing Variants" — same as the window button, invocable from
-        /// the menu / MCP automation. Run this BEFORE the Scene Migration re-apply pass so the
-        /// swap finds every variant it needs (e.g. NetworkedSandstormParent.prefab).
-        /// </summary>
+        /// <summary>Headless "Create All Missing Variants"; run before the scene migration so the swap finds every variant.</summary>
         [MenuItem("Tools/Fast And Fractured/Networked Prop Setup - Create All Missing (Headless)", priority = 11)]
         public static void CreateAllMissingHeadless()
         {
@@ -244,7 +215,6 @@ namespace FastAndFractured.Multiplayer.Editor
                       "Remember to run Fish-Networking > Refresh Default Prefab Objects if any were created.");
         }
 
-        // ── GUI ───────────────────────────────────────────────────────────────
         private void OnGUI()
         {
             DrawToolbar();
@@ -255,10 +225,10 @@ namespace FastAndFractured.Multiplayer.Editor
 
             int totalMissing = _byDef.Values.Sum(l => l.Count(e => !e.VariantExists));
 
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
             using (new EditorGUI.DisabledScope(totalMissing == 0))
             {
-                if (GUILayout.Button($"Create All Missing Variants  ({totalMissing})", GUILayout.Height(30f)))
+                if (GUILayout.Button($"Create All Missing Variants  ({totalMissing})", GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
                 {
                     foreach (var kvp in _byDef)
                         foreach (var e in kvp.Value.Where(e => !e.VariantExists).ToList())
@@ -268,7 +238,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            EditorGUILayout.Space(6f);
+            EditorGUILayout.Space(SECTION_SPACING);
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
 
             foreach (var def in HAZARD_DEFS)
@@ -320,7 +290,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 {
                     string msg = def.SceneOnlyNote ?? "No prefabs with this component found in the project.";
                     EditorGUILayout.LabelField(msg, EditorStyles.wordWrappedMiniLabel);
-                    EditorGUILayout.Space(2f);
+                    EditorGUILayout.Space(SMALL_SPACING);
                     return;
                 }
 
@@ -328,25 +298,23 @@ namespace FastAndFractured.Multiplayer.Editor
                     DrawEntry(entry);
             }
 
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SPACING);
         }
 
         private void DrawEntry(PrefabEntry entry)
         {
             Color bg = entry.VariantExists
-                ? new Color(0.2f, 0.4f, 0.2f, 0.3f)
-                : new Color(0.35f, 0.15f, 0.15f, 0.3f);
+                ? ROW_DONE_COLOR
+                : ROW_MISSING_COLOR;
 
             var rect = EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
             EditorGUI.DrawRect(rect, bg);
 
-            // Status icon
             var prevCol = GUI.color;
             GUI.color = entry.VariantExists ? Color.green : Color.yellow;
             GUILayout.Label(entry.VariantExists ? "✓" : "○", GUILayout.Width(18));
             GUI.color = prevCol;
 
-            // Names
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField(entry.OriginalPrefab.name, EditorStyles.boldLabel);
             EditorGUILayout.LabelField(entry.OriginalPath, EditorStyles.miniLabel);
@@ -359,17 +327,16 @@ namespace FastAndFractured.Multiplayer.Editor
 
             GUILayout.FlexibleSpace();
 
-            // Action button
             if (entry.VariantExists)
             {
-                if (GUILayout.Button("Select", GUILayout.Width(72), GUILayout.Height(40)))
+                if (GUILayout.Button("Select", GUILayout.Width(ROW_BUTTON_WIDTH), GUILayout.Height(ROW_BUTTON_HEIGHT)))
                     Selection.activeObject = entry.ExistingVariant;
             }
             else
             {
                 var prev2 = GUI.color;
                 GUI.color = Color.yellow;
-                if (GUILayout.Button("Create\nVariant", GUILayout.Width(72), GUILayout.Height(40)))
+                if (GUILayout.Button("Create\nVariant", GUILayout.Width(ROW_BUTTON_WIDTH), GUILayout.Height(ROW_BUTTON_HEIGHT)))
                 {
                     CreateVariant(entry);
                     _needsFishNetRefresh = true;
@@ -380,16 +347,14 @@ namespace FastAndFractured.Multiplayer.Editor
             }
 
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space(2f);
+            EditorGUILayout.Space(SMALL_SPACING);
         }
 
-        // ── Prefab variant creation ────────────────────────────────────────────
         private static void CreateVariant(PrefabEntry entry)
         {
             EnsureOutputFolder();
 
-            // Instantiate as a prefab instance — SaveAsPrefabAsset will record the base
-            // relationship and store only the overrides, producing a true prefab variant.
+            // A prefab instance, so SaveAsPrefabAsset produces a variant.
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.OriginalPrefab);
             if (instance == null)
             {
@@ -399,11 +364,7 @@ namespace FastAndFractured.Multiplayer.Editor
 
             try
             {
-                // The singleplayer component may live on a child of the prefab (e.g.
-                // ParabolicImpulse sits on Trampoline/TrampolineParabolicLogic, not on the
-                // Trampoline root). Find that GameObject and attach the wrapper there — putting
-                // it on the root would either fail [RequireComponent] checks or, worse, force
-                // a duplicate singleplayer component to be auto-added to the root.
+                // The singleplayer component may sit on a child: the wrapper goes on that GameObject.
                 var spComponent = instance.GetComponentInChildren(entry.Def.SingleplayerType, includeInactive: true);
                 if (spComponent == null)
                 {
@@ -413,22 +374,16 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 GameObject targetGO = spComponent.gameObject;
 
-                // Add NetworkObject first so [RequireComponent] on the wrapper finds it.
+                // NetworkObject first so the wrapper's [RequireComponent] finds it.
                 if (targetGO.GetComponent<NetworkObject>() == null)
                     targetGO.AddComponent<NetworkObject>();
 
-                // Add the server-authoritative wrapper on the same GO as the singleplayer component.
                 if (targetGO.GetComponent(entry.Def.WrapperType) == null)
                     targetGO.AddComponent(entry.Def.WrapperType);
 
-                // Save. Because instance was created via InstantiatePrefab, Unity records
-                // this as a prefab variant of entry.OriginalPrefab.
                 var saved = PrefabUtility.SaveAsPrefabAsset(instance, entry.OutputPath);
                 if (saved != null)
                 {
-                    // Force FishNet to populate the NetworkBehaviours list immediately
-                    // by re-saving the asset via SerializedObject (mirrors what FishNet's
-                    // "Refresh All NetworkObjects" menu item does).
                     TryRefreshNetworkObject(saved);
 
                     Debug.Log($"[NetworkedPropSetup] Created: {entry.OutputPath} (wrapper on '{targetGO.name}')", saved);
@@ -444,23 +399,13 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        /// <summary>
-        /// Attempts to trigger FishNet's NetworkObject serialization so the NetworkBehaviours
-        /// list is populated immediately (mirrors the per-asset part of "Refresh All NetworkObjects").
-        /// Falls back silently if the FishNet editor API is not accessible.
-        /// </summary>
         private static void TryRefreshNetworkObject(GameObject prefab)
         {
             try
             {
-                // NetworkObject may not be on the root (Trampoline's variant has it on
-                // TrampolineParabolicLogic). Search the whole prefab tree.
                 var nob = prefab.GetComponentInChildren<NetworkObject>(includeInactive: true);
                 if (nob == null) return;
 
-                // Call FishNet's internal ReserializeEditorSetValues to fully populate the
-                // NetworkBehaviours list. Without this the runtime throws
-                // "ObjectId [65535] is expected to be initialized but was not" on spawn.
                 var miReserialize = typeof(NetworkObject).GetMethod("ReserializeEditorSetValues",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 miReserialize?.Invoke(nob, new object[] { /*setWasActiveDuringEdit*/ true, /*setSceneId*/ false });
@@ -482,22 +427,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 AssetDatabase.CreateFolder(OUTPUT_FOLDER_PARENT, OUTPUT_SUBFOLDER);
         }
 
-        /// <summary>
-        /// Returns a singleplayer component owned DIRECTLY by this prefab asset (i.e. not coming
-        /// from a nested prefab instance embedded within it). For a Prefab Asset loaded via
-        /// AssetDatabase.LoadAssetAtPath, PrefabUtility.GetCorrespondingObjectFromSource on a
-        /// GameObject returns:
-        ///   - null  : the GO is owned by THIS prefab directly
-        ///   - non-null : the GO is part of a nested prefab instance within this asset
-        /// We only want to create variants for prefabs that OWN the hazard logic, otherwise we'd
-        /// generate redundant NetworkedTrampolines.prefab / NetworkedTrampolineMountainVillage.prefab
-        /// containers that just re-wrap the same nested logic.
-        /// </summary>
-        /// <summary>
-        /// The hazard component of a prefab VARIANT, when it sits on the variant's own root
-        /// (inherited from the base, not inside a nested prefab). Containers holding hazard
-        /// instances are still skipped.
-        /// </summary>
+        /// <summary>The hazard component on a prefab variant's own root (inherited from its base).</summary>
         private static Component FindVariantRootComponent(GameObject prefab, Type spType)
         {
             if (PrefabUtility.GetPrefabAssetType(prefab) != PrefabAssetType.Variant) return null;
@@ -505,6 +435,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return c != null && PrefabUtility.GetNearestPrefabInstanceRoot(c.gameObject) == prefab ? c : null;
         }
 
+        /// <summary>The hazard component owned by the prefab itself, not by a nested prefab instance in it.</summary>
         private static Component FindOwnedComponentInPrefab(GameObject prefab, Type spType)
         {
             var components = prefab.GetComponentsInChildren(spType, includeInactive: true);

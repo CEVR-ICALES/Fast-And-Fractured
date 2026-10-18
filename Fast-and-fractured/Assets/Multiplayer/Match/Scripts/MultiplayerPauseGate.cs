@@ -13,29 +13,9 @@ using Utilities.Managers.PauseSystem;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// The pause / options menu in a multiplayer match: it opens, it works, and the match keeps
-    /// running.
-    ///
-    /// 1. Nothing gameplay-side stops. The server keeps simulating, so pausing rigidbodies /
-    ///    inputs / timers locally only desyncs this peer (and a paused host would fight every
-    ///    client). PauseManager already leaves Time.timeScale alone, but it still notifies every
-    ///    registered IPausable. It invokes onGamePaused/onGameResumed BEFORE iterating its
-    ///    pausable list, so while a network session is active this empties the private list
-    ///    right before the loop runs.
-    ///
-    /// 2. The menu is the LOCAL player's. The pause, settings and how-to-play screens live on
-    ///    each player root, and MainMenuManager.RegisterScreens collects them with a scene-wide
-    ///    FindObjectsOfType keyed by screen type - with two players the remote player's screens
-    ///    can win, and those sit under a disabled PlayerCanvas: Escape "opened" an invisible
-    ///    pause menu (and Settings an invisible options screen). The screens of the root that
-    ///    owns MainMenuManager.Instance are put back in its table, and a menu already opened on
-    ///    the wrong root is reopened on the right one. Back from settings leads to the pause menu.
-    ///
-    /// 3. Clicking in the menu must not drive or shoot: the local driving / shooting inputs are
-    ///    blocked while it is open and given back on resume (only if they were not already
-    ///    blocked by the game, e.g. during the countdown).
-    ///
-    /// Singleplayer sessions (no active connection) are untouched.
+    /// The pause menu in a multiplayer match: the match keeps running (IPausables are not paused), the menu is the
+    /// local player's (MainMenuManager can register the remote player's hidden screens), and the local driving and
+    /// shooting inputs are blocked while it is open. Singleplayer is untouched.
     /// </summary>
     public static class MultiplayerPauseGate
     {
@@ -45,8 +25,6 @@ namespace FastAndFractured.Multiplayer
         private static PauseManager _hooked;
         private static bool _inputBlockedByUs;
 
-        // Domain reload is disabled in Enter Play Mode options; statics survive between plays,
-        // so both state and the sceneLoaded subscription must be reset or they accumulate.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticsForDomainReloadDisabled()
         {
@@ -81,8 +59,7 @@ namespace FastAndFractured.Multiplayer
             var pm = PauseManager.ExistingInstance;
             if (pm == null || pm == _hooked)
                 return;
-            // An auxiliary PauseManager created on the fly (AbstractSingleton, while a scene is
-            // being torn down) has no serialized events; wait for the scene's real one.
+            // An auxiliary PauseManager (created during teardown) has no serialized events: wait for the scene's.
             if (pm.onGamePaused == null || pm.onGameResumed == null)
                 return;
 
@@ -99,8 +76,7 @@ namespace FastAndFractured.Multiplayer
             if (!Online) return;
             ClearPausables();
 
-            // PauseGame already transitioned before raising this event; if it used the other
-            // player's screen, show the local one instead.
+            // PauseGame may have opened the other player's screen: show the local one.
             if (BindLocalScreens() && MainMenuManager.HasInstance)
             {
                 var menu = MainMenuManager.Instance;
@@ -138,11 +114,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        // ── Local menu screens ─────────────────────────────────────────────────────────
-        /// <summary>
-        /// Points the local MainMenuManager's screen table at the screens on its own player root.
-        /// Returns true when the manager lives on a networked player (a match), false otherwise.
-        /// </summary>
+        /// <summary>Points MainMenuManager's screen table at its own player root's screens; false outside a match.</summary>
         public static bool BindLocalScreens()
         {
             if (!MainMenuManager.HasInstance) return false;
@@ -156,16 +128,9 @@ namespace FastAndFractured.Multiplayer
                 if (!table.TryGetValue(screen.screenType, out var current) || current != screen)
                     table[screen.screenType] = screen;
 
-            // The settings / how-to-play Back buttons on the player root lead to MAIN_MENU (the
-            // singleplayer maps override that to PAUSE in the scene); in a match that screen
-            // does not exist, so Back - and Escape, which presses it - did nothing.
-            // Escape reaches the menu twice: PauseManager toggles the pause, and dev's
-            // MenuInputsController (one per player root, so twice more) presses the current
-            // screen's Back. The pause screen's Back is its Resume button, so whenever the
-            // toggle ran first the menu opened and was resumed in the same frame - on the host it
-            // never appeared. Escape already resumes through the toggle, so the pause screen
-            // needs no Back of its own; settings / how-to-play keep theirs (a second press during
-            // their fade-out is ignored by MainMenuManager).
+            // Back on settings/how-to-play leads to MAIN_MENU, which a match lacks: point it at PAUSE. The pause
+            // screen's own Back is dropped: Escape already toggles the pause, and pressing Back too resumed it the
+            // same frame it opened.
             if (table.TryGetValue(ScreensType.PAUSE, out var pause) && pause.backButton != null)
                 pause.backButton = null;
 
@@ -179,18 +144,14 @@ namespace FastAndFractured.Multiplayer
 
             if (pause != null) RouteExitToRoom(pause);
 
-            // Settings ▸ Multiplayer in the pause menu too (player roots spawn after the scene load).
+            // Settings > Multiplayer in the pause menu too.
             foreach (var screen in screens)
                 if (screen.TryGetComponent(out SettingsMenuBehaviour settings) && settings.GetComponent<MultiplayerSettingsTab>() == null)
                     settings.gameObject.AddComponent<MultiplayerSettingsTab>();
             return true;
         }
 
-        /// <summary>
-        /// The pause menu's home button loads the main menu scene (MainMenuManager.LoadScene):
-        /// online that left the player in the menu, still connected, outside the room. It leads
-        /// back to the room instead (MultiplayerRoomReturn).
-        /// </summary>
+        /// <summary>The pause menu's home button leads back to the room (MultiplayerRoomReturn), not the main menu.</summary>
         private static void RouteExitToRoom(MenuScreen pause)
         {
             foreach (var button in pause.GetComponentsInChildren<Button>(true))
@@ -221,12 +182,14 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Keeps the table right before Escape is pressed (players spawn after scene load).</summary>
         private sealed class ScreenBinder : MonoBehaviour
         {
+            private const float BIND_INTERVAL = 0.5f;
+
             private float _next;
 
             private void Update()
             {
                 if (Time.unscaledTime < _next) return;
-                _next = Time.unscaledTime + 0.5f;
+                _next = Time.unscaledTime + BIND_INTERVAL;
                 if (Online) BindLocalScreens();
             }
         }

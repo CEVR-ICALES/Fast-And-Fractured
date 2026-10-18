@@ -7,33 +7,19 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Measurement instrument for networked vehicle motion. Answers, with numbers instead of
-    /// impressions, the two questions we could not answer before: "is it actually jittering?" and
-    /// "is client-side prediction working?".
-    ///
-    /// Sampling runs on the UNITY FRAME (that is where jitter is seen), recording for each tracked
-    /// car the rendered world position of its visual root. From that we derive:
-    ///
-    ///   * smoothness — the mean magnitude of the second derivative of position (acceleration of
-    ///     the rendered transform). Constant-velocity motion has a second derivative near zero;
-    ///     stutter shows up as large alternating deltas even when average speed is steady. This is
-    ///     the number that corresponds to "it trembles".
-    ///   * backwards — how often the rendered position moves opposite to its own average direction.
-    ///     Interpolation hiccups and reconcile snaps show up here as visible "rubber-banding".
-    ///   * prediction — for the owned car, the reconcile correction distance reported by FishNet:
-    ///     how far the server said we were wrong each time it corrected us. Small and rare means
-    ///     prediction is doing its job; large or constant means it is fighting the simulation.
-    ///
-    /// Usage (from the MCP console or a debug key):
-    ///   NetworkedVehicleDiagnostics.StartSampling();      // begin
-    ///   NetworkedVehicleDiagnostics.Report();             // read results at any time
-    ///   NetworkedVehicleDiagnostics.StopSampling();
-    ///
-    /// Run it on BOTH peers at once: the owner's numbers describe prediction quality, the remote
-    /// peer's numbers describe what other players actually see.
+    /// Measures networked vehicle motion per rendered frame: smoothness (second derivative of the drawn position),
+    /// backward steps, body/transform gap and reconcile corrections of the owned car. Run StartSampling, Report
+    /// and StopSampling on both peers: the owner shows prediction, the remote what others see.
     /// </summary>
     public static class NetworkedVehicleDiagnostics
     {
+        private const float MIN_STEP_SQR = 1e-8f;
+        private const float BACKWARDS_DOT = -0.5f;
+        private const int MAX_POSITION_SAMPLES = 4096;
+        private const float MIN_ELAPSED_SECONDS = 0.0001f;
+        private const float TWO_WRITERS_GAP = 1f;
+        private const float PARENT_MOVING_STEP = 0.05f;
+
         private sealed class Track
         {
             public string Name;
@@ -55,13 +41,7 @@ namespace FastAndFractured.Multiplayer.Testing
             public double BodyGapSum;
             public int BodyGapCount;
 
-            // Does the car's PARENT move? A non-kinematic Rigidbody's world position is tracked by
-            // the physics engine independently of the transform hierarchy - moving an ancestor
-            // does not itself inform physics of the new position (that needs an explicit
-            // Physics.SyncTransforms()), so a moving parent is a textbook way for
-            // Body_Rigidbody.position and Body.position to drift apart, which is exactly the "TWO
-            // WRITERS FIGHTING" signature measured 2026-09-11 (up to 1.8-6.3 m, growing over time,
-            // client only).
+            // A moving parent desyncs Rigidbody.position from the transform unless physics is synced.
             public Transform Parent;
             public Vector3 ParentLastPos;
             public bool ParentHasLast;
@@ -74,12 +54,7 @@ namespace FastAndFractured.Multiplayer.Testing
         private static float _startTime;
         private static int _frames;
 
-        // --- reconcile correction tracking (owned car only) ---
-        // A client that owns a car both predicts locally and gets corrected by the server. Every
-        // correction moves the body; if the corrections are large or constant they are seen as a
-        // tremble that the HOST never shows, because a server takes no corrections. This measures
-        // them directly, which is the difference between "prediction is working and nudging" and
-        // "prediction is diverging and being yanked back 50 times a second".
+        // Reconcile corrections of the owned car: large or constant ones read as a tremble the host never shows.
         private static FishNet.Managing.Predicting.PredictionManager _predictionManager;
         private static Rigidbody _ownedBody;
         private static Vector3 _preReconcilePos;
@@ -139,7 +114,6 @@ namespace FastAndFractured.Multiplayer.Testing
 
         public static bool IsSampling => _sampling;
 
-        /// <summary>Begins sampling every networked vehicle currently spawned.</summary>
         public static string StartSampling()
         {
             Tracks.Clear();
@@ -152,8 +126,7 @@ namespace FastAndFractured.Multiplayer.Testing
                 NetworkObject nob = vehicle.GetComponent<NetworkObject>();
                 if (nob == null) continue;
 
-                // Measure the VISUAL root when present: that is what the player sees, and it is what
-                // the NetworkTickSmoother writes to. Falling back to the body still detects stutter.
+                // The visual root when present: that is what the player sees.
                 Transform visual = vehicle.transform.Find("Visuals") ?? vehicle.transform;
 
                 Tracks[nob.ObjectId] = new Track
@@ -208,19 +181,14 @@ namespace FastAndFractured.Multiplayer.Testing
                     t.SecondDerivativeSum += jerk.magnitude;
                     t.SecondDerivativeCount++;
 
-                    if (delta.sqrMagnitude > 1e-8f && t.LastDelta.sqrMagnitude > 1e-8f &&
-                        Vector3.Dot(delta.normalized, t.LastDelta.normalized) < -0.5f)
+                    if (delta.sqrMagnitude > MIN_STEP_SQR && t.LastDelta.sqrMagnitude > MIN_STEP_SQR &&
+                        Vector3.Dot(delta.normalized, t.LastDelta.normalized) < BACKWARDS_DOT)
                     {
                         t.BackwardsSteps++;
                     }
                 }
 
-                // Distance between the physics body and the transform that renders it. Anything but
-                // ~zero means two writers are fighting over the same object: the body integrates to
-                // one pose while something else (a reconcile write, a smoother, an interpolation
-                // backend) puts the transform somewhere different, and the object alternates
-                // between them every frame. This is the number that exposed the 140 m owner-car
-                // teleport loop that read on screen as "the camera has gone crazy".
+                // Physics body vs rendered transform: anything but ~0 means two writers are fighting over the car.
                 if (t.Body_Rigidbody != null && t.Body != null)
                 {
                     float gap = Vector3.Distance(t.Body_Rigidbody.position, t.Body.position);
@@ -229,7 +197,7 @@ namespace FastAndFractured.Multiplayer.Testing
                     t.MaxBodyGap = Mathf.Max(t.MaxBodyGap, gap);
                 }
 
-                if (t.Positions.Count < 4096) t.Positions.Add(pos);
+                if (t.Positions.Count < MAX_POSITION_SAMPLES) t.Positions.Add(pos);
                 t.MaxStepDistance = Mathf.Max(t.MaxStepDistance, delta.magnitude);
                 t.NetTravel += delta;
                 t.LastDelta = delta;
@@ -258,7 +226,7 @@ namespace FastAndFractured.Multiplayer.Testing
             if (Tracks.Count == 0)
                 return "Nothing sampled. Call StartSampling() during a match.";
 
-            float elapsed = Mathf.Max(0.0001f, Time.realtimeSinceStartup - _startTime);
+            float elapsed = Mathf.Max(MIN_ELAPSED_SECONDS, Time.realtimeSinceStartup - _startTime);
             var sb = new StringBuilder();
             sb.AppendLine($"=== Vehicle motion over {elapsed:F1}s ({_frames} frames, {_frames / elapsed:F0} fps) ===");
             sb.AppendLine($"peer: server={InstanceFinder.IsServerStarted} client={InstanceFinder.IsClientStarted}");
@@ -277,14 +245,14 @@ namespace FastAndFractured.Multiplayer.Testing
                 sb.AppendLine($"   largest jump    : {t.MaxStepDistance:F3} m in one frame");
 
                 double meanGap = t.BodyGapCount > 0 ? t.BodyGapSum / t.BodyGapCount : 0;
-                string verdict = t.MaxBodyGap > 1f ? "  <-- TWO WRITERS FIGHTING" : "";
+                string verdict = t.MaxBodyGap > TWO_WRITERS_GAP ? "  <-- TWO WRITERS FIGHTING" : "";
                 sb.AppendLine($"   body/transform  : mean {meanGap:F3} m, max {t.MaxBodyGap:F3} m{verdict}");
                 if (t.Body_Rigidbody != null)
                     sb.AppendLine($"   interpolation   : {t.Body_Rigidbody.interpolation}");
 
                 if (t.Parent != null)
                 {
-                    string parentVerdict = t.ParentMaxStep > 0.05f ? "  <-- PARENT IS MOVING (see body/transform note below)" : "";
+                    string parentVerdict = t.ParentMaxStep > PARENT_MOVING_STEP ? "  <-- PARENT IS MOVING (see body/transform note below)" : "";
                     sb.AppendLine($"   parent          : '{t.Parent.name}', net travel {t.ParentNetTravel.magnitude:F3} m, " +
                                   $"largest step {t.ParentMaxStep:F4} m{parentVerdict}");
                 }

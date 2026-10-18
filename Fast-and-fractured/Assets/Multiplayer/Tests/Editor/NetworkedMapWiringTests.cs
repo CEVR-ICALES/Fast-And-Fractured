@@ -10,13 +10,7 @@ using UnityEngine.TestTools;
 
 namespace FastAndFractured.Multiplayer.Tests
 {
-    /// <summary>
-    /// The networked maps are generated from the singleplayer maps by NetworkedSceneMigrationTool.
-    /// Its prefab swaps used to keep only the transform of each swapped hazard, dropping the scene
-    /// wiring: in all three maps the storm lost its sphereCenter and the level lost its storm, so
-    /// the storm could never start in multiplayer and the AI never saw it (2026-09-30). These open
-    /// every generated map and check the wiring the storm needs.
-    /// </summary>
+    /// <summary>Checks the storm wiring of every generated networked map (the migration's prefab swaps used to drop it).</summary>
     public class NetworkedMapWiringTests
     {
         private const string MultiplayerFolder = "Assets/Multiplayer";
@@ -48,8 +42,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(MapCases))]
         public void Storm_is_wired_like_in_singleplayer(string scenePath)
         {
-            // Loading a map logs its own content errors (ConstructionMap: "Tree prefab at index 3
-            // is missing", also in singleplayer). They are not what this test checks.
+            // Map loads log their own content errors, also in singleplayer.
             LogAssert.ignoreFailingMessages = true;
             WithScene(scenePath, scene =>
             {
@@ -72,9 +65,7 @@ namespace FastAndFractured.Multiplayer.Tests
         [TestCaseSource(nameof(MapCases))]
         public void Storm_and_lava_keep_the_singleplayer_maps_tuning(string scenePath)
         {
-            // The golf map's lava rose over 120 s in singleplayer and over the prefab's 20 s in
-            // multiplayer, killing a car on the low spawn point six seconds into the match; the
-            // storm ran on prefab defaults too (2026-09-30).
+            // Prefab defaults instead of the map's values made the golf lava kill a car seconds into the match.
             LogAssert.ignoreFailingMessages = true;
             string singleplayerPath = SingleplayerSourceOf(scenePath);
             Assert.That(singleplayerPath, Is.Not.Null, $"No singleplayer map found for {scenePath}.");

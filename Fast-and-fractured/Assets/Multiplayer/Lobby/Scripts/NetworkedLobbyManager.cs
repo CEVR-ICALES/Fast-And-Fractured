@@ -7,14 +7,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Server-authoritative lobby manager handling:
-    /// - Player ready states
-    /// - Character selection synchronization
-    /// - Game start conditions
-    /// 
-    /// Place this on a scene NetworkObject (e.g., NetworkManager or dedicated Lobby GO).
-    /// </summary>
+    /// <summary>Server-authoritative room: ready states, character picks, map vote, AI slots and match start.</summary>
     public class NetworkedLobbyManager : NetworkBehaviour
     {
         #region EVENTS
@@ -35,19 +28,13 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SYNCED_STATE
-        /// <summary>
-        /// Maps ClientId -> ready state. Synced to all clients.
-        /// </summary>
+        /// <summary>ClientId -> ready state.</summary>
         public readonly SyncDictionary<int, bool> PlayerReadyStates = new SyncDictionary<int, bool>();
 
-        /// <summary>
-        /// Maps ClientId -> selected character code (e.g. Pepe_0). Synced to all clients.
-        /// </summary>
+        /// <summary>ClientId -> selected character code (e.g. Pepe_0).</summary>
         public readonly SyncDictionary<int, string> PlayerCharacterSelections = new SyncDictionary<int, string>();
 
-        /// <summary>
-        /// Maps ClientId -> display name (Steam persona / platform name). Synced to all clients.
-        /// </summary>
+        /// <summary>ClientId -> display name (Steam persona or platform name).</summary>
         public readonly SyncDictionary<int, string> PlayerNames = new SyncDictionary<int, string>();
 
         /// <summary>Fired when a player's display name syncs. Args: clientId, name.</summary>
@@ -65,29 +52,17 @@ namespace FastAndFractured.Multiplayer
         public string GetPlayerName(int clientId) =>
             PlayerNames.TryGetValue(clientId, out var n) && !string.IsNullOrEmpty(n) ? n : $"Player {clientId}";
 
-        /// <summary>
-        /// Minimum players required to start the game.
-        /// </summary>
         [field: SerializeField]
         public int MinPlayersToStart { get; private set; } = 2;
 
-        /// <summary>
-        /// Countdown duration in seconds when all players are ready.
-        /// </summary>
         [field: SerializeField]
         public int CountdownDuration { get; private set; } = 5;
 
-        /// <summary>
-        /// Current countdown value. -1 means no countdown active.
-        /// </summary>
+        /// <summary>Current countdown value; -1 when none is running.</summary>
         public readonly SyncVar<int> CurrentCountdown = new SyncVar<int>(-1);
 
-        /// <summary>
-        /// Whether the game has started (no more changes allowed).
-        /// </summary>
         public readonly SyncVar<bool> GameStarted = new SyncVar<bool>(false);
 
-        // MAP VOTE
         /// <summary>Maps ClientId → voted mapId. -1 means no vote yet.</summary>
         public readonly SyncDictionary<int, int> PlayerMapVotes = new SyncDictionary<int, int>();
 
@@ -97,10 +72,8 @@ namespace FastAndFractured.Multiplayer
         public event Action<int, int> OnPlayerMapVoteChanged;
         public event Action<int>      OnMapResolved;
 
-        // AI SLOTS
         public readonly SyncVar<int> AiSlotCount = new SyncVar<int>(0);
 
-        // ROOM NAME
         /// <summary>Display name for the room, set by the host. Synced to all clients.</summary>
         public readonly SyncVar<string> RoomName = new SyncVar<string>("Room");
 
@@ -108,15 +81,9 @@ namespace FastAndFractured.Multiplayer
 
         public event Action<int> OnAiSlotCountChanged;
 
-        // MATCH IN PROGRESS
-        /// <summary>
-        /// Clients playing the current match (empty between matches). The room outlives the
-        /// match: players who join while it runs, and players who leave it early, wait in the
-        /// room for the next one.
-        /// </summary>
+        /// <summary>Clients playing the current match (empty between matches); everyone else waits in the room.</summary>
         public readonly SyncList<int> MatchParticipants = new SyncList<int>();
 
-        /// <summary>True when the client is playing the match in progress.</summary>
         public bool IsInMatch(int clientId) => GameStarted.Value && MatchParticipants.Contains(clientId);
 
         /// <summary>Clients in the room watching the match in progress (they load its map, without a car).</summary>
@@ -175,10 +142,8 @@ namespace FastAndFractured.Multiplayer
             GameStarted.OnChange += HandleGameStartedChange;
             AiSlotCount.OnChange += HandleAiSlotChange;
 
-            // OnRemoteConnectionState doesn't fire for the host's own client connection. Register
-            // AND seed the default character + display name in one RPC. We deliberately do NOT
-            // read "Selected_Player" — Construct overwrites that with the scene default, so it
-            // can't persist the real online choice.
+            // The host's own connection fires no OnRemoteConnectionState: register it here. Not from Selected_Player,
+            // which Construct overwrites.
             ServerRegisterPlayerRpc(GetPreferredCharacterCode(), GetLocalDisplayName(), Progression.PlayerProgression.Level);
         }
 
@@ -212,7 +177,6 @@ namespace FastAndFractured.Multiplayer
             var provider = Abstractions.LobbyServiceLocator.IdentityProvider;
             if (provider == null) return null;
             var task = provider.GetLocalIdentityAsync();
-            // Steam/Tugboat providers complete synchronously (Task.FromResult).
             return task.IsCompleted && task.Result != null ? task.Result.DisplayName : null;
         }
 
@@ -223,7 +187,6 @@ namespace FastAndFractured.Multiplayer
             return string.IsNullOrWhiteSpace(code) ? DEFAULT_CHARACTER_CODE : code;
         }
 
-        /// <summary>Persists the local player's online character pick for next session.</summary>
         public static void SavePreferredCharacterCode(string code)
         {
             if (string.IsNullOrWhiteSpace(code)) return;
@@ -279,7 +242,6 @@ namespace FastAndFractured.Multiplayer
             {
                 PlayerReadyStates[conn.ClientId] = false;
                 PlayerCharacterSelections[conn.ClientId] = "";
-                // Clamp AI slots so total never exceeds MAX_PLAYERS after a new player joins
                 int maxAi = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount);
                 if (AiSlotCount.Value > maxAi)
                     AiSlotCount.Value = maxAi;
@@ -375,25 +337,15 @@ namespace FastAndFractured.Multiplayer
             RpcNotifyCountdownCancelled();
         }
 
-        /// <summary>
-        /// Client-side event fired when the server broadcasts the map pick. Args: candidate map
-        /// ids, their votes (empty when nobody voted), the hops (indices into the candidates, the
-        /// last one is the chosen map) and whether it is a random pick. LobbyRoom UI listens.
-        /// </summary>
+        /// <summary>Client: the server's map pick (candidates, votes, hops ending on the chosen map, random or not).</summary>
         public event System.Action<int[], int[], int[], bool> OnMapVoteAnimationRequested;
 
         private void StartGameInternal()
         {
-            // Idempotency guard: ServerForceStart + countdown completion could both call us
-            // in the same frame; ResolveMapVote uses TimeManager.LocalTick as seed so a second
-            // call would pick a different map and trigger a second LoadGlobalScenes → FishNet
-            // kicks the client with "scene load response for handle X, but client was not sent
-            // a load for this handle" because the handles don't reconcile.
+            // Force start and the countdown can both land here; a second pick would start a second scene load.
             if (GameStarted.Value) return;
             GameStarted.Value = true;
 
-            // Stop the countdown immediately so Update() doesn't fall through and re-enter here
-            // a few frames later after Force Start already kicked the match off.
             _countdownActive = false;
 
             // Everyone in the room plays; whoever joins from now on waits for the next match.
@@ -401,21 +353,16 @@ namespace FastAndFractured.Multiplayer
             foreach (var kv in PlayerReadyStates)
                 MatchParticipants.Add(kv.Key);
 
-            // Resolve map vote first so ResolvedMapId is set before anyone reads it.
             ResolveMapVote();
 
-            // The pick every peer animates: a wheel over the voted maps, or random hops over all
-            // of them when nobody voted. The server waits for it before loading the map.
+            // Every peer animates the same pick; the server loads the map once it is over.
             var pick = BuildMapPick(PlayerMapVotes, CatalogMapIds(), ResolvedMapId.Value,
-                                    new System.Random(unchecked((int)TimeManager.LocalTick * 31 + 7)));
+                                    new System.Random(unchecked((int)TimeManager.LocalTick * MAP_PICK_SEED_MULTIPLIER + MAP_PICK_SEED_OFFSET)));
             _mapPickDuration = FastAndFractured.Multiplayer.Lobby.MapVoteAnimationUI.DurationFor(pick.Hops.Length);
             RpcPlayMapVoteAnimation(pick.Candidates, pick.Votes, pick.Hops, pick.Random);
             OnGameStarting?.Invoke();
 
-            // Legacy path: if a NetworkedLevelControllerManager happens to be in this scene
-            // (single-scene setups), keep feeding it character selections. With the recommended
-            // setup the level controller lives in the GAME scene and reads PlayerCharacterSelections
-            // from THIS lobby manager (which is Global, so it survives the scene load).
+            // Single-scene setups: feed a NetworkedLevelControllerManager in this scene, if any.
             var legacyLevelController = FindObjectOfType<NetworkedLevelControllerManager>();
             if (legacyLevelController != null)
             {
@@ -439,15 +386,16 @@ namespace FastAndFractured.Multiplayer
             }
             else
             {
-                // Modern path: schedule the FishNet scene load to fire after the animation.
                 StartCoroutine(LoadMapSceneAfterAnimation());
             }
         }
 
-        // ── Map pick animation + scene load ───────────────────────────────────
         private const int MIN_MAP_PICK_HOPS = 12;
         private const int RANDOM_MAP_PICK_HOPS = 14;
         private float _mapPickDuration = 3f;
+        private const int MAP_PICK_SEED_MULTIPLIER = 31;
+        private const int MAP_PICK_SEED_OFFSET = 7;
+        private const int MAX_ROOM_NAME_LENGTH = 64;
 
         /// <summary>What the map pick animation shows; see MapVoteAnimationUI.</summary>
         public struct MapPick
@@ -458,12 +406,7 @@ namespace FastAndFractured.Multiplayer
             public bool Random;
         }
 
-        /// <summary>
-        /// Votes cast: the voted maps, in id order, and a wheel going round them that stops on
-        /// the winner after at least MIN_MAP_PICK_HOPS hops (just the winner when only one map got
-        /// votes). Nobody voted: every map, and random hops that never repeat the previous one,
-        /// ending on the winner.
-        /// </summary>
+        /// <summary>Votes cast: a wheel over the voted maps stopping on the winner. Nobody voted: random non-repeating hops over every map.</summary>
         public static MapPick BuildMapPick(IEnumerable<KeyValuePair<int, int>> votes, IList<int> allMapIds,
                                            int winner, System.Random rng)
         {
@@ -537,10 +480,7 @@ namespace FastAndFractured.Multiplayer
 
             Debug.Log($"[NetworkedLobbyManager] Loading map scene '{sceneToLoad}' for resolved mapId={ResolvedMapId.Value}.");
 
-            // Only the match's players load the map (a connection scene, not a global one):
-            // a global scene would also be pushed onto anyone joining the room mid-match, and
-            // nobody could go back to the room while it is loaded. MatchSceneVisibility keeps
-            // the map's objects away from the players in the room.
+            // A connection scene, not a global one: it would be pushed onto anyone joining the room mid-match.
             var players = new List<NetworkConnection>();
             foreach (int clientId in MatchParticipants)
                 if (ServerManager.Clients.TryGetValue(clientId, out var conn) && conn.IsActive)
@@ -568,17 +508,11 @@ namespace FastAndFractured.Multiplayer
             return entry.GetSceneNameForMultiplayer();
         }
 
-        // -- Watching a match in progress ----------------------------------------------
         /// <summary>A player waiting in the room asks to watch the match in progress.</summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerSpectateMatch(NetworkConnection conn = null) => SpectateMatch(conn);
 
-        /// <summary>
-        /// Loads the match's map for this one connection. The match itself is untouched: the
-        /// server already runs the scene, it only starts sending its objects to one more client
-        /// (MatchSceneVisibility) - a little upload bandwidth, nothing simulated twice. The
-        /// match's controller hands the spectator the start data once its map has loaded.
-        /// </summary>
+        /// <summary>Loads the match's map for this connection only; the server just starts sending its objects there.</summary>
         [Server]
         public void SpectateMatch(NetworkConnection conn)
         {
@@ -595,12 +529,7 @@ namespace FastAndFractured.Multiplayer
             Debug.Log($"[NetworkedLobbyManager] Client {conn.ClientId} is now watching the match ('{scene}').");
         }
 
-        // -- End of a match: back to the room ------------------------------------------
-        /// <summary>
-        /// Server: the match is over (or was abandoned); the room is ready for the next one.
-        /// Players, characters, AI slots and the room name stay; ready states and map votes
-        /// start over.
-        /// </summary>
+        /// <summary>Server: the match is over; players, characters, AI slots and room name stay, ready states and votes reset.</summary>
         [Server]
         public void ServerEndMatch()
         {
@@ -621,10 +550,7 @@ namespace FastAndFractured.Multiplayer
         [ServerRpc(RequireOwnership = false)]
         public void ServerLeaveMatch(NetworkConnection conn = null) => LeaveMatch(conn);
 
-        /// <summary>
-        /// Server side of leaving a match early. The host cannot leave its own match (the map
-        /// runs on it), so the host leaving ends the match for everyone.
-        /// </summary>
+        /// <summary>Server side of leaving early; the host leaving ends the match (the map runs on it).</summary>
         [Server]
         public void LeaveMatch(NetworkConnection conn)
         {
@@ -712,18 +638,13 @@ namespace FastAndFractured.Multiplayer
             if (next && !prev)
             {
                 OnGameStarting?.Invoke();
-                // Arm the host-disconnect watchdog: any subsequent unexpected client-stop
-                // during this match means the host died (or left), so we return to the hub
-                // instead of freezing on a dead scene.
+                // From now on an unexpected client stop means the host is gone.
                 HostDisconnectWatchdog.NotifyMatchStarted();
             }
         }
         #endregion
 
         #region CLIENT_RPCS
-        /// <summary>
-        /// Client requests to toggle their ready state.
-        /// </summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerSetReady(bool ready, NetworkConnection conn = null)
         {
@@ -733,9 +654,6 @@ namespace FastAndFractured.Multiplayer
             PlayerReadyStates[conn.ClientId] = ready;
         }
 
-        /// <summary>
-        /// Client requests to select a character.
-        /// </summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerSelectCharacter(string characterName, NetworkConnection conn = null)
         {
@@ -752,15 +670,11 @@ namespace FastAndFractured.Multiplayer
             PlayerCharacterSelections[conn.ClientId] = characterCode;
         }
 
-        /// <summary>
-        /// Host/Server can force start the game regardless of ready states.
-        /// </summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerForceStart(NetworkConnection conn = null)
         {
             if (GameStarted.Value) return;
             
-            // Only allow host (clientId 0 or server-only)
             if (conn != null && conn.ClientId != 0 && !conn.IsHost)
             {
                 Debug.LogWarning($"[NetworkedLobbyManager] Non-host player {conn.ClientId} tried to force start");
@@ -777,7 +691,6 @@ namespace FastAndFractured.Multiplayer
         }
         #endregion
 
-        /// <summary>Client casts or changes their map vote.</summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerVoteMap(int mapId, NetworkConnection conn = null)
         {
@@ -785,14 +698,7 @@ namespace FastAndFractured.Multiplayer
             PlayerMapVotes[conn.ClientId] = mapId;
         }
 
-        /// <summary>
-        /// Every client (host included) calls this on OnStartClient so they appear in
-        /// PlayerReadyStates. Carries the player's preferred default character so registration +
-        /// default selection happen in ONE RPC — sending a second ServerRpc back-to-back from
-        /// OnStartClient was racy and the selection sometimes got dropped (leaving the player on
-        /// the GetFallbackCharacterCode default instead of Josefino/their last pick).
-        /// Idempotent: safe to call twice.
-        /// </summary>
+        /// <summary>Every client registers on OnStartClient, with its default character in the same RPC (a second one could be dropped). Idempotent.</summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerRegisterPlayerRpc(string preferredCharacter, string displayName, int level, NetworkConnection conn = null)
         {
@@ -802,8 +708,7 @@ namespace FastAndFractured.Multiplayer
             if (!PlayerReadyStates.ContainsKey(conn.ClientId))
                 PlayerReadyStates[conn.ClientId] = false;
 
-            // Seed the character only if the player hasn't already picked one (don't clobber a
-            // real selection on a reconnect / double-call).
+            // Keep a real pick on a reconnect.
             if (!PlayerCharacterSelections.TryGetValue(conn.ClientId, out var existing) || string.IsNullOrEmpty(existing))
             {
                 string code = NormalizeCharacterCode(preferredCharacter);
@@ -832,7 +737,6 @@ namespace FastAndFractured.Multiplayer
             AiSlotCount.Value = Mathf.Clamp(count, 0, maxAi);
         }
 
-        /// <summary>Host sets the display name of the room. Other clients see it via SyncVar.</summary>
         [ServerRpc(RequireOwnership = false)]
         public void ServerSetRoomName(string name, NetworkConnection conn = null)
         {
@@ -846,17 +750,13 @@ namespace FastAndFractured.Multiplayer
             ApplyRoomName(name);
         }
 
-        /// <summary>
-        /// Host path. The host is the server, and a [ServerRpc] called from the server never runs
-        /// its logic (see memory: ServerRpc-from-host no-op) - the room name the host typed was
-        /// silently dropped and the lobby room showed "Room" (playtest feedback 2026-09-30).
-        /// </summary>
+        /// <summary>Host path: a ServerRpc called from the host never runs its logic.</summary>
         [Server]
         public void ApplyRoomName(string name)
         {
             if (GameStarted.Value) return;
             string sanitized = string.IsNullOrWhiteSpace(name) ? "Room" : name.Trim();
-            if (sanitized.Length > 64) sanitized = sanitized.Substring(0, 64);
+            if (sanitized.Length > MAX_ROOM_NAME_LENGTH) sanitized = sanitized.Substring(0, MAX_ROOM_NAME_LENGTH);
             RoomName.Value = sanitized;
         }
 
@@ -876,9 +776,6 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region PUBLIC_HELPERS
-        /// <summary>
-        /// Check if the local player is ready.
-        /// </summary>
         public bool IsLocalPlayerReady()
         {
             if (!IsClientInitialized) return false;
@@ -886,17 +783,11 @@ namespace FastAndFractured.Multiplayer
             return PlayerReadyStates.ContainsKey(localId) && PlayerReadyStates[localId];
         }
 
-        /// <summary>
-        /// Get the character selected by a specific player.
-        /// </summary>
         public string GetPlayerCharacter(int clientId)
         {
             return PlayerCharacterSelections.ContainsKey(clientId) ? PlayerCharacterSelections[clientId] : "";
         }
 
-        /// <summary>
-        /// Get count of ready players.
-        /// </summary>
         public int GetReadyPlayerCount()
         {
             int count = 0;
@@ -907,9 +798,6 @@ namespace FastAndFractured.Multiplayer
             return count;
         }
 
-        /// <summary>
-        /// Get total player count in lobby.
-        /// </summary>
         public int GetTotalPlayerCount()
         {
             return PlayerReadyStates.Count;

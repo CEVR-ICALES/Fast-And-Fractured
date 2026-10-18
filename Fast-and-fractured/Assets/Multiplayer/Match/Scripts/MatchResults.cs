@@ -18,9 +18,8 @@ namespace FastAndFractured.Multiplayer
     }
 
     /// <summary>
-    /// End-of-match results for the multiplayer win/lose screen: your placement and the whole
-    /// table, as in other battle royales. Built on the server from the deaths in the order they
-    /// happened; kept here (static) because the map is unloaded before the menu shows them.
+    /// End-of-match results for the win/lose screen, built on the server from the deaths in order; static because
+    /// the map is unloaded before the menu shows them.
     /// </summary>
     public static class MatchResults
     {
@@ -56,7 +55,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (!TryGetLocal(out var mine) || Latest == null) return;
             int xp = Progression.ProgressionMath.MatchXp(mine.Placement, Latest.Length, mine.Kills, mine.DamageDealt);
-            // One award per match even if the results arrive twice (host and client share the process).
+            // One award per match (host and client share the process).
             string matchKey = System.DateTime.UtcNow.ToString("yyyyMMddHHmm") + "|" + Latest.Length + "|" + mine.Placement + "|" + mine.Kills;
             try { Progression.PlayerProgression.AwardMatch(matchKey, xp); }
             catch (System.Exception e) { UnityEngine.Debug.LogException(e); }
@@ -77,10 +76,7 @@ namespace FastAndFractured.Multiplayer
             return false;
         }
 
-        /// <summary>
-        /// Placement: the winner first, then anyone else still alive, then the dead from the
-        /// last to fall to the first. Kills are the deaths credited to each participant.
-        /// </summary>
+        /// <summary>Placement: the winner, then the other survivors, then the dead from last to first.</summary>
         public static MatchResultEntry[] Build(IList<Participant> participants, IList<Death> deathsInOrder, int winnerId)
         {
             var byId = participants.ToDictionary(p => p.Id);

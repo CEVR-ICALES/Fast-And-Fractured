@@ -6,15 +6,11 @@ using FastAndFractured;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// 1-click editor tool to add multiplayer components to an AI vehicle prefab.
-    /// Adds: NetworkObject, NetworkedAIShoot (server-only shooting).
-    /// 
-    /// Usage: Tools > Fast And Fractured > Networked AI Setup
-    /// Or right-click an AI prefab > Fast And Fractured > Setup Networked AI
-    /// </summary>
     public class NetworkedAISetupTool : EditorWindow
     {
+        private const float SECTION_SPACING = 10f;
+        private const float BUTTON_HEIGHT = 35f;
+
         private GameObject _aiPrefab;
         private GameObject _normalBulletPrefab;
         private GameObject _pushBulletPrefab;
@@ -50,7 +46,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 "Modifies the prefab IN PLACE (no variant created).",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             _aiPrefab = (GameObject)EditorGUILayout.ObjectField("AI Prefab", _aiPrefab, typeof(GameObject), false);
 
@@ -62,14 +58,14 @@ namespace FastAndFractured.Multiplayer.Editor
                 _pushBulletPrefab = (GameObject)EditorGUILayout.ObjectField("Push Bullet", _pushBulletPrefab, typeof(GameObject), false);
                 _minePrefab = (GameObject)EditorGUILayout.ObjectField("Mine", _minePrefab, typeof(GameObject), false);
 
-                EditorGUILayout.Space(10);
+                EditorGUILayout.Space(SECTION_SPACING);
                 DrawAnalysis();
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             GUI.enabled = _aiPrefab != null;
-            if (GUILayout.Button("Setup AI for Multiplayer", GUILayout.Height(35)))
+            if (GUILayout.Button("Setup AI for Multiplayer", GUILayout.Height(BUTTON_HEIGHT)))
             {
                 SetupAIPrefab();
             }
@@ -107,14 +103,12 @@ namespace FastAndFractured.Multiplayer.Editor
                 return;
             }
 
-            // Open prefab for editing
             GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
             try
             {
                 bool modified = false;
 
-                // 1. NetworkObject
                 if (prefabRoot.GetComponent<NetworkObject>() == null)
                 {
                     prefabRoot.AddComponent<NetworkObject>();
@@ -122,7 +116,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     modified = true;
                 }
 
-                // 2. NetworkedAIShoot
                 var aiShoot = prefabRoot.GetComponent<NetworkedAIShoot>();
                 if (aiShoot == null)
                 {
@@ -131,7 +124,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     modified = true;
                 }
 
-                // 3. Wire bullet prefabs
                 var so = new SerializedObject(aiShoot);
                 bool prefabsModified = false;
 

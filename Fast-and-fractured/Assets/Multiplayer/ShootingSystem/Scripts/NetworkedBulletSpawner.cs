@@ -6,22 +6,10 @@ using FishNet;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Shared server-authoritative bullet spawning logic used by both
-    /// NetworkedShoot (player) and NetworkedAIShoot (AI).
-    /// Eliminates code duplication between the two shoot handlers.
-    /// </summary>
+    /// <summary>Server bullet spawning shared by NetworkedShoot and NetworkedAIShoot.</summary>
     public static class NetworkedBulletSpawner
     {
-        /// <summary>
-        /// Spawns a networked projectile on the server, initializes it via RPC, and returns the spawned GameObject.
-        /// Returns null if spawning failed.
-        /// </summary>
-        /// <param name="prefab">The networked projectile prefab to instantiate.</param>
-        /// <param name="spawnParams">Bullet parameters from the shoot handle.</param>
-        /// <param name="shooterNetworkObject">The NetworkObject of the shooter (for collision ignoring). Can be null for ownerless AI.</param>
-        /// <param name="serverManager">The ServerManager used to network-spawn the object.</param>
-        /// <param name="ownerConnection">The owner connection for the spawned bullet. Null for AI (server-owned).</param>
+        /// <summary>Spawns a networked projectile on the server; null on failure. Null shooter and owner for AI.</summary>
         public static GameObject SpawnServerAuthoritative(
             GameObject prefab,
             BulletSpawnParameters spawnParams,
@@ -41,10 +29,7 @@ namespace FastAndFractured.Multiplayer
                 return null;
             }
 
-            // Validate the asset before instantiating it. Previously an invalid single-player
-            // projectile stayed alive until deferred Destroy() ran at the end of the frame;
-            // its LocalEventRunner could then participate in Physics.Simulate and throw before
-            // it disappeared.
+            // Validate before instantiating: an invalid projectile's LocalEventRunner could throw in Physics.Simulate.
             if (prefab.GetComponent<NetworkObject>() == null)
             {
                 Debug.LogError($"[NetworkedBulletSpawner] Prefab '{prefab.name}' is missing NetworkObject. Spawn aborted.", prefab);
@@ -60,10 +45,7 @@ namespace FastAndFractured.Multiplayer
             GameObject spawnedBulletGO = Object.Instantiate(prefab, spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
             spawnedBulletGO.transform.SetParent(null);
 
-            // The launch state travels in the spawn message itself (see
-            // NetworkedPredictedProjectileSpawn), so observers start the flight the moment the shot
-            // appears. It used to follow in an ObserversRpc, which left the shot sitting uninitialised
-            // at the gun until the RPC arrived.
+            // The launch state travels in the spawn message (NetworkedPredictedProjectileSpawn).
             var payload = spawnedBulletGO.GetComponent<NetworkedPredictedProjectileSpawn>();
             var netParams = ToNetworkParams(spawnParams);
             var timeManager = serverManager.NetworkManager.TimeManager;

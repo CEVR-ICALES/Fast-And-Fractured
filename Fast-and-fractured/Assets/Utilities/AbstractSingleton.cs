@@ -50,7 +50,6 @@ namespace Utilities
             {
                 if (s_Instance == null)
                 {
-                    // Use FindObjectsByType to exclude inactive components
                     var allInstances = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
                     if (allInstances != null && allInstances.Length > 0)
                     {

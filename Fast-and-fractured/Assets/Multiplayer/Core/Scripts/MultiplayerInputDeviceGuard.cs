@@ -6,15 +6,12 @@ using UnityEngine.InputSystem;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Completes device detection only while an online client is running. The shared controller
-    /// recognizes keyboard keys and gamepad buttons, but not mouse activity; consequently a
-    /// single gamepad press leaves controller glyphs visible while the player aims and fires with
-    /// the mouse. This multiplayer-only bridge avoids changing single-player input code.
-    /// </summary>
+    /// <summary>Online only: mouse activity also switches the shared controller back from gamepad glyphs.</summary>
     [DefaultExecutionOrder(1000)]
     public sealed class MultiplayerInputDeviceGuard : MonoBehaviour
     {
+        private const float MIN_MOUSE_SQR = 0.01f;
+
         private static readonly FieldInfo CurrentDeviceField = typeof(PlayerInputController)
             .GetField("_currentInputDevice", BindingFlags.Instance | BindingFlags.NonPublic);
         private static readonly FieldInfo UsingControllerField = typeof(PlayerInputController)
@@ -31,11 +28,7 @@ namespace FastAndFractured.Multiplayer
             if (mouse == null || !HasMeaningfulMouseInput(mouse))
                 return;
 
-            // ExistingInstance, never Instance: the singleton accessor auto-creates the component on a
-            // bare GameObject when none is present, and PlayerInputController.Construct then reaches for
-            // LevelController.Instance, spawning a second phantom. In the lobby (client started, no level)
-            // this fires every frame the mouse moves, and the phantoms hold s_Instance until the real
-            // controllers awake in the map scene and disable themselves as duplicates.
+            // ExistingInstance: Instance would auto-create a phantom controller (and a phantom LevelController) in the lobby.
             PlayerInputController input = PlayerInputController.ExistingInstance;
             if (input == null || !input.IsUsingController)
                 return;
@@ -51,8 +44,8 @@ namespace FastAndFractured.Multiplayer
             return mouse.leftButton.wasPressedThisFrame ||
                    mouse.rightButton.wasPressedThisFrame ||
                    mouse.middleButton.wasPressedThisFrame ||
-                   mouse.delta.ReadValue().sqrMagnitude > 0.01f ||
-                   mouse.scroll.ReadValue().sqrMagnitude > 0.01f;
+                   mouse.delta.ReadValue().sqrMagnitude > MIN_MOUSE_SQR ||
+                   mouse.scroll.ReadValue().sqrMagnitude > MIN_MOUSE_SQR;
         }
     }
 }

@@ -3,11 +3,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer.HostMigration
 {
-    /// <summary>
-    /// Client → server, on every connect: this process's migration token. FishNet client ids
-    /// change when players reconnect to a new host, and two test editors share one Steam
-    /// account, so neither identifies a player across a migration; the token does.
-    /// </summary>
+    /// <summary>Client to server on connect: the migration token, which identifies a player across hosts (client ids change).</summary>
     public struct MigrationTokenBroadcast : IBroadcast
     {
         public string Token;
@@ -16,10 +12,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
     }
 
     /// <summary>
-    /// Server → clients, several times per second during a match: everything a new host needs
-    /// to rebuild the match. The cast is rebuilt by replaying the original start (same seed,
-    /// same human characters in the same order - the singleplayer spawner is deterministic),
-    /// then each surviving character gets its saved state back.
+    /// Server to clients during a match: what a new host needs to rebuild it. The cast is replayed from the
+    /// original start (same seed and players) and each survivor gets its saved state back.
     /// </summary>
     public struct MatchSnapshotBroadcast : IBroadcast
     {
@@ -45,10 +39,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         public Vector3 StormSpawnPoint;
         public Vector3 StormMirrorPoint;
 
-        // The map: props broken so far (NetworkedWorldBreakables indices), how far each
-        // breakable platform got (NetworkedBreakablePlatform: 0 intact, 1 cracked, 2 broken, in
-        // hierarchy order) and the pickups on the map in their pool order (raw indices into
-        // InteractableHandler.interactablesToToggle; the first ones are the visible ones).
+        // The map: broken props, platform stages (0 intact, 1 cracked, 2 broken) and the pickups in pool order.
         public int[] BrokenWorldProps;
         public byte[] PlatformStages;
         public int[] InteractablePool;

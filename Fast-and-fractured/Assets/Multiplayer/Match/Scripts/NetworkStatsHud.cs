@@ -10,17 +10,22 @@ using Utilities.Managers.PauseSystem;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Match overlay with every player's connection: Wi-Fi / cable, signal bars and ping to the
-    /// host, input delay and rollback frames (see <see cref="NetworkQuality"/> for what the
-    /// numbers mean). The local player's row comes first. F3 hides / shows it; it also hides
-    /// while the pause menu is open.
-    ///
-    /// Created at runtime in networked map scenes; no scene wiring.
+    /// Match overlay with every player's connection (see <see cref="NetworkQuality"/>), local row first. F3
+    /// toggles it; hidden while the pause menu is open.
     /// </summary>
     public sealed class NetworkStatsHud : MonoBehaviour
     {
         private const float ROW_HEIGHT = 20f;
         private const float REFRESH_SECONDS = 0.25f;
+        private const float ROW_SPACING = 3f;
+        private const float COLUMN_SPACING = 10f;
+        private const float NAME_WIDTH = 130f;
+        private const float FONT_TO_ROW_HEIGHT = 0.85f;
+        private const int SORTING_ORDER = 40;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.04f, 0.05f, 0.07f, 0.55f);
+        private static readonly Color REMOTE_NAME_COLOR = new Color(1f, 1f, 1f, 0.8f);
 
         private static NetworkStatsHud _instance;
         private static bool _hiddenByUser;
@@ -92,14 +97,13 @@ namespace FastAndFractured.Multiplayer
             return pause != null && pause.IsGamePaused;
         }
 
-        // ── Content ────────────────────────────────────────────────────────────────────
         private void Refresh()
         {
             var nm = InstanceFinder.NetworkManager;
             int localId = nm.ClientManager.Connection != null ? nm.ClientManager.Connection.ClientId : -1;
 
             var entries = new List<KeyValuePair<int, NetworkQualityReport>>();
-            // The local row uses this peer's own numbers straight away (the table lags a second).
+            // The local row uses this peer's own numbers (the table lags a second).
             entries.Add(new KeyValuePair<int, NetworkQualityReport>(localId, NetworkQuality.Local));
             foreach (var pair in NetworkQuality.Players)
                 if (pair.Key != localId) entries.Add(pair);
@@ -118,7 +122,7 @@ namespace FastAndFractured.Multiplayer
         {
             string name = string.IsNullOrEmpty(report.Name) ? $"Player {clientId}" : report.Name;
             row.Name.text = local ? $"<b>{name}</b>" : name;
-            row.Name.color = local ? Color.white : new Color(1f, 1f, 1f, 0.8f);
+            row.Name.color = local ? Color.white : REMOTE_NAME_COLOR;
             row.Signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? LocalizationManager.Localize("MP.Host") : null);
 
             if (report.IsHost)
@@ -135,30 +139,28 @@ namespace FastAndFractured.Multiplayer
             return $"<color={color}>{value}</color>";
         }
 
-        // ── Building ───────────────────────────────────────────────────────────────────
         private void Build()
         {
             _canvas = gameObject.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 40;
+            _canvas.sortingOrder = SORTING_ORDER;
             var scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
 
             var panel = new GameObject("Panel", typeof(RectTransform));
             panel.transform.SetParent(transform, false);
             var background = panel.AddComponent<Image>();
-            background.color = new Color(0.04f, 0.05f, 0.07f, 0.55f);
+            background.color = BACKGROUND_COLOR;
             background.raycastTarget = false;
             _list = (RectTransform)panel.transform;
-            // Top-right, under the minimap and the match timer (the bottom-left is the portrait
-            // and damage bar, the bottom-right the abilities).
+            // Top right, under the minimap and the match timer.
             _list.anchorMin = _list.anchorMax = _list.pivot = new Vector2(1f, 1f);
             _list.anchoredPosition = new Vector2(-16f, -315f);
             var layout = panel.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(8, 8, 6, 6);
-            layout.spacing = 3f;
+            layout.spacing = ROW_SPACING;
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandWidth = layout.childForceExpandHeight = false;
             var fitter = panel.AddComponent<ContentSizeFitter>();
@@ -173,13 +175,13 @@ namespace FastAndFractured.Multiplayer
             var root = new GameObject("Row", typeof(RectTransform));
             root.transform.SetParent(_list, false);
             var layout = root.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 10f;
+            layout.spacing = COLUMN_SPACING;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandWidth = layout.childForceExpandHeight = false;
 
             var row = new Row { Root = root };
-            row.Name = NewText(root.transform, 130f);
+            row.Name = NewText(root.transform, NAME_WIDTH);
             row.Signal = NetworkSignalIndicator.Create(root.transform, row.Name, ROW_HEIGHT);
             row.Frames = NewText(root.transform, -1f);
             return row;
@@ -190,7 +192,7 @@ namespace FastAndFractured.Multiplayer
             var go = new GameObject("Text", typeof(RectTransform));
             go.transform.SetParent(parent, false);
             var text = go.AddComponent<TextMeshProUGUI>();
-            text.fontSize = ROW_HEIGHT * 0.85f;
+            text.fontSize = ROW_HEIGHT * FONT_TO_ROW_HEIGHT;
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Ellipsis;
             text.alignment = TextAlignmentOptions.MidlineLeft;

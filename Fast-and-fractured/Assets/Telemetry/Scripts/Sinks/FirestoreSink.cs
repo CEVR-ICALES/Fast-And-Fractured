@@ -9,14 +9,17 @@ using UnityEngine.Networking;
 namespace FastAndFractured.GameTelemetry
 {
     /// <summary>
-    /// Firestore over REST (the Firebase Unity SDK does not ship on Windows): signs in
-    /// anonymously once (refresh token kept in PlayerPrefs) and adds documents the security rules
-    /// allow - event batches and the player's own profile.
+    /// Firestore over REST (no Firebase SDK on Windows): one anonymous sign-in, refresh token in PlayerPrefs, and the
+    /// documents the security rules allow.
     /// </summary>
     internal sealed class FirestoreSink
     {
         private const string REFRESH_TOKEN_KEY = "Telemetry_RefreshToken";
         private const int TIMEOUT = 15;
+        private const int DEFAULT_TOKEN_SECONDS = 3600;
+        private const int MIN_TOKEN_SECONDS = 60;
+        private const int TOKEN_EXPIRY_MARGIN_SECONDS = 120;
+        private const long HTTP_UNAUTHORIZED = 401;
 
         private static string Documents =>
             $"https://firestore.googleapis.com/v1/projects/{TelemetryConfig.FIREBASE_PROJECT_ID}/databases/(default)/documents";
@@ -91,8 +94,8 @@ namespace FastAndFractured.GameTelemetry
             if (string.IsNullOrEmpty(idToken) || string.IsNullOrEmpty(uid)) return false;
             _idToken = idToken;
             _uid = uid;
-            int seconds = int.TryParse(expiresIn, out var s) ? s : 3600;
-            _tokenExpires = DateTime.UtcNow.AddSeconds(Mathf.Max(60, seconds - 120));
+            int seconds = int.TryParse(expiresIn, out var s) ? s : DEFAULT_TOKEN_SECONDS;
+            _tokenExpires = DateTime.UtcNow.AddSeconds(Mathf.Max(MIN_TOKEN_SECONDS, seconds - TOKEN_EXPIRY_MARGIN_SECONDS));
             if (!string.IsNullOrEmpty(refreshToken))
             {
                 PlayerPrefs.SetString(REFRESH_TOKEN_KEY, refreshToken);
@@ -115,7 +118,7 @@ namespace FastAndFractured.GameTelemetry
             using var request = Build(method, url, body, _idToken);
             yield return request.SendWebRequest();
             bool ok = request.result == UnityWebRequest.Result.Success;
-            if (!ok && request.responseCode == 401) _idToken = null;   // expired early: sign in again next time
+            if (!ok && request.responseCode == HTTP_UNAUTHORIZED) _idToken = null;   // expired early: sign in again next time
             if (!ok && Debug.isDebugBuild)
                 Debug.LogWarning($"[Telemetry] Firestore {method} failed: {request.responseCode} {request.error}");
             done(ok);

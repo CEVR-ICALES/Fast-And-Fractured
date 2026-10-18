@@ -1,10 +1,3 @@
-// SCENE SETUP:
-//   - Place on the MULTIPLAYER_BROWSER MenuScreen GameObject.
-//   - Wire _entryContainer  (Transform, parent for entries)
-//   - Wire _entryPrefab     (LobbyBrowserEntry prefab)
-//   - Wire _refreshButton   (Button)
-//   - Wire _backButton      (Button)
-//   - Wire _statusLabel     (TMP_Text, "Searching..." / "No rooms found")
 using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Collections.Generic;
@@ -21,6 +14,9 @@ namespace FastAndFractured.Multiplayer.Lobby
 {
     public sealed class LobbyBrowserController : MonoBehaviour
     {
+        private const int PING_TIMEOUT_MS = 1000;
+        private const int SEARCH_TIMEOUT_SECONDS = 10;
+
         [SerializeField] private Transform          _entryContainer;
         [SerializeField] private LobbyBrowserEntry  _entryPrefab;
         [SerializeField] private Button             _refreshButton;
@@ -59,9 +55,7 @@ namespace FastAndFractured.Multiplayer.Lobby
 
                 ClearEntries();
 
-                // If we're currently hosting, inject a synthetic entry for our own room. UDP
-                // broadcast loopback is unreliable on Windows when running multiple instances on
-                // the same machine, so this guarantees the host always sees their own lobby.
+                // The host's own room: UDP broadcast loopback is unreliable between instances on one Windows machine.
                 var ownListing = TryBuildOwnHostListing();
                 bool haveOwn   = ownListing != null;
 
@@ -77,7 +71,6 @@ namespace FastAndFractured.Multiplayer.Lobby
 
                     foreach (var listing in listings)
                     {
-                        // Skip if a remote listing exactly matches our own host (de-dupe loopback).
                         if (haveOwn && listing.Handle.Port == ownListing.Handle.Port &&
                             (listing.Handle.Address == ownListing.Handle.Address ||
                              listing.Handle.Address == "127.0.0.1"))
@@ -91,10 +84,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             finally { SetRefreshInteractable(true); }
         }
 
-        /// <summary>
-        /// Build a LobbyListing pointing to the local server if we are currently hosting.
-        /// Returns null when we're not the host.
-        /// </summary>
         private static LobbyListing TryBuildOwnHostListing()
         {
             if (!InstanceFinder.IsServerStarted) return null;
@@ -131,10 +120,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             else MeasurePing(entry, listing.Handle.Address);
         }
 
-        /// <summary>
-        /// ICMP echo to the room's address. LAN hosts usually answer; a firewall that drops echo
-        /// requests leaves "-- ms" (the room stays joinable, only the number is missing).
-        /// </summary>
+        /// <summary>ICMP echo to the room's address; a firewall dropping it leaves "-- ms".</summary>
         private static async void MeasurePing(LobbyBrowserEntry entry, string address)
         {
             if (string.IsNullOrEmpty(address)) return;
@@ -144,7 +130,7 @@ namespace FastAndFractured.Multiplayer.Lobby
                 using var ping = new System.Net.NetworkInformation.Ping();
                 for (int i = 0; i < 3; i++)
                 {
-                    var reply = await ping.SendPingAsync(address, 1000);
+                    var reply = await ping.SendPingAsync(address, PING_TIMEOUT_MS);
                     if (reply.Status == System.Net.NetworkInformation.IPStatus.Success &&
                         (best < 0 || reply.RoundtripTime < best))
                         best = (int)reply.RoundtripTime;
@@ -169,7 +155,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             SetStatus(LocalizationManager.Localize("MP.Connecting"));
 
             _cts?.Cancel();
-            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(SEARCH_TIMEOUT_SECONDS));
             try
             {
                 bool ok = await LobbyServiceLocator.Transport.JoinLobbyAsync(listing.Handle, _cts.Token);

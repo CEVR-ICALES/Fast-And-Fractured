@@ -9,6 +9,10 @@ namespace FastAndFractured.Progression
     /// <summary>Small builders for the code-built menu screens, in the multiplayer menus' look.</summary>
     internal static class MenuUiKit
     {
+        private const float BUTTON_FONT_SIZE = 28f;
+        private const float SCROLL_SENSITIVITY = 30f;
+        private static readonly Color SCROLL_BACKGROUND = new Color(0f, 0f, 0f, 0.25f);
+
         public static readonly Color Panel = new Color(0.07f, 0.09f, 0.15f, 0.92f);
         public static readonly Color Row = new Color(1f, 1f, 1f, 0.05f);
         public static readonly Color ButtonBlue = new Color(0.20f, 0.50f, 0.90f, 1f);
@@ -80,7 +84,7 @@ namespace FastAndFractured.Progression
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             if (onClick != null) button.onClick.AddListener(onClick);
-            var label = Text(rect, text, 28f, Color.white, TextAlignmentOptions.Center, font);
+            var label = Text(rect, text, BUTTON_FONT_SIZE, Color.white, TextAlignmentOptions.Center, font);
             Stretch((RectTransform)label.transform);
             return button;
         }
@@ -131,10 +135,10 @@ namespace FastAndFractured.Progression
         public static RectTransform ScrollList(Transform parent, string name)
         {
             var root = Rect(name, parent);
-            Background(root, new Color(0f, 0f, 0f, 0.25f));
+            Background(root, SCROLL_BACKGROUND);
             var scroll = root.gameObject.AddComponent<ScrollRect>();
             scroll.horizontal = false;
-            scroll.scrollSensitivity = 30f;
+            scroll.scrollSensitivity = SCROLL_SENSITIVITY;
             var viewport = Stretch(Rect("Viewport", root));
             viewport.gameObject.AddComponent<RectMask2D>();
             var content = Column(viewport, "Content", 6f, new RectOffset(8, 8, 8, 8));

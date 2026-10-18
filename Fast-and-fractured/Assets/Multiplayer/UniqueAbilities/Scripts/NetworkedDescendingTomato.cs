@@ -9,12 +9,8 @@ using System.Reflection;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Networked version of Pepe's descending tomato.
-    ///
-    /// It homes onto one car at a fixed speed, so every peer flies it itself toward that car as it
-    /// sees it (target and speed arrive with the spawn as SyncVars). The server alone decides the hit
-    /// and applies the debuff. Drawn through its NetworkTransform instead, it arrived on clients in
-    /// uneven steps: 3 m off a smooth path at 100 m/s (ShootingProbe, 2026-09-30).
+    /// Pepe's descending tomato: every peer flies it toward its target car (synced with the spawn); the server
+    /// decides the hit and applies the debuff.
     /// </summary>
     public class NetworkedDescendingTomato : NetworkBehaviour
     {
@@ -31,8 +27,9 @@ namespace FastAndFractured.Multiplayer
         // On clients: reached the target, waiting for the server's hit and despawn.
         private bool _arrived;
         private const float ARRIVAL_DISTANCE = 1f;
+        private const float DESPAWN_DELAY_SECONDS = 0.1f;
+        private const float LOCAL_HIT_DISTANCE = 5f;
 
-        // Server state
         private GameObject _target;
         private float _speed;
         private float _effectTime;
@@ -86,15 +83,11 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        // Client interpolation
         private Vector3 _lastServerPosition;
         private Vector3 _targetPosition;
         private float _interpTimer;
         private const float INTERP_DURATION = 0.1f;
         
-        /// <summary>
-        /// Called by NetworkedAscendingTomato on the server after spawning.
-        /// </summary>
         public void Initialize(GameObject target, float speed, float effectTime)
         {
             _target = target;
@@ -108,7 +101,6 @@ namespace FastAndFractured.Multiplayer
         
         private void Update()
         {
-            // Visual rotation on all clients
             transform.Rotate(_rotationSpeed * Time.deltaTime);
             
             if (base.IsServerInitialized)
@@ -142,12 +134,10 @@ namespace FastAndFractured.Multiplayer
             
             if (_target == null)
             {
-                // Target destroyed, despawn
                 DespawnTomato();
                 return;
             }
             
-            // Move toward target
             Vector3 direction = (_target.transform.position - transform.position).normalized;
             transform.position += direction * _speed * Time.deltaTime;
         }
@@ -165,11 +155,9 @@ namespace FastAndFractured.Multiplayer
             {
                 _hasHit = true;
                 
-                // Find NetworkedStatsController and apply debuff
                 var networkedStats = other.GetComponentInParent<NetworkedStatsController>();
                 if (networkedStats != null)
                 {
-                    // Apply speed debuff server-side
                     var statsController = other.GetComponentInParent<StatsController>();
                     if (statsController != null)
                     {
@@ -177,38 +165,32 @@ namespace FastAndFractured.Multiplayer
                     }
                 }
                 
-                // Notify clients of hit for VFX
                 OnHitRpc(other.transform.position);
                 
-                // Despawn after short delay for VFX
-                Invoke(nameof(DespawnTomato), 0.1f);
+                Invoke(nameof(DespawnTomato), DESPAWN_DELAY_SECONDS);
             }
         }
         
         [ObserversRpc]
         private void OnHitRpc(Vector3 hitPosition)
         {
-            // Play hit VFX on all clients
             var particles = GetComponentsInChildren<ParticleSystem>();
             foreach (var ps in particles)
             {
                 ps.Play();
             }
             
-            // Check if this hit the local player
             var localPlayer = LevelController.Instance?.LocalPlayer;
             if (localPlayer != null)
             {
                 float dist = Vector3.Distance(hitPosition, localPlayer.transform.position);
-                if (dist < 5f) // Hit local player
+                if (dist < LOCAL_HIT_DISTANCE)
                 {
-                    // Remove alert
                     if (IngameEventsManager.Instance != null)
                     {
                         IngameEventsManager.Instance.RemoveAlert();
                     }
                     
-                    // Show tomato effect on HUD
                     if (HUDManager.Instance != null && ResourcesManager.Instance != null)
                     {
                         HUDManager.Instance.UpdateUIEffect(

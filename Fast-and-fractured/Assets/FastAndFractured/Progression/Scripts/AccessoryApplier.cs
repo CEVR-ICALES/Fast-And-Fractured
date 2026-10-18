@@ -3,17 +3,11 @@ using UnityEngine;
 
 namespace FastAndFractured.Progression
 {
-    /// <summary>
-    /// Puts the equipped accessories on a model of a character - any model of it (the car in a
-    /// match, the character in the menu's bar or selector). For each slot: the equipped reward's
-    /// prefab, attached to the child named by the reward (e.g. "Head"), replacing what that slot
-    /// had. The test rewards have no prefab, so for now they equip without showing anything.
-    /// </summary>
+    /// <summary>Puts the equipped accessories on any model of a character, each on the child its reward names.</summary>
     public static class AccessoryApplier
     {
         private const string ATTACHED_PREFIX = "[Accessory] ";
 
-        /// <summary>Applies the LOCAL player's loadout for <paramref name="characterName"/>.</summary>
         public static void ApplyLocalLoadout(GameObject characterRoot, string characterName)
         {
             if (characterRoot == null || string.IsNullOrEmpty(characterName)) return;

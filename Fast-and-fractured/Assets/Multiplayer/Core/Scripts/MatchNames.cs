@@ -4,11 +4,7 @@ using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// The name every peer shows for a character of the match: the player's name for a human,
-    /// the bot's name (the same list the room shows for its AI slots) for an AI. Used by the
-    /// kill feed, the results table and the name above each car.
-    /// </summary>
+    /// <summary>The name every peer shows for a match character: the player's for a human, the bot's for an AI.</summary>
     public static class MatchNames
     {
         /// <summary>Stable bot name pool. Index = AI slot / AI order in the match.</summary>
@@ -37,7 +33,6 @@ namespace FastAndFractured.Multiplayer
             return aiIndex >= 0 ? BotName(aiIndex) : CleanObjectName(anyPartOfCharacter.name);
         }
 
-        /// <summary>Owner client of the character, if a human drives it.</summary>
         public static bool TryGetOwner(Transform part, out int clientId)
         {
             clientId = -1;
@@ -48,10 +43,7 @@ namespace FastAndFractured.Multiplayer
             return false;
         }
 
-        /// <summary>
-        /// Position of this AI among the match's AIs (the order LevelController spawned the cast
-        /// in, identical on every peer), or -1.
-        /// </summary>
+        /// <summary>Position of this AI among the match's AIs (spawn order, the same on every peer), or -1.</summary>
         public static int AiIndexOf(Transform part)
         {
             var level = LevelController.ExistingInstance;

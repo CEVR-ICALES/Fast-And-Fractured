@@ -19,8 +19,7 @@ namespace FastAndFractured.Multiplayer.Tests
         {
             var type = typeof(NetworkedStatsController);
 
-            // FishNet's IL weaving rewrites SyncVar fields to public at compile time,
-            // so reflection must include Public even though the source declares them private.
+            // FishNet's weaving makes SyncVar fields public.
             var enduranceField = type.GetField("_syncedEndurance",
                 BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             Assert.IsNotNull(enduranceField, "NetworkedStatsController should have _syncedEndurance field");
@@ -111,10 +110,6 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void NetworkedProjectile_IsNotReconciled()
         {
-            // A shot has no input to predict: every peer flies it from the same launch state and the
-            // server's despawn ends it. Reconciling it (the previous design) snapped the owner's shot
-            // back to the server's older position and could not re-simulate the gap under
-            // PhysicsMode.Unity - see NetworkedProjectile's class doc for the measurements.
             Assert.IsNull(typeof(NetworkedProjectile).GetNestedType("ReconcileData"),
                 "NetworkedProjectile must not be reconciled");
             Assert.IsNull(typeof(NetworkedProjectile).GetNestedType("MoveData"),
@@ -335,7 +330,6 @@ namespace FastAndFractured.Multiplayer.Tests
         [Test]
         public void NetworkShootParams_IsMine_PropagatesFromBulletSpawnParameters()
         {
-            // Verify both structs have IsMine so NetworkedBulletSpawner can propagate the flag.
             Assert.IsNotNull(typeof(BulletSpawnParameters).GetField("IsMine"),
                 "BulletSpawnParameters.IsMine missing — spawner cannot set mine type");
             Assert.IsNotNull(typeof(NetworkShootParams).GetField("IsMine"),
@@ -397,7 +391,7 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         [Test]
-        public void AllNetworkedProjectilePrefabs_HaveSerializedNetworkBehaviours()
+        public void AllNetworkedProjectilePrefabs_HaveDiscoverableNetworkBehaviours()
         {
             var guids = AssetDatabase.FindAssets("Networked t:prefab",
                 new[] { "Assets/Multiplayer/Pool" });
@@ -415,10 +409,7 @@ namespace FastAndFractured.Multiplayer.Tests
                 var networkedProjectile = prefab.GetComponent<NetworkedProjectile>();
                 if (networkedProjectile == null) continue;
 
-                Assert.IsNotNull(networkObject.NetworkBehaviours,
-                    $"NetworkBehaviours list is null in {path}");
-                Assert.Greater(networkObject.NetworkBehaviours.Count, 0,
-                    $"NetworkBehaviours list is empty in {path}. Re-serialize this prefab with FishNet tools.");
+                AssertNetworkBehavioursDiscoverable(prefab, networkObject, path);
                 validated++;
             }
 
@@ -426,23 +417,8 @@ namespace FastAndFractured.Multiplayer.Tests
                 "No networked projectile prefabs with NetworkObject found in Assets/Multiplayer/Pool/");
         }
 
-        /// <summary>
-        /// Regression test for the MariaAntonia/Carme divergence bug. The four vehicle
-        /// prefabs must use Rigidbody prediction so FishNet auto-applies reconcile to the
-        /// rb. With prediction type "Other" (=0) the client kept simulating without server
-        /// correction and "se sale del mapa". Asserts every Networked*GameplayCar variant
-        /// has _predictionType set to 1 (Rigidbody).
-        /// </summary>
-        /// <summary>
-        /// Regression test for the MariaAntonia/Carme empty-NetworkBehaviours-list bug. When a
-        /// FishNet prefab is created without re-serializing in the editor, NetworkObject.NetworkBehaviours
-        /// can stay empty and components on the prefab won't receive RPCs or replicate state. The
-        /// resulting symptom matches "still desynced" reports: the rb sort-of works but custom
-        /// behaviours appear inert. Fix in Unity: open each prefab and save, or run
-        /// Tools &gt; Fish-Networking &gt; Refresh All NetworkObjects.
-        /// </summary>
         [Test]
-        public void AllVehiclePrefabs_HaveSerializedNetworkBehaviours()
+        public void AllVehiclePrefabs_HaveDiscoverableNetworkBehaviours()
         {
             var guids = AssetDatabase.FindAssets("Networked t:prefab",
                 new[] { "Assets/Multiplayer" });
@@ -459,17 +435,29 @@ namespace FastAndFractured.Multiplayer.Tests
                 var nob = prefab.GetComponent<NetworkObject>();
                 if (nob == null) continue;
 
-                Assert.IsNotNull(nob.NetworkBehaviours,
-                    $"NetworkBehaviours list is null in '{prefab.name}'.");
-                Assert.Greater(nob.NetworkBehaviours.Count, 0,
-                    $"NetworkBehaviours list is EMPTY in '{prefab.name}'. " +
-                    "Re-serialize the prefab in Unity (open it and save, or run " +
-                    "Tools > Fish-Networking > Refresh All NetworkObjects).");
+                AssertNetworkBehavioursDiscoverable(prefab, nob, path);
+                Assert.IsNotNull(prefab.GetComponent<NetworkedVehicle>(), $"'{prefab.name}' has no NetworkedVehicle.");
                 validated++;
             }
 
             Assert.Greater(validated, 0,
                 "No NetworkedGameplayCar prefabs found in Assets/Multiplayer/. Test cannot run.");
+        }
+
+        /// <summary>
+        /// FishNet 4 builds NetworkObject.NetworkBehaviours at spawn from the components under the object (the
+        /// serialized list stays empty on new prefabs): check what that discovery will find instead.
+        /// </summary>
+        private static void AssertNetworkBehavioursDiscoverable(GameObject prefab, NetworkObject nob, string path)
+        {
+            foreach (var t in prefab.GetComponentsInChildren<Transform>(true))
+                Assert.AreEqual(0, GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject),
+                    $"Missing script on '{t.name}' in {path}.");
+
+            int owned = 0;
+            foreach (var nb in prefab.GetComponentsInChildren<NetworkBehaviour>(true))
+                if (nb.GetComponentInParent<NetworkObject>(true) == nob) owned++;
+            Assert.Greater(owned, 0, $"No NetworkBehaviour under the NetworkObject of {path}.");
         }
 
         [Test]
@@ -478,7 +466,6 @@ namespace FastAndFractured.Multiplayer.Tests
             var guids = AssetDatabase.FindAssets("NetworkedGameplayCar t:prefab",
                 new[] { "Assets/Multiplayer" });
 
-            // Fall back: scan more broadly if specific name search misses any.
             if (guids.Length == 0)
             {
                 guids = AssetDatabase.FindAssets("Networked t:prefab",
@@ -502,8 +489,7 @@ namespace FastAndFractured.Multiplayer.Tests
                 Assert.IsNotNull(predictionTypeField,
                     "FishNet's NetworkObject._predictionType field changed; this test needs updating.");
 
-                // _predictionType is a nested enum whose underlying type is not int;
-                // unboxing straight to int throws InvalidCastException.
+                // The enum's underlying type is not int: unboxing to int throws.
                 int rawType = System.Convert.ToInt32(predictionTypeField.GetValue(nob));
                 Assert.AreEqual(1, rawType,
                     $"Vehicle prefab '{prefab.name}' has _predictionType={rawType}; expected 1 (Rigidbody). " +

@@ -8,21 +8,16 @@ using System.Reflection;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// Editor tool to convert singleplayer bullet/push/mine prefabs into networked variants.
-    /// Adds: NetworkObject, NetworkedProjectile, NetworkTickSmoother, MultiplayerRigidbodyAdapter
-    /// and removes LocalEventRunner.
-    /// 
-    /// Usage: Right-click a bullet prefab in Project ->"Fast And Fractured/Create Networked Bullet Variant"
-    /// Or use the menu: Tools ->Fast And Fractured ->Networked Bullet Converter
-    /// </summary>
+    /// <summary>Creates networked variants of bullet, push and mine prefabs (Tools > Fast And Fractured > Networked Bullet Converter).</summary>
     public class NetworkedBulletConverter : EditorWindow
     {
+        private const float SECTION_SPACING = 10f;
+        private const float BUTTON_HEIGHT = 30f;
+
         private GameObject _sourcePrefab;
         private string _outputFolder = "Assets/Multiplayer/Pool";
         private string _variantName = "";
         
-        // Optional references the user can assign
         private GameObject _visualsOverride;
         private GameObject _impactParticlesOverride;
         private GameObject _explosionPrefabOverride;
@@ -56,7 +51,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 "Removes: LocalEventRunner",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             _sourcePrefab = (GameObject)EditorGUILayout.ObjectField("Source Prefab", _sourcePrefab, typeof(GameObject), false);
 
@@ -72,11 +67,10 @@ namespace FastAndFractured.Multiplayer.Editor
             _impactParticlesOverride = (GameObject)EditorGUILayout.ObjectField("Impact Particles Prefab", _impactParticlesOverride, typeof(GameObject), false);
             _explosionPrefabOverride = (GameObject)EditorGUILayout.ObjectField("Explosion Prefab", _explosionPrefabOverride, typeof(GameObject), false);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             if (_sourcePrefab != null)
             {
-                // Show preview of what will happen
                 EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
                 
                 var hasLocalEventRunner = _sourcePrefab.GetComponentInChildren<LocalEventRunner>() != null;
@@ -88,7 +82,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 EditorGUILayout.LabelField($"  LocalEventRunner: {(hasLocalEventRunner ? "[OK]Will be removed" : "[OK]Not found")}");
                 EditorGUILayout.LabelField($"  Rigidbody: {(hasRigidbody ? "[OK]Will keep (adapter wraps it)" : "[OK]Not found")}");
                 
-                // Auto-detect visuals and particles
                 var autoVisuals = FindVisualsChild(_sourcePrefab);
                 var autoParticles = FindImpactParticles(_sourcePrefab);
                 var autoExplosion = FindExplosionPrefab(_sourcePrefab);
@@ -107,10 +100,10 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(SECTION_SPACING);
 
             GUI.enabled = _sourcePrefab != null && !string.IsNullOrEmpty(_variantName);
-            if (GUILayout.Button("Create Networked Variant", GUILayout.Height(30)))
+            if (GUILayout.Button("Create Networked Variant", GUILayout.Height(BUTTON_HEIGHT)))
             {
                 CreateNetworkedVariant();
             }
@@ -134,12 +127,11 @@ namespace FastAndFractured.Multiplayer.Editor
 
             string path = $"{_outputFolder}/{_variantName}.prefab";
 
-            // Create prefab variant
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(_sourcePrefab);
             
             try
             {
-                // 1. Remove LocalEventRunner (NetworkedProjectile handles physics)
+                // NetworkedProjectile does the physics.
                 var localEventRunner = instance.GetComponentInChildren<LocalEventRunner>();
                 if (localEventRunner != null)
                 {
@@ -147,30 +139,25 @@ namespace FastAndFractured.Multiplayer.Editor
                     Debug.Log("[NetworkedBulletConverter] Removed LocalEventRunner");
                 }
 
-                // 2. Add MultiplayerRigidbodyAdapter (wraps Rigidbody for FishNet prediction)
                 if (instance.GetComponent<MultiplayerRigidbodyAdapter>() == null)
                 {
                     instance.AddComponent<MultiplayerRigidbodyAdapter>();
                     Debug.Log("[NetworkedBulletConverter] Added MultiplayerRigidbodyAdapter");
                 }
 
-                // 3. Add NetworkObject (FishNet core)
                 var networkObject = instance.GetComponent<NetworkObject>();
                 if (networkObject == null)
                 {
                     networkObject = instance.AddComponent<NetworkObject>();
                     Debug.Log("[NetworkedBulletConverter] Added NetworkObject");
                 }
-                // Configure prediction
                 var noProp = typeof(NetworkObject);
                 var enablePredField = noProp.GetField("_enablePrediction", 
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (enablePredField != null)
                     enablePredField.SetValue(networkObject, true);
 
-                // 4. Add NetworkedProjectile FIRST (before NetworkTickSmoother)
-                // Order matters: FishNet assigns RPC link indices based on component order.
-                // NetworkedProjectile must be at a stable index.
+                // Before the NetworkTickSmoother: FishNet assigns RPC indices by component order.
                 var networkedProjectile = instance.GetComponent<NetworkedProjectile>();
                 if (networkedProjectile == null)
                 {
@@ -181,7 +168,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 if (instance.GetComponent<NetworkedPredictedProjectileSpawn>() == null)
                     instance.AddComponent<NetworkedPredictedProjectileSpawn>();
 
-                // 5. Add NetworkTickSmoother
                 var tickSmoother = instance.GetComponent<NetworkTickSmoother>();
                 if (tickSmoother == null)
                 {
@@ -190,8 +176,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 EnsureTickSmootherTargetTransform(tickSmoother, instance.transform);
 
-                // 6. Wire up references
-                // Visuals
                 GameObject visuals = _visualsOverride != null ? _visualsOverride : FindVisualsChild(instance);
                 if (visuals != null)
                 {
@@ -199,7 +183,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     Debug.Log($"[NetworkedBulletConverter] Set _visuals to '{visuals.name}'");
                 }
 
-                // Impact particles
                 GameObject impactParticles = _impactParticlesOverride != null ? _impactParticlesOverride : FindImpactParticles(instance);
                 if (impactParticles != null)
                 {
@@ -207,7 +190,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     Debug.Log($"[NetworkedBulletConverter] Set _impactParticlesPrefab to '{impactParticles.name}'");
                 }
 
-                // Explosion prefab
                 GameObject explosionPrefab = _explosionPrefabOverride != null ? _explosionPrefabOverride : FindExplosionPrefab(instance);
                 if (explosionPrefab != null)
                 {
@@ -215,7 +197,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     Debug.Log($"[NetworkedBulletConverter] Set _explosionPrefab to '{explosionPrefab.name}'");
                 }
 
-                // Save as prefab variant
                 GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(instance, path);
 
                 if (savedPrefab != null)
@@ -235,13 +216,8 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        /// <summary>
-        /// Find the child GameObject most likely to be the visual mesh.
-        /// Looks for "Model", "Visual", "Mesh" children, or first child with MeshRenderer.
-        /// </summary>
         private static GameObject FindVisualsChild(GameObject root)
         {
-            // Try known naming patterns
             string[] visualNames = { "Models", "Model", "Visuals", "Visual", "Mesh" };
             foreach (var name in visualNames)
             {
@@ -249,7 +225,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 if (child != null) return child.gameObject;
             }
 
-            // Try first child with MeshRenderer (skip explosion/particle children)
             foreach (Transform child in root.transform)
             {
                 if (child.GetComponent<MeshRenderer>() != null && 
@@ -260,17 +235,13 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            // If root itself has MeshRenderer, use root
             if (root.GetComponent<MeshRenderer>() != null)
                 return root;
 
             return null;
         }
 
-        /// <summary>
-        /// Find impact particle prefab  Elooks for particle children named "Impact", "Hit", "Particles".
-        /// For push bullets, this is typically the explosion VFX child.
-        /// </summary>
+        /// <summary>The impact particles child (the explosion VFX on push bullets).</summary>
         private static GameObject FindImpactParticles(GameObject root)
         {
             string[] particleNames = { "BulletTomatoExplosion", "ImpactParticles", "Impact", "HitVFX", "HitParticles" };
@@ -280,7 +251,6 @@ namespace FastAndFractured.Multiplayer.Editor
                 if (child != null) return child.gameObject;
             }
 
-            // Try children with ParticleSystem that aren't explosion hitboxes
             foreach (Transform child in root.transform)
             {
                 if (child.GetComponent<ParticleSystem>() != null && !child.name.Contains("Explosion"))
@@ -292,9 +262,6 @@ namespace FastAndFractured.Multiplayer.Editor
             return null;
         }
 
-        /// <summary>
-        /// Find explosion prefab  Efor push bullets, look for ExplosionVFX or child with ExplosionForce.
-        /// </summary>
         private static GameObject FindExplosionPrefab(GameObject root)
         {
             string[] explosionNames = { "ExplosionVFX", "Explosion", "ExplosionHitbox" };
@@ -305,7 +272,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     return child.gameObject;
             }
 
-            // Look for children with ParticleSystem named "Explosion"
             foreach (Transform child in root.transform)
             {
                 if (child.name.Contains("Explosion") && child.GetComponent<ParticleSystem>() != null)
@@ -327,7 +293,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
             else
             {
-                // Try SerializedObject for Unity serialized fields
                 var so = new SerializedObject((Object)target);
                 var prop = so.FindProperty(fieldName);
                 if (prop != null && value is GameObject go)

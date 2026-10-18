@@ -6,26 +6,12 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Networked wrapper for SandstormController. Syncs zone shrinking state server-authoritatively.
-    /// 
-    /// The sandstorm is critical for battle royale - all clients must see the same zone boundaries
-    /// and take damage at the same time.
-    ///
-    /// The server owns WHEN the storm comes: it schedules it (LevelController's time-to-call-the-storm,
-    /// brought forward by every death as in singleplayer), publishes the start tick, starts it through
-    /// ServerSetSpawnPoints / ServerSpawnFogs / ServerStartMovement, and every peer's HUD counts down
-    /// to that tick (TIMER_TEXT). Until 2026-09-30 nothing called those server methods: the storm
-    /// could only start through the singleplayer GameLoopManager timer, which never ran in
-    /// multiplayer because the map tool's prefab swap had dropped the level's reference to the
-    /// storm (and the storm's sphereCenter). No peer saw the storm, its damage hitbox never switched
-    /// on, and the HUD storm timer stayed at 00:00. Now that the tool restores that wiring, the
-    /// singleplayer timer does start on the host; the server takes it over (see
-    /// TakeOverSingleplayerStormTimer) so the storm keeps exactly one clock.
+    /// Server-authoritative sandstorm: the server schedules it (the level's storm time, brought forward by every
+    /// death), publishes the start tick every HUD counts down to, and starts it; the singleplayer timer is taken over.
     /// </summary>
     [RequireComponent(typeof(SandstormController))]
     public class NetworkedSandstormController : NetworkBehaviour
     {
-        // Cached reflection field handles (looked up once per session, not per Update tick).
         private static System.Reflection.FieldInfo _spawnPointField;
         private static System.Reflection.FieldInfo _mirrorPointField;
         private static System.Reflection.FieldInfo _currentGrowthField;
@@ -41,8 +27,7 @@ namespace FastAndFractured.Multiplayer
         private Transform _fogParentTransform;
         private bool _stormHitboxActive;
 
-        // Server-only overlap state. Ref-counts make multi-collider vehicles and props leave the
-        // storm only after their final collider exits the isolated hitbox.
+        // Server-only overlap ref-counts: a multi-collider car leaves the storm when its last collider exits.
         private readonly Dictionary<NetworkedStatsController, int> _victimOverlapCounts = new();
         private readonly Dictionary<NetworkedStatsController, float> _victimDamagePerSecond = new();
         private readonly Dictionary<NetworkedStatsController, GameObject> _victimObjects = new();
@@ -64,48 +49,30 @@ namespace FastAndFractured.Multiplayer
         }
 
         #region SYNCED_STATE
-        /// <summary>
-        /// Spawn point determined by server. Synced to clients on game start.
-        /// </summary>
         public readonly SyncVar<Vector3> SyncedSpawnPoint = new SyncVar<Vector3>();
 
-        /// <summary>
-        /// Mirror point determined by server. Synced to clients on game start.
-        /// </summary>
         public readonly SyncVar<Vector3> SyncedMirrorPoint = new SyncVar<Vector3>();
 
-        /// <summary>
-        /// Current growth progress (0 to maxGrowth). Synced periodically.
-        /// </summary>
+        /// <summary>Growth progress (0 to maxGrowth).</summary>
         public readonly SyncVar<float> SyncedCurrentGrowth = new SyncVar<float>();
 
-        /// <summary>
-        /// Whether the sandstorm is actively moving/expanding.
-        /// </summary>
         public readonly SyncVar<bool> SyncedIsMoving = new SyncVar<bool>();
 
-        /// <summary>
-        /// Current kill time (reduces as storm expands).
-        /// </summary>
+        /// <summary>Kill time; shrinks as the storm grows.</summary>
         public readonly SyncVar<float> SyncedKillTime = new SyncVar<float>();
 
-        /// <summary>
-        /// Fog parent position for visual sync.
-        /// </summary>
         public readonly SyncVar<Vector3> SyncedFogPosition = new SyncVar<Vector3>();
         #endregion
 
         #region STORM_SCHEDULE
-        /// <summary>
-        /// Server tick at which the storm starts (0 until the level has scheduled it). Synced, so every
-        /// peer counts down to the same moment on its own estimate of the server tick.
-        /// </summary>
+        /// <summary>Server tick the storm starts at (0 until scheduled); every peer counts down to it.</summary>
         public readonly SyncVar<uint> SyncedStormStartTick = new SyncVar<uint>();
 
         internal static NetworkedSandstormController ServerInstance { get; private set; }
 
         private const float DEFAULT_TIME_TO_CALL_THE_STORM = 190f;
         private const float DEFAULT_DEATH_REDUCTION = 20f;
+        private const float MIN_KILL_TIME = 0.01f;
         private static readonly System.Reflection.FieldInfo LevelTimeToCallTheStorm =
             typeof(LevelController).GetField("_timeToCallTheStorm", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         private static readonly System.Reflection.FieldInfo LevelPlayerDeadReduction =
@@ -154,7 +121,6 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartServer();
             
-            // Initialize SyncVars from controller state
             SyncedIsMoving.Value = _sandstormController.MoveSandStorm;
             SyncedKillTime.Value = _sandstormController.KillTime;
             SetServerHitboxActive(false);
@@ -167,7 +133,6 @@ namespace FastAndFractured.Multiplayer
             base.OnStartClient();
             StormCountdownHud.DrivenByNetwork = true;   // the synced countdown below owns the HUD timer
             
-            // Subscribe to SyncVar changes for client-side state application
             SyncedSpawnPoint.OnChange += OnSpawnPointChanged;
             SyncedMirrorPoint.OnChange += OnMirrorPointChanged;
             SyncedCurrentGrowth.OnChange += OnCurrentGrowthChanged;
@@ -203,7 +168,6 @@ namespace FastAndFractured.Multiplayer
 
             UpdateStormSchedule();
 
-            // Periodically sync state to clients
             _syncTimer += Time.deltaTime;
             if (_syncTimer >= SYNC_INTERVAL)
             {
@@ -222,8 +186,7 @@ namespace FastAndFractured.Multiplayer
 
         private void LateUpdate()
         {
-            // SandstormController grows its cached collider in Update. Mirror that final geometry
-            // to the dedicated server hitbox, then keep the legacy collider physically inert.
+            // Mirror the controller's grown collider to the server hitbox; the original collider stays inert.
             CopyLegacyColliderGeometry();
             IsolateLegacyCollider();
         }
@@ -236,8 +199,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Disable the source collider immediately. Unlike disabling SandstormController, this
-            // prevents the legacy OnTriggerEnter/Exit messages at the physics source itself.
+            // Disabling the collider (not the controller) stops the legacy trigger messages at the source.
             _stormCollider.enabled = false;
 
             const string HitboxName = "[Multiplayer] Sandstorm Hitbox";
@@ -262,8 +224,7 @@ namespace FastAndFractured.Multiplayer
             _networkHitbox.isTrigger = true;
             _networkHitbox.enabled = false;
 
-            // A local kinematic body anchors trigger delivery to this child. Even if a map variant
-            // later adds a Rigidbody to the parent, callbacks remain on the relay, not legacy code.
+            // A kinematic body keeps trigger callbacks on this relay even if the parent gets a Rigidbody.
             Rigidbody relayBody = hitboxObject.GetComponent<Rigidbody>();
             if (relayBody == null)
                 relayBody = hitboxObject.AddComponent<Rigidbody>();
@@ -314,8 +275,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (_stormStarted) return;
 
-            // The singleplayer GameLoopManager may still start the storm itself on the host (a level
-            // not in debug mode). Adopt that start instead of racing it.
+            // The singleplayer GameLoopManager may start the storm itself on the host: adopt that start.
             if (_sandstormController.MoveSandStorm)
             {
                 AdoptStormStartedBySingleplayer();
@@ -339,12 +299,7 @@ namespace FastAndFractured.Multiplayer
                 StartStormOnServer();
         }
 
-        /// <summary>
-        /// The level's GameLoopManager starts its own storm timer on the host (LevelController
-        /// SetupStorm). That timer knows nothing about multiplayer deaths and would start the storm a
-        /// second time - spawning the fogs again - whenever it ran out after ours. Stop it and carry
-        /// its remaining time over as the synced start tick: one clock, the singleplayer duration.
-        /// </summary>
+        /// <summary>Stops the host's singleplayer storm timer (it ignores multiplayer deaths) and carries its remaining time over as the start tick.</summary>
         [Server]
         private void TakeOverSingleplayerStormTimer()
         {
@@ -419,10 +374,7 @@ namespace FastAndFractured.Multiplayer
             MpCanary.Mark("Sandstorm started by the singleplayer timer; adopted");
         }
 
-        /// <summary>
-        /// A character died: the storm comes sooner, like GameLoopManager.OnCharacterDied does to its
-        /// singleplayer timer.
-        /// </summary>
+        /// <summary>A character died: the storm comes sooner, as in singleplayer.</summary>
         [Server]
         public void ServerAdvanceStormForDeath()
         {
@@ -435,11 +387,7 @@ namespace FastAndFractured.Multiplayer
         internal static uint AdvancedStormStart(uint startTick, uint nowTick, uint reductionTicks) =>
             startTick > nowTick + reductionTicks ? startTick - reductionTicks : nowTick;
 
-        /// <summary>
-        /// Every peer: the HUD storm timer (TIMER_TEXT, "Tmp_StormTimer") shows the time left until
-        /// the synced start tick, then 00:00. Written only when the shown second changes; re-shown
-        /// each time because the match-start countdown hides the same element when it finishes.
-        /// </summary>
+        /// <summary>The HUD storm timer counts down to the synced start tick; re-shown each time (the 3-2-1 hides the same element).</summary>
         private void UpdateStormCountdownHud()
         {
             uint start = SyncedStormStartTick.Value;
@@ -456,7 +404,6 @@ namespace FastAndFractured.Multiplayer
             hud.UpdateUIElement(Enums.UIDynamicElementType.TIMER_TEXT, text);
         }
 
-        // ── Host migration ─────────────────────────────────────────────────────────────
         private bool _restoredFromMigration;
 
         /// <summary>Server: the storm's state for a host migration snapshot.</summary>
@@ -472,10 +419,7 @@ namespace FastAndFractured.Multiplayer
             mirrorPoint = SyncedMirrorPoint.Value;
         }
 
-        /// <summary>
-        /// Server, migrated match: continue the storm where the lost host left it - the same
-        /// countdown, or the same moving storm from the same side at the same size.
-        /// </summary>
+        /// <summary>Server, migrated match: the same countdown, or the same moving storm at the same size.</summary>
         [Server]
         internal void ServerRestoreFromMigration(bool started, float secondsUntilStorm, float growth,
             Vector3 spawnPoint, Vector3 mirrorPoint)
@@ -506,12 +450,7 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region MINIMAP_ARROW
-        /// <summary>
-        /// SandstormController.SpawnFogs on this peer, then this peer's minimap storm arrow.
-        /// SpawnFogs aims the arrow it finds through LevelController.LocalPlayer, which on the host
-        /// is not necessarily the host's car and on a remote client may be unset, so the field is
-        /// bound to this peer's own HUD arrow first and the arrow is aimed with this peer's camera.
-        /// </summary>
+        /// <summary>SpawnFogs, with this peer's own HUD arrow bound first (LevelController.LocalPlayer is not reliable here).</summary>
         private void SpawnFogsOnThisPeer()
         {
             NetworkedVehicle localCar = FindLocalCar();
@@ -546,14 +485,10 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SERVER_METHODS
-        /// <summary>
-        /// Called by NetworkedLevelControllerManager or game loop to initialize sandstorm spawn points.
-        /// Server-only - determines the random spawn angle and syncs to all clients.
-        /// </summary>
+        /// <summary>Server: picks the spawn points (DeterministicRandom) and syncs them.</summary>
         [Server]
         public void ServerSetSpawnPoints(bool debug)
         {
-            // Let the original controller set spawn points (uses DeterministicRandom)
             _sandstormController.SetSpawnPoints(debug);
             SyncSpawnPointsToClients(debug);
         }
@@ -561,20 +496,15 @@ namespace FastAndFractured.Multiplayer
         [Server]
         private void SyncSpawnPointsToClients(bool debug)
         {
-            // Extract and sync the spawn/mirror points via cached reflection (no public accessor exists).
             if (_spawnPointField != null && _mirrorPointField != null)
             {
                 SyncedSpawnPoint.Value = (Vector3)_spawnPointField.GetValue(_sandstormController);
                 SyncedMirrorPoint.Value = (Vector3)_mirrorPointField.GetValue(_sandstormController);
             }
 
-            // Notify all clients
             RpcSpawnPointsSet(SyncedSpawnPoint.Value, SyncedMirrorPoint.Value, debug);
         }
 
-        /// <summary>
-        /// Called to start the sandstorm movement/expansion. Server-authoritative.
-        /// </summary>
         [Server]
         public void ServerSpawnFogs()
         {
@@ -583,7 +513,6 @@ namespace FastAndFractured.Multiplayer
             SetServerHitboxActive(true);
             SyncedIsMoving.Value = true;
             
-            // Sync initial fog position
             if (_fogParentTransform != null)
             {
                 SyncedFogPosition.Value = _fogParentTransform.position;
@@ -592,9 +521,6 @@ namespace FastAndFractured.Multiplayer
             RpcSpawnFogs();
         }
 
-        /// <summary>
-        /// Called to start sandstorm movement. Server-authoritative.
-        /// </summary>
         [Server]
         public void ServerStartMovement()
         {
@@ -603,9 +529,6 @@ namespace FastAndFractured.Multiplayer
             RpcSetMoving(true);
         }
 
-        /// <summary>
-        /// Called to stop sandstorm movement. Server-authoritative.
-        /// </summary>
         [Server]
         public void ServerStopMovement()
         {
@@ -617,16 +540,13 @@ namespace FastAndFractured.Multiplayer
         [Server]
         private void SyncStateToClients()
         {
-            // Sync current growth (cached reflection, no public accessor)
             if (_currentGrowthField != null)
             {
                 SyncedCurrentGrowth.Value = (float)_currentGrowthField.GetValue(_sandstormController);
             }
 
-            // Sync kill time
             SyncedKillTime.Value = _sandstormController.KillTime;
 
-            // Sync fog position
             if (_fogParentTransform != null)
             {
                 SyncedFogPosition.Value = _fogParentTransform.position;
@@ -640,7 +560,6 @@ namespace FastAndFractured.Multiplayer
         {
             if (IsServerInitialized) return;
 
-            // Apply spawn points on clients
             ApplySpawnPointsOnClient(spawnPoint, mirrorPoint, debug);
         }
 
@@ -651,10 +570,7 @@ namespace FastAndFractured.Multiplayer
             SpawnFogsOnClientOnce();
         }
 
-        /// <summary>
-        /// The RPC and the IsMoving SyncVar can arrive in either order; the fog must spawn exactly
-        /// once (SpawnFogs also resets the kill time and raises the "Events.Sandstorm" banner).
-        /// </summary>
+        /// <summary>The RPC and the IsMoving SyncVar arrive in either order; the fog must spawn once.</summary>
         private void SpawnFogsOnClientOnce()
         {
             if (_clientFogsSpawned) return;
@@ -676,36 +592,29 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region CLIENT_SYNCVAR_HANDLERS
-        // These replicate the server's storm onto a remote client. FishNet also calls them on the
-        // host's own client side (asServer == false), where the storm IS the server's: there they
-        // started the fogs a second time and resized the collider from an initial size SpawnFogs
-        // had not captured yet - leaving the damage box and the fog volume 0 m wide and 0 m tall
-        // on every peer (measured 2026-09-30: size (0, 0, 1400)). They only run on remote clients.
+        // Remote clients only: on the host's client side the storm is the server's own.
         private bool IsRemoteClientCallback(bool asServer) => !asServer && !base.IsServerInitialized;
 
         private void OnSpawnPointChanged(Vector3 prev, Vector3 next, bool asServer)
         {
             if (asServer) return;
-            // Spawn point will be applied via RpcSpawnPointsSet
         }
 
         private void OnMirrorPointChanged(Vector3 prev, Vector3 next, bool asServer)
         {
             if (asServer) return;
-            // Mirror point will be applied via RpcSpawnPointsSet
         }
 
         private void OnCurrentGrowthChanged(float prev, float next, bool asServer)
         {
             if (!IsRemoteClientCallback(asServer)) return;
 
-            // Apply growth state on client (cached reflection)
             if (_currentGrowthField != null)
             {
                 _currentGrowthField.SetValue(_sandstormController, next);
             }
 
-            // Also update collider size to match - once SpawnFogs has captured its initial size.
+            // Collider size too, once SpawnFogs has captured its initial size.
             if (_clientFogsSpawned) ApplyColliderState(next);
         }
 
@@ -730,7 +639,6 @@ namespace FastAndFractured.Multiplayer
         #region CLIENT_HELPERS
         private void ApplySpawnPointsOnClient(Vector3 spawnPoint, Vector3 mirrorPoint, bool debug)
         {
-            // _spawnPointsSet is only ever read on this path so we look it up lazily once.
             if (_spawnPointsSetField == null)
             {
                 _spawnPointsSetField = typeof(SandstormController).GetField("_spawnPointsSet",
@@ -741,7 +649,6 @@ namespace FastAndFractured.Multiplayer
             if (_mirrorPointField != null) _mirrorPointField.SetValue(_sandstormController, mirrorPoint);
             if (_spawnPointsSetField != null) _spawnPointsSetField.SetValue(_sandstormController, true);
 
-            // Calculate maxGrowth
             float maxGrowth = (mirrorPoint - spawnPoint).magnitude;
             if (_maxGrowthField != null) _maxGrowthField.SetValue(_sandstormController, maxGrowth);
         }
@@ -831,7 +738,7 @@ namespace FastAndFractured.Multiplayer
             _victimOverlapCounts.Add(stats, 1);
             _victimObjects.Add(stats, characterObject);
 
-            float killTime = Mathf.Max(0.01f, _sandstormController.KillTime);
+            float killTime = Mathf.Max(MIN_KILL_TIME, _sandstormController.KillTime);
             float startingEndurance = Mathf.Max(0f, stats.GetSyncedEndurance());
             _victimDamagePerSecond.Add(stats, startingEndurance / killTime);
 
@@ -965,10 +872,7 @@ namespace FastAndFractured.Multiplayer
         #endregion
 
         #region SERVER_RPC_DAMAGE
-        /// <summary>
-        /// Server-authoritative damage from sandstorm. Called when character enters storm zone.
-        /// Ensures all clients see the same damage timing.
-        /// </summary>
+        /// <summary>Server: storm damage, so every client sees the same timing.</summary>
         [Server]
         public void ServerApplySandstormDamage(NetworkObject victim, float damagePerFrame)
         {
@@ -977,7 +881,6 @@ namespace FastAndFractured.Multiplayer
             var stats = victim.GetComponentInChildren<NetworkedStatsController>();
             if (stats != null)
             {
-                // Apply damage through networked stats controller (null attacker = environmental damage)
                 stats.DealDamageServerRpc(damagePerFrame, null);
             }
         }

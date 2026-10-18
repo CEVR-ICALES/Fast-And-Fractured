@@ -8,16 +8,8 @@ namespace FastAndFractured.Multiplayer
     public class NetworkedStatsBoostInteractable : ServerAuthoritativeWrapper<StatsBoostInteractable>
     {
         /// <summary>
-        /// The pickup message used to land on the wrong screen: it appeared on the host whoever had
-        /// actually driven into the booster.
-        ///
-        /// StatsBoostInteractable is destroyed on clients by the wrapper, so OnInteract only ever
-        /// runs on the server, and its "was it me?" test compares against
-        /// LevelController.Instance.LocalPlayer - which on the server is the host's own car. That
-        /// question cannot be answered locally once one machine resolves pickups for everybody.
-        ///
-        /// So the server answers it instead: it looks up who owns the car that touched the booster
-        /// and tells only that connection to raise the event.
+        /// Server: tells only the connection that owns the car to raise the pickup event (OnInteract only runs on the
+        /// server, where LocalPlayer is the host's car).
         /// </summary>
         protected override void OnConfigured()
         {
@@ -31,8 +23,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (interactionFrom == null) return false;
 
-            // (true): the car's NetworkObject can be an inactive parent while FishNet is still
-            // spawning it, and the active-only overload would return null.
+            // Inactive included: the car's NetworkObject can be an inactive parent while it spawns.
             NetworkObject nob = interactionFrom.GetComponentInParent<NetworkObject>(true);
             if (nob == null || nob.Owner == null || !nob.Owner.IsValid) return false;
 

@@ -11,25 +11,11 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Turns "does shooting work and feel right in multiplayer" into numbers.
-    ///
-    /// Drives the LOCAL player's weapons through PlayerInputController the same way the real buttons
-    /// do (normal fire, push shot, mine, ultimate) and records every projectile and ultimate object
-    /// this peer draws, once per frame, stamped with a machine-wide clock (DateTime.UtcNow) so the
-    /// host's and the client's recordings of the same run can be lined up afterwards.
-    ///
-    /// Script syntax, semicolon separated: <c>normal:1.5</c> (hold fire for 1.5 s), <c>push</c>,
-    /// <c>mine</c>, <c>ultimate</c> (clears the owner's ultimate cooldown first), <c>wait:2</c>,
-    /// <c>camera:0.5</c> (FreeLook height 0..1; weapons aim where the camera looks, and an untouched
-    /// camera sits on its top rig looking down, which puts every bullet into the ground).
-    /// A peer that should only watch runs a script made of waits.
-    ///
-    /// <code>
-    /// ShootingProbe.Run("pepe_client", "normal:1;wait:1.5;push;wait:2.5;mine;wait:4;ultimate;wait:7");
-    /// ShootingProbe.Status        // "running ..." / "done ..."
-    /// ShootingProbe.LastSummary   // per-object metrics
-    /// </code>
-    /// Files land in &lt;project&gt;/Logs/ShootingProbe: &lt;label&gt;_samples.csv, _events.csv, _summary.txt.
+    /// Fires the local player's weapons through PlayerInputController from a script and records every projectile
+    /// and ultimate object this peer draws, stamped with DateTime.UtcNow so host and client runs line up.
+    /// Steps, semicolon separated: normal:secs, push, mine, ultimate, wait:secs, camera:height (0..1).
+    /// <code>ShootingProbe.Run("pepe_client", "normal:1;wait:1.5;push;wait:2.5;mine;wait:4;ultimate;wait:7");</code>
+    /// Output: &lt;project&gt;/Logs/ShootingProbe.
     /// </summary>
     public static class ShootingProbe
     {
@@ -90,6 +76,15 @@ namespace FastAndFractured.Multiplayer.Testing
         internal static ShootingProbeRecorder Instance;
 
         private const BindingFlags Private = BindingFlags.NonPublic | BindingFlags.Instance;
+        private const float MIN_FIRE_HOLD_SECONDS = 0.05f;
+        private const float PUSH_AIM_SECONDS = 0.35f;
+        private const float PUSH_RELEASE_SECONDS = 0.15f;
+        private const float MINE_PULSE_SECONDS = 1f;
+        private const float ABILITY_PULSE_SECONDS = 0.3f;
+        private const float ENDURANCE_EPSILON = 0.01f;
+        private const float MIN_TRAVEL_SQR = 0.01f;
+        private const float SNAP_BACK_DISTANCE = 0.05f;
+        private const float MILLIMETRES_PER_METRE = 1000f;
         private static readonly FieldInfo ProjectileShooter = typeof(NetworkedProjectile).GetField("_shooter", Private);
         private static readonly FieldInfo ProjectileIsMine = typeof(NetworkedProjectile).GetField("_isMine", Private);
         private static readonly FieldInfo ProjectileRadius = typeof(NetworkedProjectile).GetField("_explosionRadius", Private);
@@ -145,8 +140,7 @@ namespace FastAndFractured.Multiplayer.Testing
         private PushShootHandle _localPush;
         private bool _lastNormalCan = true, _lastPushCan = true, _lastOverheat;
 
-        // Every car's ultimate state, logged on change on this peer (Josefino's shield is state, not
-        // an object, so this is how it shows up in the report).
+        // Every car's ultimate state, logged on change (Josefino's shield is state, not an object).
         private readonly Dictionary<int, (bool active, bool invulnerable)> _ultimateState = new();
 
         internal string Begin(string label, string script, string directory)
@@ -220,7 +214,7 @@ namespace FastAndFractured.Multiplayer.Testing
 
             if (step.Action == "camera")
             {
-                // Height as given, heading behind the local car so shots go where the car points.
+                // Heading behind the local car so shots go where it points.
                 float yaw = 0f;
                 foreach (var vehicle in FindObjectsByType<NetworkedVehicle>(FindObjectsSortMode.None))
                     if (vehicle.IsOwner) yaw = vehicle.transform.eulerAngles.y;
@@ -247,19 +241,18 @@ namespace FastAndFractured.Multiplayer.Testing
             {
                 case "normal":
                     InputShooting.SetValue(input, true);
-                    Hold(Mathf.Max(0.05f, step.Seconds), () => InputShooting.SetValue(input, false));
+                    Hold(Mathf.Max(MIN_FIRE_HOLD_SECONDS, step.Seconds), () => InputShooting.SetValue(input, false));
                     break;
 
                 case "push":
-                    // Real input: the shooting-mode button enters push mode (aim trace), the fire button
-                    // shoots, releasing it leaves push mode.
+                    // As the real input: mode button enters push mode, fire shoots, release leaves it.
                     InputPushMode.SetValue(input, true);
-                    Hold(0.35f, () =>
+                    Hold(PUSH_AIM_SECONDS, () =>
                     {
                         InputPushShooting.SetValue(input, true);
                         AddEvent("push trigger");
                         _fired.Add((DateTime.UtcNow.Ticks, "push-trigger"));
-                        Hold(0.15f, () =>
+                        Hold(PUSH_RELEASE_SECONDS, () =>
                         {
                             InputPushShooting.SetValue(input, false);
                             InputPushMode.SetValue(input, false);
@@ -268,15 +261,15 @@ namespace FastAndFractured.Multiplayer.Testing
                     break;
 
                 case "mine":
-                    // Same pulse as PlayerInputController's ThrowMine binding (true for one second).
+                    // PlayerInputController's ThrowMine pulse.
                     InputMine.SetValue(input, true);
-                    Hold(1f, () => InputMine.SetValue(input, false));
+                    Hold(MINE_PULSE_SECONDS, () => InputMine.SetValue(input, false));
                     break;
 
                 case "ultimate":
                     ClearOwnUltimateCooldown();
                     InputAbility.SetValue(input, true);
-                    Hold(0.3f, () => InputAbility.SetValue(input, false));
+                    Hold(ABILITY_PULSE_SECONDS, () => InputAbility.SetValue(input, false));
                     break;
             }
         }
@@ -303,7 +296,6 @@ namespace FastAndFractured.Multiplayer.Testing
             }
         }
 
-        // ------------------------------------------------------------------ sampling
 
         private void LateUpdate()
         {
@@ -361,7 +353,7 @@ namespace FastAndFractured.Multiplayer.Testing
             {
                 int id = stats.GetInstanceID();
                 float endurance = stats.Endurance;
-                if (_endurance.TryGetValue(id, out float previous) && Mathf.Abs(previous - endurance) > 0.01f)
+                if (_endurance.TryGetValue(id, out float previous) && Mathf.Abs(previous - endurance) > ENDURANCE_EPSILON)
                     AddEvent($"endurance {stats.transform.root.name}/{stats.name} {previous:F1} -> {endurance:F1}");
                 _endurance[id] = endurance;
             }
@@ -449,7 +441,6 @@ namespace FastAndFractured.Multiplayer.Testing
         private void AddEvent(string text) =>
             _events.Add($"{DateTime.UtcNow.Ticks},{Time.frameCount},{text.Replace(',', ';')}");
 
-        // ------------------------------------------------------------------ report
 
         internal void Finish(string reason)
         {
@@ -547,11 +538,7 @@ namespace FastAndFractured.Multiplayer.Testing
             return best == long.MinValue ? double.NaN : (first - best) / 1e4;
         }
 
-        /// <summary>
-        /// Smoothness of what was drawn while visible: the largest single-frame step, the number of
-        /// frames that stepped BACKWARDS against the object's own direction of travel by more than
-        /// 5 cm (a correction snapping it back), and the largest deviation from a smooth local fit.
-        /// </summary>
+        /// <summary>Largest frame step, steps back against the travel direction, and largest deviation from a local fit.</summary>
         private static void Motion(Tracked t, out float maxStep, out int snapBacks, out float residualMm)
         {
             maxStep = 0f;
@@ -566,13 +553,13 @@ namespace FastAndFractured.Multiplayer.Testing
 
                 int a = Mathf.Max(0, i - w), b = Mathf.Min(t.Position.Count - 1, i + w);
                 Vector3 travel = t.Position[b] - t.Position[a];
-                if (travel.sqrMagnitude > 0.01f && Vector3.Dot(step, travel.normalized) < -0.05f) snapBacks++;
+                if (travel.sqrMagnitude > MIN_TRAVEL_SQR && Vector3.Dot(step, travel.normalized) < -SNAP_BACK_DISTANCE) snapBacks++;
 
                 if (i >= w && i + w < t.Position.Count)
                 {
                     double t0 = t.Wall[i];
                     Vector3 fit = QuadraticFitAt(t, i - w, i + w, i, t0);
-                    residualMm = Mathf.Max(residualMm, (t.Position[i] - fit).magnitude * 1000f);
+                    residualMm = Mathf.Max(residualMm, (t.Position[i] - fit).magnitude * MILLIMETRES_PER_METRE);
                 }
             }
         }

@@ -10,27 +10,18 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Post-match routing for multiplayer. The WinLoseScreen's buttons are singleplayer-defaults:
-    /// "retry" calls LoadingManager.ReplayScene() (reloads the previous map scene locally) and
-    /// the menu button goes to MAIN_MENU. After a multiplayer match the room is still there
-    /// (the connection stays up), so both lead back to it - LOBBY_ROOM, ready for the next
-    /// match. If the room closed meanwhile (the host left), they lead to the multiplayer hub.
-    ///
-    /// Armed by NetworkedLevelControllerManager.ShowWinLoseScreen right before it loads the
-    /// MainMenu. While armed, the (already existing, approved) LoadingManager.SceneLoadOverride
-    /// hook intercepts scene loads triggered FROM the WIN_LOSE screen only, and the menu
-    /// button(s) of that screen are re-pointed when the menu loads. Singleplayer behaviour is
-    /// untouched: the override no-ops when not armed, and disarms itself after one use or as
-    /// soon as a load is requested from any other screen.
+    /// After a multiplayer match the win/lose screen's retry and menu buttons lead back to the room (or the hub if
+    /// it closed). Armed before the MainMenu loads; it disarms after one use or a load from any other screen.
     /// </summary>
     public static class MultiplayerPostMatchFlow
     {
+        private const float SCREEN_TRANSITION_SECONDS = 0.25f;
+
         private static bool _armed;
 
         private static readonly FieldInfo SpawnedCutsceneField = typeof(WinLoseScreenBehaviour)
             .GetField("_spawnedObject", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        // Domain reload is disabled in Enter Play Mode options; statics survive between plays.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticsForDomainReloadDisabled()
         {
@@ -68,9 +59,7 @@ namespace FastAndFractured.Multiplayer
                 ? menu.CurrentScreen.screenType
                 : (ScreensType?)null;
 
-            // Only hijack loads coming from the WIN_LOSE screen (the retry button). A load
-            // requested from any other screen means the player moved on (e.g. started a normal
-            // singleplayer game) — get out of the way permanently.
+            // Only loads from the WIN_LOSE screen; any other means the player moved on.
             if (currentScreenType != ScreensType.WIN_LOSE)
             {
                 Disarm();
@@ -93,13 +82,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// The three buttons of the screen, wired in the menu prefab:
-        ///  - home: GoToMainMenu + OpenScreen(MAIN_MENU) + menu cameras → to the room;
-        ///  - change character: GoToMainMenu + OpenScreen(CHARACTER_SELECTION) + cameras → the
-        ///    room's own character / map pick, which ends back in the room;
-        ///  - retry: shows the loading screen, then LoadingManager.ReplayScene (caught by
-        ///    HandleSceneLoad) → to the room, without the loading screen.
-        /// Camera switches are kept: they put the menu cameras back after the final cutscene.
+        /// The screen's home, change character and retry buttons lead to the room (change character through the room's
+        /// pick). Their camera switches are kept: they restore the menu cameras after the cutscene.
         /// </summary>
         private static void RouteMenuButtons(MenuScreen screen)
         {
@@ -149,7 +133,7 @@ namespace FastAndFractured.Multiplayer
             var target = InstanceFinder.IsClientStarted ? ScreensType.LOBBY_ROOM : ScreensType.MAIN_MENU;
             Debug.Log($"[MultiplayerPostMatchFlow] Leaving the win/lose screen → {target}.");
             if (MainMenuManager.HasInstance)
-                MainMenuManager.Instance.TransitionBetweenScreens(target, 0.25f);
+                MainMenuManager.Instance.TransitionBetweenScreens(target, SCREEN_TRANSITION_SECONDS);
         }
 
         /// <summary>The character's win/lose cutscene stays in front of the menu cameras otherwise.</summary>

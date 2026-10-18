@@ -11,18 +11,17 @@ namespace FastAndFractured.Multiplayer
     public enum LinkKind : byte { Unknown = 0, Ethernet = 1, Wifi = 2 }
 
     /// <summary>
-    /// Detects whether this machine is on Wi-Fi or cable, plus the helpers the lobby, the room
-    /// list and the match HUD share to turn a ping into signal bars.
-    ///
-    /// The adapter that matters is the one carrying traffic: the interface that owns the local
-    /// address the OS picks for an outbound route (a UDP "connect" sends nothing). Virtual
-    /// adapters (Hyper-V vEthernet, VPNs, loopback) are skipped when that lookup fails, and among
-    /// the rest one with a default gateway wins. Enumerating adapters can take tens of ms on
-    /// Windows, so it runs on a worker thread and the result is cached.
+    /// Wi-Fi or cable detection, from the adapter that owns the outbound route's local address (else a non-virtual
+    /// one with a gateway), on a worker thread and cached; plus ping to signal bars.
     /// </summary>
     public static class NetworkLink
     {
         private const float REFRESH_SECONDS = 15f;
+        private const int FOUR_BARS_MAX_PING_MS = 40;
+        private const int THREE_BARS_MAX_PING_MS = 80;
+        private const int TWO_BARS_MAX_PING_MS = 150;
+        private const string ROUTE_PROBE_ADDRESS = "8.8.8.8";
+        private const int ROUTE_PROBE_PORT = 53;
 
         private static readonly System.Diagnostics.Stopwatch Clock = System.Diagnostics.Stopwatch.StartNew();
         private static float Now => (float)Clock.Elapsed.TotalSeconds;   // any thread, unlike Time
@@ -103,9 +102,9 @@ namespace FastAndFractured.Multiplayer
         public static int Bars(int pingMs)
         {
             if (pingMs < 0) return 0;
-            if (pingMs <= 40) return 4;
-            if (pingMs <= 80) return 3;
-            if (pingMs <= 150) return 2;
+            if (pingMs <= FOUR_BARS_MAX_PING_MS) return 4;
+            if (pingMs <= THREE_BARS_MAX_PING_MS) return 3;
+            if (pingMs <= TWO_BARS_MAX_PING_MS) return 2;
             return 1;
         }
 
@@ -121,7 +120,7 @@ namespace FastAndFractured.Multiplayer
             try
             {
                 using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                socket.Connect("8.8.8.8", 53);   // routing decision only, nothing is sent
+                socket.Connect(ROUTE_PROBE_ADDRESS, ROUTE_PROBE_PORT);   // routing decision only, nothing is sent
                 return (socket.LocalEndPoint as IPEndPoint)?.Address;
             }
             catch { return null; }

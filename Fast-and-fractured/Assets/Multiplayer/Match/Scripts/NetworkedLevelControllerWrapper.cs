@@ -8,23 +8,14 @@ using StateMachine;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Wrapper for LevelController singleton that adds networking.
-    /// USES the original LevelController, doesn't replace it.
-    /// 
-    /// SERVER: Gets singleton reference, calls Construct/Initialize, spawns characters.
-    /// CLIENT: Does NOT eagerly access singleton. Waits for server to send game state via RPC.
-    ///         The client's LevelController gets initialized only after receiving spawned characters.
-    /// </summary>
+    /// <summary>Networking around the singleplayer LevelController: the server builds the level and spawns the cars; clients initialize from the server's start data.</summary>
     public class NetworkedLevelControllerWrapper : NetworkBehaviour
     {
         private LevelController _levelController;
 
         public LevelController LevelController => _levelController;
 
-        // Resolve LC eagerly in Awake so it's never null when the manager's OnStartServer fires
-        // (FishNet network callbacks can race relative to Awake order across separate
-        // NetworkBehaviours on the same dynamically-spawned NetworkObject).
+        // Resolved in Awake: FishNet callbacks on this NetworkObject can run before other components' Awake.
         private void Awake()
         {
             if (_levelController == null)
@@ -47,10 +38,7 @@ namespace FastAndFractured.Multiplayer
             
             if (!IsServerInitialized)
             {
-                // CLIENT: Do NOT call LevelController.Instance here!
-                // Accessing .Instance can create a broken auxiliar singleton if the scene's
-                // LevelController hasn't been initialized yet.
-                // Instead, find it directly without triggering auxiliar creation.
+                // Not LevelController.Instance: before the scene's one initializes it would create an auxiliar singleton.
                 _levelController = FindFirstObjectByType<LevelController>(FindObjectsInactive.Include);
                 
                 if (_levelController == null)
@@ -60,18 +48,9 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        /// <summary>
-        /// The character name code the LOCAL player actually drove this match (e.g. "Pepe_0"),
-        /// resolved at init from the authoritative spawn data. PlayerPrefs("Selected_Player")
-        /// is NOT trustworthy for this in multiplayer: editor clones share the registry hive,
-        /// so the last writer (any peer) wins. Read by NetworkedLevelControllerManager when
-        /// resolving the win/lose screen animation.
-        /// </summary>
+        /// <summary>Character code the local player drove (e.g. "Pepe_0"), from the spawn data; PlayerPrefs is shared between editor clones.</summary>
         public string LocalPlayerNameCode { get; private set; }
 
-        /// <summary>
-        /// Server: Register player's character selection
-        /// </summary>
         [Server]
         public void AddCharacterSelection(int clientId, string characterNameCode)
         {
@@ -93,9 +72,7 @@ namespace FastAndFractured.Multiplayer
             _levelController.PruneSelectedCharactersToActiveClientIds(activeClientIds);
         }
         
-        // Construct in debugMode resets PlayerPrefs("Player_Num") to defaultPlayerCount (1) and
-        // the spawner reads MaxCharactersInGame (serialized=8) — both must be re-set BETWEEN
-        // Construct and Initialize, hence this two-arg shape.
+        // Construct in debugMode resets Player_Num and MaxCharactersInGame: set both between Construct and Initialize.
         [Server]
         public void InitializeGame(int gameSeed, int totalCharacterCount, int humanCount)
         {
@@ -124,8 +101,7 @@ namespace FastAndFractured.Multiplayer
                       $"Player_Num={PlayerPrefs.GetInt("Player_Num")}, InGameCharacters(before)={beforeCount}");
 
             _levelController.PerformInitialize();
-            // Player_Num is only read during Initialize. Left in the prefs, the next singleplayer
-            // match expects that many humans and spawns no one ("Not all players have selected").
+            // Only read during Initialize; left behind, the next singleplayer match expects that many humans.
             PlayerPrefs.DeleteKey("Player_Num");
 
             int afterCount = _levelController.InGameCharacters?.Count ?? -1;
@@ -150,21 +126,8 @@ namespace FastAndFractured.Multiplayer
             return _levelController != null && _levelController.DebugMode;
         }
         
-        /// <summary>
-        /// Client: Initialize client-side singleton state with data received from server.
-        /// This is the ONLY place the client's LevelController gets initialized.
-        /// 
-        /// Critical ordering:
-        /// 1. Construct singletons in dependency order (HUDManager before IngameEventsManager)
-        /// 2. InitializeAfterSpawn (CarInjector.Install, onLevelPreStart timer, etc.)
-        /// 3. Re-apply input providers, destroy remote PlayerHUDs, bind local HUD
-        /// </summary>
+        /// <summary>Mid-match spectator: the client set-up with every car remote (no HUD, input or camera of its own).</summary>
         [Client]
-        /// <summary>
-        /// A spectator who joined mid-match: the same set-up as a player's client, with every car
-        /// remote (no local player, so no HUD, input or camera of its own - MatchSpectatorCamera
-        /// films the match).
-        /// </summary>
         public void InitializeSpectatorState(List<GameObject> characters, List<string> characterNameCodes, int gameSeed)
         {
             InitializeClientState(characters, characterNameCodes, new List<int>(), gameSeed);
@@ -188,20 +151,13 @@ namespace FastAndFractured.Multiplayer
             
             DeterministicRandom.Initialize(gameSeed);
 
-            // Same reason as the server path: the client's LevelController is also runtime-created,
-            // so its ScriptableObject roster reference is null and Construct() would throw.
+            // Runtime-created LevelController: its roster reference is null and Construct() would throw.
             EnsureCharactersDataAssigned();
 
-            // Construct LevelController first (other singletons need it)
             _levelController.PerformConstruct();
             
-            // Fix PlayerPrefs for local player
-            // LevelController.Construct() in debugMode overwrites PlayerPrefs("Selected_Player")
-            // with its serialized playerCharacter field (the host's character).
-            // HUDManager.Construct() reads this for portrait/icons, so we must fix it
-            // BEFORE constructing HUDManager.
-            // Use position in ordered client list (not raw clientId) because
-            // InGameCharactersNameCodes is compact (empty entries skipped by PrepareSpawnList).
+            // Construct() in debugMode overwrites Selected_Player and HUDManager reads it, so fix it first. Index in the
+            // ordered client list: the name codes are compact.
             int localClientId = LocalConnection.ClientId;
             int playerIndex = orderedClientIds != null ? orderedClientIds.IndexOf(localClientId) : localClientId;
             if (playerIndex >= 0 && playerIndex < characterNameCodes.Count)
@@ -215,18 +171,10 @@ namespace FastAndFractured.Multiplayer
                 Debug.LogWarning($"[NetworkedLevelControllerWrapper] Could not fix PlayerPrefs: clientId={localClientId}, playerIndex={playerIndex}, characterNameCodes.Count={characterNameCodes.Count}");
             }
             
-            // Construct player singletons in dependency order
-            // HUDManager.Construct() needs LevelController.Instance (for onLevelPreStart)
-            // IngameEventsManager.Construct() needs HUDManager.Instance.GetUIElement(PLAYER_ICONS)
-            // CameraBehaviours.Construct() needs LevelController.Instance  
-            // GameReadyScript.Initialize() needs IngameEventsManager.Instance
+            // Dependency order: LevelController -> HUDManager -> IngameEventsManager -> CameraBehaviours -> GameReadyScript.
             ConstructPlayerSingletonsInOrder();
 
-            // Force HUD sprite refresh
-            // HUDManager.PerformConstruct() may have been a no-op if _isConstructed was already
-            // true from a prior auto-init, or SetPlayerStartingSprites() may have silently failed
-            // if ResourcesManager wasn't ready yet. Set character directly on HUDManager,
-            // bypassing PlayerPrefs (unreliable in multiplayer — ParrelSync clones share registry).
+            // Set the HUD character directly (PlayerPrefs is shared between editor clones).
             {
                 string localChar = null;
                 int idx = orderedClientIds != null ? orderedClientIds.IndexOf(localClientId) : localClientId;
@@ -237,42 +185,26 @@ namespace FastAndFractured.Multiplayer
 
             _levelController.InGameCharactersNameCodes = characterNameCodes;
             
-            // Prepare HUD BEFORE InitializeAfterSpawn
-            // InitializeAfterSpawn starts a 0.1s timer that fires onLevelPreStart.
-            // PlayerHUD.Initialize() and IngameEventsManager.Initialize() register listeners on onLevelPreStart.
-            // We MUST destroy remote PlayerHUDs and init local PlayerHUD BEFORE that timer starts.
+            // Before InitializeAfterSpawn: its onLevelPreStart timer must find remote PlayerHUDs gone and ours initialized.
             DisableRemoteCanvases();
             DisableRemotePlayerHUDs();
             DisableRemotePlayerCameraRigs();
             InitializeLocalPlayerHUD();
             
-            // Ensure TimerSystem has a runner
-            // TimerSystem.Tick() must be called every frame for timers to work.
-            // The singleplayer scene uses TimerSystemSinglePlayerRunner, but it may not exist
-            // in the multiplayer scene. Without it, timers never update and onLevelPreStart never fires.
+            // Timers (onLevelPreStart included) never fire without a TimerSystem runner.
             EnsureTimerSystemRunner();
             
-            // Initialize with already-networked characters
-            // This calls CarInjector.Install(null, true) for ALL cars.
-            // CarInjector is on the root (same GO as the vehicle's parent), so GetComponentInChildren works.
-            // Also starts onLevelPreStart timer and game loop.
             _levelController.InitializeAfterSpawn(characters);
             
-            // Post-init fixups
-            // Re-apply NetworkInputProvider on all vehicles AFTER CarInjector overwrote them
             ReApplyNetworkInputProviders();
             
-            // Guard: ActivateCharacterControls fires after delayUntilGameStarts and
-            // RE-ENABLES all Controllers (including remote ones we just disabled).
+            // ActivateCharacterControls re-enables every Controller after delayUntilGameStarts.
             RegisterCharactersCustomStartGuard();
             
             // Bind HUD to local player's car (CarInjector.Install(null,true) skips speed binding)
             BindLocalPlayerHUD();
 
-            // Resize the local player's icon in the top HUD strip (and hide the unused slots).
-            // InitializeAfterSpawn above invokes onLevelPreStart synchronously, so a listener added
-            // here would never run for this match: apply it now. The listener stays for the case
-            // where the pre-start is still pending (it is idempotent).
+            // onLevelPreStart already ran synchronously above: resize now; the listener covers a pending pre-start.
             ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
             AssignScreenShakeChannels(characters);
@@ -281,18 +213,7 @@ namespace FastAndFractured.Multiplayer
 
         }
 
-        /// <summary>
-        /// Construct player-spawned singletons in the correct dependency order.
-        /// NetworkedLocalSingletonPreserver.OnStartClient only claims ownership (sets s_Instance).
-        /// Construct/Initialize must happen here where we control the order.
-        /// 
-        /// Dependency chain:
-        ///   LevelController (already constructed above)
-        ///   ->HUDManager.Construct() needs LevelController.Instance.onLevelPreStart
-        ///   ->IngameEventsManager.Construct() needs HUDManager.Instance.GetUIElement(PLAYER_ICONS)
-        ///   ->CameraBehaviours needs LevelController.Instance.onLevelPreStart
-        ///   ->GameReadyScript.Initialize() needs IngameEventsManager.Instance
-        /// </summary>
+        /// <summary>Constructs the player singletons in dependency order (the preserver only claims s_Instance).</summary>
         private void ConstructPlayerSingletonsInOrder()
         {
             var preservers = FindObjectsByType<NetworkedLocalSingletonPreserver>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -340,17 +261,10 @@ namespace FastAndFractured.Multiplayer
             
         }
         
-        /// <summary>
-        /// Host-side HUD initialization. Called from SentLevelControllerStartData when IsServerInitialized.
-        /// The host doesn't run InitializeClientState, but still needs PlayerHUD disabled on non-owner
-        /// and HUD speed binding for the local player.
-        /// </summary>
+        /// <summary>Host-side HUD set-up (the host never runs InitializeClientState).</summary>
         public void InitializeHostHUD(List<int> orderedClientIds = null)
         {
-            // Fix PlayerPrefs for host and force HUD sprites directly.
-            // LevelController.Construct() in debugMode overwrites Selected_Player with
-            // the serialized default. We fix PlayerPrefs AND apply sprites directly to
-            // HUDManager, bypassing PlayerPrefs for the actual sprite load.
+            // Fix Selected_Player and set the HUD sprites directly (Construct() in debugMode overwrote it).
             string hostCharacter = null;
             if (_levelController != null)
             {
@@ -373,55 +287,28 @@ namespace FastAndFractured.Multiplayer
             DisableRemotePlayerHUDs();
             DisableRemotePlayerCameraRigs();
 
-            // The host used to skip this entirely — it was only ever called from
-            // InitializeClientState — which is why the HOST's HUD showed no overheat, no push
-            // cooldown, no ultimate charge while the remote client's HUD worked. The preserver
-            // suppresses PlayerHUD auto-init on every player root (NetworkedLocalSingletonPreserver
-            // .Awake) so that a remote car's PlayerHUD cannot bind its cooldowns to our HUDManager;
-            // restoring the OWNER's is this method's job, and nothing was doing it on the host.
+            // The preserver suppresses PlayerHUD auto-init on every root; restore the owner's.
             InitializeLocalPlayerHUD();
 
             BindLocalPlayerHUD();
 
-            // ...and again once the level actually pre-starts. On the CLIENT this call sits safely
-            // after InitializeAfterSpawn (step 5 of InitializeClientState), but the host reaches
-            // InitializeHostHUD from WaitForClientsThenSpawn, which runs it right after
-            // LoadResolvedScene() — an ASYNC load, so the level's own InitializeAfterSpawn (and the
-            // CarInjector.Install(null, true) inside it) generally runs later. Install re-binds the
-            // shared SPEED_INDICATOR text to the CarSpeedOverlay of EVERY car, so the remote car's
-            // overlay then overwrites the host's speed reading every frame — the host's speed
-            // indicator stops tracking their own car. onLevelPreStart is invoked immediately after
-            // that Install (LevelController.cs:185-199), so re-binding there lands after it in
-            // either ordering. BindLocalPlayerHUD is idempotent.
+            // ...and again at pre-start: the host's level loads async and Install then rebinds the speed text to every car.
             _levelController.onLevelPreStart.AddListener(BindLocalPlayerHUD);
 
-            // Resize local player's icon after SetCharactersTopElements populates the icons (now
-            // if that already happened, else when the level pre-starts).
+            // Resize the local icon once SetCharactersTopElements has filled the strip.
             ResizeLocalPlayerIcon();
             _levelController.onLevelPreStart.AddListener(ResizeLocalPlayerIcon);
 
-            // Re-apply correct InputProviders on host.
-            // CarInjector.Install(null, true) in InitializeAfterSpawn overwrites ALL vehicles'
-            // InputProvider to PlayerInputProvider. This causes remote vehicles to read the host's
-            // input (shoot, dash, ultimate all mirror). Must restore NetworkInputProvider on non-owner vehicles.
             ReApplyNetworkInputProviders();
             
-            // Guard: ActivateCharacterControls fires after delayUntilGameStarts (3.5s) and
-            // RE-ENABLES all Controllers (including remote ones we just disabled).
-            // Also, Controller.CustomStart ->LoadFirsState is called by charactersCustomStart,
-            // and disabled PlayerInputControllers get BindActions creating duplicate input listeners.
-            // Register a post-guard that fixes both issues after the event fires.
+            // ActivateCharacterControls re-enables every Controller and charactersCustomStart rebinds input: fix both after it.
             RegisterCharactersCustomStartGuard();
             AssignScreenShakeChannels(_levelController.InGameCharacters);
             CarNameplate.AttachAll(_levelController.InGameCharacters);
             ApplyLocalAccessories(_levelController.InGameCharacters);
         }
 
-        /// <summary>
-        /// After InitializeAfterSpawn (which calls CarInjector.Install), re-apply the correct
-        /// InputProvider on all NetworkedVehicle components. CarInjector.Install overwrites
-        /// InputProvider to PlayerInputProvider, but non-owner cars need NetworkInputProvider.
-        /// </summary>
+        /// <summary>Re-applies the right InputProvider after CarInjector.Install overwrote it.</summary>
         private void ReApplyNetworkInputProviders()
         {
             var vehicles = FindObjectsByType<NetworkedVehicle>(FindObjectsSortMode.None);
@@ -430,19 +317,11 @@ namespace FastAndFractured.Multiplayer
                 vehicle.ApplyInputProviderLocally();
             }
             
-            // Disable state machine Controllers on non-owner vehicles.
-            // The singleplayer state machine reads from PlayerInputController.Instance (singleton),
-            // so ALL vehicles would share the local player's input if left enabled.
+            // Remote cars' state machines would read the local PlayerInputController singleton.
             DisableRemoteStateMachines();
         }
 
-        /// <summary>
-        /// Disable Controller.Update on ALL networked vehicles (owner and non-owner). The state
-        /// machine is now driven by NetworkedStateMachineDriver from NetworkedVehicle.Replicate
-        /// at tick rate, eliminating the duplicate frame-rate driver. For owners this fixes the
-        /// double ProcessMovementInput call (state machine + Replicate). For non-owners it
-        /// eliminates the singleton-input bleed (their state machine read PlayerInputController.Instance).
-        /// </summary>
+        /// <summary>Disables Controller.Update on every vehicle: NetworkedStateMachineDriver ticks the state machine from Replicate.</summary>
         private void DisableRemoteStateMachines()
         {
             var allControllers = FindObjectsByType<Controller>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -451,15 +330,7 @@ namespace FastAndFractured.Multiplayer
                 var nob = ctrl.GetComponentInParent<FishNet.Object.NetworkObject>(true);
                 if (nob == null) continue;
 
-                // The owner's CHILD state machines (the shooting Controller) must keep running from
-                // Update at frame rate, exactly like singleplayer: they only translate local input
-                // into TryPushShoot/TryMineShoot/ability calls, which already route through the
-                // owner/server paths in NetworkedShoot. Nothing ticks them from the network loop —
-                // NetworkedVehicle only ticks the MOVEMENT Controller (the one on the root NOB's own
-                // GameObject) — so taking them over left ulti, push shoot, mine and the push aim
-                // trace completely dead on any car where this ran. Non-owned cars keep everything
-                // disabled: their state machines read the local PlayerInputController singleton and
-                // would bleed this client's input into remote replicas.
+                // The owner's child state machines (shooting) keep running from Update as in singleplayer; remote ones stay off.
                 bool isMovementController = ctrl.gameObject == nob.gameObject;
                 if (nob.IsOwner && !isMovementController)
                 {
@@ -478,19 +349,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Register a listener on charactersCustomStart that fires AFTER Controller.CustomStart 
-        /// and PlayerInputController.BindActions. This fixes two issues:
-        /// 
-        /// 1. ActivateCharacterControls() (called by the game loop after delayUntilGameStarts)
-        ///    RE-ENABLES ALL Controller components, including remote ones we disabled.
-        ///    We re-disable them here.
-        /// 
-        /// 2. Controller.Awake() on non-owner vehicles registered CustomStart on charactersCustomStart.
-        ///    PlayerInputController.Construct() on non-owner vehicles registered BindActions too.
-        ///    When the event fires, disabled PlayerInputControllers create duplicate PlayerInputAction
-        ///    instances (leaked input listeners). We disable those actions here.
-        /// </summary>
+        /// <summary>After charactersCustomStart: re-disable the Controllers ActivateCharacterControls re-enabled and drop leaked input actions.</summary>
         private bool _guardRegistered = false;
         private void RegisterCharactersCustomStartGuard()
         {
@@ -519,12 +378,7 @@ namespace FastAndFractured.Multiplayer
                 }
             }
             
-            // BindActions() runs once per vehicle (CarInjector.Install -> PlayerInputProvider
-            // .Initialize) plus once from charactersCustomStart, and each call leaks a new
-            // PlayerInputAction onto the PlayerInputController singleton. ChangeShootMode()
-            // toggles _isPushShootMode, so N leaked instances toggle it N+1 times per click and
-            // an even count leaves push shoot permanently off. Drop every enabled action, then
-            // rebind exactly one. Init-time only; PauseManager re-enables its own actions.
+            // Every BindActions call leaks a PlayerInputAction and ShootingMode toggles once per instance: keep exactly one.
             UnityEngine.InputSystem.InputSystem.DisableAllEnabledActions();
             var ownerPic = PlayerInputController.Instance;
             if (ownerPic != null)
@@ -532,10 +386,7 @@ namespace FastAndFractured.Multiplayer
                 ownerPic.BindActions();
             }
 
-            // LevelController adds its single-player ReportCharacterDeath listener immediately
-            // after ActivateCharacterControls (and therefore after this UnityEvent) returns.
-            // Remove only that listener on the next frame, leaving all other StatsController
-            // listeners untouched and keeping the adaptation wholly inside Multiplayer.
+            // LevelController adds its ReportCharacterDeath listener right after this event: remove it next frame.
             StartCoroutine(RemoveSingleplayerDeathListenersNextFrame());
             
         }
@@ -553,11 +404,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Disable ALL Canvas components on non-owner player hierarchies.
-        /// Ensures remote players' UI is fully invisible even if the preserver
-        /// missed a canvas (e.g. "Canvas" not being a direct parent of a managed singleton).
-        /// </summary>
         private void DisableRemoteCanvases()
         {
             var allCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -567,7 +413,6 @@ namespace FastAndFractured.Multiplayer
                 if (nob == null) continue;                 // scene canvas, skip
                 if (IsLocalPlayerObject(nob)) continue;    // our own canvas, skip (see IsLocalPlayerObject)
                 
-                // Only disable canvases named "Canvas" or "PlayerCanvas" (player HUD canvases)
                 if (c.gameObject.name == "Canvas" || c.gameObject.name == "PlayerCanvas")
                 {
                     c.enabled = false;
@@ -575,39 +420,6 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Destroy PlayerHUD components on non-owner player hierarchies.
-        /// PlayerHUD is on the player root (NetworkedPlayer), NOT on the vehicle child.
-        /// 
-        /// Must DESTROY (not just disable) because PlayerHUD.Initialize() adds
-        /// InitUpdateHUDEvents as an onLevelPreStart listener. Dynamic UnityEvent listeners
-        /// fire even on disabled MonoBehaviours. Only destroying the component makes Unity
-        /// skip the listener when the event fires.
-        /// 
-        /// Without this, remote cars' cooldown events update OUR HUDManager (HUD overlap).
-        /// </summary>
-        /// <summary>
-        /// Whether a NetworkObject belongs to the LOCAL player.
-        ///
-        /// <see cref="NetworkObject.IsOwner"/> is not usable from the host's init path.
-        /// InitializeHostHUD runs synchronously right after SpawnCharactersOnClients, when the
-        /// server has already assigned ownership but the host's own CLIENT half has not processed
-        /// the spawn yet — so IsOwner is still false for the host's OWN objects, and every
-        /// "is this remote?" test built on it answers yes for the local player.
-        ///
-        /// Measured live (2026-08-12, MountainVillage, same match, both peers):
-        ///   client (initializes from an ObserversRpc that arrives after spawn processing):
-        ///       PlayerHUD alive = 1, IsOwner = True, owned car speedText = SpeedIndicator_TMP
-        ///   host  (initializes synchronously during spawn):
-        ///       PlayerHUD alive = 0,                 owned car speedText = NULL
-        /// One cause, both host symptoms: the HUD was destroyed and the speed overlay unbound as if
-        /// the host's own player were a remote one. Driving still worked only because
-        /// NetworkedVehicle.OnOwnershipClient re-applies the input provider once ownership lands —
-        /// a Destroy has no such second chance.
-        ///
-        /// Comparing the owner CONNECTION is valid on the server as soon as Spawn(conn) returns,
-        /// and is equivalent to IsOwner on a pure client.
-        /// </summary>
         /// <summary>
         /// The local player's equipped accessories on its own car (Progression). Other players'
         /// choices are not sent over the network yet, so their cars show none.
@@ -627,6 +439,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
+        /// <summary>IsOwner is still false for the host's own objects during its init: compare the owner connection.</summary>
         private bool IsLocalPlayerObject(NetworkObject nob)
         {
             if (nob == null) return false;
@@ -636,28 +449,13 @@ namespace FastAndFractured.Multiplayer
             return local != null && nob.Owner != null && nob.Owner.ClientId == local.ClientId;
         }
 
-        /// <summary>
-        /// Deactivate the camera rig on every non-local player root.
-        ///
-        /// Each NetworkedPlayer carries its own FreeLookCameraLast rig (virtual camera, camera
-        /// collider, impulse listeners). Nothing used to switch the remote ones off, so a two-player
-        /// match ran two virtual cameras at equal priority against the single CinemachineBrain, plus
-        /// a second CinemachineCollider raycasting against the map every frame. Which one wins is
-        /// decided by activation order, which differs between host and client - that is why the
-        /// tremble showed up on the client and not on the host.
-        ///
-        /// Deactivating the whole rig object also takes its CameraBehaviours out of
-        /// AbstractSingleton's lookups, which exclude inactive objects, so CameraBehaviours.Instance
-        /// resolves to the local player's rig.
-        /// </summary>
+        /// <summary>Deactivates the camera rig on every remote player root (two virtual cameras fought over the brain).</summary>
         private void DisableRemotePlayerCameraRigs()
         {
             var allRigs = FindObjectsByType<CameraBehaviours>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var rig in allRigs)
             {
-                // Same fail-safe ownership rule as the HUD pass: includeInactive because FishNet
-                // deactivates a NetworkObject while spawning it, and a null NetworkObject means
-                // "not provably remote", so the rig stays.
+                // includeInactive (FishNet deactivates objects while spawning); a null NetworkObject keeps the rig.
                 var nob = rig.GetComponentInParent<NetworkObject>(true);
                 if (nob == null) continue;
                 if (IsLocalPlayerObject(nob)) continue;
@@ -677,10 +475,7 @@ namespace FastAndFractured.Multiplayer
             var allHuds = FindObjectsByType<PlayerHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var hud in allHuds)
             {
-                // includeInactive: FishNet deactivates a NetworkObject while spawning it, and the
-                // host reaches this straight from WaitForClientsThenSpawn, so the active-only
-                // overload returns null for the host's own still-spawning player root.
-                // Then fail SAFE: a null NetworkObject means "not provably remote", so keep the HUD.
+                // includeInactive: FishNet deactivates the host's own root while spawning it. A null NetworkObject keeps the HUD.
                 var nob = hud.GetComponentInParent<NetworkObject>(true);
                 if (nob == null) continue;
                 if (IsLocalPlayerObject(nob)) continue;
@@ -695,21 +490,13 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Initialize the local (owner) PlayerHUD. Auto-init was suppressed by the preserver
-        /// in Awake to prevent the host's PlayerHUD from subscribing onLevelPreStart.
-        /// Now that remote PlayerHUDs are destroyed, we can safely init the owner's.
-        /// This calls PerformConstruct + PerformInitialize which adds InitUpdateHUDEvents
-        /// as an onLevelPreStart listener (fires after the 0.1s delay from InitializeAfterSpawn).
-        /// </summary>
+        /// <summary>Initializes the owner's PlayerHUD, whose auto-init the preserver suppressed.</summary>
         private void InitializeLocalPlayerHUD()
         {
             var allHuds = FindObjectsByType<PlayerHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var hud in allHuds)
             {
-                // includeInactive for the same reason as DisableRemotePlayerHUDs: the host runs this
-                // while its own player root can still be deactivated by FishNet's spawn, and the
-                // active-only overload would return null and skip the very HUD we came to initialize.
+                // includeInactive, as in DisableRemotePlayerHUDs.
                 var nob = hud.GetComponentInParent<NetworkObject>(true);
                 if (!IsLocalPlayerObject(nob)) continue;
 
@@ -721,26 +508,14 @@ namespace FastAndFractured.Multiplayer
                 hud.PerformConstruct();
                 hud.PerformInitialize();
 
-                // PerformInitialize only ADDS InitUpdateHUDEvents as an onLevelPreStart listener.
-                // That is enough on a remote client, where the car exists before the level starts,
-                // but not on the host: LevelController.InitializeAfterSpawn() invokes
-                // onLevelPreStart synchronously (LevelController.cs:199), and on the host that can
-                // already have happened by the time we get here — the listener is then registered
-                // for an event that will never fire again, so overheat, push cooldown, dash and
-                // ultimate never update. Invoking it directly makes the wiring independent of that
-                // ordering. Safe in the other order too: if onLevelPreStart has not fired yet it
-                // will call the same method again, and every handler is an idempotent HUD setter.
+                // On the host onLevelPreStart may have fired already: run the HUD hookup now too (idempotent).
                 SingleplayerReflectionCache.PlayerHUD_InitUpdateHUDEvents?.Invoke(hud, null);
 
                 break;
             }
         }
 
-        /// <summary>
-        /// Ensure TimerSystem has something calling Tick() every frame.
-        /// In singleplayer, TimerSystemSinglePlayerRunner does this. In multiplayer scenes
-        /// it may not exist, causing all timers (including onLevelPreStart delay) to never fire.
-        /// </summary>
+        /// <summary>Timers need something calling TimerSystem.Tick() every frame.</summary>
         private void EnsureTimerSystemRunner()
         {
             if (TimerSystem.Instance == null) return;
@@ -753,31 +528,11 @@ namespace FastAndFractured.Multiplayer
 
         private const string CHARACTERS_DATA_RESOURCES_PATH = "CharactersSkins/ListOfCharactersData";
 
-        /// <summary>
-        /// Assigns LevelController.charactersDataScriptableObject before Construct() runs.
-        ///
-        /// The dev branch refactored the roster from a serialized List&lt;CharacterData&gt; to a
-        /// ListOfCharactersData ScriptableObject, and Construct() now dereferences it with no null
-        /// check. Singleplayer is fine because its LevelController is placed in a scene/prefab with
-        /// the reference wired in the inspector — but NO scene serializes a LevelController for
-        /// multiplayer: the singleton accessor creates one at runtime, so every serialized field is
-        /// at its default (null) and Construct() throws a NullReferenceException, which aborted the
-        /// whole match start ("Manager spawn / game start threw").
-        ///
-        /// The asset lives under a Resources folder precisely so it can be resolved without a scene
-        /// reference, so load it and assign it via reflection (no singleplayer code is modified).
-        /// </summary>
+        /// <summary>Assigns the roster asset (from Resources) before Construct(): the runtime-created LevelController has none.</summary>
         private static ListOfCharactersData _networkedRoster;
         private static ListOfCharactersData _networkedRosterSource;
 
-        /// <summary>
-        /// The singleplayer roster with each car swapped for its networked variant
-        /// ("Networked{Car} Variant", registered with the NetworkManager), built in memory. The
-        /// shared CharacterData assets keep the singleplayer cars: pointing them at the
-        /// networked prefabs (what NetworkedVehicleSetupTool's "Update CarDefaultPrefab" does)
-        /// broke singleplayer - offline, FishNet leaves those cars deactivated and no match
-        /// starts. Stats come from the same assets, so both modes stay in sync.
-        /// </summary>
+        /// <summary>The singleplayer roster with each car swapped for its networked variant, built in memory.</summary>
         private static ListOfCharactersData NetworkedRoster(ListOfCharactersData source)
         {
             if (_networkedRoster != null && _networkedRosterSource == source) return _networkedRoster;
@@ -838,19 +593,8 @@ namespace FastAndFractured.Multiplayer
             Debug.Log($"[NetworkedLevelControllerWrapper] Assigned ListOfCharactersData " +
                       $"({asset.listOfCharactersData?.Count ?? 0} characters) to the runtime LevelController.");
 
-            // NOTE — deliberately NOT binding LevelController._sandStormController here.
-            // The multiplayer LevelController is the runtime singleton, so that reference is null
-            // too and GameLoopManager logs "_sandStormController is null. Cannot set up storm."
-            // (pre-existing: the sandstorm never runs in multiplayer). Binding the map's
-            // SandstormController was tried and made things WORSE: the networked maps' controller
-            // has its own unassigned `sphereCenter`, so SetupStorm then threw
-            // UnassignedReferenceException and aborted match start entirely. Fixing the sandstorm
-            // needs the networked scenes regenerated with that reference wired — a separate job.
         }
         
-        /// <summary>
-        /// Restore auto-init flags on a PlayerHUD that was suppressed by the preserver.
-        /// </summary>
         private void RestoreAutoInitOnPlayerHUD(PlayerHUD hud)
         {
             SingleplayerReflectionCache.AbstractAutoInit_AutoConstructOnAwake?.SetValue(hud, true);
@@ -858,15 +602,7 @@ namespace FastAndFractured.Multiplayer
             SingleplayerReflectionCache.AbstractAutoInit_AutoInitializeOnEnable?.SetValue(hud, true);
         }
 
-        /// <summary>
-        /// Forces HUDManager to display sprites for the given character, bypassing PlayerPrefs.
-        ///
-        /// PlayerPrefs is unreliable in multiplayer: ParrelSync clones share the same Windows
-        /// registry key, and the delayed onLevelPreStart re-read can pick up another clone's
-        /// value. This method sets HUDManager's private fields directly and calls
-        /// SetPlayerStartingSprites, then unregisters the onLevelPreStart listener to prevent
-        /// any future PlayerPrefs re-read from overwriting the correct sprites.
-        /// </summary>
+        /// <summary>Sets HUDManager's character directly and drops its PlayerPrefs re-read (shared between editor clones).</summary>
         private void ForceRefreshHUDSprites(string characterCode)
         {
             if (!HUDManager.HasInstance || string.IsNullOrEmpty(characterCode)) return;
@@ -889,8 +625,7 @@ namespace FastAndFractured.Multiplayer
 
             SingleplayerReflectionCache.HUDManager_SetPlayerStartingSprites?.Invoke(hud, null);
 
-            // Unregister RegisterSelectedPlayer from onLevelPreStart to prevent the delayed
-            // re-read (0.1s timer) from overwriting our sprites with stale PlayerPrefs data.
+            // Its delayed re-read would load stale PlayerPrefs.
             if (LevelController.HasInstance)
             {
                 var registerMethod = SingleplayerReflectionCache.HUDManager_RegisterSelectedPlayer;
@@ -903,14 +638,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Bind the HUD speed indicator to the local player's car, and UNBIND it from every
-        /// other car. CarInjector.Install binds the shared HUD SPEED_INDICATOR text to a
-        /// CarSpeedOverlay on EVERY player car, so remote cars' overlays write their own
-        /// speed into the local HUD every frame (a stationary remote car pins it at "0,0").
-        /// Clearing the reference on non-owned overlays stops the clobbering; the local
-        /// overlay is (re)bound right after.
-        /// </summary>
+        /// <summary>Binds the HUD speed text to the local car only (Install binds it to every car).</summary>
         private void BindLocalPlayerHUD()
         {
             if (!HUDManager.HasInstance) return;
@@ -918,9 +646,7 @@ namespace FastAndFractured.Multiplayer
             var vehicles = FindObjectsByType<NetworkedVehicle>(FindObjectsSortMode.None);
             foreach (var vehicle in vehicles)
             {
-                // IsLocalPlayerObject, not IsOwner — on the host this runs before its own client-side
-                // spawn is processed, and IsOwner would report the host's OWN car as remote, so the
-                // loop below would unbind the speed text it is about to bind. See IsLocalPlayerObject.
+                // IsLocalPlayerObject, not IsOwner (see there).
                 if (IsLocalPlayerObject(vehicle.NetworkObject)) continue;
                 var remoteOverlay = vehicle.GetComponent<CarSpeedOverlay>();
                 if (remoteOverlay != null)
@@ -941,7 +667,6 @@ namespace FastAndFractured.Multiplayer
                     continue;
                 }
                 
-                // Use textReference from UIDynamicElement, matching CarInjector.Install(prefab,name,provider) pattern
                 var tmpText = speedElement.textReference ?? speedElement.GetComponent<TextMeshProUGUI>();
                 if (tmpText != null)
                 {
@@ -951,13 +676,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// Resize the local player's character icon in the HUD top strip.
-        /// In singleplayer, Image_Player(0) is always the local player and is 65x65.
-        /// In multiplayer the local player may not be index 0, so we find their icon
-        /// and enlarge it, resetting the others to the default 50x50 size.
-        /// Called on onLevelPreStart, AFTER IngameEventsManager.SetCharactersTopElements populates the icons.
-        /// </summary>
+        /// <summary>Enlarges the local player's icon in the top strip (not always index 0 in multiplayer).</summary>
         private void ResizeLocalPlayerIcon()
         {
             if (_levelController == null || _levelController.characterIcons == null)
@@ -966,17 +685,14 @@ namespace FastAndFractured.Multiplayer
             const float LOCAL_PLAYER_ICON_SIZE = 65f;
             const float OTHER_PLAYER_ICON_SIZE = 50f;
 
-            // The player canvas has a stray "SpeedOverlay" text that nothing writes to (the speed
-            // goes to the SPEED_INDICATOR element), so it showed its "New Text" placeholder under
-            // the icons. Empty it.
+            // Empty the stray "SpeedOverlay" placeholder under the icons.
             foreach (var text in FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
                 if (text.name == "SpeedOverlay" && text.text == "New Text") text.text = string.Empty;
 
             foreach (var icon in _levelController.characterIcons)
             {
                 if (icon == null) continue;
-                // The networked HUD has 12 slots, all active; a slot with no character used to
-                // stay on screen as an empty square. Show only the characters in the match.
+                // Show only the slots of characters in the match.
                 if (icon.Character == null)
                 {
                     icon.gameObject.SetActive(false);
@@ -1002,13 +718,7 @@ namespace FastAndFractured.Multiplayer
 
         }
 
-        /// <summary>
-        /// One Cinemachine impulse channel per car on every peer (dev's per-player "local" screen
-        /// shake). The singleplayer spawner sets them (CharacterDataProvider.SetShakeLocalProfile),
-        /// but only where it runs - the server. On clients every car stayed on channel 0, which no
-        /// listener hears, so a client never felt its own shots or crashes. Remote cars run their
-        /// state machines here too (shooting shake action), so they must not share our channel.
-        /// </summary>
+        /// <summary>One impulse channel per car on every peer (the spawner only sets them on the server).</summary>
         private static void AssignScreenShakeChannels(List<GameObject> characters)
         {
             if (characters == null) return;
@@ -1039,14 +749,7 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
 
-        /// <summary>
-        /// Host of a migrated match. The new host replays the original start, so the singleplayer
-        /// level makes the FIRST human - the host that left - its local player: LocalPlayer and
-        /// the player-root singletons (HUD, top icons, events, camera, input, pause menu) are that
-        /// car's, and they go when its root is removed. The new host's own root never got them,
-        /// so its HUD showed the empty icon strip (playtest 2026-10-04). Hand them to this
-        /// peer's car and replay the level-start steps that already ran for the departed one.
-        /// </summary>
+        /// <summary>Migrated match: the replay made the departed host the local player; hand its singletons to this peer's car.</summary>
         public void RebindLocalPlayerAfterMigration(GameObject localCar)
         {
             if (_levelController == null || localCar == null) return;
@@ -1068,10 +771,7 @@ namespace FastAndFractured.Multiplayer
                 else others.Add(singleton);
             }
 
-            // Construct/Initialize them as a fresh client does (ConstructPlayerSingletonsInOrder).
-            // GameReadyScript is left alone: its Initialize schedules the 3-2-1, which the
-            // manager already drives from the server tick. MainMenuManager.Construct shows the
-            // cursor (menu default); keep the in-match cursor state.
+            // As a fresh client does. GameReadyScript is skipped (the manager drives the 3-2-1) and the in-match cursor kept.
             var ordered = new List<AbstractAutoInitializableMonoBehaviour>();
             if (hudManager != null) ordered.Add(hudManager);
             if (ingameEvents != null) ordered.Add(ingameEvents);
@@ -1119,8 +819,7 @@ namespace FastAndFractured.Multiplayer
                 var field = type.GetField("s_Instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
                 if (field == null) return;
                 var current = field.GetValue(null) as Component;
-                // A singleton read after the departed root went away is recreated as a bare
-                // "auxiliar" object; remove it so it does not linger next to the real one.
+                // Remove the auxiliar stand-in created after the departed root went away.
                 if (current != null && current != singleton && current.GetComponentInParent<NetworkObject>(true) == null)
                     Destroy(current.gameObject);
                 field.SetValue(null, singleton);

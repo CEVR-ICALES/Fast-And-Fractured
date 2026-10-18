@@ -1,12 +1,3 @@
-// SCENE SETUP:
-//   - Place on the MULTIPLAYER_HOST_SETUP MenuScreen GameObject.
-//   - Wire _roomNameInput  (TMP_InputField)
-//   - Wire _portInput      (TMP_InputField, default "7777")
-//   - Wire _startButton    (Button, begins hosting)
-//   - Wire _backButton     (Button)
-//   - Wire _statusLabel    (TMP_Text, shows errors)
-//
-// AI slot count is configured from the lobby ready screen (AiSlotsUI), not here.
 using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Threading;
@@ -21,6 +12,10 @@ namespace FastAndFractured.Multiplayer.Lobby
 {
     public sealed class MultiplayerHostSetupController : MonoBehaviour
     {
+        private const ushort DEFAULT_PORT = 7777;
+        private const int HOST_TIMEOUT_SECONDS = 10;
+        private const int LOBBY_POLL_MS = 100;
+
         [SerializeField] private TMP_InputField _roomNameInput;
         [SerializeField] private TMP_InputField _portInput;
         [SerializeField] private Button         _startButton;
@@ -47,7 +42,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             SetInteractable(false);
             SetStatus(string.Empty);
 
-            ushort port = 7777;
+            ushort port = DEFAULT_PORT;
             if (_portInput != null && !ushort.TryParse(_portInput.text, out port))
             {
                 SetStatus(LocalizationManager.Localize("MP.HostSetup.InvalidPort"));
@@ -66,13 +61,11 @@ namespace FastAndFractured.Multiplayer.Lobby
                 IsPublic      = true,
             };
 
-            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(HOST_TIMEOUT_SECONDS));
             try
             {
                 await LobbyServiceLocator.Transport.CreateLobbyAsync(options, _cts.Token);
 
-                // Propagate the room name to the lobby manager. AI count is configured later
-                // from the lobby ready screen — no need to push it here.
                 ApplyHostChoicesToLobby(options.RoomName);
 
                 MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, _fadeDuration);
@@ -93,11 +86,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
         }
 
-        /// <summary>
-        /// After the server is up, push the host's room name onto the lobby manager. We poll
-        /// because the lobby manager is a NetworkBehaviour and may not be spawned the instant
-        /// CreateLobbyAsync returns.
-        /// </summary>
         private async void ApplyHostChoicesToLobby(string roomName)
         {
             const int MAX_WAIT_MS = 5000;
@@ -107,8 +95,8 @@ namespace FastAndFractured.Multiplayer.Lobby
             {
                 lobby = LobbyLocator.GetLobbyManager();
                 if (lobby != null && lobby.IsServerInitialized) break;
-                await System.Threading.Tasks.Task.Delay(100);
-                waited += 100;
+                await System.Threading.Tasks.Task.Delay(LOBBY_POLL_MS);
+                waited += LOBBY_POLL_MS;
             }
 
             if (lobby == null || !lobby.IsServerInitialized)

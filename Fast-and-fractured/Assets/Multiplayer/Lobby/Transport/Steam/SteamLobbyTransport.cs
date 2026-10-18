@@ -15,15 +15,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Abstractions.Steam
 {
     /// <summary>
-    /// ILobbyTransport: Steam Matchmaking for lobby discovery + Tugboat (IP) for the actual connection.
-    ///
-    /// Server flow  : CreateLobbyAsync (HostAsServer=true) — creates Steam lobby, writes IP:port,
-    ///                starts FishNet server. Run this from a headless dedicated-server build.
-    /// Client flow  : ListLobbiesAsync → JoinLobbyAsync — joins Steam lobby, reads IP:port,
-    ///                connects via Tugboat.
-    ///
-    /// For LAN testing no extra setup is needed.
-    /// For internet testing expose the server port with playit.gg (free) or any port-forward.
+    /// ILobbyTransport over Steam Matchmaking for discovery and Tugboat for the connection: the host writes its
+    /// IP:port into the Steam lobby and clients read it to connect.
     /// </summary>
     public sealed class SteamLobbyTransport : ILobbyTransport, IDisposable
     {
@@ -32,23 +25,22 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         private const string KEY_MAX_PLAYERS = "max_players";
         private const string KEY_SERVER_IP   = "server_ip";
         private const string KEY_SERVER_PORT = "server_port";
-        // We mirror the FishNet connection count into lobby metadata because
-        // SteamMatchmaking.GetNumLobbyMembers() returns stale/zero data for lobbies the
-        // caller hasn't joined — GetLobbyData() is always served fresh by RequestLobbyList.
+        // Lobby metadata mirrors the connection count: GetNumLobbyMembers is stale for lobbies the caller has not joined.
         private const string KEY_NUM_PLAYERS = "num_players";
         private const string KEY_HOST_LINK   = "host_link";
+        private const ushort DEFAULT_SERVER_PORT = 7777;
+        // Any public address: connecting a UDP socket only picks the outgoing interface.
+        private const string ROUTE_PROBE_ADDRESS = "8.8.8.8";
+        private const int ROUTE_PROBE_PORT = 65530;
 
         private CSteamID _currentLobbyId = CSteamID.Nil;
         private bool _hosting;
         private ushort _hostedPort;
 
-        /// <summary>
-        /// When true, ListLobbies only returns lobbies whose version matches Application.version.
-        /// Set to false while testing editor↔build if a version mismatch is hiding rooms.
-        /// </summary>
+        /// <summary>Only list lobbies of this Application.version; turn off to test an editor against an older build.</summary>
         public static bool _filterByVersion = true;
 
-        // CallResult/Callback fields — must stay alive to avoid GC
+        // Kept alive against GC.
         private CallResult<LobbyCreated_t>   _lobbyCreatedResult;
         private CallResult<LobbyMatchList_t> _lobbyListResult;
         private Callback<LobbyEnter_t>       _lobbyEnterCallback;
@@ -63,7 +55,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             _lobbyChatUpdateCallback = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
         }
 
-        // ── Create (called from dedicated server) ────────────────────────────────
 
         public async Task<LobbyHandle> CreateLobbyAsync(LobbyCreateOptions options, CancellationToken ct = default)
         {
@@ -72,7 +63,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             _hostedPort = options.Port;
 
-            // 1. Create Steam lobby
             var lobbyType = options.IsPublic
                 ? ELobbyType.k_ELobbyTypePublic
                 : ELobbyType.k_ELobbyTypeFriendsOnly;
@@ -95,7 +85,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             _currentLobbyId = new CSteamID(created.m_ulSteamIDLobby);
             _hosting        = true;
 
-            // 2. Store server address in lobby data so clients can find it
             string serverIp = GetLocalIP();
             Debug.Log($"[SteamLobbyTransport] Created lobby {_currentLobbyId.m_SteamID} | " +
                       $"version='{Application.version}' | appId={SteamUtils.GetAppID()} | " +
@@ -105,8 +94,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_MAX_PLAYERS, options.MaxPlayers.ToString());
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_SERVER_IP,   serverIp);
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_SERVER_PORT, options.Port.ToString());
-            // Seed the count to 0; the real value is written below once the host's local client
-            // has connected (or on first remote join for dedicated servers).
+            // Seeded to 0; the real count is written once the host's client (or the first remote) connects.
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_NUM_PLAYERS, "0");
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_HOST_LINK,
                 ((byte)FastAndFractured.Multiplayer.NetworkLink.Detect()).ToString());
@@ -115,25 +103,20 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 foreach (var kv in options.Metadata)
                     SteamMatchmaking.SetLobbyData(_currentLobbyId, kv.Key, kv.Value);
 
-            // 3. Start FishNet server via whatever transport is configured (Tugboat)
             var nm = InstanceFinder.NetworkManager;
             if (nm == null) throw new InvalidOperationException("NetworkManager not found.");
 
             nm.TransportManager.Transport?.SetPort(options.Port);
             nm.ServerManager.OnRemoteConnectionState += HandleRemoteState;
-            // Also listen for the host's own local client so the count reflects host presence
-            // (FishNet doesn't raise OnRemoteConnectionState for the local connection).
+            // FishNet raises no OnRemoteConnectionState for the host's own client.
             nm.ClientManager.OnClientConnectionState += HandleLocalClientState;
 
             await StartServerAsync(nm, ct);
 
-            // The match teardown stops the server directly, not through LeaveLobbyAsync; without
-            // this the Steam lobby outlived its server and showed up empty in the browser after
-            // the match (playtest feedback 2026-09-30).
+            // The match teardown stops the server directly: without this the lobby outlived it, empty, in the browser.
             nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
             nm.ServerManager.OnServerConnectionState += HandleServerStopped;
 
-            // Host+client mode: also connect local client (skip for headless dedicated server)
             if (!options.HostAsServer)
             {
                 nm.TransportManager.Transport?.SetClientAddress("localhost");
@@ -141,25 +124,22 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             }
             else
             {
-                // Dedicated server: no local client will ever join, write authoritative 0 now.
+                // Dedicated server: no local client, so the count is 0.
                 UpdateLobbyPlayerCount();
             }
 
             return new LobbyHandle(_currentLobbyId.m_SteamID.ToString(), serverIp, options.Port);
         }
 
-        // ── Join (called from player clients) ────────────────────────────────────
 
         public async Task<bool> JoinLobbyAsync(LobbyHandle handle, CancellationToken ct = default)
         {
-            // PlatformId = Steam lobby CSteamID string. Anything else is a direct IP join
-            // (LobbyHandle.FromAddress), which has no Steam lobby to read: connect straight away.
+            // A non-Steam id is a direct IP join (LobbyHandle.FromAddress): connect straight away.
             if (!ulong.TryParse(handle.PlatformId, out ulong lobbyRaw))
                 return !string.IsNullOrEmpty(handle.Address) && await JoinAddressAsync(handle.Address, handle.Port, ct);
 
             if (!SteamManager.Initialized) return false;
 
-            // Join Steam lobby to access its data
             var joinTcs = new TaskCompletionSource<LobbyEnter_t>();
             _lobbyEnterCallback = Callback<LobbyEnter_t>.Create(r => joinTcs.TrySetResult(r));
             SteamMatchmaking.JoinLobby(new CSteamID(lobbyRaw));
@@ -176,7 +156,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             _currentLobbyId = new CSteamID(entered.m_ulSteamIDLobby);
 
-            // Read server IP:port from lobby data
             string serverIp   = SteamMatchmaking.GetLobbyData(_currentLobbyId, KEY_SERVER_IP);
             string serverPort = SteamMatchmaking.GetLobbyData(_currentLobbyId, KEY_SERVER_PORT);
 
@@ -186,12 +165,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 return false;
             }
 
-            if (!ushort.TryParse(serverPort, out ushort port)) port = (ushort)7777;
+            if (!ushort.TryParse(serverPort, out ushort port)) port = DEFAULT_SERVER_PORT;
 
             return await JoinAddressAsync(serverIp, port, ct);
         }
 
-        // Connect via Tugboat (or whatever transport is on the NetworkManager)
         private static async Task<bool> JoinAddressAsync(string ip, ushort port, CancellationToken ct)
         {
             var nm = InstanceFinder.NetworkManager;
@@ -223,7 +201,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             OnLobbyClosed?.Invoke();
         }
 
-        // ── Leave ────────────────────────────────────────────────────────────────
 
         public Task LeaveLobbyAsync(CancellationToken ct = default)
         {
@@ -249,7 +226,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             return Task.CompletedTask;
         }
 
-        // ── List ─────────────────────────────────────────────────────────────────
 
         public async Task<IReadOnlyList<LobbyListing>> ListLobbiesAsync(LobbyFilter filter, CancellationToken ct = default)
         {
@@ -259,9 +235,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             Debug.Log($"[SteamLobbyTransport] Listing lobbies | filterVersion='{Application.version}' | " +
                       $"appId={SteamUtils.GetAppID()} | versionFilter={(_filterByVersion ? "ON" : "OFF")}");
 
-            // Version gating prevents cross-version joins in production, but during editor↔build
-            // testing a stale build can have a different Application.version and silently vanish
-            // from the list. _filterByVersion lets you turn it off for testing.
             if (_filterByVersion)
                 SteamMatchmaking.AddRequestLobbyListStringFilter(
                     KEY_VERSION, Application.version, ELobbyComparison.k_ELobbyComparisonEqual);
@@ -297,9 +270,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 string maxS   = SteamMatchmaking.GetLobbyData(sid, KEY_MAX_PLAYERS);
                 string numS   = SteamMatchmaking.GetLobbyData(sid, KEY_NUM_PLAYERS);
                 int maxP      = int.TryParse(maxS,  out int m) ? m : 8;
-                ushort port   = ushort.TryParse(portS, out ushort p) ? p : (ushort)7777;
-                // Prefer authoritative count written by the host (KEY_NUM_PLAYERS); fall back to
-                // Steam's member count only when the metadata is missing (older lobby builds).
+                ushort port   = ushort.TryParse(portS, out ushort p) ? p : DEFAULT_SERVER_PORT;
+                // The host's count; Steam's member count only for lobbies without it.
                 int members   = int.TryParse(numS, out int n)
                     ? n
                     : SteamMatchmaking.GetNumLobbyMembers(sid);
@@ -319,7 +291,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             return results;
         }
 
-        // ── Metadata ─────────────────────────────────────────────────────────────
 
         public void SetLobbyMetadata(string key, string value)
         {
@@ -332,7 +303,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 ? SteamMatchmaking.GetLobbyData(_currentLobbyId, key)
                 : null;
 
-        // ── Helpers ──────────────────────────────────────────────────────────────
 
         private void OnLobbyChatUpdate(LobbyChatUpdate_t cb)
         {
@@ -353,8 +323,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             if (args.ConnectionState == RemoteConnectionState.Started) OnLobbyMemberJoined?.Invoke(h);
             if (args.ConnectionState == RemoteConnectionState.Stopped) OnLobbyMemberLeft?.Invoke(h);
 
-            // On Stopped, FishNet may not have removed conn from Clients yet, so we'd over-count
-            // by 1. Pass the leaving conn so UpdateLobbyPlayerCount can compensate.
+            // On Stopped the conn may still be in Clients: pass it so the count leaves it out.
             UpdateLobbyPlayerCount(
                 leavingConn: args.ConnectionState == RemoteConnectionState.Stopped ? conn : null);
         }
@@ -366,17 +335,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 UpdateLobbyPlayerCount();
         }
 
-        /// <summary>
-        /// Writes the current authoritative player count into lobby metadata so the browser sees
-        /// fresh values without needing to RequestLobbyData per-entry. We count FishNet
-        /// connections (host's local client + remotes); the server process itself is NOT a player.
-        /// </summary>
+        /// <summary>Writes the player count (FishNet connections; the server process is not a player) into the lobby.</summary>
         private void UpdateLobbyPlayerCount(NetworkConnection leavingConn = null)
         {
             if (!_hosting || _currentLobbyId == CSteamID.Nil) return;
             var clients = InstanceFinder.ServerManager?.Clients;
             int total = clients?.Count ?? 0;
-            // Compensate for FishNet not removing the leaving conn from Clients yet.
             if (leavingConn != null && clients != null && clients.ContainsKey(leavingConn.ClientId))
                 total -= 1;
             if (total < 0) total = 0;
@@ -430,7 +394,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             try
             {
                 using var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                s.Connect("8.8.8.8", 65530);
+                s.Connect(ROUTE_PROBE_ADDRESS, ROUTE_PROBE_PORT);
                 return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
             }
             catch { return "127.0.0.1"; }

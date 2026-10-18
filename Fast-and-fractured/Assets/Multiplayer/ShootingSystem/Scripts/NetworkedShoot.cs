@@ -100,10 +100,8 @@ namespace FastAndFractured.Multiplayer
             var localShoot = GetComponentInChildren<LocalShootController>(true);
             if (localShoot != null)
             {
-                // The SP state-machine resolves IShootController with GetComponentInChildren.
-                // A merely-disabled LocalShootController is still returned by that lookup and
-                // its Try* methods intentionally no-op while disabled. Remove the local adapter
-                // from multiplayer instances so this NetworkedShoot is the unambiguous target.
+                // The SP state machine finds IShootController with GetComponentInChildren, which also returns a disabled
+                // LocalShootController: remove it so this component is the only target.
                 Destroy(localShoot);
             }
 
@@ -115,10 +113,7 @@ namespace FastAndFractured.Multiplayer
         public override void OnStartClient()
         {
             base.OnStartClient();
-            // CameraHolder drives TurretRotationMovement.TargetDirection from Camera.main every
-            // frame. On non-owned cars that camera belongs to the LOCAL player, so every remote
-            // turret aims wherever the local player looks. Disable it and drive the turret from
-            // the replicated aim instead (see Replicate).
+            // CameraHolder aims at Camera.main, the local player's camera: remote turrets follow the replicated aim.
             if (!base.IsOwner && _cameraHolder != null)
                 _cameraHolder.enabled = false;
 
@@ -278,21 +273,15 @@ namespace FastAndFractured.Multiplayer
                 _normalShootHandle.CurrentShootDirection = sd.AimDirection;
                 _pushShootHandle.CurrentShootDirection = sd.AimDirection;
 
-                // Owner turrets are driven by CameraHolder (same as singleplayer); non-owned
-                // turrets follow the replicated aim so remote peers see where this car aims.
                 if (!base.IsOwner && _turretRotation != null)
                     _turretRotation.TargetDirection = sd.AimDirection;
             }
 
-            // Spectating clients run the remote car's handle for its muzzle VFX and sound only (no
-            // subscriber spawns anything there). The owner fires from its shooting state machine,
-            // exactly like singleplayer (TriggerShootingAction); firing here too gave the owner a
-            // second trigger that also ran inside every reconcile replay. The server never fires
-            // for a remote owner: it validates the predicted spawn instead.
+            // Non-owners fire the remote car's handle only for muzzle VFX and sound. The owner fires from its state
+            // machine, as in singleplayer; the server validates its predicted spawn instead of firing.
             if (!base.IsServerInitialized && !base.IsOwner && sd.NormalShoot) _normalShootHandle.NormalShooting();
 
-            // Push and mine are initiated by the same state-machine actions as single-player.
-            // Those actions call IShootController.TryPushShoot/TryMineShoot on this component.
+            // Push and mine come from the same state-machine actions as in singleplayer.
         }
 
         [Reconcile]
@@ -337,15 +326,12 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Relays an owner-side push or mine request to the authoritative server. Unlike the
-        /// normal shot (a held input), these actions are single-frame pulses and cannot safely
-        /// depend on prediction tick sampling. The server re-runs PushShootHandle using its own
-        /// stats/cooldown state; no client-provided damage or force values are trusted.
+        /// Relays an owner push or mine (single-frame pulses, not held input) to the server, which re-runs the handle
+        /// with its own stats and cooldown.
         /// </summary>
         private void HandleOwnerPushShootRequest(BulletSpawnParameters spawnParams)
         {
-            // Predicted spawning is itself a reliable owner->server request. Keep this legacy
-            // relay inert when the Pro predicted-spawn path is installed to avoid double shots.
+            // Inert when predicted spawning is installed: that request already reaches the server.
             if (!base.IsOwner || base.IsServerInitialized ||
                 GetNetworkedPrefabFromSpawnParams(spawnParams)?.GetComponent<NetworkedPredictedProjectileSpawn>() != null)
                 return;
@@ -359,7 +345,7 @@ namespace FastAndFractured.Multiplayer
             if (!EnsureShootHandles() || !_pushShootHandle.CanShoot)
                 return;
 
-            if (!IsFinite(aimDirection) || aimDirection.sqrMagnitude < 0.0001f)
+            if (!IsFinite(aimDirection) || aimDirection.sqrMagnitude < MIN_AIM_SQR_MAGNITUDE)
                 aimDirection = transform.forward;
 
             _pushShootHandle.CurrentShootDirection = aimDirection.normalized;
@@ -390,27 +376,19 @@ namespace FastAndFractured.Multiplayer
                 spawnParams, base.NetworkObject, base.Owner);
         }
 
-        // ---- Server validation of predicted shots ------------------------------------------------
-        //
-        // The server used to validate a shot by re-running its own shoot handle, whose cooldown timer
-        // started when the PREVIOUS shot's packet arrived - one latency after the client's. A client
-        // firing exactly on its cadence was therefore early by the server's clock about half the
-        // time: measured 2 of 4 of Pepe's shots (0.5 s cadence) and 1 of 6 of Carme's (0.3 s)
-        // rejected - bullets the shooter saw leave the gun and then vanish.
-        //
-        // Checking the cadence on the shooter's launch ticks did not hold either: FishNet runs at
-        // most 3 ticks per frame and drops the rest, so a 197 ms hitch between two of Pepe's shots
-        // left them 17 ticks apart on his clock instead of 25 and the 4th bullet was rejected
-        // (measured 2026-09-30). The cadence is now a rate limit on the server's own real-time
-        // clock (TryTakeShotCredit): shots refill at the weapon's rate, and one may arrive up to
-        // EARLY_SHOT_ALLOWANCE_SECONDS early (network jitter, or a server hitch delivering two
-        // shots in one frame). The sustained rate can never exceed the weapon's.
+        // Server validation of predicted shots. The cadence is a rate limit on the server's real-time clock
+        // (TryTakeShotCredit): the server handle's own cooldown starts a latency late, and the shooter's tick spacing
+        // shrinks when FishNet drops ticks in a hitch; both rejected valid shots.
         internal const float EARLY_SHOT_ALLOWANCE_SECONDS = 0.5f;
         private const uint MAX_LAUNCH_AGE_TICKS = 50;        // a shot fired more than 1 s ago is stale
         private const uint MAX_LAUNCH_FUTURE_TICKS = 10;
         private const float MAX_LAUNCH_POSITION_ERROR = 6f;  // metres from the server's own gun
         private const float MAX_LAUNCH_SPEED_FACTOR = 1.25f;
         private const float MAX_LAUNCH_ANGLE = 45f;
+        private const float LAUNCH_SPEED_SLACK = 5f;
+        private const float MIN_SPEED_FOR_ANGLE_CHECK = 0.1f;
+        private const float MIN_COOLDOWN_SPEED = 0.01f;
+        private const float MIN_AIM_SQR_MAGNITUDE = 0.0001f;
 
         private static readonly System.Reflection.FieldInfo HandleCanShoot =
             typeof(ShootingHandle).GetField("canShoot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -442,13 +420,12 @@ namespace FastAndFractured.Multiplayer
             ShootingHandle handle = isNormal ? _normalShootHandle : _pushShootHandle;
             StatsController stats = handle.characterStatsController;
 
-            // Both on the shooter's own clock: its LocalTick when it fired, and the LocalTick stamped
-            // on the packet that carried the shot.
+            // Both on the shooter's clock: its LocalTick when it fired and the one stamped on the packet.
             if (!IsPlausibleLaunchTick(launchTick, shooterClockNow, out reason)) return false;
 
             float cooldownSeconds = stats == null ? 0f : isNormal
                 ? stats.NormalShootCadenceTime
-                : stats.PushCooldown / Mathf.Max(0.01f, stats.CooldownSpeed);
+                : stats.PushCooldown / Mathf.Max(MIN_COOLDOWN_SPEED, stats.CooldownSpeed);
             ref ShotCredit credit = ref isNormal ? ref _normalShotCredit : ref _pushShotCredit;
             if (!TryTakeShotCredit(ref credit, Time.unscaledTimeAsDouble, cooldownSeconds))
             {
@@ -456,10 +433,8 @@ namespace FastAndFractured.Multiplayer
                 return false;
             }
 
-            // Damage, push force, explosion, bounces, gravity: always the server's own stats, taken
-            // by running the handle in capture mode. Its cadence was already checked above, so it is
-            // armed for this capture whatever its own timer says.
-            Vector3 aim = requested.InitialVelocity.sqrMagnitude > 0.0001f ? requested.InitialVelocity.normalized : transform.forward;
+            // Damage, force, bounces and gravity always come from the server's stats (the handle in capture mode).
+            Vector3 aim = requested.InitialVelocity.sqrMagnitude > MIN_AIM_SQR_MAGNITUDE ? requested.InitialVelocity.normalized : transform.forward;
             _capturedPredictedShot = false;
             _capturePredictedValidation = true;
             try
@@ -483,10 +458,8 @@ namespace FastAndFractured.Multiplayer
             spawnPosition = _capturedPredictedParams.ShootPoint.position;
             spawnRotation = _capturedPredictedParams.ShootPoint.rotation;
 
-            // Where and how fast: the shooter's own launch, as long as it is plausible for this car.
-            // The server's car is a little behind or ahead of the shooter's, so its gun is not where
-            // the shooter's was when it fired; using the server's gun made the same shot fly a
-            // different path on the shooter's screen than on everyone else's (push: 1.8 m apart).
+            // Launch position and velocity: the shooter's own, if plausible; the server's gun is a little elsewhere and
+            // the shot would fly a different path on the shooter's screen.
             if (IsPlausibleLaunch(requestedPosition, requested.InitialVelocity, spawnPosition, authoritative.InitialVelocity))
             {
                 spawnPosition = requestedPosition;
@@ -498,12 +471,7 @@ namespace FastAndFractured.Multiplayer
             return true;
         }
 
-        /// <summary>
-        /// Both ticks come from the shooter's own clock (LocalTick): when it fired, and the tick
-        /// stamped on the packet that carried the shot. The server-tick estimate a client keeps is
-        /// not usable here - after a one-second editor hitch it lagged ~49 ticks behind the server,
-        /// and a push shot fired right then was rejected as too old (measured 2026-09-30).
-        /// </summary>
+        /// <summary>Both ticks come from the shooter's LocalTick; a client's server-tick estimate lags far behind after a hitch.</summary>
         internal static bool IsPlausibleLaunchTick(uint launchTick, uint shooterClockNow, out string reason)
         {
             reason = null;
@@ -521,12 +489,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Rate limit for one weapon on the server's real-time clock. Credit refills at one shot per
-        /// cooldown up to one banked shot; a shot needs a whole credit, less the early allowance
-        /// (EARLY_SHOT_ALLOWANCE_SECONDS as a fraction of the cooldown, at most one shot), and costs
-        /// one. Credit can therefore dip below zero only by that allowance, so over any stretch of
-        /// time the accepted shots never exceed the weapon's rate, while a shot that arrives early -
-        /// jitter, or two arrivals merged by a server hitch - is still accepted.
+        /// Server real-time rate limit for one weapon: credit refills at one shot per cooldown, up to one banked shot. A
+        /// shot costs one credit and may arrive EARLY_SHOT_ALLOWANCE_SECONDS early, so the rate never exceeds the weapon's.
         /// </summary>
         internal static bool TryTakeShotCredit(ref ShotCredit state, double now, float cooldownSeconds)
         {
@@ -549,15 +513,12 @@ namespace FastAndFractured.Multiplayer
             if (!IsFinite(requestedPosition) || !IsFinite(requestedVelocity)) return false;
             if ((requestedPosition - serverPosition).sqrMagnitude > MAX_LAUNCH_POSITION_ERROR * MAX_LAUNCH_POSITION_ERROR) return false;
             float serverSpeed = serverVelocity.magnitude;
-            if (requestedVelocity.magnitude > serverSpeed * MAX_LAUNCH_SPEED_FACTOR + 5f) return false;
-            if (serverSpeed > 0.1f && Vector3.Angle(requestedVelocity, serverVelocity) > MAX_LAUNCH_ANGLE) return false;
+            if (requestedVelocity.magnitude > serverSpeed * MAX_LAUNCH_SPEED_FACTOR + LAUNCH_SPEED_SLACK) return false;
+            if (serverSpeed > MIN_SPEED_FOR_ANGLE_CHECK && Vector3.Angle(requestedVelocity, serverVelocity) > MAX_LAUNCH_ANGLE) return false;
             return true;
         }
 
-        /// <summary>
-        /// Gives the server-only AI shoot component the projectile variants already configured
-        /// for this character. This avoids trying to recover them from the single-player pool.
-        /// </summary>
+        /// <summary>Gives the server-only AI shoot component this character's projectile variants.</summary>
         internal void ConfigureAiShoot(NetworkedAIShoot aiShoot)
         {
             if (aiShoot == null) return;

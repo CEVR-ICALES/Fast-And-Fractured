@@ -7,20 +7,11 @@ using FishNet;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Server-authoritative handler for Pepe's unique ability (ascending/descending tomatoes).
-    /// 
-    /// Problem: The singleplayer PepeUniqueAbility uses ObjectPoolManager which doesn't have
-    /// networked prefabs registered. This component intercepts the ability activation and
-    /// spawns networked tomatoes via FishNet instead.
-    /// 
-    /// Flow:
-    /// 1. Owner activates ability -> NetworkedUniqueAbility.ActivateAbilityServerRpc
-    /// 2. Server calls SpawnAscendingTomato -> NetworkObject spawned
-    /// 3. NetworkedAscendingTomato handles timer and spawns descending tomatoes for each target
-    /// </summary>
+    /// <summary>Networks Pepe's ultimate: the server spawns networked tomatoes instead of the pooled singleplayer ones.</summary>
     public class NetworkedPepeUniqueAbility : NetworkBehaviour
     {
+        private const float MAX_SPAWN_SQR_ERROR = 25f;
+
         [Header("Networked Prefabs")]
         [SerializeField] private GameObject _networkedAscendingTomatoPrefab;
         [SerializeField] private GameObject _networkedDescendingTomatoPrefab;
@@ -52,10 +43,8 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             
-            // Copy settings from the singleplayer ability via reflection
             CopyAbilitySettings();
             
-            // Subscribe to ability activation
             _localAbility.onAbilityActivated.AddListener(OnAbilityActivated);
         }
         
@@ -94,27 +83,19 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsOwner) return;
 
-            // The singleplayer ability pulls its own ascending tomato from the pool right after this
-            // event; the networked tomato replaces it for everyone.
+            // The networked tomato replaces the one the singleplayer ability pulls from the pool.
             StartCoroutine(CancelSingleplayerTomatoNextFrame());
 
             Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : transform.position;
 
-            // HOST: calling a [ServerRpc] from a server context silently never delivers
-            // (live-debugged 2026-07-11: RpcWriter ran, RpcLogic never did — same FishNet pitfall
-            // already documented on StartGame / HandleServerSideDeath). Run the logic directly.
+            // A [ServerRpc] called from the host never runs its logic.
             if (base.IsServerInitialized)
                 SpawnAscendingTomatoOnServer(spawnPos);
             else
                 StartCoroutine(SpawnAscendingTomatoPredictedNextFrame(spawnPos));
         }
 
-        /// <summary>
-        /// PepeUniqueAbility.AbilityEffect runs after onAbilityActivated and hands a pooled,
-        /// non-networked ascending tomato to this car; left alone it rises next to the networked one
-        /// and then drops its own singleplayer descending tomatoes on this peer only. Clearing Caster
-        /// makes its timer callback bail out before spawning anything, then it goes back to the pool.
-        /// </summary>
+        /// <summary>Clears the Caster of the pooled tomato the singleplayer ability hands this car, so it spawns nothing.</summary>
         private IEnumerator CancelSingleplayerTomatoNextFrame()
         {
             yield return null;
@@ -163,13 +144,11 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
             
-            // Spawn the networked ascending tomato
             GameObject tomato = Instantiate(_networkedAscendingTomatoPrefab, spawnPosition, Quaternion.identity);
 
             // Same launch data as a predicted tomato, so observers fly it from its origin.
             tomato.GetComponent<NetworkedPredictedAbilitySpawn>()?.ConfigurePepe(base.NetworkObject, spawnPosition);
             
-            // Configure it
             var networkedTomato = tomato.GetComponent<NetworkedAscendingTomato>();
             if (networkedTomato != null)
             {
@@ -196,7 +175,7 @@ namespace FastAndFractured.Multiplayer
         {
             if (!base.IsServerInitialized || tomato == null) return false;
             Vector3 authoritativePosition = _spawnPoint != null ? _spawnPoint.position : transform.position;
-            if ((requestedPosition - authoritativePosition).sqrMagnitude > 25f) return false;
+            if ((requestedPosition - authoritativePosition).sqrMagnitude > MAX_SPAWN_SQR_ERROR) return false;
             tomato.transform.position = authoritativePosition;
             tomato.Initialize(base.Owner, gameObject, authoritativePosition, _tomatoSpeed,
                 _descendingTomatoSpeed, _effectDistance, _ascendingTime, _effectTime,

@@ -9,10 +9,8 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// Gives a LocalizedText to the texts the editor tools write into a scene (lobby screens by
-    /// the Lobby Setup Wizard, play-mode menu by MainMenuPlayModesTool): every text without one
-    /// whose content is the English text of a Multiplayer-sheet key ("MP.") gets that key.
-    /// Re-run it after those tools rebuild their screens.
+    /// Adds a LocalizedText to tool-generated scene texts whose content is the English text of an "MP." key. Re-run
+    /// after the tools rebuild their screens.
     /// </summary>
     public static class LocalizeSceneTextsTool
     {

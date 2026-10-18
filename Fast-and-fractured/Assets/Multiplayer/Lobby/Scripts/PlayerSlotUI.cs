@@ -6,15 +6,6 @@ using UnityEngine.UI;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Visual slot for a single player in the LOBBY_ROOM player list.
-    /// Renders:
-    ///   - character icon  (Resources/PlayerIcons/&lt;code&gt;.png  e.g. Pepe_0)
-    ///   - player name + ready badge
-    ///   - voted map thumbnail (MapCatalog.Entry.Thumbnail)
-    ///   - SELECT CHARACTER &amp; MAP button (visible only on the local player's slot)
-    /// LobbyReadyUI instantiates this prefab once per known clientId.
-    /// </summary>
     public sealed class PlayerSlotUI : MonoBehaviour
     {
         [Header("Character")]
@@ -37,15 +28,7 @@ namespace FastAndFractured.Multiplayer
         [SerializeField] private Button     _selectButton;
         [SerializeField] private GameObject _selectButtonRoot;   // hidden on remote slots
 
-        /// <summary>
-        /// Populates the slot for one player.
-        /// </summary>
-        /// <param name="clientId">For displaying "Player N".</param>
-        /// <param name="characterCode">e.g. "Pepe_0". Empty/null = unselected.</param>
-        /// <param name="isReady">Ready state.</param>
-        /// <param name="mapVoteThumbnail">Sprite from MapCatalog.Entry.Thumbnail. Null = no vote yet.</param>
-        /// <param name="isLocal">True for the slot belonging to the local connection — shows the action button.</param>
-        /// <param name="level">Progression level shown next to the name; 0 = hidden (setting off, AI, not arrived).</param>
+        /// <summary>Fills the slot; <paramref name="level"/> 0 hides the level.</summary>
         public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null, int level = 0)
         {
             // AI slots use negative ids and have no connection to show.
@@ -79,11 +62,13 @@ namespace FastAndFractured.Multiplayer
         }
 
         private static readonly Color InMatchColor = new Color(0.45f, 0.30f, 0.08f, 0.85f);
+        private const float MIN_BADGE_FONT_SIZE = 6f;
+        private const float SIGNAL_HEIGHT_PER_FONT_SIZE = 0.9f;
+        private const float MIN_SIGNAL_HEIGHT = 20f;
+        private const float MAX_SIGNAL_HEIGHT = 28f;
+        private const float DEFAULT_SIGNAL_HEIGHT = 22f;
 
-        /// <summary>
-        /// While a match runs, marks the players in it (the rest are waiting in the room). Call
-        /// after <see cref="SetData"/>.
-        /// </summary>
+        /// <summary>While a match runs, marks the players in it. Call after <see cref="SetData"/>.</summary>
         public void SetInMatch(bool inMatch)
         {
             if (!inMatch) return;
@@ -95,7 +80,7 @@ namespace FastAndFractured.Multiplayer
                 {
                     _readyLabel.enableWordWrapping = false;
                     _readyLabel.fontSizeMax = _readyLabel.fontSize;
-                    _readyLabel.fontSizeMin = 6f;
+                    _readyLabel.fontSizeMin = MIN_BADGE_FONT_SIZE;
                     _readyLabel.enableAutoSizing = true;
                 }
                 _readyLabel.text = LocalizationManager.Localize("MP.Room.InMatch");
@@ -104,7 +89,6 @@ namespace FastAndFractured.Multiplayer
             if (_selectButtonRoot != null) _selectButtonRoot.SetActive(false);
         }
 
-        // ── Connection (Wi-Fi / cable, ping to the host) ──────────────────────────────
         private int _networkClientId = -1;
         private int _networkVersion = -1;
         private NetworkSignalIndicator _signal;
@@ -132,7 +116,7 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Top-right corner of the slot, outside its layout.</summary>
         private NetworkSignalIndicator CreateSignal()
         {
-            float height = _nameLabel != null ? Mathf.Clamp(_nameLabel.fontSize * 0.9f, 20f, 28f) : 22f;
+            float height = _nameLabel != null ? Mathf.Clamp(_nameLabel.fontSize * SIGNAL_HEIGHT_PER_FONT_SIZE, MIN_SIGNAL_HEIGHT, MAX_SIGNAL_HEIGHT) : DEFAULT_SIGNAL_HEIGHT;
             var signal = NetworkSignalIndicator.Create(transform, _nameLabel, height);
             var rect = (RectTransform)signal.transform;
             rect.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
@@ -141,9 +125,6 @@ namespace FastAndFractured.Multiplayer
             return signal;
         }
 
-        /// <summary>
-        /// Returns the SELECT CHARACTER button so the lobby UI can wire its onClick.
-        /// </summary>
         public Button GetSelectButton() => _selectButton;
     }
 }

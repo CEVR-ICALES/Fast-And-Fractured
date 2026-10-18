@@ -10,22 +10,21 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Loading screen for FishNet scene loads (lobby → networked map). The singleplayer loading
-    /// screen is driven by LoadingManager's own AsyncOperation and never activates for
-    /// FishNet-managed loads, so multiplayer scene transitions showed a frozen menu instead.
-    ///
-    /// Shows the REAL singleplayer loading screen: at load start the scene's LoadingManager canvas
-    /// (inactive until a map button would activate it) is cloned into DontDestroyOnLoad, activated
-    /// (its own OnEnable picks the random background and tip exactly like singleplayer), and its
-    /// progress bar is driven from FishNet's OnLoadPercentChange instead of an AsyncOperation.
-    /// The clone is destroyed shortly after OnLoadEnd. If no LoadingManager canvas exists in the
-    /// current scene (unexpected flow), a minimal code-built overlay is used as fallback.
-    ///
-    /// Bootstrapped once per session, zero scene wiring.
+    /// Loading screen for FishNet scene loads, which LoadingManager never sees: the menu's singleplayer loading
+    /// canvas is cloned into DontDestroyOnLoad and its bar driven from FishNet's load progress, with a code-built
+    /// fallback when there is none.
     /// </summary>
     public class MultiplayerLoadingScreen : MonoBehaviour
     {
         private const float HIDE_DELAY_SECONDS = 0.6f;
+        // Above the game UI, below the connection-lost toast.
+        private const int FALLBACK_SORTING_ORDER = 32650;
+        private const float LABEL_FONT_SIZE = 52f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920, 1080);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.05f, 0.05f, 0.08f, 1f);
+        private static readonly Color LABEL_COLOR = new Color(1f, 0.9f, 0.5f, 1f);
+        private static readonly Color BAR_BACKGROUND_COLOR = new Color(1f, 1f, 1f, 0.15f);
+        private static readonly Color BAR_FILL_COLOR = new Color(1f, 0.75f, 0.2f, 1f);
 
         private static MultiplayerLoadingScreen _instance;
         private static FieldInfo _progressBarImageField;
@@ -33,11 +32,9 @@ namespace FastAndFractured.Multiplayer
         private bool _subscribed;
         private Coroutine _hideRoutine;
 
-        // Singleplayer-clone path
         private GameObject _spClone;
         private Image _spProgressFill;
 
-        // Fallback code-built path
         private Canvas _fallbackCanvas;
         private CanvasGroup _fallbackGroup;
         private Image _fallbackFill;
@@ -59,7 +56,6 @@ namespace FastAndFractured.Multiplayer
 
         private void Update()
         {
-            // The NetworkManager appears when the menu scene loads; poll cheaply until found.
             if (_subscribed || InstanceFinder.NetworkManager == null)
                 return;
 
@@ -90,16 +86,13 @@ namespace FastAndFractured.Multiplayer
                 _hideRoutine = null;
             }
 
-            // A host migration reloads the map behind its own frozen-frame overlay; a loading
-            // screen popping up over it would undo the "the match just paused" look.
+            // A host migration reloads the map behind its own frozen-frame overlay.
             if (HostMigration.HostMigrationOverlay.IsShown)
                 return;
 
             if (TrySpawnSingleplayerScreen())
                 return;
 
-            // Fallback: keep the old minimal overlay so the player is never left staring at a
-            // frozen frame, even when no LoadingManager canvas exists in the departing scene.
             EnsureFallbackUi();
             _fallbackFill.fillAmount = 0f;
             _fallbackGroup.alpha = 1f;
@@ -138,13 +131,9 @@ namespace FastAndFractured.Multiplayer
             _hideRoutine = null;
         }
 
-        // ── Singleplayer screen clone ────────────────────────────────────────────
         /// <summary>
-        /// Clones the singleplayer LoadingManager canvas (found in any loaded scene, active or not)
-        /// into DontDestroyOnLoad so it survives the FishNet scene swap, activates it, and caches
-        /// its private progressBarImage to drive from network load progress. The LoadingManager
-        /// component stays enabled: with no AsyncOperation its Update is inert, while its OnEnable
-        /// runs the exact singleplayer behaviour (random background, localized tip, rotation timer).
+        /// Clones the singleplayer LoadingManager canvas into DontDestroyOnLoad and caches its progress bar. Its
+        /// OnEnable picks the background and tip as in singleplayer; with no AsyncOperation its Update is inert.
         /// </summary>
         private bool TrySpawnSingleplayerScreen()
         {
@@ -153,8 +142,6 @@ namespace FastAndFractured.Multiplayer
             var template = FindFirstObjectByType<LoadingManager>(FindObjectsInactive.Include);
             if (template == null) return false;
 
-            // Clone the whole canvas root the LoadingManager lives under (the component sits on the
-            // canvas GameObject itself in the menu prefab; take its root-most canvas to be safe).
             var canvas = template.GetComponentInParent<Canvas>(true);
             GameObject source = canvas != null ? canvas.gameObject : template.gameObject;
 
@@ -176,7 +163,6 @@ namespace FastAndFractured.Multiplayer
             return true;
         }
 
-        // ── Fallback UI construction (no scene assets required) ──────────────────
         private void EnsureFallbackUi()
         {
             if (_fallbackCanvas != null) return;
@@ -185,24 +171,24 @@ namespace FastAndFractured.Multiplayer
             canvasGO.transform.SetParent(transform, false);
             _fallbackCanvas = canvasGO.AddComponent<Canvas>();
             _fallbackCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _fallbackCanvas.sortingOrder = 32650; // above game UI, below the connection-lost toast
+            _fallbackCanvas.sortingOrder = FALLBACK_SORTING_ORDER;
             var scaler = canvasGO.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
             _fallbackGroup = canvasGO.AddComponent<CanvasGroup>();
             _fallbackGroup.blocksRaycasts = true;
 
             var bg = new GameObject("Background").AddComponent<Image>();
             bg.transform.SetParent(canvasGO.transform, false);
-            bg.color = new Color(0.05f, 0.05f, 0.08f, 1f);
+            bg.color = BACKGROUND_COLOR;
             Stretch(bg.rectTransform, Vector2.zero, Vector2.one);
 
             var label = new GameObject("Label").AddComponent<TextMeshProUGUI>();
             label.transform.SetParent(canvasGO.transform, false);
             label.text = LocalizationManager.Localize("MP.Loading.Map");
-            label.fontSize = 52;
+            label.fontSize = LABEL_FONT_SIZE;
             label.alignment = TextAlignmentOptions.Center;
-            label.color = new Color(1f, 0.9f, 0.5f, 1f);
+            label.color = LABEL_COLOR;
             var labelRt = label.rectTransform;
             labelRt.anchorMin = new Vector2(0.5f, 0.5f);
             labelRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -211,7 +197,7 @@ namespace FastAndFractured.Multiplayer
 
             var barBg = new GameObject("BarBg").AddComponent<Image>();
             barBg.transform.SetParent(canvasGO.transform, false);
-            barBg.color = new Color(1f, 1f, 1f, 0.15f);
+            barBg.color = BAR_BACKGROUND_COLOR;
             var barBgRt = barBg.rectTransform;
             barBgRt.anchorMin = new Vector2(0.5f, 0.5f);
             barBgRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -220,7 +206,7 @@ namespace FastAndFractured.Multiplayer
 
             _fallbackFill = new GameObject("BarFill").AddComponent<Image>();
             _fallbackFill.transform.SetParent(barBg.transform, false);
-            _fallbackFill.color = new Color(1f, 0.75f, 0.2f, 1f);
+            _fallbackFill.color = BAR_FILL_COLOR;
             _fallbackFill.type = Image.Type.Filled;
             _fallbackFill.fillMethod = Image.FillMethod.Horizontal;
             _fallbackFill.sprite = null;

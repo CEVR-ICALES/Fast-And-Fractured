@@ -1,10 +1,3 @@
-// SCENE SETUP:
-//   - Place on the MULTIPLAYER_DIRECT_JOIN MenuScreen GameObject.
-//   - Wire _ipInput     (TMP_InputField, placeholder "localhost")
-//   - Wire _portInput   (TMP_InputField, default "7777")
-//   - Wire _joinButton  (Button)
-//   - Wire _backButton  (Button)
-//   - Wire _statusLabel (TMP_Text)
 using Assets.SimpleLocalization.Scripts;
 using System;
 using System.Threading;
@@ -19,6 +12,9 @@ namespace FastAndFractured.Multiplayer.Lobby
 {
     public sealed class MultiplayerDirectJoinController : MonoBehaviour
     {
+        private const ushort DEFAULT_PORT = 7777;
+        private const int JOIN_TIMEOUT_SECONDS = 10;
+
         [SerializeField] private TMP_InputField _ipInput;
         [SerializeField] private TMP_InputField _portInput;
         [SerializeField] private Button         _joinButton;
@@ -50,9 +46,9 @@ namespace FastAndFractured.Multiplayer.Lobby
                 : "localhost";
 
             if (!ushort.TryParse(_portInput?.text, out ushort port))
-                port = 7777;
+                port = DEFAULT_PORT;
 
-            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(JOIN_TIMEOUT_SECONDS));
             try
             {
                 bool ok = await LobbyServiceLocator.Transport.JoinLobbyAsync(

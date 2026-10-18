@@ -11,6 +11,10 @@ namespace FastAndFractured.Multiplayer.Editor
     {
         private const string PREFAB_PATH = "Assets/Multiplayer/Lobby/Prefabs/LobbyBrowserEntry.prefab";
         private const string PREFABS_DIR = "Assets/Multiplayer/Lobby/Prefabs";
+        private static readonly Vector2 ENTRY_SIZE = new Vector2(400f, 60f);
+        private static readonly Vector2 LABEL_PADDING = new Vector2(4f, 0f);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+        private static readonly Color JOIN_BUTTON_COLOR = new Color(0.2f, 0.6f, 0.2f, 1f);
 
         public static LobbyBrowserEntry Generate()
         {
@@ -20,41 +24,35 @@ namespace FastAndFractured.Multiplayer.Editor
                 AssetDatabase.Refresh();
             }
 
-            // Build the prefab in memory first
             var root = new GameObject("LobbyBrowserEntry");
             var rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(400f, 60f);
+            rootRT.sizeDelta = ENTRY_SIZE;
 
             var bg = root.AddComponent<Image>();
-            bg.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+            bg.color = BACKGROUND_COLOR;
 
             var entry = root.AddComponent<LobbyBrowserEntry>();
 
-            // Room name label (left)
             var roomLabelGO = CreateLabel(root.transform, "RoomNameText", "Room Name",
                 new Vector2(0f, 0f), new Vector2(0.55f, 1f), 18f, TextAlignmentOptions.MidlineLeft);
 
-            // Players label (center)
             var playersLabelGO = CreateLabel(root.transform, "PlayersText", "0/8",
                 new Vector2(0.55f, 0f), new Vector2(0.75f, 1f), 16f, TextAlignmentOptions.Center);
 
-            // Ping label
             var pingLabelGO = CreateLabel(root.transform, "PingText", "--",
                 new Vector2(0.75f, 0f), new Vector2(0.85f, 1f), 14f, TextAlignmentOptions.Center);
 
-            // Join button (right)
             var joinGO = new GameObject("JoinButton");
             joinGO.transform.SetParent(root.transform, false);
             var joinRT = joinGO.AddComponent<RectTransform>();
             joinRT.anchorMin = new Vector2(0.86f, 0.1f);
             joinRT.anchorMax = new Vector2(0.99f, 0.9f);
             joinRT.offsetMin = joinRT.offsetMax = Vector2.zero;
-            joinGO.AddComponent<Image>().color = new Color(0.2f, 0.6f, 0.2f, 1f);
+            joinGO.AddComponent<Image>().color = JOIN_BUTTON_COLOR;
             joinGO.AddComponent<Button>();
             CreateLabel(joinGO.transform, "Label", "Join",
                 Vector2.zero, Vector2.one, 16f, TextAlignmentOptions.Center);
 
-            // Wire serialized fields via SerializedObject
             var so = new SerializedObject(entry);
             so.FindProperty("_roomNameText").objectReferenceValue = roomLabelGO.GetComponent<TextMeshProUGUI>();
             so.FindProperty("_playersText").objectReferenceValue  = playersLabelGO.GetComponent<TextMeshProUGUI>();
@@ -62,7 +60,6 @@ namespace FastAndFractured.Multiplayer.Editor
             so.FindProperty("_joinButton").objectReferenceValue   = joinGO.GetComponent<Button>();
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            // Save as prefab
             bool success;
             var prefabGO = PrefabUtility.SaveAsPrefabAsset(root, PREFAB_PATH, out success);
             Object.DestroyImmediate(root);
@@ -88,8 +85,8 @@ namespace FastAndFractured.Multiplayer.Editor
             var rt = go.AddComponent<RectTransform>();
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
-            rt.offsetMin = new Vector2(4f, 0f);
-            rt.offsetMax = new Vector2(-4f, 0f);
+            rt.offsetMin = LABEL_PADDING;
+            rt.offsetMax = -LABEL_PADDING;
             var tmp = go.AddComponent<TextMeshProUGUI>();
             tmp.text      = text;
             tmp.fontSize  = fontSize;

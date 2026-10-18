@@ -120,11 +120,7 @@ namespace FastAndFractured.Multiplayer.Editor
             _initialized = true;
             LoadConfig();
 
-            // Scanning every .cs file under Assets/Multiplayer with a regex was previously done
-            // here unconditionally, which re-ran on every domain reload (i.e. on every script
-            // recompile during a live editor session, not just once). New log tags are picked up
-            // by the "Rescan Categories" button in MultiplayerLogFilterWindow instead - this keeps
-            // the filter itself just as capable without paying that cost every reload.
+            // New log tags come from the window's "Rescan Categories", not a scan on every domain reload.
         }
 
         public static bool ShouldEmit(LogType logType, string message, Object context)

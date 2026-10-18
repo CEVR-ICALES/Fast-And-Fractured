@@ -5,10 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Lobby
 {
     /// <summary>
-    /// Dynamically spawns the NetworkedLobbyManager from a Resources prefab when the server
-    /// starts. Avoids the SceneId issues that scene-placed NetworkObjects hit when added by
-    /// code (SceneId stays 0 → ServerRpc + SyncDict don't sync).
-    /// Place on the same GameObject as the NetworkManager.
+    /// Spawns the NetworkedLobbyManager from Resources when the server starts (a scene object added by code keeps
+    /// SceneId 0 and does not sync). On the NetworkManager's GameObject.
     /// </summary>
     public sealed class LobbyServerBootstrapper : MonoBehaviour
     {

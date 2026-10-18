@@ -6,6 +6,9 @@ namespace FastAndFractured.Multiplayer.HostMigration
     [CreateAssetMenu(menuName = "Fast And Fractured/Multiplayer/Host Migration Config", fileName = "HostMigrationConfig")]
     public sealed class HostMigrationConfig : ScriptableObject
     {
+        private const float MIN_SNAPSHOT_INTERVAL = 0.1f;
+        private const float MIN_RECONNECT_TIMEOUT = 5f;
+
         [Tooltip("Continue the match on another player when the host leaves or crashes. Off = the match ends for everyone, as before.")]
         [SerializeField] private bool enabled;
 
@@ -20,7 +23,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public bool Enabled { get => enabled; set => enabled = value; }
         public bool RoomMigration { get => roomMigration; set => roomMigration = value; }
-        public float SnapshotInterval => Mathf.Max(0.1f, snapshotInterval);
-        public float ReconnectTimeout => Mathf.Max(5f, reconnectTimeout);
+        public float SnapshotInterval => Mathf.Max(MIN_SNAPSHOT_INTERVAL, snapshotInterval);
+        public float ReconnectTimeout => Mathf.Max(MIN_RECONNECT_TIMEOUT, reconnectTimeout);
     }
 }

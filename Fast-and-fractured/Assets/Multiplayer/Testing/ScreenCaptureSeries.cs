@@ -6,9 +6,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Test helper (MCP): saves real screen captures - overlay UI included, unlike camera
-    /// screenshots - every few seconds, surviving scene loads.
-    ///   ScreenCaptureSeries.Start("Logs/Captures/end", 3f, 10);
+    /// Test helper (MCP): real screen captures, overlay UI included, every few seconds across scene loads.
+    /// <code>ScreenCaptureSeries.Start("Logs/Captures/end", 3f, 10);</code>
     /// </summary>
     public sealed class ScreenCaptureSeries : MonoBehaviour
     {

@@ -7,13 +7,13 @@ using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.GameTelemetry
 {
-    /// <summary>
-    /// Matches, singleplayer and multiplayer: start (map, character, how many), end (won, time,
-    /// kills, damage, placement, XP, frame rate) or abandoned (left before the end). Listens to
-    /// the level's own start event, GameplayEvents.MatchEnded and the map scene unloading.
-    /// </summary>
+    /// <summary>Match start, end and abandon events, singleplayer and multiplayer.</summary>
     public sealed class MatchCollector : MonoBehaviour
     {
+        private const float MAX_FRAME_SECONDS = 1f;
+        private const float FPS_SAMPLE_SECONDS = 1f;
+        private const int MIN_FPS_FRAMES = 30;
+
         private sealed class Match
         {
             public Scene scene;
@@ -59,7 +59,6 @@ namespace FastAndFractured.GameTelemetry
             Telemetry.Quitting -= OnQuitting;
         }
 
-        // ── Start ──────────────────────────────────────────────────────────────────────
         private static void OnLoaded(Scene scene, LoadSceneMode mode)
         {
             if (scene.buildIndex <= LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX || TutorialCollector.IsTutorial(scene)) return;
@@ -90,7 +89,6 @@ namespace FastAndFractured.GameTelemetry
                 ("character", character), ("skin", skin), ("characters", _match.characters));
         }
 
-        // ── End ────────────────────────────────────────────────────────────────────────
         private static void OnEnded(bool won)
         {
             if (_match == null || _match.ended) return;
@@ -172,17 +170,16 @@ namespace FastAndFractured.GameTelemetry
             Telemetry.Flush();
         }
 
-        // ── Frame rate during the race ─────────────────────────────────────────────────
         private void Update()
         {
             if (_match == null || !_match.started || _match.ended) return;
             float dt = Time.unscaledDeltaTime;
-            if (dt <= 0f || dt > 1f) return;   // pauses and hitches from loading are not the game's frame rate
+            if (dt <= 0f || dt > MAX_FRAME_SECONDS) return;   // pauses and hitches from loading are not the game's frame rate
             _match.frameTime += dt;
             _match.frames++;
             _match.secondTime += dt;
             _match.secondFrames++;
-            if (_match.secondTime >= 1f)
+            if (_match.secondTime >= FPS_SAMPLE_SECONDS)
             {
                 _match.worstSecondFps = Mathf.Min(_match.worstSecondFps, _match.secondFrames / _match.secondTime);
                 _match.secondTime = 0f;
@@ -192,12 +189,11 @@ namespace FastAndFractured.GameTelemetry
 
         private static void AddPerformance(Dictionary<string, object> data)
         {
-            if (_match.frames < 30) return;
+            if (_match.frames < MIN_FPS_FRAMES) return;
             data["fps_avg"] = Mathf.RoundToInt((float)(_match.frames / _match.frameTime));
             if (_match.worstSecondFps < float.MaxValue) data["fps_min"] = Mathf.RoundToInt(_match.worstSecondFps);
         }
 
-        // ── Helpers ────────────────────────────────────────────────────────────────────
         /// <summary>"NetworkedGolfMap" and "GolfMap" are both "Golf".</summary>
         public static string MapName(string sceneName)
         {

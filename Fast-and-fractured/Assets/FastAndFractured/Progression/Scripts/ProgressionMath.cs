@@ -14,6 +14,7 @@ namespace FastAndFractured.Progression
         private const int XP_FOR_WINNING = 150;
         private const int XP_FOR_BEST_PLACEMENT = 120;   // scaled down to 0 for last place
         private const int XP_PER_KILL = 40;
+        private const int DAMAGE_PER_XP_STEP = 100;
         private const int XP_PER_100_DAMAGE = 10;
         private const int MAX_DAMAGE_XP = 100;
 
@@ -42,10 +43,7 @@ namespace FastAndFractured.Progression
             return total;
         }
 
-        /// <summary>
-        /// XP for one match from its results: something for playing, a placement bonus that goes
-        /// from the full amount for 1st to nothing for last, kills, damage (capped) and the win.
-        /// </summary>
+        /// <summary>A match's XP: playing, placement (full for 1st, none for last), kills, capped damage and the win.</summary>
         public static int MatchXp(int placement, int participants, int kills, int damageDealt)
         {
             int xp = XP_FOR_PLAYING;
@@ -56,7 +54,7 @@ namespace FastAndFractured.Progression
             }
             if (placement == 1) xp += XP_FOR_WINNING;
             xp += Mathf.Max(0, kills) * XP_PER_KILL;
-            xp += Mathf.Min(MAX_DAMAGE_XP, Mathf.Max(0, damageDealt) / 100 * XP_PER_100_DAMAGE);
+            xp += Mathf.Min(MAX_DAMAGE_XP, Mathf.Max(0, damageDealt) / DAMAGE_PER_XP_STEP * XP_PER_100_DAMAGE);
             return xp;
         }
     }

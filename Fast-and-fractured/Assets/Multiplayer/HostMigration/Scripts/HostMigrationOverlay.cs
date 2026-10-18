@@ -6,15 +6,22 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer.HostMigration
 {
     /// <summary>
-    /// What players see during a host migration: the last frame of the match, frozen and dimmed,
-    /// with a message and a spinner - instead of the trip through the main menu. Behind it the
-    /// map is reloaded on the new host; it goes away when the match resumes (Hide) or the
-    /// migration fails.
+    /// During a host migration: the match's last frame, frozen and dimmed, with a message and a spinner, while the
+    /// map reloads on the new host.
     /// </summary>
     public sealed class HostMigrationOverlay : MonoBehaviour
     {
         private static HostMigrationOverlay _instance;
         private const float MAX_SECONDS = 30f;   // never leave a frozen screen up for good
+        private const float DOT_FRAME_SECONDS = 0.35f;
+        private const float FADE_OUT_SECONDS = 0.35f;
+        private const int SORTING_ORDER = 32000;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private const float MESSAGE_FONT_SIZE = 46f;
+        private const float DOTS_FONT_SIZE = 110f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920, 1080);
+        private static readonly Color DIM_COLOR = new Color(0f, 0f, 0f, 0.55f);
+        private static readonly Color DOTS_COLOR = new Color(1f, 0.78f, 0.35f, 1f);
 
         private TextMeshProUGUI _message;
         private CanvasGroup _group;
@@ -57,8 +64,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private IEnumerator Build()
         {
             _shownAt = Time.unscaledTime;
-            // The frame kept from before the host was lost still has the cars and the HUD: by
-            // the end of this frame FishNet has already removed them. Fall back to a capture.
+            // The frame kept before the host was lost: by now FishNet has removed the cars and the HUD.
             Texture frozen = LastFrameKeeper.Freeze();
             if (frozen == null)
             {
@@ -69,11 +75,11 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
             var canvas = gameObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 32000;
+            canvas.sortingOrder = SORTING_ORDER;
             var scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
             gameObject.AddComponent<GraphicRaycaster>();   // swallow clicks while frozen
             _group = gameObject.AddComponent<CanvasGroup>();
 
@@ -82,7 +88,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (frozen is RenderTexture && SystemInfo.graphicsUVStartsAtTop)
                 frame.uvRect = new Rect(0f, 1f, 1f, -1f);   // screen grabs into a RenderTexture come in upside down on D3D
             var dim = Stretch(new GameObject("Dim", typeof(RectTransform)).AddComponent<Image>());
-            dim.color = new Color(0f, 0f, 0f, 0.55f);
+            dim.color = DIM_COLOR;
 
             var box = new GameObject("Message", typeof(RectTransform)).GetComponent<RectTransform>();
             box.SetParent(transform, false);
@@ -90,7 +96,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             box.sizeDelta = new Vector2(1200f, 220f);
             _message = box.gameObject.AddComponent<TextMeshProUGUI>();
             _message.alignment = TextAlignmentOptions.Center;
-            _message.fontSize = 46f;
+            _message.fontSize = MESSAGE_FONT_SIZE;
             _message.color = Color.white;
             _message.text = _pendingMessage;
             var font = FindGameFont();
@@ -103,8 +109,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
             dots.sizeDelta = new Vector2(300f, 80f);
             _dots = dots.gameObject.AddComponent<TextMeshProUGUI>();
             _dots.alignment = TextAlignmentOptions.Center;
-            _dots.fontSize = 110f;
-            _dots.color = new Color(1f, 0.78f, 0.35f, 1f);
+            _dots.fontSize = DOTS_FONT_SIZE;
+            _dots.color = DOTS_COLOR;
             if (font != null) _dots.font = font;
         }
 
@@ -134,16 +140,16 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         private void Update()
         {
-            if (_dots != null) _dots.text = DotFrames[(int)((Time.unscaledTime - _shownAt) / 0.35f) % DotFrames.Length];
+            if (_dots != null) _dots.text = DotFrames[(int)((Time.unscaledTime - _shownAt) / DOT_FRAME_SECONDS) % DotFrames.Length];
             if (!_hiding && Time.unscaledTime - _shownAt > MAX_SECONDS) Hide();
         }
 
         private IEnumerator FadeOut()
         {
             _hiding = true;
-            for (float t = 0f; t < 0.35f; t += Time.unscaledDeltaTime)
+            for (float t = 0f; t < FADE_OUT_SECONDS; t += Time.unscaledDeltaTime)
             {
-                if (_group != null) _group.alpha = 1f - t / 0.35f;
+                if (_group != null) _group.alpha = 1f - t / FADE_OUT_SECONDS;
                 yield return null;
             }
             Destroy(gameObject);
@@ -157,11 +163,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         }
     }
 
-    /// <summary>
-    /// While a match that could migrate is running, keeps a GPU copy of the last rendered frame
-    /// (no read-back to the CPU, every other frame), so the overlay can freeze the picture as
-    /// it was just before the host was lost - cars and HUD included.
-    /// </summary>
+    /// <summary>During a match that could migrate, keeps a GPU copy of the last rendered frame for the overlay.</summary>
     internal sealed class LastFrameKeeper : MonoBehaviour
     {
         private static LastFrameKeeper _instance;

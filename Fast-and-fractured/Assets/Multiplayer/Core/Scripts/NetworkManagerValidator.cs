@@ -3,10 +3,6 @@ using FishNet.Managing;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Helper script to validate NetworkManager configuration.
-    /// Attach to NetworkManager GameObject.
-    /// </summary>
     public class NetworkManagerValidator : MonoBehaviour
     {
         [Header("Expected Configuration")]
@@ -27,7 +23,6 @@ namespace FastAndFractured.Multiplayer
         
         private void ValidatePlayerPrefab(NetworkManager nm)
         {
-            // Check if player prefab is set
             var playerPrefab = nm.SpawnablePrefabs.GetObject(false,0);
             
             if (playerPrefab == null)
@@ -46,7 +41,6 @@ namespace FastAndFractured.Multiplayer
                 Debug.LogWarning($"  Actual: {playerPrefab.name}");
             }
             
-            // Validate the player prefab has required components
             var networkObject = playerPrefab.GetComponent<FishNet.Object.NetworkObject>();
             if (networkObject == null)
             {

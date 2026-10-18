@@ -11,16 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.Multiplayer.Editor
 {
-    /// <summary>
-    /// Duplicates a singleplayer map scene into Assets/Multiplayer/Scenes/Networked&lt;Name&gt;.unity
-    /// and swaps every hazard prefab instance for its networked variant from Assets/Multiplayer/Props/.
-    /// Scene-only hazard GameObjects (not from a prefab) get NetworkObject + the wrapper added directly.
-    ///
-    /// The original singleplayer scene under Assets/FastAndFractured/ is NEVER modified — the only
-    /// scene that gets touched is the duplicate written to Assets/Multiplayer/Scenes/.
-    ///
-    /// Open via: Tools > Fast And Fractured > Scene Migration
-    /// </summary>
+    /// <summary>Duplicates a singleplayer map into Assets/Multiplayer/Scenes and swaps its hazards for their networked variants; the source scene is never modified.</summary>
     public class NetworkedSceneMigrationTool : EditorWindow
     {
         private const string OUTPUT_FOLDER        = "Assets/Multiplayer/Scenes";
@@ -28,7 +19,6 @@ namespace FastAndFractured.Multiplayer.Editor
         private const string OUTPUT_SUBFOLDER     = "Scenes";
         private const string PROPS_FOLDER         = "Assets/Multiplayer/Props";
 
-        // ── Source map definitions (mirrors NetworkedMapRegistrationTool DEFAULT_MAPS) ─────
         private static readonly SourceMap[] SOURCE_MAPS =
         {
             new SourceMap { SceneGuid = "1c251044aeaa846428dbf86821c160d3", DisplayName = "Golf Map" },
@@ -36,7 +26,6 @@ namespace FastAndFractured.Multiplayer.Editor
             new SourceMap { SceneGuid = "1354e600b46f3c3488593866c2ca43b3", DisplayName = "Mountain Village Map" },
         };
 
-        // ── Hazard component → wrapper mapping (mirrors NetworkedPropSetupTool) ────────────
         private sealed class HazardDef
         {
             public string DisplayName;
@@ -51,9 +40,6 @@ namespace FastAndFractured.Multiplayer.Editor
             new HazardDef { DisplayName = "Point Explosion",    SingleplayerType = typeof(PointExplosion),     WrapperType = typeof(NetworkedPointExplosion)      },
             new HazardDef { DisplayName = "Mega Chicken Boss",  SingleplayerType = typeof(ChickenBrain),       WrapperType = typeof(NetworkedMegaChickenBoss)     },
             new HazardDef { DisplayName = "Trampoline",         SingleplayerType = typeof(ParabolicImpulse),   WrapperType = typeof(NetworkedTrampoline)          },
-            // World systems that were written but never wired (2026-06 sync audit): without these
-            // defs the networked scenes keep the singleplayer components running locally on every
-            // instance, so storms/pickups/buildings desync between host and clients.
             new HazardDef { DisplayName = "Sandstorm",          SingleplayerType = typeof(SandstormController), WrapperType = typeof(NetworkedSandstormController)     },
             new HazardDef { DisplayName = "Stats Boost Pickup", SingleplayerType = typeof(StatsBoostInteractable), WrapperType = typeof(NetworkedStatsBoostInteractable) },
             new HazardDef { DisplayName = "Skin Unlock Pickup", SingleplayerType = typeof(SkinUnlockerInteractable), WrapperType = typeof(NetworkedSkinUnlockerInteractable) },
@@ -68,7 +54,6 @@ namespace FastAndFractured.Multiplayer.Editor
             public string DisplayName;
         }
 
-        // ── Per-row state ──────────────────────────────────────────────────────────────────
         private sealed class Row
         {
             public SourceMap   Source;
@@ -90,21 +75,16 @@ namespace FastAndFractured.Multiplayer.Editor
         public static void ShowWindow()
         {
             var w = GetWindow<NetworkedSceneMigrationTool>("Scene Migration");
-            w.minSize = new Vector2(640f, 500f);
+            w.minSize = MIN_WINDOW_SIZE;
             w.Refresh();
             w.Show();
         }
 
-        /// <summary>
-        /// Headless "Re-apply Swaps to All" — same pass the window button runs, but invocable
-        /// without opening the window (menu item / CI / MCP automation). Iterates every source
-        /// map that already has a networked variant and re-runs the swap + gating + repoint pass.
-        /// </summary>
+        /// <summary>"Re-apply Swaps to All" without the window (menu item / automation).</summary>
         [MenuItem("Tools/Fast And Fractured/Scene Migration - Reapply All (Headless)", priority = 13)]
         public static void ReapplyAllHeadless()
         {
-            // Save any pending scene edits up front WITHOUT a modal dialog, then run each pass in
-            // non-interactive mode so nothing blocks the main thread.
+            // Save without a dialog and run every pass non-interactively: a modal would block the main thread.
             EditorSceneManager.SaveOpenScenes();
 
             int scenes = 0;
@@ -135,7 +115,6 @@ namespace FastAndFractured.Multiplayer.Editor
 
         private void OnEnable() => Refresh();
 
-        // ── Scan ───────────────────────────────────────────────────────────────────────────
         private void Refresh()
         {
             _rows.Clear();
@@ -170,13 +149,12 @@ namespace FastAndFractured.Multiplayer.Editor
             Repaint();
         }
 
-        // ── GUI ────────────────────────────────────────────────────────────────────────────
         private void OnGUI()
         {
             DrawToolbar();
             DrawInfoBox();
 
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SECTION_SPACING);
             DrawBulkReapplyBar();
 
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
@@ -225,8 +203,8 @@ namespace FastAndFractured.Multiplayer.Editor
                     EditorStyles.wordWrappedMiniLabel);
 
                 var prev = GUI.color;
-                GUI.color = new Color(0.4f, 0.8f, 0.4f);
-                if (GUILayout.Button($"Re-apply Swaps to All ({migrated})", GUILayout.Width(220), GUILayout.Height(28)))
+                GUI.color = ACTION_BUTTON_COLOR;
+                if (GUILayout.Button($"Re-apply Swaps to All ({migrated})", GUILayout.Width(220), GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
                 {
                     if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
                     int totalSwaps = 0;
@@ -242,11 +220,9 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 GUI.color = prev;
             }
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SECTION_SPACING);
         }
 
-        // Cheap parser used only to aggregate counts for the bulk-action toast — extracts the
-        // first integer it sees in the per-scene report text. Returns 0 if none found.
         private static int ExtractFirstIntFromReport(string report)
         {
             if (string.IsNullOrEmpty(report)) return 0;
@@ -263,15 +239,14 @@ namespace FastAndFractured.Multiplayer.Editor
         private void DrawRow(Row row)
         {
             Color bg = !row.SourceFound
-                ? new Color(0.4f, 0.15f, 0.15f, 0.3f)
+                ? ROW_MISSING_COLOR
                 : row.OutputExists
-                    ? (row.OutputIsStale ? new Color(0.4f, 0.35f, 0.1f, 0.3f) : new Color(0.2f, 0.4f, 0.2f, 0.3f))
-                    : new Color(0.25f, 0.25f, 0.25f, 0.3f);
+                    ? (row.OutputIsStale ? ROW_STALE_COLOR : ROW_MIGRATED_COLOR)
+                    : ROW_PENDING_COLOR;
 
             var rect = EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUI.DrawRect(rect, bg);
 
-            // Header
             using (new EditorGUILayout.HorizontalScope())
             {
                 string icon;
@@ -298,7 +273,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 {
                     var p2 = GUI.color;
                     GUI.color = Color.yellow;
-                    if (GUILayout.Button("Create Networked Variant", GUILayout.Width(190), GUILayout.Height(28)))
+                    if (GUILayout.Button("Create Networked Variant", GUILayout.Width(190), GUILayout.Height(PRIMARY_BUTTON_HEIGHT)))
                     {
                         var report = MigrateScene(row);
                         row.LastReport = report;
@@ -309,12 +284,10 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
                 else
                 {
-                    // Non-destructive: opens the networked scene, runs the swap pass over any
-                    // remaining singleplayer hazard instances (e.g. Trampoline → NetworkedTrampoline
-                    // after a new wrapper was added), and saves. Manual edits to the scene are kept.
+                    // Runs the swap pass on the existing networked scene; manual edits are kept.
                     var p3 = GUI.color;
-                    GUI.color = new Color(0.4f, 0.8f, 0.4f);
-                    if (GUILayout.Button("Re-apply Swaps", GUILayout.Width(120), GUILayout.Height(24)))
+                    GUI.color = ACTION_BUTTON_COLOR;
+                    if (GUILayout.Button("Re-apply Swaps", GUILayout.Width(120), GUILayout.Height(BUTTON_HEIGHT)))
                     {
                         var report = ReapplyPrefabSwaps(row);
                         row.LastReport = report;
@@ -326,7 +299,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         var p2 = GUI.color;
                         GUI.color = Color.yellow;
-                        if (GUILayout.Button("Re-sync from Source", GUILayout.Width(150), GUILayout.Height(24)))
+                        if (GUILayout.Button("Re-sync from Source", GUILayout.Width(150), GUILayout.Height(BUTTON_HEIGHT)))
                         {
                             if (EditorUtility.DisplayDialog("Re-sync " + row.OutputName,
                                 $"This deletes {row.OutputPath} and rebuilds it from " +
@@ -355,14 +328,12 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            // Paths
             if (row.SourceFound)
             {
                 EditorGUILayout.LabelField("source",  row.SourcePath, EditorStyles.miniLabel);
                 EditorGUILayout.LabelField("output",  row.OutputPath, EditorStyles.miniLabel);
             }
 
-            // Stale notice
             if (row.OutputIsStale)
             {
                 TimeSpan delta = row.SourceModified - row.OutputModified;
@@ -372,15 +343,14 @@ namespace FastAndFractured.Multiplayer.Editor
                     MessageType.Warning);
             }
 
-            // Last migration report
             if (!string.IsNullOrEmpty(row.LastReport))
             {
-                EditorGUILayout.Space(2f);
+                EditorGUILayout.Space(SMALL_SPACING);
                 EditorGUILayout.LabelField(row.LastReport, EditorStyles.wordWrappedMiniLabel);
             }
 
             EditorGUILayout.EndVertical();
-            EditorGUILayout.Space(4f);
+            EditorGUILayout.Space(SECTION_SPACING);
         }
 
         private static string FormatDelta(TimeSpan d)
@@ -391,19 +361,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return $"{(int)d.TotalSeconds}s";
         }
 
-        // ── Re-apply Swaps (non-destructive) ───────────────────────────────────────────────
-        /// <summary>
-        /// Opens the already-migrated networked scene and runs the hazard swap pass over it.
-        /// Unlike MigrateScene this does NOT copy from the source — it preserves every manual
-        /// edit (lights, decals, camera tweaks, lobby-specific changes). It only touches
-        /// GameObjects whose components match a singleplayer hazard type that doesn't yet have
-        /// its networked wrapper attached. Run after adding a new HazardDef (e.g. Trampoline) so
-        /// the new wrapper rolls out into every existing networked map.
-        ///
-        /// FIRST performs a cleanup pass that strips bad NetworkObject + wrapper overrides that
-        /// a previous (buggy) migration added to prefab children. These overrides cause the
-        /// FishNet "ObjectId [65535] is expected to be initialized but was not" runtime error.
-        /// </summary>
+        /// <summary>Re-runs the hazard swaps on the existing networked scene, keeping manual edits; first strips wrappers older runs added to prefab children.</summary>
         private static string ReapplyPrefabSwaps(Row row) => ReapplyPrefabSwaps(row, interactive: true);
 
         private static string ReapplyPrefabSwaps(Row row, bool interactive)
@@ -411,19 +369,15 @@ namespace FastAndFractured.Multiplayer.Editor
             if (!row.OutputExists)
                 return "Networked scene does not exist yet — use \"Create Networked Variant\" first.";
 
-            // In interactive (window) mode we may prompt to save; in headless mode we must NOT
-            // open modal dialogs (they block Unity's main thread indefinitely, which hangs the
-            // MCP bridge / CI). Headless callers are responsible for having a clean scene state.
+            // Headless: no modal dialogs (they block the main thread).
             if (interactive)
             {
                 if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                     return "Cancelled (unsaved changes).";
             }
 
-            // Open the existing networked scene in place. NO source copy — manual edits preserved.
             var scene = EditorSceneManager.OpenScene(row.OutputPath, OpenSceneMode.Single);
 
-            // Cleanup pass — undo previous buggy adds before doing fresh swaps.
             int strippedOverrides = StripBadOverrideWrappers(scene);
 
             int prefabSwaps       = 0;
@@ -463,28 +417,22 @@ namespace FastAndFractured.Multiplayer.Editor
             return report;
         }
 
-        /// <summary>
-        /// Disables auto-Construct/Initialize on every LevelController in the given scene by
-        /// flipping the three serialized flags to false via SerializedObject. Persisted into the
-        /// scene file, so at runtime LC stays dormant until the wrapper explicitly drives it.
-        ///
-        /// This is the editor-time replacement for the runtime reflection-based teardown — once
-        /// every networked scene has been processed by this, the AutoInitGate's destroy-and-reset
-        /// path is a no-op.
-        /// </summary>
-        // Networked spawn prefabs the migrated scene's LevelController must reference instead of
-        // the singleplayer ones. Without this, PlayerBaseFinalWithoutCar (no NetworkObject, no
-        // singleton preservers) gets instantiated in multiplayer: the second player's duplicate
-        // singletons resolve via DESTROY_GAMEOBJECT and the match implodes (see memory:
-        // project-networked-scene-player-prefab).
+        // Networked player/AI prefabs the migrated LevelController spawns instead of the singleplayer ones.
         private const string NETWORKED_PLAYER_PREFAB_PATH  = "Assets/Multiplayer/Player/Prefabs/NetworkedPlayer.prefab";
         private const string NETWORKED_AI_PREFAB_PATH      = "Assets/FastAndFractured/EnemyAI/Prefabs/NetworkedEnemyAI.prefab";
 
-        /// <summary>
-        /// Points every LevelController's PlayerPrefab / AIPrefab at the networked variants.
-        /// Editor-time, persisted into the scene file — same pattern as auto-init suppression.
-        /// Returns how many fields were actually repointed.
-        /// </summary>
+        private const float PRIMARY_BUTTON_HEIGHT = 28f;
+        private const float BUTTON_HEIGHT = 24f;
+        private const float SECTION_SPACING = 4f;
+        private const float SMALL_SPACING = 2f;
+        private static readonly Vector2 MIN_WINDOW_SIZE = new Vector2(640f, 500f);
+        private static readonly Color ACTION_BUTTON_COLOR = new Color(0.4f, 0.8f, 0.4f);
+        private static readonly Color ROW_MISSING_COLOR = new Color(0.4f, 0.15f, 0.15f, 0.3f);
+        private static readonly Color ROW_STALE_COLOR = new Color(0.4f, 0.35f, 0.1f, 0.3f);
+        private static readonly Color ROW_MIGRATED_COLOR = new Color(0.2f, 0.4f, 0.2f, 0.3f);
+        private static readonly Color ROW_PENDING_COLOR = new Color(0.25f, 0.25f, 0.25f, 0.3f);
+
+        /// <summary>Points every LevelController's PlayerPrefab / AIPrefab at the networked variants; returns how many changed.</summary>
         private static int RepointLevelControllerPrefabs(Scene scene)
         {
             var networkedPlayer = AssetDatabase.LoadAssetAtPath<GameObject>(NETWORKED_PLAYER_PREFAB_PATH);
@@ -539,13 +487,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return repointed;
         }
 
-        /// <summary>
-        /// The prefab swaps destroy the scene objects InteractableHandler.interactablesToToggle
-        /// referenced (every migrated map ended up with 25 null entries → UnassignedReferenceException
-        /// in Construct at runtime). Rebuild the array from the interactables actually present, and
-        /// make sure a scene-placed NetworkedInteractableHandler exists so pool state replicates.
-        /// Returns how many changes were made (0 = untouched).
-        /// </summary>
+        /// <summary>Rebuilds InteractableHandler.interactablesToToggle from the interactables left after the swaps; returns how many changes.</summary>
         private static int EnsureInteractableInfra(Scene scene)
         {
             int changes = 0;
@@ -591,12 +533,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 }
             }
 
-            // NOTE: the NetworkedInteractableHandler wrapper is deliberately NOT scene-placed.
-            // Scene NetworkObjects added by code end up with an unserialized SceneId ("expected
-            // to be initialized but was not") — the same failure LobbyServerBootstrapper documents
-            // for the lobby manager. It is runtime-spawned from NetworkedLevelControllerManager
-            // instead (Resources/NetworkedInteractablesSpawnable). Remove any wrapper a previous
-            // version of this tool left in the scene.
+            // The networked handler is runtime-spawned (scene NetworkObjects added by code lack a SceneId): remove old ones.
             foreach (var root in scene.GetRootGameObjects())
             {
                 var legacyWrapper = root.GetComponentInChildren<NetworkedInteractableHandler>(true);
@@ -612,24 +549,10 @@ namespace FastAndFractured.Multiplayer.Editor
         }
 
         /// <summary>
-        /// A swap keeps only the transform, so everything the singleplayer map had set on a swapped
-        /// hazard was lost - the references its instance carried as overrides, the values the level
-        /// designers tuned per map, and the references other objects held to it. Measured 2026-09-30
-        /// on all three maps: the storm had no sphereCenter (UnassignedReferenceException, it could
-        /// never start), the level had no storm ("_sandStormController is null", the AI never saw
-        /// it), the storm ran on prefab defaults (maxGrowthTime, sphereRadius, kill times), and the
-        /// golf map's rising lava used the prefab's 20 s rise instead of the map's 120 s, so a car on
-        /// the low spawn point died six seconds into the match.
-        ///
-        /// Reads the singleplayer source scene and, for every swapped instance, re-applies the
-        /// instance overrides of the singleplayer one:
-        ///  - a value only where the networked variant still has the singleplayer prefab's value,
-        ///    so a deliberate multiplayer change always wins;
-        ///  - a reference only where the networked field is empty.
-        /// Then every empty reference other objects had to a swapped instance is re-pointed at the
-        /// networked one. Objects are matched by hierarchy path (a swap keeps the name, the parent
-        /// and the sibling order) and components by type and order. Returns how many properties
-        /// were restored.
+        /// A swap keeps only the transform. Re-applies the singleplayer instance's overrides to each swapped one
+        /// (values only where the networked variant kept the singleplayer default, references only where empty)
+        /// and re-points empty references to swapped instances. Matched by hierarchy path. Returns how many
+        /// properties were restored.
         /// </summary>
         private static int RestoreSwappedHazardOverrides(Scene output, string sourcePath)
         {
@@ -641,7 +564,6 @@ namespace FastAndFractured.Multiplayer.Editor
             int restored = 0;
             try
             {
-                // Each networked instance and the singleplayer instance it replaced.
                 var replaced = new List<KeyValuePair<Transform, Transform>>();
                 foreach (var outRoot in swappedRoots)
                 {
@@ -649,8 +571,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (srcRoot == null) continue;
                     Transform dstRoot = outRoot.transform;
 
-                    // Placed before the singleplayer prefab variant had its own networked
-                    // variant (health pickups as NetworkedShootingDamage): place the right one.
+                    // Placed before this prefab variant had its own networked variant: place the right one.
                     var wanted = NetworkedVariantFor(srcRoot.gameObject);
                     var placed = PrefabUtility.GetCorrespondingObjectFromSource(dstRoot.gameObject);
                     if (wanted != null && placed != wanted)
@@ -664,11 +585,9 @@ namespace FastAndFractured.Multiplayer.Editor
                     replaced.Add(new KeyValuePair<Transform, Transform>(srcRoot, dstRoot));
                 }
 
-                // 0. What the singleplayer map deleted from or added to its instance.
                 foreach (var pair in replaced)
                     restored += MirrorSingleplayerHierarchy(pair.Key, pair.Value);
 
-                // 1. The overrides of the replaced singleplayer instances.
                 foreach (var pair in replaced)
                 {
                     Transform srcRoot = pair.Key, outRoot = pair.Value;
@@ -684,7 +603,6 @@ namespace FastAndFractured.Multiplayer.Editor
                         bool isRoot = srcTransform == srcRoot;
                         var dstGameObject = FindEquivalent(srcTransform.gameObject, srcRoot, outRoot) as GameObject;
                         if (dstGameObject == null) continue;
-                        // The swap placed and named the root itself.
                         if (!isRoot) restored += CopyInstanceOverrides(srcTransform.gameObject, dstGameObject, mapReference);
 
                         foreach (var srcComponent in srcTransform.GetComponents<Component>())
@@ -696,7 +614,6 @@ namespace FastAndFractured.Multiplayer.Editor
                     }
                 }
 
-                // 2. Empty references other objects had to a replaced instance.
                 foreach (var root in source.GetRootGameObjects())
                 {
                     foreach (var srcBehaviour in root.GetComponentsInChildren<MonoBehaviour>(true))
@@ -732,18 +649,8 @@ namespace FastAndFractured.Multiplayer.Editor
         }
 
         /// <summary>
-        /// Gives a swapped instance the hierarchy the singleplayer instance has. The swap places a
-        /// fresh variant, so what the map deleted from its instance came back and what it added
-        /// was lost:
-        ///  - deleted GameObjects / components (m_RemovedGameObjects / m_RemovedComponents):
-        ///    ConstructionMap keeps one of the 63 walls of the DeadZone prefab (the kill floor
-        ///    under the map) and the networked map had all 63 - red walls across the play area
-        ///    that cars spawned and drove into (2026-10-16). Matched by the base prefab object
-        ///    they come from, so same-named walls cannot be confused and what the networked
-        ///    variant adds is never touched.
-        ///  - added GameObjects (the breakable platforms swap the prefab's stage meshes for their
-        ///    own): copied to the same parent and sibling position.
-        /// Returns how many objects were deleted or added.
+        /// Gives a swapped instance the singleplayer instance's hierarchy: removes the GameObjects and components
+        /// the map deleted (matched by base prefab object) and copies the ones it added. Returns how many changed.
         /// </summary>
         private static int MirrorSingleplayerHierarchy(Transform srcRoot, Transform outRoot)
         {
@@ -751,7 +658,6 @@ namespace FastAndFractured.Multiplayer.Editor
             string baseAsset = srcBase != null ? AssetDatabase.GetAssetPath(srcBase) : null;
             if (string.IsNullOrEmpty(baseAsset)) return 0;
 
-            // Every base prefab object the singleplayer instance still has.
             var kept = new HashSet<UnityEngine.Object>();
             foreach (var t in srcRoot.GetComponentsInChildren<Transform>(true))
             {
@@ -827,13 +733,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return !string.IsNullOrEmpty(assetPath) && assetPath.StartsWith(PROPS_FOLDER + "/Networked", StringComparison.Ordinal);
         }
 
-        /// <summary>
-        /// Re-applies to <paramref name="destination"/> what the singleplayer map changed on
-        /// <paramref name="source"/> relative to the base prefab both come from (its map variant and
-        /// its scene overrides): a value only where the networked instance still has the base value,
-        /// a reference only where the networked field is empty. Fields the networked scene already
-        /// overrides are left alone, so running the pass again changes nothing.
-        /// </summary>
+        /// <summary>Re-applies what the map changed on <paramref name="source"/> to <paramref name="destination"/>: values only where it kept the base value, references only where empty. Idempotent.</summary>
         private static int CopyInstanceOverrides(UnityEngine.Object source, UnityEngine.Object destination,
             Func<UnityEngine.Object, UnityEngine.Object> mapReference)
         {
@@ -867,8 +767,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     if (!IsCopyableValue(it.propertyType)) continue;
                     object srcValue = it.boxedValue, dstValue = dstProp.boxedValue;
                     if (Equals(srcValue, dstValue)) continue;
-                    // The networked variant changed this value itself: keep the multiplayer one.
-                    // (An array element past the base's size has no base value to compare with.)
+                    // The networked variant changed this value itself, or the element has no base value: keep it.
                     SerializedProperty baseProp = baseSo.FindProperty(it.propertyPath);
                     if (baseProp != null && !Equals(baseProp.boxedValue, dstValue)) continue;
                     dstProp.boxedValue = srcValue;
@@ -958,8 +857,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return restored;
         }
 
-        // Unity's own bookkeeping and the hierarchy itself: never copied between instances (copying
-        // Transform.m_Children linked children twice to their parent).
+        // Unity bookkeeping and the hierarchy itself (copying m_Children links children twice).
         private static readonly string[] UnityInternalProperties =
         {
             "m_Script", "m_GameObject", "m_PrefabInstance", "m_CorrespondingSourceObject", "m_PrefabAsset",
@@ -1116,16 +1014,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return suppressed;
         }
 
-        /// <summary>
-        /// Removes NetworkObject + wrapper components that an earlier buggy migration added to
-        /// CHILDREN of prefab instances as prefab overrides. These overrides never get a SceneId
-        /// from FishNet's OnValidate pipeline (which only runs for the prefab asset itself, not
-        /// for added-component overrides on instances), so at runtime FishNet logs the
-        /// "ObjectId [65535] is expected to be initialized but was not" error.
-        ///
-        /// Only strips components that are confirmed prefab-override "added components". Anything
-        /// the user manually added to a non-prefab scene GO or to a prefab root is left alone.
-        /// </summary>
+        /// <summary>Removes NetworkObject + wrapper overrides an older migration added to prefab children (they never get a SceneId).</summary>
         private static int StripBadOverrideWrappers(Scene scene)
         {
             int removed = 0;
@@ -1139,12 +1028,9 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         var go = wrapper.gameObject;
 
-                        // Skip if not part of a prefab instance.
                         if (PrefabUtility.GetPrefabInstanceStatus(go) != PrefabInstanceStatus.Connected) continue;
-                        // Skip if this is the outermost root — that's the correct place for a
-                        // wrapper added via legitimate variant swap, leave it alone.
+                        // The outermost root is where a variant swap legitimately puts the wrapper.
                         if (PrefabUtility.IsOutermostPrefabInstanceRoot(go)) continue;
-                        // Only target wrappers added as overrides (not inherited from the variant prefab).
                         if (!PrefabUtility.IsAddedComponentOverride(wrapper)) continue;
 
                         var nob = go.GetComponent<FishNet.Object.NetworkObject>();
@@ -1162,20 +1048,13 @@ namespace FastAndFractured.Multiplayer.Editor
             return removed;
         }
 
-        // ── Migration ──────────────────────────────────────────────────────────────────────
-        /// <summary>
-        /// Duplicates the source scene into OUTPUT_FOLDER and swaps hazard prefab instances for
-        /// their networked variants. Returns a human-readable migration report.
-        /// </summary>
         private static string MigrateScene(Row row)
         {
             EnsureOutputFolder();
 
-            // Make sure we don't lose unsaved work in the currently-open scene.
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 return "Cancelled (unsaved changes).";
 
-            // Copy the .unity asset (and its .meta) — Unity treats this as a new scene asset.
             if (!AssetDatabase.CopyAsset(row.SourcePath, row.OutputPath))
             {
                 Debug.LogError($"[SceneMigration] Failed to copy {row.SourcePath} → {row.OutputPath}");
@@ -1183,7 +1062,6 @@ namespace FastAndFractured.Multiplayer.Editor
             }
             AssetDatabase.Refresh();
 
-            // Open the duplicated scene.
             var scene = EditorSceneManager.OpenScene(row.OutputPath, OpenSceneMode.Single);
 
             int prefabSwaps     = 0;
@@ -1191,30 +1069,23 @@ namespace FastAndFractured.Multiplayer.Editor
             var perDefCounts    = new Dictionary<HazardDef, int>();
             foreach (var d in HAZARD_DEFS) perDefCounts[d] = 0;
 
-            // Walk every root, then every descendant.
             foreach (var root in scene.GetRootGameObjects())
             {
                 MigrateGameObjectTree(root, ref prefabSwaps, ref sceneOnlyConverts, perDefCounts);
             }
 
-            // The swaps keep only the transform; bring back the scene wiring from the source.
             int overridesRestored = RestoreSwappedHazardOverrides(scene, row.SourcePath);
 
-            // Disable LC auto-init in the scene file — wrapper will drive Construct/Initialize.
             int autoInitSuppressed = SuppressLevelControllerAutoInit(scene);
 
-            // Point LC's PlayerPrefab / AIPrefab at the networked variants.
             int prefabsRepointed = RepointLevelControllerPrefabs(scene);
 
-            // Rewire InteractableHandler refs broken by the swaps + place the networking wrapper.
             EnsureInteractableInfra(scene);
 
-            // Save the modified duplicate.
             EditorSceneManager.MarkSceneDirty(scene);
             AssignSceneIds(scene);
             EditorSceneManager.SaveScene(scene, row.OutputPath);
 
-            // Auto-register: add to Build Settings and update MapCatalog.NetworkedSceneName.
             bool addedToBuild = AddToBuildSettingsIfMissing(row.OutputPath);
             bool catalogUpdated = TryWriteNetworkedSceneNameIntoCatalog(
                 Path.GetFileNameWithoutExtension(row.SourcePath), row.OutputName);
@@ -1248,11 +1119,6 @@ namespace FastAndFractured.Multiplayer.Editor
             return true;
         }
 
-        /// <summary>
-        /// If the catalog has an entry whose SceneName matches the source scene's filename,
-        /// write the networked variant's name into entry.NetworkedSceneName. No-op if the
-        /// source scene isn't registered yet (user can register later via Map Registration Tool).
-        /// </summary>
         private static bool TryWriteNetworkedSceneNameIntoCatalog(string sourceSceneName, string networkedSceneName)
         {
             const string CATALOG_PATH = "Assets/Multiplayer/Lobby/Resources/MapCatalog.asset";
@@ -1289,17 +1155,7 @@ namespace FastAndFractured.Multiplayer.Editor
             return changed;
         }
 
-        /// <summary>
-        /// Recursive migration. For each GameObject we find a hazard component on, we walk UP to
-        /// the outermost prefab instance root and try to swap that root with a networked variant.
-        /// Walking-up matters because some singleplayer prefabs (e.g. Trampoline) put their hazard
-        /// component on a CHILD GameObject — swapping the child directly would orphan its siblings
-        /// and adding NetworkObject as a prefab override on a child leaves it with no SceneId,
-        /// causing the FishNet "ObjectId [65535] is expected to be initialized but was not" error.
-        ///
-        /// Tracks already-processed prefab instance roots so we don't try to swap the same
-        /// Trampoline twice when both the root and a child contain components of interest.
-        /// </summary>
+        /// <summary>Swaps each hazard's outermost prefab instance root (some prefabs keep the hazard on a child), once per root.</summary>
         private static void MigrateGameObjectTree(
             GameObject go,
             ref int prefabSwaps,
@@ -1309,12 +1165,10 @@ namespace FastAndFractured.Multiplayer.Editor
         {
             swappedRootInstanceIds ??= new HashSet<int>();
 
-            // Collect children first because we may destroy/replace `go` or its ancestors.
             var children = new List<Transform>();
             for (int i = 0; i < go.transform.childCount; i++)
                 children.Add(go.transform.GetChild(i));
 
-            // Find which hazard def (if any) this GO matches.
             HazardDef matched = null;
             foreach (var def in HAZARD_DEFS)
             {
@@ -1327,32 +1181,20 @@ namespace FastAndFractured.Multiplayer.Editor
 
             if (matched != null)
             {
-                // Walk up to the outermost prefab instance root. If the GO itself is a root, this
-                // returns the GO. If it's a child of a prefab instance, this returns the parent
-                // root prefab. If the GO is scene-only (no prefab connection), this returns null.
                 GameObject prefabRoot = null;
                 if (PrefabUtility.GetPrefabInstanceStatus(go) == PrefabInstanceStatus.Connected)
                     prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(go);
 
                 if (prefabRoot != null)
                 {
-                    // Skip if we already swapped this prefab instance in a previous tree visit
-                    // (e.g. encountered the root and a hazard-carrying child in the same migration).
                     if (!swappedRootInstanceIds.Add(prefabRoot.GetInstanceID()))
                         return;
 
-                    // Already a networked variant whose wrapper sits on another object than the
-                    // singleplayer component (SuckingBuildingPrefab, DeadZones*): nothing to swap.
-                    // Re-swapping it replaced the instance on every Reapply - new file ids and
-                    // SceneIds each run (1229 changed lines in MountainVillage, 2026-09-30).
+                    // Already a networked variant whose wrapper sits on another object: re-swapping would churn file ids.
                     if (IsNetworkedVariantInstance(prefabRoot))
                         return;
 
-                    // The hazard sits in a prefab NESTED inside a group prefab (dev's TNT.prefab
-                    // holding 25 TNTs, GolfBalls.prefab, Trampolines.prefab). Swapping the outermost
-                    // root replaced the whole group with ONE networked hazard - the group "TNT" even
-                    // matched NetworkedTNT by name and 24 TNTs vanished (2026-10-12). Unpack the
-                    // group one level in this networked copy and swap each hazard on its own.
+                    // Hazard nested in a group prefab (TNT, GolfBalls, Trampolines): unpack the group one level and swap each.
                     var nearestRoot = PrefabUtility.GetNearestPrefabInstanceRoot(go);
                     if (nearestRoot != null && nearestRoot != prefabRoot && HasNetworkedVariant(nearestRoot))
                     {
@@ -1367,30 +1209,22 @@ namespace FastAndFractured.Multiplayer.Editor
                     {
                         prefabSwaps++;
                         perDefCounts[matched] = perDefCounts[matched] + 1;
-                        // Don't recurse into the replacement — the variant has the wrapper already.
                         return;
                     }
 
-                    // Variant prefab missing — log and stop. Do NOT fall back to AddWrapperInPlace
-                    // on a prefab child: that creates a NetworkObject prefab-override with no
-                    // SceneId, which is exactly the "[65535] not initialized" runtime error we
-                    // are trying to fix. The user should generate the missing variant via
-                    // Tools > Fast And Fractured > Networked Prop Setup.
+                    // Missing variant: never add the wrapper to a prefab child (no SceneId). Generate it with Networked Prop Setup.
                     Debug.LogWarning($"[SceneMigration] Cannot swap '{prefabRoot.name}' (variant missing). " +
                                      $"Generate the networked variant first; skipping in-place wrapper for " +
                                      "prefab child to avoid the [65535] NetworkObject error.");
                     return;
                 }
 
-                // Scene-only path: GO is NOT part of any prefab. AddWrapperInPlace is safe here
-                // because a scene-only NetworkObject gets a SceneId from the standard FishNet
-                // OnValidate pipeline (we trigger it explicitly below).
+                // Scene-only object: adding the wrapper in place is safe, it gets a SceneId below.
                 AddWrapperInPlace(go, matched);
                 sceneOnlyConverts++;
                 perDefCounts[matched] = perDefCounts[matched] + 1;
             }
 
-            // Recurse into children (they may also carry hazards, or be containers for them).
             foreach (var child in children)
             {
                 if (child != null) // guard against destroyed transforms
@@ -1398,13 +1232,7 @@ namespace FastAndFractured.Multiplayer.Editor
             }
         }
 
-        /// <summary>
-        /// Give every NetworkObject in the networked scene its SceneId before saving. Swapped and
-        /// unpacked hazards (nested NetworkObjects such as TrampolineParabolicLogic/TriggerCheck)
-        /// were saved without one, so the server never spawned them and the match never started
-        /// ("ObjectId [65535] is expected to be initialized", 2026-10-12). Same as FishNet's
-        /// Utility > Reserialize NetworkObjects > Scenes, which uses this internal method.
-        /// </summary>
+        /// <summary>Gives every NetworkObject in the scene its SceneId before saving (FishNet's Reserialize NetworkObjects > Scenes).</summary>
         private static void AssignSceneIds(Scene scene)
         {
             var create = typeof(NetworkObject).GetMethod("CreateSceneId",
@@ -1423,12 +1251,7 @@ namespace FastAndFractured.Multiplayer.Editor
         /// <summary>The prefab this instance comes from has a Networked&lt;Name&gt; variant in PROPS_FOLDER.</summary>
         private static bool HasNetworkedVariant(GameObject instanceRoot) => NetworkedVariantFor(instanceRoot) != null;
 
-        /// <summary>
-        /// The networked variant to place for an instance: the one made from the instance's own
-        /// prefab variant when Networked Prop Setup generated one (NetworkedRecoverHealth
-        /// Variant), else "Networked&lt;BaseName&gt;" of the base prefab. Map variants without their
-        /// own networked variant (Trampolines, BigTrampoline) keep resolving to the base one.
-        /// </summary>
+        /// <summary>The networked variant made from the instance's own prefab variant if there is one, else the base prefab's.</summary>
         private static GameObject NetworkedVariantFor(GameObject instanceRoot)
         {
             var source = PrefabUtility.GetCorrespondingObjectFromSource(instanceRoot);
@@ -1442,22 +1265,15 @@ namespace FastAndFractured.Multiplayer.Editor
             return baseAsset == null ? null : AssetDatabase.LoadAssetAtPath<GameObject>($"{PROPS_FOLDER}/Networked{baseAsset.name}.prefab");
         }
 
-        /// <summary>
-        /// `go` must be the outermost root of a prefab instance (callers walk up to it). Finds the
-        /// networked variant by base prefab name → "Networked&lt;BaseName&gt;.prefab" in PROPS_FOLDER
-        /// and swaps the instance, preserving world transform and sibling index.
-        /// </summary>
+        /// <summary>Swaps an outermost prefab instance root for its networked variant, keeping pose and sibling index.</summary>
         private static bool TryReplaceWithNetworkedVariant(GameObject go, HazardDef def, out GameObject newInstance)
         {
             newInstance = null;
 
-            // Only operate on prefab-instance roots — replacing a non-root would orphan siblings.
             var status = PrefabUtility.GetPrefabInstanceStatus(go);
             if (status != PrefabInstanceStatus.Connected) return false;
             if (!PrefabUtility.IsOutermostPrefabInstanceRoot(go)) return false;
 
-            // e.g. Trampolines.prefab (map variant) → NetworkedTrampoline (base), but
-            // RecoverHealth Variant → NetworkedRecoverHealth Variant (see NetworkedVariantFor).
             var variantAsset = NetworkedVariantFor(go);
             if (variantAsset == null)
             {
@@ -1472,7 +1288,6 @@ namespace FastAndFractured.Multiplayer.Editor
         /// <summary>Swaps <paramref name="go"/> for an instance of <paramref name="variantAsset"/>, keeping its pose, name and sibling index.</summary>
         private static GameObject ReplaceInstance(GameObject go, GameObject variantAsset)
         {
-            // Capture transform so we can restore it on the replacement.
             var t = go.transform;
             Vector3   pos    = t.position;
             Quaternion rot   = t.rotation;
@@ -1481,7 +1296,6 @@ namespace FastAndFractured.Multiplayer.Editor
             var       parent = t.parent;
             int       siblingIdx = t.GetSiblingIndex();
 
-            // Instantiate the variant in the scene at the parent's position.
             var inst = (GameObject)PrefabUtility.InstantiatePrefab(variantAsset, go.scene);
             if (inst == null) return null;
 
@@ -1492,16 +1306,11 @@ namespace FastAndFractured.Multiplayer.Editor
             inst.transform.SetSiblingIndex(siblingIdx);
             inst.name = goName;
 
-            // Destroy the original.
             UnityEngine.Object.DestroyImmediate(go);
             return inst;
         }
 
-        /// <summary>
-        /// Scene-only fallback: GameObject is not part of any prefab. Add NetworkObject + the
-        /// matching wrapper component directly. This is identical to what NetworkedPropSetupTool
-        /// does for prefab variants, but applied in-place inside the duplicated scene.
-        /// </summary>
+        /// <summary>Scene-only object (no prefab): adds NetworkObject + the wrapper in place.</summary>
         private static void AddWrapperInPlace(GameObject go, HazardDef def)
         {
             if (go.GetComponent<NetworkObject>() == null)

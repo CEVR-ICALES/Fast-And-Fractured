@@ -9,41 +9,19 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Testing
 {
     /// <summary>
-    /// Always-on recorder for the two bugs that keep surviving fixes: the host being unable to use
-    /// push shoot / ultimate, and the client's camera trembling.
-    ///
-    /// It exists because every attempt to measure these by hand caught an idle game — the session
-    /// has to be driven and shot at while the trace runs, and that cannot be coordinated remotely.
-    /// This installs itself when a match scene loads, watches silently, and writes a file only when
-    /// something interesting actually happens. Just play normally; the file will be there after.
-    ///
-    /// Output: &lt;project&gt;/../MpAutoRecord.log (next to the Assets folder, so it survives play mode).
-    ///
-    /// It records:
-    ///   * every change in the push-shoot / ultimate input chain, from the raw input flag through
-    ///     the provider to the handle and the ability, so the exact link that fails to fire is
-    ///     visible instead of inferred;
-    ///   * whether more than one PlayerInputController is answering the keyboard (the remote
-    ///     player's was found stuck at IsPushShooting=true, which is what a duplicate binding
-    ///     looks like);
-    ///   * a camera-jerk spike, with the 30 frames leading up to it, whenever the rendered camera
-    ///     stutters — with the car's body, transform and Visuals alongside, so we can tell whether
-    ///     the camera is shaking on its own or faithfully following something that is.
-    ///
-    /// To remove it, delete this file. It writes nothing unless a match is running.
+    /// Diagnostic recorder for the host push/ultimate input chain and the client camera tremble. Writes
+    /// &lt;project&gt;/../MpAutoRecord.log only when something happens during a match.
     /// </summary>
     public static class MpAutoRecorder
     {
         private const float CameraJerkSpikeMetres = 0.05f;
         private const int HistoryFrames = 30;
         private const int MaxSpikesRecorded = 12;
+        private const float BindRetrySeconds = 1f;
 
         private static Runner _runner;
 
-        // Off by default: this samples the input chain and camera every frame of every real match.
-        // Flip it on (Tools > Fast And Fractured > Diagnostics) only while actively hunting a
-        // regression of the two bugs it was built for - push-shoot/ulti not firing on the host, or
-        // the client camera trembling. Both are root-caused and fixed as of this writing.
+        // Off by default (it samples every frame): Tools > Fast And Fractured > Diagnostics.
 #if UNITY_EDITOR
         private const string EnabledPrefsKey = "FastAndFractured.Multiplayer.MpAutoRecorder.Enabled";
 
@@ -94,7 +72,6 @@ namespace FastAndFractured.Multiplayer.Testing
             private int _spikes;
             private float _nextBindAttempt;
 
-            // input chain
             private PlayerInputController _localInput;
             private PlayerInputController _otherInput;
             private PlayerInputProvider _provider;
@@ -102,7 +79,6 @@ namespace FastAndFractured.Multiplayer.Testing
             private BaseUniqueAbility _ability;
             private string _lastInputState = "";
 
-            // camera / car
             private Transform _camera;
             private Transform _visuals;
             private Transform _body;
@@ -117,7 +93,7 @@ namespace FastAndFractured.Multiplayer.Testing
                 if (!_bound)
                 {
                     if (Time.unscaledTime < _nextBindAttempt) return;
-                    _nextBindAttempt = Time.unscaledTime + 1f;
+                    _nextBindAttempt = Time.unscaledTime + BindRetrySeconds;
                     TryBind();
                     return;
                 }
@@ -228,8 +204,7 @@ namespace FastAndFractured.Multiplayer.Testing
                     _history.Enqueue(row);
                     while (_history.Count > HistoryFrames) _history.Dequeue();
 
-                    // Only a spike is worth recording: a steady camera produces thousands of
-                    // uninteresting rows, and the question is what happens AROUND a stutter.
+                    // Only spikes are recorded, with the frames leading up to them.
                     if (jerk > CameraJerkSpikeMetres && _spikes < MaxSpikesRecorded)
                     {
                         _spikes++;

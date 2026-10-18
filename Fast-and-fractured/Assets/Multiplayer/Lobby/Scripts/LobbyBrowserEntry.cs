@@ -8,6 +8,11 @@ namespace FastAndFractured.Multiplayer.Lobby
 {
     public sealed class LobbyBrowserEntry : MonoBehaviour
     {
+        private const float SIGNAL_HEIGHT_PER_FONT_SIZE = 0.9f;
+        private const float MIN_SIGNAL_HEIGHT = 18f;
+        private const float MAX_SIGNAL_HEIGHT = 26f;
+        private const float MIN_ROW_WIDTH = 560f;
+
         [SerializeField] private TMP_Text _roomNameText;
         [SerializeField] private TMP_Text _playersText;
         [SerializeField] private TMP_Text _pingText;
@@ -38,9 +43,8 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_signal == null)
             {
                 MakeRoomForSignal();
-                // Sits inside the old ping label's rect, so it lands wherever the prefab put it.
                 _signal = FastAndFractured.Multiplayer.NetworkSignalIndicator.Create(
-                    _pingText.transform, _pingText, Mathf.Clamp(_pingText.fontSize * 0.9f, 18f, 26f));
+                    _pingText.transform, _pingText, Mathf.Clamp(_pingText.fontSize * SIGNAL_HEIGHT_PER_FONT_SIZE, MIN_SIGNAL_HEIGHT, MAX_SIGNAL_HEIGHT));
                 var rect = (RectTransform)_signal.transform;
                 rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 0.5f);
                 rect.anchoredPosition = Vector2.zero;
@@ -51,14 +55,11 @@ namespace FastAndFractured.Multiplayer.Lobby
 
         private FastAndFractured.Multiplayer.NetworkSignalIndicator _signal;
 
-        /// <summary>
-        /// The prefab's ping column was sized for "45ms" (32 px of a 400 px row); the icon and
-        /// the bars need more. Widen the row and re-split the columns (anchors are relative).
-        /// </summary>
+        /// <summary>Widens the row and re-splits the columns: the ping column was sized for "45ms".</summary>
         private void MakeRoomForSignal()
         {
             var root = (RectTransform)transform;
-            if (root.rect.width < 560f) root.sizeDelta = new Vector2(root.sizeDelta.x + (560f - root.rect.width), root.sizeDelta.y);
+            if (root.rect.width < MIN_ROW_WIDTH) root.sizeDelta = new Vector2(root.sizeDelta.x + (MIN_ROW_WIDTH - root.rect.width), root.sizeDelta.y);
             SetColumn(_roomNameText, 0.00f, 0.45f);
             SetColumn(_playersText,  0.45f, 0.57f);
             SetColumn(_pingText,     0.58f, 0.85f);

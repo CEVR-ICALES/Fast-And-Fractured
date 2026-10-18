@@ -7,13 +7,7 @@ using System.Reflection;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Wrapper for InteractableHandler singleton that adds networking.
-    /// USES the original InteractableHandler, doesn't replace it.
-    ///
-    /// SERVER: Gets singleton reference, subscribes to events, syncs pool state.
-    /// CLIENT: Does NOT eagerly access singleton. Receives state from server via RPC.
-    /// </summary>
+    /// <summary>Networks the scene's InteractableHandler: the server syncs its pickup pool to clients by raw index.</summary>
     [DefaultExecutionOrder(-400)] // Awake self-heal must run before InteractableHandler.Awake (Construct iterates the array)
     public class NetworkedInteractableHandler : NetworkBehaviour
     {
@@ -27,12 +21,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// The scene-migration prefab swaps destroy the objects the scene's
-        /// InteractableHandler.interactablesToToggle referenced, leaving 25 null entries in the
-        /// networked maps — Construct/MakeInitialPool then throw UnassignedReferenceException.
-        /// Rebuild the array from the interactables actually present in the scene (any GameObject
-        /// carrying a GenericInteractable satisfies the handler's contract: it resolves the
-        /// interactable via GetComponentInParent and toggles the entry with SetActive).
+        /// Rebuilds interactablesToToggle from the scene's GenericInteractables: the migration's prefab swaps leave
+        /// it full of nulls, and Construct then throws.
         /// </summary>
         private void HealBrokenInteractablesArray()
         {
@@ -58,8 +48,7 @@ namespace FastAndFractured.Multiplayer
                     if (go != null && !rebuilt.Contains(go)) rebuilt.Add(go);
             }
 
-            // Sorted by hierarchy path: the pool is synced by index, so every peer must build the
-            // same order. Instance ids (the old sort) are assigned per process.
+            // Sorted by hierarchy path: the pool is synced by index, so every peer needs the same order.
             var found = new List<GameObject>();
             foreach (var interactable in FindObjectsByType<GenericInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
@@ -91,6 +80,14 @@ namespace FastAndFractured.Multiplayer
         // Client: the pickups the server has in play, by raw index. Null until the first sync.
         private bool[] _serverActive;
         private const float CLIENT_ENFORCE_INTERVAL = 0.2f;
+        private const float APPLY_RETRY_TIMEOUT = 5f;
+        private const float APPLY_RETRY_INTERVAL = 0.5f;
+        private const float INITIAL_SYNC_TIMEOUT = 6f;
+        private const float INITIAL_SYNC_INTERVAL = 0.2f;
+        private const float POOL_WATCH_INTERVAL = 0.25f;
+        private const float RESTORE_POOL_TIMEOUT = 10f;
+        private const int HASH_SEED = 17;
+        private const int HASH_MULTIPLIER = 31;
 
         public override void OnStartClient()
         {
@@ -99,14 +96,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// Pure client: keep the pickups exactly as the server has them.
-        ///
-        /// The server only sends the pool when it changes on its side, but on a client two
-        /// things change it locally afterwards: FishNet activates every scene NetworkObject when
-        /// it spawns it for that client (pickups are scene NOBs), and the singleplayer
-        /// InteractableHandler still runs there - it builds its own shuffled pool when the match
-        /// starts and toggles items from its own timers. Either one left a pickup showing on one
-        /// screen and not on the other until the next pickup re-sent the pool.
+        /// Pure client: keeps the pickups as the server has them. FishNet activates scene objects on spawn and the
+        /// singleplayer handler still toggles items here, so the local state drifts between syncs.
         /// </summary>
         private IEnumerator ClientEnforceServerState()
         {
@@ -137,9 +128,6 @@ namespace FastAndFractured.Multiplayer
                 if (index >= 0 && index < length) _serverActive[index] = true;
         }
 
-        /// <summary>
-        /// Client-side cached lookup for InteractableHandler. Avoids FindFirstObjectByType per RPC.
-        /// </summary>
         private InteractableHandler GetClientHandler()
         {
             if (_clientCachedHandler == null)
@@ -155,7 +143,6 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartServer();
             
-            // Server gets reference to the scene singleton
             _interactableHandler = FindFirstObjectByType<InteractableHandler>(FindObjectsInactive.Include);
             
             if (_interactableHandler != null)
@@ -171,12 +158,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
         
-        /// <summary>
-        /// Called when InteractableHandler initializes its pool on server.
-        /// Syncs active interactable states to all clients using raw array indices
-        /// (into interactablesToToggle, not ShuffledActivePool) so clients don't
-        /// need to reproduce the shuffle.
-        /// </summary>
+        /// <summary>Server: syncs the active pickups by raw index (not the shuffled pool), so clients need no shuffle.</summary>
         [Server]
         private void OnPoolInitialized()
         {
@@ -221,7 +203,6 @@ namespace FastAndFractured.Multiplayer
             var rawItems = GetRawInteractables(handler);
             if (rawItems == null || rawItems.Length == 0)
             {
-                // Buffer and retry
                 _pendingActiveIndices = activeRawIndices;
                 StartCoroutine(RetryApplyInteractablePool());
                 return;
@@ -232,13 +213,13 @@ namespace FastAndFractured.Multiplayer
         
         private IEnumerator RetryApplyInteractablePool()
         {
-            float timeout = 5f;
+            float timeout = APPLY_RETRY_TIMEOUT;
             float elapsed = 0f;
             
             while (elapsed < timeout)
             {
-                yield return new WaitForSeconds(0.5f);
-                elapsed += 0.5f;
+                yield return new WaitForSeconds(APPLY_RETRY_INTERVAL);
+                elapsed += APPLY_RETRY_INTERVAL;
                 
                 var handler = GetClientHandler();
                 if (handler == null) continue;
@@ -258,14 +239,12 @@ namespace FastAndFractured.Multiplayer
         private void ApplyFromRawIndices(GameObject[] rawItems, int[] activeRawIndices)
         {
             RememberServerState(rawItems.Length, activeRawIndices);
-            // Deactivate all
             foreach (var item in rawItems)
             {
                 if (item != null)
                     item.SetActive(false);
             }
             
-            // Activate only the server-specified items
             foreach (int index in activeRawIndices)
             {
                 if (index >= 0 && index < rawItems.Length && rawItems[index] != null)
@@ -305,7 +284,7 @@ namespace FastAndFractured.Multiplayer
         [Server]
         private IEnumerator ForceInitialPoolSyncRoutine()
         {
-            float timeout = 6f;
+            float timeout = INITIAL_SYNC_TIMEOUT;
             float elapsed = 0f;
             while (elapsed < timeout)
             {
@@ -316,8 +295,8 @@ namespace FastAndFractured.Multiplayer
                     yield break;
                 }
 
-                elapsed += 0.2f;
-                yield return new WaitForSeconds(0.2f);
+                elapsed += INITIAL_SYNC_INTERVAL;
+                yield return new WaitForSeconds(INITIAL_SYNC_INTERVAL);
             }
 
             Debug.LogWarning("[NetworkedInteractableHandler] Server: Could not force initial pool sync (raw interactables unavailable).");
@@ -433,7 +412,7 @@ namespace FastAndFractured.Multiplayer
                     }
                 }
 
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(POOL_WATCH_INTERVAL);
             }
         }
 
@@ -443,12 +422,12 @@ namespace FastAndFractured.Multiplayer
 
             unchecked
             {
-                int hash = 17;
-                hash = hash * 31 + rawItems.Length;
+                int hash = HASH_SEED;
+                hash = hash * HASH_MULTIPLIER + rawItems.Length;
                 for (int i = 0; i < rawItems.Length; i++)
                 {
                     int value = (rawItems[i] != null && rawItems[i].activeSelf) ? (i + 1) : 0;
-                    hash = hash * 31 + value;
+                    hash = hash * HASH_MULTIPLIER + value;
                 }
                 return hash;
             }
@@ -509,14 +488,10 @@ namespace FastAndFractured.Multiplayer
             return _interactablesField?.GetValue(handler) as GameObject[];
         }
         
-        // -- Host migration -----------------------------------------------------------------
         private static FieldInfo _cooldownField;
         private static MethodInfo _updateVisibleMethod;
 
-        /// <summary>
-        /// Server: the pickups still in play, in pool order (raw indices), those on their short
-        /// post-pickup cooldown last. Picked skins are out of the pool and stay out.
-        /// </summary>
+        /// <summary>Server: the pickups still in play, in pool order, those on their post-pickup cooldown last.</summary>
         [Server]
         public int[] ServerDescribePool()
         {
@@ -538,10 +513,7 @@ namespace FastAndFractured.Multiplayer
             return order.ToArray();
         }
 
-        /// <summary>
-        /// Server, migrated match: put the pickups back the way they were. Waits for the
-        /// singleplayer handler to build its initial pool first, or that would overwrite it.
-        /// </summary>
+        /// <summary>Server, migrated match: restores the pickups once the singleplayer handler built its initial pool.</summary>
         [Server]
         public void ServerRestorePool(int[] order)
         {
@@ -552,7 +524,7 @@ namespace FastAndFractured.Multiplayer
         private IEnumerator RestorePoolWhenReady(int[] order)
         {
             float waited = 0f;
-            while (_interactableHandler.ShuffledActivePool.Count == 0 && waited < 10f)
+            while (_interactableHandler.ShuffledActivePool.Count == 0 && waited < RESTORE_POOL_TIMEOUT)
             {
                 waited += Time.unscaledDeltaTime;
                 yield return null;
@@ -580,8 +552,7 @@ namespace FastAndFractured.Multiplayer
                 _interactableHandler.onPoolInitialize.RemoveListener(OnPoolInitialized);
             }
 
-            // IsServerInitialized dereferences the NetworkManager; on a NetworkObject that never
-            // initialized (or after shutdown teardown) that throws NRE inside FishNet.
+            // IsServerInitialized throws on a NetworkObject that never initialized or was shut down.
             if (NetworkManager != null && IsServerInitialized)
             {
                 UnsubscribeFromInteractableEvents();

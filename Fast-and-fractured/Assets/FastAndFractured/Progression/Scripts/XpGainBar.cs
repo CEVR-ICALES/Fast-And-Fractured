@@ -7,11 +7,7 @@ using UnityEngine.UI;
 
 namespace FastAndFractured.Progression
 {
-    /// <summary>
-    /// The XP a match gave, on the results screen: "+N XP", the level bar filling up from where
-    /// it was to where it is now (crossing levels with a LEVEL UP), and how far the next reward is.
-    /// Built by code, so it can sit on any panel with a vertical layout.
-    /// </summary>
+    /// <summary>The match's XP on the results screen: "+N XP", the level bar filling (with LEVEL UP) and the next reward.</summary>
     public sealed class XpGainBar : MonoBehaviour
     {
         private static readonly Color Gain = new Color(0.49f, 0.88f, 0.54f, 1f);
@@ -22,6 +18,12 @@ namespace FastAndFractured.Progression
         private const float START_DELAY = 0.8f;      // the screen fades in first
         private const float FILL_TIME = 1.8f;        // the whole gain, however many levels it crosses
         private const float LEVEL_UP_PAUSE = 0.35f;  // the full bar holds a moment before it empties
+        private const float LEVEL_UP_PAUSE_FILL_SHARE = 0.5f;
+        private const float POP_SCALE = 0.18f;
+        private const float GAIN_FONT_SIZE = 32f;
+        private const float LEVEL_FONT_SIZE = 28f;
+        private const float SMALL_FONT_SIZE = 22f;
+        private const float BAR_HEIGHT = 18f;
 
         private PlayerProgression.Award _award;
         private TextMeshProUGUI _gain, _level, _numbers, _next, _unlocked;
@@ -49,14 +51,14 @@ namespace FastAndFractured.Progression
             column.childForceExpandHeight = false;
 
             var top = Row(transform, 40f);
-            _gain = Label(top, LocalizationManager.Localize("MP.Progress.XpGain", _award.Xp), font, 32f, Gain, TextAlignmentOptions.MidlineLeft);
-            _level = Label(top, "", font, 28f, Color.white, TextAlignmentOptions.MidlineRight);
+            _gain = Label(top, LocalizationManager.Localize("MP.Progress.XpGain", _award.Xp), font, GAIN_FONT_SIZE, Gain, TextAlignmentOptions.MidlineLeft);
+            _level = Label(top, "", font, LEVEL_FONT_SIZE, Color.white, TextAlignmentOptions.MidlineRight);
 
             var back = new GameObject("Bar", typeof(RectTransform), typeof(Image));
             back.transform.SetParent(transform, false);
             back.GetComponent<Image>().color = BarBack;
             back.GetComponent<Image>().raycastTarget = false;
-            back.AddComponent<LayoutElement>().preferredHeight = 18f;
+            back.AddComponent<LayoutElement>().preferredHeight = BAR_HEIGHT;
             var fill = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fill.transform.SetParent(back.transform, false);
             _fill = (RectTransform)fill.transform;
@@ -68,17 +70,16 @@ namespace FastAndFractured.Progression
             _fillImage.raycastTarget = false;
 
             var bottom = Row(transform, 30f);
-            _numbers = Label(bottom, "", font, 22f, Muted, TextAlignmentOptions.MidlineLeft);
-            _next = Label(bottom, "", font, 22f, Muted, TextAlignmentOptions.MidlineRight);
+            _numbers = Label(bottom, "", font, SMALL_FONT_SIZE, Muted, TextAlignmentOptions.MidlineLeft);
+            _next = Label(bottom, "", font, SMALL_FONT_SIZE, Muted, TextAlignmentOptions.MidlineRight);
 
-            _unlocked = Label(transform, "", font, 22f, Accent, TextAlignmentOptions.MidlineLeft);
+            _unlocked = Label(transform, "", font, SMALL_FONT_SIZE, Accent, TextAlignmentOptions.MidlineLeft);
             _unlocked.gameObject.SetActive(false);
 
             Show(_award.TotalBefore);
         }
 
-        // Start, not OnEnable: Create sets the award after AddComponent, and the animation should
-        // run when the results screen is first shown.
+        // Start, not OnEnable: Create sets the award after AddComponent.
         private void Start() => StartCoroutine(Animate());
 
         private IEnumerator Animate()
@@ -100,7 +101,7 @@ namespace FastAndFractured.Progression
                     _level.text = $"<color=#FFC759>{LocalizationManager.Localize("MP.Progress.LevelUp")}</color>";
                     StartCoroutine(Pulse(_level.transform));
                     for (float p = 0f; p < LEVEL_UP_PAUSE; p += Time.unscaledDeltaTime) yield return null;
-                    t += LEVEL_UP_PAUSE * 0.5f;   // the pause eats a little of the fill, not all
+                    t += LEVEL_UP_PAUSE * LEVEL_UP_PAUSE_FILL_SHARE;   // the pause eats a little of the fill, not all
                     shownLevel = level;
                     _leveledUp = true;
                 }
@@ -159,7 +160,7 @@ namespace FastAndFractured.Progression
             for (float t = 0f; t < time && target != null; t += Time.unscaledDeltaTime)
             {
                 float k = Mathf.Sin(Mathf.Clamp01(t / time) * Mathf.PI);
-                target.localScale = Vector3.one * (1f + 0.18f * k);
+                target.localScale = Vector3.one * (1f + POP_SCALE * k);
                 yield return null;
             }
             if (target != null) target.localScale = Vector3.one;

@@ -6,9 +6,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Removes the wrapped singleplayer component on non-server clients so its world-affecting
-    /// logic only runs on the server. Disabling a MonoBehaviour is not sufficient isolation:
-    /// Unity can still deliver physics messages to disabled behaviours.
+    /// Removes the wrapped singleplayer component on clients so it only runs on the server (disabled behaviours
+    /// still get physics messages).
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
     public abstract class ServerAuthoritativeWrapper<T> : NetworkBehaviour where T : MonoBehaviour
@@ -32,10 +31,7 @@ namespace FastAndFractured.Multiplayer
             OnConfigured();
         }
 
-        /// <summary>
-        /// Quarantines the colliders for one frame and removes the legacy behaviour. Derived
-        /// wrappers which fully replace the singleplayer path may call this on the server too.
-        /// </summary>
+        /// <summary>Quarantines the colliders for a frame and removes the legacy behaviour; also usable on the server.</summary>
         protected void RemoveWrappedBehaviour()
         {
             if (_wrappedRemovalScheduled || Wrapped == null)

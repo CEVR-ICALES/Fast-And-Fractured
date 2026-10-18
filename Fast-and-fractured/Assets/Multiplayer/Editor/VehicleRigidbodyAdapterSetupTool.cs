@@ -5,18 +5,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer.Editor
 {
     /// <summary>
-    /// Leaves every networked car with exactly one ICustomRigidbody: the MultiplayerRigidbodyAdapter.
-    ///
-    /// The networked cars are variants of the singleplayer cars, which carry a UnityRigidbodyAdapter.
-    /// Pepe's, Josefino's and MariaAntonia's variants remove it; Carme's did not, and
-    /// GetComponent&lt;ICustomRigidbody&gt;() returned the singleplayer adapter first. For Carme,
-    /// NetworkedVehicle.CreateReconcile then never produced a reconcile (it only reconciles a
-    /// MultiplayerRigidbodyAdapter), so her car was never corrected by the server: measured
-    /// 2026-09-30, a server-side move of 520 m never reached her own screen, and every physics
-    /// component drove her car through the non-predicted adapter.
-    ///
-    /// Run from Tools ▸ Fast And Fractured ▸ Vehicle Setup - Single Rigidbody Adapter (Headless).
-    /// NetworkedVehicleSetupTests asserts the result.
+    /// Leaves each networked car with only the MultiplayerRigidbodyAdapter: a leftover singleplayer adapter is
+    /// found first and the car is never reconciled. NetworkedVehicleSetupTests asserts it.
     /// </summary>
     public static class VehicleRigidbodyAdapterSetupTool
     {

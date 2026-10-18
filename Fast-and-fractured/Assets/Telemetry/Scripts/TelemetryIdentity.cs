@@ -10,13 +10,13 @@ using Steamworks;
 namespace FastAndFractured.GameTelemetry
 {
     /// <summary>
-    /// Who is playing: the Steam ID, hashed with a salt (the same player always gets the same
-    /// id, but the stored value is not their Steam ID), and an install id for when Steam is not
-    /// running. GA4 needs the install id as its client id anyway.
+    /// Who is playing: the salted hash of the Steam ID, plus an install id when Steam is not running (also GA4's
+    /// client id).
     /// </summary>
     public static class TelemetryIdentity
     {
         private const string CLIENT_ID_KEY = "Telemetry_ClientId";
+        private const int HASH_BYTES = 16;
 
         /// <summary>Random id of this installation, kept in PlayerPrefs.</summary>
         public static string ClientId
@@ -56,8 +56,8 @@ namespace FastAndFractured.GameTelemetry
         {
             using var sha = SHA256.Create();
             byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(TelemetryConfig.STEAM_ID_SALT + ":" + steamId));
-            var text = new StringBuilder(32);
-            for (int i = 0; i < 16; i++) text.Append(hash[i].ToString("x2"));
+            var text = new StringBuilder(HASH_BYTES * 2);
+            for (int i = 0; i < HASH_BYTES; i++) text.Append(hash[i].ToString("x2"));
             return text.ToString();
         }
     }

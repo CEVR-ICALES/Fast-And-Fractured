@@ -8,19 +8,14 @@ using UnityEngine;
 namespace FastAndFractured.GameTelemetry
 {
     /// <summary>
-    /// The one entry point for gameplay statistics: Telemetry.Track(TelemetryKeys.X, data).
-    /// Gameplay code does not call it - collectors (Telemetry/Scripts/Collectors) listen to the
-    /// game's events and track them, so the statistics never get in the game's way.
-    ///
-    /// Who sends: release builds unless the player turns it off (Settings ▸ "Share gameplay
-    /// statistics"); development builds and the editor only when it is turned on. Events queue
-    /// up (saved to disk, so a closed game or no connection loses nothing) and leave in batches
-    /// to Firestore and GA4: every few minutes, at the end of a match, and at the next start.
+    /// Entry point for gameplay statistics, called by the collectors. Events queue on disk and leave in batches to
+    /// Firestore and GA4. Release builds share unless turned off; development builds only when turned on.
     /// </summary>
     public static class Telemetry
     {
         private const string SHARE_KEY = "Telemetry_Share";
         private const string QUEUE_FILE = "telemetry_queue.json";
+        private const float FIRST_FLUSH_DELAY = 10f;
 
         private static readonly List<TelemetryEvent> Pending = new List<TelemetryEvent>();
         private static readonly List<TelemetryBatch> Batches = new List<TelemetryBatch>();
@@ -101,7 +96,6 @@ namespace FastAndFractured.GameTelemetry
             });
         }
 
-        // ── Queue on disk ──────────────────────────────────────────────────────────────
         private static string QueuePath => Path.Combine(Application.persistentDataPath, QUEUE_FILE);
 
         private static void SaveQueueFile()
@@ -142,7 +136,6 @@ namespace FastAndFractured.GameTelemetry
             }
         }
 
-        // ── Sending ────────────────────────────────────────────────────────────────────
         private sealed class Runner : MonoBehaviour
         {
             private readonly FirestoreSink _firestore = new FirestoreSink();
@@ -150,7 +143,7 @@ namespace FastAndFractured.GameTelemetry
             private bool _sending, _flushRequested;
             private float _nextFlush;
 
-            private void Start() => _nextFlush = Time.unscaledTime + 10f;   // leftovers from last time go soon
+            private void Start() => _nextFlush = Time.unscaledTime + FIRST_FLUSH_DELAY;   // leftovers from last time go soon
 
             public void RequestFlush() => _flushRequested = true;
 

@@ -7,9 +7,7 @@ using FastAndFractured;
 
 namespace FastAndFractured.Multiplayer
 {
-    /// <summary>
-    /// Multiplayer rigidbody adapter  for singleplayer use the other one
-    /// </summary>
+    /// <summary>The networked cars' rigidbody adapter; singleplayer uses UnityRigidbodyAdapter.</summary>
     [RequireComponent(typeof(Rigidbody))]
     [DefaultExecutionOrder(-100)]
 
@@ -55,12 +53,8 @@ namespace FastAndFractured.Multiplayer
         public Vector3 position { get => _rb.position; set => _rb.position = value; }
         public Quaternion rotation { get => _rb.rotation; set => _rb.rotation = value; }
 
-        // Apply velocity directly to the Rigidbody (same as singleplayer UnityRigidbodyAdapter).
-        // Routing through PredictionRigidbody.Velocity() queues the set, which only applies on
-        // Simulate(). FixedUpdate calls LimitRigidBodySpeed between ticks, but the clamp never
-        // takes effect until the next Simulate(), allowing accumulated forces to overshoot.
-        // Setters silently skip when kinematic — Unity logs a warning and drops the assignment
-        // anyway, but our callers (LimitRigidBodySpeed, etc.) shouldn't spam the console.
+        // Straight to the Rigidbody, as in singleplayer: PredictionRigidbody queues it until Simulate(), so the
+        // speed clamp between ticks never applied. Skipped when kinematic (Unity would warn and drop it).
         public Vector3 linearVelocity
         {
             get => _rb.linearVelocity;
@@ -81,13 +75,8 @@ namespace FastAndFractured.Multiplayer
         public RigidbodyConstraints constraints { get => _rb.constraints; set => _rb.constraints = value; }
         public new Transform transform => _rb.transform;
 
-        // Apply forces directly to the Rigidbody (same as singleplayer UnityRigidbodyAdapter).
-        // Routing through PredictionRigidbody.AddForce() queues forces; they only apply on
-        // Simulate(). FixedUpdate calls ApplyDrift/AddForce between ticks, accumulating N frames
-        // of drift force that all fire at once in Simulate() — causing extreme speed bursts.
-        // Direct application matches singleplayer: each FixedUpdate force is processed by
-        // Unity physics in the same physics step it was added.
-        // PredictionRigidbody is kept for reconciliation only (position/velocity sync from server).
+        // Straight to the Rigidbody, as in singleplayer: PredictionRigidbody queues forces until Simulate(), and
+        // several FixedUpdates of drift fired at once. PredictionRigidbody is kept for reconciliation only.
         public void AddForce(Vector3 force, ForceMode mode = ForceMode.Force) => _rb.AddForce(force, mode);
         public void AddTorque(Vector3 torque, ForceMode mode = ForceMode.Force) => _rb.AddTorque(torque, mode);
         public void AddForceAtPosition(Vector3 force, Vector3 position, ForceMode mode = ForceMode.Force) => _rb.AddForceAtPosition(force, position, mode);

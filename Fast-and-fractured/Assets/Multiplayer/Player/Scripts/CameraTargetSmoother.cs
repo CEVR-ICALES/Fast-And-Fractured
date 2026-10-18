@@ -4,30 +4,8 @@ using UnityEngine;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Makes the camera follow a point that is smoothed per frame instead of the car's physics
-    /// transform, so the view stops trembling.
-    ///
-    /// Why it is needed. The camera rig aims at CameraLookAtPoint, which a PositionConstraint pins
-    /// rigidly to the car's Visuals. Visuals is supposed to be smoothed between ticks by FishNet's
-    /// NetworkTickSmoother, but measured live on the client both smoothers (Visuals and Turret) sit
-    /// at enabled=false, and Visuals moves exactly in step with the Rigidbody - which, with
-    /// interpolation deliberately left at None, only moves on a tick boundary. The simulation runs
-    /// at 50 Hz and the client renders at ~100 fps, so the point the camera follows stands still for
-    /// one frame and then jumps two ticks' worth on the next. The whole world judders around a car
-    /// that is perfectly still on screen, which is what reads as "the camera trembles".
-    ///
-    /// Measured on the client, same session, car barely moving:
-    ///   raw CameraLookAtPoint : 18% of frames with ZERO movement, p95 step 0.0087 m, max 0.0647 m
-    ///   smoothed proxy        :  0% of frames with ZERO movement, p95 step 0.0032 m, max 0.0188 m
-    ///   cost: proxy trails the real point by 3 mm on average, 47 mm at worst
-    ///
-    /// This is deliberately a local, per-frame, render-side fix. Nothing about the camera is sent
-    /// over the network and nothing here participates in prediction or reconciliation - aiming and
-    /// the turret are the only camera-adjacent things that need to be authoritative, and they stay
-    /// exactly as they were.
-    ///
-    /// It does not fix the car model itself still stepping at tick rate; that is the disabled
-    /// NetworkTickSmoother, and it is a separate problem.
+    /// The camera follows a proxy smoothed per frame instead of CameraLookAtPoint, which is pinned to the
+    /// tick-stepped car and made the whole view judder. Local and render-side only.
     /// </summary>
     [DefaultExecutionOrder(-200)]
     [RequireComponent(typeof(CinemachineFreeLook))]
@@ -67,15 +45,14 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // A root object, so nothing in the player hierarchy can move it behind our back.
+            // A root object, so nothing in the player hierarchy moves it.
             _proxy = new GameObject($"[CameraTarget] {name}").transform;
             _proxy.position = _rawTarget.position;
             _velocity = Vector3.zero;
             _lastTarget = _rawTarget.position;
             _targetVelocity = Vector3.zero;
 
-            // Setting these on the FreeLook propagates to its three rigs, so TopRig, MiddleRig and
-            // BottomRig all follow the smoothed point too.
+            // Set on the FreeLook, this reaches its three rigs.
             _freeLook.Follow = _proxy;
             _freeLook.LookAt = _proxy;
         }
@@ -83,11 +60,7 @@ namespace FastAndFractured.Multiplayer
         /// <summary>The point the proxy chases (the car's Visuals, not the proxy itself).</summary>
         public Transform RawTarget => _rawTarget;
 
-        /// <summary>
-        /// Chase another point - the spectator uses it to watch other cars through the same
-        /// smoothing. Setting the rig's Follow directly would bypass the proxy and bring the
-        /// tick-rate stepping back. The camera jumps to the new point instead of sliding there.
-        /// </summary>
+        /// <summary>Chases another point (the spectator), through the same smoothing; the camera jumps there.</summary>
         public void Retarget(Transform target)
         {
             if (target == null || target == _rawTarget) return;
@@ -114,12 +87,7 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
-        /// <summary>
-        /// LateUpdate, not Update: Unity evaluates the PositionConstraint that drives the real point
-        /// in PreLateUpdate, so reading it in Update would sample the previous frame. The execution
-        /// order above puts this ahead of CinemachineBrain's own LateUpdate, so the brain always
-        /// reads a proxy that was updated this frame.
-        /// </summary>
+        /// <summary>LateUpdate: the PositionConstraint moving the real point runs in PreLateUpdate.</summary>
         private void LateUpdate()
         {
             if (_proxy == null || _rawTarget == null) return;
@@ -127,10 +95,7 @@ namespace FastAndFractured.Multiplayer
             Vector3 target = _rawTarget.position;
             float deltaTime = Time.deltaTime;
 
-            // A teleport is a jump the target's own motion does not explain. This used to measure
-            // the distance to the proxy instead, which trails the target by speed * smoothTime:
-            // during a dash (~2 m behind, ~3 m per frame at 30 fps) that tripped the 5 m limit and
-            // yanked the camera forward - 4 times in one dash, measured on the client 2026-09-29.
+            // A teleport is a jump the target's own motion does not explain; the proxy itself trails by speed * smoothTime.
             Vector3 expected = _lastTarget + _targetVelocity * deltaTime;
             bool teleported = (target - expected).sqrMagnitude > teleportDistance * teleportDistance;
             _targetVelocity = teleported || deltaTime <= 0f ? Vector3.zero : (target - _lastTarget) / deltaTime;

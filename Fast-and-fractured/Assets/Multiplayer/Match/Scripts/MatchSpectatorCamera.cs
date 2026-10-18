@@ -10,14 +10,8 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Camera of a player who came from the room to watch the match in progress
-    /// (NetworkedLobbyManager.SpectateMatch). That client has no car and no player root, so
-    /// there is no player camera rig to borrow: this is a plain chase camera of its own that
-    /// follows one car at a time.
-    ///
-    /// TAB / click / gamepad A: next car · right mouse or right stick: look around ·
-    /// Esc / gamepad B: back to the room.
-    /// Lives in the map scene and goes with it.
+    /// Chase camera of a player watching a match from the room (no car, no rig). TAB / click / A: next car;
+    /// right mouse or stick: look around; Esc / B: back to the room.
     /// </summary>
     public sealed class MatchSpectatorCamera : MonoBehaviour
     {
@@ -27,6 +21,17 @@ namespace FastAndFractured.Multiplayer
         private const float FOLLOW_SMOOTH = 0.18f;
         private const float ORBIT_SPEED = 120f;     // degrees per second at full stick
         private const float MOUSE_ORBIT = 0.25f;    // degrees per pixel
+        private const float MIN_HEADING_SPEED_SQR = 4f;
+        private const float MIN_HEADING_SQR = 0.01f;
+        private const float TARGET_REFRESH_SECONDS = 0.5f;
+        private const float CAMERA_DEPTH = 50f;
+        private const float NEAR_CLIP = 0.3f;
+        private const float FAR_CLIP = 3000f;
+        private const int SORTING_ORDER = 30;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private const float FONT_SIZE = 28f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
+        private static readonly Color BAR_COLOR = new Color(0f, 0f, 0f, 0.55f);
 
         private static MatchSpectatorCamera _instance;
 
@@ -72,9 +77,9 @@ namespace FastAndFractured.Multiplayer
             foreach (var listener in FindObjectsByType<AudioListener>(FindObjectsSortMode.None))
                 listener.enabled = false;
             _camera = gameObject.AddComponent<Camera>();
-            _camera.depth = 50f;
-            _camera.nearClipPlane = 0.3f;
-            _camera.farClipPlane = 3000f;
+            _camera.depth = CAMERA_DEPTH;
+            _camera.nearClipPlane = NEAR_CLIP;
+            _camera.farClipPlane = FAR_CLIP;
             gameObject.AddComponent<AudioListener>();
             gameObject.tag = "MainCamera";
 
@@ -82,11 +87,11 @@ namespace FastAndFractured.Multiplayer
             canvasGo.transform.SetParent(transform, false);
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 30;
+            canvas.sortingOrder = SORTING_ORDER;
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
 
             var bar = new GameObject("Bar", typeof(RectTransform));
             var barRect = (RectTransform)bar.transform;
@@ -95,7 +100,7 @@ namespace FastAndFractured.Multiplayer
             barRect.anchoredPosition = new Vector2(0f, 40f);
             barRect.sizeDelta = new Vector2(1100f, 64f);
             var background = bar.AddComponent<Image>();
-            background.color = new Color(0f, 0f, 0f, 0.55f);
+            background.color = BAR_COLOR;
             background.raycastTarget = false;
 
             var textGo = new GameObject("Text", typeof(RectTransform));
@@ -105,7 +110,7 @@ namespace FastAndFractured.Multiplayer
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = textRect.offsetMax = Vector2.zero;
             _label = textGo.AddComponent<TextMeshProUGUI>();
-            _label.fontSize = 28f;
+            _label.fontSize = FONT_SIZE;
             _label.alignment = TextAlignmentOptions.Center;
             _label.richText = true;
             _label.raycastTarget = false;
@@ -132,7 +137,7 @@ namespace FastAndFractured.Multiplayer
 
             if (Time.unscaledTime >= _nextRefresh)
             {
-                _nextRefresh = Time.unscaledTime + 0.5f;
+                _nextRefresh = Time.unscaledTime + TARGET_REFRESH_SECONDS;
                 RefreshAlive();
                 if (_target == null || !_alive.Contains(_target)) NextTarget();
                 UpdateLabel();
@@ -143,13 +148,12 @@ namespace FastAndFractured.Multiplayer
         {
             if (_target == null) return;
             var body = _target.GetComponentInParent<Rigidbody>();
-            Vector3 heading = body != null && body.linearVelocity.sqrMagnitude > 4f ? body.linearVelocity : _target.forward;
+            Vector3 heading = body != null && body.linearVelocity.sqrMagnitude > MIN_HEADING_SPEED_SQR ? body.linearVelocity : _target.forward;
             heading.y = 0f;
-            if (heading.sqrMagnitude < 0.01f) heading = Vector3.forward;
+            if (heading.sqrMagnitude < MIN_HEADING_SQR) heading = Vector3.forward;
             heading = Quaternion.Euler(0f, _orbitYaw, 0f) * heading.normalized;
 
-            // The interpolated model, not the car root: the root only moves on physics steps, and
-            // aiming the camera straight at it every frame made the whole view jerk.
+            // The interpolated model, not the car root, which only moves on physics steps.
             Vector3 point = NetworkedSpectatorController.SmoothedPointOf(_target).position;
             Vector3 wanted = point - heading * DISTANCE + Vector3.up * HEIGHT;
             transform.position = Vector3.SmoothDamp(transform.position, wanted, ref _velocity, FOLLOW_SMOOTH, Mathf.Infinity, Time.unscaledDeltaTime);
