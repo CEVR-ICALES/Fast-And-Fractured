@@ -1,10 +1,12 @@
 using Enums;
+using FastAndFractured.Utilities;
+using System;
 using UnityEngine;
 using Utilities;
 
 namespace FastAndFractured
 {
-    public abstract class BulletBehaviour : MonoBehaviour, IPooledObject
+    public abstract class BulletBehaviour : MonoBehaviour, IPooledObject, IEventSimulable
     {
 
         [SerializeField] protected Pooltype pooltype;
@@ -20,26 +22,32 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         [SerializeField] private bool initValues = true;
         //References
-        protected Rigidbody rb;
+        protected ICustomRigidbody rb;
         protected Collider ownCollider;
         [SerializeField]
         private GameObject visuals;
         [SerializeField] protected GameObject particles;
         [Tooltip("Time delay to allow particles to show up")][SerializeField] private float delayProyectileEnd = 1.5f;
 
-        // Update is called once per frame
-        protected abstract void FixedUpdate();
+        public event Action<GameObject> OnDespawnRequested;
+         
         public virtual void InitializeValues()
         {
-            rb = GetComponent<Rigidbody>();
-            ownCollider = GetComponent<Collider>();
+            rb = GetComponent<ICustomRigidbody>();
+            ownCollider = GetComponentInParent<Collider>();
            
         }
         public virtual void InitBulletTrayectory()
         {
+            ownCollider = GetComponentInParent<Collider>();
+
             if (particles != null)
             {
                 particles.SetActive(false);
+            }
+            if (rb==null)
+            {
+                rb = GetComponent<ICustomRigidbody>();
             }
             initPosition = transform.position;
             rb.linearVelocity = velocity;
@@ -50,6 +58,10 @@ namespace FastAndFractured
             if (particles != null)
             {
                 rb.linearVelocity = Vector3.zero;
+                if (!ownCollider)
+                {
+                    ownCollider = GetComponentInParent<Collider>();
+                }
                 ownCollider.enabled = false;
                 visuals.SetActive(false);
                 rb.constraints = RigidbodyConstraints.FreezePosition;
@@ -59,26 +71,31 @@ namespace FastAndFractured
                 TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
                 {
                     visuals.SetActive(true);
-                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
                     ownCollider.enabled = true;
                     rb.constraints = RigidbodyConstraints.None;
                 });
             }
-            else
-                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+            OnDespawnRequested?.Invoke(gameObject); 
         }
 
-        protected virtual void OnTriggerEnter(Collider other)
+       
+
+        public virtual void OnSimulateStart(object[] args)
         {
+            InitializeValues();
+         }
 
-        }
-
-        protected virtual void OnCollisionEnter(Collision collision)
+        public virtual void OnSimulateTick(float deltaTime)
         {
+         }
 
-        }
+        public virtual void OnSimulateTriggerEnter(Collider other)
+        {
+         }
 
-
+        public virtual void OnSimulateCollisionEnter(Collision collision)
+        {
+         }
     }
 
 }

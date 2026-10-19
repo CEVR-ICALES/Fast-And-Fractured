@@ -1,5 +1,7 @@
+using NRandom;
 using System;
 using UnityEngine;
+using Utilities;
 
 namespace StateMachine
 {
@@ -11,7 +13,7 @@ namespace StateMachine
         {
 
           
-            return UnityEngine.Random.Range(0, 2) == 1;
+            return DeterministicRandom.Instance.NextInt(0, 2) == 1;
         }
     }
 }

@@ -139,7 +139,9 @@ namespace FastAndFractured
         {
             //just for try propouses
             charDataSO.Invulnerable = false;
+            if (transform.parent) { 
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
+            }
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
@@ -149,12 +151,15 @@ namespace FastAndFractured
         }
         private void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         private void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         #endregion

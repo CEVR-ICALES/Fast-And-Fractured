@@ -40,36 +40,44 @@ namespace FastAndFractured
 
         }
 
+   
         public void StartGameInitializationDelay(float delay, System.Action onTimerComplete)
         {
             if (TimerSystem.Instance != null)
             {
-                _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete:()=>{
+                _delayUntilGameStartsTimer = TimerSystem.Instance.CreateTimer(delay, onTimerDecreaseComplete: () => {
                     onTimerComplete?.Invoke();
                     _delayUntilGameStartsTimer = null;
-                 
-                
+
+
                 });
             }
             else
             {
                 Debug.LogError("TimerSystem.Instance is null. Cannot start game delay timer.");
-                onTimerComplete?.Invoke(); 
+                onTimerComplete?.Invoke();
             }
         }
-        
         public void ActivateCharacterControls()
         {
             if (_playerReference != null)
             {
                 var playerInputCtrl = _playerReference.GetComponentInParent<PlayerInputController>();
                 if (playerInputCtrl) playerInputCtrl.enabled = true;
+
                 var playerBaseCtrl = _playerReference.GetComponentInParent<Controller>();
-                if(playerBaseCtrl) playerBaseCtrl.enabled = true;
+                if (playerBaseCtrl) playerBaseCtrl.enabled = true;
+            }
+
+            if (_inGameCharacters == null)
+            {
+                _charactersCustomStartEvent?.Invoke();
+                return;
             }
 
             foreach (var character in _inGameCharacters)
             {
+                if (character == null) continue;
                 if (character == _playerReference) continue;  
                 var aiBaseCtrl = character.GetComponentInParent<Controller>();
                 if (aiBaseCtrl) aiBaseCtrl.enabled = true;
@@ -77,6 +85,12 @@ namespace FastAndFractured
             _charactersCustomStartEvent?.Invoke();
         }
 
+
+        /// <summary>Seconds until the storm is called; null when no storm countdown is running.</summary>
+        public float? StormSecondsLeft =>
+            _callStormTimer != null && TimerSystem.ExistingInstance != null && TimerSystem.ExistingInstance.HasTimer(_callStormTimer)
+                ? Mathf.Max(0f, _callStormTimer.GetData().CurrentTime)
+                : (float?)null;
 
         public void SetupStorm(bool callStormInitially, bool debugModeForStormSpawns)
         {

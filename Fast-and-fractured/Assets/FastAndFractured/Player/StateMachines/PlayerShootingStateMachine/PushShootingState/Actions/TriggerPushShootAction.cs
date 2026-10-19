@@ -1,4 +1,5 @@
 using FastAndFractured;
+using FastAndFractured.Abstractions;
 using UnityEngine;
 using Utilities;
 
@@ -10,11 +11,12 @@ namespace StateMachine
     {
         public override void Act(Controller controller)
         {
+            var shootController = controller.transform.root.GetComponentInChildren<IShootController>();
             PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
             pushShootHandle.CurrentShootDirection = controller.GetBehaviour<CameraHolder>().CameraToHold.transform.forward;
-            if (controller.GetBehaviour<PlayerInputController>().IsPushShooting)
+            if (shootController != null && controller.GetBehaviour<PlayerInputController>().IsPushShooting)
             {
-                pushShootHandle.PushShooting();
+                shootController.TryPushShoot();
             }
         }
     }

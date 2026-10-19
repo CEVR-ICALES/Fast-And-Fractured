@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Unity.Cinemachine;
-using Unity.Cinemachine.Editor;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -29,9 +28,6 @@ namespace FastAndFractured
         [SerializeField]
         private ScreenShakeProfile defaultProfile;
         private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
-         [SerializeField]
-         private CinemachineImpulseChannels _cinemachineImpulseChanels;
-
          private int _shakeLayer;
 
         private const int LAYER_COMMON = 1;
@@ -39,10 +35,10 @@ namespace FastAndFractured
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            LevelController.Instance.onLevelPreStart.AddListener(
                 () => TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
             {
-                _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
+                _statsController = LevelController.Instance.LocalPlayer.GetComponent<StatsController>();
             }));
             if(commonCinemachineImpulseListener==null){
             commonCinemachineImpulseListener = GetComponent<CinemachineImpulseListener>();
@@ -54,12 +50,15 @@ namespace FastAndFractured
             _inputController = PlayerInputController.Instance;
             _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
             _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void Update()

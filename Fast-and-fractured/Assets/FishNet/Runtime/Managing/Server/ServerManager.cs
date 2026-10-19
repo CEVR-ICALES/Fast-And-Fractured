@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FishNet.Managing.Statistic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FishNet.Managing.Server
@@ -58,7 +60,7 @@ namespace FishNet.Managing.Server
         public Dictionary<int, NetworkConnection> Clients = new();
         /// <summary>
         /// Clients dictionary as a list, containing only values.
-        /// </summary>        
+        /// </summary>
         private List<NetworkConnection> _clientsList = new();
         /// <summary>
         /// NetworkManager for server.
@@ -122,7 +124,6 @@ namespace FishNet.Managing.Server
         [SerializeField]
         private bool _allowPredictedSpawning = false;
         /// <summary>
-        /// 
         /// </summary>
         [Tooltip("Maximum number of Ids to reserve on clients for predicted spawning. Higher values will allow clients to send more predicted spawns per second but may reduce availability of ObjectIds with high player counts.")]
         [Range(1, MAXIMUM_RESERVED_OBJECT_IDS)]
@@ -165,15 +166,16 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Maximum frame rate the server may run at. When as host this value runs at whichever is higher between client and server.
         /// </summary>
-        internal ushort FrameRate => (_changeFrameRate) ? _frameRate : (ushort)0;
+        internal ushort FrameRate => _changeFrameRate ? _frameRate : (ushort)0;
         [Tooltip("Maximum frame rate the server may run at. When as host this value runs at whichever is higher between client and server.")]
         [Range(1, NetworkManager.MAXIMUM_FRAMERATE)]
         [SerializeField]
         private ushort _frameRate = NetworkManager.MAXIMUM_FRAMERATE;
 
-        /// Sets the maximum frame rate the client may run at. Calling this method will enable ChangeFrameRate.
+        /// <summary>
+        /// Sets the maximum frame rate the server may run at. Calling this method will enable ChangeFrameRate.
         /// </summary>
-        /// <param name="value">New value.</param>
+        /// <param name = "value">New value.</param>
         public void SetFrameRate(ushort value)
         {
             _frameRate = (ushort)Mathf.Clamp(value, 0, NetworkManager.MAXIMUM_FRAMERATE);
@@ -198,7 +200,7 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Sets StartOnHeadless value.
         /// </summary>
-        /// <param name="value">New value to use.</param>
+        /// <param name = "value">New value to use.</param>
         public void SetStartOnHeadless(bool value) => _startOnHeadless = value;
 
         [Tooltip("True to automatically start the server connection when running as headless.")]
@@ -216,15 +218,18 @@ namespace FishNet.Managing.Server
         /// </summary>
         private float _nextTimeoutCheckTime;
         /// <summary>
-        /// Used to read splits.
         /// </summary>
-        private SplitReader _splitReader = new();
-#if DEVELOPMENT
+        private NetworkTrafficStatistics _networkTrafficStatistics;
+        #if DEVELOPMENT
         /// <summary>
         /// Logs data about parser to help debug.
         /// </summary>
         private PacketIdHistory _packetIdHistory = new();
-#endif
+        #endif
+        #endregion
+
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_OnPostTick = new("ServerManager.TimeManager_OnPostTick()");
         #endregion
 
         #region Const.
@@ -235,7 +240,7 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Maximum number of reserved object Ids allowed for predicted spawning.
         /// </summary>
-        private const int MAXIMUM_RESERVED_OBJECT_IDS = 100;  //QUICK-TEST Increase this to 5000, save, within ServerManager set maximum reserved Ids to max.
+        private const int MAXIMUM_RESERVED_OBJECT_IDS = 100; // QUICK-TEST Increase this to 5000, save, within ServerManager set maximum reserved Ids to max.
         #endregion
 
         private void OnDestroy()
@@ -246,19 +251,21 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Initializes this script for use.
         /// </summary>
-        /// <param name="manager"></param>
+        /// <param name = "manager"></param>
         internal void InitializeOnce_Internal(NetworkManager manager)
         {
             NetworkManager = manager;
             Objects = new(manager);
             Objects.SubscribeToSceneLoaded(true);
             InitializeRpcLinks();
-            //Unsubscribe first incase already subscribed.
+            // Unsubscribe first incase already subscribed.
             SubscribeToTransport(false);
             SubscribeToTransport(true);
             NetworkManager.ClientManager.OnClientConnectionState += ClientManager_OnClientConnectionState;
             NetworkManager.SceneManager.OnClientLoadedStartScenes += SceneManager_OnClientLoadedStartScenes;
             NetworkManager.TimeManager.OnPostTick += TimeManager_OnPostTick;
+
+            NetworkManager.StatisticsManager.TryGetNetworkTrafficStatistics(out _networkTrafficStatistics);
 
             if (_authenticator == null)
                 _authenticator = GetComponent<Authenticator>();
@@ -288,23 +295,23 @@ namespace FishNet.Managing.Server
         {
             if (GetStartOnHeadless())
             {
-                //Wrapping logic in check instead of everything so _startOnHeadless doesnt warn as unused in editor.
-#if UNITY_SERVER
+                // Wrapping logic in check instead of everything so _startOnHeadless doesnt warn as unused in editor.
+                #if UNITY_SERVER && !UNITY_EDITOR
                 StartConnection();
-#endif
+                #endif
             }
         }
 
         /// <summary>
         /// Stops the local server connection.
         /// </summary>
-        /// <param name="sendDisconnectMessage">True to send a disconnect message to all clients first.</param>
+        /// <param name = "sendDisconnectMessage">True to send a disconnect message to all clients first.</param>
         public bool StopConnection(bool sendDisconnectMessage)
         {
             if (sendDisconnectMessage)
                 SendDisconnectMessages(Clients.Values.ToList(), true);
 
-            //Return stop connection result.
+            // Return stop connection result.
             return NetworkManager.TransportManager.Transport.StopConnection(true);
         }
 
@@ -312,7 +319,7 @@ namespace FishNet.Managing.Server
         /// Sends a disconnect messge to connectionIds.
         /// This does not iterate outgoing automatically.
         /// </summary>
-        /// <param name="connectionIds"></param>
+        /// <param name = "connectionIds"></param>
         public void SendDisconnectMessages(int[] connectionIds)
         {
             List<NetworkConnection> conns = new();
@@ -334,7 +341,7 @@ namespace FishNet.Managing.Server
             PooledWriter writer = WriterPool.Retrieve();
             writer.WritePacketIdUnpacked(PacketId.Disconnect);
             ArraySegment<byte> segment = writer.GetArraySegment();
-            //Send segment to each client, authenticated or not.
+            // Send segment to each client, authenticated or not.
             foreach (NetworkConnection c in conns)
                 c.SendToClient((byte)Channel.Reliable, segment);
             //Recycle writer.
@@ -355,7 +362,7 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Starts the local server using port.
         /// </summary>
-        /// <param name="port">Port to start on.</param>
+        /// <param name = "port">Port to start on.</param>
         /// <returns></returns>
         public bool StartConnection(ushort port)
         {
@@ -371,11 +378,11 @@ namespace FishNet.Managing.Server
         {
             if (_remoteClientTimeout == RemoteTimeoutType.Disabled)
                 return;
-#if DEVELOPMENT
+            #if DEVELOPMENT
             //If development but not set to development return.
             if (_remoteClientTimeout != RemoteTimeoutType.Development)
                 return;
-#endif
+            #endif
             //Wait two timing intervals to give packets a chance to come through.
             if (NetworkManager.SceneManager.IsIteratingQueue(2f))
                 return;
@@ -385,7 +392,7 @@ namespace FishNet.Managing.Server
                 return;
             //Check for timeouts every 200ms.
             const float TIMEOUT_CHECK_FREQUENCY = 0.2f;
-            _nextTimeoutCheckTime = (unscaledTime + TIMEOUT_CHECK_FREQUENCY);
+            _nextTimeoutCheckTime = unscaledTime + TIMEOUT_CHECK_FREQUENCY;
             //No clients.
             int clientsCount = Clients.Count;
             if (clientsCount == 0)
@@ -419,7 +426,7 @@ namespace FishNet.Managing.Server
                 if (clientLocalTick == 0)
                     clientLocalTick = item.ServerConnectionTick;
 
-                uint difference = (localTick - clientLocalTick);
+                uint difference = localTick - clientLocalTick;
                 //Client has timed out.
                 if (difference >= requiredTicks)
                     item.Kick(KickReason.UnexpectedProblem, LoggingType.Common, $"{item.ToString()} has timed out. You can modify this feature on the ServerManager component.");
@@ -433,7 +440,8 @@ namespace FishNet.Managing.Server
         /// </summary>
         private void TimeManager_OnPostTick()
         {
-            CheckClientTimeout();
+            using (_pm_OnPostTick.Auto())
+                CheckClientTimeout();
         }
 
         /// <summary>
@@ -474,7 +482,7 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Changes subscription status to transport.
         /// </summary>
-        /// <param name="subscribe"></param>
+        /// <param name = "subscribe"></param>
         private void SubscribeToTransport(bool subscribe)
         {
             if (NetworkManager == null || NetworkManager.TransportManager == null || NetworkManager.TransportManager.Transport == null)
@@ -534,11 +542,11 @@ namespace FishNet.Managing.Server
             if (NetworkManager.CanLog(LoggingType.Common))
             {
                 Transport t = NetworkManager.TransportManager.GetTransport(args.TransportIndex);
-                string tName = (t == null) ? "Unknown" : t.GetType().Name;
+                string tName = t == null ? "Unknown" : t.GetType().Name;
                 string socketInformation = string.Empty;
                 if (state == LocalConnectionState.Starting)
                     socketInformation = $" Listening on port {t.GetPort()}.";
-                NetworkManagerExtensions.Log($"Local server is {state.ToString().ToLower()} for {tName}.{socketInformation}");
+                NetworkManager.Log($"Local server is {state.ToString().ToLower()} for {tName}.{socketInformation}");
             }
 
             NetworkManager.UpdateFramerate();
@@ -567,11 +575,11 @@ namespace FishNet.Managing.Server
                  * This is to allow the client to utilize some features/information
                  * received from the server only when it's in dev mode. */
                 bool isDevelopmentBuild;
-#if DEVELOPMENT
+                #if DEVELOPMENT
                 isDevelopmentBuild = true;
-#else
+                #else
                 isDevelopmentBuild = false;
-#endif
+                #endif
                 PooledWriter writer = WriterPool.Retrieve();
                 writer.WritePacketIdUnpacked(PacketId.Version);
                 writer.WriteBoolean(isDevelopmentBuild);
@@ -581,7 +589,7 @@ namespace FishNet.Managing.Server
                 /* If there is an authenticator
                  * and the transport is not a local transport. */
                 Authenticator auth = GetAuthenticator();
-                if (auth != null && !NetworkManager.TransportManager.IsLocalTransport(transportId))
+                if (auth != null)
                     auth.OnRemoteConnection(conn);
                 else
                     ClientAuthenticated(conn);
@@ -599,46 +607,44 @@ namespace FishNet.Managing.Server
         {
             //Sanity check to make sure transports are following proper types/ranges.
             int id = args.ConnectionId;
-            if (id < 0 || id > NetworkConnection.MAXIMUM_CLIENTID_VALUE)
+            if (id < 0)
             {
                 Kick(args.ConnectionId, KickReason.UnexpectedProblem, LoggingType.Error, $"The transport you are using supplied an invalid connection Id of {id}. Connection Id values must range between 0 and {NetworkConnection.MAXIMUM_CLIENTID_VALUE}. The client has been disconnected.");
                 return;
             }
+
             //Valid Id.
-            else
+            //If started then add to authenticated clients.
+            if (args.ConnectionState == RemoteConnectionState.Started)
             {
-                //If started then add to authenticated clients.
-                if (args.ConnectionState == RemoteConnectionState.Started)
+                NetworkManager.Log($"Remote connection started for Id {id}.");
+                NetworkConnection conn = new(NetworkManager, id, args.TransportIndex, true);
+                Clients.Add(args.ConnectionId, conn);
+                _clientsList.Add(conn);
+                OnRemoteConnectionState?.Invoke(conn, args);
+
+                //Do nothing else until the client sends it's version.
+            }
+            //If stopping.
+            else if (args.ConnectionState == RemoteConnectionState.Stopped)
+            {
+                /* If client's connection is found then clean
+                 * them up from server. */
+                if (Clients.TryGetValueIL2CPP(id, out NetworkConnection conn))
                 {
-                    NetworkManager.Log($"Remote connection started for Id {id}.");
-                    NetworkConnection conn = new(NetworkManager, id, args.TransportIndex, true);
-                    Clients.Add(args.ConnectionId, conn);
-                    _clientsList.Add(conn);
+                    conn.SetDisconnecting(true);
                     OnRemoteConnectionState?.Invoke(conn, args);
+                    Clients.Remove(id);
+                    _clientsList.Remove(conn);
+                    Objects.ClientDisconnected(conn);
+                    BroadcastClientConnectionChange(false, conn);
+                    //Return predictedObjectIds.
+                    Queue<int> pqId = conn.PredictedObjectIds;
+                    while (pqId.Count > 0)
+                        Objects.CacheObjectId(pqId.Dequeue());
 
-                    //Do nothing else until the client sends it's version.
-                }
-                //If stopping.
-                else if (args.ConnectionState == RemoteConnectionState.Stopped)
-                {
-                    /* If client's connection is found then clean
-                     * them up from server. */
-                    if (Clients.TryGetValueIL2CPP(id, out NetworkConnection conn))
-                    {
-                        conn.SetDisconnecting(true);
-                        OnRemoteConnectionState?.Invoke(conn, args);
-                        Clients.Remove(id);
-                        _clientsList.Remove(conn);
-                        Objects.ClientDisconnected(conn);
-                        BroadcastClientConnectionChange(false, conn);
-                        //Return predictedObjectIds.
-                        Queue<int> pqId = conn.PredictedObjectIds;
-                        while (pqId.Count > 0)
-                            Objects.CacheObjectId(pqId.Dequeue());
-
-                        conn.ResetState();
-                        NetworkManager.Log($"Remote connection stopped for Id {id}.");
-                    }
+                    conn.ResetState();
+                    NetworkManager.Log($"Remote connection stopped for Id {id}.");
                 }
             }
         }
@@ -646,7 +652,7 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Sends client their connectionId.
         /// </summary>
-        /// <param name="connectionid"></param>
+        /// <param name = "connectionid"></param>
         private void SendAuthenticated(NetworkConnection conn)
         {
             PooledWriter writer = WriterPool.Retrieve();
@@ -654,14 +660,14 @@ namespace FishNet.Managing.Server
             writer.WriteNetworkConnection(conn);
             /* If predicted spawning is enabled then also send
              * reserved objectIds. */
-            ;
+
             PredictionManager pm = NetworkManager.PredictionManager;
             if (GetAllowPredictedSpawning())
             {
                 int count = Mathf.Min(Objects.GetObjectIdCache().Count, GetReservedObjectIds());
                 if (count > MAXIMUM_RESERVED_OBJECT_IDS)
                     count = MAXIMUM_RESERVED_OBJECT_IDS;
-                
+
                 List<int> ids = CollectionCaches<int>.RetrieveList();
                 for (int i = 0; i < count; i++)
                 {
@@ -670,12 +676,12 @@ namespace FishNet.Managing.Server
                 }
 
                 writer.WriteSignedPackedWhole(ids.Count);
-                foreach (int id in ids) 
+                foreach (int id in ids)
                 {
                     writer.WriteNetworkObjectId(id);
                     conn.PredictedObjectIds.Enqueue(id);
                 }
-           
+
                 CollectionCaches<int>.Store(ids);
             }
 
@@ -694,12 +700,25 @@ namespace FishNet.Managing.Server
         /// <summary>
         /// Called when the server receives data.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name = "args"></param>
         private void ParseReceived(ServerReceivedDataArgs args)
         {
-            //Not from a valid connection.
+            #if DEVELOPMENT && !UNITY_SERVER
+            if (_networkTrafficStatistics != null)
+                _networkTrafficStatistics.PacketBundleReceived(asServer: true);
+            #endif
+
+            //Not from a valid connection. Should not be possible.
             if (args.ConnectionId < 0)
                 return;
+            
+            /* Connection isn't available. This should never happen.
+             * Force an immediate disconnect. */
+            if (!Clients.TryGetValueIL2CPP(args.ConnectionId, out NetworkConnection connection))
+            {
+                Kick(args.ConnectionId, KickReason.UnexpectedProblem, LoggingType.Error, $"ConnectionId {args.ConnectionId} not found within Clients. Connection will be kicked immediately.");
+                return;
+            }
 
             ArraySegment<byte> segment;
             if (NetworkManager.TransportManager.HasIntermediateLayer)
@@ -707,7 +726,9 @@ namespace FishNet.Managing.Server
             else
                 segment = args.Data;
 
-            NetworkManager.StatisticsManager.NetworkTraffic.LocalServerReceivedData((ulong)segment.Count);
+            if (_networkTrafficStatistics != null)
+                _networkTrafficStatistics.AddInboundSocketData((ulong)segment.Count, asServer: true);
+
             if (segment.Count <= TransportManager.UNPACKED_TICK_LENGTH)
                 return;
 
@@ -716,19 +737,18 @@ namespace FishNet.Managing.Server
             //If over MTU kick client immediately.
             if (segment.Count > channelMtu)
             {
-                ExceededMTUKick();
+                ExceededMTUKick(segment.Count, channelMtu);
                 return;
             }
 
             TimeManager timeManager = NetworkManager.TimeManager;
 
-            bool hasIntermediateLayer = NetworkManager.TransportManager.HasIntermediateLayer;
             PacketId packetId = PacketId.Unset;
             PooledReader reader = null;
-#if !DEVELOPMENT
+            #if !DEVELOPMENT
             try
             {
-#endif
+            #endif
             Reader.DataSource dataSource = Reader.DataSource.Client;
             reader = ReaderPool.Retrieve(segment, NetworkManager, dataSource);
             uint tick = reader.ReadTickUnpacked();
@@ -738,143 +758,141 @@ namespace FishNet.Managing.Server
              * received. */
             if (reader.PeekPacketId() == PacketId.Split)
             {
-#if DEVELOPMENT
+                #if DEVELOPMENT
                 NetworkManager.PacketIdHistory.ReceivedPacket(PacketId.Split, packetFromServer: false);
-#endif
+                #endif
                 //Skip packetId.
                 reader.ReadPacketId();
-
-                int expectedMessages;
-                _splitReader.GetHeader(reader, out expectedMessages);
-                //If here split message is to be read into splitReader.
-                _splitReader.Write(tick, reader, expectedMessages);
-
-                /* If fullMessage returns 0 count then the split
-                 * has not written fully yet. Otherwise, if there is
-                 * data within then reinitialize reader with the
-                 * full message. */
-                ArraySegment<byte> fullMessage = _splitReader.GetFullMessage();
-                if (fullMessage.Count == 0)
+                
+                int expectedMessages = reader.ReadInt32();
+                
+                if (!connection.TryGetSplitReader(expectedMessages, out SplitReader splitReader))
+                {
+                    //Intentionally a normal log rather than error to prevent spam from client attacks.
+                    NetworkManager.Log($"Something went wrong when trying to get the [{nameof(splitReader)}] for connection [{connection.ToString()}].");
+                    connection.Kick(KickReason.UnusualActivity);
+                    
                     return;
-
-                /* If here then all data has been received.
-                 * It's possible the client could have exceeded
-                 * maximum MTU but not the maximum number of splits.
-                 * This is because the length of each split
-                 * is not written, so we don't know how much data of the
-                 * final message actually belonged to the split vs
-                 * unrelated data added afterwards. We're going to cut
-                 * the client some slack in this situation for the sake
-                 * of keeping things simple. */
+                }
+                
+                if (!splitReader.Write(reader))
+                {
+                    //Intentionally a normal log rather than error to prevent spam from client attacks.
+                    NetworkManager.Log($"Something went wrong when trying to write a split message for connection [{connection.ToString()}].");
+                    connection.Kick(KickReason.UnusualActivity);
+                    
+                    return;
+                }
+                
+                //This will return true if the full message has been written.
+                if (!splitReader.TryGetFullMessage(out ArraySegment<byte> fullMessage))
+                    return;
+                
                 reader.Initialize(fullMessage, NetworkManager, dataSource);
+                
+                //Once here the split reader can be returned.
+                connection.StoreSplitReader();
             }
 
             //Parse reader.
             while (reader.Remaining > 0)
             {
                 packetId = reader.ReadPacketId();
-#if DEVELOPMENT
+                #if DEVELOPMENT
                 NetworkManager.PacketIdHistory.ReceivedPacket(packetId, packetFromServer: false);
-#endif
-                NetworkConnection conn;
-
-                /* Connection isn't available. This should never happen.
-                 * Force an immediate disconnect. */
-                if (!Clients.TryGetValueIL2CPP(args.ConnectionId, out conn))
-                {
-                    Kick(args.ConnectionId, KickReason.UnexpectedProblem, LoggingType.Error, $"ConnectionId {args.ConnectionId} not found within Clients. Connection will be kicked immediately.");
-                    return;
-                }
-                conn.LocalTick.Update(timeManager, tick, EstimatedTick.OldTickOption.Discard);
-                conn.PacketTick.Update(timeManager, tick, EstimatedTick.OldTickOption.SetLastRemoteTick);
+                #endif
+                connection.LocalTick.Update(timeManager, tick, EstimatedTick.OldTickOption.Discard);
+                connection.PacketTick.Update(timeManager, tick, EstimatedTick.OldTickOption.SetLastRemoteTick);
                 /* If connection isn't authenticated and isn't a broadcast
                  * then disconnect client. If a broadcast then process
                  * normally; client may still become disconnected if the broadcast
                  * does not allow to be called while not authenticated. */
-                if (!conn.IsAuthenticated && packetId != PacketId.Version && packetId != PacketId.Broadcast)
+                if (!connection.IsAuthenticated && packetId != PacketId.Version && packetId != PacketId.Broadcast)
                 {
-                    conn.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {conn.ClientId} sent packetId {packetId} without being authenticated. Connection will be kicked immediately.");
+                    connection.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {connection.ClientId} sent packetId {packetId} without being authenticated. Connection will be kicked immediately.");
                     return;
                 }
 
                 if (packetId == PacketId.Replicate)
                 {
-                    Objects.ParseReplicateRpc(reader, conn, args.Channel);
+                    Objects.ParseReplicateRpc(reader, connection, args.Channel);
                 }
                 else if (packetId == PacketId.ServerRpc)
                 {
-                    Objects.ParseServerRpc(reader, conn, args.Channel);
+                    Objects.ParseServerRpc(reader, connection, args.Channel);
                 }
                 else if (packetId == PacketId.ObjectSpawn)
                 {
                     if (!GetAllowPredictedSpawning())
                     {
-                        conn.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {conn.ClientId} sent a predicted spawn while predicted spawning is not enabled. Connection will be kicked immediately.");
+                        connection.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {connection.ClientId} sent a predicted spawn while predicted spawning is not enabled. Connection will be kicked immediately.");
                         return;
                     }
-                    Objects.ReadSpawn(reader, conn);
+                    Objects.ReadSpawn(reader, connection);
                 }
                 else if (packetId == PacketId.ObjectDespawn)
                 {
                     if (!GetAllowPredictedSpawning())
                     {
-                        conn.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {conn.ClientId} sent a predicted spawn while predicted spawning is not enabled. Connection will be kicked immediately.");
+                        connection.Kick(KickReason.ExploitAttempt, LoggingType.Common, $"ConnectionId {connection.ClientId} sent a predicted spawn while predicted spawning is not enabled. Connection will be kicked immediately.");
                         return;
                     }
-                    Objects.ReadDespawn(reader, conn);
+                    Objects.ReadDespawn(reader, connection);
                 }
                 else if (packetId == PacketId.Broadcast)
                 {
-                    ParseBroadcast(reader, conn, args.Channel);
+                    ParseBroadcast(reader, connection, args.Channel);
                 }
                 else if (packetId == PacketId.PingPong)
                 {
-                    ParsePingPong(reader, conn);
+                    ParsePingPong(reader, connection);
                 }
                 else if (packetId == PacketId.Version)
                 {
-                    ParseVersion(reader, conn, args.TransportIndex);
+                    ParseVersion(reader, connection, args.TransportIndex);
                 }
                 else
                 {
-#if DEVELOPMENT
+                    #if DEVELOPMENT
                     NetworkManager.LogError($"Server received an unhandled PacketId of {(ushort)packetId} on channel {args.Channel} from connectionId {args.ConnectionId}. Remaining data has been purged.");
                     NetworkManager.LogError(NetworkManager.PacketIdHistory.GetReceivedPacketIds(packetsFromServer: false));
-#else
-                        NetworkManager.LogError($"Server received an unhandled PacketId of {(ushort)packetId} on channel {args.Channel} from connectionId {args.ConnectionId}. Connection will be kicked immediately.");
-                        NetworkManager.TransportManager.Transport.StopConnection(args.ConnectionId, true);
-#endif
+                    #else
+                    NetworkManager.LogError($"Server received an unhandled PacketId of {(ushort)packetId} on channel {args.Channel} from connectionId {args.ConnectionId}. Connection will be kicked immediately.");
+                    NetworkManager.TransportManager.Transport.StopConnection(args.ConnectionId, true);
+                    #endif
                     return;
                 }
             }
-#if !DEVELOPMENT
+            #if !DEVELOPMENT
             }
             catch (Exception e)
             {
-                Kick(args.ConnectionId, KickReason.MalformedData, LoggingType.Error, $"Server encountered an error while parsing data for packetId {packetId} from connectionId {args.ConnectionId}. Connection will be kicked immediately. Message: {e.Message}.");
+                Kick(args.ConnectionId, KickReason.MalformedData, LoggingType.Error, $"Server encountered an error while parsing data for packetId {packetId} from connectionId {args.ConnectionId}. Connection will be kicked immediately. Message: {e}.");
             }
             finally
             {
                 reader?.Store();
             }
-#else
+            #else
             reader?.Store();
-#endif
+            #endif
 
             //Kicks connection for exceeding MTU.
-            void ExceededMTUKick()
+            void ExceededMTUKick(int sentCount, int maximumCount)
             {
-                Kick(args.ConnectionId, KickReason.ExploitExcessiveData, LoggingType.Common, $"ConnectionId {args.ConnectionId} sent a message larger than allowed amount. Connection will be kicked immediately.");
+                Kick(args.ConnectionId, KickReason.ExploitExcessiveData, LoggingType.Common, $"ConnectionId {args.ConnectionId} sent a message of {sentCount} bytes while the maximum allowed amount is {maximumCount}. Connection will be kicked immediately.");
             }
         }
 
         /// <summary>
         /// Parses a received PingPong.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="conn"></param>
+        /// <param name = "reader"></param>
+        /// <param name = "conn"></param>
         private void ParsePingPong(PooledReader reader, NetworkConnection conn)
         {
+            int readerPositionAfterDebug = reader.Position;
+
             /* //security limit how often clients can send pings.
              * have clients use a stopwatch rather than frame time
              * for checks to ensure it's not possible to send
@@ -882,12 +900,17 @@ namespace FishNet.Managing.Server
             uint clientTick = reader.ReadTickUnpacked();
             if (conn.CanPingPong())
                 NetworkManager.TimeManager.SendPong(conn, clientTick);
+
+            #if DEVELOPMENT && !UNITY_SERVER
+            if (_networkTrafficStatistics != null)
+                _networkTrafficStatistics.AddInboundPacketIdData(PacketId.PingPong, string.Empty, reader.Position - readerPositionAfterDebug + TransportManager.PACKETID_LENGTH, gameObject: null, asServer: false);
+            #endif
         }
 
         /// <summary>
         /// Called when a remote client authenticates with the server.
         /// </summary>
-        /// <param name="connectionId"></param>
+        /// <param name = "connectionId"></param>
         private void ClientAuthenticated(NetworkConnection connection)
         {
             /* Immediately send connectionId to client. Some transports

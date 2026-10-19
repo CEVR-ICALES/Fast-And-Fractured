@@ -10,6 +10,6 @@ public class HasItemBeenTakenDecision : Decision
     public override bool Decide(Controller controller)
     {
         EnemyAIBrain brain = controller.GetBehaviour<EnemyAIBrain>();
-        return brain.TargetToGo.activeSelf;
+        return brain.TargetToGo != null && brain.TargetToGo.activeSelf;
     }
 }

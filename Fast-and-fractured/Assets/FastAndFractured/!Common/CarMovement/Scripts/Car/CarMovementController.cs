@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
 using Enums;
+using FastAndFractured;
 
 namespace FastAndFractured
 {
-    public class CarMovementController : MonoBehaviour, ITimeSpeedModifiable
+    public class CarMovementController : AbstractAutoInitializableMonoBehaviour, ITimeSpeedModifiable
     {
         public UnityEvent<float, float> onDashCooldownUpdate;
 
@@ -58,7 +59,11 @@ namespace FastAndFractured
 
         public bool IsFlipped { get { return _isFlipped; } set => _isFlipped = value; }
 
-        public IInputProvider InputProvider { get => _inputProvider; set => _inputProvider = value; }
+        public IInputProvider InputProvider { get => _inputProvider; set { _inputProvider = value;
+                _inputProvider?.Initialize();
+                currentProviderName = _inputProvider?.GetType().Name;
+            }
+        }
 
         private bool _isFlipped = false;
 
@@ -96,10 +101,18 @@ namespace FastAndFractured
         private bool _canSlowDownMomentum = false;
         private ITimer _slowDownAngularMomentumTimer;
         private IInputProvider _inputProvider;
+        public string currentProviderName;
 
 
+        protected override void Construct()
+        {
+        }
         private void Start()
         {
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
             statsController.CustomStart();
             if (_physicsBehaviour == null)
             {
@@ -109,6 +122,7 @@ namespace FastAndFractured
             _combinedMask = groundLayer | staticLayer;
             if(_inputProvider==null)
             _inputProvider = GetComponentInParent<IInputProvider>();
+            currentProviderName = _inputProvider?.GetType().Name;
 
         }
 
@@ -175,7 +189,7 @@ namespace FastAndFractured
 
          
 
-        private void ApplyMotorTorque(float acceleration)
+        public void ApplyMotorTorque(float acceleration)
         {
             if (_brakeSlowDownTimer != null) return;
             foreach (WheelController wheel in wheels)
@@ -400,7 +414,7 @@ namespace FastAndFractured
 
         #region Dash
         ITimer _dashTimer;
-        public void HandleDashWithPhysics()
+        public void HandleDashWithPhysics(bool skipEffectsAndSounds=false)
         {
             if (!_isDashing && _canDash)
             {
@@ -697,6 +711,7 @@ namespace FastAndFractured
 }
 public interface IInputProvider
 {
+    void Initialize();
     Vector2 MoveInput { get;   }  
     bool IsBraking { get; }
     bool IsDashing { get; }

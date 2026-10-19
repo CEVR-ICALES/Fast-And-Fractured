@@ -42,7 +42,7 @@ namespace FastAndFractured
             wheelCollider.GetWorldPose(out position, out rotation);
             if(wheelMesh != null)
             {
-                wheelMesh.position = position;
+            //    wheelMesh.position = position;
                 wheelMesh.rotation = rotation;
             }
 

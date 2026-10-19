@@ -22,7 +22,7 @@ namespace FastAndFractured
         public GameObject replayButton;
         public LoadingManager LoadingManager;
         private PlayableDirector _playableDirector;
-        [SerializeField] private GameEndData gameEndData;
+        [SerializeField] public GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
         private const string WIN_TEXT = "Menu.Win";
@@ -52,9 +52,16 @@ namespace FastAndFractured
             MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, 0.5f);
             ResetGameEndData();
         }
+        private void OnDisable()
+        {
+            if (_playableDirector != null)
+                _playableDirector.stopped -= OnPlayableDirectorStopped;
+        }
+
         private void OnPlayableDirectorStopped(PlayableDirector obj)
         {
             _playableDirector.stopped -= OnPlayableDirectorStopped;
+            if (!gameObject.scene.isLoaded) return;
             ShowMenu();
         }
         private void SetFinalStats()

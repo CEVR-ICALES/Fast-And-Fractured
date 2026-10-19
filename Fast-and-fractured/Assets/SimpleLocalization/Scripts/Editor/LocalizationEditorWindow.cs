@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +37,7 @@ namespace Assets.SimpleLocalization.Scripts.Editor
             LocalizationSettings.OnRunEditor += Open;
         }
 
-        [MenuItem("Window/‚óÜ Simple Localization/Editor [PRO]")]
+        [MenuItem("Window/Åü Simple Localization/Editor [PRO]")]
         public static void Open()
         {
             if (_window == null)
@@ -151,7 +151,7 @@ namespace Assets.SimpleLocalization.Scripts.Editor
             
             GUILayout.BeginHorizontal("box");
 
-            if (GUILayout.Button("‚àí", GUILayout.Width(25)))
+            if (GUILayout.Button("?", GUILayout.Width(25)))
             {
                 _columnWidth -= 25;
             }
@@ -182,7 +182,7 @@ namespace Assets.SimpleLocalization.Scripts.Editor
                 GUILayout.BeginHorizontal("box", GUILayout.MinWidth(_columnWidth - 30));
                 GUILayout.Label(language + (language == LocalizedTranslate.PrimaryLanguage ? " [Primary]" : ""), style, GUILayout.MinWidth(_columnWidth - 28), GUILayout.MinHeight(20));
 
-                if (GUILayout.Button("Ô∏∞", GUILayout.Width(25)))
+                if (GUILayout.Button("?", GUILayout.Width(25)))
                 {
                     LocalizedTranslate.DestinationLanguage = language;
                     PopupWindow.Show(LanguageButtons[language], new LocalizedTranslate());
@@ -290,17 +290,17 @@ namespace Assets.SimpleLocalization.Scripts.Editor
             
             var newSheetIndex = EditorGUILayout.Popup(_selectedSheetIndex, sheetNamesArray, GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix));
             
-            if (GUILayout.Button("‚ñº Download Sheets", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
+            if (GUILayout.Button("Å• Download Sheets", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
             {
                 Settings.DownloadGoogleSheets(Editor.ResetSheet);
             }
 
-            if (GUILayout.Button("‚ùñ Open Sheets", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
+            if (GUILayout.Button("? Open Sheets", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
             {
                 Settings.OpenGoogleSheets();
             }
 
-            if (GUILayout.Button("‚òÖ Leave Review", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
+            if (GUILayout.Button("Åö Leave Review", GUILayout.MinWidth(MinColumnWidth + ButtonsColumnSizeFix), GUILayout.MaxWidth(MinColumnWidth + ButtonsColumnSizeFix)))
             {
                 Settings.LeaveReview();
             }

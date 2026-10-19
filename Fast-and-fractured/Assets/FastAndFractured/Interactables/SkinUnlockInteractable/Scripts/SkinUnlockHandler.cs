@@ -1,4 +1,5 @@
-﻿using FastAndFractured;
+using FastAndFractured;
+using NRandom;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +31,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
     {
         List<string> unlockableSkins = new List<string>();
 
-        int numOfSkins = LevelControllerButBetter.Instance.LocalPlayer!=null ? LevelControllerButBetter.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
+        int numOfSkins = LevelController.Instance.LocalPlayer!=null ? LevelController.Instance.LocalPlayer.GetComponentInChildren<StatsController>().SkinCount : 0;
 
         if (_playerSelected == "")
         {
@@ -72,7 +73,7 @@ public class SkinUnlockHandler : AbstractSingleton<SkinUnlockHandler>
             DestroySkins(activeSkinInteractables);
             return;
         }
-        int randomSkinIndex = UnityEngine.Random.Range(0, skinsPlayerCanUnlock.Count);
+        int randomSkinIndex = DeterministicRandom.Instance.NextInt(0, skinsPlayerCanUnlock.Count);
         string targetSkinIDForInteractables = skinsPlayerCanUnlock[randomSkinIndex];
         int piecesPlayerHasForTargetSkin = PlayerPrefs.GetInt(targetSkinIDForInteractables, 0);
         int piecesNeededForTargetSkin = PIECES_TO_UNLOCK_SKIN - piecesPlayerHasForTargetSkin;

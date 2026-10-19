@@ -7,11 +7,21 @@ namespace Utilities
 {
     public class ObjectPoolManager : AbstractSingleton<ObjectPoolManager>
     {
+       private Dictionary<ObjectPool, Transform> _poolParentList;
+
+        private Dictionary<Pooltype, ObjectPool> _objectPools;
+        private Transform _parentGameObjectOfPools;
+        [SerializeField]
+        private string parentGameObjectOfPoolsName = "ObjectPools";
+        [SerializeField] private List<ObjectPoolSO> poolSOList;
+
         protected override void Construct()
         {
             base.Construct();
-            _objectPools = new List<ObjectPool>();
+            _objectPools = new Dictionary<Pooltype, ObjectPool>();
             _parentGameObjectOfPools = new GameObject(parentGameObjectOfPoolsName).transform;
+            _poolParentList = new Dictionary<ObjectPool, Transform>();
+
             foreach (var poolSO in poolSOList)
             {
                 CreateObjectPool(poolSO);
@@ -19,14 +29,8 @@ namespace Utilities
         }
         protected override void Initialize()
         {
-            
-        }
 
-        private List<ObjectPool> _objectPools;
-        private Transform _parentGameObjectOfPools;
-        [SerializeField]
-        private string parentGameObjectOfPoolsName = "ObjectPools";
-        [SerializeField] private List<ObjectPoolSO> poolSOList;
+        }
 
         //Method called in Level Controller or Game Manager. One of them will handle a list of ScriptableObjects with the differents pools
         public void CreateObjectPool(ObjectPoolSO objectPoolSO)
@@ -37,17 +41,18 @@ namespace Utilities
             if (objectPoolSO.prefab != null)
             {
                 ObjectPool newObjectPool = new ObjectPool(objectPoolSO.pooltype, objectPoolSO.poolNum, objectPoolSO.poolNum);
-                var pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.prefab,objectPoolSO.prefabVariants, objectPoolSO.poolNum, poolGameObject.transform);
+                var pooledGameObjectList = InstanceObjectPoolGameObjects(objectPoolSO.prefab, objectPoolSO.prefabVariants, objectPoolSO.poolNum, poolGameObject.transform);
                 foreach (GameObject pooledGameObject in pooledGameObjectList)
                 {
                     newObjectPool.AddObject(pooledGameObject);
                 }
-                _objectPools.Add(newObjectPool);
+                _objectPools.TryAdd(objectPoolSO.pooltype, newObjectPool);
+                _poolParentList.Add(newObjectPool, _parentGameObjectOfPools);
             }
             else
                 Debug.LogError("ObjectPoolSO " + objectPoolSO.name + "have a empty prefab.");
         }
-        
+
         //Create and prepare the GameObjects of a pool in scene
         private GameObject[] InstanceObjectPoolGameObjects(GameObject gameobjectToPool, GameObject[] prefabVariants, int num, Transform parent)
         {
@@ -58,11 +63,16 @@ namespace Utilities
             {
                 variantMaxCount = prefabVariants.Length;
             }
-            for (int i = 0; i < num; i++) {
+            for (int i = 0; i < num; i++)
+            {
                 GameObject gameObjectPooled = null;
-                if (i != 0 && variantMaxCount > 0)
+                // Index 0 of the cycle is the base object, 1..variantMaxCount the variants.
+                int cycleSize = variantMaxCount + 1;
+                int cycleIndex = i % cycleSize;
+
+                if (cycleIndex != 0 && variantMaxCount > 0)
                 {
-                    gameObjectPooled = Instantiate(prefabVariants[i], parent);
+                    gameObjectPooled = Instantiate(prefabVariants[cycleIndex - 1], parent);
                 }
                 else
                 {
@@ -78,7 +88,7 @@ namespace Utilities
                 gameObjectPooled.SetActive(false);
                 gameObjectsPooled[i] = gameObjectPooled;
                 variantCount++;
-                if(variantCount>=variantMaxCount)
+                if (variantCount >= variantMaxCount)
                     variantCount = 0;
             }
             return gameObjectsPooled;
@@ -86,8 +96,7 @@ namespace Utilities
 
         public GameObject GivePooledObject(Pooltype pooltype, Vector3? position = null)
         {
-            var objectPool = FindObjectPoolInList(pooltype);
-            if (objectPool != null)
+            if (_objectPools.TryGetValue(pooltype, out var objectPool))
             {
                 if (!objectPool.IsNextObjectActive())
                 {
@@ -110,13 +119,13 @@ namespace Utilities
                 }
                 return null;
             }
+            Debug.LogError("ObjectPool list of type " + pooltype + " not exist.");
             return null;
         }
 
         public T GivePooledObjectOfType<T>(Pooltype pooltype) where T : IPooledObject
         {
-            var objectPool = FindObjectPoolInList(pooltype);
-            if (objectPool != null)
+            if (_objectPools.TryGetValue(pooltype, out var objectPool))
             {
                 if (!objectPool.IsNextObjectActive())
                 {
@@ -135,34 +144,40 @@ namespace Utilities
                 }
                 return default;
             }
+            Debug.LogError("ObjectPool list of type " + pooltype + " not exist.");
             return default;
         }
 
         public List<GameObject> GiveAllMyPooledObjects(Pooltype pooltype)
         {
-            ObjectPool objectPool = FindObjectPoolInList(pooltype);
-            if (objectPool != null) {
+            if (_objectPools.TryGetValue(pooltype, out var objectPool))
+            {
                 return objectPool.GetAllObjectsInPool();
             }
+            Debug.LogError("ObjectPool list of type " + pooltype + " not exist.");
             return null;
         }
 
-        public void DesactivatePooledObject(IPooledObject pooledObject,GameObject instance)
+        public void DeactivatePooledObject(IPooledObject pooledObject, GameObject instance)
         {
-            ObjectPool objectPool = FindObjectPoolInList(pooledObject.Pooltype);
+            if (_objectPools.TryGetValue(pooledObject.Pooltype, out var objectPool))
+            {
                 if (objectPool.IsIntheList(instance))
                 {
                     instance.SetActive(false);
                 }
+                if (_poolParentList.TryGetValue(objectPool, out Transform parent))
+                {
+                    instance.transform.parent = parent;
+                }
+            }
         }
 
         private ObjectPool FindObjectPoolInList(Pooltype type)
         {
-            foreach (ObjectPool objectPool in _objectPools)
-            {
-                if (objectPool.Type == type)
-                    return objectPool;
-            }
+            if (_objectPools.TryGetValue(type, out var objectPool))
+                return objectPool;
+
             Debug.LogError("ObjectPool list of type " + type + " not exist.");
             return null;
         }

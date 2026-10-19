@@ -9,10 +9,16 @@ namespace StateMachine
         public override void Act(Controller controller)
         {
             PlayerInputController playerInputController = controller.GetBehaviour<PlayerInputController>();
-            if (!playerInputController.IsMovementInputsBlocked)
-            {
-                controller.GetBehaviour<CarMovementController>().HandleBrakingInput(playerInputController.IsBraking, playerInputController.MoveInput);
-            }
+            if (playerInputController != null && playerInputController.IsMovementInputsBlocked)
+                return;
+
+            // Read the input actually driving this car, not the local PlayerInputController: in
+            // multiplayer the server read false/(0,0) for a client's car every tick, cancelling
+            // that client's brake and drift on the authoritative simulation.
+            CarMovementController carMovement = controller.GetBehaviour<CarMovementController>();
+            IInputProvider input = carMovement.InputProvider;
+            if (input == null) return;
+            carMovement.HandleBrakingInput(input.IsBraking, input.MoveInput);
         }
     }
 }

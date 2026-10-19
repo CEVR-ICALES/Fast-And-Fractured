@@ -43,7 +43,7 @@ namespace FastAndFractured
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            PauseManager.TryUnregisterPausable(this);   // never creates a PauseManager while the scene closes
             decalProyector.size = new Vector3(0f, 0f, 800f);
             decalProyector.material = _originalMaterial;
         }

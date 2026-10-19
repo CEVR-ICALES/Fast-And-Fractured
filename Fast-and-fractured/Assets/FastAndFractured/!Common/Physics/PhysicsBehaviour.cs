@@ -1,4 +1,5 @@
 using Enums;
+using FastAndFractured.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,17 @@ namespace FastAndFractured
     public class PhysicsBehaviour : MonoBehaviour
     {
         [SerializeField] private float isMovingThreshold;
+
+        // Hysteresis around isMovingThreshold: IsMovingDecision gates both Idle and Grounded, and speed noise at rest
+        // crossed a single threshold many times a second, dropping the throttle for a tick each time.
+        private const float MovingHysteresisHalfWidth = 0.25f;
+        private bool _wasMoving;
+
+        // Cooldown counted in calls: a flip happens at once but blocks the next one for this many calls
+        // (a confirmation filter would delay every real transition).
+        private const int MovingDebounceTicks = 5;
+        private int _ticksSinceLastFlip = MovingDebounceTicks;
+
         public bool IsCurrentlyDashing = false;
         public bool HasBeenPushed { get => _hasBeenPushed; }
         private bool _hasBeenPushed = false;
@@ -47,10 +59,12 @@ namespace FastAndFractured
         [Header("Reference")]
         [SerializeField] private StatsController statsController;
         public StatsController StatsController { get => statsController; }
-        public Rigidbody Rb { get => _rb; set => _rb = value; }
-        private Rigidbody _rb;
+        public ICustomRigidbody Rb { get => _rb; set => _rb = value; }
+        private ICustomRigidbody _rb;
         private CarMovementController _carMovementController;
         public CarImpactHandler CarImpactHandler { get => _carImpactHandler; }
+        public float CurrentSpeed { get => _currentSpeed; set => _currentSpeed = value; }
+
         private CarImpactHandler _carImpactHandler;
         public CharacterKinematicReactionsController CharacterKinematicReactionsController { get => _characterKinematicReactionsController; } 
         private CharacterKinematicReactionsController _characterKinematicReactionsController;
@@ -68,12 +82,12 @@ namespace FastAndFractured
         const float TIME_ON_DASH_PUSH = 1f;
 
         GameObject hudEffect;
-
+        float _currentSpeed;
         private void OnEnable()
         {
-            if (!_rb)
+            if (_rb==null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
 
             _carImpactHandler = GetComponent<CarImpactHandler>();
@@ -107,7 +121,13 @@ namespace FastAndFractured
         {
             ExitGroundCheck(collision);
         }
-
+        private void FixedUpdate()
+        {
+            if (!_rb.isKinematic)
+            {
+                _currentSpeed = _rb.linearVelocity.magnitude;
+            }
+        }
         private void RefactoredVehicleCollision(Collision collision)
         {
 
@@ -421,14 +441,28 @@ namespace FastAndFractured
         {
             return _rb.linearVelocity;
         }
-
+        public float GetCurrentSpeed()
+        {
+            return _currentSpeed;
+        }
         public bool IsVehicleMoving()
         {
-            if (_rb.linearVelocity.magnitude > isMovingThreshold)
+            float threshold = _wasMoving
+                ? isMovingThreshold - MovingHysteresisHalfWidth
+                : isMovingThreshold + MovingHysteresisHalfWidth;
+            threshold = Mathf.Max(0f, threshold);
+
+            // The band alone fails when the speed dwells on its edge: the cooldown caps the flips.
+            bool candidateMoving = _currentSpeed > threshold;
+            _ticksSinceLastFlip++;
+
+            if (candidateMoving != _wasMoving && _ticksSinceLastFlip >= MovingDebounceTicks)
             {
-                return true;
+                _wasMoving = candidateMoving;
+                _ticksSinceLastFlip = 0;
             }
-            else return false;
+
+            return _wasMoving;
         }
     }
 }

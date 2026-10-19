@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d67064f32f01e846a4817703d8c5578, type: 3}
+  m_Name: MapCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.Lobby.MapCatalog
+  _entries:
+  - Id: 0
+    DisplayNameKey: Menu.Golf
+    SceneName: GolfMap
+    NetworkedSceneName: NetworkedGolfMap
+    Thumbnail: {fileID: 21300000, guid: ab137395df4797d4dbb7f71d61ecaa3d, type: 3}
+  - Id: 1
+    DisplayNameKey: Menu.Obras
+    SceneName: ConstructionMap
+    NetworkedSceneName: NetworkedConstructionMap
+    Thumbnail: {fileID: 21300000, guid: 0198a220852e2804b84157cd55cbd1ce, type: 3}
+  - Id: 2
+    DisplayNameKey: Menu.Pueblo
+    SceneName: MountainVillageMap
+    NetworkedSceneName: NetworkedMountainVillageMap
+    Thumbnail: {fileID: 21300000, guid: 137903cab1426b445b8dec162252bf67, type: 3}

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using FastAndFractured;
-using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Events;
@@ -47,14 +46,13 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     {
         
     }
-    protected override void Initialize()
+    public void Setup()
     {
         base.Initialize();
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
-        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
+        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>(true);
         _pushShootPoint = pushShootHandle.PushShootPoint;
-        _hitMarkMask = layerMasksForHitMark[0];
-
+        _hitMarkMask = layerMasksForHitMark[0]; 
         for (int i = 1; i < layerMasksForHitMark.Length; i++)
         {
             _hitMarkMask |= layerMasksForHitMark[i];

@@ -17,7 +17,7 @@ public class MinimapScaler : MonoBehaviour
 
     RectTransform rectTransform;
     InputAction toggleMinimapAction;
-    LevelControllerButBetter levelController;
+    LevelController levelController;
     bool inputEnabled;
     bool isExpanded;
     float baseScale = 1f;
@@ -55,7 +55,7 @@ public class MinimapScaler : MonoBehaviour
             toggleMinimapAction.performed += OnToggleMinimapPerformed;
         }
 
-        levelController = LevelControllerButBetter.Instance;
+        levelController = LevelController.Instance;
         if (levelController != null)
         {
             levelController.charactersCustomStart.AddListener(OnCharactersCustomStart);
