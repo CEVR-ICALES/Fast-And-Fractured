@@ -149,7 +149,7 @@ namespace FastAndFractured.GameTelemetry
 
             private void Update()
             {
-                if (_sending || !Sharing) return;
+                if (_sending || !Sharing || !FirestoreSink.Configured) return;
                 if (!_flushRequested && Time.unscaledTime < _nextFlush) return;
                 _flushRequested = false;
                 _nextFlush = Time.unscaledTime + TelemetryConfig.FLUSH_INTERVAL;

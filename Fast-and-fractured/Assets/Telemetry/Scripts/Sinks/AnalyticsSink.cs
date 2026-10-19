@@ -15,12 +15,12 @@ namespace FastAndFractured.GameTelemetry
     {
         private const int TIMEOUT = 15;
 
-        public static bool Configured => !string.IsNullOrEmpty(TelemetryConfig.GA_API_SECRET);
+        public static bool Configured => !string.IsNullOrEmpty(TelemetryConfig.GaApiSecret);
 
         public IEnumerator Send(IList<TelemetryEvent> events, string userId, long sessionId, string version, bool dev, Action<bool> done)
         {
             if (!Configured) { done(true); yield break; }   // nothing to send to yet
-            string url = $"https://www.google-analytics.com/mp/collect?measurement_id={TelemetryConfig.GA_MEASUREMENT_ID}&api_secret={TelemetryConfig.GA_API_SECRET}";
+            string url = $"https://www.google-analytics.com/mp/collect?measurement_id={TelemetryConfig.GA_MEASUREMENT_ID}&api_secret={TelemetryConfig.GaApiSecret}";
             foreach (var body in TelemetryJson.Ga4Requests(TelemetryIdentity.ClientId, userId, sessionId, version, dev, events))
             {
                 using var request = new UnityWebRequest(url, "POST")

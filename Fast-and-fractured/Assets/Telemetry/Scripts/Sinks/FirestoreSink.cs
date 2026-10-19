@@ -21,6 +21,8 @@ namespace FastAndFractured.GameTelemetry
         private const int TOKEN_EXPIRY_MARGIN_SECONDS = 120;
         private const long HTTP_UNAUTHORIZED = 401;
 
+        public static bool Configured => !string.IsNullOrEmpty(TelemetryConfig.FirebaseApiKey);
+
         private static string Documents =>
             $"https://firestore.googleapis.com/v1/projects/{TelemetryConfig.FIREBASE_PROJECT_ID}/databases/(default)/documents";
 
@@ -76,7 +78,7 @@ namespace FastAndFractured.GameTelemetry
             if (!string.IsNullOrEmpty(refresh))
             {
                 // securetoken answers in snake_case: id_token, refresh_token, user_id, expires_in.
-                yield return Post($"https://securetoken.googleapis.com/v1/token?key={TelemetryConfig.FIREBASE_API_KEY}",
+                yield return Post($"https://securetoken.googleapis.com/v1/token?key={TelemetryConfig.FirebaseApiKey}",
                     new JObject { ["grant_type"] = "refresh_token", ["refresh_token"] = refresh }, r => reply = r);
                 if (reply != null && Store((string)reply["id_token"], (string)reply["refresh_token"], (string)reply["user_id"], (string)reply["expires_in"]))
                 { done(true); yield break; }
@@ -84,7 +86,7 @@ namespace FastAndFractured.GameTelemetry
 
             // First time (or the old account is gone): a new anonymous account.
             reply = null;
-            yield return Post($"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={TelemetryConfig.FIREBASE_API_KEY}",
+            yield return Post($"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={TelemetryConfig.FirebaseApiKey}",
                 new JObject { ["returnSecureToken"] = true }, r => reply = r);
             done(reply != null && Store((string)reply["idToken"], (string)reply["refreshToken"], (string)reply["localId"], (string)reply["expiresIn"]));
         }
