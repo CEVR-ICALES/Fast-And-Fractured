@@ -317,7 +317,7 @@ namespace FastAndFractured
             MinimapScaler scaler = FindFirstObjectByType<MinimapScaler>();
             if (scaler != null)
             {
-                scaler.setCurrentScale();
+                scaler.SetCurrentScale();
             }
         }
 
