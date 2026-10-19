@@ -2,69 +2,42 @@ using UnityEngine;
 using UnityEditor;
 using FastAndFractured;
 
-/// <summary>Scene View right-click menu that moves the player's car to the scene camera or to the clicked point.</summary>
+/// <summary>Scene View right-click entries that move the player's car to the scene camera or to the clicked point.</summary>
 [InitializeOnLoad]
 public static class PlayerSceneViewEditor
 {
     private const float MAX_RAYCAST_DISTANCE = 10000f;
 
+    private const string SCENE_CONTEXT_MENU = "CONTEXT/GameObjectToolContext/";
+
+    private static Ray _lastRightClickRay;
+
     static PlayerSceneViewEditor()
     {
-        // ParrelSync clones have no main window.
-        if (IsMultiplayerClone())
-        {
-            return;
-        }
-
-        Debug.Log("PlayerSceneViewEditor.cs loaded successfully!");
-
-        SceneView.duringSceneGui += OnSceneGUI;
+        SceneView.duringSceneGui += RememberRightClick;
     }
 
-    private static bool IsMultiplayerClone()
-    {
-        return Application.dataPath.ToLower().Contains("library/vp/");
-    }
-
-    private static void OnSceneGUI(SceneView sceneView)
+    private static void RememberRightClick(SceneView sceneView)
     {
         Event e = Event.current;
-
-        if (e.type == EventType.ContextClick)
+        if (e.type == EventType.MouseDown && e.button == 1)
         {
-            Debug.Log("ContextClick event detected! Creating menu...");
-
-            GenericMenu menu = new GenericMenu();
-
-            // The event is gone by the time the menu callback runs.
-            Vector2 mousePosition = e.mousePosition;
-
-            menu.AddItem(new GUIContent("Move Player Here (Match Camera)"), false, () =>
-            {
-                MovePlayerToSceneView(sceneView);
-            });
-
-            menu.AddItem(new GUIContent("Move Player to Point"), false, () =>
-            {
-                MovePlayerToPoint(sceneView, mousePosition);
-            });
-
-            // Replacing the default menu: re-add the common items.
-            menu.AddSeparator("");
-            menu.AddItem(new GUIContent("Copy"), false, () => EditorApplication.ExecuteMenuItem("Edit/Copy"));
-            menu.AddItem(new GUIContent("Paste"), false, () => EditorApplication.ExecuteMenuItem("Edit/Paste"));
-            menu.AddItem(new GUIContent("Duplicate"), false, () => EditorApplication.ExecuteMenuItem("Edit/Duplicate"));
-            menu.AddItem(new GUIContent("Delete"), false, () => EditorApplication.ExecuteMenuItem("Edit/Delete"));
-
-            menu.ShowAsContext();
-
-            Debug.Log("Menu shown. Consuming event.");
-
-            e.Use();
+            _lastRightClickRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         }
     }
 
-    /// <summary>The Rigidbody of the scene's player car (the CarMovementController under PlayerInputController).</summary>
+    [MenuItem(SCENE_CONTEXT_MENU + "Move Player Here (Match Camera)")]
+    private static void ContextMovePlayerToSceneView(MenuCommand command)
+    {
+        if (SceneView.lastActiveSceneView != null) MovePlayerToSceneView(SceneView.lastActiveSceneView);
+    }
+
+    [MenuItem(SCENE_CONTEXT_MENU + "Move Player to Point")]
+    private static void ContextMovePlayerToPoint(MenuCommand command)
+    {
+        MovePlayerToPoint(_lastRightClickRay);
+    }
+
     private static Rigidbody GetPlayerRigidbody()
     {
         PlayerInputController inputController = Object.FindObjectOfType<PlayerInputController>();
@@ -115,12 +88,11 @@ public static class PlayerSceneViewEditor
     }
 
     /// <summary>Moves the car to the clicked point, keeping its rotation.</summary>
-    private static void MovePlayerToPoint(SceneView sceneView, Vector2 mousePosition)
+    private static void MovePlayerToPoint(Ray worldRay)
     {
         Rigidbody playerRb = GetPlayerRigidbody();
         if (playerRb == null) return; // Helper method already logged a warning.
 
-        Ray worldRay = HandleUtility.GUIPointToWorldRay(mousePosition);
 
         if (Physics.Raycast(worldRay, out RaycastHit hit, MAX_RAYCAST_DISTANCE))
         {
