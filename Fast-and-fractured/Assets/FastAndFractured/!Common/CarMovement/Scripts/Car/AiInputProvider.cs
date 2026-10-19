@@ -12,15 +12,15 @@ namespace FastAndFractured
         public bool IsBraking => DesiredBraking;
         public bool IsDashing => DesiredDashing;
 
-        public Vector3 AimDirection => throw new System.NotImplementedException();
+        public Vector3 AimDirection => Vector3.zero;
 
-        public bool IsNormalShooting => throw new System.NotImplementedException();
+        public bool IsNormalShooting => false;
 
-        public bool IsPushShooting => throw new System.NotImplementedException();
+        public bool IsPushShooting => false;
 
-        public bool FirePushAction => throw new System.NotImplementedException();
+        public bool FirePushAction => false;
 
-        public bool IsThrowingMine => throw new System.NotImplementedException();
+        public bool IsThrowingMine => false;
 
         public void Initialize()
         {
