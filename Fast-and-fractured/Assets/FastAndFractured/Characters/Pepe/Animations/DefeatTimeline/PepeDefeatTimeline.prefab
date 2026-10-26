@@ -115,9 +115,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1853094968961178454, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      propertyPath: far clip plane
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: -1853094968961178454, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      propertyPath: near clip plane
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
       propertyPath: m_Name
-      value: pepe derrota 2.0_pivoteFix
+      value: PepeDefeatTimeline Variant
       objectReference: {fileID: 0}
     - target: {fileID: 5658264950732885144, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -137,6 +145,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1205791263305058307}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 815102762322585067}
     - targetCorrespondingSourceObject: {fileID: 65702495048144492, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6515236328073592456}
@@ -200,3 +211,36 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &815102762322585067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5337794308964592840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0db4b8b51e3971545aeca32b9529bace, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.FinalAnimationSkins
+  skins:
+  - skin: 1
+    swaps:
+    - original: {fileID: -8771166627424403242, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      replacement: {fileID: 2100000, guid: 22dcd5c62075b98478f3c108630ccc74, type: 2}
+    - original: {fileID: 2100000, guid: 64e17d07a136e0940a4e5ceb82451269, type: 2}
+      replacement: {fileID: 2100000, guid: 613cb80a9780bf4489151311ef6b8e4a, type: 2}
+    - original: {fileID: 2100000, guid: dd96bdaf9dcaa7f4388ffefb2294914d, type: 2}
+      replacement: {fileID: 2100000, guid: 2e467ccb1cdd97248ad166f64cbcff4d, type: 2}
+  - skin: 2
+    swaps:
+    - original: {fileID: -8771166627424403242, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      replacement: {fileID: 2100000, guid: 8f79dc9f77d7322488d0947acc41a242, type: 2}
+    - original: {fileID: 3269630341641711457, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      replacement: {fileID: 2100000, guid: 830c45fa6df35704a9de712a740f5ade, type: 2}
+    - original: {fileID: -9057262392797507780, guid: f90bf99cd650a1846b40ec0a42114740, type: 3}
+      replacement: {fileID: 2100000, guid: 830c45fa6df35704a9de712a740f5ade, type: 2}
+    - original: {fileID: 2100000, guid: 64e17d07a136e0940a4e5ceb82451269, type: 2}
+      replacement: {fileID: 2100000, guid: b84cd8ab3f80c79428d26649ce8306af, type: 2}
+    - original: {fileID: 2100000, guid: dd96bdaf9dcaa7f4388ffefb2294914d, type: 2}
+      replacement: {fileID: 2100000, guid: 830c45fa6df35704a9de712a740f5ade, type: 2}

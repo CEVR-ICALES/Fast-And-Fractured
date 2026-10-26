@@ -237,6 +237,8 @@ VFXRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_StaticBatchInfo:
@@ -256,9 +258,11 @@ VFXRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
 --- !u!114 &553672419939248906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -642,8 +646,45 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9057203522094535141}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6737682138099265387, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2866450753872683096}
   m_SourcePrefab: {fileID: 100100000, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+--- !u!1 &2180426808490395825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6737682138099265387, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
+  m_PrefabInstance: {fileID: 4882852617021663194}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2866450753872683096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2180426808490395825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0db4b8b51e3971545aeca32b9529bace, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.FinalAnimationSkins
+  skins:
+  - skin: 1
+    swaps:
+    - original: {fileID: 2100000, guid: af1a5a487d167dd48b39f6aecc51b517, type: 2}
+      replacement: {fileID: 2100000, guid: 22dcd5c62075b98478f3c108630ccc74, type: 2}
+    - original: {fileID: 2100000, guid: 64e17d07a136e0940a4e5ceb82451269, type: 2}
+      replacement: {fileID: 2100000, guid: 613cb80a9780bf4489151311ef6b8e4a, type: 2}
+    - original: {fileID: 2100000, guid: dd96bdaf9dcaa7f4388ffefb2294914d, type: 2}
+      replacement: {fileID: 2100000, guid: 2e467ccb1cdd97248ad166f64cbcff4d, type: 2}
+  - skin: 2
+    swaps:
+    - original: {fileID: 2100000, guid: af1a5a487d167dd48b39f6aecc51b517, type: 2}
+      replacement: {fileID: 2100000, guid: 8f79dc9f77d7322488d0947acc41a242, type: 2}
+    - original: {fileID: 2100000, guid: 64e17d07a136e0940a4e5ceb82451269, type: 2}
+      replacement: {fileID: 2100000, guid: b84cd8ab3f80c79428d26649ce8306af, type: 2}
+    - original: {fileID: 2100000, guid: dd96bdaf9dcaa7f4388ffefb2294914d, type: 2}
+      replacement: {fileID: 2100000, guid: 830c45fa6df35704a9de712a740f5ade, type: 2}
 --- !u!4 &2849396372869790132 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7226155835005148782, guid: a8daad90437b6bc47a02348107f055d7, type: 3}
@@ -762,6 +803,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2849396372869790132}
     m_Modifications:
+    - target: {fileID: -8737204920524100739, guid: 12ecf0bb7674833469d24a1ef4bb8018, type: 3}
+      propertyPath: far clip plane
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 12ecf0bb7674833469d24a1ef4bb8018, type: 3}
+      propertyPath: near clip plane
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 12ecf0bb7674833469d24a1ef4bb8018, type: 3}
       propertyPath: m_LocalScale.x
       value: 1

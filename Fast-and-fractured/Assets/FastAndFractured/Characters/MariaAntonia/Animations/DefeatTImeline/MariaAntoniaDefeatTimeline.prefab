@@ -61,6 +61,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -82,9 +84,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1925850628019738119
 GameObject:
@@ -147,6 +151,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -168,9 +174,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2251017676849509149
 GameObject:
@@ -233,6 +241,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -254,9 +264,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4947466672996495979
 GameObject:
@@ -355,6 +367,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -376,9 +390,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &7065753272106746971
 GameObject:
@@ -441,6 +457,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -462,9 +480,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &8318285037439170506
 GameObject:
@@ -649,6 +669,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1444892075336533078}
     m_Modifications:
+    - target: {fileID: -8737204920524100739, guid: 6f05974a19de71943aeee872e8c3bd5f, type: 3}
+      propertyPath: far clip plane
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 6f05974a19de71943aeee872e8c3bd5f, type: 3}
+      propertyPath: near clip plane
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6f05974a19de71943aeee872e8c3bd5f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.4156632
@@ -982,13 +1010,52 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7226155835005148782, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4794648950234836458}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6737682138099265387, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4661253460658699057}
   m_SourcePrefab: {fileID: 100100000, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
 --- !u!4 &1444892075336533078 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7226155835005148782, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
   m_PrefabInstance: {fileID: 8089942527755360824}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3297815704724157779 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6737682138099265387, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}
+  m_PrefabInstance: {fileID: 8089942527755360824}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4661253460658699057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3297815704724157779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0db4b8b51e3971545aeca32b9529bace, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.FinalAnimationSkins
+  skins:
+  - skin: 1
+    swaps:
+    - original: {fileID: 2100000, guid: 4c7c6bfddb13e044bba4a201620ea47c, type: 2}
+      replacement: {fileID: 2100000, guid: 351c3ddd7a02c114e9f1704112276921, type: 2}
+    - original: {fileID: 2100000, guid: 27fa003b99e10e24eac64d6c589027cd, type: 2}
+      replacement: {fileID: 2100000, guid: 3caba474803c4814d9e4f86d10bbb3e3, type: 2}
+    - original: {fileID: 2100000, guid: e8c4adc5eb0dcea49bfe0972025fe077, type: 2}
+      replacement: {fileID: 2100000, guid: b559983843d33544781840f1aef99c5a, type: 2}
+  - skin: 2
+    swaps:
+    - original: {fileID: 2100000, guid: 4c7c6bfddb13e044bba4a201620ea47c, type: 2}
+      replacement: {fileID: 2100000, guid: 2462435762962d84ab0459624719f0dc, type: 2}
+    - original: {fileID: 2100000, guid: 27fa003b99e10e24eac64d6c589027cd, type: 2}
+      replacement: {fileID: 2100000, guid: 1eac322f5f5f4724a84f2ab7eacd5d72, type: 2}
+    - original: {fileID: 2100000, guid: e8c4adc5eb0dcea49bfe0972025fe077, type: 2}
+      replacement: {fileID: 2100000, guid: 0a469bc8a68e9014a8d8cd693ea6dbe3, type: 2}
+    - original: {fileID: 2100000, guid: 3469fd7f6810c5b409a00e01bd5c40e6, type: 2}
+      replacement: {fileID: 2100000, guid: 266c115604a1c8c4481a9e3ca8a4d71a, type: 2}
 --- !u!4 &8558197843221365263 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 468915619578140727, guid: 59880aa2c896b57499f1e6750fb3f257, type: 3}

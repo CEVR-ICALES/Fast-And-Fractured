@@ -44,17 +44,9 @@ namespace FastAndFractured
                 totalDistanceText = distance.ToString() + LevelConstants.KILOMETERS_TEXT;
             }
 
-            GameObject finalAnimationPrefab = null;
             string playerCharacterNameCode = PlayerPrefs.GetString(selectedPlayerKeyInPrefs, "Pepe_0");  
-
-            if (hasPlayerWon)
-            {
-                finalAnimationPrefab = playerStats.GetWinObjectByString(playerCharacterNameCode);
-            }
-            else
-            {
-                finalAnimationPrefab = playerStats.GetLoseObjectByString(playerCharacterNameCode);
-            }
+            GameObject finalAnimationPrefab = playerStats.GetFinalAnimation(playerCharacterNameCode, hasPlayerWon);
+            LevelUtilities.ParseCharacterNameCode(playerCharacterNameCode, out _, out int skin);
 
             if (_gameEndDataSO != null)
             {
@@ -63,6 +55,7 @@ namespace FastAndFractured
                 _gameEndDataSO.totalDamageTaken = playerStats.totalDamageTaken.ToString();
                 _gameEndDataSO.totalDistanceTraveled = totalDistanceText;
                 _gameEndDataSO.finalAnimation = finalAnimationPrefab; 
+                _gameEndDataSO.finalAnimationSkin = skin;
                 _gameEndDataSO.sceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
                 _gameEndDataSO.killCount = playerStats.totalKills.ToString();
             }
