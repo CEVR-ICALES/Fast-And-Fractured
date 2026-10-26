@@ -20,7 +20,7 @@ namespace FastAndFractured
             {
                 winLoseScreenParent.SetActive(true);
                 mainMenuTimeline.SetActive(false);
-                MenuSkipInitialCutscene.Instance.timeLine = gameEndData.finalAnimation.GetComponentInChildren<PlayableDirector>();
+                MenuSkipInitialCutscene.Instance.timeLine = winLoseScreenParent.GetComponentInChildren<WinLoseScreenBehaviour>(true).SpawnedDirector;
                 MenuSkipInitialCutscene.Instance.skipText.SetActive(true);
             }
             else

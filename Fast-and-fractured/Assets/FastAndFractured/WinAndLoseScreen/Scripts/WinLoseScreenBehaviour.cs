@@ -22,6 +22,7 @@ namespace FastAndFractured
         public GameObject replayButton;
         public LoadingManager LoadingManager;
         private PlayableDirector _playableDirector;
+        public PlayableDirector SpawnedDirector => _playableDirector;
         [SerializeField] public GameEndData gameEndData;
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
@@ -36,6 +37,8 @@ namespace FastAndFractured
             if (_objectToSpawn != null)
             {
                 _spawnedObject = Instantiate(_objectToSpawn, spawnPoint.transform.position, spawnPoint.transform.rotation);
+                if (_spawnedObject.TryGetComponent(out FinalAnimationSkins skins))
+                    skins.Apply(gameEndData.finalAnimationSkin);
                 _playableDirector = _spawnedObject.GetComponentInChildren<PlayableDirector>();
                 _playableDirector.stopped += OnPlayableDirectorStopped;
                 replayButton.GetComponent<Button>().onClick.AddListener(() => { LoadingManager.ReplayScene();});
@@ -88,6 +91,7 @@ namespace FastAndFractured
             gameEndData.totalDamageTaken = gameEndDataDefault.totalDamageTaken;
             gameEndData.totalDistanceTraveled = gameEndDataDefault.totalDistanceTraveled;
             gameEndData.finalAnimation = gameEndDataDefault.finalAnimation;
+            gameEndData.finalAnimationSkin = gameEndDataDefault.finalAnimationSkin;
             gameEndData.sceneBuildIndex = gameEndDataDefault.sceneBuildIndex;
             gameEndData.killCount = gameEndDataDefault.killCount;
         }
