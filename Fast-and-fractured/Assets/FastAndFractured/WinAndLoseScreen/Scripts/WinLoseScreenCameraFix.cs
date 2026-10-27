@@ -5,17 +5,15 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured
 {
     /// <summary>
-    /// The win/lose cutscene camera stays on top of the menu camera after the cutscene: while WIN_LOSE shows, the
-    /// menu canvas draws through the top camera instead.
+    /// The win/lose cutscene camera renders on top of the menu camera, hiding the menu canvas. While WIN_LOSE shows, the
+    /// canvas is drawn as an overlay: over every camera and out of the cutscene's post-processing, which darkened it.
     /// </summary>
     public sealed class WinLoseScreenCameraFix : MonoBehaviour
     {
-        private const float NEAR_CLIP_MARGIN = 0.05f;
-        private const float MIN_PLANE_DISTANCE = 0.5f;
-
+        private MenuScreen _screen;
         private Canvas _rootCanvas;
-        private Camera _originalCamera;
-        private float _originalPlaneDistance;
+        private RenderMode _originalRenderMode;
+        private bool _overlaid;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -37,31 +35,27 @@ namespace FastAndFractured
                         screen.gameObject.AddComponent<WinLoseScreenCameraFix>();
         }
 
-        private void LateUpdate()
+        private void Awake()
         {
-            if (_rootCanvas == null)
-            {
-                var canvas = GetComponentInParent<Canvas>(true);
-                _rootCanvas = canvas != null ? canvas.rootCanvas : null;
-                if (_rootCanvas == null || _rootCanvas.renderMode != RenderMode.ScreenSpaceCamera) { enabled = false; return; }
-                _originalCamera = _rootCanvas.worldCamera;
-                _originalPlaneDistance = _rootCanvas.planeDistance;
-            }
-            Camera top = null;
-            foreach (var cam in Camera.allCameras)
-                if (cam.targetTexture == null && (top == null || cam.depth > top.depth)) top = cam;
-            if (top != null && _rootCanvas.worldCamera != top)
-            {
-                _rootCanvas.worldCamera = top;
-                _rootCanvas.planeDistance = Mathf.Max(top.nearClipPlane + NEAR_CLIP_MARGIN, MIN_PLANE_DISTANCE);
-            }
+            _screen = GetComponent<MenuScreen>();
+            var canvas = GetComponentInParent<Canvas>(true);
+            _rootCanvas = canvas != null ? canvas.rootCanvas : null;
         }
 
-        private void OnDisable()
+        private void LateUpdate()
         {
-            if (_rootCanvas == null || _originalCamera == null) return;
-            _rootCanvas.worldCamera = _originalCamera;
-            _rootCanvas.planeDistance = _originalPlaneDistance;
+            bool showing = MainMenuManager.HasInstance && MainMenuManager.Instance.CurrentScreen == _screen;
+            if (showing != _overlaid) SetOverlay(showing);
+        }
+
+        private void OnDisable() => SetOverlay(false);
+
+        private void SetOverlay(bool overlay)
+        {
+            if (_rootCanvas == null || overlay == _overlaid) return;
+            if (overlay) _originalRenderMode = _rootCanvas.renderMode;
+            _rootCanvas.renderMode = overlay ? RenderMode.ScreenSpaceOverlay : _originalRenderMode;
+            _overlaid = overlay;
         }
     }
 }
