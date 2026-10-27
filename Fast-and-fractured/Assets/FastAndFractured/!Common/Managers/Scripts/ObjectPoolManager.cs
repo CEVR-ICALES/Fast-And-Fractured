@@ -47,7 +47,7 @@ namespace Utilities
                     newObjectPool.AddObject(pooledGameObject);
                 }
                 _objectPools.TryAdd(objectPoolSO.pooltype, newObjectPool);
-                _poolParentList.Add(newObjectPool, _parentGameObjectOfPools);
+                _poolParentList.Add(newObjectPool, poolGameObject.transform);
             }
             else
                 Debug.LogError("ObjectPoolSO " + objectPoolSO.name + "have a empty prefab.");

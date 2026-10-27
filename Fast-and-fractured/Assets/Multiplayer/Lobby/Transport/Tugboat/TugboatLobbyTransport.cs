@@ -64,7 +64,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                 else if (args.ConnectionState == LocalConnectionState.Stopped) tcs.TrySetResult(false);
             }
             nm.ServerManager.OnServerConnectionState += OnServerState;
-            nm.ServerManager.StartConnection();
+            MultiplayerTransport.StartServer(nm);
 
             using (ct.Register(() => tcs.TrySetCanceled()))
             {
@@ -270,13 +270,10 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         }
 
         private static void ConfigurePort(FishNet.Managing.NetworkManager nm, ushort port)
-            => nm.TransportManager.Transport?.SetPort(port);
+            => MultiplayerTransport.SetPort(port);
 
         private static void ConfigureAddress(FishNet.Managing.NetworkManager nm, string address, ushort port)
-        {
-            nm.TransportManager.Transport?.SetClientAddress(address);
-            nm.TransportManager.Transport?.SetPort(port);
-        }
+            => MultiplayerTransport.SetClientTarget(address, port);
 
         private static string GetLocalIP()
         {

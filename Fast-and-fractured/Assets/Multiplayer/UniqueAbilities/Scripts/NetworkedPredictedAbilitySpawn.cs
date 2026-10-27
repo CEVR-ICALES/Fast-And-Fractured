@@ -94,7 +94,7 @@ namespace FastAndFractured.Multiplayer
                     // already initialised theirs; InitializeReplica ignores a second call).
                     var pepe = _caster != null ? _caster.GetComponentInChildren<NetworkedPepeUniqueAbility>(true) : null;
                     tomato.transform.position = _positionOrTarget;
-                    if (pepe != null) tomato.InitializeReplica(_positionOrTarget, pepe.TomatoSpeed);
+                    if (pepe != null) tomato.InitializeReplica(_positionOrTarget, pepe.TomatoSpeed, pepe.EffectDistance, pepe.AscendingTime);
                 }
             }
             else

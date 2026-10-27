@@ -14,14 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CharacterName: MariaAntonia
   CarDefaultPrefab: {fileID: 4605594044978536144, guid: d38fd54556205e343a98988fd7efaae2, type: 3}
-  CarWithSkinsPrefabs:
-  - {fileID: 4605594044978536144, guid: d38fd54556205e343a98988fd7efaae2, type: 3}
-  - {fileID: 4605594044978536144, guid: d38fd54556205e343a98988fd7efaae2, type: 3}
   MaxEndurance: 900
   MinEndurance: 0
   Invulnerable: 0
   MaxSpeed: 200
   MaxSpeedDashing: 260
+  MaxSpeedAscend: 185
+  MaxSpeedDescend: 215
   MaxSpeedMultiplier: 1
   MinSpeed: 0
   MaxAcceleration: 10000
@@ -39,7 +38,7 @@ MonoBehaviour:
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 950
-  BaseForce: 300000
+  BaseForce: 30000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 2.2
   BaseDownwardForce: 1400
@@ -48,13 +47,13 @@ MonoBehaviour:
   NormalShootDMG: 22
   MaxNormalShootDMG: 39
   MinNormalShootDMG: 19.5
-  PushShootFORCE: 750000
+  PushShootFORCE: 27000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 120
   NormalShootCadenceTime: 0.2
   NormalShootMaxRange: 150
-  NormalShootAngle: 180
+  NormalShootAngle: 90
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
@@ -85,17 +84,7 @@ MonoBehaviour:
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
     marginToFleeFromSandstorm: 200
-  WinObjects:
-  - GameObject: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
-    StringValue: MariaAntonia_0
-  - GameObject: {fileID: 7559195656437023497, guid: 3a567dae7b3819f4aab0b02265518819, type: 3}
-    StringValue: MariaAntonia_1
-  - GameObject: {fileID: 4710033694140581016, guid: 16a1efb12f6be6040918158e578d9110, type: 3}
-    StringValue: MariaAntonia_2
-  LoseObjects:
-  - GameObject: {fileID: 3297815704724157779, guid: 0a0781605152f0b4784883c2b6fac456, type: 3}
-    StringValue: MariaAntonia_0
-  - GameObject: {fileID: 6278665350653037024, guid: 8113ed478f0f44746af8da56500a8a29, type: 3}
-    StringValue: MariaAntonia_1
-  - GameObject: {fileID: 2508495496778248647, guid: e6111fb867613104a9527768cd97de61, type: 3}
-    StringValue: MariaAntonia_2
+  WinAnimation: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
+  LoseAnimation: {fileID: 3297815704724157779, guid: 0a0781605152f0b4784883c2b6fac456, type: 3}
+  WinAnimationOverrides: []
+  LoseAnimationOverrides: []

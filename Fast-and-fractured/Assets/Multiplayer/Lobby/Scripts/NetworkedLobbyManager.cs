@@ -640,6 +640,7 @@ namespace FastAndFractured.Multiplayer
                 OnGameStarting?.Invoke();
                 // From now on an unexpected client stop means the host is gone.
                 HostDisconnectWatchdog.NotifyMatchStarted();
+                MultiplayerRoomReturn.NotifyMatchStarted();
             }
         }
         #endregion

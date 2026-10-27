@@ -28,6 +28,14 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         // Lobby metadata mirrors the connection count: GetNumLobbyMembers is stale for lobbies the caller has not joined.
         private const string KEY_NUM_PLAYERS = "num_players";
         private const string KEY_HOST_LINK   = "host_link";
+        // Steam keeps a lobby alive while anyone is still in it: the browser hides one whose host stopped writing this.
+        private const string KEY_HEARTBEAT   = "heartbeat";
+        // The host's SteamID, set when it also listens on Steam's relay: clients connect to it from any network.
+        private const string KEY_RELAY_HOST  = "relay_host";
+        internal const uint HEARTBEAT_INTERVAL_SECONDS = 15;
+        internal const uint STALE_HEARTBEAT_SECONDS = 60;
+        // FishySteamworks' own connect timeout never fires: give up on the relay after this and try the IP.
+        private const float RELAY_CONNECT_TIMEOUT_SECONDS = 10f;
         private const ushort DEFAULT_SERVER_PORT = 7777;
         // Any public address: connecting a UDP socket only picks the outgoing interface.
         private const string ROUTE_PROBE_ADDRESS = "8.8.8.8";
@@ -36,6 +44,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         private CSteamID _currentLobbyId = CSteamID.Nil;
         private bool _hosting;
         private ushort _hostedPort;
+        private bool _watchingJoinedClient;
+        private LobbyHeartbeat _heartbeat;
 
         /// <summary>Only list lobbies of this Application.version; turn off to test an editor against an older build.</summary>
         public static bool _filterByVersion = true;
@@ -53,6 +63,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         public SteamLobbyTransport()
         {
             _lobbyChatUpdateCallback = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+            Application.quitting += LeaveCurrentLobby;
         }
 
 
@@ -67,7 +78,10 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 ? ELobbyType.k_ELobbyTypePublic
                 : ELobbyType.k_ELobbyTypeFriendsOnly;
 
+            LeaveCurrentLobby();
+
             var createTcs = new TaskCompletionSource<LobbyCreated_t>();
+            _lobbyCreatedResult?.Dispose();
             _lobbyCreatedResult = CallResult<LobbyCreated_t>.Create((r, failure) =>
             {
                 if (failure) createTcs.TrySetException(new Exception("Steam lobby I/O failed."));
@@ -98,6 +112,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_NUM_PLAYERS, "0");
             SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_HOST_LINK,
                 ((byte)FastAndFractured.Multiplayer.NetworkLink.Detect()).ToString());
+            StartHeartbeat();
 
             if (options.Metadata != null)
                 foreach (var kv in options.Metadata)
@@ -106,12 +121,14 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             var nm = InstanceFinder.NetworkManager;
             if (nm == null) throw new InvalidOperationException("NetworkManager not found.");
 
-            nm.TransportManager.Transport?.SetPort(options.Port);
+            MultiplayerTransport.SetPort(options.Port);
             nm.ServerManager.OnRemoteConnectionState += HandleRemoteState;
             // FishNet raises no OnRemoteConnectionState for the host's own client.
             nm.ClientManager.OnClientConnectionState += HandleLocalClientState;
 
             await StartServerAsync(nm, ct);
+            if (MultiplayerTransport.SteamRelayAvailable)
+                SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_RELAY_HOST, MultiplayerTransport.LocalSteamId);
 
             // The match teardown stops the server directly: without this the lobby outlived it, empty, in the browser.
             nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
@@ -119,7 +136,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             if (!options.HostAsServer)
             {
-                nm.TransportManager.Transport?.SetClientAddress("localhost");
+                MultiplayerTransport.SetLocalHostTarget();
                 nm.ClientManager.StartConnection();
             }
             else
@@ -140,7 +157,10 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             if (!SteamManager.Initialized) return false;
 
+            LeaveCurrentLobby();
+
             var joinTcs = new TaskCompletionSource<LobbyEnter_t>();
+            _lobbyEnterCallback?.Dispose();
             _lobbyEnterCallback = Callback<LobbyEnter_t>.Create(r => joinTcs.TrySetResult(r));
             SteamMatchmaking.JoinLobby(new CSteamID(lobbyRaw));
 
@@ -149,6 +169,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             {
                 try { entered = await joinTcs.Task; }
                 catch { return false; }
+                finally
+                {
+                    _lobbyEnterCallback?.Dispose();
+                    _lobbyEnterCallback = null;
+                }
             }
 
             if (entered.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
@@ -162,12 +187,39 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             if (string.IsNullOrEmpty(serverIp))
             {
                 Debug.LogError("[SteamLobbyTransport] Lobby is missing server_ip — server may not be ready yet.");
+                LeaveCurrentLobby();
                 return false;
             }
 
             if (!ushort.TryParse(serverPort, out ushort port)) port = DEFAULT_SERVER_PORT;
 
-            return await JoinAddressAsync(serverIp, port, ct);
+            bool joined = false;
+            try
+            {
+                string relayHost = SteamMatchmaking.GetLobbyData(_currentLobbyId, KEY_RELAY_HOST);
+                if (MultiplayerTransport.SteamRelayAvailable && MultiplayerTransport.IsSteamId(relayHost))
+                {
+                    using (var relayAttempt = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                    {
+                        relayAttempt.CancelAfter(TimeSpan.FromSeconds(RELAY_CONNECT_TIMEOUT_SECONDS));
+                        joined = await JoinAddressAsync(relayHost, port, relayAttempt.Token);
+                    }
+                    if (!joined)
+                    {
+                        FastAndFractured.Multiplayer.HostDisconnectWatchdog.NotifyIntentionalLeave();
+                        InstanceFinder.ClientManager?.StopConnection();
+                        Debug.LogWarning("[SteamLobbyTransport] Could not reach the host through Steam's relay; trying its IP.");
+                    }
+                }
+                if (!joined && !ct.IsCancellationRequested)
+                    joined = await JoinAddressAsync(serverIp, port, ct);
+            }
+            finally
+            {
+                if (joined) WatchJoinedClient();
+                else LeaveCurrentLobby();
+            }
+            return joined;
         }
 
         private static async Task<bool> JoinAddressAsync(string ip, ushort port, CancellationToken ct)
@@ -175,9 +227,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             var nm = InstanceFinder.NetworkManager;
             if (nm == null) return false;
 
-            nm.TransportManager.Transport?.SetClientAddress(ip);
-            nm.TransportManager.Transport?.SetPort(port);
-
+            MultiplayerTransport.SetClientTarget(ip, port);
             return await StartClientAsync(nm, ct);
         }
 
@@ -185,6 +235,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         {
             if (args.ConnectionState != FishNet.Transporting.LocalConnectionState.Stopped) return;
             var nm = InstanceFinder.NetworkManager;
+            // Multipass reports each transport: the room lives while any of them still serves.
+            if (nm != null && nm.ServerManager.Started) return;
             if (nm != null)
             {
                 nm.ServerManager.OnServerConnectionState -= HandleServerStopped;
@@ -192,13 +244,78 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                 nm.ClientManager.OnClientConnectionState -= HandleLocalClientState;
             }
             if (!_hosting) return;
-            if (_currentLobbyId != CSteamID.Nil)
-            {
-                SteamMatchmaking.LeaveLobby(_currentLobbyId);
-                _currentLobbyId = CSteamID.Nil;
-            }
-            _hosting = false;
+            LeaveCurrentLobby();
             OnLobbyClosed?.Invoke();
+        }
+
+        private void WatchJoinedClient()
+        {
+            var nm = InstanceFinder.NetworkManager;
+            if (nm == null || _watchingJoinedClient) return;
+            nm.ClientManager.OnClientConnectionState += HandleJoinedClientState;
+            _watchingJoinedClient = true;
+        }
+
+        private void HandleJoinedClientState(ClientConnectionStateArgs args)
+        {
+            if (args.ConnectionState != LocalConnectionState.Stopped || _hosting) return;
+            LeaveCurrentLobby();
+        }
+
+        private void LeaveCurrentLobby()
+        {
+            if (_watchingJoinedClient)
+            {
+                var nm = InstanceFinder.NetworkManager;
+                if (nm != null) nm.ClientManager.OnClientConnectionState -= HandleJoinedClientState;
+                _watchingJoinedClient = false;
+            }
+            StopHeartbeat();
+            if (_currentLobbyId != CSteamID.Nil && SteamManager.Initialized)
+                SteamMatchmaking.LeaveLobby(_currentLobbyId);
+            _currentLobbyId = CSteamID.Nil;
+            _hosting = false;
+        }
+
+        private void StartHeartbeat()
+        {
+            StopHeartbeat();
+            WriteHeartbeat();
+            var go = new GameObject("[SteamLobbyHeartbeat]");
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            _heartbeat = go.AddComponent<LobbyHeartbeat>();
+            _heartbeat.Owner = this;
+        }
+
+        private void StopHeartbeat()
+        {
+            if (_heartbeat != null) UnityEngine.Object.Destroy(_heartbeat.gameObject);
+            _heartbeat = null;
+        }
+
+        private void WriteHeartbeat()
+        {
+            if (_hosting && _currentLobbyId != CSteamID.Nil && SteamManager.Initialized)
+                SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_HEARTBEAT, SteamUtils.GetServerRealTime().ToString());
+        }
+
+        internal static bool IsHeartbeatStale(string heartbeat, uint now)
+        {
+            if (!uint.TryParse(heartbeat, out uint last)) return false;
+            return now > last && now - last > STALE_HEARTBEAT_SECONDS;
+        }
+
+        private sealed class LobbyHeartbeat : MonoBehaviour
+        {
+            public SteamLobbyTransport Owner;
+            private float _next;
+
+            private void Update()
+            {
+                if (Time.unscaledTime < _next) return;
+                _next = Time.unscaledTime + HEARTBEAT_INTERVAL_SECONDS;
+                Owner?.WriteHeartbeat();
+            }
         }
 
 
@@ -215,13 +332,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                     nm.ClientManager.StopConnection();
             }
 
-            if (_currentLobbyId != CSteamID.Nil)
-            {
-                SteamMatchmaking.LeaveLobby(_currentLobbyId);
-                _currentLobbyId = CSteamID.Nil;
-            }
-
-            _hosting = false;
+            LeaveCurrentLobby();
             OnLobbyClosed?.Invoke();
             return Task.CompletedTask;
         }
@@ -245,6 +356,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                         kv.Key, kv.Value, ELobbyComparison.k_ELobbyComparisonEqual);
 
             var listTcs = new TaskCompletionSource<LobbyMatchList_t>();
+            _lobbyListResult?.Dispose();
             _lobbyListResult = CallResult<LobbyMatchList_t>.Create((r, failure) =>
             {
                 if (failure) listTcs.TrySetResult(default);
@@ -261,9 +373,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             Debug.Log($"[SteamLobbyTransport] RequestLobbyList returned {(int)list.m_nLobbiesMatching} matching lobbies.");
 
+            uint now = SteamUtils.GetServerRealTime();
             for (int i = 0; i < (int)list.m_nLobbiesMatching; i++)
             {
                 var sid       = SteamMatchmaking.GetLobbyByIndex(i);
+                if (IsHeartbeatStale(SteamMatchmaking.GetLobbyData(sid, KEY_HEARTBEAT), now)) continue;
                 string name   = SteamMatchmaking.GetLobbyData(sid, KEY_ROOM_NAME);
                 string ip     = SteamMatchmaking.GetLobbyData(sid, KEY_SERVER_IP);
                 string portS  = SteamMatchmaking.GetLobbyData(sid, KEY_SERVER_PORT);
@@ -350,13 +464,16 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         private static async Task StartServerAsync(FishNet.Managing.NetworkManager nm, CancellationToken ct)
         {
             var tcs = new TaskCompletionSource<bool>();
+            // Tugboat decides: the relay is optional, its failure must not fail the room.
+            int primary = MultiplayerTransport.Tugboat != null ? MultiplayerTransport.Tugboat.Index : -1;
             void OnState(ServerConnectionStateArgs a)
             {
+                if (primary >= 0 && a.TransportIndex != primary) return;
                 if (a.ConnectionState == LocalConnectionState.Started) tcs.TrySetResult(true);
                 if (a.ConnectionState == LocalConnectionState.Stopped) tcs.TrySetResult(false);
             }
             nm.ServerManager.OnServerConnectionState += OnState;
-            nm.ServerManager.StartConnection();
+            MultiplayerTransport.StartServer(nm);
 
             bool ok;
             using (ct.Register(() => tcs.TrySetCanceled()))
@@ -371,8 +488,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         private static async Task<bool> StartClientAsync(FishNet.Managing.NetworkManager nm, CancellationToken ct)
         {
             var tcs = new TaskCompletionSource<bool>();
+            int clientIndex = nm.TransportManager.Transport is FishNet.Transporting.Multipass.Multipass multipass && multipass.ClientTransport != null
+                ? multipass.ClientTransport.Index : -1;
             void OnState(ClientConnectionStateArgs a)
             {
+                if (clientIndex >= 0 && a.TransportIndex != clientIndex) return;
                 if (a.ConnectionState == LocalConnectionState.Started) tcs.TrySetResult(true);
                 if (a.ConnectionState == LocalConnectionState.Stopped) tcs.TrySetResult(false);
             }
@@ -402,6 +522,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
         public void Dispose()
         {
+            Application.quitting -= LeaveCurrentLobby;
+            LeaveCurrentLobby();
             _lobbyChatUpdateCallback?.Dispose();
             _lobbyCreatedResult?.Dispose();
             _lobbyListResult?.Dispose();

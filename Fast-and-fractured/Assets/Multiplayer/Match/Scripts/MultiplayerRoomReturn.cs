@@ -18,8 +18,25 @@ namespace FastAndFractured.Multiplayer
 
         private static Runner _runner;
 
+        /// <summary>This player walked out of the match in progress: its end (results, win/lose) is no longer theirs.</summary>
+        internal static bool LeftMatch { get; private set; }
+
+        /// <summary>Set while the match is decided but its result not shown yet (the end reveal): the way out is the result.</summary>
+        internal static System.Action ShowDecidedResult;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => _runner = null;
+        private static void ResetStatics()
+        {
+            _runner = null;
+            LeftMatch = false;
+            ShowDecidedResult = null;
+        }
+
+        internal static void NotifyMatchStarted()
+        {
+            LeftMatch = false;
+            ShowDecidedResult = null;
+        }
 
         private static bool Online => InstanceFinder.IsClientStarted || InstanceFinder.IsServerStarted;
 
@@ -28,6 +45,15 @@ namespace FastAndFractured.Multiplayer
 
         public static void LeaveMatchToRoom()
         {
+            if (ShowDecidedResult != null)
+            {
+                var showResult = ShowDecidedResult;
+                ShowDecidedResult = null;
+                showResult();
+                return;
+            }
+
+            LeftMatch = true;
             HostDisconnectWatchdog.NotifyMatchEnded();
             var lobby = LobbyLocator.GetLobbyManager();
             if (!Online || lobby == null)

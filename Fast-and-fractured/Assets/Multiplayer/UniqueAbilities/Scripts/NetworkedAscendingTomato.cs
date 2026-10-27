@@ -12,6 +12,7 @@ namespace FastAndFractured.Multiplayer
     public class NetworkedAscendingTomato : NetworkBehaviour
     {
         private const float DESPAWN_DELAY_SECONDS = 0.5f;
+        private const float AREA_FADE_SECONDS = AscendingTomatoBehaviour.TIME_BEFORE_START_FADE;
 
         [Header("Visual Settings")]
         [SerializeField] private Vector3 _rotationSpeed = new Vector3(30f, 60f, 45f);
@@ -29,6 +30,9 @@ namespace FastAndFractured.Multiplayer
         private float _startTime;
         private bool _initialized;
         private bool _hasExploded;
+        private bool _areaFading;
+        private TomatoDecal _areaDecal;
+        private Quaternion _areaRotation;
 
         private void Awake()
         {
@@ -39,6 +43,9 @@ namespace FastAndFractured.Multiplayer
                 legacy.enabled = false;
                 Destroy(legacy);
             }
+
+            _areaDecal = GetComponentInChildren<TomatoDecal>(true);
+            if (_areaDecal != null) _areaRotation = _areaDecal.transform.localRotation;
 
             var networkTransform = GetComponent<FishNet.Component.Transforming.NetworkTransform>();
             if (networkTransform != null)
@@ -72,25 +79,43 @@ namespace FastAndFractured.Multiplayer
             _startTime = Time.time;
             _initialized = true;
             _hasExploded = false;
+            ShowArea();
         }
 
         /// <summary>Observers: fly the tomato from its launch point; the server does the rest.</summary>
-        internal void InitializeReplica(Vector3 originPosition, float speed)
+        internal void InitializeReplica(Vector3 originPosition, float speed, float effectDistance, float ascendingTime)
         {
             if (_initialized) return;
             _originPosition = originPosition;
             _speed = speed;
+            _effectDistance = effectDistance;
+            _ascendingTime = ascendingTime;
             _startTime = Time.time;
             _initialized = true;
+            ShowArea();
+        }
+
+        /// <summary>The area the singleplayer AscendingTomatoBehaviour draws: it is removed here, so nothing else sizes the decal.</summary>
+        private void ShowArea()
+        {
+            _areaFading = false;
+            if (_areaDecal != null) _areaDecal.SetRadius(_effectDistance);
         }
         
         private void Update()
         {
             transform.Rotate(_rotationSpeed * Time.deltaTime);
+            if (_areaDecal != null) _areaDecal.transform.rotation = _areaRotation;
             if (!_initialized) return;
 
             float elapsed = Time.time - _startTime;
             transform.position = _originPosition + Vector3.up * (_speed * elapsed);
+
+            if (!_areaFading && _areaDecal != null && elapsed >= _ascendingTime - AREA_FADE_SECONDS)
+            {
+                _areaFading = true;
+                _areaDecal.DecalFadeOut(AREA_FADE_SECONDS);
+            }
 
             if (base.IsServerInitialized && elapsed >= _ascendingTime && !_hasExploded)
             {

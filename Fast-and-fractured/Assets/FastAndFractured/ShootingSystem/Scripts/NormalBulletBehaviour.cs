@@ -17,8 +17,6 @@ namespace FastAndFractured
         public override void InitBulletTrayectory()
         {
             base.InitBulletTrayectory();
-
-            if (!_ignoreCollider) _ignoreCollider = GetComponentInParent<Collider>();
             if (_ignoreCollider != null)
             {
                 Physics.IgnoreCollision(_ignoreCollider, ownCollider, true);
@@ -29,7 +27,6 @@ namespace FastAndFractured
         {
             if ((transform.position - initPosition).magnitude >= range && _callForDestroy)
             {
-                Debug.Log("END BY RANGE" + gameObject.name);
                 OnBulletEndTrayectory();
                 _callForDestroy = false;
             }
@@ -66,9 +63,6 @@ namespace FastAndFractured
             }
             else
                 OnBulletEndTrayectory();
-
-
-            Debug.Log("END BY COLLISION" + gameObject.name);
         }
         protected override void OnBulletEndTrayectory()
         {

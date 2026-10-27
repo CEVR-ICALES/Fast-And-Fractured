@@ -19,6 +19,8 @@ MonoBehaviour:
   Invulnerable: 1
   MaxSpeed: 180
   MaxSpeedDashing: 240
+  MaxSpeedAscend: 165
+  MaxSpeedDescend: 195
   MaxSpeedMultiplier: 1
   MinSpeed: 0
   MaxAcceleration: 8000
@@ -36,7 +38,7 @@ MonoBehaviour:
   FrontWheelsStrenghtFactor: 0.8
   RearWheelsStrenghtFactor: 0.2
   Weight: 1050
-  BaseForce: 350000
+  BaseForce: 35000
   FrontalHitAnlgeThreshold: 35
   EnduranceImportanceWhenColliding: 2.2
   BaseDownwardForce: 1550
@@ -45,13 +47,13 @@ MonoBehaviour:
   NormalShootDMG: 34
   MaxNormalShootDMG: 60
   MinNormalShootDMG: 30
-  PushShootFORCE: 170000
+  PushShootFORCE: 27000
   ExplosionRadius: 7
   ExplosionCenterOffset: {x: 0, y: 0, z: 0}
   NormalShootSpeed: 120
   NormalShootCadenceTime: 0.3
   NormalShootMaxRange: 150
-  NormalShootAngle: 180
+  NormalShootAngle: 90
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
@@ -82,17 +84,7 @@ MonoBehaviour:
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 25
     marginToFleeFromSandstorm: 250
-  WinObjects:
-  - GameObject: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
-    StringValue: Carme_0
-  - GameObject: {fileID: 3549267821951525901, guid: 011cf9e171cdece4fa786e996e80ed55, type: 3}
-    StringValue: Carme_1
-  - GameObject: {fileID: 7767996628973137842, guid: d372f0d900257d647be5a4e17d687d7a, type: 3}
-    StringValue: Carme_2
-  LoseObjects:
-  - GameObject: {fileID: 5554116291560390806, guid: bcba3650ae9352640bea3764f562c5ae, type: 3}
-    StringValue: Carme_0
-  - GameObject: {fileID: 7204318328350644205, guid: f8f5737185be6fd44b20f11aaa8557bb, type: 3}
-    StringValue: Carme_1
-  - GameObject: {fileID: 7767996628973137842, guid: d372f0d900257d647be5a4e17d687d7a, type: 3}
-    StringValue: Carme_2
+  WinAnimation: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
+  LoseAnimation: {fileID: 5554116291560390806, guid: bcba3650ae9352640bea3764f562c5ae, type: 3}
+  WinAnimationOverrides: []
+  LoseAnimationOverrides: []

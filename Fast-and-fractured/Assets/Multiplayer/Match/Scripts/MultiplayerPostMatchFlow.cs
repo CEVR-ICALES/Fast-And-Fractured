@@ -10,8 +10,9 @@ using UnityEngine.UI;
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// After a multiplayer match the win/lose screen's retry and menu buttons lead back to the room (or the hub if
-    /// it closed). Armed before the MainMenu loads; it disarms after one use or a load from any other screen.
+    /// After a multiplayer match the win/lose screen's retry button (and Esc) lead back to the room, change character
+    /// through the room's pick, and home out of the room to the main menu (the room migrates to another player).
+    /// Armed before the MainMenu loads; it disarms after one use or a load from any other screen.
     /// </summary>
     public static class MultiplayerPostMatchFlow
     {
@@ -59,7 +60,6 @@ namespace FastAndFractured.Multiplayer
                 ? menu.CurrentScreen.screenType
                 : (ScreensType?)null;
 
-            // Only loads from the WIN_LOSE screen; any other means the player moved on.
             if (currentScreenType != ScreensType.WIN_LOSE)
             {
                 Disarm();
@@ -82,8 +82,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         /// <summary>
-        /// The screen's home, change character and retry buttons lead to the room (change character through the room's
-        /// pick). Their camera switches are kept: they restore the menu cameras after the cutscene.
+        /// Retry leads to the room, change character to the room's pick and home out of the room. Their camera switches
+        /// are kept: they restore the menu cameras after the cutscene.
         /// </summary>
         private static void RouteMenuButtons(MenuScreen screen)
         {
@@ -103,12 +103,30 @@ namespace FastAndFractured.Multiplayer
                                          go.GetComponentInChildren<LoadingManager>(true) != null;
                     if (!goToMenu && !openMenu && !loadingScreen) continue;
                     click.SetPersistentListenerState(i, UnityEventCallState.Off);
-                    routed |= goToMenu;
+                    routed = true;
                 }
                 if (!routed) continue;
                 if (picksCharacter) click.AddListener(PickCharacterForNextMatch);
-                else click.AddListener(BackToRoom);
+                else if (transition != null && transition.screenToOpen == ScreensType.MAIN_MENU) click.AddListener(LeaveRoomToMainMenu);
+                else
+                {
+                    click.AddListener(BackToRoom);
+                    screen.backButton = button;
+                }
             }
+        }
+
+        /// <summary>Home: out of the room. If this player hosted it, the room carries on under another (RoomMigration).</summary>
+        private static async void LeaveRoomToMainMenu()
+        {
+            if (!_armed) return;
+            Disarm();
+            HideFinalCutscene();
+            HostDisconnectWatchdog.NotifyIntentionalLeave();
+            try { await Abstractions.LobbyServiceLocator.Transport.LeaveLobbyAsync(); }
+            catch (System.Exception e) { Debug.LogException(e); }
+            if (MainMenuManager.HasInstance)
+                MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, SCREEN_TRANSITION_SECONDS);
         }
 
         /// <summary>Character selection through the room's flow: picking a map returns to the room.</summary>

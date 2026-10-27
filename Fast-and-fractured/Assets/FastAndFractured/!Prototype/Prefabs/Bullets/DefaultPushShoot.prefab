@@ -156,6 +156,7 @@ GameObject:
   - component: {fileID: 349250238249279075}
   - component: {fileID: 7978465082485488719}
   - component: {fileID: 2392769544839505661}
+  - component: {fileID: 7381527465926847170}
   m_Layer: 8
   m_Name: DefaultPushShoot
   m_TagString: Untagged
@@ -231,10 +232,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8225382753086449546}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -276,6 +277,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eaa71b452aa6d47a5ee1b985761e97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7381527465926847170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8225382753086449546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0759428142b3e1c4c951a90f95932e3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Utilities.LocalEventRunner
 --- !u!1001 &3826154811773690714
 PrefabInstance:
   m_ObjectHideFlags: 0

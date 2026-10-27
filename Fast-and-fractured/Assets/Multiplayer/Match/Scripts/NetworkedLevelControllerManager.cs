@@ -323,7 +323,6 @@ namespace FastAndFractured.Multiplayer
                 characters.Add(saved);
             }
 
-            var transport = base.NetworkManager.TransportManager.Transport;
             snapshot = new HostMigration.MatchSnapshotBroadcast
             {
                 MigrationEnabled = true,
@@ -334,7 +333,7 @@ namespace FastAndFractured.Multiplayer
                 HumanCodes = _replayHumanCodes,
                 SuccessorTokens = successorTokens.ToArray(),
                 SuccessorAddresses = successorAddresses.ToArray(),
-                Port = transport != null ? transport.GetPort() : FALLBACK_PORT,
+                Port = MultiplayerTransport.Port != 0 ? MultiplayerTransport.Port : FALLBACK_PORT,
                 Characters = characters.ToArray(),
             };
             NetworkedSandstormController.ServerInstance?.ServerDescribeForMigration(
@@ -1101,12 +1100,13 @@ namespace FastAndFractured.Multiplayer
 
         [Server]
         private System.Collections.IEnumerator RevealThenEndGame(NetworkObject winner)
-        {
-            yield return new WaitForSeconds(END_OF_MATCH_REVEAL_DELAY);
-
-            // Sent before EndGameRpc on the same reliable channel; the win/lose screen reads it.
+        { 
             try { MatchResultsRpc(BuildMatchResults(winner)); }
             catch (Exception e) { Debug.LogException(e); }
+            MatchDecidedRpc(winner);
+
+            _revealEndsAt = Time.time + END_OF_MATCH_REVEAL_DELAY;
+            while (Time.time < _revealEndsAt) yield return null;
             EndGameRpc(winner);
             Debug.Log("<color=magenta>[NetworkedLevelControllerManager] EndGameRpc dispatched. The room stays open for the next match.</color>");
 
@@ -1447,11 +1447,35 @@ namespace FastAndFractured.Multiplayer
             return null;
         }
         
+        private float _revealEndsAt;
+        private bool _matchEndShown;
+
+        /// <summary>Server: the host asked for the result during the reveal; everyone gets it now.</summary>
+        [Server]
+        private void ServerEndRevealNow() => _revealEndsAt = 0f;
+
         [ObserversRpc]
-        private void EndGameRpc(NetworkObject winner)
+        private void MatchDecidedRpc(NetworkObject winner)
         {
+             MultiplayerRoomReturn.ShowDecidedResult = base.IsServerInitialized
+                ? (System.Action)ServerEndRevealNow
+                : () => ShowMatchEnd(winner);
+        }
+
+        [ObserversRpc]
+        private void EndGameRpc(NetworkObject winner) => ShowMatchEnd(winner);
+
+        private void ShowMatchEnd(NetworkObject winner)
+        {
+            if (_matchEndShown) return;
+            _matchEndShown = true;
+            MultiplayerRoomReturn.ShowDecidedResult = null;
+
             // The match is over: losing the host from now on is a room matter, not a match one.
             HostDisconnectWatchdog.NotifyMatchEnded();
+
+            // Left during the last seconds (Esc while the end was on its way): already heading to the room.
+            if (MultiplayerRoomReturn.LeftMatch) return;
 
             if (MatchSpectatorCamera.IsSpectating)
             {
@@ -1460,8 +1484,6 @@ namespace FastAndFractured.Multiplayer
                 MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
                 return;
             }
-
-            string winnerName = winner != null ? winner.gameObject.name : "DRAW";
 
             // Restore the freelook camera before the win/lose screen.
             NetworkedSpectatorController.Instance?.DeactivateSpectator();
@@ -1520,7 +1542,10 @@ namespace FastAndFractured.Multiplayer
             gameEndData.killCount = MatchResults.TryGetLocal(out var myResult) ? myResult.Kills.ToString() : "0";
 
             // A non-null finalAnimation makes the main menu open on the win/lose screen.
-            gameEndData.finalAnimation = ResolveFinalAnimation(localStats, isWin);
+            string characterCode = ResolveLocalCharacterCode();
+            gameEndData.finalAnimation = ResolveFinalAnimation(localStats, characterCode, isWin);
+            LevelUtilities.ParseCharacterNameCode(characterCode, out _, out int skin);
+            gameEndData.finalAnimationSkin = skin;
 
             MultiplayerPostMatchFlow.ArmAfterMultiplayerMatch(InstanceFinder.IsServerStarted);
 
@@ -1535,36 +1560,17 @@ namespace FastAndFractured.Multiplayer
             return field?.GetValue(lc) as GameEndData;
         }
 
-        /// <summary>The local character's win/lose animation (code from the spawn data, not the shared PlayerPrefs), else the first one configured.</summary>
-        private GameObject ResolveFinalAnimation(NetworkedStatsController localStats, bool isWin)
+        /// <summary>The local character code from the spawn data (not the shared PlayerPrefs, which a clone may overwrite).</summary>
+        private string ResolveLocalCharacterCode()
+        {
+            string code = _levelControllerWrapper != null ? _levelControllerWrapper.LocalPlayerNameCode : null;
+            return string.IsNullOrEmpty(code) ? PlayerPrefs.GetString("Selected_Player", "Pepe_0") : code;
+        }
+
+        private static GameObject ResolveFinalAnimation(NetworkedStatsController localStats, string characterCode, bool isWin)
         {
             var coreStats = localStats != null ? localStats.GetComponent<StatsController>() : null;
-            if (coreStats == null) return null;
-
-            string code = _levelControllerWrapper != null ? _levelControllerWrapper.LocalPlayerNameCode : null;
-            if (string.IsNullOrEmpty(code))
-                code = PlayerPrefs.GetString("Selected_Player", "Pepe_0");
-
-            var animation = isWin ? coreStats.GetWinObjectByString(code) : coreStats.GetLoseObjectByString(code);
-            if (animation == null)
-            {
-                // Unknown code: any configured object still shows the screen.
-                var candidates = isWin ? coreStats.WinObjects : coreStats.LoseObjects;
-                if (candidates != null)
-                {
-                    foreach (var pair in candidates)
-                    {
-                        if (pair != null && pair.GameObject != null)
-                        {
-                            Debug.LogWarning($"[NetworkedLevelControllerManager] No {(isWin ? "win" : "lose")} animation for code '{code}' — " +
-                                             $"falling back to '{pair.StringValue}'.");
-                            animation = pair.GameObject;
-                            break;
-                        }
-                    }
-                }
-            }
-            return animation;
+            return coreStats != null ? coreStats.GetFinalAnimation(characterCode, isWin) : null;
         }
 
         /// <summary>Local load of the main menu, marked as an intentional leave for HostDisconnectWatchdog.</summary>

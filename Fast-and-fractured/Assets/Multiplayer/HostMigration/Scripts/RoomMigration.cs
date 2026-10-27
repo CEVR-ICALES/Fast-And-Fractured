@@ -10,7 +10,6 @@ using FishNet.Broadcast;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Transporting;
-using FishNet.Transporting.Tugboat;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -115,7 +114,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 Enabled = HostMigrationSettings.RoomMigrationEnabled,
                 RoomName = lobby.RoomName.Value,
                 AiSlots = lobby.AiSlotCount.Value,
-                Port = nm.TransportManager.Transport != null ? nm.TransportManager.Transport.GetPort() : DEFAULT_PORT,
+                Port = MultiplayerTransport.Port != 0 ? MultiplayerTransport.Port : DEFAULT_PORT,
                 MatchMigrationTakesOver = lobby.GameStarted.Value && HostMigrationSettings.Enabled,
                 SuccessorTokens = tokens.ToArray(),
                 SuccessorAddresses = addresses.ToArray(),
@@ -194,12 +193,11 @@ namespace FastAndFractured.Multiplayer.HostMigration
             yield return new WaitForSecondsRealtime(SUCCESSOR_HEAD_START);
 
             var nm = InstanceFinder.NetworkManager;
-            var tugboat = nm != null ? nm.TransportManager.Transport as Tugboat : null;
             float deadline = Time.unscaledTime + RECONNECT_TIMEOUT;
             while (nm != null && Time.unscaledTime < deadline)
             {
                 if (nm.ClientManager.Started) nm.ClientManager.StopConnection();
-                if (tugboat != null) { tugboat.SetClientAddress(address); tugboat.SetPort(snapshot.Port); }
+                MultiplayerTransport.SetClientTarget(address, snapshot.Port);
                 nm.ClientManager.StartConnection();
                 for (float attempt = 0f; attempt < CLIENT_START_TIMEOUT && !nm.ClientManager.Started; attempt += Time.unscaledDeltaTime)
                     yield return null;

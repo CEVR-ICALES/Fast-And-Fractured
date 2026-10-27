@@ -19,6 +19,28 @@ namespace FastAndFractured.Multiplayer.Tests
         }
 
         [Test]
+        public void ClientTarget_SteamIdGoesThroughTheRelay_AddressesThroughTugboat()
+        {
+            Assert.IsTrue(MultiplayerTransport.IsSteamId("76561198195407945"));
+            Assert.IsFalse(MultiplayerTransport.IsSteamId("192.168.1.141"));
+            Assert.IsFalse(MultiplayerTransport.IsSteamId("localhost"));
+            Assert.IsFalse(MultiplayerTransport.IsSteamId("3232235917"), "an IPv4 address written as a number");
+        }
+
+#if STEAMWORKS_NET
+        [Test]
+        public void SteamLobby_HiddenOnceItsHostStopsBeating()
+        {
+            const uint NOW = 1_000_000;
+            uint stale = Abstractions.Steam.SteamLobbyTransport.STALE_HEARTBEAT_SECONDS;
+            Assert.IsFalse(Abstractions.Steam.SteamLobbyTransport.IsHeartbeatStale((NOW - stale).ToString(), NOW));
+            Assert.IsTrue(Abstractions.Steam.SteamLobbyTransport.IsHeartbeatStale((NOW - stale - 1).ToString(), NOW));
+            Assert.IsFalse(Abstractions.Steam.SteamLobbyTransport.IsHeartbeatStale((NOW + 5).ToString(), NOW));
+            Assert.IsFalse(Abstractions.Steam.SteamLobbyTransport.IsHeartbeatStale(string.Empty, NOW));
+        }
+#endif
+
+        [Test]
         public void ILobbyTransport_HasRequiredEvents()
         {
             var t = typeof(ILobbyTransport);

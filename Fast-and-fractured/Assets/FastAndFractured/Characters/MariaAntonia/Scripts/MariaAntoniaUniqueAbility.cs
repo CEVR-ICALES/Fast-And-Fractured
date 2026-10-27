@@ -129,7 +129,8 @@ namespace FastAndFractured
 
         private void OnDestroy()
         {
-            SoundManager.Instance?.StopSound(ssjUltiReference);
+            var soundManager = SoundManager.ExistingInstance;
+            if (soundManager != null) soundManager.StopSound(ssjUltiReference);
         }
 
         #region Croquette Methods

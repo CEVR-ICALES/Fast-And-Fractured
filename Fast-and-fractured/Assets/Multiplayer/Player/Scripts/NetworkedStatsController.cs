@@ -20,9 +20,6 @@ namespace FastAndFractured.Multiplayer
 
         [Header("Debug")]
         [SerializeField] private bool verboseLogging = false;
-        
-        [Header("VFX")]
-        [SerializeField] private GameObject dieExplosionVfx;
         #endregion
         
         #region STATS_TRACKING
@@ -299,7 +296,6 @@ namespace FastAndFractured.Multiplayer
         private const float MAX_DAMAGE_PER_CALL = 500f;
         private const float MAX_HEAL_PER_CALL = 500f;
         private const float MIN_DISTANCE_STEP = 0.01f;
-        private const float DEATH_VFX_LIFETIME_SECONDS = 5f;
         private const float DEBUG_AMOUNT = 50f;
         // Skips DeathCaller and HandleServerSideDeath.
         private const int DEATH_CALLER_SKIPPED_FRAMES = 2;
@@ -568,11 +564,8 @@ namespace FastAndFractured.Multiplayer
             string victimName = victim != null ? MatchNames.Of(victim.gameObject) : null;
             string killerName = killer != null ? MatchNames.Of(killer.gameObject) : null;
                         
-            if (dieExplosionVfx != null)
-            {
-                var vfx = Instantiate(dieExplosionVfx, transform.position, Quaternion.identity);
-                Destroy(vfx, DEATH_VFX_LIFETIME_SECONDS);
-            }
+			var vehicleVfx = _coreStats != null ? _coreStats.GetComponentInChildren<VehicleVfxController>(true) : null;
+            if (vehicleVfx != null) vehicleVfx.OnDead();
 
             if (HUDManager.HasInstance)
             {

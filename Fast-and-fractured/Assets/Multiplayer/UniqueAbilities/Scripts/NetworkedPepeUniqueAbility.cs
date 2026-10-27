@@ -81,9 +81,9 @@ namespace FastAndFractured.Multiplayer
         
         private void OnAbilityActivated()
         {
-            if (!base.IsOwner) return;
+            bool serverAi = base.IsServerInitialized && (base.Owner == null || !base.Owner.IsValid);
+            if (!base.IsOwner && !serverAi) return;
 
-            // The networked tomato replaces the one the singleplayer ability pulls from the pool.
             StartCoroutine(CancelSingleplayerTomatoNextFrame());
 
             Vector3 spawnPos = _spawnPoint != null ? _spawnPoint.position : transform.position;
@@ -169,6 +169,8 @@ namespace FastAndFractured.Multiplayer
         }
 
         internal float TomatoSpeed => _tomatoSpeed;
+        internal float EffectDistance => _effectDistance;
+        internal float AscendingTime => _ascendingTime;
 
         internal bool InitializeValidatedPredictedTomato(NetworkedAscendingTomato tomato,
             Vector3 requestedPosition)

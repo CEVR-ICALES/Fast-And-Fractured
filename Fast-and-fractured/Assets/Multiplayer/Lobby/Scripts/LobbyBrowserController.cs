@@ -16,6 +16,7 @@ namespace FastAndFractured.Multiplayer.Lobby
     {
         private const int PING_TIMEOUT_MS = 1000;
         private const int SEARCH_TIMEOUT_SECONDS = 10;
+        private const int JOIN_TIMEOUT_SECONDS = 20;
 
         [SerializeField] private Transform          _entryContainer;
         [SerializeField] private LobbyBrowserEntry  _entryPrefab;
@@ -88,9 +89,7 @@ namespace FastAndFractured.Multiplayer.Lobby
         {
             if (!InstanceFinder.IsServerStarted) return null;
 
-            ushort port = 0;
-            try { port = InstanceFinder.NetworkManager?.TransportManager?.Transport?.GetPort() ?? (ushort)0; }
-            catch { /* transport may not expose port */ }
+            ushort port = MultiplayerTransport.Port;
 
             int currentPlayers = InstanceFinder.ServerManager?.Clients?.Count ?? 0;
 
@@ -155,7 +154,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             SetStatus(LocalizationManager.Localize("MP.Connecting"));
 
             _cts?.Cancel();
-            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(SEARCH_TIMEOUT_SECONDS));
+            _cts = new CancellationTokenSource(TimeSpan.FromSeconds(JOIN_TIMEOUT_SECONDS));
             try
             {
                 bool ok = await LobbyServiceLocator.Transport.JoinLobbyAsync(listing.Handle, _cts.Token);

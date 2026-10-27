@@ -107,6 +107,13 @@ namespace FastAndFractured
         protected override void Construct()
         {
         }
+
+        protected override void Deconstruct()
+        {
+            base.Deconstruct();
+            if (_dashTimer != null && TimerSystem.HasInstance && TimerSystem.Instance.HasTimer(_dashTimer))
+                TimerSystem.Instance.StopTimer(_dashTimer.GetData().ID);
+        }
         private void Start()
         {
         }

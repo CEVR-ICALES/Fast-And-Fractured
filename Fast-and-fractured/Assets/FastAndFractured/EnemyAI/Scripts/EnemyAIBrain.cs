@@ -1,4 +1,5 @@
 using Enums;
+using FastAndFractured.Utilities;
 using NRandom;
 using System.Collections.Generic;
 using System.Linq;
@@ -664,6 +665,7 @@ namespace FastAndFractured
 
         public void UseUniqueAbility()
         {
+            if (uniqueAbility == null) return;
             uniqueAbility.ActivateAbility();
         }
 
@@ -975,8 +977,8 @@ namespace FastAndFractured
             Vector3 shootFrom = normalShootHandle.ShootPoint.position;
             Vector3 aimPoint = _currentTarget.transform.position;
             float distance = Vector3.Distance(shootFrom, aimPoint);
-            Rigidbody targetBody = _currentTarget.GetComponentInParent<Rigidbody>();
-            if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<Rigidbody>();
+            ICustomRigidbody targetBody = _currentTarget.GetComponentInParent<ICustomRigidbody>();
+            if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<ICustomRigidbody>();
             float bulletSpeed = statsController.NormalShootSpeed;
             if (targetBody != null && bulletSpeed > MIN_LEAD_BULLET_SPEED)
                 aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, MAX_LEAD_SECONDS);
@@ -986,10 +988,9 @@ namespace FastAndFractured
             {
                 turretRotationMovement.TargetDirection = shootingDirection;
             }
-            //Add shooting error: per-AI skill, and wider the farther the target is
-            float error = shootingMarginErrorAngle * _aimErrorScale * (1f + distance / AIM_ERROR_DISTANCE);
-            return shootingDirection + new Vector3(UnityEngine.Random.Range(-error, error),
-                UnityEngine.Random.Range(0, error), UnityEngine.Random.Range(-error, error));
+            float error = shootingMarginErrorAngle * Mathf.Min(_aimErrorScale * (1f + distance / AIM_ERROR_DISTANCE), 1f);
+            return (shootingDirection + new Vector3(UnityEngine.Random.Range(-error, error),
+                UnityEngine.Random.Range(0, error), UnityEngine.Random.Range(-error, error))).normalized;
         }
 
         public void StopMovement()

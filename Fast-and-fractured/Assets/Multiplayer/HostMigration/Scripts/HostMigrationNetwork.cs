@@ -5,7 +5,6 @@ using FishNet;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Transporting;
-using FishNet.Transporting.Tugboat;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -95,7 +94,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             if (args.ConnectionState != LocalConnectionState.Started) return;
             InstanceFinder.ClientManager.Broadcast(new MigrationTokenBroadcast { Token = LocalToken, WillingToHost = MultiplayerSettings.WillingToHost });
             if (HostMigrationSettings.Enabled && !InstanceFinder.IsServerStarted)
-                InstanceFinder.TransportManager.Transport.SetTimeout(CLIENT_TIMEOUT_SECONDS, asServer: false);
+                MultiplayerTransport.SetTimeout(CLIENT_TIMEOUT_SECONDS, asServer: false);
         }
 
         private static void OnSnapshotReceived(MatchSnapshotBroadcast snapshot, Channel channel)
@@ -162,13 +161,12 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
             HostMigrationResume.Pending = snapshot;
             var nm = InstanceFinder.NetworkManager;
-            var tugboat = nm != null ? nm.TransportManager.Transport as Tugboat : null;
-            if (tugboat != null) tugboat.SetPort(snapshot.Port);
-            nm.ServerManager.StartConnection();
+            MultiplayerTransport.SetPort(snapshot.Port);
+            MultiplayerTransport.StartServer(nm);
             float waited = 0f;
             while (!nm.ServerManager.Started && waited < SERVER_START_TIMEOUT) { waited += Time.unscaledDeltaTime; yield return null; }
             if (!nm.ServerManager.Started) { Fail("could not open a server"); yield break; }
-            if (tugboat != null) tugboat.SetClientAddress("localhost");
+            MultiplayerTransport.SetLocalHostTarget();
             nm.ClientManager.StartConnection();
 
             var expected = new HashSet<string>();
@@ -197,7 +195,6 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             yield return LeaveCurrentMatchScene(becomingHost: false);
             var nm = InstanceFinder.NetworkManager;
-            var tugboat = nm != null ? nm.TransportManager.Transport as Tugboat : null;
             string address = snapshot.SuccessorAddresses[0];
             MpCanary.Mark($"HostMigration: reconnecting to the new host at {address}:{snapshot.Port}");
 
@@ -205,7 +202,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             while (Time.unscaledTime < deadline)
             {
                 if (nm.ClientManager.Started) nm.ClientManager.StopConnection();
-                if (tugboat != null) { tugboat.SetClientAddress(address); tugboat.SetPort(snapshot.Port); }
+                MultiplayerTransport.SetClientTarget(address, snapshot.Port);
                 nm.ClientManager.StartConnection();
                 float attempt = 0f;
                 while (attempt < CLIENT_START_TIMEOUT && !nm.ClientManager.Started) { attempt += Time.unscaledDeltaTime; yield return null; }

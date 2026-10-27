@@ -95,17 +95,14 @@ namespace FastAndFractured.Multiplayer
             /// </summary>
             private static void RelaxClientTimeout()
             {
-                var transport = InstanceFinder.TransportManager != null ? InstanceFinder.TransportManager.Transport : null;
-                if (transport != null && InstanceFinder.IsClientStarted)
-                    transport.SetTimeout(transport.GetTimeout(asServer: true), asServer: false);
+                if (InstanceFinder.IsClientStarted)
+                    MultiplayerTransport.SetTimeout(MultiplayerTransport.GetTimeout(asServer: true), asServer: false);
             }
 
             private static void RestoreClientTimeout()
             {
-                var transport = InstanceFinder.TransportManager != null ? InstanceFinder.TransportManager.Transport : null;
-                if (transport != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted &&
-                    HostMigration.HostMigrationSettings.Enabled)
-                    transport.SetTimeout(HostMigration.HostMigrationNetwork.CLIENT_TIMEOUT_SECONDS, asServer: false);
+                if (InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted && HostMigration.HostMigrationSettings.Enabled)
+                    MultiplayerTransport.SetTimeout(HostMigration.HostMigrationNetwork.CLIENT_TIMEOUT_SECONDS, asServer: false);
             }
         }
     }

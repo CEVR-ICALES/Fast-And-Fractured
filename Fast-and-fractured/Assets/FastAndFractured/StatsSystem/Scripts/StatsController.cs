@@ -128,9 +128,6 @@ namespace FastAndFractured
         public GameObject lastEnemyThatPushedMe;
         private Vector3 _lastPosition;
 
-        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
-        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
-
         const string BULLET_EFFECT_NAME = "Bullet_Effect";
         const float TIME_IN_SCREEN = 0.2f;
 
@@ -272,28 +269,9 @@ namespace FastAndFractured
                 }
             }
         }
-        public GameObject GetWinObjectByString(string key)
+        public GameObject GetFinalAnimation(string characterCode, bool isWin)
         {
-            foreach (GameObjectStringPair pair in WinObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
-        }
-
-        public GameObject GetLoseObjectByString(string key)
-        {
-            foreach (GameObjectStringPair pair in LoseObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
+            return charDataSO.GetFinalAnimation(characterCode, isWin);
         }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)

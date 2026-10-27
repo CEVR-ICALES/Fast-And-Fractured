@@ -34,13 +34,10 @@ namespace FastAndFractured
         public virtual void InitializeValues()
         {
             rb = GetComponent<ICustomRigidbody>();
-            ownCollider = GetComponentInParent<Collider>();
-           
+            ownCollider = GetComponent<Collider>();
         }
         public virtual void InitBulletTrayectory()
         {
-            ownCollider = GetComponentInParent<Collider>();
-
             if (particles != null)
             {
                 particles.SetActive(false);
@@ -58,24 +55,21 @@ namespace FastAndFractured
             if (particles != null)
             {
                 rb.linearVelocity = Vector3.zero;
-                if (!ownCollider)
-                {
-                    ownCollider = GetComponentInParent<Collider>();
-                }
                 ownCollider.enabled = false;
                 visuals.SetActive(false);
-                rb.constraints = RigidbodyConstraints.FreezePosition;
-                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                rb.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 transform.rotation = new Quaternion(0, 0, 0, 0);
                 particles.SetActive(true);
                 TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
                 {
                     visuals.SetActive(true);
+                    OnDespawnRequested?.Invoke(gameObject);
                     ownCollider.enabled = true;
                     rb.constraints = RigidbodyConstraints.None;
                 });
             }
-            OnDespawnRequested?.Invoke(gameObject); 
+            else
+                OnDespawnRequested?.Invoke(gameObject);
         }
 
        

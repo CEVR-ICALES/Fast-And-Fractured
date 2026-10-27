@@ -32,9 +32,10 @@ namespace FastAndFractured.Multiplayer
         [SerializeField] private GameObject _visuals;
         [SerializeField] private GameObject _impactParticlesPrefab;
         [SerializeField] private GameObject _explosionPrefab;
+        private GameObject _pushExplosionVfx;
 
         private bool _isInitialized;
-        private NetworkObject _shooter; // Reference to the shooter for robust collision ignoring
+        private NetworkObject _shooter;  
         private float _damage;
         private LayerMask _collisionMask;
         private Collider[] _ignoredColliders;
@@ -71,6 +72,9 @@ namespace FastAndFractured.Multiplayer
         private uint _despawnTick;
         private uint _mineExplodeTick;
 
+        private float _sweepRadius = DEFAULT_SWEEP_RADIUS;
+        private Vector3 _sweepLocalCenter;
+
         private bool _tickSmoothersStopped;
         private Vector3 _visualsLocalPosition;
         private Quaternion _visualsLocalRotation;
@@ -79,8 +83,10 @@ namespace FastAndFractured.Multiplayer
         private const float MIN_FLIGHT_SPEED = 0.1f;
         // Lobbed shots (push, mine) have no range; this only catches one that never hits anything.
         private const float MAX_LOBBED_FLIGHT_SECONDS = 8f;
-        private const float SPHERE_CAST_RADIUS = 0.15f;
-        private const float BOUNCE_OFFSET_FROM_SURFACE = 0.15f;
+        private const float DEFAULT_SWEEP_RADIUS = 0.15f;
+        private const float CONTACT_SKIN = 0.02f;
+        private const int MAX_SWEEP_HITS = 16;
+        private static readonly RaycastHit[] _sweepHits = new RaycastHit[MAX_SWEEP_HITS];
         private const float MIN_VELOCITY_FOR_RAYCAST = 0.01f;
         private const float NON_VEHICLE_PUSH_FORCE_MULTIPLIER = 0.5f;
         private const float MIN_DIRECTION_SQR_MAG = 0.001f;
@@ -160,6 +166,12 @@ namespace FastAndFractured.Multiplayer
         {
             _customRigidbody = GetComponent<ICustomRigidbody>();
             _ownCollider = GetComponent<Collider>();
+            if (_ownCollider is SphereCollider sphere)
+            {
+                Vector3 scale = transform.lossyScale;
+                _sweepRadius = sphere.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+                _sweepLocalCenter = Vector3.Scale(sphere.center, scale);
+            }
 
             if (_customRigidbody is MultiplayerRigidbodyAdapter adapter)
             {
@@ -173,12 +185,20 @@ namespace FastAndFractured.Multiplayer
 
             var bulletBehaviour = GetComponent<BulletBehaviour>();
             if (bulletBehaviour != null)
+            {
+                var impactParticles = typeof(BulletBehaviour).GetField("particles", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.GetValue(bulletBehaviour) as GameObject;
+                if (impactParticles != null) impactParticles.SetActive(false);
                 DestroyImmediate(bulletBehaviour);
+            }
 
             // ApplyExplosionForce does ExplosionForce's job with an OverlapSphere.
             foreach (var ef in GetComponentsInChildren<ExplosionForce>(true))
             {
                 ReadImpulseSettings(ef);
+                if (_pushExplosionVfx == null)
+                    _pushExplosionVfx = (typeof(ExplosionForce).GetField("_explosionVFX", BindingFlags.Instance | BindingFlags.NonPublic)
+                        ?.GetValue(ef) as Transform)?.gameObject;
                 ef.gameObject.SetActive(false);
                 DestroyImmediate(ef);
             }
@@ -338,17 +358,20 @@ namespace FastAndFractured.Multiplayer
             float distance = _simulatedVelocity.magnitude * delta;
             if (distance < MIN_VELOCITY_FOR_RAYCAST) return false;
 
+            Vector3 direction = _simulatedVelocity.normalized;
+            Vector3 centerOffset = transform.rotation * _sweepLocalCenter;
+            Vector3 origin = _simulatedPosition + centerOffset;
             // Ignore triggers: this sweep stands in for OnCollisionEnter, which never fires against one.
-            if (!Physics.SphereCast(_simulatedPosition, SPHERE_CAST_RADIUS, _simulatedVelocity.normalized, out RaycastHit hit,
-                    distance, _collisionMask, QueryTriggerInteraction.Ignore))
-                return false;
+            int count = Physics.SphereCastNonAlloc(origin, _sweepRadius, direction, _sweepHits, distance, _collisionMask,
+                QueryTriggerInteraction.Ignore);
+            if (!TryGetFirstContact(count, out RaycastHit hit)) return false;
 
-            if (IsIgnored(hit.collider)) return false;
+            Vector3 contactPosition = origin + direction * hit.distance - centerOffset;
 
             if (hit.collider.gameObject.layer == CharactersLayer)
             {
-                _simulatedPosition = hit.point;
-                EndFlight(hit.point, hit.normal, hit.collider.gameObject);
+                _simulatedPosition = contactPosition;
+                EndFlight(contactPosition, hit.normal, hit.collider.gameObject);
                 return true;
             }
 
@@ -356,12 +379,12 @@ namespace FastAndFractured.Multiplayer
             {
                 case SurfaceHitOutcome.Bounce:
                     _simulatedVelocity = BounceVelocity(_simulatedVelocity, hit.normal, _bounceStrength);
-                    _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
+                    _simulatedPosition = contactPosition + hit.normal * CONTACT_SKIN;
                     return true;
 
                 case SurfaceHitOutcome.Rest:
                     // Every peer rests the mine where it landed; only the server owns its timer.
-                    _simulatedPosition = hit.point + hit.normal * BOUNCE_OFFSET_FROM_SURFACE;
+                    _simulatedPosition = contactPosition + hit.normal * CONTACT_SKIN;
                     _simulatedVelocity = Vector3.zero;
                     _useCustomGravity = false;
                     _hasLanded = true;
@@ -370,10 +393,27 @@ namespace FastAndFractured.Multiplayer
                     return true;
 
                 default:
-                    _simulatedPosition = hit.point;
-                    EndFlight(hit.point, hit.normal, hit.collider.gameObject);
+                    _simulatedPosition = contactPosition;
+                    EndFlight(contactPosition, hit.normal, hit.collider.gameObject);
                     return true;
             }
+        }
+
+        /// <summary>The nearest hit that is not the shooter, nor something the sphere already overlapped when the step began.</summary>
+        private bool TryGetFirstContact(int count, out RaycastHit first)
+        {
+            first = default;
+            bool found = false;
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit candidate = _sweepHits[i];
+                if (candidate.distance <= 0f && candidate.point == Vector3.zero) continue;
+                if (IsIgnored(candidate.collider)) continue;
+                if (found && candidate.distance >= first.distance) continue;
+                first = candidate;
+                found = true;
+            }
+            return found;
         }
 
         private bool IsIgnored(Collider other)
@@ -418,7 +458,8 @@ namespace FastAndFractured.Multiplayer
         private void ApplyServerEnd()
         {
             MpCanary.Mark($"Projectile end {(_isMine ? "mine" : _explosionRadius > 0f ? "push" : "normal")} " +
-                          $"after {base.TimeManager.Tick - _spawnTick} ticks, hit='{(_endHitObject != null ? _endHitObject.name : "none")}'");
+                          $"after {base.TimeManager.Tick - _spawnTick} ticks, hit='{(_endHitObject != null ? _endHitObject.name : "none")}' " +
+                          $"shooter='{(_shooter != null ? _shooter.name : "none")}'");
 
             if (_explosionRadius > 0f)
             {
@@ -538,17 +579,6 @@ namespace FastAndFractured.Multiplayer
 
             foreach (var hit in hits)
             {
-                if (_ignoredColliders != null)
-                {
-                    bool skip = false;
-                    foreach (var ignored in _ignoredColliders)
-                    {
-                        if (ignored != null && (hit == ignored || hit.transform.IsChildOf(ignored.transform)))
-                        { skip = true; break; }
-                    }
-                    if (skip) continue;
-                }
-
                 var physicsBehaviour = hit.GetComponentInParent<PhysicsBehaviour>();
                 if (physicsBehaviour != null && pushedSet.Add(physicsBehaviour))
                 {
@@ -581,11 +611,14 @@ namespace FastAndFractured.Multiplayer
                         // ApplyImpulse, as singleplayer: it lifts the speed cap, which would otherwise cut the sideways push.
                         physicsBehaviour.ApplyImpulse(direction, closestPoint, forceToApply, _impulseForceMode,
                             _impulseLimitRbSpeed, _impulseTime, _impulseStopMomentum, _impulseSpeedLimit);
+                        MpCanary.Mark($"Blast pushed '{physicsBehaviour.name}' force={forceToApply:F0} base={_pushForce:F0} mode={_impulseForceMode} " +
+                                      $"mass={physicsBehaviour.Rb.mass:F0} dir={direction:F2}");
                         if (carImpact != null) carImpact.OnHasBeenPushed(physicsBehaviour);
                         // Pushed into a pit or the storm: the kill goes to the shooter.
                         var pushedStats = physicsBehaviour.GetComponentInParent<NetworkedStatsController>();
                         if (pushedStats == null) pushedStats = physicsBehaviour.GetComponentInChildren<NetworkedStatsController>();
-                        if (pushedStats != null && base.IsServerInitialized) pushedStats.ServerNoteAttacker(_shooter);
+                        bool ownBlast = _shooter != null && physicsBehaviour.transform.root == _shooter.transform.root;
+                        if (pushedStats != null && base.IsServerInitialized && !ownBlast) pushedStats.ServerNoteAttacker(_shooter);
                     }
                 }
                 else if (physicsBehaviour == null)
@@ -646,10 +679,16 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         private void RpcSpawnExplosionVFX(Vector3 point, Vector3 normal)
         {
-            // The singleplayer ExplosionForce that triggers the shake is stripped from networked shots.
             NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, point);
 
-            if (_explosionPrefab != null)
+            if (_pushExplosionVfx != null)
+            {
+                var vfx = Instantiate(_pushExplosionVfx, point, Quaternion.identity);
+                vfx.SetActive(true);
+                vfx.transform.localScale = Vector3.one * _explosionRadius;
+                Destroy(vfx, VFX_AUTO_DESTROY_TIME);
+            }
+            else if (_explosionPrefab != null)
             {
                 var vfx = Instantiate(_explosionPrefab, point, Quaternion.LookRotation(normal));
                 vfx.transform.localScale = Vector3.one * _explosionRadius;
@@ -663,6 +702,7 @@ namespace FastAndFractured.Multiplayer
             if (_impactParticlesPrefab != null)
             {
                 var vfx = Instantiate(_impactParticlesPrefab, point, Quaternion.LookRotation(normal));
+                vfx.SetActive(true);    
                 Destroy(vfx, VFX_AUTO_DESTROY_TIME);
             }
         }

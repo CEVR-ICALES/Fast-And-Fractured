@@ -24,23 +24,40 @@ namespace FastAndFractured.Progression
         private const float SLOT_FONT_SIZE = 30f;
         private const float NOTE_FONT_SIZE = 22f;
 
-        /// <summary>Screen the Back button returns to (set by whoever opens this one).</summary>
         public static ScreensType ReturnTo = ScreensType.PROGRESSION;
 
-        private static readonly string[] Characters = { "Pepe", "Josefino", "MariaAntonia", "Carme" };
+        private const string CHARACTERS_RESOURCE = "CharactersSkins/ListOfCharactersData";
+        private static List<string> _characters;
+        private static List<string> Characters => _characters ??= LoadCharacters();
         private static readonly AccessorySlot[] Slots = { AccessorySlot.Head, AccessorySlot.Face, AccessorySlot.Car };
 
         private TMP_FontAsset _font;
-        private string _character = Characters[0];
+        private string _character;
         private readonly List<Button> _tabs = new List<Button>();
         private RectTransform _slots;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => ReturnTo = ScreensType.PROGRESSION;
+        private static void ResetStatics()
+        {
+            ReturnTo = ScreensType.PROGRESSION;
+            _characters = null;
+        }
+
+        private static List<string> LoadCharacters()
+        {
+            var names = new List<string>();
+            var roster = Resources.Load<ListOfCharactersData>(CHARACTERS_RESOURCE);
+            if (roster == null || roster.listOfCharactersData == null) return names;
+            foreach (var data in roster.listOfCharactersData)
+                if (data != null && !string.IsNullOrEmpty(data.CharacterName) && !names.Contains(data.CharacterName))
+                    names.Add(data.CharacterName);
+            return names;
+        }
 
         private void Awake()
         {
             _font = MenuUiKit.FontNear(transform.root);
+            _character = Characters.Count > 0 ? Characters[0] : string.Empty;
             Build();
         }
 

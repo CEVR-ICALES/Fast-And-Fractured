@@ -106,8 +106,6 @@ namespace FastAndFractured
             GameObject bulletGO = ObjectPoolManager.Instance.GivePooledObject(spawnParams.Pooltype);
             if (bulletGO == null) return;
 
-            bulletGO.transform.parent = this.transform;
-
             if (spawnParams.ShootPoint != null)
             {
                 bulletGO.transform.SetPositionAndRotation(spawnParams.ShootPoint.position, spawnParams.ShootPoint.rotation);
