@@ -37,7 +37,7 @@ namespace FastAndFractured
         private const float EXPLOSION_TIME = 1.5f;
         private const float NORMAL_RADIUS = 0.68f;
         private const float MAX_RADIUS = 1.5f;
-        private const float AGENT_SPEED = 40f;
+        private const float AGENT_SPEED = 60f;
         private const float POINT_RADIUS = 500f;
 
         public virtual void InitializeValues()

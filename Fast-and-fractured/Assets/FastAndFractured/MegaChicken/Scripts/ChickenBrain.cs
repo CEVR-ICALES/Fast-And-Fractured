@@ -83,7 +83,7 @@ namespace FastAndFractured
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_LAYING_EGG && !_hasEggBeenLayed)
                 {
                     _hasEggBeenLayed = true;
-                    int randomIndex = Random.Range(0, MAX_SPAWNING_EGGS_AT_ONCE);
+                    int randomIndex = Random.Range(1, MAX_SPAWNING_EGGS_AT_ONCE);
                     if (randomIndex >= eggSpawnPoints.Length)
                     {
                         randomIndex = eggSpawnPoints.Length;
@@ -91,13 +91,7 @@ namespace FastAndFractured
                     for (int i = 0; i < randomIndex; i++)
                     {
                         GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg, eggSpawnPoints[i].transform.position);
-                        // egg.transform.position = eggSpawnPoints[i].transform.position;
                         egg.transform.rotation = Quaternion.Euler(0, 0, 0);
-                        // NavMeshHit hit;
-                        // if (NavMesh.SamplePosition(egg.transform.position, out hit, 20f, NavMesh.AllAreas))
-                        // {
-                        //     egg.transform.position = hit.position;
-                        // }
                     }
                 }
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE)
