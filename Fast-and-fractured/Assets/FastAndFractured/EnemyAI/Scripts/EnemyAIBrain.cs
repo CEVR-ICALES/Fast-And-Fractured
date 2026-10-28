@@ -35,7 +35,6 @@ namespace FastAndFractured
         private GameObject _currentTarget;
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
-        private float _minDistanceUntilNextCorner = 3f;
 
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
@@ -56,44 +55,19 @@ namespace FastAndFractured
         PathMode pathMode = PathMode.ADVANCED;
 
         const float ANGLE_90 = 90f;
-        const float ANGLE_30 = 30f;
-        const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
-        const float SWEEP_FREQUENCY = 0.5f;
         const int MAX_ITEM_TYPE_ATTEMPTS = 20;
 
-        // Driving: ease off the throttle into tight turns instead of taking every corner flat out.
-        const float CORNER_SLOWDOWN_START_ANGLE = 35f;
-        const float MIN_CORNER_THROTTLE = 0.35f;
-        // Aiming: lead moving targets, and miss more the farther they are.
-        const float MAX_LEAD_SECONDS = 1.2f;
-        const float AIM_ERROR_DISTANCE = 30f;
-        // Targeting: stick with a target a while instead of switching every frame.
-        const float TARGET_COMMIT_SECONDS = 3f;
         const float MIN_LEAD_BULLET_SPEED = 1f;
         const float SEED_POSITION_SCALE = 10f;
         const int SEED_PRIME_X = 73856093;
         const int SEED_PRIME_Z = 19349663;
-        const float MIN_AIM_ERROR_SCALE = 0.6f;
-        const float MAX_AIM_ERROR_SCALE = 1.8f;
-        const float MIN_REACTION_TIME = 0.15f;
-        const float MAX_REACTION_TIME = 0.5f;
-        const float MIN_CORNER_CAUTION = 0.7f;
-        const float MAX_CORNER_CAUTION = 1.3f;
-        const float THRESHOLD_JITTER = 10f;
-        const float MIN_THRESHOLD = 5f;
-        const float MAX_THRESHOLD = 95f;
-        const float SCORE_HUMAN_BONUS = 10f;
-        const float SCORE_DAMAGED_ME_BONUS = 15f;
-        const float SCORE_LOW_HEALTH_BONUS = 20f;
 
         // Personality, seeded from the spawn point so every peer rolls the same.
         private float _aimErrorScale = 1f;
         private float _reactionTime = 0.3f;
         private float _cornerCaution = 1f;
         private float _targetAcquiredAt;
-        const float DISTANCE_MARGIN_ERROR = 35f;
-        const int HEALTH_WEIGHT_PERCENTAGE = 3;
         const int START_CORNER_INDEX = 1;
         private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
@@ -132,8 +106,67 @@ namespace FastAndFractured
 
         [Tooltip("Extra distance (m) to the storm at which the AI already counts as inside it and runs away. Negative = it waits until it is that deep inside.")]
         [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
-        private const float ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM = 0.5f;
-        private const int NUM_CHARACTERS_TO_CONSIDER_END_GAME = 3;
+
+        [Header("Driving")]
+        [Tooltip("Angle (deg) to the next path point from which the AI starts easing off the throttle (divided by its corner caution).")]
+        [SerializeField] private float cornerSlowdownStartAngle = 35f;
+        [Tooltip("Throttle (0-1) the AI keeps in the tightest turns (90 deg).")]
+        [SerializeField] private float minCornerThrottle = 0.35f;
+        [Tooltip("Distance (m) to a path corner at which the AI aims for the next one.")]
+        [SerializeField] private float minDistanceUntilNextCorner = 3f;
+        [Tooltip("Distance (m) at which the AI counts an item or zone it drives to as reached.")]
+        [SerializeField] private float arrivedDistance = 35f;
+        [Tooltip("Multiplier of the flipped-car reset timer when the car lies on the ground (lower = it recovers sooner).")]
+        [SerializeField] private float flipTimerFactorOnGround = 0.75f;
+
+        [Header("Aiming")]
+        [Tooltip("Max seconds ahead the AI leads a moving target (aims where it will be).")]
+        [SerializeField] private float maxLeadSeconds = 1.2f;
+        [Tooltip("Distance (m) at which the aim error doubles; it never goes past Shooting Margin Error Angle.")]
+        [SerializeField] private float aimErrorDistance = 30f;
+        [Tooltip("A target within +/- this angle (deg) of the car's heading counts as in front (IsInFront decision).")]
+        [SerializeField] private float frontAngle = 20f;
+
+        [Header("Personality (rolled per AI from its spawn point)")]
+        [Tooltip("Best aim an AI can roll: multiplier of the aim error (lower = sharper).")]
+        [SerializeField] private float minAimErrorScale = 0.6f;
+        [Tooltip("Worst aim an AI can roll: multiplier of the aim error.")]
+        [SerializeField] private float maxAimErrorScale = 1.8f;
+        [Tooltip("Fastest reaction an AI can roll: seconds before it shoots a newly chosen target.")]
+        [SerializeField] private float minReactionTime = 0.15f;
+        [Tooltip("Slowest reaction an AI can roll.")]
+        [SerializeField] private float maxReactionTime = 0.5f;
+        [Tooltip("Boldest driver an AI can roll: lower brakes later into corners.")]
+        [SerializeField] private float minCornerCaution = 0.7f;
+        [Tooltip("Most careful driver an AI can roll.")]
+        [SerializeField] private float maxCornerCaution = 1.3f;
+        [Tooltip("Random +/- added to the flee and fight-back thresholds, so some AIs are bolder and others flee sooner.")]
+        [SerializeField] private float thresholdJitter = 10f;
+        [Tooltip("Lowest value the jittered thresholds can take.")]
+        [SerializeField] private float minThreshold = 5f;
+        [Tooltip("Highest value the jittered thresholds can take.")]
+        [SerializeField] private float maxThreshold = 95f;
+
+        [Header("Target choice (lowest score wins: distance in m minus bonuses)")]
+        [Tooltip("Seconds the AI sticks to its target before choosing again (stops it switching every frame).")]
+        [SerializeField] private float targetCommitSeconds = 3f;
+        [Tooltip("Metres of preference for human players over AIs.")]
+        [SerializeField] private float scoreHumanBonus = 10f;
+        [Tooltip("Metres of preference for a car that damaged this AI recently.")]
+        [SerializeField] private float scoreDamagedMeBonus = 15f;
+        [Tooltip("Metres of preference for a nearly dead car (scaled by how much endurance it lost).")]
+        [SerializeField] private float scoreLowHealthBonus = 20f;
+
+        [Header("Items, storm and end of match")]
+        [Tooltip("Fleeing: the AI only goes for the nearest item or safe zone when its target is more than this angle (deg) off its heading.")]
+        [SerializeField] private float awayFromTargetAngle = 30f;
+        [Tooltip("Added to the Health item weight per endurance % the AI currently has.")]
+        [SerializeField] private int healthWeightPerEndurance = 3;
+        [Tooltip("How much missing endurance widens the storm margin (0.5 = up to +50% when nearly dead).")]
+        [SerializeField] private float sandstormEnduranceFactor = 0.5f;
+        [Tooltip("With this many cars or fewer left, the AI plays the end-game behaviour.")]
+        [SerializeField] private int endGameCharacters = 3;
+
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -149,7 +182,6 @@ namespace FastAndFractured
         public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
         private bool _doTrainingAction;
 
-        private const float DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND = 0.75f;
 
 
         private void OnEnable()
@@ -193,7 +225,7 @@ namespace FastAndFractured
                     {
                         if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
                         {
-                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND : 1);
+                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? flipTimerFactorOnGround : 1);
                         }
                         else
                         {
@@ -320,12 +352,12 @@ namespace FastAndFractured
             var rng = new System.Random(seed);
             float Roll(float min, float max) => Mathf.Lerp(min, max, (float)rng.NextDouble());
 
-            _aimErrorScale = Roll(MIN_AIM_ERROR_SCALE, MAX_AIM_ERROR_SCALE);
-            _reactionTime = Roll(MIN_REACTION_TIME, MAX_REACTION_TIME);
-            _cornerCaution = Roll(MIN_CORNER_CAUTION, MAX_CORNER_CAUTION);
+            _aimErrorScale = Roll(minAimErrorScale, maxAimErrorScale);
+            _reactionTime = Roll(minReactionTime, maxReactionTime);
+            _cornerCaution = Roll(minCornerCaution, maxCornerCaution);
             // Some are bolder, some flee sooner.
-            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-THRESHOLD_JITTER, THRESHOLD_JITTER), MIN_THRESHOLD, MAX_THRESHOLD);
-            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-THRESHOLD_JITTER, THRESHOLD_JITTER), MIN_THRESHOLD, MAX_THRESHOLD);
+            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-thresholdJitter, thresholdJitter), minThreshold, maxThreshold);
+            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-thresholdJitter, thresholdJitter), minThreshold, maxThreshold);
         }
         public void ReturnToStartPosition()
         {
@@ -358,8 +390,8 @@ namespace FastAndFractured
             }
             else
             {
-                float slowFrom = CORNER_SLOWDOWN_START_ANGLE / _cornerCaution;
-                inputY = Mathf.Lerp(MAX_INPUT_VALUE, MIN_CORNER_THROTTLE, Mathf.InverseLerp(slowFrom, ANGLE_90, Mathf.Abs(angle)));
+                float slowFrom = cornerSlowdownStartAngle / _cornerCaution;
+                inputY = Mathf.Lerp(MAX_INPUT_VALUE, minCornerThrottle, Mathf.InverseLerp(slowFrom, ANGLE_90, Mathf.Abs(angle)));
             }
 
             Vector2 input = new Vector2(inputX, inputY);
@@ -401,7 +433,7 @@ namespace FastAndFractured
                 return true;
             }
             float distance = Vector3.Distance(_currentPosition, _currentTarget.transform.position);
-            return distance < DISTANCE_MARGIN_ERROR;
+            return distance < arrivedDistance;
         }
         #endregion
 
@@ -483,7 +515,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - _currentPosition).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (itemDistance < nearestOne && (angle < -awayFromTargetAngle || angle > awayFromTargetAngle))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -504,14 +536,14 @@ namespace FastAndFractured
 
         /// <summary>
         /// Lowest score wins: distance minus bonuses for humans, for whoever hurt this AI recently and for low health.
-        /// The current target is kept for TARGET_COMMIT_SECONDS while alive.
+        /// The current target is kept for targetCommitSeconds while alive.
         /// </summary>
         private GameObject ChooseBestTarget(bool humansOnly)
         {
             // LevelController picks the first target before this AI has initialized.
             if (carMovementController == null || !LevelController.HasInstance) return null;
             if (_targetToShoot != null && IsAliveCharacter(_targetToShoot) &&
-                Time.time - _targetAcquiredAt < TARGET_COMMIT_SECONDS &&
+                Time.time - _targetAcquiredAt < targetCommitSeconds &&
                 (!humansOnly || !IsAICharacter(_targetToShoot)))
                 return _targetToShoot;
 
@@ -525,10 +557,10 @@ namespace FastAndFractured
                 if (humansOnly && ai) continue;
 
                 float score = Vector3.Distance(character.transform.position, _currentPosition);
-                if (!ai) score -= SCORE_HUMAN_BONUS;
-                if (_carsThatDamagedAI.ContainsKey(character)) score -= SCORE_DAMAGED_ME_BONUS;
+                if (!ai) score -= scoreHumanBonus;
+                if (_carsThatDamagedAI.ContainsKey(character)) score -= scoreDamagedMeBonus;
                 var stats = character.GetComponentInChildren<StatsController>();
-                if (stats != null) score -= (1f - stats.GetEndurancePercentage() / PERCENTAGE_VALUE) * SCORE_LOW_HEALTH_BONUS;
+                if (stats != null) score -= (1f - stats.GetEndurancePercentage() / PERCENTAGE_VALUE) * scoreLowHealthBonus;
 
                 if (score < bestScore)
                 {
@@ -611,7 +643,7 @@ namespace FastAndFractured
             foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
                 float safeZoneDistance = (safeZone.transform.position - _currentPosition).sqrMagnitude;
-                if (safeZoneDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (safeZoneDistance < nearestOne && (angle < -awayFromTargetAngle || angle > awayFromTargetAngle))
                 {
                     nearestOne = safeZoneDistance;
                     nearestSafeZone = safeZone.gameObject;
@@ -754,7 +786,7 @@ namespace FastAndFractured
         public bool IsInFront()
         {
             float angle = GetAngleDirection(Vector3.up);
-            return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
+            return (angle > -frontAngle && angle < frontAngle);
         }
 
         public bool WantsToChangeToCombatState()
@@ -965,7 +997,7 @@ namespace FastAndFractured
 
         private void CheckIfGoToNextPathPoint()
         {
-            if (Vector3.Distance(_currentPosition, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            if (Vector3.Distance(_currentPosition, GetActivePathPoint()) < minDistanceUntilNextCorner &&
                 (_pathIndex + 1) < _currentPath.corners.Length)
             {
                 _pathIndex++;
@@ -987,14 +1019,14 @@ namespace FastAndFractured
             if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<ICustomRigidbody>();
             float bulletSpeed = statsController.NormalShootSpeed;
             if (targetBody != null && bulletSpeed > MIN_LEAD_BULLET_SPEED)
-                aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, MAX_LEAD_SECONDS);
+                aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, maxLeadSeconds);
 
             Vector3 shootingDirection = (aimPoint - shootFrom).normalized;
             if (turretRotationMovement != null)
             {
                 turretRotationMovement.TargetDirection = shootingDirection;
             }
-            float error = shootingMarginErrorAngle * Mathf.Min(_aimErrorScale * (1f + distance / AIM_ERROR_DISTANCE), 1f);
+            float error = shootingMarginErrorAngle * Mathf.Min(_aimErrorScale * (1f + distance / aimErrorDistance), 1f);
             return (shootingDirection + new Vector3(UnityEngine.Random.Range(-error, error),
                 UnityEngine.Random.Range(0, error), UnityEngine.Random.Range(-error, error))).normalized;
         }
@@ -1018,7 +1050,7 @@ namespace FastAndFractured
 
         private void RecalculateDecisionsPercentage()
         {
-            decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * HEALTH_WEIGHT_PERCENTAGE);
+            decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * healthWeightPerEndurance);
         }
 
         private void GetClosestItemByList(List<StatsBoostInteractable> list)
@@ -1070,7 +1102,7 @@ namespace FastAndFractured
 
         public bool IsIAInsideSandstorm()
         {
-            float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM;
+            float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * sandstormEnduranceFactor;
             float marginWithEnduranceToFleeTheSandstorm = marginToFleeFromSandstorm + marginToFleeFromSandstorm * enduranceFactor;
             return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
@@ -1087,7 +1119,7 @@ namespace FastAndFractured
 
         public bool IsOnEndGame()
         {
-            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelController.Instance.InGameCharacters.Count;
+            return endGameCharacters >= LevelController.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)
