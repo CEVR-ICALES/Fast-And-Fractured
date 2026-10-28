@@ -174,7 +174,7 @@ namespace FastAndFractured
             }
 
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(cutscene, screen.gameObject.scene);
-            instance.transform.SetPositionAndRotation(screen.spawnPoint.transform.position, screen.spawnPoint.transform.rotation);
+            instance.transform.SetPositionAndRotation(screen.CutscenePosition, screen.spawnPoint.transform.rotation);
             // Never saved with the menu scene; changes go back to the prefab with Apply.
             instance.hideFlags = HideFlags.DontSaveInEditor;
             EditingInstance = instance;

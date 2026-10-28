@@ -104,45 +104,61 @@ namespace FastAndFractured
         public AIParameters AIParameters => aiParameters;
 
         [Header("FinalAnimations")]
-        public List<GameObjectStringPair> WinObjects;
-        public List<GameObjectStringPair> LoseObjects;
+        [Tooltip("Win cutscene for every skin; its FinalAnimationSkins recolours it per skin.")]
+        public GameObject WinAnimation;
+        [Tooltip("Lose cutscene for every skin; its FinalAnimationSkins recolours it per skin.")]
+        public GameObject LoseAnimation;
+        [Tooltip("Skins (e.g. Pepe_2) that use their own win cutscene instead of WinAnimation.")]
+        public List<GameObjectStringPair> WinAnimationOverrides = new List<GameObjectStringPair>();
+        [Tooltip("Skins (e.g. Pepe_2) that use their own lose cutscene instead of LoseAnimation.")]
+        public List<GameObjectStringPair> LoseAnimationOverrides = new List<GameObjectStringPair>();
+
+        public GameObject GetFinalAnimation(string characterCode, bool isWin)
+        {
+            foreach (GameObjectStringPair pair in isWin ? WinAnimationOverrides : LoseAnimationOverrides)
+                if (pair != null && pair.GameObject != null && pair.StringValue == characterCode)
+                    return pair.GameObject;
+            return isWin ? WinAnimation : LoseAnimation;
+        }
     }
 
 }
 [Serializable]
 public class AIParameters
 {
-    [Tooltip("Distance to retreat from the current target when executing in flee state.")]
+    [Tooltip("Flee state: how far (m) the AI drives away from its current target.")]
     [SerializeField] private float fleeDistance = 5f;
-    [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
+    [Tooltip("Radius (m) in which the AI notices other cars and switches from searching items to fighting.")]
     [SerializeField] private float sweepRadius = 20f;
-    [Tooltip("The shooting error that AI has on normal shoot")]
+    [Tooltip("Aim error added to every shot (normal and push). Each AI scales it by its personality and by the target distance, but never past this value. 0 = perfect aim; 0.25 = up to ~14 deg off.")]
     [SerializeField] private float shootingMarginErrorAngle = 0.02f;
-    
+
     [Header("Aggressiveness parameters")]
-    [Tooltip("Duration of continuous damage required to reach this value")]
+    [Tooltip("Seconds without being hit before the damage counted for fleeing resets to 0.")]
     [SerializeField] private float damageAccumulationDuration = 5f;
+    [Tooltip("Damage points taken within the window above that make the AI flee. Raw damage, not a percentage: with 1200 endurance, 40 means fleeing after losing ~3%.")]
     [Range(0, 100)][SerializeField] private float fleeTriggerDamageThresholdPercentage = 40;
-    [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
+    [Tooltip("Endurance % the AI needs to leave the flee state and go back to searching. Keep it below 100.")]
     [Range(0, 100)][SerializeField] private float _recoveryThresholdPercentageForSearch = 50;
-    [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
+    [Tooltip("Flee state: the AI goes back to fighting when its endurance % minus the target's is below this value.")]
     [Range(0, 100)][SerializeField] private float _combatHealthAdvantageThreshold = 60f;
-    [Tooltip("Percentage threshold used to determine if a car has dealt enough damage relative to the endurance value.")]
+    [Tooltip("Damage dealt by another car, as a % of the AI's current endurance, that makes it switch target to that car.")]
     [Range(10, 100)][SerializeField] private int damageThresholdPercentage = 60;
 
-
     [Header("Item Type Priority")]
-    [Header("Range of weight on how likely it's going to choose that item type.\n" +
-        "--> 10 is base and the minimum.\n" +
-        "--> 25 to 30 if multiple priorities.\n" +
-        "--> 50 if one normal priority is needed.\n" +
-        "--> 150 for hyperfixation in that stat.")]
+    [Tooltip("Weight for health pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 10;
+    [Tooltip("Weight for max speed pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentageMaxSpeed = 10;
+    [Tooltip("Weight for acceleration pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentageAcceleration = 10;
+    [Tooltip("Weight for normal shot damage pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
+    [Tooltip("Weight for push shot pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
+    [Tooltip("Weight for cooldown pickups.")]
     [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
+    [Tooltip("Extra distance (m) to the storm at which the AI already counts as inside it and runs away. Negative = it waits until it is that deep inside.")]
     [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
 
     public float FleeDistance { get => fleeDistance; set => fleeDistance = value; }
