@@ -17,11 +17,12 @@ namespace FastAndFractured
         public float cooldownTime = 15f;
         [SerializeField, Range(0f, 1f)] private float chanceOfEgg = 0.6f;
         public Pooltype pooltypeMegaChickenEgg;
-        public GameObject eggSpawnPoint;
+        public GameObject[] eggSpawnPoints;
         public Animator Animator { get => _animator; }
         private Animator _animator;
         private bool _isPaused = false;
         private bool _hasEggBeenLayed = false;
+        private const int MAX_SPAWNING_EGGS_AT_ONCE = 4;
         private const float ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE = 0.95f;
         private const float ANIMATION_TIME_UNTIL_LAYING_EGG = 0.5f;
         private const string JUMP_ANIMATION_NAME = "Jump";
@@ -82,14 +83,22 @@ namespace FastAndFractured
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_LAYING_EGG && !_hasEggBeenLayed)
                 {
                     _hasEggBeenLayed = true;
-                    GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg, eggSpawnPoint.transform.position);
-                    // egg.transform.position = eggSpawnPoint.transform.position;
-                    egg.transform.rotation = Quaternion.Euler(0, 0, 0);
-                    // NavMeshHit hit;
-                    // if (NavMesh.SamplePosition(egg.transform.position, out hit, 20f, NavMesh.AllAreas))
-                    // {
-                    //     egg.transform.position = hit.position;
-                    // }
+                    int randomIndex = Random.Range(0, MAX_SPAWNING_EGGS_AT_ONCE);
+                    if (randomIndex >= eggSpawnPoints.Length)
+                    {
+                        randomIndex = eggSpawnPoints.Length;
+                    }
+                    for (int i = 0; i < randomIndex; i++)
+                    {
+                        GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg, eggSpawnPoints[i].transform.position);
+                        // egg.transform.position = eggSpawnPoints[i].transform.position;
+                        egg.transform.rotation = Quaternion.Euler(0, 0, 0);
+                        // NavMeshHit hit;
+                        // if (NavMesh.SamplePosition(egg.transform.position, out hit, 20f, NavMesh.AllAreas))
+                        // {
+                        //     egg.transform.position = hit.position;
+                        // }
+                    }
                 }
                 if (stateInfo.normalizedTime >= ANIMATION_TIME_UNTIL_CHANGE_TO_IDLE)
                 {
