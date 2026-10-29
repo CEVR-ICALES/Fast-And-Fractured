@@ -28,10 +28,12 @@ namespace FastAndFractured.Multiplayer.Lobby
         private readonly List<LobbyBrowserEntry> _entries = new List<LobbyBrowserEntry>();
         private CancellationTokenSource _cts;
         private bool _joining;
+        private SearchingIndicator _searchingIndicator;
 
         private void Awake()
         {
             _refreshButton?.onClick.AddListener(StartRefresh);
+            if (_statusLabel != null) _searchingIndicator = SearchingIndicator.Create(_statusLabel);
             _backButton?.onClick.AddListener(() => MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MULTIPLAYER_HUB, _fadeDuration));
         }
 
@@ -47,6 +49,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             _cts = new CancellationTokenSource();
             ClearEntries();
             SetStatus(LocalizationManager.Localize("MP.Browser.Searching"));
+            SetSearching(true);
             SetRefreshInteractable(false);
 
             try
@@ -82,7 +85,18 @@ namespace FastAndFractured.Multiplayer.Lobby
             }
             catch (OperationCanceledException) { }
             catch { SetStatus(LocalizationManager.Localize("MP.Browser.Failed")); }
-            finally { SetRefreshInteractable(true); }
+            finally
+            {
+                SetSearching(false);
+                SetRefreshInteractable(true);
+            }
+        }
+
+        private void SetSearching(bool searching)
+        {
+            if (_searchingIndicator == null) return;
+            if (searching) _searchingIndicator.FollowText(_statusLabel);
+            _searchingIndicator.gameObject.SetActive(searching);
         }
 
         private static LobbyListing TryBuildOwnHostListing()
