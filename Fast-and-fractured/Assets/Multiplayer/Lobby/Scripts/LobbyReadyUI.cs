@@ -113,9 +113,6 @@ namespace FastAndFractured.Multiplayer
         {
             CancelInvoke(nameof(TryLateSubscribe));
             Unsubscribe();
-
-            if (CharacterSelectorManager.HasInstance)
-                CharacterSelectorManager.Instance.OnCharacterCodeChanged -= OnLocalCharacterChanged;
         }
 
         private void Subscribe()
@@ -140,14 +137,6 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.GameStarted.OnChange              += HandleGameStartedSync;
             _lobbyManager.MatchParticipants.OnChange        += HandleParticipantsSync;
             UpdateRoomName(_lobbyManager.RoomName.Value);
-
-            if (CharacterSelectorManager.HasInstance)
-            {
-                CharacterSelectorManager.Instance.OnCharacterCodeChanged += OnLocalCharacterChanged;
-                string current = CharacterSelectorManager.Instance.CurrentCharacterCode;
-                if (!string.IsNullOrEmpty(current))
-                    _lobbyManager.ServerSelectCharacter(current);
-            }
 
             if (_readyButton != null)
             {
@@ -350,9 +339,6 @@ namespace FastAndFractured.Multiplayer
             if (_roomNameLabel != null)
                 _roomNameLabel.text = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
         }
-
-        private void OnLocalCharacterChanged(string code) =>
-            _lobbyManager?.ServerSelectCharacter(code);
 
         #region UI_CALLBACKS
         private void OnReadyClicked()

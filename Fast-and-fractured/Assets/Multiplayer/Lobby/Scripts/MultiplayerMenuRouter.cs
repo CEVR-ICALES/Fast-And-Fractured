@@ -9,8 +9,8 @@ using UnityEngine.SceneManagement;
 namespace FastAndFractured.Multiplayer.Lobby
 {
     /// <summary>
-    /// Reuses the singleplayer character and map screens for the lobby: character changes are forwarded live and
-    /// the map button's scene load is intercepted as a map vote. Singleplayer is unaffected.
+    /// Reuses the singleplayer character and map screens for the lobby: the map button's scene load is intercepted as
+    /// a map vote and confirms the character (browsing does not: a match may start mid-selection). Singleplayer is unaffected.
     /// </summary>
     public static class MultiplayerMenuRouter
     {
@@ -26,15 +26,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             IsRoutingForLobby = true;
 
             LoadingManager.SceneLoadOverride = HandleSceneLoadAttempt;
-
-            if (CharacterSelectorManager.HasInstance)
-            {
-                var inst = CharacterSelectorManager.Instance;
-                string current = inst.CurrentCharacterCode;
-                if (!string.IsNullOrEmpty(current)) ForwardCharacter(current);
-
-                inst.OnCharacterCodeChanged += ForwardCharacter;
-            }
         }
 
         public static void EndLobbyFlow()
@@ -43,18 +34,6 @@ namespace FastAndFractured.Multiplayer.Lobby
             IsRoutingForLobby = false;
 
             LoadingManager.SceneLoadOverride = null;
-
-            if (CharacterSelectorManager.HasInstance)
-                CharacterSelectorManager.Instance.OnCharacterCodeChanged -= ForwardCharacter;
-        }
-
-        private static void ForwardCharacter(string code)
-        {
-            if (string.IsNullOrEmpty(code)) return;
-            // The MP key, so the lobby uses this pick next session.
-            NetworkedLobbyManager.SavePreferredCharacterCode(code);
-            var lobby = LobbyLocator.GetLobbyManager();
-            if (lobby != null) lobby.ServerSelectCharacter(code);
         }
 
         /// <summary>LoadingManager.SceneLoadOverride: turns a map load into a lobby vote; false when the scene is not a map.</summary>
@@ -78,7 +57,11 @@ namespace FastAndFractured.Multiplayer.Lobby
                 if (CharacterSelectorManager.HasInstance)
                 {
                     string code = CharacterSelectorManager.Instance.CurrentCharacterCode;
-                    if (!string.IsNullOrEmpty(code)) lobby.ServerSelectCharacter(code);
+                    if (!string.IsNullOrEmpty(code))
+                    {
+                        NetworkedLobbyManager.SavePreferredCharacterCode(code);
+                        lobby.ServerSelectCharacter(code);
+                    }
                 }
             }
             else
