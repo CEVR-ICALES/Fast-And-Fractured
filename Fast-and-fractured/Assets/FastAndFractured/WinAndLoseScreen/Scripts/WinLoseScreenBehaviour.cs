@@ -122,8 +122,14 @@ namespace FastAndFractured
         }
         public void GoToMainMenu()
         {
-            _spawnedObject.SetActive(false);
+            HideCutscene();
             MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MAIN_MENU, -1);
+        }
+
+        // Its camera draws over the menu cameras: any screen opened while it stays up shows only its last frame.
+        public void HideCutscene()
+        {
+            if (_spawnedObject != null) _spawnedObject.SetActive(false);
         }
     }
 }

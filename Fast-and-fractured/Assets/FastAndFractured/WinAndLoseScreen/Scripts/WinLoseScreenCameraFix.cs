@@ -50,12 +50,14 @@ namespace FastAndFractured
 
         private void OnDisable() => SetOverlay(false);
 
+        // Leaving WIN_LOSE by any route (room migration, host left...) also hides the cutscene, which would cover the next screen.
         private void SetOverlay(bool overlay)
         {
             if (_rootCanvas == null || overlay == _overlaid) return;
             if (overlay) _originalRenderMode = _rootCanvas.renderMode;
             _rootCanvas.renderMode = overlay ? RenderMode.ScreenSpaceOverlay : _originalRenderMode;
             _overlaid = overlay;
+            if (!overlay && WinLoseScreenBehaviour.HasInstance) WinLoseScreenBehaviour.Instance.HideCutscene();
         }
     }
 }

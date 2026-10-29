@@ -1,4 +1,3 @@
-using System.Reflection;
 using Enums;
 using FastAndFractured;
 using FishNet;
@@ -19,9 +18,6 @@ namespace FastAndFractured.Multiplayer
         private const float SCREEN_TRANSITION_SECONDS = 0.25f;
 
         private static bool _armed;
-
-        private static readonly FieldInfo SpawnedCutsceneField = typeof(WinLoseScreenBehaviour)
-            .GetField("_spawnedObject", BindingFlags.NonPublic | BindingFlags.Instance);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticsForDomainReloadDisabled()
@@ -157,9 +153,7 @@ namespace FastAndFractured.Multiplayer
         /// <summary>The character's win/lose cutscene stays in front of the menu cameras otherwise.</summary>
         private static void HideFinalCutscene()
         {
-            if (!WinLoseScreenBehaviour.HasInstance || SpawnedCutsceneField == null) return;
-            if (SpawnedCutsceneField.GetValue(WinLoseScreenBehaviour.Instance) is GameObject cutscene && cutscene != null)
-                cutscene.SetActive(false);
+            if (WinLoseScreenBehaviour.HasInstance) WinLoseScreenBehaviour.Instance.HideCutscene();
         }
     }
 }
