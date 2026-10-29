@@ -69,6 +69,10 @@ namespace FastAndFractured
         public float? StormSecondsLeft => _gameLoopManager?.StormSecondsLeft;
         public bool DebugMode { get => debugMode; set => debugMode = value; }
         public bool HasGameStarted { get; private set; }
+        public bool HasMatchClockStarted { get; private set; }
+        public event Action onMatchClockStarted;
+        // Online: seconds since "Start" read from the server tick, identical on every peer; null offline.
+        public Func<float> NetworkMatchSeconds { get; set; }
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -268,12 +272,22 @@ namespace FastAndFractured
         {
             _gameLoopManager.ActivateCharacterControls();
             HasGameStarted = true;
+            if (!IsOnline) StartMatchClock();
 
             foreach (var character in InGameCharacters)
             {
                 character.GetComponent<StatsController>().onDead.AddListener(ReportCharacterDeath);
             }
         }
+        public void StartMatchClock()
+        {
+            if (HasMatchClockStarted) return;
+            HasMatchClockStarted = true;
+            onMatchClockStarted?.Invoke();
+        }
+
+        private static bool IsOnline => FishNet.InstanceFinder.IsServerStarted || FishNet.InstanceFinder.IsClientStarted;
+
         public void ReportCharacterDeath(float delay, GameObject character, bool isPlayer)
         {
             character.GetComponent<StatsController>().onDead.RemoveListener(ReportCharacterDeath);
