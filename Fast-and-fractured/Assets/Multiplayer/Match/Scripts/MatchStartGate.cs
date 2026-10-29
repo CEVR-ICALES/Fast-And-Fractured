@@ -2,7 +2,7 @@ namespace FastAndFractured.Multiplayer
 {
     /// <summary>
     /// Holds every car still until the countdown says "Start": the server publishes the countdown's start tick and
-    /// the state machines only tick from the Start tick on, on the replicated tick so replays agree.
+    /// the state machines only tick from the Start tick on, compared against each peer's server tick.
     /// </summary>
     public static class MatchStartGate
     {

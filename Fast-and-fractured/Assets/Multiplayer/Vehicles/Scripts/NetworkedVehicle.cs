@@ -596,7 +596,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
             {
-                _stateMachineDriver.TickStateMachine(md.GetTick());
+                _stateMachineDriver.TickStateMachine(base.TimeManager.Tick);
             }
             else
             {
