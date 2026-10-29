@@ -15,6 +15,7 @@ namespace FastAndFractured
 
         public void ProcessGameEnd(bool hasPlayerWon, GameObject playerReference, string selectedPlayerKeyInPrefs)
         {
+            GameplayEvents.RaiseMatchEnded(hasPlayerWon);
             if (playerReference == null)
             {
                 Debug.LogError("Player reference is null, cannot process game end stats.");
@@ -43,17 +44,9 @@ namespace FastAndFractured
                 totalDistanceText = distance.ToString() + LevelConstants.KILOMETERS_TEXT;
             }
 
-            GameObject finalAnimationPrefab = null;
             string playerCharacterNameCode = PlayerPrefs.GetString(selectedPlayerKeyInPrefs, "Pepe_0");  
-
-            if (hasPlayerWon)
-            {
-                finalAnimationPrefab = playerStats.GetWinObjectByString(playerCharacterNameCode);
-            }
-            else
-            {
-                finalAnimationPrefab = playerStats.GetLoseObjectByString(playerCharacterNameCode);
-            }
+            GameObject finalAnimationPrefab = playerStats.GetFinalAnimation(playerCharacterNameCode, hasPlayerWon);
+            LevelUtilities.ParseCharacterNameCode(playerCharacterNameCode, out _, out int skin);
 
             if (_gameEndDataSO != null)
             {
@@ -62,6 +55,7 @@ namespace FastAndFractured
                 _gameEndDataSO.totalDamageTaken = playerStats.totalDamageTaken.ToString();
                 _gameEndDataSO.totalDistanceTraveled = totalDistanceText;
                 _gameEndDataSO.finalAnimation = finalAnimationPrefab; 
+                _gameEndDataSO.finalAnimationSkin = skin;
                 _gameEndDataSO.sceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
                 _gameEndDataSO.killCount = playerStats.totalKills.ToString();
             }
@@ -70,15 +64,19 @@ namespace FastAndFractured
                 Debug.LogError("GameEndData ScriptableObject is not assigned.");
             }
 
-             if (MainMenuManager.Instance != null)
+            // Curtain transition into the win/lose screen; the menu loads once it is shut.
+            SceneCurtain.Close(() =>
             {
-                MainMenuManager.Instance.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX);  
-            }
-            else
-            {
-                Debug.LogWarning("MainMenuManager.Instance is null. Attempting direct scene load to index 0.");
-                SceneManager.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX); 
-            }
+                if (MainMenuManager.Instance != null)
+                {
+                    MainMenuManager.Instance.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX);  
+                }
+                else
+                {
+                    Debug.LogWarning("MainMenuManager.Instance is null. Attempting direct scene load to index 0.");
+                    SceneManager.LoadScene(LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX); 
+                }
+            });
         }
     }
 }

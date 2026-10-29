@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && !THREADED_TICKSMOOTHERS
 using FishNet.Object;
 using GameKit.Dependencies.Utilities;
 using UnityEditor;
@@ -17,7 +17,7 @@ namespace FishNet.Component.Transforming.Beta.Editing
 
             _propertyDrawer = new(position);
 
-            //_propertyDrawer.DrawLabel(label, FontStyle.Bold); 
+            // _propertyDrawer.DrawLabel(label, FontStyle.Bold); 
 
             EditorGUI.indentLevel++;
 

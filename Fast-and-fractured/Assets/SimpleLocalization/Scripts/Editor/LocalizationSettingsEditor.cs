@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 
 namespace Assets.SimpleLocalization.Scripts.Editor
 {

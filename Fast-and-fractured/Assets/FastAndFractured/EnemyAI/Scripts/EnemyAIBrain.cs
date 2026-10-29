@@ -1,4 +1,6 @@
 using Enums;
+using FastAndFractured.Utilities;
+using NRandom;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,12 +15,13 @@ namespace FastAndFractured
         [SerializeField] NavMeshAgent agent;
         NavMeshPath _currentPath;
         Vector3[] _previousPath;
-        [Tooltip("Distance to retreat from the current target when executing in flee state.")]
+        [Tooltip("Flee state: how far (m) the AI drives away from its current target.")]
         [SerializeField] float fleeDistance = 5f;
-        [Tooltip("Radius of the sweep that the AI uses to search for possible enemies")]
+        [Tooltip("Radius (m) in which the AI notices other cars and switches from searching items to fighting.")]
         [SerializeField] float sweepRadius = 20f;
-        [Tooltip("The shooting error that AI has on normal shoot")]
+        [Tooltip("Aim error added to every shot (normal and push). Each AI scales it by its personality and by the target distance, but never past this value. 0 = perfect aim; 0.25 = up to ~14 deg off.")]
         [SerializeField] float shootingMarginErrorAngle = 0.02f;
+        [Tooltip("Layers the AI looks through when searching for cars.")]
         [SerializeField] LayerMask sweepLayerMask;
 
         private Vector3 _currentPosition;
@@ -32,7 +35,6 @@ namespace FastAndFractured
         private GameObject _currentTarget;
         //path index starts at 1 because 0 is their actual position
         private int _pathIndex = START_CORNER_INDEX;
-        private float _minDistanceUntilNextCorner = 3f;
 
         public Vector3 PositionToDrive { get => _positionToDrive; set => _positionToDrive = value; }
         public GameObject Player { get => _player; set => _player = value; }
@@ -47,54 +49,124 @@ namespace FastAndFractured
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] ApplyForceByState applyForceByState;
         [SerializeField] TurretRotationMovement turretRotationMovement;
+        [Tooltip("Ground layers the AI raycasts against to keep its flee point on the ground.")]
         [SerializeField] LayerMask ignoreLayerMask;
 
         PathMode pathMode = PathMode.ADVANCED;
 
         const float ANGLE_90 = 90f;
-        const float ANGLE_30 = 30f;
-        const float FRONT_ANGLE = 20f;
         const float MAX_INPUT_VALUE = 1f;
-        const float SWEEP_FREQUENCY = 0.5f;
-        const float DISTANCE_MARGIN_ERROR = 35f;
-        const int HEALTH_WEIGHT_PERCENTAGE = 3;
+        const int MAX_ITEM_TYPE_ATTEMPTS = 20;
+
+        const float MIN_LEAD_BULLET_SPEED = 1f;
+        const float SEED_POSITION_SCALE = 10f;
+        const int SEED_PRIME_X = 73856093;
+        const int SEED_PRIME_Z = 19349663;
+
+        // Personality, seeded from the spawn point so every peer rolls the same.
+        private float _aimErrorScale = 1f;
+        private float _reactionTime = 0.3f;
+        private float _cornerCaution = 1f;
+        private float _targetAcquiredAt;
         const int START_CORNER_INDEX = 1;
         private const int PERCENTAGE_VALUE = 100;
         private Vector3 startPosition;
         private Quaternion startRotation;
         private float speedMultiplier=1;
 
-        [Header("Aggressiveness parameters")]
-        [Tooltip("Duration of continuous damage required to reach this value")]
+        [Header("Aggressiveness parameters (each character's AIParameters override these)")]
+        [Tooltip("Seconds without being hit before the damage counted for fleeing resets to 0.")]
         [SerializeField] private float damageAccumulationDuration = 5f;
+        [Tooltip("Damage points taken within the window above that make the AI flee. Raw damage, not a percentage: with 1200 endurance, 40 means fleeing after losing ~3%.")]
         [Range(0, 100)][SerializeField] private float fleeTriggerDamageThresholdPercentage = 40;
         private ITimer damageAccumulationTimer;
         private float _currentAccumulatedDamageTime;
-        [Tooltip("The main way to get out of fleestate. It should be lower than the variable below")]
+        [Tooltip("Endurance % the AI needs to leave the flee state and go back to searching. Keep it below 100.")]
         [Range(0, 100)][SerializeField] private float recoveryThresholdPercentageForSearch = 50;
         public float RecoveryThresholdPercentageForSearch => recoveryThresholdPercentageForSearch;
-        [Tooltip("How much more health more the AI needs to have over the enemy to start attacking him from flee state")]
+        [Tooltip("Flee state: the AI goes back to fighting when its endurance % minus the target's is below this value.")]
         [Range(0, 100)][SerializeField] private float combatHealthAdvantageThreshold = 60f;
-        [Tooltip("Percentage threshold used to determine if a car has dealt enough damage relative to the endurance value.")]
+        [Tooltip("Damage dealt by another car, as a % of the AI's current endurance, that makes it switch target to that car.")]
         [Range(10, 100)][SerializeField] private int damageThresholdPercentage = 60;
 
 
         [Header("Item Type Priority")]
-        [Tooltip("Range of weight on how likely it's going to choose that item type.\n" +
-            "--> 10 is base and the minimum.\n" +
-            "--> 25 to 30 if multiple priorities.\n" +
-            "--> 50 if one normal priority is needed.\n" +
-            "--> 150 for hyperfixation in that stat.")]
+        [Tooltip("Weight for health pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentageHealth = 10;
+        [Tooltip("Weight for max speed pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentageMaxSpeed = 10;
+        [Tooltip("Weight for acceleration pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentageAcceleration = 10;
+        [Tooltip("Weight for normal shot damage pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentageNormalShoot = 50;
+        [Tooltip("Weight for push shot pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentagePushShoot = 10;
+        [Tooltip("Weight for cooldown pickups.")]
         [Range(10, 150)][SerializeField] private int decisionPercentageCooldown = 10;
 
+        [Tooltip("Extra distance (m) to the storm at which the AI already counts as inside it and runs away. Negative = it waits until it is that deep inside.")]
         [Range(-300, 600)][SerializeField] private int marginToFleeFromSandstorm = 0;
-        private const float ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM = 0.5f;
-        private const int NUM_CHARACTERS_TO_CONSIDER_END_GAME = 3;
+
+        [Header("Driving")]
+        [Tooltip("Angle (deg) to the next path point from which the AI starts easing off the throttle (divided by its corner caution).")]
+        [SerializeField] private float cornerSlowdownStartAngle = 35f;
+        [Tooltip("Throttle (0-1) the AI keeps in the tightest turns (90 deg).")]
+        [SerializeField] private float minCornerThrottle = 0.35f;
+        [Tooltip("Distance (m) to a path corner at which the AI aims for the next one.")]
+        [SerializeField] private float minDistanceUntilNextCorner = 3f;
+        [Tooltip("Distance (m) at which the AI counts an item or zone it drives to as reached.")]
+        [SerializeField] private float arrivedDistance = 35f;
+        [Tooltip("Multiplier of the flipped-car reset timer when the car lies on the ground (lower = it recovers sooner).")]
+        [SerializeField] private float flipTimerFactorOnGround = 0.75f;
+
+        [Header("Aiming")]
+        [Tooltip("Max seconds ahead the AI leads a moving target (aims where it will be).")]
+        [SerializeField] private float maxLeadSeconds = 1.2f;
+        [Tooltip("Distance (m) at which the aim error doubles; it never goes past Shooting Margin Error Angle.")]
+        [SerializeField] private float aimErrorDistance = 30f;
+        [Tooltip("A target within +/- this angle (deg) of the car's heading counts as in front (IsInFront decision).")]
+        [SerializeField] private float frontAngle = 20f;
+
+        [Header("Personality (rolled per AI from its spawn point)")]
+        [Tooltip("Best aim an AI can roll: multiplier of the aim error (lower = sharper).")]
+        [SerializeField] private float minAimErrorScale = 0.6f;
+        [Tooltip("Worst aim an AI can roll: multiplier of the aim error.")]
+        [SerializeField] private float maxAimErrorScale = 1.8f;
+        [Tooltip("Fastest reaction an AI can roll: seconds before it shoots a newly chosen target.")]
+        [SerializeField] private float minReactionTime = 0.15f;
+        [Tooltip("Slowest reaction an AI can roll.")]
+        [SerializeField] private float maxReactionTime = 0.5f;
+        [Tooltip("Boldest driver an AI can roll: lower brakes later into corners.")]
+        [SerializeField] private float minCornerCaution = 0.7f;
+        [Tooltip("Most careful driver an AI can roll.")]
+        [SerializeField] private float maxCornerCaution = 1.3f;
+        [Tooltip("Random +/- added to the flee and fight-back thresholds, so some AIs are bolder and others flee sooner.")]
+        [SerializeField] private float thresholdJitter = 10f;
+        [Tooltip("Lowest value the jittered thresholds can take.")]
+        [SerializeField] private float minThreshold = 5f;
+        [Tooltip("Highest value the jittered thresholds can take.")]
+        [SerializeField] private float maxThreshold = 95f;
+
+        [Header("Target choice (lowest score wins: distance in m minus bonuses)")]
+        [Tooltip("Seconds the AI sticks to its target before choosing again (stops it switching every frame).")]
+        [SerializeField] private float targetCommitSeconds = 3f;
+        [Tooltip("Metres of preference for human players over AIs.")]
+        [SerializeField] private float scoreHumanBonus = 10f;
+        [Tooltip("Metres of preference for a car that damaged this AI recently.")]
+        [SerializeField] private float scoreDamagedMeBonus = 15f;
+        [Tooltip("Metres of preference for a nearly dead car (scaled by how much endurance it lost).")]
+        [SerializeField] private float scoreLowHealthBonus = 20f;
+
+        [Header("Items, storm and end of match")]
+        [Tooltip("Fleeing: the AI only goes for the nearest item or safe zone when its target is more than this angle (deg) off its heading.")]
+        [SerializeField] private float awayFromTargetAngle = 30f;
+        [Tooltip("Added to the Health item weight per endurance % the AI currently has.")]
+        [SerializeField] private int healthWeightPerEndurance = 3;
+        [Tooltip("How much missing endurance widens the storm margin (0.5 = up to +50% when nearly dead).")]
+        [SerializeField] private float sandstormEnduranceFactor = 0.5f;
+        [Tooltip("With this many cars or fewer left, the AI plays the end-game behaviour.")]
+        [SerializeField] private int endGameCharacters = 3;
+
         private int _totalDecisionPercentage = 0;
         private int _startingPercentageHealth = 0;
         public Stats StatToChoose => _statToChoose;
@@ -110,7 +182,6 @@ namespace FastAndFractured
         public bool DoTrainingAction { get => _doTrainingAction; set => _doTrainingAction = value;}
         private bool _doTrainingAction;
 
-        private const float DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND = 0.75f;
 
 
         private void OnEnable()
@@ -135,7 +206,7 @@ namespace FastAndFractured
         }
         private void Awake()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitializeAIValues);
+            LevelController.Instance.charactersCustomStart.AddListener(InitializeAIValues);
         }
 
         private void Update()
@@ -154,7 +225,7 @@ namespace FastAndFractured
                     {
                         if (carMovementController.IsInFlipCase() || physicsBehaviour.IsTouchingGround)
                         {
-                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? DECRESE_TIME_FACTOR_IF_TOUCHING_GROUND : 1);
+                            carMovementController.StartIsFlippedTimer(physicsBehaviour.IsTouchingGround ? flipTimerFactorOnGround : 1);
                         }
                         else
                         {
@@ -259,10 +330,34 @@ namespace FastAndFractured
             startPosition = carMovementController.transform.position;
             startRotation = carMovementController.transform.rotation;
             _startingPercentageHealth = decisionPercentageHealth;
-            statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
-            statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
+            
+            // Subscribes here if statsController was still null in OnEnable; RemoveListener avoids doubles.
+            if (statsController)
+            {
+                statsController.onEnduranceDamageTaken.RemoveListener(OnTakeEnduranceDamage);
+                statsController.onEnduranceDamageTaken.AddListener(OnTakeEnduranceDamage);
+                
+                statsController.onEnduranceDamageHealed.RemoveListener(OnTakeEnduranceHealed);
+                statsController.onEnduranceDamageHealed.AddListener(OnTakeEnduranceHealed);
+            }
+            
             _currentPosition = carMovementController.transform.position;
-            _player = LevelControllerButBetter.Instance.LocalPlayer;
+            _player = LevelController.Instance.LocalPlayer;
+            RollPersonality();
+        }
+
+        private void RollPersonality()
+        {
+            int seed = unchecked(Mathf.RoundToInt(startPosition.x * SEED_POSITION_SCALE) * SEED_PRIME_X ^ Mathf.RoundToInt(startPosition.z * SEED_POSITION_SCALE) * SEED_PRIME_Z);
+            var rng = new System.Random(seed);
+            float Roll(float min, float max) => Mathf.Lerp(min, max, (float)rng.NextDouble());
+
+            _aimErrorScale = Roll(minAimErrorScale, maxAimErrorScale);
+            _reactionTime = Roll(minReactionTime, maxReactionTime);
+            _cornerCaution = Roll(minCornerCaution, maxCornerCaution);
+            // Some are bolder, some flee sooner.
+            fleeTriggerDamageThresholdPercentage = Mathf.Clamp(fleeTriggerDamageThresholdPercentage + Roll(-thresholdJitter, thresholdJitter), minThreshold, maxThreshold);
+            combatHealthAdvantageThreshold = Mathf.Clamp(combatHealthAdvantageThreshold + Roll(-thresholdJitter, thresholdJitter), minThreshold, maxThreshold);
         }
         public void ReturnToStartPosition()
         {
@@ -292,6 +387,11 @@ namespace FastAndFractured
             if (angle > ANGLE_90 || angle < -ANGLE_90)
             {
                 inputY = -MAX_INPUT_VALUE;
+            }
+            else
+            {
+                float slowFrom = cornerSlowdownStartAngle / _cornerCaution;
+                inputY = Mathf.Lerp(MAX_INPUT_VALUE, minCornerThrottle, Mathf.InverseLerp(slowFrom, ANGLE_90, Mathf.Abs(angle)));
             }
 
             Vector2 input = new Vector2(inputX, inputY);
@@ -333,27 +433,38 @@ namespace FastAndFractured
                 return true;
             }
             float distance = Vector3.Distance(_currentPosition, _currentTarget.transform.position);
-            return distance < DISTANCE_MARGIN_ERROR;
+            return distance < arrivedDistance;
         }
         #endregion
 
         #region SearchState
         public void ChoosePlayer()
         {
-            if (_player != null)
+            // Online, the best human target rather than the host's car (LevelController.LocalPlayer).
+            GameObject target = ChooseBestTarget(humansOnly: true);
+            if (target == null) target = _player;
+            if (target != null)
             {
-                ChangeTargetToShoot(_player);
+                ChangeTargetToShoot(target);
             }
         }
 
         public void ChooseItemFromType()
         {
+            // With no stat item left on the map the loop below would never end.
+            var allItems = InteractableHandler.Instance.GetStatBoostItems();
+            if (allItems == null || allItems.Count == 0) return;
+            int attempts = 0;
             do
             {
+                if (++attempts > MAX_ITEM_TYPE_ATTEMPTS)
+                {
+                    ChooseNearestItem();
+                    return;
+                }
                 CalculateTotalDecisionPercentage();
                 //+1 because it's max is exclusive
-                int decision = Random.Range(0, _totalDecisionPercentage + 1);
-
+                int decision = DeterministicRandom.Instance.NextInt(0, _totalDecisionPercentage + 1);
                 int percentageMaxSpeed = decisionPercentageHealth + decisionPercentageMaxSpeed;
                 int percentageAcceleration = percentageMaxSpeed + decisionPercentageAcceleration;
                 int percentageNormalShoot = percentageAcceleration + decisionPercentageNormalShoot;
@@ -404,7 +515,7 @@ namespace FastAndFractured
             foreach (StatsBoostInteractable statItem in items)
             {
                 float itemDistance = (statItem.transform.position - _currentPosition).sqrMagnitude;
-                if (itemDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (itemDistance < nearestOne && (angle < -awayFromTargetAngle || angle > awayFromTargetAngle))
                 {
                     nearestOne = itemDistance;
                     nearestTarget = statItem.gameObject;
@@ -418,14 +529,62 @@ namespace FastAndFractured
 
         public void ChooseNearestCharacter()
         {
-            GameObject nearestTarget = CalcNearestCharacter();
-            ChangeTargetToShoot(nearestTarget);
+            GameObject target = ChooseBestTarget(humansOnly: false);
+            if (target == null) target = CalcNearestCharacter();
+            ChangeTargetToShoot(target);
+        }
+
+        /// <summary>
+        /// Lowest score wins: distance minus bonuses for humans, for whoever hurt this AI recently and for low health.
+        /// The current target is kept for targetCommitSeconds while alive.
+        /// </summary>
+        private GameObject ChooseBestTarget(bool humansOnly)
+        {
+            // LevelController picks the first target before this AI has initialized.
+            if (carMovementController == null || !LevelController.HasInstance) return null;
+            if (_targetToShoot != null && IsAliveCharacter(_targetToShoot) &&
+                Time.time - _targetAcquiredAt < targetCommitSeconds &&
+                (!humansOnly || !IsAICharacter(_targetToShoot)))
+                return _targetToShoot;
+
+            List<GameObject> characters = ListWithGameElementNotInsideSandstorm(LevelController.Instance.InGameCharacters);
+            GameObject best = null;
+            float bestScore = float.MaxValue;
+            foreach (GameObject character in characters)
+            {
+                if (!character || character == carMovementController.gameObject || !IsAliveCharacter(character)) continue;
+                bool ai = IsAICharacter(character);
+                if (humansOnly && ai) continue;
+
+                float score = Vector3.Distance(character.transform.position, _currentPosition);
+                if (!ai) score -= scoreHumanBonus;
+                if (_carsThatDamagedAI.ContainsKey(character)) score -= scoreDamagedMeBonus;
+                var stats = character.GetComponentInChildren<StatsController>();
+                if (stats != null) score -= (1f - stats.GetEndurancePercentage() / PERCENTAGE_VALUE) * scoreLowHealthBonus;
+
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = character;
+                }
+            }
+            return best;
+        }
+
+        private static bool IsAICharacter(GameObject character) =>
+            character.GetComponentInParent<EnemyAIBrain>() != null || character.GetComponentInChildren<EnemyAIBrain>() != null;
+
+        private static bool IsAliveCharacter(GameObject character)
+        {
+            if (!character || !character.activeInHierarchy) return false;
+            var stats = character.GetComponentInChildren<StatsController>();
+            return stats == null || stats.Endurance > 0f;
         }
 
 
         public GameObject CalcNearestCharacter()
         {
-            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             inGameCharacters = ListWithGameElementNotInsideSandstorm(inGameCharacters);
             if (inGameCharacters.Count > 1)
             {
@@ -455,7 +614,7 @@ namespace FastAndFractured
 
         private GameObject ReturnCharacterThatIsNotPlayer()
         {
-            List<GameObject> inGameCharacters = LevelControllerButBetter.Instance.InGameCharacters;
+            List<GameObject> inGameCharacters = LevelController.Instance.InGameCharacters;
             foreach (GameObject character in inGameCharacters)
             {
                 if(character!=_player)
@@ -479,12 +638,12 @@ namespace FastAndFractured
         {
             float angle = GetAngleDirection(Vector3.up);
             float nearestOne = float.MaxValue;
-            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             foreach (GameObject safeZone in safeZonesOutsideSandstorm)
             {
                 float safeZoneDistance = (safeZone.transform.position - _currentPosition).sqrMagnitude;
-                if (safeZoneDistance < nearestOne && (angle < -ANGLE_30 || angle > ANGLE_30))
+                if (safeZoneDistance < nearestOne && (angle < -awayFromTargetAngle || angle > awayFromTargetAngle))
                 {
                     nearestOne = safeZoneDistance;
                     nearestSafeZone = safeZone.gameObject;
@@ -495,7 +654,7 @@ namespace FastAndFractured
 
         public GameObject CalcNearestSafeZone()
         {
-            List<GameObject> safeZonesOutsideSandstorm = LevelControllerButBetter.Instance.SafeZonesOutsideSandstorm();
+            List<GameObject> safeZonesOutsideSandstorm = LevelController.Instance.SafeZonesOutsideSandstorm();
             GameObject nearestSafeZone = safeZonesOutsideSandstorm[0];
             float nearestOne = float.MaxValue;
 
@@ -520,6 +679,7 @@ namespace FastAndFractured
         public void NormalShoot()
         {
             if (!TargetToShoot) return;
+            if (Time.time - _targetAcquiredAt < _reactionTime) return;   // still reacting to the new target
 
             normalShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             normalShootHandle.NormalShooting();
@@ -535,12 +695,14 @@ namespace FastAndFractured
         public void PushShoot()
         {
             if (!_targetToShoot) return;
+            if (Time.time - _targetAcquiredAt < _reactionTime) return;
             pushShootHandle.CurrentShootDirection = GetShootingDirectionWithError();
             pushShootHandle.PushShooting();
         }
 
         public void UseUniqueAbility()
         {
+            if (uniqueAbility == null) return;
             uniqueAbility.ActivateAbility();
         }
 
@@ -624,7 +786,7 @@ namespace FastAndFractured
         public bool IsInFront()
         {
             float angle = GetAngleDirection(Vector3.up);
-            return (angle > -FRONT_ANGLE && angle < FRONT_ANGLE);
+            return (angle > -frontAngle && angle < frontAngle);
         }
 
         public bool WantsToChangeToCombatState()
@@ -658,7 +820,7 @@ namespace FastAndFractured
 
         public bool HasTargetToShoot()
         {
-            return LevelControllerButBetter.Instance.InGameCharacters.Contains(TargetToShoot);
+            return LevelController.Instance.InGameCharacters.Contains(TargetToShoot);
         }
 
         public bool HasSomeoneThatIsNotTheTargetMadeEnoughDamage()
@@ -687,6 +849,7 @@ namespace FastAndFractured
 
         private Dictionary<GameObject, CarDamagedMe> _carsThatDamagedAI = new();
 
+        [Tooltip("Seconds the AI remembers who damaged it (for switching target to them).")]
         [SerializeField] private float forgetDuration = 5f;
         private void OnTakeEnduranceDamage(float damageTaken, GameObject whoIsMakingDamage)
         {
@@ -754,7 +917,7 @@ namespace FastAndFractured
                         }
                         else
                         {
-                            Debug.LogWarning("No path to follow" + _currentPath.ToString());
+                            //Debug.LogWarning("No path to follow" + _currentPath.ToString());
                             if (Physics.Raycast(_positionToDrive, Vector3.down, out RaycastHit hit, 100f, ignoreLayerMask))
                             {
                                 Debug.DrawRay(_positionToDrive, Vector3.down, Color.magenta);
@@ -834,7 +997,7 @@ namespace FastAndFractured
 
         private void CheckIfGoToNextPathPoint()
         {
-            if (Vector3.Distance(_currentPosition, GetActivePathPoint()) < _minDistanceUntilNextCorner &&
+            if (Vector3.Distance(_currentPosition, GetActivePathPoint()) < minDistanceUntilNextCorner &&
                 (_pathIndex + 1) < _currentPath.corners.Length)
             {
                 _pathIndex++;
@@ -849,15 +1012,23 @@ namespace FastAndFractured
 
         public Vector3 GetShootingDirectionWithError()
         {
-            Vector3 shootingDirection = CalcNormalizedShootingDirection();
+            Vector3 shootFrom = normalShootHandle.ShootPoint.position;
+            Vector3 aimPoint = _currentTarget.transform.position;
+            float distance = Vector3.Distance(shootFrom, aimPoint);
+            ICustomRigidbody targetBody = _currentTarget.GetComponentInParent<ICustomRigidbody>();
+            if (targetBody == null) targetBody = _currentTarget.GetComponentInChildren<ICustomRigidbody>();
+            float bulletSpeed = statsController.NormalShootSpeed;
+            if (targetBody != null && bulletSpeed > MIN_LEAD_BULLET_SPEED)
+                aimPoint += targetBody.linearVelocity * Mathf.Min(distance / bulletSpeed, maxLeadSeconds);
+
+            Vector3 shootingDirection = (aimPoint - shootFrom).normalized;
             if (turretRotationMovement != null)
             {
                 turretRotationMovement.TargetDirection = shootingDirection;
             }
-            //Add shooting error 
-            return shootingDirection + new Vector3(UnityEngine.Random.Range(-shootingMarginErrorAngle, shootingMarginErrorAngle),
-                UnityEngine.Random.Range(0, shootingMarginErrorAngle), 0);
-
+            float error = shootingMarginErrorAngle * Mathf.Min(_aimErrorScale * (1f + distance / aimErrorDistance), 1f);
+            return (shootingDirection + new Vector3(UnityEngine.Random.Range(-error, error),
+                UnityEngine.Random.Range(0, error), UnityEngine.Random.Range(-error, error))).normalized;
         }
 
         public void StopMovement()
@@ -879,11 +1050,13 @@ namespace FastAndFractured
 
         private void RecalculateDecisionsPercentage()
         {
-            decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * HEALTH_WEIGHT_PERCENTAGE);
+            decisionPercentageHealth = Mathf.RoundToInt(_startingPercentageHealth + statsController.GetEndurancePercentage() * healthWeightPerEndurance);
         }
 
         private void GetClosestItemByList(List<StatsBoostInteractable> list)
         {
+            // No item of that type on the map right now (all picked up): keep the current target.
+            if (list == null || list.Count == 0) return;
             float nearestOne = float.MaxValue;
             List<StatsBoostInteractable> items = list;
             GameObject nearestTarget = items[0].gameObject;
@@ -906,7 +1079,7 @@ namespace FastAndFractured
             List<T> gameElementsNotInsideSandstorm = new List<T>();
             foreach (T gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement.gameObject))
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement.gameObject))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -919,7 +1092,7 @@ namespace FastAndFractured
             List<GameObject> gameElementsNotInsideSandstorm = new List<GameObject>();
             foreach (GameObject gameElement in gameElementListIfInsideSandstorm)
             {
-                if (!LevelControllerButBetter.Instance.IsInsideSandstorm(gameElement))
+                if (!LevelController.Instance.IsInsideSandstorm(gameElement))
                 {
                     gameElementsNotInsideSandstorm.Add(gameElement);
                 }
@@ -929,24 +1102,24 @@ namespace FastAndFractured
 
         public bool IsIAInsideSandstorm()
         {
-            float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * ENDURANCE_FACTOR_TO_FLEE_THE_SANDSTORM;
+            float enduranceFactor = (1 - (statsController.Endurance / statsController.MaxEndurance)) * sandstormEnduranceFactor;
             float marginWithEnduranceToFleeTheSandstorm = marginToFleeFromSandstorm + marginToFleeFromSandstorm * enduranceFactor;
-            return LevelControllerButBetter.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
+            return LevelController.Instance.IsInsideSandstorm(carMovementController.gameObject, marginToFleeFromSandstorm);
         }
 
         public bool AreAllInteractablesInsideSandstorm()
         {
-            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.INTERACTABLE);
         }
 
         public bool AreAllSafeZonesInsideSandstorm()
         {
-            return LevelControllerButBetter.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
+            return LevelController.Instance.AreAllThisGameElementsInsideSandstorm(GameElement.SAFE_ZONES);
         }
 
         public bool IsOnEndGame()
         {
-            return NUM_CHARACTERS_TO_CONSIDER_END_GAME >= LevelControllerButBetter.Instance.InGameCharacters.Count;
+            return endGameCharacters >= LevelController.Instance.InGameCharacters.Count;
         }
 
         public void InstallAIParameters(AIParameters aIParameters)
@@ -982,6 +1155,7 @@ namespace FastAndFractured
         /// </summary>
         private void ChangeTargetToShoot(GameObject target)
         {
+            if (target != _targetToShoot) _targetAcquiredAt = Time.time;
             _targetToShoot = target;
             UpdateCurrentTarget(_targetToShoot);
         }

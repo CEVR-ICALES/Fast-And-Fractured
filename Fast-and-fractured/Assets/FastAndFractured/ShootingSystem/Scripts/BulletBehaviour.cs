@@ -1,10 +1,12 @@
 using Enums;
+using FastAndFractured.Utilities;
+using System;
 using UnityEngine;
 using Utilities;
 
 namespace FastAndFractured
 {
-    public abstract class BulletBehaviour : MonoBehaviour, IPooledObject
+    public abstract class BulletBehaviour : MonoBehaviour, IPooledObject, IEventSimulable
     {
 
         [SerializeField] protected Pooltype pooltype;
@@ -20,26 +22,29 @@ namespace FastAndFractured
         public bool InitValues => initValues;
         [SerializeField] private bool initValues = true;
         //References
-        protected Rigidbody rb;
+        protected ICustomRigidbody rb;
         protected Collider ownCollider;
         [SerializeField]
         private GameObject visuals;
         [SerializeField] protected GameObject particles;
         [Tooltip("Time delay to allow particles to show up")][SerializeField] private float delayProyectileEnd = 1.5f;
 
-        // Update is called once per frame
-        protected abstract void FixedUpdate();
+        public event Action<GameObject> OnDespawnRequested;
+         
         public virtual void InitializeValues()
         {
-            rb = GetComponent<Rigidbody>();
+            rb = GetComponent<ICustomRigidbody>();
             ownCollider = GetComponent<Collider>();
-           
         }
         public virtual void InitBulletTrayectory()
         {
             if (particles != null)
             {
                 particles.SetActive(false);
+            }
+            if (rb==null)
+            {
+                rb = GetComponent<ICustomRigidbody>();
             }
             initPosition = transform.position;
             rb.linearVelocity = velocity;
@@ -52,33 +57,39 @@ namespace FastAndFractured
                 rb.linearVelocity = Vector3.zero;
                 ownCollider.enabled = false;
                 visuals.SetActive(false);
-                rb.constraints = RigidbodyConstraints.FreezePosition;
-                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                rb.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 transform.rotation = new Quaternion(0, 0, 0, 0);
                 particles.SetActive(true);
                 TimerSystem.Instance.CreateTimer(delayProyectileEnd, onTimerDecreaseComplete: () =>
                 {
                     visuals.SetActive(true);
-                    ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                    OnDespawnRequested?.Invoke(gameObject);
                     ownCollider.enabled = true;
                     rb.constraints = RigidbodyConstraints.None;
                 });
             }
             else
-                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                OnDespawnRequested?.Invoke(gameObject);
         }
 
-        protected virtual void OnTriggerEnter(Collider other)
+       
+
+        public virtual void OnSimulateStart(object[] args)
         {
+            InitializeValues();
+         }
 
-        }
-
-        protected virtual void OnCollisionEnter(Collision collision)
+        public virtual void OnSimulateTick(float deltaTime)
         {
+         }
 
-        }
+        public virtual void OnSimulateTriggerEnter(Collider other)
+        {
+         }
 
-
+        public virtual void OnSimulateCollisionEnter(Collision collision)
+        {
+         }
     }
 
 }

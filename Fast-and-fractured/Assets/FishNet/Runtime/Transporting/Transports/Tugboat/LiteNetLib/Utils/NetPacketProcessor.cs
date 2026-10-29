@@ -10,21 +10,22 @@ namespace LiteNetLib.Utils
         {
             public static readonly ulong Id;
 
-            //FNV-1 64 bit hash
+            // FNV-1 64 bit hash
             static HashCache()
             {
-                ulong hash = 14695981039346656037UL; //offset
+                ulong hash = 14695981039346656037UL; // offset
                 string typeName = typeof(T).ToString();
-                for (var i = 0; i < typeName.Length; i++)
+                for (int i = 0; i < typeName.Length; i++)
                 {
                     hash ^= typeName[i];
-                    hash *= 1099511628211UL; //prime
+                    hash *= 1099511628211UL; // prime
                 }
                 Id = hash;
             }
         }
 
         protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
+
         private readonly NetSerializer _netSerializer;
         private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new();
 
@@ -46,7 +47,7 @@ namespace LiteNetLib.Utils
         protected virtual SubscribeDelegate GetCallbackFromData(NetDataReader reader)
         {
             ulong hash = reader.GetULong();
-            if (!_callbacks.TryGetValue(hash, out var action))
+            if (!_callbacks.TryGetValue(hash, out SubscribeDelegate action))
             {
                 throw new ParseException("Undefined packet in NetDataReader");
             }
@@ -61,7 +62,7 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Register nested property type
         /// </summary>
-        /// <typeparam name="T">INetSerializable structure</typeparam>
+        /// <typeparam name = "T">INetSerializable structure</typeparam>
         public void RegisterNestedType<T>() where T : struct, INetSerializable
         {
             _netSerializer.RegisterNestedType<T>();
@@ -70,8 +71,8 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Register nested property type
         /// </summary>
-        /// <param name="writeDelegate"></param>
-        /// <param name="readDelegate"></param>
+        /// <param name = "writeDelegate"></param>
+        /// <param name = "readDelegate"></param>
         public void RegisterNestedType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
         {
             _netSerializer.RegisterNestedType(writeDelegate, readDelegate);
@@ -80,7 +81,7 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Register nested property type
         /// </summary>
-        /// <typeparam name="T">INetSerializable class</typeparam>
+        /// <typeparam name = "T">INetSerializable class</typeparam>
         public void RegisterNestedType<T>(Func<T> constructor) where T : class, INetSerializable
         {
             _netSerializer.RegisterNestedType(constructor);
@@ -89,7 +90,7 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Reads all available data from NetDataReader and calls OnReceive delegates
         /// </summary>
-        /// <param name="reader">NetDataReader with packets data</param>
+        /// <param name = "reader">NetDataReader with packets data</param>
         public void ReadAllPackets(NetDataReader reader)
         {
             while (reader.AvailableBytes > 0)
@@ -99,9 +100,9 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Reads all available data from NetDataReader and calls OnReceive delegates
         /// </summary>
-        /// <param name="reader">NetDataReader with packets data</param>
-        /// <param name="userData">Argument that passed to OnReceivedEvent</param>
-        /// <exception cref="ParseException">Malformed packet</exception>
+        /// <param name = "reader">NetDataReader with packets data</param>
+        /// <param name = "userData">Argument that passed to OnReceivedEvent</param>
+        /// <exception cref = "ParseException">Malformed packet</exception>
         public void ReadAllPackets(NetDataReader reader, object userData)
         {
             while (reader.AvailableBytes > 0)
@@ -111,8 +112,8 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Reads one packet from NetDataReader and calls OnReceive delegate
         /// </summary>
-        /// <param name="reader">NetDataReader with packet</param>
-        /// <exception cref="ParseException">Malformed packet</exception>
+        /// <param name = "reader">NetDataReader with packet</param>
+        /// <exception cref = "ParseException">Malformed packet</exception>
         public void ReadPacket(NetDataReader reader)
         {
             ReadPacket(reader, null);
@@ -122,7 +123,7 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(NetDataWriter writer, T packet) where T : class, new()
+            T>(NetDataWriter writer, T packet) where T : class, new()
         {
             WriteHash<T>(writer);
             _netSerializer.Serialize(writer, packet);
@@ -137,9 +138,9 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Reads one packet from NetDataReader and calls OnReceive delegate
         /// </summary>
-        /// <param name="reader">NetDataReader with packet</param>
-        /// <param name="userData">Argument that passed to OnReceivedEvent</param>
-        /// <exception cref="ParseException">Malformed packet</exception>
+        /// <param name = "reader">NetDataReader with packet</param>
+        /// <param name = "userData">Argument that passed to OnReceivedEvent</param>
+        /// <exception cref = "ParseException">Malformed packet</exception>
         public void ReadPacket(NetDataReader reader, object userData)
         {
             GetCallbackFromData(reader)(reader, userData);
@@ -148,19 +149,19 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Register and subscribe to packet receive event
         /// </summary>
-        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
-        /// <param name="packetConstructor">Method that constructs packet instead of slow Activator.CreateInstance</param>
-        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        /// <param name = "onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <param name = "packetConstructor">Method that constructs packet instead of slow Activator.CreateInstance</param>
+        /// <exception cref = "InvalidTypeException"><typeparamref name = "T"/>'s fields are not supported, or it has no fields</exception>
         public void Subscribe<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(Action<T> onReceive, Func<T> packetConstructor) where T : class, new()
+            T>(Action<T> onReceive, Func<T> packetConstructor) where T : class, new()
         {
             _netSerializer.Register<T>();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                var reference = packetConstructor();
+                T reference = packetConstructor();
                 _netSerializer.Deserialize(reader, reference);
                 onReceive(reference);
             };
@@ -169,19 +170,19 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Register and subscribe to packet receive event (with userData)
         /// </summary>
-        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
-        /// <param name="packetConstructor">Method that constructs packet instead of slow Activator.CreateInstance</param>
-        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        /// <param name = "onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <param name = "packetConstructor">Method that constructs packet instead of slow Activator.CreateInstance</param>
+        /// <exception cref = "InvalidTypeException"><typeparamref name = "T"/>'s fields are not supported, or it has no fields</exception>
         public void Subscribe<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T, TUserData>(Action<T, TUserData> onReceive, Func<T> packetConstructor) where T : class, new()
+            T, TUserData>(Action<T, TUserData> onReceive, Func<T> packetConstructor) where T : class, new()
         {
             _netSerializer.Register<T>();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                var reference = packetConstructor();
+                T reference = packetConstructor();
                 _netSerializer.Deserialize(reader, reference);
                 onReceive(reference, (TUserData)userData);
             };
@@ -191,16 +192,16 @@ namespace LiteNetLib.Utils
         /// Register and subscribe to packet receive event
         /// This method will overwrite last received packet class on receive (less garbage)
         /// </summary>
-        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
-        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        /// <param name = "onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref = "InvalidTypeException"><typeparamref name = "T"/>'s fields are not supported, or it has no fields</exception>
         public void SubscribeReusable<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(Action<T> onReceive) where T : class, new()
+            T>(Action<T> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
-            var reference = new T();
+            T reference = new();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
                 _netSerializer.Deserialize(reader, reference);
@@ -212,16 +213,16 @@ namespace LiteNetLib.Utils
         /// Register and subscribe to packet receive event
         /// This method will overwrite last received packet class on receive (less garbage)
         /// </summary>
-        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
-        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        /// <param name = "onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref = "InvalidTypeException"><typeparamref name = "T"/>'s fields are not supported, or it has no fields</exception>
         public void SubscribeReusable<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
+            T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
-            var reference = new T();
+            T reference = new();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
                 _netSerializer.Deserialize(reader, reference);
@@ -229,34 +230,29 @@ namespace LiteNetLib.Utils
             };
         }
 
-        public void SubscribeNetSerializable<T, TUserData>(
-            Action<T, TUserData> onReceive,
-            Func<T> packetConstructor) where T : INetSerializable
+        public void SubscribeNetSerializable<T, TUserData>(Action<T, TUserData> onReceive, Func<T> packetConstructor) where T : INetSerializable
         {
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                var pkt = packetConstructor();
+                T pkt = packetConstructor();
                 pkt.Deserialize(reader);
                 onReceive(pkt, (TUserData)userData);
             };
         }
 
-        public void SubscribeNetSerializable<T>(
-            Action<T> onReceive,
-            Func<T> packetConstructor) where T : INetSerializable
+        public void SubscribeNetSerializable<T>(Action<T> onReceive, Func<T> packetConstructor) where T : INetSerializable
         {
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                var pkt = packetConstructor();
+                T pkt = packetConstructor();
                 pkt.Deserialize(reader);
                 onReceive(pkt);
             };
         }
 
-        public void SubscribeNetSerializable<T, TUserData>(
-            Action<T, TUserData> onReceive) where T : INetSerializable, new()
+        public void SubscribeNetSerializable<T, TUserData>(Action<T, TUserData> onReceive) where T : INetSerializable, new()
         {
-            var reference = new T();
+            T reference = new();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
                 reference.Deserialize(reader);
@@ -264,10 +260,9 @@ namespace LiteNetLib.Utils
             };
         }
 
-        public void SubscribeNetSerializable<T>(
-            Action<T> onReceive) where T : INetSerializable, new()
+        public void SubscribeNetSerializable<T>(Action<T> onReceive) where T : INetSerializable, new()
         {
-            var reference = new T();
+            T reference = new();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
                 reference.Deserialize(reader);
@@ -278,7 +273,7 @@ namespace LiteNetLib.Utils
         /// <summary>
         /// Remove any subscriptions by type
         /// </summary>
-        /// <typeparam name="T">Packet type</typeparam>
+        /// <typeparam name = "T">Packet type</typeparam>
         /// <returns>true if remove is success</returns>
         public bool RemoveSubscription<T>()
         {

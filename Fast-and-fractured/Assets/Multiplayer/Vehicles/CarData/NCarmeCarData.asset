@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21ff3bb6b84fcd04c9a4584674e1d6f9, type: 3}
+  m_Name: NCarmeCarData
+  m_EditorClassIdentifier: 
+  CharacterName: Carme
+  CarDefaultPrefab: {fileID: 8284357542529456002, guid: a6a56ebfcb77f4349b6493a58476cdbe, type: 3}
+  MaxEndurance: 1000
+  MinEndurance: 0
+  Invulnerable: 1
+  MaxSpeed: 180
+  MaxSpeedDashing: 240
+  MaxSpeedAscend: 165
+  MaxSpeedDescend: 195
+  MaxSpeedMultiplier: 1
+  MinSpeed: 0
+  MaxAcceleration: 8000
+  MinAcceleration: 0
+  Acceleration: 5500
+  BrakeTorque: 60000
+  Handling: 35
+  HandlingSmoothnes: 5
+  AerialRotationSpeed: 2.5
+  DriftThreshold: 0.1
+  DriftingFactorToSpeed: 80
+  DriftingSmoothFactor: 0.1
+  DriftForce: 30
+  DashTime: 1.25
+  FrontWheelsStrenghtFactor: 0.8
+  RearWheelsStrenghtFactor: 0.2
+  Weight: 1050
+  BaseForce: 35000
+  FrontalHitAnlgeThreshold: 35
+  EnduranceImportanceWhenColliding: 2.2
+  BaseDownwardForce: 1550
+  TurningForceMultiplier: 2.5
+  SpeedForceMultiplier: 0.6
+  NormalShootDMG: 34
+  MaxNormalShootDMG: 60
+  MinNormalShootDMG: 30
+  PushShootFORCE: 27000
+  ExplosionRadius: 7
+  ExplosionCenterOffset: {x: 0, y: 0, z: 0}
+  NormalShootSpeed: 120
+  NormalShootCadenceTime: 0.3
+  NormalShootMaxRange: 150
+  NormalShootAngle: 90
+  PushShootAngle: 40
+  PushShootRange: 15
+  PushShootGravityMultiplier: 30
+  PushShootBounceNum: 2
+  PushShootBounceForce: 50
+  MineShootAngle: 40
+  MineShootRange: 5
+  DashCooldown: 4
+  PushShootCooldown: 6
+  MineExplosionTime: 5
+  UniqueAbilityCooldown: 35
+  NormalShootOverHeat: 5
+  CooldownSpeed: 1
+  DeadDelay: 2.5
+  aiParameters:
+    fleeDistance: 100
+    sweepRadius: 150
+    shootingMarginErrorAngle: 0.25
+    damageAccumulationDuration: 2
+    fleeTriggerDamageThresholdPercentage: 50
+    _recoveryThresholdPercentageForSearch: 50
+    _combatHealthAdvantageThreshold: 60
+    damageThresholdPercentage: 60
+    decisionPercentageHealth: 10
+    decisionPercentageMaxSpeed: 25
+    decisionPercentageAcceleration: 25
+    decisionPercentageNormalShoot: 10
+    decisionPercentagePushShoot: 10
+    decisionPercentageCooldown: 25
+    marginToFleeFromSandstorm: 250
+  WinAnimation: {fileID: 9210662375518096111, guid: daee004ade165854f90f6edb58e43e8e, type: 3}
+  LoseAnimation: {fileID: 5554116291560390806, guid: bcba3650ae9352640bea3764f562c5ae, type: 3}
+  WinAnimationOverrides: []
+  LoseAnimationOverrides: []

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2057355190036813191}
   - component: {fileID: 7869669430191183688}
-  - component: {fileID: 974663299248581994}
   m_Layer: 0
   m_Name: LevelController(Testing)
   m_TagString: Untagged
@@ -45,6 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0ca2c67c9478114d8d628ab87d87e56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _autoConstructOnAwake: 1
+  _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
+  singletonDuplicateResolution: 0
+  alsoDisableGameobjectOnDuplicateResolution: 0
   onLevelPreStart:
     m_PersistentCalls:
       m_Calls: []
@@ -90,45 +94,11 @@ MonoBehaviour:
   useMyCharacters: 0
   stormInDebugMode: 0
   justSpawnAI: 0
+  delayPreStart: 0.1
   delayUntilGameStarts: 3.5
   characterIcons: []
   endGameDelayTime: 0.5
   gameEndDataScriptableObject: {fileID: 11400000, guid: d6586914b10116444a99eddca7cff681, type: 2}
---- !u!114 &974663299248581994
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6284926943504238984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 433404f91474ae541ac2204a23562d62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  usingController: 0
-  onLevelPreStart:
-    m_PersistentCalls:
-      m_Calls: []
-  charactersCustomStart:
-    m_PersistentCalls:
-      m_Calls: []
-  charactersData: []
-  playerCharacter: Pepe_0
-  maxCharactersInGame: 8
-  playerCamera: {fileID: 0}
-  spawnPoints: []
-  safeZones: []
-  _timeToCallTheStorm: 190
-  _playerDeadReductionTime: 40
-  _sandStormController: {fileID: 0}
-  PlayerPrefab: {fileID: 0}
-  AIPrefab: {fileID: 0}
-  debugMode: 1
-  useMyCharacters: 0
-  stormInDebugMode: 0
-  justSpawnAI: 0
-  characterIcons: []
-  endGameDelayTime: 0.5
-  gameEndDataScriptableObject: {fileID: 0}
-  delayUntilGameStarts: 3.5
+  availablePlayer: []
+  _playersCharacterNameCodes: []
+  defaultPlayerCount: 1

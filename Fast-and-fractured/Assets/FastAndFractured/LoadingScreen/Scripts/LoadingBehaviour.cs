@@ -35,13 +35,14 @@ namespace FastAndFractured
         void OnEnable()
         {
             eventSystem = EventSystem.current;
-            inputModule = eventSystem.GetComponent<InputSystemUIInputModule>();
-            inputModule.enabled = false;
+            inputModule = eventSystem != null ? eventSystem.GetComponent<InputSystemUIInputModule>() : null;
+            if (inputModule != null) inputModule.enabled = false;
             SetRandomBackgroundImage();
         }
         void OnDisable()
         {
-            inputModule.enabled = true;
+            // The scene that owned the event system may be gone (multiplayer keeps this screen across the map load).
+            if (inputModule != null) inputModule.enabled = true;
             if (_timerReference != null)
             {
                 _timerReference.StopTimer();
@@ -73,8 +74,14 @@ namespace FastAndFractured
             }
         }
 
+        /// <summary>Optional hook: when it returns true, LoadScene skips the load (the multiplayer map vote). Null in singleplayer.</summary>
+        public static System.Func<int, bool> SceneLoadOverride;
+
         public void LoadScene(int sceneBuildIndex)
         {
+            if (SceneLoadOverride != null && SceneLoadOverride(sceneBuildIndex))
+                return;
+
             PlayerPrefs.SetInt(PREVIOUS_GAME_SCENE, sceneBuildIndex);
             TimerSystem.Instance.CreateTimer(SCENE_LOAD_DELAY, onTimerDecreaseComplete: () =>
             {

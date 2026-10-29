@@ -11,5 +11,19 @@ namespace FastAndFractured
         public Vector2 MoveInput => DesiredMoveInput;
         public bool IsBraking => DesiredBraking;
         public bool IsDashing => DesiredDashing;
+
+        public Vector3 AimDirection => Vector3.zero;
+
+        public bool IsNormalShooting => false;
+
+        public bool IsPushShooting => false;
+
+        public bool FirePushAction => false;
+
+        public bool IsThrowingMine => false;
+
+        public void Initialize()
+        {
+        }
     }
 }

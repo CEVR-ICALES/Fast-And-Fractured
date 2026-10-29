@@ -128,9 +128,6 @@ namespace FastAndFractured
         public GameObject lastEnemyThatPushedMe;
         private Vector3 _lastPosition;
 
-        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
-        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
-
         const string BULLET_EFFECT_NAME = "Bullet_Effect";
         const float TIME_IN_SCREEN = 0.2f;
 
@@ -139,7 +136,9 @@ namespace FastAndFractured
         {
             //just for try propouses
             charDataSO.Invulnerable = false;
+            if (transform.parent) { 
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
+            }
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
@@ -149,12 +148,15 @@ namespace FastAndFractured
         }
         private void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         private void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         #endregion
@@ -267,28 +269,9 @@ namespace FastAndFractured
                 }
             }
         }
-        public GameObject GetWinObjectByString(string key)
+        public GameObject GetFinalAnimation(string characterCode, bool isWin)
         {
-            foreach (GameObjectStringPair pair in WinObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
-        }
-
-        public GameObject GetLoseObjectByString(string key)
-        {
-            foreach (GameObjectStringPair pair in LoseObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
+            return charDataSO.GetFinalAnimation(characterCode, isWin);
         }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)

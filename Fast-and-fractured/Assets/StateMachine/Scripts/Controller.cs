@@ -19,12 +19,12 @@ namespace StateMachine
         // Start is called before the first frame update
         private void Awake()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(CustomStart);
+            LevelController.Instance.charactersCustomStart.AddListener(CustomStart);
         }
         public void CustomStart()
         {
             LoadFirsState();
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
         public void LoadFirsState()
         {
@@ -175,7 +175,10 @@ namespace StateMachine
 
         private void OnDestroy()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
       public void AddBehaviour(Behaviour monoBehaviour) {

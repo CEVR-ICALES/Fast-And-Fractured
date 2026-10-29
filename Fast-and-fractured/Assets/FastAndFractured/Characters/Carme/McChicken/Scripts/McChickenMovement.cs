@@ -40,12 +40,15 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
         public void Initialize(Rigidbody rb, McChickenPhysicsHandler physics, McChickenVisuals visuals)
         {
@@ -70,7 +73,7 @@ namespace FastAndFractured
 
             if (_isClimbing)
             {
-                // TODO handle effect when climbing
+                // Climbing is handled by DOTween (kinematic), so we don't apply manual movement/gravity here.
             }
             else
             {

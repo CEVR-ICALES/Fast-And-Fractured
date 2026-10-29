@@ -7,56 +7,46 @@ using Utilities.Managers.PauseSystem;
 
 namespace Utilities
 {
-    public class TimerSystem : AbstractSingleton<TimerSystem>, IPausable
+    public class TimerSystem : AbstractSingleton<TimerSystem>
     {
         private Dictionary<string, ITimer> _timers = new Dictionary<string, ITimer>();
 
         private int _nextTimerId = 0;
 
         private bool _isPaused = false;
-
-        #region UNITY_LIFECYCLE
-
-        protected override void Awake()
+         
+        protected override void Deconstruct()
         {
-            base.Awake();
-        }
-
-        private void Start()
-        {
-            PauseManager.Instance.RegisterPausable(this);
-        }
-
-        private void Update()
-        {
-            UpdateAllTimers(Time.deltaTime);
-        }
-
-        private void OnDestroy()
-        {
+            base.Deconstruct();
             _timers.Clear();
-            PauseManager.Instance?.UnregisterPausable(this);
-        }
-        #endregion
 
+        }
+        public void Tick(float tickTime)
+        {
+            UpdateAllTimers(tickTime);
+        }
         #region TIMER_MANAGEMENT
+
+        private readonly List<KeyValuePair<string, ITimer>> _timersToUpdate = new List<KeyValuePair<string, ITimer>>();
 
         private void UpdateAllTimers(float deltaTime)
         {
-            List<string> timersToRemove = new List<string>();
-            for (int i = 0; i < _timers.Count; i++)
+            _timersToUpdate.Clear();
+            _timersToUpdate.AddRange(_timers);
+
+            foreach (var timerPair in _timersToUpdate)
             {
-                var timerPair = _timers.ElementAt(i);
-                timerPair.Value.UpdateTimer(deltaTime);
-                if (!timerPair.Value.GetData().IsRunning)
-                {
-                    timersToRemove.Add(timerPair.Key);
-                }
+                if (_timers.TryGetValue(timerPair.Key, out ITimer current) && current == timerPair.Value)
+                    timerPair.Value.UpdateTimer(deltaTime);
             }
 
-            for (int i = 0; i < timersToRemove.Count; i++)
+            foreach (var timerPair in _timersToUpdate)
             {
-                _timers.Remove(timersToRemove[i]);
+                if (!timerPair.Value.GetData().IsRunning &&
+                    _timers.TryGetValue(timerPair.Key, out ITimer current) && current == timerPair.Value)
+                {
+                    _timers.Remove(timerPair.Key);
+                }
             }
         }
 
@@ -349,6 +339,6 @@ namespace Utilities
             {
                 timer.Value.ResumeTimer();
             }
-        }
+        } 
     }
 }

@@ -264,3 +264,22 @@ UserSettings/
 
 /ExternalAssets/Plugins/FMOD/Cache/*
 !/Editor Default Resources/FMOD/*
+
+# Metas belonging to the local-only files ignored from the repo root .gitignore.
+# They need to be listed here because line 186 un-ignores every meta under Assets/.
+/Assets/_Recovery.meta
+/Assets/ff.bat.meta
+/Assets/test.txt.meta
+/Assets/Multiplayer/Testing/test_results.json.meta
+/Assets/Multiplayer/FastAndFractured.Multiplayer.asmdef.backup.meta
+
+# Mono crash dumps written by the editor next to the project
+/mono_crash.*
+
+# Planning notes (local only); must come after the Assets meta un-ignore above
+/[Aa]ssets/**/_PLANS/
+/[Aa]ssets/**/_PLANS.meta
+
+# Telemetry keys (template: Assets/Telemetry/TelemetrySecrets.example.json)
+/[Aa]ssets/Telemetry/Resources/TelemetrySecrets.json
+/[Aa]ssets/Telemetry/Resources/TelemetrySecrets.json.meta

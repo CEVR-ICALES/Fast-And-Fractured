@@ -1,4 +1,5 @@
 using FastAndFractured;
+using FastAndFractured.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
@@ -142,9 +143,15 @@ public class GolfBallBehaviour : MonoBehaviour, ICanBeImpulseByTrampoline
         });
     }
 
-    public Rigidbody GetRigidbody()
+    private ICustomRigidbody _customRigidbody;
+
+    // The trampoline works on ICustomRigidbody (the multiplayer branch abstracts the car
+    // rigidbody); the ball wraps its own Rigidbody in the same adapter the cars use.
+    public ICustomRigidbody GetRigidbody()
     {
-        return rb;
+        if (_customRigidbody == null)
+            _customRigidbody = GetComponent<UnityRigidbodyAdapter>() ?? gameObject.AddComponent<UnityRigidbodyAdapter>();
+        return _customRigidbody;
     }
 
     public float GetMassReference()
