@@ -73,6 +73,7 @@ namespace FastAndFractured
         public event Action onMatchClockStarted;
         // Online: seconds since "Start" read from the server tick, identical on every peer; null offline.
         public Func<float> NetworkMatchSeconds { get; set; }
+        private bool _startWithMatchClock;
         private bool _isStormActive = false;
 
         [SerializeField] private List<string> _playersCharacterNameCodes;
@@ -200,7 +201,7 @@ namespace FastAndFractured
                 _characterSpawner.InGameCharacters, _localPlayer, charactersCustomStart);
             _gameLoopManager.SetupStorm(stormInDebugMode, debugMode);
             onLevelPreStart?.Invoke();
-            _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
+            StartGameWhenReady();
         }
 
         private void StartLevelWithSpawnedCharacters()
@@ -249,7 +250,11 @@ namespace FastAndFractured
             }
 
             onLevelPreStart?.Invoke();
-            _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
+            if (IsOnline)
+                StartGameWhenReady();
+            else
+                PreMatchSequence.Run(gameObject.scene, _localPlayer != null ? _localPlayer.transform : null, false,
+                    () => _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete));
 
             if (!useMyCharacters && InGameCharacters.Count > 0)
             {
@@ -268,8 +273,20 @@ namespace FastAndFractured
             }
         }
 
+        // Online, controls (AI brains drive their car directly, shooting) wait for the server's "Start", not a local timer.
+        private void StartGameWhenReady()
+        {
+            if (!IsOnline)
+                _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
+            else if (HasMatchClockStarted)
+                OnGameStartDelayComplete();
+            else
+                _startWithMatchClock = true;
+        }
+
         private void OnGameStartDelayComplete()
         {
+            if (HasGameStarted) return;
             _gameLoopManager.ActivateCharacterControls();
             HasGameStarted = true;
             if (!IsOnline) StartMatchClock();
@@ -284,6 +301,7 @@ namespace FastAndFractured
             if (HasMatchClockStarted) return;
             HasMatchClockStarted = true;
             onMatchClockStarted?.Invoke();
+            if (_startWithMatchClock) OnGameStartDelayComplete();
         }
 
         private static bool IsOnline => FishNet.InstanceFinder.IsServerStarted || FishNet.InstanceFinder.IsClientStarted;
