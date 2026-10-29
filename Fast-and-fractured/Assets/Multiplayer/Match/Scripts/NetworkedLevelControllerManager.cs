@@ -37,7 +37,7 @@ namespace FastAndFractured.Multiplayer
         private const float DEATH_VFX_LIFETIME_SECONDS = 5f;
         private const ushort FALLBACK_PORT = 7770;
 
-        private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent;
+        private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent, _matchClockStarted;
         private void LateUpdate()
         {
             if (!_countdownSignalled)
@@ -50,7 +50,9 @@ namespace FastAndFractured.Multiplayer
             if (_countdownStartTick.Value == 0 || base.TimeManager == null) return;
             uint start = _countdownStartTick.Value;
             bool resumed = _resumedAfterMigration.Value;
-            MatchStartGate.LockUntil(start + base.TimeManager.TimeToTicks(resumed ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
+            uint controlsTick = start + base.TimeManager.TimeToTicks(resumed ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS);
+            MatchStartGate.LockUntil(controlsTick);
+            StartMatchClockAt(controlsTick);
 
             // The on-screen countdown follows the server's RPC: a client's own server-tick estimate lags after loading.
             if (base.IsServerInitialized && !_countdownRpcSent && base.TimeManager.Tick >= start)
@@ -88,6 +90,17 @@ namespace FastAndFractured.Multiplayer
 
         [ObserversRpc(RunLocally = true)]
         private void RpcStartCountdown() => _countdownSignalled = true;
+
+        // Map timers (rising lava) count from the server's "Start" tick, so every peer agrees on them.
+        private void StartMatchClockAt(uint controlsTick)
+        {
+            if (_matchClockStarted || base.TimeManager.Tick < controlsTick || !LevelController.HasInstance) return;
+            _matchClockStarted = true;
+            var levelController = LevelController.Instance;
+            levelController.NetworkMatchSeconds = () => base.TimeManager.Tick > controlsTick
+                ? (float)base.TimeManager.TicksToTime(base.TimeManager.Tick - controlsTick) : 0f;
+            levelController.StartMatchClock();
+        }
 
         #region HOST_MIGRATION
         // Everything here is inert while HostMigrationSettings.Enabled is off (see HostMigration/).
