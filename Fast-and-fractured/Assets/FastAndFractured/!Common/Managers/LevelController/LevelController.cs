@@ -238,6 +238,12 @@ namespace FastAndFractured
             bool shouldCallStorm = !debugMode || stormInDebugMode;
             _gameLoopManager.SetupStorm(shouldCallStorm, debugMode);
 
+            foreach (GameObject character in InGameCharacters)
+            {
+                var movement = character != null ? character.GetComponentInChildren<CarMovementController>() : null;
+                if (movement != null) movement.HoldInPlace();
+            }
+
             onLevelPreStart?.Invoke();
             _gameLoopManager.StartGameInitializationDelay(delayUntilGameStarts, OnGameStartDelayComplete);
 

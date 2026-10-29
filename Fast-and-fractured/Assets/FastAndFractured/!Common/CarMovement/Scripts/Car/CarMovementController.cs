@@ -685,6 +685,14 @@ namespace FastAndFractured
 
         }
         #endregion
+        // Before "Start" no state machine brakes: a car spawned on a slope rolls away (the next movement input releases it).
+        public void HoldInPlace()
+        {
+            if (statsController == null) return;
+            ApplyMotorTorque(0f);
+            ApplyBrakeTorque(statsController.BrakeTorque);
+        }
+
         public void StopAllCarMovement()
         {
             foreach (var wheel in wheels)

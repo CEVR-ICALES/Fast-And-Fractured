@@ -594,7 +594,11 @@ namespace FastAndFractured.Multiplayer
                 }
             }
 
-            if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
+            if (MatchStartGate.IsLocked(base.TimeManager.Tick))
+            {
+                _coreMovementController.HoldInPlace();
+            }
+            else if (_stateMachineDriver != null && _stateMachineDriver.IsReady)
             {
                 _stateMachineDriver.TickStateMachine(base.TimeManager.Tick);
             }
