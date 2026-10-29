@@ -40,6 +40,13 @@ namespace FastAndFractured.Multiplayer
         private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent;
         private void LateUpdate()
         {
+            if (!_countdownSignalled)
+            {
+                // Cancel every root's pending 3-2-1 until the server says so: which one is ours is not settled yet.
+                foreach (var script in FindObjectsByType<GameReadyScript>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    script.CancelInvoke("StartEventCountdown");
+            }
+
             if (_countdownStartTick.Value == 0 || base.TimeManager == null) return;
             uint start = _countdownStartTick.Value;
             bool resumed = _resumedAfterMigration.Value;
@@ -53,12 +60,6 @@ namespace FastAndFractured.Multiplayer
             }
 
             if (_countdownShown) return;
-            if (!_countdownSignalled)
-            {
-                // Cancel every root's pending 3-2-1 until the server says so: which one is ours is not settled yet.
-                foreach (var script in FindObjectsByType<GameReadyScript>(FindObjectsSortMode.None))
-                    script.CancelInvoke("StartEventCountdown");
-            }
             if (resumed && _countdownSignalled && FindLocalCountdown() == null)
             {
                 // No car of our own after the migration (spectating): just drop the overlay.
