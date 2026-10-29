@@ -37,7 +37,7 @@ namespace FastAndFractured.Multiplayer
         private const float DEATH_VFX_LIFETIME_SECONDS = 5f;
         private const ushort FALLBACK_PORT = 7770;
 
-        private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent, _matchClockStarted;
+        private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent, _introStarted, _matchClockStarted;
         private void LateUpdate()
         {
             if (!_countdownSignalled)
@@ -76,8 +76,15 @@ namespace FastAndFractured.Multiplayer
                 _countdownSuppressed = true;
                 countdown.CancelInvoke("StartEventCountdown");
             }
+            if (!_introStarted && !resumed)
+            {
+                _introStarted = true;
+                var car = countdown.transform.root.GetComponentInChildren<CarMovementController>();
+                if (!_countdownSignalled) PreMatchSequence.Run(gameObject.scene, car != null ? car.transform : null, true, null);
+            }
             if (!_countdownSignalled) return;
             _countdownShown = true;
+            if (PreMatchSequence.Current != null) PreMatchSequence.Current.EndForCountdown();
             if (resumed)
             {
                 HostMigration.HostMigrationOverlay.Hide();
@@ -635,7 +642,8 @@ namespace FastAndFractured.Multiplayer
 
             // Every peer shows 3-2-1 and gets control on the same server tick (see MATCH_COUNTDOWN).
             _resumedAfterMigration.Value = resumingMigration;
-            _countdownStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_LEAD_SECONDS : COUNTDOWN_LEAD_SECONDS);
+            float countdownLead = resumingMigration ? MIGRATION_LEAD_SECONDS : COUNTDOWN_LEAD_SECONDS + Mathf.Max(0f, PreMatchSequence.DurationFor(gameObject.scene) - PreMatchSequence.COUNTDOWN_OVERLAP_SECONDS);
+            _countdownStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(countdownLead);
             MatchStartGate.LockUntil(_countdownStartTick.Value + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
 
             InitializePlayerTracking();
