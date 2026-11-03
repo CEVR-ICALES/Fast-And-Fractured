@@ -27,6 +27,7 @@ public class AnimatorPanelHandle : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //Since the multiplayer pull request has a method on Level Controller for "before match starts". On implementation, this method needs to be called in that function
         if (tutorialImage == null)
         {
 
