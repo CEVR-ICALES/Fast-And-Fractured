@@ -37,7 +37,7 @@ public class AnimatorPanelHandle : MonoBehaviour
          tutorialPanel.TryGetComponent(out tutorialImage);
          tutorialPanel.TryGetComponent(out fadeOut);   
         }
-        if(animationsGif.Length == 0||animationsGif==null){
+        if(animationsGif==null||animationsGif.Length==0){
         Debug.LogWarning("Couldn't show how to play panel. Check if tutorial panel or tutorial images are not null or empty");
         return;
         }
