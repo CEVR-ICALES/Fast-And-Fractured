@@ -1232,21 +1232,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialPanel: {fileID: 0}
   fadeOut: {fileID: 0}
-  tutorialImages:
-  - {fileID: 21300000, guid: a126beefeadb5f2b685367cd62d778c2, type: 3}
-  - {fileID: 21300000, guid: 5826cb39d273eafdbab480bd315a5857, type: 3}
-  - {fileID: 21300000, guid: c694d5505b104eba1b65c223a90c9da6, type: 3}
-  - {fileID: 21300000, guid: 482f0258c32a24e0b96e98e508020faf, type: 3}
-  - {fileID: 21300000, guid: 88956c87ee74e836abac0227e901fa90, type: 3}
-  - {fileID: 21300000, guid: a320fe34e9c8f4257bfe846200022175, type: 3}
-  - {fileID: 21300000, guid: a0607dc627c52d24886368328900255e, type: 3}
-  - {fileID: 21300000, guid: e6da1613cf65081e2bc02a3fe5481868, type: 3}
-  - {fileID: 21300000, guid: d3347bab125d36953a3814ab18348603, type: 3}
-  - {fileID: 21300000, guid: e1139d98645fed69e9c3d6bf890041ce, type: 3}
-  - {fileID: 21300000, guid: 5cd850ca6c9201dc6b57b0f5f8ea7531, type: 3}
-  delayToStart: 0.3
-  endTutorialTime: 100
-  frameRate: 20
+  animationsGif:
+  - sprites:
+    - {fileID: 21300000, guid: a126beefeadb5f2b685367cd62d778c2, type: 3}
+    - {fileID: 21300000, guid: 5826cb39d273eafdbab480bd315a5857, type: 3}
+    - {fileID: 21300000, guid: c694d5505b104eba1b65c223a90c9da6, type: 3}
+    - {fileID: 21300000, guid: 482f0258c32a24e0b96e98e508020faf, type: 3}
+    - {fileID: 21300000, guid: 88956c87ee74e836abac0227e901fa90, type: 3}
+    - {fileID: 21300000, guid: a320fe34e9c8f4257bfe846200022175, type: 3}
+    - {fileID: 21300000, guid: a0607dc627c52d24886368328900255e, type: 3}
+    - {fileID: 21300000, guid: e6da1613cf65081e2bc02a3fe5481868, type: 3}
+    - {fileID: 21300000, guid: d3347bab125d36953a3814ab18348603, type: 3}
+    - {fileID: 21300000, guid: e1139d98645fed69e9c3d6bf890041ce, type: 3}
+    - {fileID: 21300000, guid: 5cd850ca6c9201dc6b57b0f5f8ea7531, type: 3}
+    animationGifData:
+      delayToStart: 0.3
+      frameRate: 20
+      endAnimationTime: 50
+      loop: 0
 --- !u!1 &5828599598335731669
 GameObject:
   m_ObjectHideFlags: 0
