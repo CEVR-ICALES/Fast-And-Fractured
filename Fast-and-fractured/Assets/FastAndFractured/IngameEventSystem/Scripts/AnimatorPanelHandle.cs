@@ -32,10 +32,12 @@ public class AnimatorPanelHandle : MonoBehaviour
         {
 
          GameObject tutorialPanel = GameObject.FindGameObjectWithTag(TUTORIAL_TAG);
+         if(tutorialPanel==null)
+         return;
          tutorialPanel.TryGetComponent(out tutorialImage);
          tutorialPanel.TryGetComponent(out fadeOut);   
         }
-        if(animationsGif==Array.Empty<AnimationGif>()||animationsGif==null){
+        if(animationsGif.Length == 0||animationsGif==null){
         Debug.LogWarning("Couldn't show how to play panel. Check if tutorial panel or tutorial images are not null or empty");
         return;
         }
@@ -65,34 +67,34 @@ public class AnimatorPanelHandle : MonoBehaviour
         _currentAnimationGifData = _currentAnimationGif.GetAnimationData();
         if(_currentAnimationGifData==null||_currentAnimationGif.CheckIfArrayIsEmptyOrNull())
         return;
-        tutorialImage.enabled = true;
         TimerSystem.Instance.CreateTimer(_currentAnimationGifData.DelayToStart, onTimerDecreaseComplete: () =>
         {
+            tutorialImage.enabled = true;
         if(!_currentAnimationGifData.Loop){
         _endLoopTimer = TimerSystem.Instance.CreateTimer(_currentAnimationGifData.EndAnimationTime, onTimerDecreaseComplete: () =>
         {
           EndAnimationGif();
         });
         }
+        tutorialImage.sprite = _currentAnimationGif.GetCurrentFrame();
         StartAnimationLoopTimer();
         });
     }
 
     private void StartAnimationLoopTimer()
     {
-        tutorialImage.sprite = _currentAnimationGif.GetCurrentFrame();
           _animationLoopTimer = TimerSystem.Instance.CreateTimer(_currentAnimationGifData.GetTimeBetweenFrames(), onTimerDecreaseComplete: () =>
         {   
-            _currentAnimationGif.CountNextFrame();
+           tutorialImage.sprite = _currentAnimationGif.GetNextFrame();
             _frameEnded = true;
         });
     }
 
     public void EndAnimationGif()
     {
-        _animationLoopTimer.StopTimer();
+        _animationLoopTimer?.StopTimer();
         _animationLoopTimer = null;
-        _endLoopTimer.StopTimer();
+        _endLoopTimer?.StopTimer();
         _endLoopTimer = null;
         int nextAnimationGifCount = _animationGifCount+1;
         if(nextAnimationGifCount==animationsGif.Length){
@@ -127,7 +129,7 @@ public class AnimationGif
     }
     public bool CheckIfArrayIsEmptyOrNull()
     {
-        return sprites==null || sprites == Array.Empty<Sprite>();
+        return sprites==null || sprites.Length == 0;
     }
 
     public bool CheckIfIsOutOfRange(int spriteNum)
@@ -149,13 +151,6 @@ public class AnimationGif
         _spriteCount = CheckIfIsOutOfRange(nextSpriteCount) ? nextSpriteCount:0;
         return sprites[_spriteCount];
     }
-
-    public void CountNextFrame()
-    {
-        int nextSpriteCount = _spriteCount +1;
-        _spriteCount = CheckIfIsOutOfRange(nextSpriteCount) ? nextSpriteCount:0;
-    }
-
     public Sprite GetSpecificFrame(int spriteNum)
     {
            if(CheckIfArrayIsEmptyOrNull())
@@ -187,6 +182,6 @@ public class AnimationGifData
 
     public float GetTimeBetweenFrames()
     {
-        return frameRate*Time.deltaTime;
+        return 1f/frameRate;
     }
 }
