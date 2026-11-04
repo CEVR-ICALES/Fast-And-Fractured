@@ -385,10 +385,21 @@ namespace FastAndFractured.Multiplayer
             {
                 ownerPic.BindActions();
             }
+            ReenableUiInput();
 
             // LevelController adds its ReportCharacterDeath listener right after this event: remove it next frame.
             StartCoroutine(RemoveSingleplayerDeathListenersNextFrame());
             
+        }
+
+        private static void ReenableUiInput()
+        {
+            foreach (var module in FindObjectsByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>(FindObjectsSortMode.None))
+            {
+                if (!module.enabled) continue;
+                module.enabled = false;
+                module.enabled = true;
+            }
         }
 
         private System.Collections.IEnumerator RemoveSingleplayerDeathListenersNextFrame()

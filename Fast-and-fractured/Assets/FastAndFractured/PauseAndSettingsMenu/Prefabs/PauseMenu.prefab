@@ -1591,6 +1591,7 @@ GameObject:
   - component: {fileID: 7650979473144045849}
   - component: {fileID: 9043270656138847302}
   - component: {fileID: 2098279075632884128}
+  - component: {fileID: 4896384170447156382}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -1700,19 +1701,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9043270656138847302}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Utilities.Managers.PauseSystem.PauseManager, Assembly-CSharp
-        m_MethodName: ResumeGame
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &7993217053051446485
 GameObject:
   m_ObjectHideFlags: 0
@@ -2072,3 +2061,15 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4896384170447156382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851739351030149215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0fc2cb8d4f5db4488ba02397b2f9bf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Utilities.Managers.PauseSystem.ResumeGameButton
