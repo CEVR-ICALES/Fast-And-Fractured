@@ -15,7 +15,7 @@ namespace StateMachine
             {
                 if (controller.GetBehaviour<AimPushShootTrace>() != null)
                 {
-                    controller.GetBehaviour<AimPushShootTrace>().DrawTrayectory(activateAim);
+                    controller.GetBehaviour<AimPushShootTrace>().DrawTrayectory(activateAim, controller.GetBehaviour<PushShootHandle>().IsOnCooldown());
                 }
             }
         }
