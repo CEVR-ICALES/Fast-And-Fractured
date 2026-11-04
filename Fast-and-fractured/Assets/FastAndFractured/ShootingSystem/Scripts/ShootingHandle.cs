@@ -19,6 +19,7 @@ namespace FastAndFractured
         private Vector3 _velocity;
         private float _range;
         private float _damage;
+        protected GameObject author;
         [SerializeField]
         protected Vector3 directionCenterOffSet;
         protected bool canShoot = true;
@@ -32,6 +33,7 @@ namespace FastAndFractured
                 Debug.LogError("Character " + gameObject.name + " needs a StatsController for  " + name + " Script");
             if(physicsBehaviour == null)
                 Debug.LogError("Character " + gameObject.name + " needs a PhysicsBehaivour for  " + name + " Script");
+            author = physicsBehaviour.gameObject;
         }
 
         protected void ShootBullet(Vector3 velocity, float range)
@@ -43,10 +45,6 @@ namespace FastAndFractured
             if (bullet != null)
             {
                 bullet.transform.position = shootPoint.position;
-                if(bullet.TryGetComponent<PushBulletBehaviour>(out var pushBullet))
-                {
-                   pushBullet.Creator = physicsBehaviour.gameObject;
-                }
                 if (bullet.TryGetComponent<BulletBehaviour>(out var bulletBehaivour))
                 {
                     SetBulletStats(bulletBehaivour);

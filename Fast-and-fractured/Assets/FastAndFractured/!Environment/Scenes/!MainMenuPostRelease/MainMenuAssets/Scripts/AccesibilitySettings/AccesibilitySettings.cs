@@ -51,7 +51,8 @@ namespace FastAndFractured
             _colorblindModeIndex = PlayerPrefs.GetInt(COLORBLIND_INDEX_KEY);
             colorBlindToggle.isOn = _isColorBlindModeOn;
             UpdateColorblindModeText();
-            HandleColorblindButtons();
+            // disabled for now because it breaks how the buttons move with controller, also being able to change the type of colorblind while not enabled does not affect the game
+            // HandleColorblindButtons();
 
             bool isSubtitlesOn = PlayerPrefs.GetInt(SUBTITLES_KEY, 0) == 1;
             subtitlesToggle.isOn = isSubtitlesOn;
@@ -125,7 +126,8 @@ namespace FastAndFractured
             PlayerPrefs.SetInt(COLORBLIND_KEY, isOn ? 1 : 0); // 1 true
             PlayerPrefs.Save();
             NotifyColorblindMode();
-            HandleColorblindButtons();
+            // disabled for now because it breaks how the buttons move with controller, also being able to change the type of colorblind while not enabled does not affect the game
+            // HandleColorblindButtons();
         }
 
         public void NextColorblindMode()
@@ -159,19 +161,20 @@ namespace FastAndFractured
             UpdateColorblindModeText();
         }
 
-        private void HandleColorblindButtons()
-        {
-            if (!_isColorBlindModeOn)
-            {
-                nextColorblindModeButton.enabled = false;
-                previousColorblindModeButton.enabled = false;
-            }
-            else
-            {
-                nextColorblindModeButton.enabled = true;
-                previousColorblindModeButton.enabled = true;
-            }
-        }
+        // disabled for now because it breaks how the buttons move with controller, also being able to change the type of colorblind while not enabled does not affect the game
+        // private void HandleColorblindButtons() 
+        // {
+        //     if (!_isColorBlindModeOn)
+        //     {
+        //         nextColorblindModeButton.enabled = false;
+        //         previousColorblindModeButton.enabled = false;
+        //     }
+        //     else
+        //     {
+        //         nextColorblindModeButton.enabled = true;
+        //         previousColorblindModeButton.enabled = true;
+        //     }
+        // }
 
         public void UpdateColorblindModeText()
         {

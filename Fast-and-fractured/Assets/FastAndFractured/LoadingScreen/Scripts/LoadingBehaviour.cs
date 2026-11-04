@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using Utilities;
 using TMPro;
 using Assets.SimpleLocalization.Scripts;
+
 
 namespace FastAndFractured
 {
@@ -26,13 +29,19 @@ namespace FastAndFractured
         private const float OPERATION_PROGRESS_TARGET = 0.9f;
         private const string LOADING_TIP_TEXT = "Tips.Tip";
         private const string PREVIOUS_GAME_SCENE = "Previous_Scene";
+        private EventSystem eventSystem;
+        private InputSystemUIInputModule inputModule;
 
         void OnEnable()
         {
+            eventSystem = EventSystem.current;
+            inputModule = eventSystem.GetComponent<InputSystemUIInputModule>();
+            inputModule.enabled = false;
             SetRandomBackgroundImage();
         }
         void OnDisable()
         {
+            inputModule.enabled = true;
             if (_timerReference != null)
             {
                 _timerReference.StopTimer();

@@ -69,7 +69,9 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             "<Keyboard>/upArrow",
             "<Keyboard>/downArrow",
             "<Keyboard>/leftArrow",
-            "<Keyboard>/rightArrow"
+            "<Keyboard>/rightArrow",
+            "<Mouse>/leftButton",
+            "<Mouse>/rightButton"
         };
 
         public enum ControlSchemeRestriction

@@ -89,7 +89,6 @@ MonoBehaviour:
   stopSpeedOnHit: 1
   limitRbSpeed: 0
   limitRbSpeedLimit: 1000
-  screenShakeSourceController: {fileID: 0}
   isGrounded: 1
 --- !u!135 &5384367818190901466
 SphereCollider:
@@ -443,6 +442,26 @@ PrefabInstance:
       propertyPath: screenShakeProfile
       value: 
       objectReference: {fileID: 11400000, guid: dc3873adbc8d75f3481f1876fcbb2753, type: 2}
+    - target: {fileID: 8578378583065296405, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
+      propertyPath: factorDistanceEvaluate.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8578378583065296405, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
+      propertyPath: factorDistanceEvaluate.m_Curve.Array.data[0].time
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8578378583065296405, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
+      propertyPath: factorDistanceEvaluate.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8578378583065296405, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
+      propertyPath: factorDistanceEvaluate.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8578378583065296405, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
+      propertyPath: factorDistanceEvaluate.m_Curve.Array.data[1].value
+      value: 0.2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3180497232759831245, guid: 92a4fb0846963726e8ed1f930a319625, type: 3}
     m_RemovedGameObjects: []

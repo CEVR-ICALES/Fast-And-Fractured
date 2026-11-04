@@ -42,7 +42,9 @@ public class GolfBallSpawnHandle : MonoBehaviour
 
     private void StopRelocateTimer(GolfBallBehaviour golfBallBehaviour)
     {
+        if(onCurrentOutOfBounds.ContainsKey(golfBallBehaviour)){
         onCurrentOutOfBounds[golfBallBehaviour].StopTimer();
         onCurrentOutOfBounds.Remove(golfBallBehaviour);
+        }
     }
 }

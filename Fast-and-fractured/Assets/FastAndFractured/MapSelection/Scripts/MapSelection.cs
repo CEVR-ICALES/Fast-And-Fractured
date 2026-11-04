@@ -42,6 +42,10 @@ namespace FastAndFractured
                 var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
                 entry.callback.AddListener((_) => UpdateSelectedMapImage(idx));
                 trigger.triggers.Add(entry);
+
+                var selectEntry = new EventTrigger.Entry { eventID = EventTriggerType.Select };
+                selectEntry.callback.AddListener((_) => UpdateSelectedMapImage(idx));
+                trigger.triggers.Add(selectEntry);
             }
 
             UpdateSelectedMapImage(selectedIndex);

@@ -235,6 +235,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleMinimap"",
+                    ""type"": ""Button"",
+                    ""id"": ""25714570-a528-4777-b984-dcccca7ca5e8"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -556,6 +565,39 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""DebugRemoveUltimateAbilityCooldown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1d075c87-e0a2-4c9b-8780-ffb62a8a515e"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleMinimap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1f2b3c4-5d6e-4f70-8192-a3b4c5d6e7f8"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleMinimap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b2c3d4e5-6f70-4181-92a3-b4c5d6e7f809"",
+                    ""path"": ""<Gamepad>/touchpadButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleMinimap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -733,7 +775,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""f1741046-fda7-43da-ad12-07fdf3680267"",
-                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -744,7 +786,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""4880748b-afa7-4fe7-a87a-f4778fedad65"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -755,7 +797,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""b7cd48dd-8f6e-441a-bab7-8d3b650b50bc"",
-                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -766,7 +808,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1369c782-01f0-4f4f-a784-ece3c5f1c26b"",
-                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -819,6 +861,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_PlayerInputActions_DebugAIChangeState = m_PlayerInputActions.FindAction("DebugAIChangeState", throwIfNotFound: true);
         m_PlayerInputActions_DebugAIResetPosition = m_PlayerInputActions.FindAction("DebugAIResetPosition", throwIfNotFound: true);
         m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown = m_PlayerInputActions.FindAction("DebugRemoveUltimateAbilityCooldown", throwIfNotFound: true);
+        m_PlayerInputActions_ToggleMinimap = m_PlayerInputActions.FindAction("ToggleMinimap", throwIfNotFound: true);
         // MenuInputActions
         m_MenuInputActions = asset.FindActionMap("MenuInputActions", throwIfNotFound: true);
         m_MenuInputActions_GoBack = m_MenuInputActions.FindAction("GoBack", throwIfNotFound: true);
@@ -929,6 +972,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputActions_DebugAIChangeState;
     private readonly InputAction m_PlayerInputActions_DebugAIResetPosition;
     private readonly InputAction m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
+    private readonly InputAction m_PlayerInputActions_ToggleMinimap;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInputActions".
     /// </summary>
@@ -1005,6 +1049,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @DebugRemoveUltimateAbilityCooldown => m_Wrapper.m_PlayerInputActions_DebugRemoveUltimateAbilityCooldown;
         /// <summary>
+        /// Provides access to the underlying input action "PlayerInputActions/ToggleMinimap".
+        /// </summary>
+        public InputAction @ToggleMinimap => m_Wrapper.m_PlayerInputActions_ToggleMinimap;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputActions; }
@@ -1078,6 +1126,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugRemoveUltimateAbilityCooldown.started += instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.performed += instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.canceled += instance.OnDebugRemoveUltimateAbilityCooldown;
+            @ToggleMinimap.started += instance.OnToggleMinimap;
+            @ToggleMinimap.performed += instance.OnToggleMinimap;
+            @ToggleMinimap.canceled += instance.OnToggleMinimap;
         }
 
         /// <summary>
@@ -1137,6 +1188,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @DebugRemoveUltimateAbilityCooldown.started -= instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.performed -= instance.OnDebugRemoveUltimateAbilityCooldown;
             @DebugRemoveUltimateAbilityCooldown.canceled -= instance.OnDebugRemoveUltimateAbilityCooldown;
+            @ToggleMinimap.started -= instance.OnToggleMinimap;
+            @ToggleMinimap.performed -= instance.OnToggleMinimap;
+            @ToggleMinimap.canceled -= instance.OnToggleMinimap;
         }
 
         /// <summary>
@@ -1495,6 +1549,13 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDebugRemoveUltimateAbilityCooldown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleMinimap" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleMinimap(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MenuInputActions" which allows adding and removing callbacks.
