@@ -126,6 +126,19 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateImageUIElement(UIDynamicElementType type, bool isActive,float fadeTime)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element))
+            {
+                if(!element.TryGetComponent(out Image image))
+                    return;
+                if(isActive)
+                    FadeInEffectSprites(image,fadeTime);
+                else
+                    FadeOutEffectSprites(image,fadeTime);
+            }
+        }
+
         public void UpdateUIElement(UIDynamicElementType type, Vector3 position, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector3 scale)
         {
             if(TryGetUIElement(type, out UIDynamicElement element))
@@ -271,6 +284,15 @@ namespace FastAndFractured
                     hudEffect.gameObject.SetActive(false);
                     hudEffect.CrossFadeAlpha(1f, 0f, true);
                 });
+            }
+        }
+
+        private void FadeInEffectSprites(Image hudEffect, float fadeInTime)
+        {
+            if (hudEffect != null)
+            {
+                hudEffect.gameObject.SetActive(true);
+                hudEffect.CrossFadeAlpha(1f, fadeInTime, true);
             }
         }
         #endregion

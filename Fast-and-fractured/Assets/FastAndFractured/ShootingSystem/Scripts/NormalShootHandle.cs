@@ -34,6 +34,8 @@ namespace FastAndFractured
         //Delay before overheat variable starts to dwindle down
         private const float DELAY_BEFORE_COOLING_SHOOT = 2f;
 
+        private const float FADE_SIGHT_HUD_TIME = 0.5f;
+
         private ITimer _overheatTimer;
         private string _delayUntilStartDecreaseTimerId;
         [SerializeField]
@@ -119,12 +121,14 @@ namespace FastAndFractured
         {
             _isOverHeat = true;
             DecreaseOverheatTime();
+            OnOverHeatHUDChanges();
         }
 
         private void OnCoolingComplete()
         {
             _isOverHeat = false;
             _overheatTimer = null;
+            OnCoolingHUDChanges();
         }
 
 
@@ -229,6 +233,16 @@ namespace FastAndFractured
             {
                 particleSystem.Stop();
             }
+        }
+
+        private void OnOverHeatHUDChanges()
+        {
+            HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,false,FADE_SIGHT_HUD_TIME);
+        }
+
+        private void OnCoolingHUDChanges()
+        {
+            HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,true,FADE_SIGHT_HUD_TIME);
         }
 
         private void ChangeCurrentOverHeathVFX(float timeDirection = 1)
