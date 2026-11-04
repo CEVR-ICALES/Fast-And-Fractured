@@ -129,11 +129,11 @@ namespace FastAndFractured
         // MapIntro listens for its own skips.
         private void OnAnyButtonPress(InputControl control)
         {
-            if (_countdownStarted || !(Stage is TimelinePreMatchStep step) || !step.Skippable) return;
+            if (_countdownStarted || !(Stage is PreMatchStep step) || !step.Skippable) return;
             if (Time.unscaledTime - _stageStartTime < SKIP_INPUT_GRACE_SECONDS) return;
             if (control.name == PAUSE_KEY || control.name == PAUSE_BUTTON) return;
             if (PauseManager.HasInstance && PauseManager.Instance.IsGamePaused) return;
-            step.Skip();
+            step.OnSkipPressed();
         }
 
         private void OnDestroy()

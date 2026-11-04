@@ -27,5 +27,7 @@ namespace FastAndFractured
         public abstract void Play(Action onFinished);
         public abstract void Skip();
         public virtual void OnCountdownStarted() { }
+        public virtual bool Skippable => false;
+        public virtual void OnSkipPressed() => Skip();
     }
 }

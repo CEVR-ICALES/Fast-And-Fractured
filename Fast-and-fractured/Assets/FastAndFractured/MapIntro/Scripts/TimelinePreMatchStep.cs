@@ -12,7 +12,7 @@ namespace FastAndFractured
         [Tooltip("Any key skips the step, like the map intro.")]
         [SerializeField] private bool skippable = true;
 
-        public bool Skippable => skippable;
+        public override bool Skippable => skippable;
         public override float Duration => director != null && director.playableAsset != null ? (float)director.playableAsset.duration : 0f;
         public override float Remaining => _playing ? Mathf.Max(0f, Duration - (float)director.time) : 0f;
 
