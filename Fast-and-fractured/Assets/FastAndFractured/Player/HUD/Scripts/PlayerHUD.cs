@@ -10,6 +10,7 @@ namespace FastAndFractured
         [SerializeField] PushShootHandle pushShootHandle;
         [SerializeField] CarMovementController carMovementController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
+        [SerializeField] StatsController statsController;
         private void Awake()
         {
             LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
@@ -32,6 +33,10 @@ namespace FastAndFractured
             {
                 uniqueAbility = GetComponentInChildren<BaseUniqueAbility>();
             }
+            if (!statsController)
+            {
+                statsController = GetComponentInChildren<StatsController>();
+            }
         }
         private void InitUpdateHUDEvents()
         {
@@ -40,6 +45,8 @@ namespace FastAndFractured
             pushShootHandle.onCooldownUpdate?.AddListener(UpdatePushCooldownHUD);
             carMovementController.onDashCooldownUpdate?.AddListener(UpdateDashCooldownHUD);
             uniqueAbility.onCooldownUpdate?.AddListener(UpdateUniqueAbilityCooldownHUD);
+            CharacterData characterData = statsController.CharacterData;
+            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,characterData.Position,characterData.MinAnchor,characterData.MaxAnchor,characterData.Pivot,characterData.Scale);
         }
         private void OnDisable()
         {

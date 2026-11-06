@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Utilities;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using GameKit.Dependencies.Utilities;
 
 namespace FastAndFractured
 {
@@ -125,15 +126,43 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateImageUIElement(UIDynamicElementType type, bool isActive,float fadeTime)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element))
+            {
+                if(!element.TryGetComponent(out Image image))
+                    return;
+                if(isActive)
+                    FadeInEffectSprites(image,fadeTime);
+                else
+                    FadeOutEffectSprites(image,fadeTime);
+            }
+        }
+
+        public void UpdateUIElement(UIDynamicElementType type, Vector3 position, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector3 scale)
+        {
+            if(TryGetUIElement(type, out UIDynamicElement element))
+            {
+                element.gameObject.TryGetComponent<RectTransform>(out var rectTransform);
+                if(rectTransform==null)
+                    return;
+                rectTransform.localPosition = position;
+                rectTransform.anchorMax = maxAnchor;
+                rectTransform.anchorMin = minAnchor;
+                rectTransform.pivot = pivot;
+                rectTransform.localScale = scale;
+            }
+        }
+
         /// <summary>
         /// Updates the specified UI effect with the given sprite.
         /// <para>If timeInscreen is greater than 0, the effect will fade out after the given time.</para>
         /// </summary>
         public void UpdateUIEffect(UIDynamicElementType type, Sprite newSprite, float timeInscreen){
-            GameObject effectGameObj = null;
-            
+            GameObject effectGameObj = null;            
             switch (type)
             {
+
                 case UIDynamicElementType.GOOD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_goodEffects, newSprite);
                     break;
@@ -255,6 +284,15 @@ namespace FastAndFractured
                     hudEffect.gameObject.SetActive(false);
                     hudEffect.CrossFadeAlpha(1f, 0f, true);
                 });
+            }
+        }
+
+        private void FadeInEffectSprites(Image hudEffect, float fadeInTime)
+        {
+            if (hudEffect != null)
+            {
+                hudEffect.gameObject.SetActive(true);
+                hudEffect.CrossFadeAlpha(1f, fadeInTime, true);
             }
         }
         #endregion

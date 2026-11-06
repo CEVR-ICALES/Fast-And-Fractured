@@ -71,11 +71,14 @@ namespace FastAndFractured
         public float ExplosionRadius = 7f;
         public Vector3 ExplosionCenterOffset = Vector3.zero;
 
-        [Header("ShootMovement")]
+        [Header("NormalShoot")]
+
         public float NormalShootSpeed = 100f;
         [Tooltip("Wait time to shoot next bullet")] public float NormalShootCadenceTime = 0.3f;
         public float NormalShootMaxRange = 150f;
         public float NormalShootAngle = 180f;
+        [Header("PushShoot")]
+
         [Tooltip("The angle include from 10� to 89�. 90� will return infinity.")]
         public float PushShootAngle = 40f;
         [Tooltip("The range of the variable calculates the distance between the first point and an hipotetic second point at the same Y position. Lower the angel bigger will be the distance.")]
@@ -87,7 +90,12 @@ namespace FastAndFractured
         public float MineShootAngle = 40;
         public float MineShootRange = 5;
 
-
+        [Header("SightParameters")]
+        public Vector3 Position = new Vector3(0,41.1f,0);
+        public Vector2 MinAnchor = new Vector2(0.5f,0.5f);
+        public Vector2 MaxAnchor = new Vector2(0.5f,0.5f);
+        public Vector2 Pivot = new Vector2(0.5f,0.5f);
+        public Vector3 Scale = new Vector3(1.5f,1.5f,1.5f);
 
         [Header("Cooldowns")]
 

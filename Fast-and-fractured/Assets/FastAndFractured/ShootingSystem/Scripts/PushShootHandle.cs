@@ -139,5 +139,10 @@ namespace FastAndFractured {
             }
         }
 
+        public bool IsOnCooldown()
+        {
+            return !canShoot;
+        }
+
     }
 }
