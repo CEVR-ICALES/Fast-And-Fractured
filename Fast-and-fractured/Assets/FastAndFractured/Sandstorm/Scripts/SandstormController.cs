@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Utilities;
 using Utilities.Managers.PauseSystem;
 using System.Net.NetworkInformation;
-using FastAndFractured.Core;
+using Utilities;
 namespace FastAndFractured
 {
     public class SandstormController : AbstractAutoInitializableMonoBehaviour, IKillCharacters, IPausable
@@ -98,12 +98,15 @@ namespace FastAndFractured
 
         private void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         private void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
         private void Update()
         {
@@ -126,7 +129,7 @@ namespace FastAndFractured
                 possibleAngels[countAngle] = currentAngle;
                 currentAngle += nextAngleFactor;
             }
-            possibleAngels.ShuffleList();
+            possibleAngels.ShuffleList(DeterministicRandom.Instance);
 
             float spawnAngle = possibleAngels[0];
             Quaternion vectorRotation = Quaternion.AngleAxis(spawnAngle, Vector3.up);
@@ -172,7 +175,20 @@ namespace FastAndFractured
             _growthSpeed = (_maxGrowth) / maxGrowthTime;
             IngameEventsManager.Instance.CreateEvent("Events.Sandstorm", 5f);
 
-            minimapSandstormDirection.GetComponent<SandstormDirectionMinimap>().SetSandstormDirection(_direction);
+            // The PlayerHUD (and its minimap arrow) lives on the player now, so maps can no longer
+            // reference the arrow; find it on the local player. Without an arrow the storm still runs.
+            if (minimapSandstormDirection == null) minimapSandstormDirection = FindLocalPlayerMinimapArrow();
+            if (minimapSandstormDirection != null && minimapSandstormDirection.TryGetComponent(out SandstormDirectionMinimap directionArrow))
+                directionArrow.SetSandstormDirection(_direction);
+        }
+
+        private static GameObject FindLocalPlayerMinimapArrow()
+        {
+            GameObject player = LevelController.ExistingInstance != null ? LevelController.ExistingInstance.LocalPlayer : null;
+            SandstormDirectionMinimap arrow = player != null
+                ? player.transform.root.GetComponentInChildren<SandstormDirectionMinimap>(true)
+                : FindFirstObjectByType<SandstormDirectionMinimap>(FindObjectsInactive.Include);
+            return arrow != null ? arrow.gameObject : null;
         }
 
         /// <summary>

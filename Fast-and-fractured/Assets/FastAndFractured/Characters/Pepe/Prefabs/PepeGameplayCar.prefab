@@ -621,8 +621,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: carModel.Array.size
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: 'carModel.Array.data[3]'
+      value: 
+      objectReference: {fileID: 38091424568048606}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: highEnduranceMaxStartSpeed
       value: 1.8
@@ -1589,6 +1593,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 7922916343531115828}
   m_SourcePrefab: {fileID: 100100000, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+--- !u!1 &38091424568048606 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8257880983716890985, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 8223204524156514999}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &259418342896148673 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

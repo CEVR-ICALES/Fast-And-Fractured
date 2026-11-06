@@ -44,18 +44,18 @@ namespace FastAndFractured
         public UnityEvent OnInitialized;
 
         #region Unity Methods
-
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             _eventSystem = EventSystem.current;
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
-        private void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
             // Register all Screens in scene
             RegisterScreens();
             if(_menuScreens.TryGetValue(defaultScreenType, out MenuScreen menuScreen))
@@ -106,56 +106,65 @@ namespace FastAndFractured
             if (_currentScreen != null)
             {
                 _currentScreen.gameObject.SetActive(false);
+                _currentScreen.DeactivateCamera();
             }
             _currentScreen = _menuScreens[screenType];
             _currentScreen.gameObject.SetActive(true);
+            _currentScreen.ActivateCamera();
         }
 
         public void TransitionBetweenScreens(ScreensType nextScreen, float fadeDuration)
         {
+            if (!_menuScreens.TryGetValue(nextScreen, out MenuScreen targetScreen))
+            {
+                Debug.LogWarning($"[MainMenuManager] Screen {nextScreen} not registered.");
+                return;
+            }
+
             if (fadeDuration == -1)
             {
                 if (_currentScreen != null)
+                {
                     _currentScreen.gameObject.SetActive(false);
-                _currentScreen = _menuScreens[nextScreen];
+                    _currentScreen.DeactivateCamera();
+                }
+                _currentScreen = targetScreen;
                 _currentScreen.SetInteractable(true);
                 isCurrentScreenInteractable = true;
                 _currentScreen.gameObject.SetActive(true);
+                _currentScreen.ActivateCamera();
                 LockFocusOnButton();
                 return;
-
             }
+
             _currentScreen.SetInteractable(false);
             isCurrentScreenInteractable = false;
             _fadeOutTimer = TimerSystem.Instance.CreateTimer(fadeDuration,
              onTimerDecreaseComplete: () =>
              {
-                 // when fade out completes, switch screens and start fade in
                  _currentScreen.gameObject.SetActive(false);
-                 _currentScreen = _menuScreens[nextScreen];
+                 _currentScreen.DeactivateCamera();
+                 _currentScreen = targetScreen;
                  _currentScreen.gameObject.SetActive(true);
+                 _currentScreen.ActivateCamera();
                  _currentScreen.SetAlpha(0);
                  _currentScreen.SetInteractable(false);
                  isCurrentScreenInteractable = false;
 
-                 // fade in new screen
                  _fadeInTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
                      onTimerIncreaseComplete: () =>
                      {
-
                          _currentScreen.SetInteractable(true);
                          LockFocusOnButton();
                          isCurrentScreenInteractable = true;
                      },
                      onTimerIncreaseUpdate: (progress) =>
                      {
-
                          _currentScreen.SetAlpha(progress / fadeDuration);
                      });
              },
              onTimerDecreaseUpdate: (progress) =>
              {
-
                  _currentScreen.SetAlpha(progress / fadeDuration);
              });
         }
@@ -194,7 +203,8 @@ namespace FastAndFractured
 
         public void UseBackButton()
         {
-            if (_currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
+            // No screen open (in a match, before Escape opens the pause menu): nothing to go back from.
+            if (_currentScreen != null && _currentScreen.backButton != null && isCurrentScreenInteractable && _currentScreen.backButton.IsActive())
             {
                 _currentScreen.backButton.onClick.Invoke();
             }
@@ -224,7 +234,7 @@ namespace FastAndFractured
         }
         public bool IsInPauseMenu()
         {
-            return _currentScreen.screenType == ScreensType.PAUSE;
+            return _currentScreen != null && _currentScreen.screenType == ScreensType.PAUSE;
         }
         #endregion
     }

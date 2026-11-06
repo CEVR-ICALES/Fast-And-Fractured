@@ -83,14 +83,23 @@ namespace FastAndFractured
 
         private InputDeviceType _currentInputDevice = InputDeviceType.KEYBOARD_MOUSE;
 
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(BindActions);
+            base.Construct();
+            LevelController.Instance.charactersCustomStart.AddListener(BindActions);
         }
 
-        private void BindActions()
+        public void BindActions()
         {
+            // Idempotent by disposal: every car installation calls this, and two live action sets made the ShootingMode
+            // toggle flip twice per press.
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
+
             _inputActions = new PlayerInputAction();
 
             _inputActions.Enable();
@@ -153,11 +162,26 @@ namespace FastAndFractured
                 _inputActions.Disable();
             }
         }
-
-        private void Start()
+        private void OnDestroy()
         {
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
         }
-
+        protected override void Deconstruct()
+        {
+            base.Deconstruct();
+            if (_inputActions != null)
+            {
+                _inputActions.Disable();
+                _inputActions.Dispose();
+                _inputActions = null;
+            }
+        }
+         
         private void Update()
         {
             CheckForInputDeviceChange();
@@ -338,15 +362,23 @@ namespace FastAndFractured
             });
         }
 
+        Action onNormalShootEvent;
+
+        Action onPushShootEvent;
+        internal Action OnNormalShootEvent;
+        internal Action OnPushShootEvent;
+
         private void SetShootType()
         {
             if (_isPushShootMode)
             {
                 _isPushShooting = true;
+                onPushShootEvent?.Invoke();
             }
             else
             {
                 _isShooting = true;
+                onNormalShootEvent?.Invoke();
             }
         }
 

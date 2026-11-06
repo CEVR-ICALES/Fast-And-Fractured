@@ -16,12 +16,17 @@ namespace FastAndFractured
         private const string MARIA_ANTONIA_NAME = "Maria";
         [SerializeField] List<GameObject> visuals;
 
+        /// <summary>
+        /// Optional hook (multiplayer) that credits the unlock and shows the toast; true when it did. Null in singleplayer.
+        /// </summary>
+        public System.Func<GameObject, bool> InteractionRouter;
+
         public void ChangeVisual(string skinToUnlock)
         {
             DisableAllVisuals();
             _skinToUnlock = skinToUnlock;
   
-            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
+            GameObject player = LevelController.Instance.LocalPlayer;
             if (player != null)
             {
                 switch (player.name)
@@ -60,10 +65,14 @@ namespace FastAndFractured
             {
                 if(statsController.IsPlayer)
                 {
-                    PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                    if (InteractionRouter == null || !InteractionRouter(interactionFrom))
+                    {
+                        PlayerPrefs.SetInt(_skinToUnlock, PlayerPrefs.GetInt(_skinToUnlock) + 1);
+                        IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
+                        //If the int of player prefs is 5, skin is unlocked
+                    }
                     InteractableHandler.Instance.DestroySkinInteractable(gameObject);
-                    IngameEventsManager.Instance.CreateEvent("Events.SkinUnlock", 2f);
-                    //If the int of player prefs is 5, skin is unlocked
+                    base.OnInteract(interactionFrom, interactionTo);
                 }
             }
         }

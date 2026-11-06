@@ -45,8 +45,6 @@ namespace FastAndFractured
         [SerializeField]
         private float _overHeathMinEmissionRate = 0;
         private float _overHeathEmissionRateXTime;
-        [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
         #endregion
 
         #region UNITY_EVENTS
@@ -64,10 +62,13 @@ namespace FastAndFractured
 
         #region OVERRIDE_METHODS
 
-        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
+        // The turret's serialized collider is ignored by its bullets; otherwise the base uses the parent's collider.
+        protected override BulletSpawnParameters PopulateBaseSpawnParameters(Vector3 velocity, float range)
         {
-            base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaviour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+            var spawnParams = base.PopulateBaseSpawnParameters(velocity, range);
+            if (ignoredCollider != null)
+                spawnParams.IgnoredCollider = ignoredCollider;
+            return spawnParams;
         }
 
         #endregion
@@ -77,6 +78,8 @@ namespace FastAndFractured
         {
             ignoredCollider = collider;
         }
+
+        [SerializeField] private ScreenShakeSourceController screenShakeSourceController;
 
         public void NormalShooting()
         {
@@ -101,6 +104,7 @@ namespace FastAndFractured
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
+                // The shooting screen shake is played by the state machine (AplyScreenShakeAction).
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
 
                 canShoot = false;

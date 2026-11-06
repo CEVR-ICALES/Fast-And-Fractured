@@ -29,12 +29,15 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void Update()
@@ -50,13 +53,13 @@ namespace FastAndFractured
             }
             else
             {
-                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                ObjectPoolManager.Instance.DeactivatePooledObject(this, gameObject);
             }
         }
         void OnTriggerEnter(Collider other)
         {
             //si el objetivo es el player quitara la alerta, independientemente de si a colisionado con otro objeto
-            if(objective == LevelControllerButBetter.Instance.LocalPlayer)
+            if(objective == LevelController.Instance.LocalPlayer)
             {
                 IngameEventsManager.Instance.RemoveAlert();
             }
@@ -68,7 +71,7 @@ namespace FastAndFractured
                 {
                     if(!otherCarImpactHandler.HandleIfTomatoEffect())
                     {
-                        ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                        ObjectPoolManager.Instance.DeactivatePooledObject(this, gameObject);
 
                     } else
                     {
@@ -79,7 +82,7 @@ namespace FastAndFractured
         }
         private void EffectOnCharacter(Collider other)
         {
-            if (other.gameObject == LevelControllerButBetter.Instance.LocalPlayer)
+            if (other.gameObject == LevelController.Instance.LocalPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);
             }
@@ -90,7 +93,7 @@ namespace FastAndFractured
                 //todo efect on IA
             }
             
-            ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+            ObjectPoolManager.Instance.DeactivatePooledObject(this, gameObject);
         }
 
         public void OnPause()

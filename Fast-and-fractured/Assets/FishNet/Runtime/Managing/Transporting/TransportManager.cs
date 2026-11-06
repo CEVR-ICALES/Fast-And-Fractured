@@ -9,8 +9,10 @@ using FishNet.Transporting;
 using FishNet.Transporting.Multipass;
 using System;
 using System.Collections.Generic;
+using FishNet.Managing.Statistic;
 using GameKit.Dependencies.Utilities;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FishNet.Managing.Transporting
 {
@@ -39,7 +41,7 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Returns if an IntermediateLayer is in use.
         /// </summary>
-        public bool HasIntermediateLayer => (_intermediateLayer != null);
+        public bool HasIntermediateLayer => _intermediateLayer != null;
         /// <summary>
         /// Called before IterateOutgoing has started.
         /// </summary>
@@ -65,13 +67,19 @@ namespace FishNet.Managing.Transporting
 
         #region Serialized.
         /// <summary>
+        /// The maximum amount of bytes of any combined packet that a client may send.  
+        /// </summary>
+        public uint MaximumClientPacketSize => _maximumClientPacketSize;
+        [Tooltip("The maximum amount of bytes of any combined packet that a client may send.")]
+        [SerializeField]
+        private uint _maximumClientPacketSize = 20480;
+        /// <summary>
         /// Layer used to modify data before it is sent or received.
         /// </summary>
         [Tooltip("Layer used to modify data before it is sent or received.")]
         [SerializeField]
         private IntermediateLayer _intermediateLayer;
         /// <summary>
-        /// 
         /// </summary>
         [Tooltip("Latency simulation settings.")]
         [SerializeField]
@@ -83,7 +91,7 @@ namespace FishNet.Managing.Transporting
         {
             get
             {
-                //Shouldn't ever be null unless the user nullifies it.
+                // Shouldn't ever be null unless the user nullifies it.
                 if (_latencySimulator == null)
                     _latencySimulator = new();
                 return _latencySimulator;
@@ -120,6 +128,13 @@ namespace FishNet.Managing.Transporting
         /// Custom amount to reserve on the MTU.
         /// </summary>
         private int _customMtuReserve = MINIMUM_MTU_RESERVE;
+        /// <summary>
+        /// </summary>
+        private NetworkTrafficStatistics _networkTrafficStatistics;
+        /// <summary>
+        /// Maximum size which each segment of a split message can be.
+        /// </summary>
+        private int _maximumSplitPacketSegmentLength => GetLowestMTU(SPLIT_PACKET_CHANNELID) - SPLIT_PACKET_HEADER_LENGTH - UNPACKED_TICK_LENGTH;
         #endregion
 
         #region Consts.
@@ -148,9 +163,9 @@ namespace FishNet.Managing.Transporting
         /// </summary>
         private const byte SPLIT_COUNT_LENGTH = 4;
         /// <summary>
-        /// Number of bytes required for split data. 
-        /// </summary> //todo: This shouldn't have to include TickBytes but there is a parse error if it's not included. Figure out why.
-        public const byte SPLIT_INDICATOR_LENGTH = (UNPACKED_TICK_LENGTH + PACKETID_LENGTH + SPLIT_COUNT_LENGTH);
+        /// Number of bytes required for split data.
+        /// </summary>
+        public const byte SPLIT_PACKET_HEADER_LENGTH = PACKETID_LENGTH + SPLIT_COUNT_LENGTH;
         /// <summary>
         /// Number of channels supported.
         /// </summary>
@@ -164,6 +179,22 @@ namespace FishNet.Managing.Transporting
         /// Value to use when a MTU could not be found.
         /// </summary>
         public const int INVALID_MTU = -1;
+        /// <summary>
+        /// A split message was not required, the value can be sent normally.
+        /// </summary>
+        private const int SPLIT_NOT_REQUIRED_VALUE = 0;
+        /// <summary>
+        /// A message was sent split.
+        /// </summary>
+        private const int SPLIT_SENT_VALUE = 1;
+        /// <summary>
+        /// An error occurred while trying to split a message.
+        /// </summary>
+        private const int SPLIT_ERROR_VALUE = 2;
+        /// <summary>
+        /// ChannelId to use for split packets.
+        /// </summary>
+        private const byte SPLIT_PACKET_CHANNELID = (byte)Channel.Reliable;
         #endregion
 
         /// <summary>
@@ -177,14 +208,16 @@ namespace FishNet.Managing.Transporting
             SetLowestMTUs();
             InitializeToServerBundles();
 
+            manager.StatisticsManager.TryGetNetworkTrafficStatistics(out _networkTrafficStatistics);
+
             manager.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
             manager.ClientManager.OnClientConnectionState += ClientManager_OnClientConnectionState;
 
             if (_intermediateLayer != null)
                 _intermediateLayer.InitializeOnce(this);
-#if DEVELOPMENT
+            #if DEVELOPMENT
             _latencySimulator.Initialize(manager, Transport);
-#endif
+            #endif
         }
 
         /// <summary>
@@ -192,7 +225,7 @@ namespace FishNet.Managing.Transporting
         /// </summary>
         private void SetLowestMTUs()
         {
-            //Already set.
+            // Already set.
             if (_lowestMtu != 0)
                 return;
 
@@ -202,7 +235,7 @@ namespace FishNet.Managing.Transporting
             TryAddDefaultTransport();
 
             int allLowest = int.MaxValue;
-            //Cache lowest Mtus.
+            // Cache lowest Mtus.
             _lowestMtus = new int[CHANNEL_COUNT];
             for (byte i = 0; i < CHANNEL_COUNT; i++)
             {
@@ -240,11 +273,11 @@ namespace FishNet.Managing.Transporting
         /// </summary>
         private void ClientManager_OnClientConnectionState(ClientConnectionStateArgs obj)
         {
-            //Not stopped.
+            // Not stopped.
             if (obj.ConnectionState != LocalConnectionState.Stopped)
                 return;
 
-            //Reset toServer data.
+            // Reset toServer data.
             foreach (PacketBundle pb in _toServerBundles)
                 pb.Reset(resetSendLast: true);
         }
@@ -254,106 +287,51 @@ namespace FishNet.Managing.Transporting
         /// </summary>
         private void ServerManager_OnServerConnectionState(ServerConnectionStateArgs obj)
         {
-            //Not stopped.
+            // Not stopped.
             if (obj.ConnectionState != LocalConnectionState.Stopped)
                 return;
 
-            //If no server is started just clear all dirtyToClients.
+            // If no server is started just clear all dirtyToClients.
             if (!_networkManager.ServerManager.IsAnyServerStarted())
             {
                 _dirtyToClients.Clear();
+                _disconnectingClients.Clear();
+
                 return;
             }
 
-            //Only one server is stopped, remove connections for that server.
+            // Only one server is stopped, remove connections for that server.
             int index = obj.TransportIndex;
 
-            List<NetworkConnection> clientsForIndex = CollectionCaches<NetworkConnection>.RetrieveList();
-            foreach (NetworkConnection conn in _dirtyToClients)
+            //Remove any disconnecting clients for the stopped transport.
+            for (int i = 0; i < _disconnectingClients.Count; i++)
             {
-                if (conn.TransportIndex == index)
-                    clientsForIndex.Add(conn);
+                DisconnectingClient dc = _disconnectingClients[i];
+
+                if (dc.Connection == null || dc.Connection.TransportIndex == index)
+                {
+                    _disconnectingClients.RemoveAt(i);
+                    i--;
+                }
             }
 
-            foreach (NetworkConnection conn in clientsForIndex)
-                _dirtyToClients.Remove(conn);
+            //Remove any dirty connection indicators for the transport.
+            for (int i = 0; i < _dirtyToClients.Count; i++)
+            {
+                NetworkConnection connection = _dirtyToClients[i];
 
-            CollectionCaches<NetworkConnection>.Store(clientsForIndex);
+                if (connection == null || connection.TransportIndex == index)
+                {
+                    _dirtyToClients.RemoveAt(i);
+                    i--;
+                }
+            }
         }
-
-        ///// <summary>
-        ///// Gets port for the first transport, or client transport if using Multipass.
-        ///// </summary>
-        //private ushort GetPort(bool asServer)
-        //{
-        //    if (Transport is Multipass mp)
-        //    {
-        //        if (asServer)
-        //            return mp.Transports[0].GetPort();
-        //        else
-        //            return mp.ClientTransport.GetPort();
-        //    }
-        //    else
-        //    {
-        //        return Transport.GetPort();
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Stops the local server or client connection.
-        ///// </summary>
-        //internal bool StopConnection(bool asServer)
-        //{
-        //    return Transport.StopConnection(asServer);
-        //}
-
-        ///// <summary>
-        ///// Starts the local server or client connection.
-        ///// </summary>
-        //internal bool StartConnection(bool asServer)
-        //{
-        //    return Transport.StartConnection(asServer);
-        //}
-
-        ///// <summary>
-        ///// Starts the local server or client connection.
-        ///// </summary>
-        //internal bool StartConnection(string address, bool asServer)
-        //{
-        //    return StartConnection(address, GetPort(asServer), asServer);
-        //}
-
-        ///// <summary>
-        ///// Starts the local server or client connection on the first transport or ClientTransport if using Multipass and as client.
-        ///// </summary>
-        //internal bool StartConnection(string address, ushort port, bool asServer)
-        //{
-        //    Transport t;
-        //    if (Transport is Multipass mp)
-        //    {
-        //        if (asServer)
-        //            t = mp.Transports[0];
-        //        else
-        //            t = mp.ClientTransport;
-        //    }
-        //    else
-        //    {
-        //        t = Transport;
-        //    }
-
-        //    /* SetServerBindAddress must be called explictly. Only
-        //     * set address if for client. */
-        //    if (!asServer)
-        //        t.SetClientAddress(address);
-        //    t.SetPort(port);
-
-        //    return t.StartConnection(asServer);
-        //}
 
         /// <summary>
         /// Sets a connection from server to client dirty.
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name = "conn"></param>
         internal void ServerDirty(NetworkConnection conn)
         {
             _dirtyToClients.Add(conn);
@@ -378,15 +356,15 @@ namespace FishNet.Managing.Transporting
         #region GetMTU.
         /// <summary>
         /// Returns MTU excluding reserve amount.
-        /// </summary> 
+        /// </summary>
         private int GetMTUWithReserve(int mtu)
         {
-            int value = (mtu - MINIMUM_MTU_RESERVE - _customMtuReserve);
+            int value = mtu - MINIMUM_MTU_RESERVE - _customMtuReserve;
             /* If MTU is extremely low then warn user.
              * The number choosen has no significant value. */
             if (value <= 100)
             {
-                string msg = $"Available MTU of {mtu} is significantly low; an invalid MTU will be returned. Check transport settings, or reduce MTU reserve if you set one using {nameof(TransportManager.SetMTUReserve)}";
+                string msg = $"Available MTU of {mtu} is significantly low; an invalid MTU will be returned. Check transport settings, or reduce MTU reserve if you set one using {nameof(SetMTUReserve)}";
                 _networkManager.LogWarning(msg);
 
                 return INVALID_MTU;
@@ -399,10 +377,10 @@ namespace FishNet.Managing.Transporting
         /// Sets a custom value to reserve for the internal buffers.
         /// This value is also deducted from transport MTU when using GetMTU methods.
         /// </summary>
-        /// <param name="value">Value to use.</param>
+        /// <param name = "value">Value to use.</param>
         public void SetMTUReserve(int value)
         {
-            if (_networkManager != null && _networkManager.IsClientStarted || _networkManager.IsServerStarted)
+            if ((_networkManager != null && _networkManager.IsClientStarted) || _networkManager.IsServerStarted)
             {
                 _networkManager.LogError($"A custom MTU reserve cannot be set after the server or client have been started or connected.");
                 return;
@@ -427,7 +405,7 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Returns the lowest MTU of all channels. When using multipass this will evaluate all transports within Multipass.
         /// </summary>
-        /// <param name="channel"></param>
+        /// <param name = "channel"></param>
         /// <returns></returns>
         public int GetLowestMTU()
         {
@@ -438,22 +416,24 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Returns the lowest MTU for a channel. When using multipass this will evaluate all transports within Multipass.
         /// </summary>
-        /// <param name="channel"></param>
+        /// <param name = "channel"></param>
         /// <returns></returns>
         public int GetLowestMTU(byte channel)
         {
             SetLowestMTUs();
+
             return GetMTUWithReserve(_lowestMtus[channel]);
         }
 
         /// <summary>
         /// Gets MTU on the current transport for channel.
         /// </summary>
-        /// <param name="channel">Channel to get MTU of.</param>
+        /// <param name = "channel">Channel to get MTU of.</param>
         /// <returns></returns>
         public int GetMTU(byte channel)
         {
             SetLowestMTUs();
+
             int mtu = Transport.GetMTU(channel);
             if (mtu == INVALID_MTU)
                 return mtu;
@@ -464,8 +444,8 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Gets MTU on the transportIndex for channel. This requires use of Multipass.
         /// </summary>
-        /// <param name="transportIndex">Index of the transport to get the MTU on.</param>
-        /// <param name="channel">Channel to get MTU of.</param>
+        /// <param name = "transportIndex">Index of the transport to get the MTU on.</param>
+        /// <param name = "channel">Channel to get MTU of.</param>
         /// <returns></returns>
         public int GetMTU(int transportIndex, byte channel)
         {
@@ -477,24 +457,25 @@ namespace FishNet.Managing.Transporting
 
                 return GetMTUWithReserve(mtu);
             }
-            //Using first/only transport.
-            else if (transportIndex == 0)
-            {
+            // Using first/only transport.
+            if (transportIndex == 0)
                 return GetMTU(channel);
-            }
-            //Unhandled.
-            else
-            {
-                _networkManager.LogWarning($"MTU cannot be returned with transportIndex because {typeof(Multipass).Name} is not in use.");
-                return -1;
-            }
+
+            // Unhandled.
+            _networkManager.LogWarning($"MTU cannot be returned with transportIndex because {typeof(Multipass).Name} is not in use.");
+            return -1;
         }
+
+        /// <summary>
+        /// Returns Channel.Reliable if data length is over MTU for the provided channel.
+        /// </summary>
+        public Channel GetReliableChannelIfOverMTU(int dataLength, Channel currentChannel) => dataLength > GetMTU((byte)currentChannel) ? Channel.Reliable : currentChannel;
 
         /// <summary>
         /// Gets MTU on the transport type for channel. This requires use of Multipass.
         /// </summary>
-        /// <typeparam name="T">Tyep of transport to use.</typeparam>
-        /// <param name="channel">Channel to get MTU of.</param>
+        /// <typeparam name = "T">Tyep of transport to use.</typeparam>
+        /// <param name = "channel">Channel to get MTU of.</param>
         /// <returns></returns>
         public int GetMTU<T>(byte channel) where T : Transport
         {
@@ -508,7 +489,7 @@ namespace FishNet.Managing.Transporting
                 return GetMTUWithReserve(mtu);
             }
 
-            //Fall through.
+            // Fall through.
             return INVALID_MTU;
         }
         #endregion
@@ -532,42 +513,27 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Sends data to a client.
         /// </summary>
-        /// <param name="channelId">Channel to send on.</param>
-        /// <param name="segment">Data to send.</param>
-        /// <param name="connection">Connection to send to. Use null for all clients.</param>
-        /// <param name="splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
-        internal void SendToClient(byte channelId, ArraySegment<byte> segment, NetworkConnection connection, bool splitLargeMessages = true, DataOrderType orderType = DataOrderType.Default)
+        /// <param name = "channelId">Channel to send on.</param>
+        /// <param name = "segment">Data to send.</param>
+        /// <param name = "connection">Connection to send to. Use null for all clients.</param>
+        /// <param name = "splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
+        internal void SendToClient(byte channelId, ArraySegment<byte> segment, NetworkConnection connection, DataOrderType orderType = DataOrderType.Default)
         {
-            SetSplitValues(channelId, segment, splitLargeMessages, out int requiredMessages, out int maxSplitMessageSize);
-            SendToClient(channelId, segment, connection, requiredMessages, maxSplitMessageSize, orderType);
-        }
+            channelId = GetFallbackChannelIdAsNeeded(channelId);
 
-        private void SendToClient(byte channelId, ArraySegment<byte> segment, NetworkConnection connection, int requiredSplitMessages, int maxSplitMessageSize, DataOrderType orderType = DataOrderType.Default)
-        {
-            if (connection == null)
-                return;
-
-            if (requiredSplitMessages > 1)
-                SendSplitData(connection, ref segment, requiredSplitMessages, maxSplitMessageSize, orderType);
-            else
-                connection.SendToClient(channelId, segment, false, orderType);
+            if (SendSplitMessage(connection, channelId, segment, orderType) == SPLIT_NOT_REQUIRED_VALUE)
+                connection.SendToClient(channelId, segment, forceNewBuffer: false, orderType);
         }
 
         /// <summary>
         /// Sends data to observers.
         /// </summary>
-        internal void SendToClients(byte channelId, ArraySegment<byte> segment, HashSet<NetworkConnection> observers, HashSet<NetworkConnection> excludedConnections = null, bool splitLargeMessages = true, DataOrderType orderType = DataOrderType.Default)
-        {
-            SetSplitValues(channelId, segment, splitLargeMessages, out int requiredMessages, out int maxSplitMessageSize);
-            SendToClients(channelId, segment, observers, excludedConnections, requiredMessages, maxSplitMessageSize, orderType);
-        }
-
-        private void SendToClients(byte channelId, ArraySegment<byte> segment, HashSet<NetworkConnection> observers, HashSet<NetworkConnection> excludedConnections, int requiredSplitMessages, int maxSplitMessageSize, DataOrderType orderType = DataOrderType.Default)
+        internal void SendToClients(byte channelId, ArraySegment<byte> segment, HashSet<NetworkConnection> observers, HashSet<NetworkConnection> excludedConnections = null, DataOrderType orderType = DataOrderType.Default)
         {
             if (excludedConnections == null || excludedConnections.Count == 0)
             {
                 foreach (NetworkConnection conn in observers)
-                    SendToClient(channelId, segment, conn, requiredSplitMessages, maxSplitMessageSize, orderType);
+                    SendToClient(channelId, segment, conn, orderType);
             }
             else
             {
@@ -575,7 +541,8 @@ namespace FishNet.Managing.Transporting
                 {
                     if (excludedConnections.Contains(conn))
                         continue;
-                    SendToClient(channelId, segment, conn, requiredSplitMessages, maxSplitMessageSize, orderType);
+
+                    SendToClient(channelId, segment, conn, orderType);
                 }
             }
         }
@@ -583,161 +550,100 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Sends data to all clients.
         /// </summary>
-        /// <param name="channelId">Channel to send on.</param>
-        /// <param name="segment">Data to send.</param>
-        /// <param name="splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
-        internal void SendToClients(byte channelId, ArraySegment<byte> segment, bool splitLargeMessages = true)
-        {
-            SetSplitValues(channelId, segment, splitLargeMessages, out int requiredMessages, out int maxSplitMessageSize);
-            SendToClients_Internal(channelId, segment, requiredMessages, maxSplitMessageSize);
-        }
-
-        private void SendToClients_Internal(byte channelId, ArraySegment<byte> segment, int requiredSplitMessages, int maxSplitMessageSize)
+        /// <param name = "channelId">Channel to send on.</param>
+        /// <param name = "segment">Data to send.</param>
+        /// <param name = "splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
+        internal void SendToClients(byte channelId, ArraySegment<byte> segment)
         {
             /* Rather than buffer the message once and send to every client
              * it must be queued into every client. This ensures clients
              * receive the message in order of other packets being
              * delivered to them. */
             foreach (NetworkConnection conn in _networkManager.ServerManager.Clients.Values)
-                SendToClient(channelId, segment, conn, requiredSplitMessages, maxSplitMessageSize);
+                SendToClient(channelId, segment, conn);
         }
 
         /// <summary>
         /// Sends data to the server.
         /// </summary>
-        /// <param name="channelId">Channel to send on.</param>
-        /// <param name="segment">Data to send.</param>
-        /// <param name="splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
-        internal void SendToServer(byte channelId, ArraySegment<byte> segment, bool splitLargeMessages = true, DataOrderType orderType = DataOrderType.Default)
+        /// <param name = "channelId">Channel to send on.</param>
+        /// <param name = "segment">Data to send.</param>
+        /// <param name = "splitLargeMessages">True to split large packets which exceed MTU and send them in order on the reliable channel.</param>
+        internal void SendToServer(byte channelId, ArraySegment<byte> segment, DataOrderType orderType = DataOrderType.Default)
         {
-            SetSplitValues(channelId, segment, splitLargeMessages, out int requiredMessages, out int maxSplitMessageSize);
-            SendToServer(channelId, segment, requiredMessages, maxSplitMessageSize, orderType);
-        }
+            channelId = GetFallbackChannelIdAsNeeded(channelId);
 
-        private void SendToServer(byte channelId, ArraySegment<byte> segment, int requiredMessages, int maxSplitMessageSize, DataOrderType orderType)
-        {
-            if (channelId >= _toServerBundles.Count)
-                channelId = (byte)Channel.Reliable;
-
-            if (requiredMessages > 1)
-                SendSplitData(null, ref segment, requiredMessages, maxSplitMessageSize, orderType);
-            else
-                _toServerBundles[channelId].Write(segment, false, orderType);
-        }
-
-        #region Splitting.
-        /// <summary>
-        /// Checks if a message can be split and outputs split information if so.
-        /// </summary>
-        private void SetSplitValues(byte channelId, ArraySegment<byte> segment, bool split, out int requiredMessages, out int maxSplitMessageSize)
-        {
-            if (!split)
-            {
-                requiredMessages = 0;
-                maxSplitMessageSize = 0;
-            }
-            else
-            {
-                SplitRequired(channelId, segment.Count, out requiredMessages, out maxSplitMessageSize);
-            }
+            if (SendSplitMessage(conn: null, channelId, segment, orderType) == SPLIT_NOT_REQUIRED_VALUE)
+                _toServerBundles[channelId].Write(segment, forceNewBuffer: false, orderType);
         }
 
         /// <summary>
-        /// Checks to set channel to reliable if dataLength is too long.
+        /// Gets the channelId to use, returning a fallback Id if the provided channelId is not supported.
         /// </summary>
-        internal void CheckSetReliableChannel(int dataLength, ref Channel channel)
-        {
-            if (channel == Channel.Reliable)
-                return;
-
-            bool requiresMultipleMessages = (GetRequiredMessageCount((byte)channel, dataLength, out _) > 1);
-            if (requiresMultipleMessages)
-                channel = Channel.Reliable;
-        }
-
-        /// <summary>
-        /// Gets the required number of messages needed for segmentSize and channel.
-        /// </summary>
-        private int GetRequiredMessageCount(byte channelId, int segmentSize, out int maxMessageSize)
-        {
-            maxMessageSize = GetLowestMTU(channelId) - SPLIT_INDICATOR_LENGTH;
-            return Mathf.CeilToInt((float)segmentSize / maxMessageSize);
-        }
-
-        /// <summary>
-        /// True if data must be split.
-        /// </summary>
-        /// <param name="channelId"></param>
-        /// <param name="segmentSize"></param>
-        private bool SplitRequired(byte channelId, int segmentSize, out int requiredMessages, out int maxMessageSize)
-        {
-            requiredMessages = GetRequiredMessageCount(channelId, segmentSize, out maxMessageSize);
-
-            bool splitRequired = (requiredMessages > 1);
-            if (splitRequired && channelId != (byte)Channel.Reliable)
-                _networkManager.LogError($"A message of length {segmentSize} requires the reliable channel but was sent on channel {(Channel)channelId}. Please file this stack trace as a bug report.");
-
-            return splitRequired;
-        }
+        private byte GetFallbackChannelIdAsNeeded(byte channelId) => channelId > _toServerBundles.Count ? (byte)Channel.Reliable : channelId;
 
         /// <summary>
         /// Splits data going to which is too large to fit within the transport MTU.
         /// </summary>
-        /// <param name="conn">Connection to send to. If null data will be sent to the server.</param>
+        /// <param name = "conn">Connection to send to. If null data will be sent to the server.</param>
         /// <returns>True if data was sent split.</returns>
-        private void SendSplitData(NetworkConnection conn, ref ArraySegment<byte> segment, int requiredMessages, int maxMessageSize, DataOrderType orderType)
+        private int SendSplitMessage(NetworkConnection conn, byte channelId, ArraySegment<byte> segment, DataOrderType orderType)
         {
-            if (requiredMessages <= 1)
+            int lowestMTU = GetLowestMTU(channelId);
+            int segmentCount = segment.Count;
+
+            //Splitting is not required.
+            if (segmentCount <= lowestMTU)
+                //0 indicates no split required.
+                return SPLIT_NOT_REQUIRED_VALUE;
+
+            int maximumSegmentLength = _maximumSplitPacketSegmentLength;
+            int messageCount = (int)Math.Ceiling((double)segmentCount / maximumSegmentLength);
+
+            /* If going to the server and value exceeds the
+             * maximum segment size then the data cannot be sent. */
+            if (conn == null && messageCount * maximumSegmentLength > _maximumClientPacketSize)
             {
-                _networkManager.LogError($"SendSplitData was called with {requiredMessages} required messages. This method should only be called if messages must be split into 2 pieces or more.");
-                return;
+                _networkManager.LogError($"A packet of length {segmentCount} cannot be sent because it exceeds the maximum packet size allowed by a client of {_maximumClientPacketSize}.");
+                return SPLIT_ERROR_VALUE;
             }
 
-            byte channelId = (byte)Channel.Reliable;
-            PooledWriter headerWriter = WriterPool.Retrieve();
-            headerWriter.WritePacketIdUnpacked(PacketId.Split);
-            headerWriter.WriteInt32(requiredMessages);
-            ArraySegment<byte> headerSegment = headerWriter.GetArraySegment();
+            //Writer used to write the header and segment of each split message.
+            PooledWriter splitWriter = WriterPool.Retrieve();
 
-            int writeIndex = 0;
-            bool firstWrite = true;
-            //Send to connection until everything is written.
-            while (writeIndex < segment.Count)
+            //Channel is forced to reliable for split messages.
+            channelId = SPLIT_PACKET_CHANNELID;
+
+            for (int i = 0; i < messageCount; i++)
             {
-                int headerReduction = 0;
-                if (firstWrite)
-                {
-                    headerReduction = headerSegment.Count;
-                    firstWrite = false;
-                }
-                int chunkSize = Mathf.Min(segment.Count - writeIndex - headerReduction, maxMessageSize);
-                //Make a new array segment for the chunk that is getting split.
-                ArraySegment<byte> splitSegment = new(segment.Array, segment.Offset + writeIndex, chunkSize);
+                splitWriter.WritePacketIdUnpacked(PacketId.Split);
+                splitWriter.WriteInt32(messageCount);
 
-                //If connection is specified then it's going to a client.
+                int startPosition = i * maximumSegmentLength;
+
+                int chunkSize = Mathf.Min(segment.Count - startPosition, maximumSegmentLength);
+                ArraySegment<byte> splitSegment = new(segment.Array, segment.Offset + startPosition, chunkSize);
+                splitWriter.WriteArraySegment(splitSegment);
+
+                // If connection is specified then it's going to a client.
                 if (conn != null)
-                {
-                    conn.SendToClient(channelId, headerSegment, true);
-                    conn.SendToClient(channelId, splitSegment);
-                }
-                //Otherwise it's going to the server.
+                    conn.SendToClient(channelId, splitWriter.GetArraySegment());
+                // Otherwise it's going to the server.
                 else
-                {
-                    _toServerBundles[channelId].Write(headerSegment, true, orderType);
-                    _toServerBundles[channelId].Write(splitSegment, false, orderType);
-                }
+                    _toServerBundles[channelId].Write(splitWriter.GetArraySegment(), forceNewBuffer: false, orderType);
 
-                writeIndex += chunkSize;
+                splitWriter.Clear();
             }
 
-            headerWriter.Store();
+            WriterPool.Store(splitWriter);
+
+            return SPLIT_SENT_VALUE;
         }
-        #endregion
 
         /// <summary>
         /// Processes data received by the socket.
         /// </summary>
-        /// <param name="asServer">True to read data from clients, false to read data from the server.
+        /// <param name = "asServer">True to read data from clients, false to read data from the server.
         internal void IterateIncoming(bool asServer)
         {
             OnIterateIncomingStart?.Invoke(asServer);
@@ -748,7 +654,7 @@ namespace FishNet.Managing.Transporting
         /// <summary>
         /// Processes data to be sent by the socket.
         /// </summary>
-        /// <param name="asServer">True to send data from the local server to clients, false to send from the local client to server.
+        /// <param name = "asServer">True to send data from the local server to clients, false to send from the local client to server.
         internal void IterateOutgoing(bool asServer)
         {
             if (asServer && _networkManager.ServerManager.AreAllServersStopped())
@@ -757,32 +663,32 @@ namespace FishNet.Managing.Transporting
             OnIterateOutgoingStart?.Invoke();
             int channelCount = CHANNEL_COUNT;
             ulong sentBytes = 0;
-#if DEVELOPMENT
+            #if DEVELOPMENT
             bool latencySimulatorEnabled = LatencySimulator.CanSimulate;
-#endif
+            #endif
             if (asServer)
                 SendAsServer();
             else
                 SendAsClient();
 
-            //Sends data as server.
+            // Sends data as server.
             void SendAsServer()
             {
                 TimeManager tm = _networkManager.TimeManager;
                 uint localTick = tm.LocalTick;
-                //Write any dirty syncTypes.
+                // Write any dirty syncTypes.
                 _networkManager.ServerManager.Objects.WriteDirtySyncTypes();
 
                 int dirtyCount = _dirtyToClients.Count;
 
-                //Run through all dirty connections to send data to.
+                // Run through all dirty connections to send data to.
                 for (int z = 0; z < dirtyCount; z++)
                 {
                     NetworkConnection conn = _dirtyToClients[z];
                     if (conn == null || !conn.IsValid)
                         continue;
 
-                    //Get packets for every channel.
+                    // Get packets for every channel.
                     for (byte channel = 0; channel < channelCount; channel++)
                     {
                         if (conn.GetPacketBundle(channel, out PacketBundle pb))
@@ -794,17 +700,17 @@ namespace FishNet.Managing.Transporting
                             {
                                 for (int i = 0; i < ppb.WrittenBuffers; i++)
                                 {
-                                    //Length should always be more than 0 but check to be safe.
+                                    // Length should always be more than 0 but check to be safe.
                                     if (ppb.GetBuffer(i, out ByteBuffer bb))
                                     {
                                         ArraySegment<byte> segment = new(bb.Data, 0, bb.Length);
                                         if (HasIntermediateLayer)
                                             segment = ProcessIntermediateOutgoing(segment, false);
-#if DEVELOPMENT
+                                        #if DEVELOPMENT
                                         if (latencySimulatorEnabled)
                                             _latencySimulator.AddOutgoing(channel, segment, false, conn.ClientId);
                                         else
-#endif
+                                            #endif
                                             Transport.SendToClient(channel, segment, conn.ClientId);
                                         sentBytes += (ulong)segment.Count;
                                     }
@@ -835,7 +741,7 @@ namespace FishNet.Managing.Transporting
                     conn.ResetServerDirty();
                 }
 
-                //Iterate disconnects.
+                // Iterate disconnects.
                 for (int i = 0; i < _disconnectingClients.Count; i++)
                 {
                     DisconnectingClient dc = _disconnectingClients[i];
@@ -847,7 +753,8 @@ namespace FishNet.Managing.Transporting
                     }
                 }
 
-                _networkManager.StatisticsManager.NetworkTraffic.LocalServerSentData(sentBytes);
+                if (_networkTrafficStatistics != null)
+                    _networkTrafficStatistics.AddOutboundSocketData(sentBytes, asServer: true);
 
                 if (dirtyCount == _dirtyToClients.Count)
                     _dirtyToClients.Clear();
@@ -855,7 +762,7 @@ namespace FishNet.Managing.Transporting
                     _dirtyToClients.RemoveRange(0, dirtyCount);
             }
 
-            //Sends data as client.
+            // Sends data as client.
             void SendAsClient()
             {
                 for (byte channel = 0; channel < channelCount; channel++)
@@ -874,11 +781,11 @@ namespace FishNet.Managing.Transporting
                                     ArraySegment<byte> segment = new(bb.Data, 0, bb.Length);
                                     if (HasIntermediateLayer)
                                         segment = ProcessIntermediateOutgoing(segment, true);
-#if DEVELOPMENT
+                                    #if DEVELOPMENT
                                     if (latencySimulatorEnabled)
                                         _latencySimulator.AddOutgoing(channel, segment);
                                     else
-#endif
+                                        #endif
                                         Transport.SendToServer(channel, segment);
                                     sentBytes += (ulong)segment.Count;
                                 }
@@ -889,20 +796,21 @@ namespace FishNet.Managing.Transporting
                     }
                 }
 
-                _networkManager.StatisticsManager.NetworkTraffic.LocalClientSentData(sentBytes);
+                if (_networkTrafficStatistics != null)
+                    _networkTrafficStatistics.AddOutboundSocketData(sentBytes, asServer: false);
             }
 
-#if DEVELOPMENT
+            #if DEVELOPMENT
             if (latencySimulatorEnabled)
                 _latencySimulator.IterateOutgoing(asServer);
-#endif
+            #endif
 
             Transport.IterateOutgoing(asServer);
             OnIterateOutgoingEnd?.Invoke();
         }
 
         #region Editor.
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private void OnValidate()
         {
             if (Transport == null)
@@ -915,7 +823,7 @@ namespace FishNet.Managing.Transporting
              * will happen. */
             _latencySimulator.SetEnabled(_latencySimulator.GetEnabled());
         }
-#endif
+        #endif
         #endregion
     }
 }

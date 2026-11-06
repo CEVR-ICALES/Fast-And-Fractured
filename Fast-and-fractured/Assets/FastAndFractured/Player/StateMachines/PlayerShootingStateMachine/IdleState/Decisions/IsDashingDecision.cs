@@ -10,7 +10,7 @@ namespace StateMachine
         {
             PlayerInputController playerInputController = controller.GetBehaviour<PlayerInputController>();
             CarMovementController carMovementController = controller.GetBehaviour<CarMovementController>();
-            return playerInputController.IsDashing && carMovementController.CanDash;
+            return playerInputController.IsDashing && (carMovementController.CanDash || carMovementController.IsDashing);
         }
     }
 }

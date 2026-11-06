@@ -212,6 +212,16 @@ namespace FastAndFractured
             PlayerInputController.OnInputDeviceChanged -= OnDeviceChangedNotifyed;
         }
 
+        private void OnDestroy()
+        {
+            if (_playerActions != null)
+            {
+                _playerActions.Disable();
+                _playerActions.Dispose();
+                _playerActions = null;
+            }
+        }
+
         private void Start()
         {
             _currentDevice = InputDeviceType.KEYBOARD_MOUSE;

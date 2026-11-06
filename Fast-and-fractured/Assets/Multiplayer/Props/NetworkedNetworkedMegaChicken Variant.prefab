@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &2505092281063785235
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 75463480103687001, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: <PrefabId>k__BackingField
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 75463480103687001, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: NetworkBehaviours.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 75463480103687001, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: <AssetPathHash>k__BackingField
+      value: 4987276425563075930
+      objectReference: {fileID: 0}
+    - target: {fileID: 75463480103687001, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: 'NetworkBehaviours.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2764070566931870493}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5057713512036382403, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5583138664917986425, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      propertyPath: m_Name
+      value: NetworkedNetworkedMegaChicken Variant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5583138664917986425, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2764070566931870493}
+  m_SourcePrefab: {fileID: 100100000, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+--- !u!114 &2580555485081571402 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 75463480103687001, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+  m_PrefabInstance: {fileID: 2505092281063785235}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8050372491078414186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+--- !u!1 &8050372491078414186 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5583138664917986425, guid: 58217edb9ab90f140a4971943c08e5e2, type: 3}
+  m_PrefabInstance: {fileID: 2505092281063785235}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2764070566931870493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8050372491078414186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f98c8ea008594b44a84efb4c0d67bb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedMegaChickenBoss
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 2580555485081571402}
+  _networkObjectCache: {fileID: 2580555485081571402}

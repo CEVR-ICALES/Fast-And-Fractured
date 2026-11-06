@@ -14,13 +14,12 @@ namespace FishNet.Serializing.Helping
         private Writer _writer;
         private int _startPosition;
         private byte _reservedBytes;
-
         /// <summary>
         /// Number of bytes currently written.
         /// </summary>
         public int Length
         {
-            get { return (_writer == null) ? 0 : (_writer.Position - _startPosition); }
+            get { return _writer == null ? 0 : _writer.Position - _startPosition; }
         }
 
         public void Initialize(Writer writer, byte reservedBytes)
@@ -56,7 +55,7 @@ namespace FishNet.Serializing.Helping
 
             ResetState();
 
-            return (written > 0);
+            return written > 0;
         }
 
         /// <summary>
@@ -77,11 +76,8 @@ namespace FishNet.Serializing.Helping
                     _writer.InsertUInt32Unpacked((uint)written, _startPosition - _reservedBytes);
                     break;
                 default:
-                    string errorMsg = $"Reserved bytes value of {_reservedBytes} is unhandled.";
-                    if (_writer != null)
-                        _writer.NetworkManager.LogError(errorMsg);
-                    else
-                        NetworkManagerExtensions.LogError(errorMsg);
+                    NetworkManager nm = _writer == null ? null : _writer.NetworkManager;
+                    nm.LogError($"Reserved bytes value of {_reservedBytes} is unhandled.");
                     break;
             }
 
@@ -94,8 +90,8 @@ namespace FishNet.Serializing.Helping
         /// </summary>
         public bool WriteLengthOrRemove()
         {
-            //Insert written amount.
-            int written = (_writer.Position - _startPosition);
+            // Insert written amount.
+            int written = _writer.Position - _startPosition;
 
             if (written == 0)
                 _writer.Remove(_reservedBytes);
@@ -104,13 +100,13 @@ namespace FishNet.Serializing.Helping
 
             ResetState();
 
-            return (written > 0);
+            return written > 0;
         }
 
         /// <summary>
         /// Returns a length read based on a reserved byte count.
         /// </summary>
-        /// <param name="resetPosition">True to reset to position before read.</param>
+        /// <param name = "resetPosition">True to reset to position before read.</param>
         public static uint ReadLength(PooledReader reader, byte reservedBytes, bool resetPosition = false)
         {
             uint result;
@@ -126,11 +122,8 @@ namespace FishNet.Serializing.Helping
                     result = reader.ReadUInt32Unpacked();
                     break;
                 default:
-                    string errorMsg = $"Reserved bytes value of {reservedBytes} is unhandled.";
-                    if (reader != null)
-                        reader.NetworkManager.LogError(errorMsg);
-                    else
-                        NetworkManagerExtensions.LogError(errorMsg);
+                    NetworkManager nm = reader == null ? null : reader.NetworkManager;
+                    nm.LogError($"Reserved bytes value of {reservedBytes} is unhandled.");
                     return 0;
             }
 

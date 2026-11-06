@@ -30,12 +30,15 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         private void FixedUpdate()

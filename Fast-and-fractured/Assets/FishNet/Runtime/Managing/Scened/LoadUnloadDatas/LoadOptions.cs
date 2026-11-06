@@ -34,6 +34,4 @@ namespace FishNet.Managing.Scened
         /// </summary>
         public bool Addressables;
     }
-
-
 }

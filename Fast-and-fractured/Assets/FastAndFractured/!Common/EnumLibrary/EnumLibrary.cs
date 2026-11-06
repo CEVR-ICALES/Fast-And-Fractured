@@ -65,7 +65,20 @@ namespace Enums
         WIN_LOSE,
         HOW_TO_PLAY,
         MAP_SELECTION,
-        DELETE_DATA_POPUP
+        MULTIPLAYER_HUB,
+        MULTIPLAYER_HOST_SETUP,
+        MULTIPLAYER_BROWSER,
+        MULTIPLAYER_DIRECT_JOIN,
+        LOBBY_ROOM,
+        LOBBY_MAP_VOTE,
+        // Added on dev at the same position as the multiplayer screens; kept last so both
+        // serialized values stay valid (DeleteConfirm / SettingsMenu prefabs were moved to 18).
+        DELETE_DATA_POPUP,
+        // Main menu restructure (MainMenuPlayModesTool): Play → Singleplayer / Multiplayer, plus
+        // the progression and accessories screens. Appended so serialized values stay valid.
+        PLAY_MODE_SELECTION,
+        PROGRESSION,
+        ACCESSORIES
     }
 
     public enum Pooltype
@@ -84,7 +97,19 @@ namespace Enums
         PUSH_BULLET_MELON,
         NORMAL_BULLET_CROQUETA,
         PUSH_BULLET_SARTENAZO,
-        MEGA_CHICKEN_EGG
+        MEGA_CHICKEN_EGG,
+		
+		
+		
+		
+		
+		
+		
+		
+        COSMETIC_NORMAL_BULLET_GOLF,
+        COSMETIC_PUSH_BULLET_GOLF,
+        COSMETIC_NORMAL_BULLET_TOMATO,
+        COSMETIC_PUSH_BULLET_TOMATO
     }
 
     public enum PathMode
