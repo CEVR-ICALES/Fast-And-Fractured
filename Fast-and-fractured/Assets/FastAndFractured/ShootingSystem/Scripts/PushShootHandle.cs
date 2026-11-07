@@ -131,5 +131,10 @@ namespace FastAndFractured
                 TimerSystem.Instance.ModifyTimer(_pushShootCooldown, speedMultiplier: newTimerSpeed);
             }
         }
+
+        public bool IsOnCooldown()
+        {
+            return !canShoot;
+        }
     }
 }

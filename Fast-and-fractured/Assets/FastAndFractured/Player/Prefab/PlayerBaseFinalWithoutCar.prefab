@@ -231,6 +231,7 @@ MonoBehaviour:
   pushShootHandle: {fileID: 0}
   carMovementController: {fileID: 0}
   uniqueAbility: {fileID: 0}
+  statsController: {fileID: 0}
 --- !u!114 &3679666603489496442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -451,6 +452,8 @@ MonoBehaviour:
   tolerance: 0.25
   magnitudeDiferenceFactorBetweenColisionPoints: 1.5
   hitMark: {fileID: 1414713137637181422}
+  activeMatColor: {r: 0.03529412, g: 1, b: 0.85490197, a: 0.62352943}
+  notActiveColor: {r: 1, g: 0.07058824, b: 0, a: 0.34901962}
   layerMasksForHitMark:
   - serializedVersion: 2
     m_Bits: 8
@@ -2684,15 +2687,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1990155140326921304, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 11.664463
+      value: -6.536276
       objectReference: {fileID: 0}
     - target: {fileID: 1990155140326921304, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 22.601274
+      value: 35.55406
       objectReference: {fileID: 0}
     - target: {fileID: 1990155140326921304, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 21.470438
+      value: -18.673178
       objectReference: {fileID: 0}
     - target: {fileID: 1990155140326921304, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2740,35 +2743,47 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.23742501
+      value: 0.8701884
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.07487484
+      value: 0.4641694
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.92367333
+      value: 0.14583424
       objectReference: {fileID: 0}
     - target: {fileID: 2121852596404305225, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.29129153
+      value: -0.07778981
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.23910455
+      value: 0.88076574
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.06932351
+      value: 0.44377124
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9302085
+      value: 0.14760691
       objectReference: {fileID: 0}
     - target: {fileID: 2127451642633396453, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.26969504
+      value: -0.07437132
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300864749303516214, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_XAxis.Value
+      value: 19.027489
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300864749303516214, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.y
+      value: 29.894064
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300864749303516214, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.z
+      value: -20.048588
       objectReference: {fileID: 0}
     - target: {fileID: 2506882354399734611, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_XAxis.Value
@@ -2812,19 +2827,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.24064563
+      value: 0.8908223
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.06375905
+      value: 0.42322186
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.93621355
+      value: 0.14929238
       objectReference: {fileID: 0}
     - target: {fileID: 2932810444949245926, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.24804975
+      value: -0.0709275
       objectReference: {fileID: 0}
     - target: {fileID: 4742470576089822462, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_XAxis.Value
@@ -2853,6 +2868,18 @@ PrefabInstance:
     - target: {fileID: 5039598445622808153, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: ReactionSettings.m_NoiseOffsets.z
       value: 769.16785
+      objectReference: {fileID: 0}
+    - target: {fileID: 5059965293092546560, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_XAxis.Value
+      value: 19.027489
+      objectReference: {fileID: 0}
+    - target: {fileID: 5059965293092546560, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.y
+      value: 29.894064
+      objectReference: {fileID: 0}
+    - target: {fileID: 5059965293092546560, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.z
+      value: -20.048588
       objectReference: {fileID: 0}
     - target: {fileID: 5133628448549618136, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_Name
@@ -2886,6 +2913,18 @@ PrefabInstance:
       propertyPath: m_Lens.m_SensorSize.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7339667493306098018, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_XAxis.Value
+      value: 19.027489
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339667493306098018, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.y
+      value: 29.894064
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339667493306098018, guid: 55a9455bff2445845a50df2159436297, type: 3}
+      propertyPath: m_FollowOffset.z
+      value: -20.048588
+      objectReference: {fileID: 0}
     - target: {fileID: 7412337874091992427, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: _cinemachineImpulseChanels
       value: 
@@ -2900,11 +2939,11 @@ PrefabInstance:
       objectReference: {fileID: 3085982174626725679}
     - target: {fileID: 9110617478394333511, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_XAxis.Value
-      value: -151.16902
+      value: 19.027489
       objectReference: {fileID: 0}
     - target: {fileID: 9110617478394333511, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_YAxis.Value
-      value: 0.7526303
+      value: 0.99658656
       objectReference: {fileID: 0}
     - target: {fileID: 9110617478394333511, guid: 55a9455bff2445845a50df2159436297, type: 3}
       propertyPath: m_YAxis.m_InputAxisValue

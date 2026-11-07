@@ -34,6 +34,8 @@ namespace FastAndFractured
         //Delay before overheat variable starts to dwindle down
         private const float DELAY_BEFORE_COOLING_SHOOT = 2f;
 
+        private const float FADE_SIGHT_HUD_TIME = 0.5f;
+
         private ITimer _overheatTimer;
         private string _delayUntilStartDecreaseTimerId;
         [SerializeField]
@@ -123,12 +125,14 @@ namespace FastAndFractured
         {
             _isOverHeat = true;
             DecreaseOverheatTime();
+            OnOverHeatHUDChanges();
         }
 
         private void OnCoolingComplete()
         {
             _isOverHeat = false;
             _overheatTimer = null;
+            OnCoolingHUDChanges();
         }
 
 
@@ -233,6 +237,21 @@ namespace FastAndFractured
             {
                 particleSystem.Stop();
             }
+        }
+
+        private void OnOverHeatHUDChanges() => UpdateSightHud(false);
+
+        private void OnCoolingHUDChanges() => UpdateSightHud(true);
+
+        private void UpdateSightHud(bool isVisible)
+        {
+            var hud = HUDManager.ExistingInstance;
+            var level = LevelController.ExistingInstance;
+            if (hud == null || level == null || characterStatsController == null) return;
+            var localPlayer = level.LocalPlayer;
+            if (localPlayer == null) return;
+            if (characterStatsController.gameObject != localPlayer && !characterStatsController.transform.IsChildOf(localPlayer.transform)) return;
+            hud.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, isVisible, FADE_SIGHT_HUD_TIME);
         }
 
         private void ChangeCurrentOverHeathVFX(float timeDirection = 1)

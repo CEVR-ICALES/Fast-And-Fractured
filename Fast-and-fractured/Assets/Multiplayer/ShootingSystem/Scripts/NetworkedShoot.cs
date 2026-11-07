@@ -182,7 +182,7 @@ namespace FastAndFractured.Multiplayer
 
             if (!base.IsOwner && _pushShootAimTrace != null)
             {
-                _pushShootAimTrace.DrawTrayectory(false);
+                _pushShootAimTrace.DrawTrayectory(draw: false, isOnCooldown: false);
             }
         }
 
@@ -617,7 +617,7 @@ namespace FastAndFractured.Multiplayer
                 return;
 
             bool shouldDraw = _showPushAimOnRemoteClients && pushShootMode;
-            _pushShootAimTrace.DrawTrayectory(shouldDraw);
+            _pushShootAimTrace.DrawTrayectory(shouldDraw, isOnCooldown: _pushShootHandle != null && _pushShootHandle.IsOnCooldown());
         }
         #endregion
     }
