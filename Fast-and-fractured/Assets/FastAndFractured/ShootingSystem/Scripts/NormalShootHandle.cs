@@ -121,14 +121,14 @@ namespace FastAndFractured
         {
             _isOverHeat = true;
             DecreaseOverheatTime();
-            OnOverHeatHUDChanges();
+            FadeOutSightHUD();
         }
 
         private void OnCoolingComplete()
         {
             _isOverHeat = false;
             _overheatTimer = null;
-            OnCoolingHUDChanges();
+            FadeInSightHUD();
         }
 
 
@@ -235,13 +235,32 @@ namespace FastAndFractured
             }
         }
 
-        private void OnOverHeatHUDChanges()
+        public void HandleExternalFadeSightUI(bool toggle)
         {
+            if (_isOverHeat)
+                return;
+
+            if (toggle)
+            {
+                FadeInSightHUD();
+            }
+            else
+            {
+                FadeOutSightHUD();
+            }
+        }
+
+        private void FadeOutSightHUD()
+        {
+            if (!characterStatsController.IsPlayer)
+                return;
             HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,false,FADE_SIGHT_HUD_TIME);
         }
 
-        private void OnCoolingHUDChanges()
+        private void FadeInSightHUD()
         {
+            if (!characterStatsController.IsPlayer)
+                return;
             HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,true,FADE_SIGHT_HUD_TIME);
         }
 
