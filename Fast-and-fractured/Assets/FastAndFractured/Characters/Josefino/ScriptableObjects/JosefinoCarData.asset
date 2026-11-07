@@ -16,7 +16,7 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   MaxEndurance: 1200
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 155
   MaxSpeedDashing: 230
   MaxSpeedAscend: 135
@@ -58,9 +58,14 @@ MonoBehaviour:
   PushShootRange: 15
   PushShootGravityMultiplier: 30
   PushShootBounceNum: 2
-  PushShootBounceForce: 50
+  PushShootBounceForce: 80
   MineShootAngle: 40
   MineShootRange: 10
+  Position: {x: 0, y: 41.1, z: 0}
+  MinAnchor: {x: 0.5, y: 0.5}
+  MaxAnchor: {x: 0.5, y: 0.5}
+  Pivot: {x: 0.5, y: 0.5}
+  Scale: {x: 1.5, y: 1.5, z: 1.5}
   DashCooldown: 4
   PushShootCooldown: 6
   MineExplosionTime: 5
