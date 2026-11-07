@@ -97,7 +97,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""017e8e69-ccd5-4d28-b82c-187068865d4f"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0
@@ -107,7 +107,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""2f11717d-ef60-4557-bdaa-c65a52510283"",
                     ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
+                    ""processors"": ""AxisDeadzone"",
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0
@@ -117,7 +117,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""38a23e7d-4f3d-4eda-bf26-222fccc54458"",
                     ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
+                    ""processors"": ""AxisDeadzone"",
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0
@@ -147,7 +147,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""a8e50b16-4e0f-41f4-8335-eb73eb98a9cc"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0

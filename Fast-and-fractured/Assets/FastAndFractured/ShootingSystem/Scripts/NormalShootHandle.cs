@@ -125,14 +125,14 @@ namespace FastAndFractured
         {
             _isOverHeat = true;
             DecreaseOverheatTime();
-            OnOverHeatHUDChanges();
+            FadeOutSightHUD();
         }
 
         private void OnCoolingComplete()
         {
             _isOverHeat = false;
             _overheatTimer = null;
-            OnCoolingHUDChanges();
+            FadeInSightHUD();
         }
 
 
@@ -239,9 +239,15 @@ namespace FastAndFractured
             }
         }
 
-        private void OnOverHeatHUDChanges() => UpdateSightHud(false);
+        public void HandleExternalFadeSightUI(bool toggle)
+        {
+            if (_isOverHeat) return;
+            UpdateSightHud(toggle);
+        }
 
-        private void OnCoolingHUDChanges() => UpdateSightHud(true);
+        private void FadeOutSightHUD() => UpdateSightHud(false);
+
+        private void FadeInSightHUD() => UpdateSightHud(true);
 
         private void UpdateSightHud(bool isVisible)
         {

@@ -32,6 +32,8 @@ namespace FastAndFractured
 
         private const int LAYER_COMMON = 1;
         private const int INIT_CHARACTER_COUNT = 1;
+
+        private const float RESET_CAMERA_POSITION_TIME = 2f;
         protected override void Initialize()
         {
             base.Initialize();
@@ -51,6 +53,7 @@ namespace FastAndFractured
             _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
             _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
             PauseManager.TryRegisterPausable(this);
+            ResetCameraPosition();
         }
 
         void OnDisable()
@@ -108,7 +111,7 @@ namespace FastAndFractured
                 freeLookCamera.m_RecenterToTargetHeading.m_enabled = true;
                 _inputController.IsResettingCamera = true;
 
-                TimerSystem.Instance.CreateTimer(3f, onTimerDecreaseComplete: () =>
+                TimerSystem.Instance.CreateTimer(RESET_CAMERA_POSITION_TIME, onTimerDecreaseComplete: () =>
                 {
                     freeLookCamera.m_YAxisRecentering.m_enabled = false;
                     freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;
