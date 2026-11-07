@@ -166,6 +166,8 @@ namespace FastAndFractured
             fogParent.transform.rotation = targetRotation;
             fogParent.transform.LookAt(_mirrorPoint);
             _stormCollider.enabled = true;
+            if (!TryGetComponent<SandstormAudioController>(out var audio)) audio = gameObject.AddComponent<SandstormAudioController>();
+            audio.Begin(_stormCollider);
             if (primaryFog != null)
             {
                 _initialVolumeSizeMain = primaryFog.transform.position;

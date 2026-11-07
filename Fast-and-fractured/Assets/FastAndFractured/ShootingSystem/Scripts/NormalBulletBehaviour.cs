@@ -40,6 +40,7 @@ namespace FastAndFractured
                 {
                     return;
                 }
+                GameplayAudio.Play(GameAudioCues.CommonShieldImpact, transform.position);
                 Vector3 contactPoint = other.ClosestPoint(transform.position);
                 Vector3 normal = (contactPoint - other.transform.position).normalized;
                 Vector3 incomingDirection = rb.linearVelocity.normalized;
@@ -54,6 +55,7 @@ namespace FastAndFractured
             }
             else if (other.TryGetComponent<StatsController>(out var statsController))
             {
+                GameplayAudio.Play(GameAudioCues.CommonCharacterBulletImpact, transform.position);
                 statsController.TakeEndurance(damage, false, _ignoreCollider.gameObject);
                 if (_ignoreCollider != null && _ignoreCollider.TryGetComponent<StatsController>(out var ownerStatsController))
                 {
@@ -62,7 +64,10 @@ namespace FastAndFractured
                 OnBulletEndTrayectory();
             }
             else
+            {
+                GameplayAudio.Play(GameAudioCues.CommonWorldBulletImpact, transform.position);
                 OnBulletEndTrayectory();
+            }
         }
         protected override void OnBulletEndTrayectory()
         {

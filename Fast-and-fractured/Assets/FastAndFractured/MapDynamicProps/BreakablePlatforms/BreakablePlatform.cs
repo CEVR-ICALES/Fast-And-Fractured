@@ -49,6 +49,8 @@ public class BreakablePlatform : MonoBehaviour
             // Store entry time
             if (breakTimeTimer == null)
             {
+                    if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+                        GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
                     breakTimeTimer = TimerSystem.Instance.CreateTimer(breakTime, onTimerDecreaseComplete: () =>
                     {
                         BreakPlatform();
@@ -101,6 +103,8 @@ public class BreakablePlatform : MonoBehaviour
 
     private void BreakPlatform()
     {
+        if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+            GameplayAudio.Play(GameAudioCues.CommonPlatformSplinter, transform.position);
         isBreaking = true;
         _platformFaces[_platformIndex - 1].enabled = false;
         _platformFaces[_platformIndex].enabled = true;
@@ -109,6 +113,8 @@ public class BreakablePlatform : MonoBehaviour
 
     private void SemiBreakPlatform()
     {
+        if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+            GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
         _platformIndex++;
         _platformFaces[_platformIndex-1].enabled = false;
         _platformFaces[_platformIndex].enabled = true;

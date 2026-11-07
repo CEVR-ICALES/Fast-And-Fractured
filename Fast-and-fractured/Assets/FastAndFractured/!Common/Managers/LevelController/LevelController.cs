@@ -82,6 +82,7 @@ namespace FastAndFractured
             base.Construct();
             _charactersData = charactersDataScriptableObject.listOfCharactersData;
             InitializeHandlers();
+            if (!TryGetComponent<MapAudioZones>(out _)) gameObject.AddComponent<MapAudioZones>();
             //Provisional For Debug 
             if (debugMode)
             {

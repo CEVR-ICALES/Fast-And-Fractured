@@ -75,8 +75,15 @@ namespace FastAndFractured.Multiplayer
                 StopBreakTimers();
         }
 
+        [ObserversRpc]
+        private void RpcPlayContact()
+        {
+            GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
+        }
+
         private void StartBreakTimers()
         {
+            RpcPlayContact();
             float breakTime  = _breakTimeField   != null ? (float)_breakTimeField.GetValue(_wrapped)   : DEFAULT_BREAK_TIME;
             float semiPct    = _semiBreakPctField != null ? (float)_semiBreakPctField.GetValue(_wrapped) : DEFAULT_SEMI_BREAK_FRACTION;
 
@@ -100,19 +107,21 @@ namespace FastAndFractured.Multiplayer
         }
 
         [ObserversRpc(RunLocally = true)]
-        private void RpcSemiBreak()
+        private void RpcSemiBreak(bool playAudio = true)
         {
             if (_wrapped == null || _stage >= 1) return;
             _stage = 1;
+            if (playAudio) GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
             _semiBreakMethod?.Invoke(_wrapped, null);
         }
 
         [ObserversRpc(RunLocally = true)]
-        private void RpcBreak()
+        private void RpcBreak(bool playAudio = true)
         {
             _isBreaking = true;
             if (_wrapped == null || _stage >= 2) return;
             _stage = 2;
+            if (playAudio) GameplayAudio.Play(GameAudioCues.CommonPlatformSplinter, transform.position);
             _isBreakingField?.SetValue(_wrapped, true);
             _breakMethod?.Invoke(_wrapped, null);
         }
@@ -150,8 +159,8 @@ namespace FastAndFractured.Multiplayer
                 var platform = list[i];
                 if (!platform.IsServerInitialized) continue;
                 // The singleplayer break expects the crack first.
-                if (stages[i] >= 1) platform.RpcSemiBreak();
-                if (stages[i] >= 2) platform.RpcBreak();
+                if (stages[i] >= 1) platform.RpcSemiBreak(false);
+                if (stages[i] >= 2) platform.RpcBreak(false);
             }
         }
     }

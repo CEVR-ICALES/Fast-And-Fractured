@@ -174,6 +174,9 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         private void OnHitRpc(Vector3 hitPosition)
         {
+            var audioSettings = AudioPresentationProfile.Load().Abilities;
+            GameplayAudio.Play(GameAudioCues.SpecialAbilityEventsTomatoImpactSFX, hitPosition, audioSettings.TomatoImpactVolume);
+            GameplayAudio.Play(GameAudioCues.CommonTomatoSplat, hitPosition, audioSettings.TomatoSplatVolume);
             var particles = GetComponentsInChildren<ParticleSystem>();
             foreach (var ps in particles)
             {

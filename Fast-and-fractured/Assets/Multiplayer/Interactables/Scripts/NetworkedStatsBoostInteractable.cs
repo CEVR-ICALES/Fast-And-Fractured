@@ -27,13 +27,15 @@ namespace FastAndFractured.Multiplayer
             NetworkObject nob = interactionFrom.GetComponentInParent<NetworkObject>(true);
             if (nob == null || nob.Owner == null || !nob.Owner.IsValid) return false;
 
-            TargetShowPickupEvent(nob.Owner, Wrapped.ingameEventText, Wrapped.ingameEventTimeOnScreen);
+            TargetShowPickupEvent(nob.Owner, nob, Wrapped.ingameEventText, Wrapped.ingameEventTimeOnScreen);
             return true;
         }
 
         [TargetRpc]
-        private void TargetShowPickupEvent(NetworkConnection connection, string text, float timeOnScreen)
+        private void TargetShowPickupEvent(NetworkConnection connection, NetworkObject collector, string text, float timeOnScreen)
         {
+            if (Wrapped != null && collector != null)
+                Wrapped.PlayPickupAudio(collector.GetComponentInChildren<StatsController>());
             if (!IngameEventsManager.HasInstance) return;
 
             IngameEventsManager.Instance.CreateEvent(text, timeOnScreen);

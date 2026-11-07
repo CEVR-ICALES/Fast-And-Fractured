@@ -86,6 +86,7 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
+            GameplayAudio.Play(GameAudioCues.PhysicsEventsExplosion, transform.position);
             _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset,startHitBoxTime,endHitBoxTime,_author);
             OnBulletEndTrayectory();
         }
@@ -94,6 +95,7 @@ namespace FastAndFractured {
         {
             if (_bouncingNum > _currentBouncingNum)
             {
+                GameplayAudio.Play(GameplayAudio.BounceCue(pooltype), transform.position);
                 _currentBouncingNum++;
                 _currentBounceStrenght = _bounceStrenght * (1f - (_currentBouncingNum / _bouncingNum));
                 var newDirection = collision.GetContact(0).normal * _currentBounceStrenght;

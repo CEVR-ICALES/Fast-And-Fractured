@@ -98,6 +98,7 @@ namespace FastAndFractured.Multiplayer
         /// <summary>The area the singleplayer AscendingTomatoBehaviour draws: it is removed here, so nothing else sizes the decal.</summary>
         private void ShowArea()
         {
+            GameplayAudio.Play(GameAudioCues.SpecialAbilityEventsTomatoLaunchSFX, _originPosition, AudioPresentationProfile.Load().Abilities.TomatoLaunchVolume);
             _areaFading = false;
             if (_areaDecal != null) _areaDecal.SetRadius(_effectDistance);
         }

@@ -58,6 +58,7 @@ namespace FastAndFractured.Multiplayer
         private bool _useCustomGravity;
         private float _timeToExplode;
         private bool _isMine;
+        private Pooltype _audioPoolType;
 
         // One step per tick; the drawn position is interpolated from the previous tick's (see LateUpdate).
         private Vector3 _simulatedPosition;
@@ -293,6 +294,7 @@ namespace FastAndFractured.Multiplayer
             _currentBounces = 0;
             _timeToExplode = data.TimeToExplode;
             _isMine = data.IsMine;
+            _audioPoolType = data.Pooltype;
             _hasLanded = false;
             _hasEnded = false;
             _serverEndPending = false;
@@ -378,6 +380,7 @@ namespace FastAndFractured.Multiplayer
             switch (ResolveSurfaceHit(ref _currentBounces, _maxBounces, _timeToExplode))
             {
                 case SurfaceHitOutcome.Bounce:
+                    if (base.IsServerInitialized) RpcPlayBounce(contactPosition, _audioPoolType);
                     _simulatedVelocity = BounceVelocity(_simulatedVelocity, hit.normal, _bounceStrength);
                     _simulatedPosition = contactPosition + hit.normal * CONTACT_SKIN;
                     return true;
@@ -469,7 +472,7 @@ namespace FastAndFractured.Multiplayer
             else
             {
                 if (_endHitObject != null) ApplyPointDamage(_endHitObject);
-                RpcSpawnImpactVFX(_endPoint, _endNormal);
+                RpcSpawnImpactVFX(_endPoint, _endNormal, _endHitObject != null, _endHitObject != null && _endHitObject.GetComponentInParent<StatsController>() != null);
             }
 
             InstanceFinder.ServerManager.Despawn(base.NetworkObject, DespawnType.Destroy);
@@ -677,8 +680,15 @@ namespace FastAndFractured.Multiplayer
         private const float VFX_AUTO_DESTROY_TIME = 5f;
 
         [ObserversRpc]
+        private void RpcPlayBounce(Vector3 point, Pooltype type)
+        {
+            GameplayAudio.Play(GameplayAudio.BounceCue(type), point);
+        }
+
+        [ObserversRpc]
         private void RpcSpawnExplosionVFX(Vector3 point, Vector3 normal)
         {
+            GameplayAudio.Play(GameAudioCues.PhysicsEventsExplosion, point);
             NetworkedScreenShake.PlayAtPosition(ScreenShakeProfileType.ImpactCollision, point);
 
             if (_pushExplosionVfx != null)
@@ -697,8 +707,9 @@ namespace FastAndFractured.Multiplayer
         }
 
         [ObserversRpc]
-        private void RpcSpawnImpactVFX(Vector3 point, Vector3 normal)
+        private void RpcSpawnImpactVFX(Vector3 point, Vector3 normal, bool playAudio, bool characterHit)
         {
+            if (playAudio) GameplayAudio.Play(characterHit ? GameAudioCues.CommonCharacterBulletImpact : GameAudioCues.CommonWorldBulletImpact, point);
             if (_impactParticlesPrefab != null)
             {
                 var vfx = Instantiate(_impactParticlesPrefab, point, Quaternion.LookRotation(normal));

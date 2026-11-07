@@ -82,6 +82,9 @@ namespace FastAndFractured
         }
         private void EffectOnCharacter(Collider other)
         {
+            var audioSettings = AudioPresentationProfile.Load().Abilities;
+            GameplayAudio.Play(GameAudioCues.SpecialAbilityEventsTomatoImpactSFX, transform.position, audioSettings.TomatoImpactVolume);
+            GameplayAudio.Play(GameAudioCues.CommonTomatoSplat, transform.position, audioSettings.TomatoSplatVolume);
             if (other.gameObject == LevelController.Instance.LocalPlayer)
             {
                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BAD_EFFECTS, ResourcesManager.Instance.GetResourcesSprite(ScreenEffects.TOMATO_EFFECT), effectTime);

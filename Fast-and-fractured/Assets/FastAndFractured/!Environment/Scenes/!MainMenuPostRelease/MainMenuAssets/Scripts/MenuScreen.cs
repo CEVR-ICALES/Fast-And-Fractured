@@ -21,6 +21,7 @@ namespace FastAndFractured
 
         public void SetInteractable(bool interactable)
         {
+            if (interactable) UiAudioFeedback.AttachTo(transform);
             canvasGroup.interactable = interactable;
             canvasGroup.blocksRaycasts = interactable;
         }

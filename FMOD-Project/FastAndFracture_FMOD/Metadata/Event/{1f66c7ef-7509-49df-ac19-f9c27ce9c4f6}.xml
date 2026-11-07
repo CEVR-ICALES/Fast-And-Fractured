@@ -61,8 +61,11 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{e78af2a6-e7a1-453d-90ba-b11529bdb79f}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
 		<property name="maximumDistance">
-			<value>90</value>
+			<value>100</value>
 		</property>
 	</object>
 	<object class="MarkerTrack" id="{895fb4e1-ca34-408e-b025-61f382a16700}" />
@@ -82,6 +85,7 @@
 		<relationship name="markers">
 			<destination>{3a121f91-a4da-435f-a81b-3eead5f50ee1}</destination>
 			<destination>{bb700bb9-c1dd-4cdc-bab8-5b9bc4fe5944}</destination>
+			<destination>{b0a3ddde-d43b-4750-9ef1-52562b0f05a3}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{ad739bfa-2524-43b2-8d89-1a56157e8203}">
@@ -113,9 +117,6 @@
 		</relationship>
 	</object>
 	<object class="EventMixerGroup" id="{8e96834b-a7eb-4462-a624-60093bbb20c5}">
-		<property name="volume">
-			<value>-4.5</value>
-		</property>
 		<property name="name">
 			<value>Audio 2</value>
 		</property>
@@ -155,6 +156,20 @@
 		</relationship>
 		<relationship name="destination">
 			<destination>{3a121f91-a4da-435f-a81b-3eead5f50ee1}</destination>
+		</relationship>
+	</object>
+	<object class="LoopRegion" id="{b0a3ddde-d43b-4750-9ef1-52562b0f05a3}">
+		<property name="position">
+			<value>1</value>
+		</property>
+		<property name="length">
+			<value>13.5</value>
+		</property>
+		<relationship name="timeline">
+			<destination>{371382f5-cdb8-41d0-abd0-94286adfa921}</destination>
+		</relationship>
+		<relationship name="markerTrack">
+			<destination>{895fb4e1-ca34-408e-b025-61f382a16700}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusEffectChain" id="{978a1d5e-c925-4592-b405-f37e95fa1d44}">

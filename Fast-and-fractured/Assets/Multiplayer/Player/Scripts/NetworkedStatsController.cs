@@ -566,6 +566,9 @@ namespace FastAndFractured.Multiplayer
                         
 			var vehicleVfx = _coreStats != null ? _coreStats.GetComponentInChildren<VehicleVfxController>(true) : null;
             if (vehicleVfx != null) vehicleVfx.OnDead();
+            if (_coreStats != null) _coreStats.GetComponent<VehicleAudioController>()?.OnDeath();
+            if (killer != null && killer != victim && killer.IsOwner)
+                GameplayAudio.PlayPersonal(GameAudioCues.CommonKill, killer.GetComponentInChildren<StatsController>());
 
             if (HUDManager.HasInstance)
             {

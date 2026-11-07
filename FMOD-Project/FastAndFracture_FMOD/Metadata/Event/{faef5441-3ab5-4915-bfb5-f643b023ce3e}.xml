@@ -5,7 +5,7 @@
 			<value>Explosion</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{259e8cd4-2a92-4522-b3bb-704d19ef6664}</destination>
@@ -56,7 +56,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{9be8f54f-3f5b-4b33-80e8-f73c3642ee19}" />
+	<object class="EventAutomatableProperties" id="{9be8f54f-3f5b-4b33-80e8-f73c3642ee19}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{e79e305c-3593-4dde-917a-50880c130ba2}" />
 	<object class="GroupTrack" id="{347e1c61-6dd5-411d-a69d-5e2fc3d6b0ef}">
 		<relationship name="modules">
@@ -122,6 +129,7 @@
 	<object class="MixerBusEffectChain" id="{08c20fc6-dc60-4aad-a41c-686b28252db1}">
 		<relationship name="effects">
 			<destination>{c9b6519d-3204-4c5d-8e5c-dafac040545b}</destination>
+			<destination>{e659e5a1-2aba-4a11-8599-ad0db3535d5e}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{a2aacdd7-a9fb-49d4-bcc1-bf09520b4c15}" />
@@ -133,5 +141,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{4a9cad5d-45b4-4de2-b8cd-055b3424aee8}" />
 	<object class="MixerBusFader" id="{c9b6519d-3204-4c5d-8e5c-dafac040545b}" />
+	<object class="SpatialiserEffect" id="{e659e5a1-2aba-4a11-8599-ad0db3535d5e}" />
 	<object class="MixerBusFader" id="{22584e36-a03c-4360-848b-f5144ce45f24}" />
 </objects>

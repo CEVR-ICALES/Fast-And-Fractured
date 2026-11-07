@@ -27,6 +27,7 @@ namespace FastAndFractured
         [SerializeField] private GameEndData gameEndDataDefault;
         private GameObject _spawnedObject;
         private bool _menuShown;
+        private System.IDisposable _menuMusicPause;
         private const string WIN_TEXT = "Menu.Win";
         private const string GROUND_LAYER = "Ground";
         private const float GROUND_PROBE_HEIGHT = 3f;
@@ -36,6 +37,8 @@ namespace FastAndFractured
         void OnEnable()
         {
             _menuShown = false;
+            RestoreMenuMusic();
+            _menuMusicPause = global::Utilities.Audio.AudioServices.SuspendCue(GameAudioCues.MusicEventsMainMenuMusicEvent);
             SetFinalStats();
             _objectToSpawn = gameEndData.finalAnimation;
             if (_objectToSpawn != null)
@@ -68,13 +71,21 @@ namespace FastAndFractured
         {
             if (_menuShown) return;
             _menuShown = true;
+            RestoreMenuMusic();
             MenuSkipInitialCutscene.Instance.AlreadySkipped = true;
             MenuSkipInitialCutscene.Instance.skipText.SetActive(false);
             MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.WIN_LOSE, 0.5f);
             ResetGameEndData();
         }
+        private void RestoreMenuMusic()
+        {
+            _menuMusicPause?.Dispose();
+            _menuMusicPause = null;
+        }
+
         private void OnDisable()
         {
+            RestoreMenuMusic();
             if (_playableDirector != null)
                 _playableDirector.stopped -= OnPlayableDirectorStopped;
         }
@@ -129,6 +140,7 @@ namespace FastAndFractured
         // Its camera draws over the menu cameras: any screen opened while it stays up shows only its last frame.
         public void HideCutscene()
         {
+            RestoreMenuMusic();
             if (_spawnedObject != null) _spawnedObject.SetActive(false);
         }
     }

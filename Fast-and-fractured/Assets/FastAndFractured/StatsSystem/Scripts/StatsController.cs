@@ -352,7 +352,7 @@ namespace FastAndFractured
         }
         public void CelebrateKill()
         {
-            //Kill celebration audio or particles can be triggered here when we decide what to do
+            GameplayAudio.PlayPersonal(GameAudioCues.CommonKill, this);
         }
 
         public float GetEndurancePercentage()

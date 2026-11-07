@@ -80,10 +80,11 @@ namespace FastAndFractured
 
              OnShootRequest?.Invoke(spawnParams);
 
-            if (!bulletSound.IsNull)
-            {
-                SoundManager.Instance.PlayOneShot(bulletSound, shootPoint.position);
-            }
+            if (!GameplayAudio.CanPlay) return;
+            if (pooltype == Pooltype.PUSH_BULLET_SARTENAZO)
+                GameplayAudio.Play(GameAudioCues.CommonPanThrow, shootPoint.position);
+            else if (!bulletSound.IsNull && SoundManager.ExistingInstance != null)
+                SoundManager.ExistingInstance.PlayOneShot(bulletSound, shootPoint.position);
         }
     }
 }

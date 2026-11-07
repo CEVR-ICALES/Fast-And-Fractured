@@ -5,7 +5,7 @@
 			<value>ChickenStepsSFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{8a608e6b-0678-4308-b52b-4f0ba691fe5d}</destination>
@@ -56,7 +56,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{aacfbaf5-76a8-47b0-a3ad-17920db4f15c}" />
+	<object class="EventAutomatableProperties" id="{aacfbaf5-76a8-47b0-a3ad-17920db4f15c}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{6f6968e6-7bb1-43f0-91da-81490d2da8a2}" />
 	<object class="GroupTrack" id="{0962110f-e6a8-471a-9422-f2e273475160}">
 		<relationship name="modules">
@@ -134,6 +141,7 @@
 	<object class="MixerBusEffectChain" id="{4a05f169-f6f8-4b57-abd8-274d0b4cf4a3}">
 		<relationship name="effects">
 			<destination>{9d3e8973-a428-4e6a-a652-2577500fa1ac}</destination>
+			<destination>{5b3f6b59-7152-4d54-990f-b26a0fc61036}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{d9101ed6-da9f-4704-ac10-0d6c9be3fb83}" />
@@ -155,5 +163,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{0e414741-6198-49fc-9ac2-4fcca66333c1}" />
 	<object class="MixerBusFader" id="{9d3e8973-a428-4e6a-a652-2577500fa1ac}" />
+	<object class="SpatialiserEffect" id="{5b3f6b59-7152-4d54-990f-b26a0fc61036}" />
 	<object class="MixerBusFader" id="{a1c8f3a6-a109-486b-a05f-bb09889c1b7f}" />
 </objects>

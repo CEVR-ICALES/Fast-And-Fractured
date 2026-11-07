@@ -5,7 +5,7 @@
 			<value>VespaEngineSound</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{546fec08-fd3e-4814-9312-8512edee9f6b}</destination>
@@ -58,7 +58,17 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{46d1707f-ec14-46ac-83ce-527cdc7e9c28}" />
+	<object class="EventAutomatableProperties" id="{46d1707f-ec14-46ac-83ce-527cdc7e9c28}">
+		<property name="maxVoices">
+			<value>16</value>
+		</property>
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{d13e457d-bb85-422b-9e6b-d4c5f3d6348a}" />
 	<object class="MarkerTrack" id="{2560e2a2-742f-4f56-bca1-b8c0969d80fe}" />
 	<object class="MarkerTrack" id="{ef116a35-2573-4268-be57-619392298f0d}" />
@@ -84,6 +94,9 @@
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{b13b82f7-e16a-4405-8b5d-f629c14b2fac}">
+		<property name="volume">
+			<value>3</value>
+		</property>
 		<relationship name="effectChain">
 			<destination>{f501a958-b74a-4c4c-9be0-57fc854b6b2c}</destination>
 		</relationship>
@@ -233,6 +246,7 @@
 	<object class="MixerBusEffectChain" id="{f501a958-b74a-4c4c-9be0-57fc854b6b2c}">
 		<relationship name="effects">
 			<destination>{3b550b62-c73b-4cd5-91b5-ae45047bd396}</destination>
+			<destination>{f903c963-7a62-42fd-88f6-4d21e15de7d0}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{4174e3cf-24d6-4429-853b-6ba80214c1ec}" />
@@ -266,5 +280,6 @@
 		</relationship>
 	</object>
 	<object class="MixerBusFader" id="{3b550b62-c73b-4cd5-91b5-ae45047bd396}" />
+	<object class="SpatialiserEffect" id="{f903c963-7a62-42fd-88f6-4d21e15de7d0}" />
 	<object class="MixerBusFader" id="{200c30b9-136e-44e0-9ff2-80877df53796}" />
 </objects>

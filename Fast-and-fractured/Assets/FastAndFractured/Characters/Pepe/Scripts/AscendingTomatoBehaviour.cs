@@ -48,6 +48,7 @@ namespace FastAndFractured
 
         public void StartTimer()
         {
+            GameplayAudio.Play(GameAudioCues.SpecialAbilityEventsTomatoLaunchSFX, OriginPosition, AudioPresentationProfile.Load().Abilities.TomatoLaunchVolume);
             decal.GetComponent<TomatoDecal>().SetRadius(effectDistance);
             charactersList = LevelController.Instance.InGameCharacters;
             _randomRotation = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));

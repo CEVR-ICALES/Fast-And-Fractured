@@ -270,12 +270,14 @@ namespace FastAndFractured.Multiplayer
         [ObserversRpc]
         public void RpcNotifyWallBounce(Vector3 bounceDirection)
         {
+            GameplayAudio.Play(GameAudioCues.CommonBounceSoft, transform.position);
             if (IsServerInitialized) return;
         }
 
         [ObserversRpc]
         public void RpcNotifyCharacterHit(Vector3 hitPosition)
         {
+            GetComponent<ChickenAudioController>()?.Cry();
             if (IsServerInitialized) return;
         }
         #endregion
