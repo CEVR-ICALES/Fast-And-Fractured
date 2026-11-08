@@ -86,7 +86,6 @@ namespace FastAndFractured {
 
         private void Explosion()
         {
-            GameplayAudio.Play(GameAudioCues.PhysicsEventsExplosion, transform.position);
             _explosionHitbox.ActivateExplosionHitbox(_explosionRadius, _pushForce, _explosionCenterOffset,startHitBoxTime,endHitBoxTime,_author);
             OnBulletEndTrayectory();
         }
