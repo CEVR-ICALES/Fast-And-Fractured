@@ -1,6 +1,8 @@
 using FastAndFractured;
 using UnityEngine;
 using Enums;
+using UnityEngine.InputSystem;
+using Utilities.Managers.PauseSystem;
 
 public class MenuInputsController : MonoBehaviour
 {
@@ -17,7 +19,8 @@ public class MenuInputsController : MonoBehaviour
         {
             _inputActions.Enable();
 
-            _inputActions.MenuInputActions.GoBack.started += ctx => MainMenuManager.Instance.UseBackButton();      
+            _inputActions.MenuInputActions.GoBack.started -= HandleGoBack;
+            _inputActions.MenuInputActions.GoBack.started += HandleGoBack;
             _inputActions.MenuInputActions.LeftCharacter.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectPreviousCharacter();};
             _inputActions.MenuInputActions.RightCharacter.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectNextCharacter();};
             _inputActions.MenuInputActions.LeftSkin.started += ctx => {if (CompareCurrentScreenType(ScreensType.CHARACTER_SELECTION)) CharacterSelectorManager.Instance.SelectPreviousSkin();};
@@ -26,7 +29,25 @@ public class MenuInputsController : MonoBehaviour
 
         private void OnDisable()
         {
-            _inputActions?.Disable();
+            if (_inputActions == null) return;
+            _inputActions.MenuInputActions.GoBack.started -= HandleGoBack;
+            _inputActions.Disable();
+        }
+
+        private void HandleGoBack(InputAction.CallbackContext context)
+        {
+            var pauseManager = PauseManager.ExistingInstance;
+            bool isPaused = pauseManager != null && pauseManager.IsGamePaused;
+            if (!ShouldUseMenuBack(isPaused, context.control, _inputActions.PlayerInputActions.Pause)) return;
+            MainMenuManager.ExistingInstance?.UseBackButton();
+        }
+
+        private static bool ShouldUseMenuBack(bool isPaused, InputControl control, InputAction pauseAction)
+        {
+            if (!isPaused || pauseAction == null) return true;
+            foreach (var pauseControl in pauseAction.controls)
+                if (pauseControl == control) return false;
+            return true;
         }
 
         private void OnDestroy()
