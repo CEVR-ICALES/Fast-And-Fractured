@@ -12588,6 +12588,26 @@ PrefabInstance:
       propertyPath: inBetweenPrefabs.Array.data[0].actualObject
       value: 
       objectReference: {fileID: 6995888563224637375, guid: ac85e337081b7344bb32f5d343d41b9c, type: 3}
+    - target: {fileID: 4798329922075587364, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_Size.x
+      value: 105.45965
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798329922075587364, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_Size.y
+      value: 10.626782
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798329922075587364, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_Center.x
+      value: 39.220634
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798329922075587364, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_Center.y
+      value: -3.5211568
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798329922075587364, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_Center.z
+      value: -0.924984
+      objectReference: {fileID: 0}
     - target: {fileID: 4990615834070731963, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 762.7
@@ -12615,6 +12635,38 @@ PrefabInstance:
     - target: {fileID: 5376476704704434374, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
       propertyPath: m_Name
       value: BreakablePlatformsGolf
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 27.975147
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.384622
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.8285618
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.99279267
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.0066180886
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.117780924
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.02113203
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855182801974698749, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -2.494
       objectReference: {fileID: 0}
     - target: {fileID: 7041152207679418924, guid: ea5fd3c0d9553784aa20708a2e9de93b, type: 3}
       propertyPath: m_Splines.Array.data[0].m_MetaData.Array.data[0].Mode
@@ -82174,7 +82226,6 @@ GameObject:
   - component: {fileID: 1938535136}
   - component: {fileID: 1938535138}
   - component: {fileID: 1938535137}
-  - component: {fileID: 1938535139}
   m_Layer: 0
   m_Name: BreakingPlatform_Stage2(Clone)
   m_TagString: Untagged
@@ -82284,28 +82335,6 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1938535135}
-  m_Mesh: {fileID: 788287445}
---- !u!64 &1938535139
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1938535135}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 788287445}
 --- !u!1001 &1942380822
 PrefabInstance:
