@@ -152,6 +152,7 @@ namespace FastAndFractured
             if (_inputActions != null)
             {
                 _inputActions.Enable();
+                Cursor.lockState = CursorLockMode.Locked;
             }
         }
 
@@ -160,6 +161,7 @@ namespace FastAndFractured
             if (_inputActions != null)
             {
                 _inputActions.Disable();
+                Cursor.lockState = CursorLockMode.None;
             }
         }
         private void OnDestroy()
