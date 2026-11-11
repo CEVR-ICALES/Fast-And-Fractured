@@ -138,8 +138,16 @@ namespace UnityEditor.Recorder.Examples
 
         internal string CloseAndGetOutput()
         {
+            if (_disposed) return "";
+            
             // Terminate the subthreads.
-            _cancellationToken.Cancel();
+            try 
+            {
+                if (!_cancellationToken.IsCancellationRequested)
+                    _cancellationToken.Cancel();
+            } 
+            catch (ObjectDisposedException) { /* Already disposed */ }
+
             _terminate = true;
 
             _copyPing.Set();
@@ -172,9 +180,15 @@ namespace UnityEditor.Recorder.Examples
 
         #region IDisposable implementation
 
+        bool _disposed = false;
+
         public void Dispose()
         {
-            if (!_terminate) CloseAndGetOutput();
+            if (!_disposed)
+            {
+                CloseAndGetOutput();
+                _disposed = true;
+            }
         }
 
         ~FFmpegPipe()

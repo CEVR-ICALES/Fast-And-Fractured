@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6633583916856065284
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_Name
+      value: NetworkedMcChickenAbility
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 512.48975
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 607.6246
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 87.807
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915018531571300850, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6057483425730708098}
+    - targetCorrespondingSourceObject: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 646134013124703094}
+    - targetCorrespondingSourceObject: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6371429410008099343}
+  m_SourcePrefab: {fileID: 100100000, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+--- !u!1 &6568322717828566873 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 515776347792994909, guid: 49820f362f1e3dc468736ce934576f58, type: 3}
+  m_PrefabInstance: {fileID: 6633583916856065284}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6057483425730708098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6568322717828566873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 0
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  _initializedTimestamp: 0
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _localReconcileCorrectionType: 2
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 11148631335118766442
+  SceneId: 0
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
+--- !u!114 &646134013124703094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6568322717828566873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9e81c6ca5ff2dd4f90b0c4265172004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedMcChickenBehaviour
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6057483425730708098}
+  _networkObjectCache: {fileID: 0}
+--- !u!114 &6371429410008099343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6568322717828566873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfd3d627812a3804d9497e5368729f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.NetworkedPredictedAbilitySpawn
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6057483425730708098}
+  _networkObjectCache: {fileID: 0}
+  _allowSpawning: 1
+  _allowDespawning: 1
+  _kind: 1

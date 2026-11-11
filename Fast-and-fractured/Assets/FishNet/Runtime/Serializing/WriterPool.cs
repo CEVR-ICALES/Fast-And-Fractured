@@ -15,7 +15,8 @@ namespace FishNet.Serializing
         public void StoreLength() => WriterPool.StoreLength(this);
 
         [Obsolete("Use Clear instead.")]
-        public void ResetState() => base.Clear();
+        public void ResetState() => Clear();
+
         [Obsolete("This does not function.")]
         public void InitializeState() { }
     }
@@ -55,9 +56,9 @@ namespace FishNet.Serializing
             result.Clear(networkManager);
             return result;
         }
+
         /// Gets a writer from the pool.
         /// </summary>
-        
         public static PooledWriter Retrieve()
         {
             return Retrieve(null);
@@ -66,17 +67,16 @@ namespace FishNet.Serializing
         /// <summary>
         /// Gets the next writer in the pool of minimum length.
         /// </summary>
-        /// <param name="length">Minimum length the writer buffer must be.</param>
-        
+        /// <param name = "length">Minimum length the writer buffer must be.</param>
         public static PooledWriter Retrieve(int length)
         {
             return Retrieve(null, length);
         }
+
         /// <summary>
         /// Gets the next writer in the pool of minimum length.
         /// </summary>
-        /// <param name="length">Minimum length the writer buffer must be.</param>
-        
+        /// <param name = "length">Minimum length the writer buffer must be.</param>
         public static PooledWriter Retrieve(NetworkManager networkManager, int length)
         {
             /* The index returned will be for writers which have
@@ -87,15 +87,23 @@ namespace FishNet.Serializing
             int index = GetDictionaryIndex(length);
             Stack<PooledWriter> stack;
             PooledWriter result;
-            //There is already one pooled.
+            // There is already one pooled.
             if (_lengthPool.TryGetValue(index, out stack) && stack.TryPop(out result))
+            {
+                if (stack.Count == 0)
+                    _lengthPool.Remove(index);
+
+                result.Clear(networkManager);
+            }
+            // There is a larger writer pooled.
+            else if (TryPopLengthWriterAbove(index, out result))
             {
                 result.Clear(networkManager);
             }
-            //Not pooled yet or failed to pop.
+            // Not pooled yet or failed to pop.
             else
             {
-                //Get any ol' writer.
+                // Get any ol' writer.
                 result = Retrieve(networkManager);
                 /* Ensure length to fill it's bracket.
                  * Increase index by 1 since 0 index would
@@ -105,6 +113,46 @@ namespace FishNet.Serializing
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Tries to pop the closest writer from a bucket above minimum index.
+        /// </summary>
+        private static bool TryPopLengthWriterAbove(int minimumIndex, out PooledWriter writer)
+        {
+            int foundIndex = int.MaxValue;
+            Stack<PooledWriter> foundStack = null;
+
+            foreach (KeyValuePair<int, Stack<PooledWriter>> entry in _lengthPool)
+            {
+                if (entry.Key <= minimumIndex)
+                    continue;
+                if (entry.Value.Count == 0)
+                    continue;
+                if (entry.Key < foundIndex)
+                {
+                    foundIndex = entry.Key;
+                    foundStack = entry.Value;
+                }
+            }
+
+            if (foundStack == null)
+            {
+                writer = null;
+                return false;
+            }
+
+            bool popped = foundStack.TryPop(out writer);
+            if (!popped)
+            {
+                writer = null;
+                return false;
+            }
+
+            if (foundStack.Count == 0)
+                _lengthPool.Remove(foundIndex);
+
+            return true;
         }
 
         /// <summary>
@@ -144,6 +192,7 @@ namespace FishNet.Serializing
                 writer = null;
             }
         }
+
         #region Dictionary indexes.
         /// <summary>
         /// Gets which index to use for length when retrieving a writer.
@@ -151,11 +200,11 @@ namespace FishNet.Serializing
         private static int GetDictionaryIndex(int length)
         {
             /* The index returned will be for writers which have
-            * length as a minimum capacity.
-            * EG: if length is 1200 / 1000 (length_bracket) result
-            * will be index 1. Index 0 will be up to 1000, while
-            * index 1 will be up to 2000. So to accomodate 1200
-            * length index 1 must be used as 0 has a maximum of 1000. */
+             * length as a minimum capacity.
+             * EG: if length is 1200 / 1000 (length_bracket) result
+             * will be index 1. Index 0 will be up to 1000, while
+             * index 1 will be up to 2000. So to accomodate 1200
+             * length index 1 must be used as 0 has a maximum of 1000. */
 
             /* Examples if length_bracket is 1000, using floor:
              * 800 / 1000 = 0.
@@ -166,7 +215,7 @@ namespace FishNet.Serializing
             if (index > 0 && length % LENGTH_BRACKET == 0)
                 index--;
 
-            //UnityEngine.Debug.Log($"Returning length {length} from index {index}");
+            // UnityEngine.Debug.Log($"Returning length {length} from index {index}");
             return index;
         }
 
@@ -187,7 +236,7 @@ namespace FishNet.Serializing
 
             /* Since capacity is set to minimum of length_bracket
              * capacity / length_bracket will always be at least 1.
-             * 
+             *
              * Here are some result examples using floor:
              * 1000 / 1000 = 1.
              * 1200 / 1000 = 1.
@@ -201,10 +250,9 @@ namespace FishNet.Serializing
              * Just as 2000-2999 would go into 1. */
             index--;
 
-            //UnityEngine.Debug.Log($"Storing capacity {capacity} at index {index}");
+            // UnityEngine.Debug.Log($"Storing capacity {capacity} at index {index}");
             return index;
         }
         #endregion
-
     }
 }

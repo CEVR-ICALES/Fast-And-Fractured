@@ -16,21 +16,19 @@ namespace FishNet.Object
         /// <summary>
         /// Called when the clientHost gains or loses visibility of this object.
         /// Boolean value will be true if clientHost has visibility.
-        /// </summary>        
+        /// </summary>
         public event HostVisibilityUpdatedDelegate OnHostVisibilityUpdated;
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="prevVisible">True if clientHost was known to have visibility of the object prior to this invoking.</param>
-        /// <param name="nextVisible">True if the clientHost now has visibility of the object.</param>
+        /// <param name = "prevVisible">True if clientHost was known to have visibility of the object prior to this invoking.</param>
+        /// <param name = "nextVisible">True if the clientHost now has visibility of the object.</param>
         public delegate void HostVisibilityUpdatedDelegate(bool prevVisible, bool nextVisible);
 
         /// <summary>
         /// Called when this NetworkObject losses all observers or gains observers while previously having none.
         /// </summary>
         public event Action<NetworkObject> OnObserversActive;
-
         /// <summary>
         /// NetworkObserver on this object.
         /// </summary>
@@ -62,7 +60,7 @@ namespace FishNet.Object
         /// <summary>
         /// Found renderers on the NetworkObject and it's children. This is only used as clientHost to hide non-observers objects.
         /// </summary>
-        [System.NonSerialized]
+        [NonSerialized]
         private List<Renderer> _renderers;
         /// <summary>
         /// True if renderers have been looked up.
@@ -101,7 +99,7 @@ namespace FishNet.Object
                 return;
 
             float unscaledTime = Time.unscaledTime;
-            //Not enough time has passed to update.
+            // Not enough time has passed to update.
             if (!force && unscaledTime < _nextHashGridUpdateTime)
                 return;
 
@@ -118,7 +116,7 @@ namespace FishNet.Object
         /// <summary>
         /// Updates cached renderers used to managing clientHost visibility.
         /// </summary>
-        /// <param name="updateVisibility">True to also update visibility if clientHost.</param>
+        /// <param name = "updateVisibility">True to also update visibility if clientHost.</param>
         public void UpdateRenderers(bool updateVisibility = true)
         {
             InitializeRendererCollection(force: true, updateVisibility);
@@ -127,20 +125,20 @@ namespace FishNet.Object
         /// <summary>
         /// Sets the renderer visibility for clientHost.
         /// </summary>
-        /// <param name="visible">True if renderers are to be visibile.</param>
-        /// <param name="force">True to skip blocking checks.</param>
+        /// <param name = "visible">True if renderers are to be visibile.</param>
+        /// <param name = "force">True to skip blocking checks.</param>
         public void SetRenderersVisible(bool visible, bool force = false)
         {
             if (!force && !NetworkObserver.UpdateHostVisibility)
                 return;
-            
+
             UpdateRenderVisibility(visible);
         }
-        
+
         /// <summary>
         /// Updates visibilites on renders without checks.
         /// </summary>
-        /// <param name="visible"></param>
+        /// <param name = "visible"></param>
         private void UpdateRenderVisibility(bool visible)
         {
             InitializeRendererCollection(force: false, updateVisibility: false);
@@ -207,43 +205,101 @@ namespace FishNet.Object
             NetworkObserver = NetworkManager.ObserverManager.AddDefaultConditions(this);
         }
 
+        internal void ClearObservers()
+        {
+            int startCount = Observers.Count;
+
+            Observers.Clear();
+
+            /* Done before ObserversActiveChanged because
+             * that trickles into storing the LOD collection.
+             * Realistically, the collection does not need to be
+             * cleared because when it's stored it would be
+             * then, but keeping this here for intent. */
+            ClearObserverLevelOfDetail();
+            
+            if (startCount > 0)
+                ObserversActiveChanged();
+        }
+
+        internal bool AddObserver(NetworkConnection connection)
+        {
+            int startCount = Observers.Count;
+
+            bool added = Observers.Add(connection);
+
+            if (added)
+            {
+                if (TimeManager != null)
+                    ObserverAddedTick = TimeManager.LocalTick;
+
+                if (startCount == 0)
+                    ObserversActiveChanged();        
+                
+                /* Add after ObserversActiveChanged because
+                * the LOD might not be setup yet otherwise;
+                 * LOD uses hot loading. */
+                AddObserverLevelOfDetail(connection);
+            }
+
+            return added;
+        }
+
         /// <summary>
         /// Removes a connection from observers for this object returning if the connection was removed.
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name = "connection"></param>
         internal bool RemoveObserver(NetworkConnection connection)
         {
+            RemoveObserverLevelOfDetail(connection);
+
             int startCount = Observers.Count;
+
             bool removed = Observers.Remove(connection);
-            if (removed)
-                TryInvokeOnObserversActive(startCount);
+
+            //Like with clear, remove before calling ObserversActiveChange.
+            RemoveObserverLevelOfDetail(connection);
+            
+            if (removed && startCount == 0)
+                ObserversActiveChanged();
 
             return removed;
         }
 
         /// <summary>
+        /// Called when observers active has changed.
+        /// </summary>
+        private void ObserversActiveChanged()
+        {
+            ObserversActiveChanged_LevelOfDetail();
+            OnObserversActive?.Invoke(this);
+        }
+
+        /// <summary>
         /// Adds the connection to observers if conditions are met.
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name = "connection"></param>
         /// <returns>True if added to Observers.</returns>
         internal ObserverStateChange RebuildObservers(NetworkConnection connection, bool timedOnly)
         {
-            //If not a valid connection.
+            // If not a valid connection.
             if (!connection.IsValid)
             {
                 NetworkManager.LogWarning($"An invalid connection was used when rebuilding observers.");
                 return ObserverStateChange.Unchanged;
             }
-            //Valid not not active.
-            else if (!connection.IsActive)
+
+            // Valid not not active.
+            if (!connection.IsActive)
             {
                 /* Just remove from observers since connection isn't active
                  * and return unchanged because nothing should process
                  * given the connection isnt active. */
-                Observers.Remove(connection);
+                RemoveObserver(connection);
                 return ObserverStateChange.Unchanged;
             }
-            else if (IsDeinitializing)
+
+            if (IsDeinitializing)
             {
                 /* If object is deinitializing it's either being despawned
                  * this frame or it's not spawned. If we've made it this far,
@@ -251,37 +307,17 @@ namespace FishNet.Object
                 return ObserverStateChange.Unchanged;
             }
 
-            //Update hashgrid if needed.
+            // Update hashgrid if needed.
             UpdateForNetworkObject(!timedOnly);
 
-            int startCount = Observers.Count;
             ObserverStateChange osc = NetworkObserver.RebuildObservers(connection, timedOnly);
 
             if (osc == ObserverStateChange.Added)
-                Observers.Add(connection);
+                AddObserver(connection);
             else if (osc == ObserverStateChange.Removed)
-                Observers.Remove(connection);
-
-            if (osc != ObserverStateChange.Unchanged)
-                TryInvokeOnObserversActive(startCount);
+                RemoveObserver(connection);
 
             return osc;
-        }
-
-        /// <summary>
-        /// Invokes OnObserversActive if observers are now 0 but previously were not, or if was previously 0 but now has observers.
-        /// </summary>
-        /// <param name="startCount"></param>
-        private void TryInvokeOnObserversActive(int startCount)
-        {
-            if (TimeManager != null)
-                ObserverAddedTick = TimeManager.LocalTick;
-
-            if (OnObserversActive != null)
-            {
-                if ((Observers.Count > 0 && startCount == 0) || Observers.Count == 0 && startCount > 0)
-                    OnObserversActive.Invoke(this);
-            }
         }
 
         /// <summary>
@@ -289,7 +325,7 @@ namespace FishNet.Object
         /// </summary>
         private void ResetState_Observers(bool asServer)
         {
-            //As server or client it's safe to reset this value.
+            // As server or client it's safe to reset this value.
             ObserverAddedTick = TimeManager.UNSET_TICK;
         }
     }

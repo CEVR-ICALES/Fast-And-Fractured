@@ -23,22 +23,26 @@ namespace FastAndFractured
         }
         void OnEnable()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.AddListener(OnCharactersCustomStart);
             }
         }
 
         void OnDestroy()
         {
-            if (LevelControllerButBetter.Instance != null)
+            if (LevelController.Instance != null)
             {
-                LevelControllerButBetter.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
+                LevelController.Instance.onLevelPreStart.RemoveListener(OnCharactersCustomStart);
             }
         }
         
         void Update()
         {
+            // The player car can exist before this subscribes to onLevelPreStart (it already fired): pick it up here.
+            if (!_isPlayerReceived && LevelController.HasInstance && LevelController.Instance.LocalPlayer != null)
+                OnCharactersCustomStart();
+
             if (_player != null && _isPlayerReceived)
             {
                 Vector3 newPosition = _player.transform.position;
@@ -59,13 +63,15 @@ namespace FastAndFractured
         {
             if (!_isPlayerReceived)
             {
-                _player = LevelControllerButBetter.Instance.LocalPlayer;
+                _player = LevelController.Instance.LocalPlayer;
+                if (_player == null) return;
                 _isPlayerReceived = true;
                 string icon = PlayerPrefs.GetString("Selected_Player");
                 if (_player != null)
                 {
                     characterIconMinimap.GetComponent<Image>().sprite = ResourcesManager.Instance.GetResourcesSprite(icon);
-                    _cameraReference = _player.transform.parent.GetComponent<CameraHolder>().CameraToHold;
+                    CameraHolder holder = _player.transform.parent != null ? _player.transform.parent.GetComponent<CameraHolder>() : null;
+                    _cameraReference = holder != null && holder.CameraToHold != null ? holder.CameraToHold : Camera.main;
                 }
             }
         }

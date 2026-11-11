@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FastAndFractured;
+using FastAndFractured.Abstractions;
 using UnityEngine;
 using Utilities;
 namespace StateMachine {
@@ -10,8 +11,11 @@ namespace StateMachine {
     {
         public override void Act(Controller controller)
         {
-            PushShootHandle pushShootHandle = controller.GetBehaviour<PushShootHandle>();
-            pushShootHandle.MineShoot();
+            var shootController = controller.transform.root.GetComponentInChildren<IShootController>();
+            if (shootController != null)
+            {
+                shootController.TryMineShoot();
+            }
         }
     }
 }

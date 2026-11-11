@@ -1,4 +1,4 @@
-﻿using Enums;
+using Enums;
  using System;
  using UnityEngine;
 

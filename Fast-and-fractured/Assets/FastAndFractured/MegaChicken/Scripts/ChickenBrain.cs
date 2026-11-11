@@ -31,7 +31,7 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
         void Start()
         {
@@ -83,8 +83,7 @@ namespace FastAndFractured
                 {
                     _hasEggBeenLayed = true;
                     GameObject egg = ObjectPoolManager.Instance.GivePooledObject(pooltypeMegaChickenEgg, eggSpawnPoint.transform.position);
-                    // egg.transform.position = eggSpawnPoint.transform.position;
-                    egg.transform.rotation = Quaternion.Euler(0, 0, 0);
+                    if (egg != null) egg.transform.rotation = Quaternion.Euler(0, 0, 0);
                     // NavMeshHit hit;
                     // if (NavMesh.SamplePosition(egg.transform.position, out hit, 20f, NavMesh.AllAreas))
                     // {

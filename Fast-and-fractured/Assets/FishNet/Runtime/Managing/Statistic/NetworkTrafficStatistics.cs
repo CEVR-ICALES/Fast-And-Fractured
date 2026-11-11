@@ -1,39 +1,60 @@
-
-
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEVELOPMENT
+#endif
 using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using FishNet.Editing;
+using FishNet.Editing.NetworkProfiler;
+using FishNet.Transporting;
+using GameKit.Dependencies.Utilities;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FishNet.Managing.Statistic
 {
-    [System.Serializable]
-    public class NetworkTraficStatistics
+    [Serializable]
+    public partial class NetworkTrafficStatistics
     {
+        #region Types.
+        public enum EnabledMode : byte
+        {
+            /// <summary>
+            /// Not enabled.
+            /// </summary>
+            Disabled = 0,
+            /// <summary>
+            /// Enabled for development only.
+            /// </summary>
+            Development = 1,
+            /// <summary>
+            /// Enabled for release and development.
+            /// </summary>
+            Release = 2,
+            /// <summary>
+            /// Enable for release, development, and headless.
+            /// </summary>
+            Headless = 3,
+        }
+        #endregion
+
         #region Public.
         /// <summary>
-        /// Called when NetworkTraffic is updated for the client.
+        /// Called when NetworkTraffic is updated.
         /// </summary>
-        public event Action<NetworkTrafficArgs> OnClientNetworkTraffic;
-        /// <summary>
-        /// Called when NetworkTraffic is updated for the server.
-        /// </summary>
-        public event Action<NetworkTrafficArgs> OnServerNetworkTraffic;
+        /// <remarks>This API is for internal use and may change at any time.</remarks>
+        public event NetworkTrafficUpdateDel OnNetworkTraffic;
+
+        public delegate void NetworkTrafficUpdateDel(uint tick, BidirectionalNetworkTraffic serverTraffic, BidirectionalNetworkTraffic clientTraffic);
         #endregion
 
         #region Serialized.
         /// <summary>
-        /// How often to update traffic statistics.
+        /// When to enable network traffic statistics.
         /// </summary>
-        [Tooltip("How often to update traffic statistics.")]
+        public EnabledMode EnableMode => _enableMode;
+        [Tooltip("When to enable network traffic statistics.")]
         [SerializeField]
-        [Range(0f, 10f)]
-        private float _updateInteval = 1f;
-        /// <summary>
-        /// 
-        /// </summary>
-        [Tooltip("True to update client statistics.")]
-        [SerializeField]
-        private bool _updateClient;
+        private EnabledMode _enableMode = EnabledMode.Disabled;
         /// <summary>
         /// True to update client statistics.
         /// </summary>
@@ -42,20 +63,16 @@ namespace FishNet.Managing.Statistic
             get => _updateClient;
             private set => _updateClient = value;
         }
+        [Tooltip("True to update client statistics.")]
+        [SerializeField]
+        private bool _updateClient;
+
         /// <summary>
         /// Sets UpdateClient value.
         /// </summary>
-        /// <param name="update"></param>
-        public void SetUpdateClient(bool update)
-        {
-            UpdateClient = update;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        [Tooltip("True to update server statistics.")]
-        [SerializeField]
-        private bool _updateServer;
+        /// <param name = "update"></param>
+        public void SetUpdateClient(bool update) => UpdateClient = update;
+
         /// <summary>
         /// True to update client statistics.
         /// </summary>
@@ -64,14 +81,15 @@ namespace FishNet.Managing.Statistic
             get => _updateServer;
             private set => _updateServer = value;
         }
+        [Tooltip("True to update server statistics.")]
+        [SerializeField]
+        private bool _updateServer;
+
         /// <summary>
         /// Sets UpdateServer value.
         /// </summary>
-        /// <param name="update"></param>
-        public void SetUpdateServer(bool update)
-        {
-            UpdateServer = update;
-        }
+        /// <param name = "update"></param>
+        public void SetUpdateServer(bool update) => UpdateServer = update;
         #endregion
 
         #region Private.
@@ -80,35 +98,54 @@ namespace FishNet.Managing.Statistic
         /// </summary>
         private NetworkManager _networkManager;
         /// <summary>
-        /// Bytes sent to the server from local client.
+        /// Latest tick statistics for data on the local server.
         /// </summary>
-        private ulong _client_toServerBytes;
+        private BidirectionalNetworkTraffic _serverTraffic;
         /// <summary>
-        /// Bytes received on the local client from the server.
+        /// Latest tick statistics for data on the local client.
         /// </summary>
-        private ulong _client_fromServerBytes;
-        /// <summary>
-        /// Bytes sent to all clients from the local server.
-        /// </summary>
-        private ulong _server_toClientsBytes;
-        /// <summary>
-        /// Bytes received on the local server from all clients.
-        /// </summary>
-        private ulong _server_fromClientsBytes;
-        /// <summary>
-        /// Next time network traffic updates may invoke.
-        /// </summary>
-        private float _nextUpdateTime;
+        private BidirectionalNetworkTraffic _clientTraffic;
         /// <summary>
         /// Size suffixes as text.
         /// </summary>
         private static readonly string[] _sizeSuffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+        /// <summary>
+        /// True if initialized.
+        /// </summary>
+        private bool _initializedOnce;
+        #endregion
+
+        #region Private Profiler Markers
+        private static readonly ProfilerMarker _pm_OnPreTick = new("NetworkTrafficStatistics.TimeManager_OnPreTick()");
+        #endregion
+
+        #region Consts.
+        /// <summary>
+        /// Id for unspecified packets.
+        /// </summary>
+        internal const PacketId UNSPECIFIED_PACKETID = (PacketId)ushort.MaxValue;
         #endregion
 
         internal void InitializeOnce_Internal(NetworkManager manager)
         {
-            _networkManager = manager;
+            if (_initializedOnce)
+                return;
+
+            /* Only subscribe if enabled. Always unsubscribe even if not enabled -- doing so is safe. */
+            if (!IsEnabled())
+                return;
+
             manager.TimeManager.OnPreTick += TimeManager_OnPreTick;
+
+            _networkManager = manager;
+
+            /* Do not bother caching once destroyed. Losing a single instance of each
+             * isn't going to hurt anything, and if destroyed everything is probably
+             * shutting down anyway. */
+            _serverTraffic = ResettableObjectCaches<BidirectionalNetworkTraffic>.Retrieve();
+            _clientTraffic = ResettableObjectCaches<BidirectionalNetworkTraffic>.Retrieve();
+
+            _initializedOnce = true;
         }
 
         /// <summary>
@@ -116,91 +153,139 @@ namespace FishNet.Managing.Statistic
         /// </summary>
         private void TimeManager_OnPreTick()
         {
-            if (Time.unscaledTime < _nextUpdateTime)
+            using (_pm_OnPreTick.Auto())
+            {
+                /* Since we are sending last ticks data at the end of the tick,
+                 * the tick used will always be 1 less than current tick. */
+                long trafficTick = _networkManager.TimeManager.LocalTick - 1;
+                //Invalid tick.
+                if (trafficTick <= 0)
+                    return;
+
+                if (_networkManager.IsClientStarted || _networkManager.IsServerStarted)
+                    OnNetworkTraffic?.Invoke((uint)trafficTick, _serverTraffic, _clientTraffic);
+
+                /* It's important to remember that after actions are invoked
+                 * the traffic stat fields are reset. Each listener should use
+                 * the MultiwayTrafficCollection.Clone method to get a copy,
+                 * and should cache that copy when done. */
+                _clientTraffic.Reinitialize();
+                _serverTraffic.Reinitialize();
+            }
+        }
+
+        /// <summary>
+        /// Called when a packet bundle is received. This is any number of packets bundled into a single transmission.
+        /// </summary>
+        internal void PacketBundleReceived(bool asServer)
+        {
+            //Debug.LogError("Inbound and outbound bidirection datas should count up how many packet bundles are received. This is so the bundle headers can be calculated appropriately.");
+        }
+
+        /// <summary>
+        /// Called when data is being sent from the local server or client for a specific packet.
+        /// </summary>
+        internal void AddOutboundPacketIdData(PacketId typeSource, string details, int bytes, GameObject gameObject, bool asServer)
+        {
+            if (bytes <= 0)
                 return;
-            _nextUpdateTime = Time.unscaledTime + _updateInteval;
 
-            if (UpdateClient && _networkManager.IsClientStarted)
-                OnClientNetworkTraffic?.Invoke(new(_client_toServerBytes, _client_fromServerBytes));
-            if (UpdateServer && _networkManager.IsServerStarted)
-                OnServerNetworkTraffic?.Invoke(new(_server_fromClientsBytes, _server_toClientsBytes));
-
-            _client_toServerBytes = 0;
-            _client_fromServerBytes = 0;
-            _server_toClientsBytes = 0;
-            _server_fromClientsBytes = 0;
+            if (TryGetBidirectionalNetworkTraffic(asServer, out BidirectionalNetworkTraffic networkTraffic))
+                networkTraffic.OutboundTraffic.AddPacketIdData(typeSource, details, (ulong)bytes, gameObject);
         }
 
         /// <summary>
-        /// Called when the local client sends data.
+        /// Called when data is being sent from the local server or client as it's going to the socket.
         /// </summary>
-        internal void LocalClientSentData(ulong dataLength)
+        internal void AddOutboundSocketData(ulong bytes, bool asServer)
         {
-            _client_toServerBytes = Math.Min(_client_toServerBytes + dataLength, ulong.MaxValue);
-        }
-        /// <summary>
-        /// Called when the local client receives data.
-        /// </summary>
-        public void LocalClientReceivedData(ulong dataLength)
-        {
-            _client_fromServerBytes = Math.Min(_client_fromServerBytes + dataLength, ulong.MaxValue);
-        }
+            if (bytes > int.MaxValue)
+                bytes = int.MaxValue;
+            else if (bytes <= 0)
+                return;
 
+            if (TryGetBidirectionalNetworkTraffic(asServer, out BidirectionalNetworkTraffic networkTraffic))
+                networkTraffic.OutboundTraffic.AddSocketData(bytes);
+        }
 
         /// <summary>
-        /// Called when the local client sends data.
+        /// Called when data is being received on the local server or client for a specific packet.
         /// </summary>
-        internal void LocalServerSentData(ulong dataLength)
+        internal void AddInboundPacketIdData(PacketId typeSource, string details, int bytes, GameObject gameObject, bool asServer)
         {
-            _server_toClientsBytes = Math.Min(_server_toClientsBytes + dataLength, ulong.MaxValue);
+            if (bytes <= 0)
+                return;
+
+            if (TryGetBidirectionalNetworkTraffic(asServer, out BidirectionalNetworkTraffic networkTraffic))
+                networkTraffic.InboundTraffic.AddPacketIdData(typeSource, details, (ulong)bytes, gameObject);
         }
+
         /// <summary>
-        /// Called when the local client receives data.
+        /// Called when data is being received on the local server or client as it's coming from the socket.
         /// </summary>
-        public void LocalServerReceivedData(ulong dataLength)
+        internal void AddInboundSocketData(ulong bytes, bool asServer)
         {
-            _server_fromClientsBytes = Math.Min(_server_fromClientsBytes + dataLength, ulong.MaxValue);
+            if (bytes > int.MaxValue)
+                bytes = int.MaxValue;
+            else if (bytes <= 0)
+                return;
+
+            if (TryGetBidirectionalNetworkTraffic(asServer, out BidirectionalNetworkTraffic networkTraffic))
+                networkTraffic.InboundTraffic.AddSocketData(bytes);
         }
 
+        /// <summary>
+        /// Gets current statistics for server or client.
+        /// </summary>
+        private bool TryGetBidirectionalNetworkTraffic(bool asServer, out BidirectionalNetworkTraffic networkTraffic)
+        {
+            networkTraffic = asServer ? _serverTraffic : _clientTraffic;
 
-        //Attribution: https://stackoverflow.com/questions/14488796/does-net-provide-an-easy-way-convert-bytes-to-kb-mb-gb-etc
+            return networkTraffic != null;
+        }
+
         /// <summary>
         /// Formats passed in bytes value to the largest possible data type with 2 decimals.
         /// </summary>
         public static string FormatBytesToLargest(float bytes)
         {
-            int decimalPlaces = 2;
-            if (bytes < 1f || float.IsInfinity(bytes) || float.IsNaN(bytes))
-                return ReturnZero();
+            string[] units = { "B", "kB", "MB", "GB", "TB", "PB" };
+            int unitIndex = 0;
 
-            string ReturnZero() 
+            while (bytes >= 1024 && unitIndex < units.Length - 1)
             {
-                decimalPlaces = 0;
-                return string.Format("{0:n" + decimalPlaces + "} B/s", 0);
-            }
-            
-            // mag is 0 for bytes, 1 for KB, 2, for MB, etc.
-            int mag = (int)Math.Log(bytes, 1024);
-
-            // 1L << (mag * 10) == 2 ^ (10 * mag) 
-            // [i.e. the number of bytes in the unit corresponding to mag]
-            decimal adjustedSize = (decimal)bytes / (1L << (mag * 10));
-
-            // make adjustment when the value is large enough that
-            // it would round up to 1000 or more
-            if (Math.Round(adjustedSize, decimalPlaces) >= 1000)
-            {
-                mag += 1;
-                adjustedSize /= 1024;
+                bytes /= 1024;
+                unitIndex++;
             }
 
-            //Don't show decimals for bytes.
-            if (mag == 0)
-                decimalPlaces = 0;
+            return $"{bytes:0.00} {units[unitIndex]}";
+        }
 
-            return string.Format("{0:n" + decimalPlaces + "} {1}", adjustedSize, _sizeSuffixes[mag]);
+        /// <summary>
+        /// Returns if enabled or not.
+        /// </summary>
+        public bool IsEnabled()
+        {
+            if (_enableMode == EnabledMode.Disabled)
+                return false;
+
+            int modeValue = (int)_enableMode;
+
+            //Never enabled for server builds.
+            #if UNITY_SERVER
+            return modeValue >= (int)EnabledMode.Headless;
+            #endif
+
+            if (_enableMode == EnabledMode.Disabled)
+                return false;
+
+            // If not in dev mode then return true if to run in release.
+            #if !DEVELOPMENT
+            return modeValue >= (int)EnabledMode.Release;
+            // Always run in dev mode if not disabled.
+            #else
+            return true;
+            #endif
         }
     }
-
-
 }

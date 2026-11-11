@@ -8,30 +8,34 @@ namespace StateMachine
     [CreateAssetMenu(fileName = "ApplyAirRotationAction", menuName = "PlayerStateMachine/Actions/ApplyAirRotation")]
     public class ApplyAirRotationAction : Action
     {
-        private bool _isAirRotationToggled = false;
-        private bool _wasBrakingLastFrame = true;
-        PlayerInputController _playerInputController;
+        // Per car: this action is a shared ScriptableObject, so state kept in plain fields was
+        // shared by every car running the state machine.
+        private class ToggleState
+        {
+            public bool IsAirRotationToggled;
+            public bool WasBrakingLastFrame = true;
+        }
+        private readonly Dictionary<Controller, ToggleState> _states = new Dictionary<Controller, ToggleState>();
+
         public override void Act(Controller controller)
         {
-            _playerInputController = controller.GetBehaviour<PlayerInputController>();
-            HandleIsBrakingInput(_playerInputController.IsBraking);
-            
-            if(_isAirRotationToggled)
+            if (!_states.TryGetValue(controller, out ToggleState state))
             {
-                 controller.GetBehaviour<CarMovementController>().ProcessAirRotationInput();
-            }
-           
-        }
-
-        private void HandleIsBrakingInput(bool isBraking)
-        {
-            if(!_wasBrakingLastFrame && isBraking == true)
-            {
-                _isAirRotationToggled = !_isAirRotationToggled;
+                state = new ToggleState();
+                _states[controller] = state;
             }
 
-            _wasBrakingLastFrame = isBraking;
+            // The input actually driving this car, not the local PlayerInputController (see
+            // ApplyBrakeAction).
+            CarMovementController carMovement = controller.GetBehaviour<CarMovementController>();
+            bool isBraking = carMovement.InputProvider != null && carMovement.InputProvider.IsBraking;
 
+            if (!state.WasBrakingLastFrame && isBraking)
+                state.IsAirRotationToggled = !state.IsAirRotationToggled;
+            state.WasBrakingLastFrame = isBraking;
+
+            if (state.IsAirRotationToggled)
+                carMovement.ProcessAirRotationInput();
         }
     }
 }

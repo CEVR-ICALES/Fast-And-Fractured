@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-
 using UnityEditor;
 using UnityEngine;
 using UnitySettingsProviderAttribute = UnityEditor.SettingsProviderAttribute;
@@ -32,7 +31,7 @@ namespace FishNet.Editing.NewNetworkBehaviourScript
                     "Networking",
                     "CreateNewNetworkBehaviour",
                     "Template"
-                },
+                }
             };
         }
 
@@ -52,7 +51,7 @@ namespace FishNet.Editing.NewNetworkBehaviourScript
             if (GUILayout.Button("Edit template"))
             {
                 CreateNewNetworkBehaviour.EnsureTemplateExists();
-                
+
                 try
                 {
                     System.Diagnostics.Process.Start(CreateNewNetworkBehaviour.TemplatePath);
@@ -94,7 +93,7 @@ namespace FishNet.Editing.NewNetworkBehaviourScript
 
             EditorGUILayout.EndHorizontal();
 
-//            EditorGUILayout.HelpBox("By default MonoBehaviour script template will be copied", MessageType.Info);
+            //            EditorGUILayout.HelpBox("By default MonoBehaviour script template will be copied", MessageType.Info);
             if (EditorGUI.EndChangeCheck())
                 Configuration.Configurations.Write(true);
         }

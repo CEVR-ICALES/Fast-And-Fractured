@@ -5,7 +5,7 @@
 			<value>CarCrashMetallic</value>
 		</property>
 		<property name="outputFormat">
-			<value>0</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{259e8cd4-2a92-4522-b3bb-704d19ef6664}</destination>
@@ -60,7 +60,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{5e884d5e-2870-4863-9c8f-53fd12739e58}" />
+	<object class="EventAutomatableProperties" id="{5e884d5e-2870-4863-9c8f-53fd12739e58}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{411096d3-6fcc-4d65-afbb-0a7b54e31ada}" />
 	<object class="GroupTrack" id="{cddc8846-a528-48e0-8726-b78ccbdd205d}">
 		<relationship name="modules">
@@ -166,6 +173,7 @@
 	<object class="MixerBusEffectChain" id="{d2faceb5-03bb-4337-9e18-9d5548ec3277}">
 		<relationship name="effects">
 			<destination>{8b11b42e-064a-41d7-b8e4-fc496dbbafce}</destination>
+			<destination>{04aa48ee-f465-4ceb-864f-a6fa49b4996f}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{935a5cf8-78ab-4317-b070-dae133b64c52}" />
@@ -175,7 +183,7 @@
 			<value>pitch</value>
 		</property>
 		<property name="amount">
-			<value>18.75</value>
+			<value>1.5</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{86a62ec1-befb-49d1-8fda-e2f27ecf1658}">
@@ -197,7 +205,7 @@
 			<value>pitch</value>
 		</property>
 		<property name="amount">
-			<value>16.6666679</value>
+			<value>1.5</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{39db686d-0c9e-42ab-8741-1d4298034ed1}">
@@ -215,6 +223,7 @@
 	</object>
 	<object class="MixerBusPanner" id="{cad99705-ce1d-4464-82b6-f97a9d9b2ebd}" />
 	<object class="MixerBusFader" id="{8b11b42e-064a-41d7-b8e4-fc496dbbafce}" />
+	<object class="SpatialiserEffect" id="{04aa48ee-f465-4ceb-864f-a6fa49b4996f}" />
 	<object class="AutomationPoint" id="{8f4c55db-8eae-4766-80f6-7e4030427cf9}">
 		<property name="position">
 			<value>0.57999999999999996</value>

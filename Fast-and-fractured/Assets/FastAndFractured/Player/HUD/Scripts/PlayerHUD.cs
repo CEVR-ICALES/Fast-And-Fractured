@@ -1,19 +1,28 @@
 using Enums;
-using System.Collections.Generic;
+ using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured
 {
-    public class PlayerHUD : MonoBehaviour
+    public class PlayerHUD : AbstractAutoInitializableMonoBehaviour
     {
         [SerializeField] NormalShootHandle normalShootHandle;
         [SerializeField] PushShootHandle pushShootHandle;
         [SerializeField] CarMovementController carMovementController;
         [SerializeField] BaseUniqueAbility uniqueAbility;
         [SerializeField] StatsController statsController;
-        private void Awake()
+
+        protected override void Construct()
         {
-            LevelControllerButBetter.Instance.charactersCustomStart.AddListener(InitUpdateHUDEvents);
+            GetComponentsNeededInChildren();
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
+            GetComponentsNeededInChildren();
+            LevelController.Instance.onLevelPreStart.AddListener(InitUpdateHUDEvents);
+            
         }
         private void GetComponentsNeededInChildren()
         {
@@ -57,6 +66,7 @@ namespace FastAndFractured
                 carMovementController.onDashCooldownUpdate?.RemoveListener(UpdateDashCooldownHUD);
                 uniqueAbility.onCooldownUpdate?.RemoveListener(UpdateUniqueAbilityCooldownHUD);
             }
+            Deconstruct();
         }
 
         private void UpdateOverheatHUD(float currentValue, float maxValue)

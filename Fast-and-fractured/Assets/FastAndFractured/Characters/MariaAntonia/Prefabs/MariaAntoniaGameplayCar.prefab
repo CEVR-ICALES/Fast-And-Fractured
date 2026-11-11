@@ -4128,8 +4128,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: carModel.Array.size
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+      propertyPath: 'carModel.Array.data[3]'
+      value: 
+      objectReference: {fileID: 2701408875522869414}
     - target: {fileID: 856863917156540184, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
       propertyPath: lowEnduranceEmmissionRate
       value: 55
@@ -5076,6 +5080,11 @@ MonoBehaviour:
   firstReactionDuration: 0.1
   returnReactionDuration: 0.8
   impactReturnSmoothing: 8
+--- !u!1 &2701408875522869414 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8257880983716890985, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}
+  m_PrefabInstance: {fileID: 6333387155377144271}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2766236455326356409 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8180528592001716854, guid: c0082cd8ad96a0c408d8c1791c398cf2, type: 3}

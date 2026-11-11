@@ -11,6 +11,8 @@ namespace FastAndFractured
         public Button backButton;
         public Selectable defaultInteractable;
         public Button settingsButton;
+        [Tooltip("Optional Cinemachine virtual camera to activate when this screen is shown.")]
+        public GameObject screenCamera;
 
         public void SetAlpha(float alpha)
         {
@@ -19,9 +21,13 @@ namespace FastAndFractured
 
         public void SetInteractable(bool interactable)
         {
+            if (interactable) UiAudioFeedback.AttachTo(transform);
             canvasGroup.interactable = interactable;
             canvasGroup.blocksRaycasts = interactable;
         }
+
+        public void ActivateCamera() { if (screenCamera != null) screenCamera.SetActive(true); }
+        public void DeactivateCamera() { if (screenCamera != null) screenCamera.SetActive(false); }
     }
 }
 

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c40d61292c57cf47875163bc0794c15, type: 3}
+  m_Name: AudioPresentationProfile
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.AudioPresentationProfile
+  vehicle:
+    initialEngineVolume: 0.8
+    localEngineVolume: 0.8
+    remoteEngineVolume: 0.45
+    minimumEnginePitch: 0.85
+    maximumEnginePitch: 1.25
+    fullPitchSpeed: 25
+    engineRunningSpeed: 0.5
+    collisionCooldownSeconds: 0.18
+    minimumCollisionSpeed: 2
+    minimumCollisionVolume: 0.2
+    maximumCollisionVolume: 1
+    minimumCollisionMass: 1
+    collisionReferenceMass: 100
+    collisionReferenceSpeed: 15
+    hurtCooldownSeconds: 1.2
+    fallingDelaySeconds: 0.45
+    fallingVerticalSpeed: -5
+  ui:
+    clickVolume: 0.7
+    hoverVolume: 0.55
+    pitchVariation: 0.06
+    hoverCooldownSeconds: 0.08
+  abilities:
+    tomatoLaunchVolume: 1.25
+    tomatoImpactVolume: 1.2
+    tomatoSplatVolume: 0.6
+    chickenLaunchVolume: 1.25
+    chickenLaunchPitch: 1.2
+  chicken:
+    voiceVolume: 0.4
+    stepsVolume: 0.5
+    stepsDelaySeconds: 1.2
+    minimumWalkingSpeed: 0.6
+    cryCooldownSeconds: 0.4
+  zones:
+    marketPadding: 15
+    constructionPadding: 35
+    bridgePadding: 1
+    verticalExpansion: 20
+    volume: 0.4

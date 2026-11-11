@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace FishNet.Authenticating
 {
-
     /// <summary>
     /// This authenticator is an example of how to let host bypass the authentication process.
     /// When checking to authenticate on the client side call AuthenticateAsHost, and if returned true skip normal authentication.
@@ -23,11 +22,13 @@ namespace FishNet.Authenticating
         [Tooltip("True to enable use of AuthenticateAsHost.")]
         [SerializeField]
         private bool _allowHostAuthentication;
+
         /// <summary>
         /// Sets if to allow host authentication.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name = "value"></param>
         public void SetAllowHostAuthentication(bool value) => _allowHostAuthentication = value;
+
         /// <summary>
         /// Returns if AllowHostAuthentication is enabled.
         /// </summary>
@@ -45,14 +46,14 @@ namespace FishNet.Authenticating
         /// <summary>
         /// Initializes this script for use.
         /// </summary>
-        /// <param name="networkManager"></param>
+        /// <param name = "networkManager"></param>
         public override void InitializeOnce(NetworkManager networkManager)
         {
             base.InitializeOnce(networkManager);
-            //Listen for connection state of local server to set hash.
-            base.NetworkManager.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
-            //Listen for broadcast from client. Be sure to set requireAuthentication to false.
-            base.NetworkManager.ServerManager.RegisterBroadcast<HostPasswordBroadcast>(OnHostPasswordBroadcast, false);
+            // Listen for connection state of local server to set hash.
+            NetworkManager.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
+            // Listen for broadcast from client. Be sure to set requireAuthentication to false.
+            NetworkManager.ServerManager.RegisterBroadcast<HostPasswordBroadcast>(OnHostPasswordBroadcast, false);
         }
 
         /// <summary>
@@ -60,18 +61,18 @@ namespace FishNet.Authenticating
         /// </summary>
         private void ServerManager_OnServerConnectionState(ServerConnectionStateArgs obj)
         {
-            int length = (obj.ConnectionState == LocalConnectionState.Started) ? 25 : 0;
+            int length = obj.ConnectionState == LocalConnectionState.Started ? 25 : 0;
             SetHostHash(length);
         }
 
         /// <summary>
         /// Received on server when a client sends the password broadcast message.
         /// </summary>
-        /// <param name="conn">Connection sending broadcast.</param>
-        /// <param name="hpb"></param>
+        /// <param name = "conn">Connection sending broadcast.</param>
+        /// <param name = "hpb"></param>
         private void OnHostPasswordBroadcast(NetworkConnection conn, HostPasswordBroadcast hpb, Channel channel)
         {
-            //Not accepting host authentications. This could be an attack.
+            // Not accepting host authentications. This could be an attack.
             if (!_allowHostAuthentication)
             {
                 conn.Disconnect(true);
@@ -86,23 +87,23 @@ namespace FishNet.Authenticating
                 return;
             }
 
-            bool correctPassword = (hpb.Password == _hostHash);
+            bool correctPassword = hpb.Password == _hostHash;
             OnHostAuthenticationResult(conn, correctPassword);
         }
 
         /// <summary>
         /// Called after handling a host authentication result.
         /// </summary>
-        /// <param name="conn">Connection authenticating.</param>
-        /// <param name="authenticated">True if authentication passed.</param>
-        protected abstract void OnHostAuthenticationResult(NetworkConnection conn, bool authenticated);    
+        /// <param name = "conn">Connection authenticating.</param>
+        /// <param name = "authenticated">True if authentication passed.</param>
+        protected abstract void OnHostAuthenticationResult(NetworkConnection conn, bool authenticated);
 
         /// <summary>
         /// Sets a host hash of length.
         /// </summary>
         /// https://stackoverflow.com/questions/32932679/using-rngcryptoserviceprovider-to-generate-random-string
         private void SetHostHash(int length)
-        {            
+        {
             if (length <= 0)
             {
                 _hostHash = string.Empty;
@@ -127,26 +128,26 @@ namespace FishNet.Authenticating
         }
 
         /// <summary>
-        /// Returns true if authentication was sent as host.
+        /// Returns true if authentication was sent as the clientHost.
         /// </summary>
-        /// <returns></returns>
-        protected bool AuthenticateAsHost()
+        /// <remarks>This should only be called from the client side when receiving an authentication request.</remarks>
+        protected bool TryAuthenticateAsClientHost()
         {
             if (!_allowHostAuthentication)
                 return false;
+            /* Host hash would only exist if also
+             * the server. */
             if (_hostHash == string.Empty)
                 return false;
 
+            /* Send the password as it is only on the host. */
             HostPasswordBroadcast hpb = new()
             {
-                Password = _hostHash,
+                Password = _hostHash
             };
 
-            base.NetworkManager.ClientManager.Broadcast(hpb);
+            NetworkManager.ClientManager.Broadcast(hpb);
             return true;
         }
-
     }
-
-
 }

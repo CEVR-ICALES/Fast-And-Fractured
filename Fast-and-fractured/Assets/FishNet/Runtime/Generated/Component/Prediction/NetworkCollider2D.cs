@@ -1,89 +1,25 @@
-using FishNet.Managing;
-using FishNet.Object;
 using GameKit.Dependencies.Utilities;
-using GameKit.Dependencies.Utilities.Types;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using TimeManagerCls = FishNet.Managing.Timing.TimeManager;
 
 namespace FishNet.Component.Prediction
 {
-
-    public abstract class NetworkCollider2D : NetworkBehaviour
+    public abstract class NetworkCollider2D : NetworkColliderBase
     {
-        #region Types.
-        private struct Collider2DData : IResettable
-        {
-            /// <summary>
-            /// Tick which the collisions happened.
-            /// </summary>
-            public uint Tick;
-            /// <summary>
-            /// Hits for Tick.
-            /// </summary>
-            public HashSet<Collider2D> Hits;
-
-            public Collider2DData(uint tick, HashSet<Collider2D> hits)
-            {
-                Tick = tick;
-                Hits = hits;
-            }
-
-            public void InitializeState() { }
-            public void ResetState()
-            {
-                Tick = TimeManagerCls.UNSET_TICK;
-                CollectionCaches<Collider2D>.StoreAndDefault(ref Hits);
-            }
-        }
-        #endregion
-
         /// <summary>
         /// Called when another collider enters this collider.
         /// </summary>
-        public event Action<Collider2D> OnEnter;
+        public event Action<Collider2D, uint> OnEnter;
         /// <summary>
         /// Called when another collider stays in this collider.
         /// </summary>
-        public event Action<Collider2D> OnStay;
+        public event Action<Collider2D, uint> OnStay;
         /// <summary>
         /// Called when another collider exits this collider.
         /// </summary>
-        public event Action<Collider2D> OnExit;
-        /// <summary>
-        /// True to run collisions for colliders which are triggers, false to run collisions for colliders which are not triggers.
-        /// </summary>
-        [HideInInspector]
-        protected bool IsTrigger;
-        /// <summary>
-        /// Maximum number of simultaneous hits to check for. Larger values decrease performance but allow detection to work for more overlapping colliders. Typically the default value of 16 is more than sufficient.
-        /// </summary>
-        [Tooltip("Maximum number of simultaneous hits to check for. Larger values decrease performance but allow detection to work for more overlapping colliders. Typically the default value of 16 is more than sufficient.")]
-        [SerializeField]
-        private ushort _maximumSimultaneousHits = 16;
-        /// <summary>
-        /// How long of collision history to keep. Lower values will result in marginally better memory usage at the cost of collision histories desynchronizing on clients with excessive latency.
-        /// </summary>
-        [Tooltip("How long of collision history to keep. Lower values will result in marginally better memory usage at the cost of collision histories desynchronizing on clients with excessive latency.")]
-        [Range(0.1f, 2f)]
-        [SerializeField]
-        private float _historyDuration = 0.5f;
-        /// <summary>
-        /// Units to extend collision traces by. This is used to prevent missed overlaps when colliders do not intersect enough.
-        /// </summary>
-        [Tooltip("Units to extend collision traces by. This is used to prevent missed overlaps when colliders do not intersect enough.")]
-        [Range(0f, 100f)]
-        [SerializeField]
-        private float _additionalSize = 0.1f;
-        /// <summary>
-        /// Layers to trace on. This is used when value is not nothing.
-        /// </summary>
-        [Tooltip("Layers to trace on. This is used when value is not nothing.")]
-        [SerializeField]
-        private LayerMask _layers = (LayerMask)0;
-
+        public event Action<Collider2D, uint> OnExit;
         /// <summary>
         /// The colliders on this object.
         /// </summary>
@@ -93,209 +29,114 @@ namespace FishNet.Component.Prediction
         /// </summary>
         private Collider2D[] _hits;
         /// <summary>
-        /// The history of collider data.
+        /// Colliders which are entered for a tick, be it stay or for the first time.
         /// </summary>
-        private ResettableRingBuffer<Collider2DData> _colliderDataHistory;
-        /// <summary>
-        /// True if colliders have been searched for at least once.
-        /// We cannot check the null state on _colliders because Unity has a habit of initializing collections on it's own.
-        /// </summary>
-        private bool _collidersFound;
-        /// <summary>
-        /// True to cache collision histories for comparing start and exits.
-        /// </summary>
-        private bool _useCache => (OnEnter != null || OnExit != null);
-        /// <summary>
-        /// Last layer of the gameObject.
-        /// </summary>
-        private int _lastGameObjectLayer = -1;
-        /// <summary>
-        /// Interactable layers for the layer of this gameObject.
-        /// </summary>
-        private int _interactableLayers;
+        private Dictionary<uint, HashSet<Collider2D>> _enteredColliders;
 
-        protected virtual void Awake()
+        protected override void Awake()
         {
-            _colliderDataHistory = new();
-            //_colliderDataHistory = ResettableCollectionCaches<Collider2DData>.RetrieveRingBuffer();
+            base.Awake();
+
+            _enteredColliders = CollectionCaches<uint, HashSet<Collider2D>>.RetrieveDictionary();
             _hits = CollectionCaches<Collider2D>.RetrieveArray();
-            if (_hits.Length < _maximumSimultaneousHits)
-                _hits = new Collider2D[_maximumSimultaneousHits];
-        }
-
-        private void OnDestroy()
-        {
-            //ResettableCollectionCaches<Collider2DData>.StoreAndDefault(ref _colliderDataHistory);
-            CollectionCaches<Collider2D>.StoreAndDefault(ref _hits, _hits.Length);
-        }
-
-        public override void OnStartNetwork()
-        {
-            FindColliders();
-
-            //Initialize the ringbuffer. Server only needs 1 tick worth of history.
-            uint historyTicks = (base.IsServerStarted) ? 1 : TimeManager.TimeToTicks(_historyDuration);
-            _colliderDataHistory.Initialize((int)historyTicks);
-
-            //Events needed by server and client.
-            TimeManager.OnPostPhysicsSimulation += TimeManager_OnPostPhysicsSimulation;
-        }
-
-        public override void OnStartClient()
-        {
-            //Events only needed by the client.
-            PredictionManager.OnPostPhysicsTransformSync += PredictionManager_OnPostPhysicsTransformSync;
-            PredictionManager.OnPostReplicateReplay += PredictionManager_OnPostReplicateReplay;
-        }
-
-        public override void OnStopClient()
-        {
-            //Events only needed by the client.
-            PredictionManager.OnPostPhysicsTransformSync -= PredictionManager_OnPostPhysicsTransformSync;
-            PredictionManager.OnPostReplicateReplay -= PredictionManager_OnPostReplicateReplay;
-
+            if (_hits.Length < MaximumSimultaneousHits)
+                _hits = new Collider2D[MaximumSimultaneousHits];
         }
 
         public override void OnStopNetwork()
         {
-            TimeManager.OnPostPhysicsSimulation -= TimeManager_OnPostPhysicsSimulation;
+            base.OnStopNetwork();
+
+            StoreEnteredColliders(keepDictionary: true);
+            _enteredColliders?.Clear();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            CollectionCaches<uint, HashSet<Collider2D>>.StoreAndDefault(ref _enteredColliders);
+            CollectionCaches<Collider2D>.StoreAndDefault(ref _hits, _hits.Length);
         }
 
         /// <summary>
-        /// Called after Physics SyncTransforms are run after a reconcile.
-        /// This will only invoke if physics are set to TimeManager, within the TimeManager inspector.
+        /// Called by the PredictionManager immediately before a reconcile begins.
         /// </summary>
-        private void PredictionManager_OnPostPhysicsTransformSync(uint clientTick, uint serverTick)
+        protected override void PredictionManager_OnPostPhysicsTransformSync(uint clientTick, uint serverTick)
         {
-            /* This callback will only occur when client only.
-             * SInce this is the case remove histories prior
-             * to clientTick. */
-            if (clientTick > 0)
-                CleanHistory(clientTick - 1);
-            CheckColliders(clientTick, true);
-        }
-
-        /// <summary>
-        /// When using TimeManager for physics timing, this is called immediately after the physics simulation has occured for the tick.
-        /// While using Unity for physics timing, this is called during Update, only if a physics frame.
-        /// This may be useful if you wish to run physics differently for stacked scenes.
-        private void TimeManager_OnPostPhysicsSimulation(float delta)
-        {
-            CheckColliders(TimeManager.LocalTick, false);
-        }
-
-        /// <summary>
-        /// Called after physics is simulated when replaying a replicate method.
-        /// </summary>
-        private void PredictionManager_OnPostReplicateReplay(uint clientTick, uint serverTick)
-        {
-            CheckColliders(clientTick, true);
-        }
-
-        /// <summary>
-        /// Cleans history up to, while excluding tick.
-        /// </summary>
-        
-        private void CleanHistory(uint tick)
-        {
-            if (_useCache)
-            {
-                int removeCount = 0;
-                int historyCount = _colliderDataHistory.Count;
-                for (int i = 0; i < historyCount; i++)
-                {
-                    if (_colliderDataHistory[i].Tick >= tick)
-                        break;
-                    removeCount++;
-                }
-
-                _colliderDataHistory.RemoveRange(true, removeCount, resetRemoved: true);
-            }
-            //Cache is not used.
-            else
-            {
-                ClearColliderDataHistory();
-            }
-        }
-
-
-        /// <summary>
-        /// Units to extend collision traces by. This is used to prevent missed overlaps when colliders do not intersect enough.
-        /// </summary>
-        protected virtual float GetAdditionalSize() => _additionalSize;
-
-        /// <summary>
-        /// Checks for any trigger changes;
-        /// </summary>
-        
-        private void CheckColliders(uint tick, bool replay)
-        {
-            //Should not be possible as tick always starts on 1.
-            if (tick == TimeManagerCls.UNSET_TICK)
+            if (IsStopping)
                 return;
 
-            const int INVALID_HISTORY_VALUE = -1;
+            if (clientTick > 0)
+            {
+                List<uint> keysToRemove = CollectionCaches<uint>.RetrieveList();
+
+                uint maximumTick = clientTick - 2;
+                foreach (uint enteredTick in _enteredColliders.Keys)
+                {
+                    if (enteredTick < maximumTick)
+                        keysToRemove.Add(enteredTick);
+                }
+
+                foreach (uint tick in keysToRemove)
+                {
+                    HashSet<Collider2D> colliders = _enteredColliders[tick];
+                    CollectionCaches<Collider2D>.Store(colliders);
+
+                    _enteredColliders.Remove(tick);
+                }
+
+                CollectionCaches<uint>.Store(keysToRemove);
+            }
+
+            /* Call base only after removing old entries. This ensures old entries are removed
+             * before CheckColliders is called. */
+            base.PredictionManager_OnPostPhysicsTransformSync(clientTick, serverTick);
+        }
+        
+        /// <summary>
+        /// Removes a client from the entered state, if present.
+        /// </summary>
+        /// <remarks>This may be used to force OnEnter to trigger again while previously ignored, such as if collisions were time restricted.</remarks>
+        public void RemoveEnteredCollider(Collider2D c)
+        {
+            List<uint> keysToRemove = CollectionCaches<uint>.RetrieveList();
+            
+            foreach (KeyValuePair<uint, HashSet<Collider2D>> kvp in _enteredColliders)
+            {
+                kvp.Value.Remove(c);
+                
+                if (kvp.Value.Count == 0)
+                    keysToRemove.Add(kvp.Key);
+            }
+            
+            foreach (uint tick in keysToRemove)
+            {
+                HashSet<Collider2D> colliders = _enteredColliders[tick];
+                CollectionCaches<Collider2D>.Store(colliders);
+
+                _enteredColliders.Remove(tick);
+            }
+
+            CollectionCaches<uint>.Store(keysToRemove);
+        }
+
+        /// <summary>
+        /// Checks for any collider changes;
+        /// </summary>
+        protected override void CheckColliders(uint localTick)
+        {
+            // Initial checks failed.
+            if (!TryPrepareColliderCheck(localTick))
+                return;
 
             HashSet<Collider2D> current = CollectionCaches<Collider2D>.RetrieveHashSet();
-            HashSet<Collider2D> previous = null;
-
-            int previousHitsIndex = INVALID_HISTORY_VALUE;
-            /* Server only keeps 1 history so
-             * if server is started then
-             * simply clean one. When the server is
-             * started replay will never be true, so this
-             * will only call once per tick. */
-            if (base.IsServerStarted && tick > 0)
-                CleanHistory(tick - 1);
-
-            if (_useCache)
-            {
-                if (replay)
-                {
-                    previousHitsIndex = GetHistoryIndex(tick - 1, false);
-                    if (previousHitsIndex != -1)
-                        previous = _colliderDataHistory[previousHitsIndex].Hits;
-                }
-                //Not replaying.
-                else
-                {
-                    if (_colliderDataHistory.Count > 0)
-                    {
-                        Collider2DData cd = _colliderDataHistory[_colliderDataHistory.Count - 1];
-                        /* If the hit tick one before current then it can be used, otherwise
-                        * use a new collection for previous. */
-                        if (cd.Tick == (tick - 1))
-                            previous = cd.Hits;
-                    }
-                }
-            }
-            //Not using history, clear it all.
-            else
-            {
-                ClearColliderDataHistory();
-            }
 
             /* Previous may not be set here if there were
              * no collisions during the previous tick. */
 
             // The rotation of the object for box colliders.
             Quaternion rotation = transform.rotation;
-
-            //If layers are specified then do not use GOs layers, use specified.
-            if (_layers != (LayerMask)0)
-            {
-                _interactableLayers = _layers;
-            }
-            //Use GOs layers.
-            else
-            {
-                int currentLayer = gameObject.layer;
-                if (_lastGameObjectLayer != currentLayer)
-                {
-                    _lastGameObjectLayer = currentLayer;
-                    _interactableLayers = Layers.GetInteractableLayersValue(currentLayer);
-                }
-            }
 
             // Check each collider for triggers.
             foreach (Collider2D col in _colliders)
@@ -305,143 +146,117 @@ namespace FishNet.Component.Prediction
                 if (IsTrigger != col.isTrigger)
                     continue;
 
-                //Number of hits from the checks.
+                // Number of hits from the checks.
+                // Number of hits from the checks.
                 int hits;
                 if (col is CircleCollider2D circleCollider)
-                    hits = GetCircleCollider2DHits(circleCollider, _interactableLayers);
+                    hits = GetCircleCollider2DHits(circleCollider, InteractableLayers);
                 else if (col is BoxCollider2D boxCollider)
-                    hits = GetBoxCollider2DHits(boxCollider, rotation, _interactableLayers);
+                    hits = GetBoxCollider2DHits(boxCollider, rotation, InteractableLayers);
                 else
-                    hits = 0;
+                    hits = PhysicsScene2D.OverlapCollider(col, _hits, InteractableLayers);
 
-                // Check the hits for triggers.
+                /* Check hits for enter/exit callbacks. */
                 for (int i = 0; i < hits; i++)
                 {
                     Collider2D hit = _hits[i];
                     if (hit == null || hit == col)
                         continue;
 
-                    /* If not in previous then add and
-                     * invoke enter. */
-                    if (previous == null || !previous.Contains(hit))
-                        OnEnter?.Invoke(hit);
+                    /* An object may be hit through several of its own colliders; it should only be
+                     * reported once. The collider with the lowest instanceId represents the object,
+                     * a stable choice across ticks so a single object never causes duplicate
+                     * enter/exit callbacks. */
+                    if (IsDuplicateObjectHit(hit, i, hits, col))
+                        continue;
 
-                    //Also add to current hits.
                     current.Add(hit);
-                    OnStay?.Invoke(hit);
                 }
-            }
 
-            if (previous != null)
-            {
-                //Check for stays and exits.
-                foreach (Collider2D col in previous)
+                /* If the colliders already exist then the tick is being
+                 * run again, which would indicate this is being run during a reconcile.
+                 *
+                 * Since this key will have its data replaced with current, store the prior collection.*/
+                if (_enteredColliders.TryGetValueIL2CPP(localTick, out HashSet<Collider2D> enteredColliders))
                 {
-                    //If it was in previous but not current, it has exited.
-                    if (!current.Contains(col))
-                        OnExit?.Invoke(col);
+                    CollectionCaches<Collider2D>.Store(enteredColliders);
+                    _enteredColliders.Remove(localTick);
                 }
-            }
 
-            //If not using the cache then clean up collections.
-            if (_useCache)
-            {
-                //If not replaying add onto the end. */
-                if (!replay)
+                const uint unsetLastTick = uint.MaxValue;
+                uint lastTick = localTick > 1 ? localTick - 1 : unsetLastTick;
+
+                _enteredColliders.TryGetValueIL2CPP(lastTick, out HashSet<Collider2D> lastEnteredColliders);
+
+                /* If there are entered colliders then
+                 * update enteredColliders for the tick. */
+                if (current.Count > 0)
                 {
-                    AddToEnd();
-                }
-                /* If a replay then set current colliders
-                 * to one entry past historyIndex. If the next entry
-                 * beyond historyIndex is for the right tick it can be
-                 * updated, otherwise a result has to be inserted. */
-                else
-                {
-                    /* Previous hits was not found in history so we
-                     * cannot assume current results go right after the previousIndex.
-                     * Find whichever index is the closest to tick and return it. 
-                     * 
-                     * If an exact match is not found for tick then the entry just after
-                     * tick will be returned. This will let us insert current hits right
-                     * before that entry. */
-                    if (previousHitsIndex == -1)
+                    _enteredColliders[localTick] = current;
+
+                    /* If there were no colliders last tick
+                     * then without a doubt enter should be called since
+                     * the collider could not possibly be present already. */
+                    if (lastEnteredColliders == null)
                     {
-                        int currentIndex = GetHistoryIndex(tick, true);
-                        AddDataToIndex(currentIndex);
+                        //Invoke OnEnter for every collider in current.
+                        foreach (Collider2D c in current)
+                            InvokeOnEnter(c, localTick);
                     }
-                    //If previous hits are known then the index to update is right after previous index.
+                    /* If the last collection is found then
+                     * check to invoke Enter or Stay. */
                     else
                     {
-                        int insertIndex = (previousHitsIndex + 1);
-                        /* InsertIndex is out of bounds which means
-                         * to add onto the end. */
-                        if (insertIndex >= _colliderDataHistory.Count)
-                            AddToEnd();
-                        //Not the last entry to insert in the middle.
-                        else
-                            AddDataToIndex(insertIndex);
-                    }
-
-                    /* Adds data to an index. If the tick
-                     * matches on index with the current tick then
-                     * replace the entry. Otherwise insert to the
-                     * correct location. */
-                    void AddDataToIndex(int index)
-                    {
-                        Collider2DData colliderData = new(tick, current);
-                        /* If insertIndex is the same tick then replace, otherwise
-                         * put in front of. */
-                        //Replace.
-                        if (_colliderDataHistory[index].Tick == tick)
+                        foreach (Collider2D c in current)
                         {
-                            _colliderDataHistory[index].ResetState();
-                            _colliderDataHistory[index] = colliderData;
-                        }
-                        //Insert before.
-                        else
-                        {
-                            _colliderDataHistory.Insert(index, colliderData);
+                            if (lastEnteredColliders.Contains(c))
+                                OnStay?.Invoke(c, localTick);
+                            else
+                                InvokeOnEnter(c, localTick);
                         }
                     }
                 }
-
-                void AddToEnd()
+                //If current is empty the collection can be stored.
+                else
                 {
-                    Collider2DData colliderData = new(tick, current);
-                    _colliderDataHistory.Add(colliderData);
+                    CollectionCaches<Collider2D>.Store(current);
                 }
 
-            }
-            /* If not using caching then store results from this run. */
-            else
-            {
-                CollectionCaches<Collider2D>.Store(current);
-            }
-
-            //Returns history index for a tick.
-            /* GetClosest will return the closest match which is
-             * past lTick if lTick could not be found. */
-            int GetHistoryIndex(uint lTick, bool getClosest)
-            {
-                for (int i = 0; i < _colliderDataHistory.Count; i++)
+                /* Check to invoke OnExit. */
+                if (lastEnteredColliders != null)
                 {
-                    uint localTick = _colliderDataHistory[i].Tick;
-                    if (localTick == lTick)
-                        return i;
-                    /* Tick is too high, any further results
-                     * will also be too high. */
-                    if (localTick > tick)
+                    /* If current does not have the colliders from
+                     * the last tick, then an exit has occurred. */
+                    foreach (Collider2D c in lastEnteredColliders)
                     {
-                        if (getClosest)
-                            return i;
-                        else
-                            return INVALID_HISTORY_VALUE;
+                        if (!current.Contains(c))
+                            OnExit?.Invoke(c, localTick);
                     }
                 }
 
-                //Fall through.
-                return INVALID_HISTORY_VALUE;
+                /* If the server is started the lastEnteredColliders can
+                 * be discarded since the server will never reconcile, and
+                 * will never need to check them again. */
+                if (IsServerStarted)
+                {
+                    if (lastTick is not unsetLastTick && _enteredColliders.TryGetValueIL2CPP(lastTick, out HashSet<Collider2D> lEnteredColliders))
+                    {
+                        CollectionCaches<Collider2D>.Store(lEnteredColliders);
+                        _enteredColliders.Remove(lastTick);
+                    }
+                }
             }
+        }
+
+        /// <summary>
+        /// Invokes OnEnter, and OnStay if configured.
+        /// </summary>
+        private void InvokeOnEnter(Collider2D c, uint localTick)
+        {
+            OnEnter?.Invoke(c, localTick);
+
+            if (InvokeStayOnEnter)
+                OnStay?.Invoke(c, localTick);
         }
 
         /// <summary>
@@ -451,7 +266,7 @@ namespace FishNet.Component.Prediction
         private int GetCircleCollider2DHits(CircleCollider2D circleCollider, int layerMask)
         {
             circleCollider.GetCircleOverlapParams(out Vector3 center, out float radius);
-            radius += GetAdditionalSize();
+            radius += AdditionalSize;
             return gameObject.scene.GetPhysicsScene2D().OverlapCircle(center, radius, _hits, layerMask);
         }
 
@@ -462,44 +277,120 @@ namespace FishNet.Component.Prediction
         private int GetBoxCollider2DHits(BoxCollider2D boxCollider, Quaternion rotation, int layerMask)
         {
             boxCollider.GetBox2DOverlapParams(out Vector3 center, out Vector3 halfExtents);
-            Vector3 additional = (Vector3.one * GetAdditionalSize());
+            Vector3 additional = Vector3.one * AdditionalSize;
             halfExtents += additional;
             return gameObject.scene.GetPhysicsScene2D().OverlapBox(center, halfExtents, rotation.z, _hits, layerMask);
         }
 
         /// <summary>
-        /// Finds colliders to use.
-        /// <paramref name="rebuild"/>True to rebuild the colliders even if they are already populated.
+        /// Returns true when another hit from the same check belongs to the same object as <paramref name = "hit"/> and represents that
+        /// object, meaning this hit is a duplicate and should be ignored. The collider with the lowest instanceId is the representative,
+        /// a stable choice across ticks so one object never registers through more than one of its colliders.
         /// </summary>
-        public void FindColliders(bool rebuild = false)
+        /// <returns>True if this hit should be skipped as a duplicate of the same object.</returns>
+        private bool IsDuplicateObjectHit(Collider2D hit, int index, int hitCount, Collider2D self)
         {
-            if (_collidersFound && !rebuild)
-                return;
-            _collidersFound = true;
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (i == index)
+                    continue;
 
+                Collider2D other = _hits[i];
+                if (other == null || other == self || other == hit)
+                    continue;
+
+#if UNITY_6000_5_OR_NEWER
+                if (IsSameObject(hit, other) && other.GetEntityId() < hit.GetEntityId())
+#else
+                if (IsSameObject(hit, other) && other.GetInstanceID() < hit.GetInstanceID())
+#endif
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns whether two colliders belong to the same object, grouped by their attached rigidbody when either has one and
+        /// otherwise by their transform root.
+        /// </summary>
+        /// <returns>True if both colliders are on the same object.</returns>
+        private static bool IsSameObject(Collider2D a, Collider2D b)
+        {
+            Rigidbody2D aRigidbody = a.attachedRigidbody;
+            Rigidbody2D bRigidbody = b.attachedRigidbody;
+            if (aRigidbody != null || bRigidbody != null)
+                return aRigidbody == bRigidbody;
+
+            return a.transform.root == b.transform.root;
+        }
+
+        /// <summary>
+        /// Finds colliders on this object to check.
+        /// </summary>
+        /// <param name = "force">True to set colliders again even if already found. This action will clear stored collider states.</param>
+        /// <returns>True if colliders should be found again.</returns>
+        public override bool TryFindColliders(bool force = false)
+        {
+            if (!base.TryFindColliders(force))
+                return false;
+
+            ClearColliderDataHistory(invokeOnExit: true);
             _colliders = GetComponents<Collider2D>();
+
+            return true;
         }
 
         /// <summary>
         /// Resets this NetworkBehaviour so that it may be added to an object pool.
         /// </summary>
-        
         public override void ResetState(bool asServer)
         {
+            ClearColliderDataHistory(invokeOnExit: true);
             base.ResetState(asServer);
-            ClearColliderDataHistory();
         }
 
         /// <summary>
-        /// Resets datas in collider data history and clears collection.
+        /// Clears stored collider states.
         /// </summary>
-        private void ClearColliderDataHistory()
+        /// <param name = "invokeOnExit">True to invoke OnExit if a collider is stored in the OnEntered state. When called during a reconcile this used the current ClientReplayTick, otherwise uses LocalTick.</param>
+        protected override void ClearColliderDataHistory(bool invokeOnExit)
         {
-            foreach (Collider2DData cd in _colliderDataHistory)
-                cd.ResetState();
-            _colliderDataHistory.Clear();
+            if (_enteredColliders == null)
+                return;
+
+            /* Data needs to exist to iterate, and managers are needed
+             * to get the proper tick to invoke. */
+            if (invokeOnExit)
+            {
+                uint largestTick = 0;
+                foreach (uint tick in _enteredColliders.Keys)
+                    largestTick = Math.Max(tick, largestTick);
+
+                if (_enteredColliders.TryGetValueIL2CPP(largestTick, out HashSet<Collider2D> colliders))
+                {
+                    if (colliders != null)
+                    {
+                        foreach (Collider2D c in colliders)
+                            OnExit?.Invoke(c, TimeManagerCls.UNSET_TICK);
+                    }
+                }
+            }
+
+            StoreEnteredColliders(keepDictionary: true);
+            _enteredColliders.Clear();
+        }
+
+        /// <summary>
+        /// Stores each Collider HashSet within EnteredColliders.
+        /// </summary>
+        private void StoreEnteredColliders(bool keepDictionary)
+        {
+            foreach (HashSet<Collider2D> colliders in _enteredColliders.Values)
+                CollectionCaches<Collider2D>.Store(colliders);
+
+            if (!keepDictionary)
+                CollectionCaches<uint, HashSet<Collider2D>>.Store(_enteredColliders);
         }
     }
-
-
 }

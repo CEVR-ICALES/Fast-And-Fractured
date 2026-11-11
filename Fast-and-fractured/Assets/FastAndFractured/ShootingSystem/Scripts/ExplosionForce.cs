@@ -38,6 +38,7 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
+                GameplayAudio.Play(GameAudioCues.PhysicsEventsExplosion, transform.position);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;
@@ -64,6 +65,7 @@ namespace FastAndFractured
         {
             if (_explosionCollider != null)
             {
+                GameplayAudio.Play(GameAudioCues.PhysicsEventsExplosion, transform.position);
                 gameObject.SetActive(true);
                 _pushForce = pushForce;
                 _explosionCollider.center = center;

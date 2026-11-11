@@ -15,12 +15,15 @@ namespace FastAndFractured
         private List<GameObject> _charactersList = new List<GameObject>();
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void FixedUpdate()
@@ -46,6 +49,12 @@ namespace FastAndFractured
 
         private void HandleVfx()
         {
+            // Some map dead zones intentionally have no particle effect assigned. Treat VFX as
+            // optional instead of throwing every FixedUpdate (exception logging can stall the
+            // game completely when several zones are active at once).
+            if (vfx == null)
+                return;
+
             if(_charactersList.Count > 0)
             {
                 if(!vfx.isPlaying)

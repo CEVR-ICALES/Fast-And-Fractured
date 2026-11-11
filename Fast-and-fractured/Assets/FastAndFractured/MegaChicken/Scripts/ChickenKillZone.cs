@@ -19,11 +19,12 @@ namespace FastAndFractured
         private const float ANIMATION_LAYING_EGG_KILL_TIME = 0.4f;
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
-        void Start()
+        void Awake()
         {
-            _pushZone = groundImpactEffect.GetComponent<ChickenPushZone>();
+            if (groundImpactEffect != null)
+                _pushZone = groundImpactEffect.GetComponent<ChickenPushZone>();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -31,9 +32,10 @@ namespace FastAndFractured
             if (other.gameObject.layer == LayerMask.NameToLayer(GROUND_LAYER_NAME) && brain.IsJumping)
             {
                 if (_avoidMultipleExecutions) return;
-                groundImpactEffect.Play();
+                if (groundImpactEffect != null)
+                    groundImpactEffect.Play();
                 _avoidMultipleExecutions = true;
-                _pushZone.ActivatePushZone();
+                _pushZone?.ActivatePushZone();
                 TimerSystem.Instance.CreateTimer(TIME_TO_AVOID_MULTIPLE_EXECUTIONS, onTimerDecreaseComplete: () =>
                 {
                     _avoidMultipleExecutions = false;
