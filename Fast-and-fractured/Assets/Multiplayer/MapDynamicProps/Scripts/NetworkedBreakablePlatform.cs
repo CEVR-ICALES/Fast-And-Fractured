@@ -1,8 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured.Multiplayer
 {
@@ -27,8 +27,8 @@ namespace FastAndFractured.Multiplayer
         private static bool _reflectionCached;
 
         private int _currentCharacters;
-        private Coroutine _semiBreakCoroutine;
-        private Coroutine _breakCoroutine;
+        private ITimer _semiBreakTimer;
+        private ITimer _breakTimer;
         private bool _isBreaking;
 
         // 0 intact, 1 cracked (semi-break), 2 broken - for the host migration snapshot.
@@ -62,7 +62,7 @@ namespace FastAndFractured.Multiplayer
 
             _currentCharacters++;
             if (_currentCharacters == 1)
-                StartBreakTimers();
+                StartOrResumeBreakTimers();
         }
 
         private void OnTriggerExit(Collider other)
@@ -72,7 +72,14 @@ namespace FastAndFractured.Multiplayer
 
             _currentCharacters = Mathf.Max(0, _currentCharacters - 1);
             if (_currentCharacters == 0)
-                StopBreakTimers();
+                PauseBreakTimers();
+        }
+
+        public override void OnStopNetwork()
+        {
+            base.OnStopNetwork();
+            MatchTimers.Stop(ref _semiBreakTimer);
+            MatchTimers.Stop(ref _breakTimer);
         }
 
         [ObserversRpc]
@@ -81,29 +88,39 @@ namespace FastAndFractured.Multiplayer
             GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
         }
 
-        private void StartBreakTimers()
+        private void StartOrResumeBreakTimers()
         {
+            if (_breakTimer != null)
+            {
+                _semiBreakTimer?.ResumeTimer();
+                _breakTimer.ResumeTimer();
+                return;
+            }
+
             RpcPlayContact();
             float breakTime  = _breakTimeField   != null ? (float)_breakTimeField.GetValue(_wrapped)   : DEFAULT_BREAK_TIME;
             float semiPct    = _semiBreakPctField != null ? (float)_semiBreakPctField.GetValue(_wrapped) : DEFAULT_SEMI_BREAK_FRACTION;
 
-            _semiBreakCoroutine = StartCoroutine(BreakAfterDelay(breakTime * semiPct, semiBreak: true));
-            _breakCoroutine     = StartCoroutine(BreakAfterDelay(breakTime,           semiBreak: false));
+            _semiBreakTimer = MatchTimers.After(breakTime * semiPct, OnSemiBreakTimerComplete);
+            _breakTimer     = MatchTimers.After(breakTime,           OnBreakTimerComplete);
         }
 
-        private void StopBreakTimers()
+        private void PauseBreakTimers()
         {
-            if (_semiBreakCoroutine != null) { StopCoroutine(_semiBreakCoroutine); _semiBreakCoroutine = null; }
-            if (_breakCoroutine     != null) { StopCoroutine(_breakCoroutine);     _breakCoroutine     = null; }
+            _semiBreakTimer?.PauseTimer();
+            _breakTimer?.PauseTimer();
         }
 
-        private IEnumerator BreakAfterDelay(float delay, bool semiBreak)
+        private void OnSemiBreakTimerComplete()
         {
-            yield return new WaitForSeconds(delay);
-            if (semiBreak)
-                RpcSemiBreak();
-            else
-                RpcBreak();
+            _semiBreakTimer = null;
+            if (this != null && base.IsServerInitialized) RpcSemiBreak();
+        }
+
+        private void OnBreakTimerComplete()
+        {
+            _breakTimer = null;
+            if (this != null && base.IsServerInitialized) RpcBreak();
         }
 
         [ObserversRpc(RunLocally = true)]
