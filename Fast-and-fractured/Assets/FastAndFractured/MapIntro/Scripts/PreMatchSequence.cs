@@ -29,7 +29,7 @@ namespace FastAndFractured
         private readonly List<IPreMatchStage> _stages = new List<IPreMatchStage>();
         private int _index = -1;
         private bool _online, _countdownStarted, _cutToEnd;
-        private Action _onCountdown;
+        private Action _onCountdown, _onStagesDone;
         private IDisposable _skipListener;
         private float _stageStartTime;
 
@@ -37,8 +37,9 @@ namespace FastAndFractured
         private bool OnLastStage => _index == _stages.Count - 1;
         private float CountdownLead => COUNTDOWN_OVERLAP_SECONDS + (_online ? 0f : IngameEventsManager.EVENT_START_DELAY);
 
-        // Offline onCountdown runs when the 3-2-1 is released (right away when there is nothing to show).
-        public static PreMatchSequence Run(Scene scene, Transform car, bool online, Action onCountdown)
+        // Offline onCountdown runs when the 3-2-1 is released (right away when there is nothing to show). Online
+        // onStagesDone runs when every stage has ended or been skipped before the countdown.
+        public static PreMatchSequence Run(Scene scene, Transform car, bool online, Action onCountdown, Action onStagesDone = null)
         {
             var stages = new List<IPreMatchStage>();
             MapIntro intro = MapIntro.Create(scene, car);
@@ -48,6 +49,7 @@ namespace FastAndFractured
             {
                 if (intro != null) Destroy(intro.gameObject);
                 onCountdown?.Invoke();
+                if (online && Current == null) onStagesDone?.Invoke();
                 return null;
             }
 
@@ -57,6 +59,7 @@ namespace FastAndFractured
             sequence._stages.AddRange(stages);
             sequence._online = online;
             sequence._onCountdown = onCountdown;
+            sequence._onStagesDone = onStagesDone;
             Current = sequence;
             sequence._skipListener = InputSystem.onAnyButtonPress.Call(sequence.OnAnyButtonPress);
             sequence.PlayNext();
@@ -84,6 +87,7 @@ namespace FastAndFractured
             _index++;
             if (_cutToEnd || Stage == null)
             {
+                if (_online && !_cutToEnd) _onStagesDone?.Invoke();
                 StartCountdown();
                 Destroy(gameObject);
                 return;

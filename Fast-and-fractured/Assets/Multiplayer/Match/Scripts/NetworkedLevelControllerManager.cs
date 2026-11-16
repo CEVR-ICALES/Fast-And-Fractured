@@ -38,6 +38,11 @@ namespace FastAndFractured.Multiplayer
         private const ushort FALLBACK_PORT = 7770;
 
         private bool _countdownSuppressed, _countdownSignalled, _countdownShown, _countdownRpcSent, _introStarted, _matchClockStarted;
+
+        // The lead covers the whole intro and tutorial: once every player has skipped them, the "3" comes this soon.
+        private const float SKIPPED_PRE_MATCH_LEAD_SECONDS = 0.5f;
+        private readonly List<NetworkConnection> _preMatchPlayers = new List<NetworkConnection>();
+        private readonly HashSet<int> _preMatchDone = new HashSet<int>();
         private void LateUpdate()
         {
             if (!_countdownSignalled)
@@ -80,7 +85,7 @@ namespace FastAndFractured.Multiplayer
             {
                 _introStarted = true;
                 var car = countdown.transform.root.GetComponentInChildren<CarMovementController>();
-                if (!_countdownSignalled) PreMatchSequence.Run(gameObject.scene, car != null ? car.transform : null, true, null);
+                if (!_countdownSignalled) PreMatchSequence.Run(gameObject.scene, car != null ? car.transform : null, true, null, ReportPreMatchDone);
             }
             if (!_countdownSignalled) return;
             _countdownShown = true;
@@ -97,6 +102,29 @@ namespace FastAndFractured.Multiplayer
 
         [ObserversRpc(RunLocally = true)]
         private void RpcStartCountdown() => _countdownSignalled = true;
+
+        private void ReportPreMatchDone()
+        {
+            if (base.IsServerInitialized) MarkPreMatchDone(base.LocalConnection);
+            else ServerPreMatchDone();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void ServerPreMatchDone(NetworkConnection conn = null) => MarkPreMatchDone(conn);
+
+        [Server]
+        private void MarkPreMatchDone(NetworkConnection conn)
+        {
+            if (conn == null || _countdownRpcSent || _resumedAfterMigration.Value || _countdownStartTick.Value == 0) return;
+            _preMatchDone.Add(conn.ClientId);
+            foreach (var player in _preMatchPlayers)
+                if (player != null && player.IsActive && !_preMatchDone.Contains(player.ClientId)) return;
+
+            uint start = base.TimeManager.Tick + base.TimeManager.TimeToTicks(SKIPPED_PRE_MATCH_LEAD_SECONDS);
+            if (start >= _countdownStartTick.Value) return;
+            _countdownStartTick.Value = start;
+            MatchStartGate.LockUntil(start + base.TimeManager.TimeToTicks(COUNTDOWN_TO_CONTROLS_SECONDS));
+        }
 
         // Map timers (rising lava) count from the server's "Start" tick, so every peer agrees on them.
         private void StartMatchClockAt(uint controlsTick)
@@ -644,6 +672,9 @@ namespace FastAndFractured.Multiplayer
             _resumedAfterMigration.Value = resumingMigration;
             float countdownLead = resumingMigration ? MIGRATION_LEAD_SECONDS : COUNTDOWN_LEAD_SECONDS + Mathf.Max(0f, PreMatchSequence.DurationFor(gameObject.scene) - PreMatchSequence.COUNTDOWN_OVERLAP_SECONDS);
             _countdownStartTick.Value = base.TimeManager.Tick + base.TimeManager.TimeToTicks(countdownLead);
+            _preMatchPlayers.Clear();
+            _preMatchPlayers.AddRange(orderedConns);
+            _preMatchDone.Clear();
             MatchStartGate.LockUntil(_countdownStartTick.Value + base.TimeManager.TimeToTicks(resumingMigration ? MIGRATION_RESUME_SECONDS : COUNTDOWN_TO_CONTROLS_SECONDS));
 
             InitializePlayerTracking();
