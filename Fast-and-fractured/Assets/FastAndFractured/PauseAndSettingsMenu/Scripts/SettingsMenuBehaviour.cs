@@ -364,6 +364,7 @@ namespace FastAndFractured
                 antiAliasingDropdown.value = 0;
 
             antiAliasingDropdown.RefreshShownValue();
+            GraphicsQuality.ApplySavedAntiAliasing(_camera);
         }
 
         private void SetAntiAliasing(int dropdownIndex)
