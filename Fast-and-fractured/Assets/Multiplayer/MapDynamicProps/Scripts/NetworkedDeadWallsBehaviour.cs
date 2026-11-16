@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured.Multiplayer
 {
@@ -18,8 +18,8 @@ namespace FastAndFractured.Multiplayer
         private DeadWallsBehaivour[] _walls;
         private readonly List<Collider> _collidersToRestore = new List<Collider>();
 
-        private readonly Dictionary<NetworkedStatsController, Coroutine> _activeKillCountdowns
-            = new Dictionary<NetworkedStatsController, Coroutine>();
+        private readonly Dictionary<NetworkedStatsController, ITimer> _activeKillCountdowns
+            = new Dictionary<NetworkedStatsController, ITimer>();
         private readonly Dictionary<NetworkedStatsController, HashSet<long>> _activeContacts
             = new Dictionary<NetworkedStatsController, HashSet<long>>();
 
@@ -37,7 +37,7 @@ namespace FastAndFractured.Multiplayer
                     relay = wall.gameObject.AddComponent<NetworkedDeadWallRelay>();
                 relay.Configure(this, wall);
 
-                // Unity calls physics callbacks on disabled components: collider off, destroy, collider back next frame.
+                // Unity calls physics callbacks on disabled components: collider off until the legacy wall is gone.
                 foreach (var wallCollider in wall.GetComponents<Collider>())
                 {
                     if (wallCollider == null || !wallCollider.enabled || _collidersToRestore.Contains(wallCollider))
@@ -49,21 +49,12 @@ namespace FastAndFractured.Multiplayer
 
                 Destroy(wall);
             }
-
-            StartCoroutine(RestoreWallCollidersNextFrame());
         }
 
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
 
-            // FishNet deactivates scene objects before spawn, which stops the restore coroutine: restore here too.
-            RestoreWallColliders();
-        }
-
-        private IEnumerator RestoreWallCollidersNextFrame()
-        {
-            yield return null;
             RestoreWallColliders();
         }
 
@@ -107,8 +98,7 @@ namespace FastAndFractured.Multiplayer
             if (_activeKillCountdowns.ContainsKey(stats)) return;
 
             float killTime = wall != null ? wall.KillTime : DEFAULT_KILL_TIME;
-            var coroutine = StartCoroutine(KillCountdown(stats, killTime));
-            _activeKillCountdowns[stats] = coroutine;
+            _activeKillCountdowns[stats] = MatchTimers.After(killTime, () => OnKillCountdownComplete(stats));
 
             if (stats.Owner != null && stats.Owner.IsValid)
                 RpcNotifyOutsideMap(stats.Owner, true);
@@ -162,9 +152,9 @@ namespace FastAndFractured.Multiplayer
             return true;
         }
 
-        private IEnumerator KillCountdown(NetworkedStatsController stats, float delay)
+        private void OnKillCountdownComplete(NetworkedStatsController stats)
         {
-            yield return new WaitForSeconds(delay);
+            if (this == null || !base.IsServerInitialized) return;
 
             bool wasActive = _activeKillCountdowns.Remove(stats);
             _activeContacts.Remove(stats);
@@ -174,9 +164,9 @@ namespace FastAndFractured.Multiplayer
 
         private void CancelCountdown(NetworkedStatsController stats)
         {
-            if (_activeKillCountdowns.TryGetValue(stats, out var coroutine))
+            if (_activeKillCountdowns.TryGetValue(stats, out var countdown))
             {
-                if (coroutine != null) StopCoroutine(coroutine);
+                MatchTimers.Stop(ref countdown);
                 _activeKillCountdowns.Remove(stats);
             }
         }
@@ -197,8 +187,11 @@ namespace FastAndFractured.Multiplayer
         public override void OnStopNetwork()
         {
             base.OnStopNetwork();
-            foreach (var coroutine in _activeKillCountdowns.Values)
-                if (coroutine != null) StopCoroutine(coroutine);
+            foreach (var countdown in _activeKillCountdowns.Values)
+            {
+                var timer = countdown;
+                MatchTimers.Stop(ref timer);
+            }
             _activeKillCountdowns.Clear();
             _activeContacts.Clear();
         }
