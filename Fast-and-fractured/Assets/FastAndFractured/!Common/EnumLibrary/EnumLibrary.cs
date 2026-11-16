@@ -180,6 +180,22 @@ namespace Enums
         MARIAANTONIA_2_HALFBODY
     }
 
+    public enum PlayerOnPush
+    {
+        CARME_0_ONPUSH,
+        JOSEFINO_0_ONPUSH,
+        MARIAANTONIA_0_ONPUSH,
+        PEPE_0_ONPUSH,
+        CARME_1_ONPUSH,
+        JOSEFINO_1_ONPUSH,
+        MARIAANTONIA_1_ONPUSh,
+        PEPE_1_ONPUSH,
+        CARME_2_ONPUSH,
+        JOSEFINO_2_ONPUSH,
+        MARIAANTONIA_2_ONPUSH,
+        PEPE_2_ONPUSH
+    }
+
     public enum UniqueAbilitiesIcons
     {
         CARME_UA,

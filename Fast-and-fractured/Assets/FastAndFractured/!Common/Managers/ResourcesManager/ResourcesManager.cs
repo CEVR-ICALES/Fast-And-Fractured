@@ -15,6 +15,10 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     private List<Sprite> _playerPortraits;
     public List<Sprite> PlayerHalfBody => _playerHalfBody;
     private List<Sprite> _playerHalfBody;
+    public List<Sprite> PlayerLowEndurance => _playerLowEndurance;
+    private List<Sprite> _playerLowEndurance;
+    public List<Sprite> PlayerOnPush => _playerOnPush;
+    private List<Sprite> _playerOnPush;
     public List<Sprite> UniqueAbilitiesIcons => _uniqueAbilitiesIcons;
     private List<Sprite> _uniqueAbilitiesIcons;
     public List<Sprite> PushShootIcons => _pushShootIcons;
@@ -35,6 +39,8 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     private Dictionary<PlayerIcons, Sprite> _playerIconsDictionary = new Dictionary<PlayerIcons, Sprite>();
     private Dictionary<PlayerPortraits, Sprite> _playerPortraitsDictionary = new Dictionary<PlayerPortraits, Sprite>();
     private Dictionary<PlayerHalfBody, Sprite> _playerHalfBodyDictionary = new Dictionary<PlayerHalfBody, Sprite>();
+    private Dictionary<PlayerLowEndurance, Sprite> _playerLowEnduranceDictionary = new Dictionary<PlayerLowEndurance, Sprite>();
+    private Dictionary<PlayerOnPush, Sprite> _playerOnPushDictionary = new Dictionary<PlayerOnPush, Sprite>();
     private Dictionary<UniqueAbilitiesIcons, Sprite> _uaIconsDictionary = new Dictionary<UniqueAbilitiesIcons, Sprite>();
     private Dictionary<PushShootIcons, Sprite> _pushShootIconsDictionary = new Dictionary<PushShootIcons, Sprite>();
     private Dictionary<NormalShootIcons, Sprite> _normalShootIconsDictionary = new Dictionary<NormalShootIcons, Sprite>();
@@ -44,11 +50,13 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
     {
         base.Construct();
         _resourcesLoader = gameObject.GetComponent<ResourcesLoader>();
-        _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits, ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _pushShootIcons, ref _normalShootIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons);
+        _resourcesLoader.LoadResources(ref _playerIcons, ref _playerPortraits, ref _playerHalfBody, ref _uniqueAbilitiesIcons, ref _pushShootIcons, ref _normalShootIcons, ref _screenEffectsSprites, ref _keyboardIcons, ref _xboxIcons, ref _playstationIcons,ref _playerLowEndurance, ref _playerOnPush);
 
         InitDictionary(typeof(PlayerIcons), _playerIcons, _playerIconsDictionary);
         InitDictionary(typeof(PlayerPortraits), _playerPortraits, _playerPortraitsDictionary);
         InitDictionary(typeof(PlayerHalfBody), _playerHalfBody, _playerHalfBodyDictionary);
+        InitDictionary(typeof(PlayerLowEndurance), _playerLowEndurance, _playerLowEnduranceDictionary);
+        InitDictionary(typeof(PlayerOnPush), _playerOnPush, _playerOnPushDictionary);
         InitDictionary(typeof(UniqueAbilitiesIcons), _uniqueAbilitiesIcons, _uaIconsDictionary);
         InitDictionary(typeof(PushShootIcons), _pushShootIcons, _pushShootIconsDictionary);
         InitDictionary(typeof(NormalShootIcons), _normalShootIcons, _normalShootIconsDictionary);
@@ -150,6 +158,16 @@ public class ResourcesManager : AbstractSingleton<ResourcesManager>
         foreach (Sprite sprite in _playerHalfBodyDictionary.Values)
         {
             if (sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        foreach (Sprite sprite in _playerLowEnduranceDictionary.Values)
+        {
+            if(sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
+        }
+
+        foreach (Sprite sprite in _playerOnPushDictionary.Values)
+        {
+            if(sprite.name.ToUpper() == spriteKey.ToUpper()) return sprite;
         }
 
         foreach (Sprite sprite in _screenEffectsDictionary.Values)
