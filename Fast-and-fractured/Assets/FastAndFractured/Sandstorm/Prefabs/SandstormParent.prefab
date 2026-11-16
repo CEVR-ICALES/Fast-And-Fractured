@@ -31781,6 +31781,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -31802,9 +31804,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &3638430436764155573
 MeshFilter:
@@ -31873,6 +31877,8 @@ VFXRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_StaticBatchInfo:
@@ -31892,9 +31898,11 @@ VFXRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
 --- !u!1 &8837894182934861129
 GameObject:
   m_ObjectHideFlags: 0
@@ -31906,6 +31914,7 @@ GameObject:
   - component: {fileID: 362617908678673583}
   - component: {fileID: 6586242171806106470}
   - component: {fileID: 7377365295970745952}
+  - component: {fileID: 3834133001233021958}
   m_Layer: 9
   m_Name: SandstormParent
   m_TagString: Untagged
@@ -31944,6 +31953,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _autoConstructOnAwake: 1
   _autoInitializeOnStart: 1
+  _autoInitializeOnEnable: 1
   fogParent: {fileID: 8837894182934861129}
   primaryFog: {fileID: 1170395247874031829}
   maxGrowthTime: 125
@@ -31984,6 +31994,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1807, y: 254.2, z: 34.42}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3834133001233021958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8837894182934861129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4e93bcd9443f6e45ad131283b9ea374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.SandstormQuality
+  stormRenderer: {fileID: 3971053391363650404}
+  lowResolutionUpToLevel: 3
 --- !u!1001 &4591910501815239477
 PrefabInstance:
   m_ObjectHideFlags: 0
