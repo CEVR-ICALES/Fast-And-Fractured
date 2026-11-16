@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -14,7 +13,7 @@ namespace FastAndFractured.Multiplayer
     /// </summary>
     [RequireComponent(typeof(ChickenBrain))]
     [RequireComponent(typeof(NetworkObject))]
-    public class NetworkedMegaChickenBoss : NetworkBehaviour
+    public class NetworkedMegaChickenBoss : NetworkBehaviour, IOwnsStateMachineTick
     {
         private ChickenBrain    _brain;
         private ChickenKillZone _killZone;
@@ -272,20 +271,12 @@ namespace FastAndFractured.Multiplayer
 
             _quarantined = colliders;
             _quarantinedStates = enabledStates;
-            StartCoroutine(RestoreRelayedCollidersNextFrame());
         }
 
         // The kill zone's colliders while the legacy component is being destroyed.
         private Collider[] _quarantined;
         private bool[] _quarantinedStates;
 
-        private IEnumerator RestoreRelayedCollidersNextFrame()
-        {
-            yield return null;
-            RestoreRelayedColliders();
-        }
-
-        /// <summary>Also run from OnStartNetwork: FishNet deactivates scene objects before spawn, which stops the coroutine.</summary>
         private void RestoreRelayedColliders()
         {
             if (_quarantined == null) return;

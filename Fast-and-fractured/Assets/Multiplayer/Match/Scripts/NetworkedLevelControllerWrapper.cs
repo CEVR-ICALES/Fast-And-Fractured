@@ -329,6 +329,7 @@ namespace FastAndFractured.Multiplayer
             {
                 var nob = ctrl.GetComponentInParent<FishNet.Object.NetworkObject>(true);
                 if (nob == null) continue;
+                if (nob.GetComponent<IOwnsStateMachineTick>() != null) continue;
 
                 // The owner's child state machines (shooting) keep running from Update as in singleplayer; remote ones stay off.
                 bool isMovementController = ctrl.gameObject == nob.gameObject;
