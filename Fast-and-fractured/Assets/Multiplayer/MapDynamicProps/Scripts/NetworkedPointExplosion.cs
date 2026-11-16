@@ -1,8 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using FishNet.Object;
 using UnityEngine;
+using Utilities;
 
 namespace FastAndFractured.Multiplayer
 {
@@ -70,7 +70,7 @@ namespace FastAndFractured.Multiplayer
             if (_explosionHitbox != null)
                 _explosionHitbox.ExplosionCollider = _explosionHitbox.GetComponent<SphereCollider>();
 
-            StartCoroutine(RemoveLegacyAfterColliderQuarantine());
+            RemoveLegacyBehindColliderQuarantine();
         }
 
         private float ReadFloat(FieldInfo field, float fallback)
@@ -79,8 +79,11 @@ namespace FastAndFractured.Multiplayer
         }
 
         private readonly List<Collider> _collidersToRestore = new List<Collider>();
+        private readonly HashSet<NetworkedStatsController> _damaged = new HashSet<NetworkedStatsController>();
+        private ITimer _damageTimer;
+        private ITimer _deactivateTimer;
 
-        private IEnumerator RemoveLegacyAfterColliderQuarantine()
+        private void RemoveLegacyBehindColliderQuarantine()
         {
             foreach (var collider in GetComponentsInChildren<Collider>(true))
             {
@@ -93,15 +96,19 @@ namespace FastAndFractured.Multiplayer
 
             Destroy(_wrapped);
             _wrapped = null;
-            yield return null;
-            RestoreColliders();
         }
 
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
-            // FishNet deactivates scene objects before spawn, which stops the restore coroutine: restore here too.
             RestoreColliders();
+        }
+
+        public override void OnStopNetwork()
+        {
+            base.OnStopNetwork();
+            MatchTimers.Stop(ref _damageTimer);
+            MatchTimers.Stop(ref _deactivateTimer);
         }
 
         private void RestoreColliders()
@@ -129,34 +136,41 @@ namespace FastAndFractured.Multiplayer
                     _explosionRadius, _pushForce, _explosionCenter, _startHitTime, _endHitTime, gameObject);
             }
 
-            StartCoroutine(ServerRadiusDamage());
+            StartRadiusDamage();
 
             RpcExplosionTriggered();
         }
 
-        private IEnumerator ServerRadiusDamage()
+        [Server]
+        private void StartRadiusDamage()
         {
-            if (_damagePercentage <= 0f) yield break;
-            yield return new WaitForSeconds(_startHitTime);
+            if (_damagePercentage <= 0f) return;
+            _damaged.Clear();
+            float window = Mathf.Max(0f, _endHitTime - _startHitTime);
+            _damageTimer = MatchTimers.After(_startHitTime, () => ScanRadiusDamage(window));
+        }
 
-            var damaged = new HashSet<NetworkedStatsController>();
-            float until = Time.time + Mathf.Max(0f, _endHitTime - _startHitTime);
-            do
+        private void ScanRadiusDamage(float remainingWindow)
+        {
+            _damageTimer = null;
+            if (this == null || !base.IsServerInitialized) return;
+
+            Transform origin = _explosionHitbox != null ? _explosionHitbox.transform : transform;
+            Vector3 center = origin.TransformPoint(_explosionCenter);
+            Vector3 scale = origin.lossyScale;
+            float radius = _explosionRadius * Mathf.Max(scale.x, Mathf.Max(scale.y, scale.z));
+            foreach (var hit in Physics.OverlapSphere(center, radius, ~0, QueryTriggerInteraction.Ignore))
             {
-                Transform origin = _explosionHitbox != null ? _explosionHitbox.transform : transform;
-                Vector3 center = origin.TransformPoint(_explosionCenter);
-                Vector3 scale = origin.lossyScale;
-                float radius = _explosionRadius * Mathf.Max(scale.x, Mathf.Max(scale.y, scale.z));
-                foreach (var hit in Physics.OverlapSphere(center, radius, ~0, QueryTriggerInteraction.Ignore))
-                {
-                    if (!hit.TryGetComponent(out StatsController core)) continue;   // the car body collider
-                    var stats = hit.GetComponentInParent<NetworkedStatsController>();
-                    if (stats == null) stats = hit.GetComponentInChildren<NetworkedStatsController>();
-                    if (stats == null || !damaged.Add(stats)) continue;
-                    stats.DealEnvironmentDamageServer(core.MaxEndurance * _damagePercentage);
-                }
-                yield return new WaitForSeconds(DAMAGE_SCAN_INTERVAL);
-            } while (Time.time < until);
+                if (!hit.TryGetComponent(out StatsController core)) continue;   // the car body collider
+                var stats = hit.GetComponentInParent<NetworkedStatsController>();
+                if (stats == null) stats = hit.GetComponentInChildren<NetworkedStatsController>();
+                if (stats == null || !_damaged.Add(stats)) continue;
+                stats.DealEnvironmentDamageServer(core.MaxEndurance * _damagePercentage);
+            }
+
+            float nextWindow = remainingWindow - DAMAGE_SCAN_INTERVAL;
+            if (nextWindow > 0f)
+                _damageTimer = MatchTimers.After(DAMAGE_SCAN_INTERVAL, () => ScanRadiusDamage(nextWindow));
         }
 
         [ObserversRpc(RunLocally = true)]
@@ -168,7 +182,15 @@ namespace FastAndFractured.Multiplayer
             if (_visuals != null) _visuals.SetActive(false);
             if (!base.IsServerInitialized) ShowClientBlast();
 
-            StartCoroutine(DeactivateAfterDelay(_endingTime));
+            MatchTimers.Stop(ref _deactivateTimer);
+            _deactivateTimer = MatchTimers.After(_endingTime, DeactivateAfterExplosion);
+        }
+
+        private void DeactivateAfterExplosion()
+        {
+            _deactivateTimer = null;
+            MatchTimers.Stop(ref _damageTimer);
+            if (this != null) gameObject.SetActive(false);
         }
 
         private static readonly FieldInfo _explosionVfxField =
@@ -185,10 +207,5 @@ namespace FastAndFractured.Multiplayer
             _explosionHitbox.gameObject.SetActive(true);
         }
 
-        private IEnumerator DeactivateAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            gameObject.SetActive(false);
-        }
     }
 }
