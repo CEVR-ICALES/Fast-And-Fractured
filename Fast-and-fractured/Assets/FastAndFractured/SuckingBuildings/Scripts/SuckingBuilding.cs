@@ -13,6 +13,13 @@ namespace FastAndFractured
         [SerializeField] private ParticleSystem vfx;
         private bool _isPaused = false;
         private List<GameObject> _charactersList = new List<GameObject>();
+        private System.Predicate<GameObject> _pullFilter;
+
+        public void SetPullFilter(System.Predicate<GameObject> pullFilter)
+        {
+            _pullFilter = pullFilter;
+        }
+
         void OnEnable()
         {
             PauseManager.TryRegisterPausable(this);
@@ -35,7 +42,7 @@ namespace FastAndFractured
                 HandleVfx();
                 foreach (GameObject obj in _charactersList)
                 {
-                    if(obj!=null)
+                    if(obj!=null && (_pullFilter == null || _pullFilter(obj)))
                     {
                         float distance = Vector3.Distance(transform.position, obj.transform.position);
                         if(distance<=detectionRadius)
