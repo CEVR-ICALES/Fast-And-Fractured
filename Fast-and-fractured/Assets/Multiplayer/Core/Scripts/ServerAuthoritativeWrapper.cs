@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using UnityEngine;
@@ -14,8 +13,11 @@ namespace FastAndFractured.Multiplayer
     {
         protected T Wrapped { get; private set; }
 
+        protected virtual bool KeepWrappedOnClients => false;
+
         private bool _wrappedRemovalScheduled;
         private List<Collider> _quarantinedColliders;
+        private int _quarantineFrame;
 
         protected virtual void Awake()
         {
@@ -26,13 +28,19 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartNetwork();
 
-            // FishNet deactivates scene objects before spawn, which stops a restore started in Awake.
+            // FishNet deactivates scene objects before spawn, so a quarantine from Awake may still be pending.
             RestoreQuarantinedColliders();
 
-            if (Wrapped != null && !base.IsServerInitialized)
+            if (Wrapped != null && !base.IsServerInitialized && !KeepWrappedOnClients)
                 RemoveWrappedBehaviour();
 
             OnConfigured();
+        }
+
+        private void Update()
+        {
+            if (_quarantinedColliders != null && Time.frameCount > _quarantineFrame)
+                RestoreQuarantinedColliders();
         }
 
         /// <summary>Quarantines the colliders for a frame and removes the legacy behaviour; also usable on the server.</summary>
@@ -42,27 +50,23 @@ namespace FastAndFractured.Multiplayer
                 return;
 
             _wrappedRemovalScheduled = true;
-            _quarantinedColliders = new List<Collider>();
+            var quarantined = new List<Collider>();
             foreach (var collider in GetComponents<Collider>())
             {
                 if (collider == null || !collider.enabled)
                     continue;
 
                 collider.enabled = false;
-                _quarantinedColliders.Add(collider);
+                quarantined.Add(collider);
             }
 
             Destroy(Wrapped);
             Wrapped = null;
 
-            if (_quarantinedColliders.Count > 0)
-                StartCoroutine(RestoreCollidersNextFrame());
-        }
-
-        private IEnumerator RestoreCollidersNextFrame()
-        {
-            yield return null;
-            RestoreQuarantinedColliders();
+            if (quarantined.Count == 0)
+                return;
+            _quarantinedColliders = quarantined;
+            _quarantineFrame = Time.frameCount;
         }
 
         private void RestoreQuarantinedColliders()
