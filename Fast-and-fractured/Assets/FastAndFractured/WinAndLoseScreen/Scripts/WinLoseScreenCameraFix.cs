@@ -10,9 +10,12 @@ namespace FastAndFractured
     /// </summary>
     public sealed class WinLoseScreenCameraFix : MonoBehaviour
     {
+        public const int OVERLAY_SORTING_ORDER = -1;
+
         private MenuScreen _screen;
         private Canvas _rootCanvas;
         private RenderMode _originalRenderMode;
+        private int _originalSortingOrder;
         private bool _overlaid;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -54,8 +57,14 @@ namespace FastAndFractured
         private void SetOverlay(bool overlay)
         {
             if (_rootCanvas == null || overlay == _overlaid) return;
-            if (overlay) _originalRenderMode = _rootCanvas.renderMode;
+            if (overlay)
+            {
+                _originalRenderMode = _rootCanvas.renderMode;
+                _originalSortingOrder = _rootCanvas.sortingOrder;
+            }
             _rootCanvas.renderMode = overlay ? RenderMode.ScreenSpaceOverlay : _originalRenderMode;
+            // Switching to overlay at runtime draws the canvas last whatever its order; a new order re-sorts it.
+            _rootCanvas.sortingOrder = overlay ? OVERLAY_SORTING_ORDER : _originalSortingOrder;
             _overlaid = overlay;
             if (!overlay && WinLoseScreenBehaviour.HasInstance) WinLoseScreenBehaviour.Instance.HideCutscene();
         }
