@@ -47,8 +47,6 @@ namespace FastAndFractured
         [SerializeField]
         private float _overHeathMinEmissionRate = 0;
         private float _overHeathEmissionRateXTime;
-        [SerializeField]
-        private ScreenShakeSourceController screenShakeSourceController;
         #endregion
 
         #region UNITY_EVENTS
@@ -66,10 +64,13 @@ namespace FastAndFractured
 
         #region OVERRIDE_METHODS
 
-        protected override void SetBulletStats(BulletBehaviour bulletBehaivour)
+        // The turret's serialized collider is ignored by its bullets; otherwise the base uses the parent's collider.
+        protected override BulletSpawnParameters PopulateBaseSpawnParameters(Vector3 velocity, float range)
         {
-            base.SetBulletStats(bulletBehaivour);
-            ((NormalBulletBehaviour)bulletBehaivour).IgnoreCollider = ignoredCollider;
+            var spawnParams = base.PopulateBaseSpawnParameters(velocity, range);
+            if (ignoredCollider != null)
+                spawnParams.IgnoredCollider = ignoredCollider;
+            return spawnParams;
         }
 
         #endregion
@@ -79,6 +80,8 @@ namespace FastAndFractured
         {
             ignoredCollider = collider;
         }
+
+        [SerializeField] private ScreenShakeSourceController screenShakeSourceController;
 
         public void NormalShooting()
         {
@@ -103,6 +106,7 @@ namespace FastAndFractured
 
                 Vector3 velocity = shootingDirection * characterStatsController.NormalShootSpeed;
 
+                // The shooting screen shake is played by the state machine (AplyScreenShakeAction).
                 ShootBullet(velocity, characterStatsController.NormalShootMaxRange);
 
                 canShoot = false;
@@ -237,31 +241,23 @@ namespace FastAndFractured
 
         public void HandleExternalFadeSightUI(bool toggle)
         {
-            if (_isOverHeat)
-                return;
-
-            if (toggle)
-            {
-                FadeInSightHUD();
-            }
-            else
-            {
-                FadeOutSightHUD();
-            }
+            if (_isOverHeat) return;
+            UpdateSightHud(toggle);
         }
 
-        private void FadeOutSightHUD()
-        {
-            if (!characterStatsController.IsPlayer)
-                return;
-            HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,false,FADE_SIGHT_HUD_TIME);
-        }
+        private void FadeOutSightHUD() => UpdateSightHud(false);
 
-        private void FadeInSightHUD()
+        private void FadeInSightHUD() => UpdateSightHud(true);
+
+        private void UpdateSightHud(bool isVisible)
         {
-            if (!characterStatsController.IsPlayer)
-                return;
-            HUDManager.Instance.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR,true,FADE_SIGHT_HUD_TIME);
+            var hud = HUDManager.ExistingInstance;
+            var level = LevelController.ExistingInstance;
+            if (hud == null || level == null || characterStatsController == null) return;
+            var localPlayer = level.LocalPlayer;
+            if (localPlayer == null) return;
+            if (characterStatsController.gameObject != localPlayer && !characterStatsController.transform.IsChildOf(localPlayer.transform)) return;
+            hud.UpdateImageUIElement(UIDynamicElementType.SHOOTING_CROSSHAIR, isVisible, FADE_SIGHT_HUD_TIME);
         }
 
         private void ChangeCurrentOverHeathVFX(float timeDirection = 1)

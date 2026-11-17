@@ -44,7 +44,9 @@ namespace FastAndFractured
             }
             else
             {
-                if(EventSystem.current.currentSelectedGameObject != null)
+                GameObject selected = EventSystem.current.currentSelectedGameObject;
+                // A text field only receives typing while it is selected.
+                if(selected != null && !IsTextField(selected))
                 {
                     EventSystem.current.SetSelectedGameObject(null);
                 }
@@ -84,6 +86,11 @@ namespace FastAndFractured
             {
                 lastButtonSelected = EventSystem.current.currentSelectedGameObject;
             }
+        }
+        private static bool IsTextField(GameObject selected)
+        {
+            return selected.GetComponent<TMPro.TMP_InputField>() != null
+                || selected.GetComponent<UnityEngine.UI.InputField>() != null;
         }
         private void LoadScreensInScene()
         {

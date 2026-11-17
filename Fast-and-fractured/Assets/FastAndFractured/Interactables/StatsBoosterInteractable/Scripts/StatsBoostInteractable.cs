@@ -16,15 +16,24 @@ namespace FastAndFractured
         public string ingameEventText;
         public float ingameEventTimeOnScreen = 2f;
 
+        /// <summary>
+        /// Optional hook (multiplayer) deciding who is told about this pickup; true when it showed the message. Null in
+        /// singleplayer.
+        /// </summary>
+        public System.Func<GameObject, bool> IngameEventRouter;
+
         public override void OnInteract(GameObject interactionFrom, GameObject intearactionTo)
         {
             StatsController statsController = interactionFrom.GetComponentInParent<StatsController>();
             VehicleVfxController vehicleVfxController = interactionFrom.GetComponentInParent<VehicleVfxController>();
-            GameObject player = LevelControllerButBetter.Instance.LocalPlayer;
-            if (interactionFrom == player)
+            if (IngameEventRouter == null || !IngameEventRouter(interactionFrom))
             {
-                IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
-                if(ingameEventsManager != null) ingameEventsManager.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+                GameObject player = LevelController.Instance.LocalPlayer;
+                if (interactionFrom == player)
+                {
+                    IngameEventsManager ingameEventsManager = IngameEventsManager.Instance;
+                    if (ingameEventsManager != null) ingameEventsManager.CreateEvent(ingameEventText, ingameEventTimeOnScreen);
+                }
             }
             if (!statsController) return;
 

@@ -14,7 +14,6 @@ namespace StateMachine
             NormalShootHandle normalShootHandle = controller.GetBehaviour<NormalShootHandle>();
             if (normalShootHandle != null)
             {
-                
                 normalShootHandle.HandleExternalFadeSightUI(enable);
             }
         }

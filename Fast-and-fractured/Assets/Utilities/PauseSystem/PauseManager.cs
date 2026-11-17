@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,6 +17,24 @@ namespace Utilities.Managers.PauseSystem
         public UnityEvent onGamePaused;
         public UnityEvent onGameResumed;
         public bool IsGamePaused => _isGamePaused;  
+
+        public static void TryRegisterPausable(IPausable pausable)
+        {
+            var pauseManager = ExistingInstance;
+            if (pauseManager != null)
+            {
+                pauseManager.RegisterPausable(pausable);
+            }
+        }
+
+        public static void TryUnregisterPausable(IPausable pausable)
+        {
+            var pauseManager = ExistingInstance;
+            if (pauseManager != null)
+            {
+                pauseManager.UnregisterPausable(pausable);
+            }
+        }
 
         #region Pause_Control
 

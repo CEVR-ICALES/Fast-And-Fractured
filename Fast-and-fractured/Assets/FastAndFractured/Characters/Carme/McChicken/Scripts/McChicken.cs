@@ -48,10 +48,14 @@ namespace FastAndFractured
 
             _movementHandler.Initialize(_rb, _phyisicsHandler, _visualsHandler);
             _phyisicsHandler.Initialize(_rb, _movementHandler, _visualsHandler);
+            if (!TryGetComponent<ChickenAudioController>(out _)) gameObject.AddComponent<ChickenAudioController>();
         }
 
         public void InitializeChicken(Vector3 targetPosition, Vector3 direction)
         {
+            var audioSettings = AudioPresentationProfile.Load().Abilities;
+            var launchSound = GameplayAudio.Play(GameAudioCues.ShootingEventsEggShootSFX, transform.position, audioSettings.ChickenLaunchVolume);
+            launchSound?.SetPitch(audioSettings.ChickenLaunchPitch);
             _moveDirection = direction.normalized;
             _rb.freezeRotation = true;
 
@@ -63,6 +67,7 @@ namespace FastAndFractured
         private void Land()
         {
             if (_hasLanded) return;
+            GetComponent<ChickenAudioController>()?.Cry();
 
             _mainCollider.enabled = true;
             _rb.freezeRotation = false;

@@ -3,6 +3,7 @@ using FMODUnity;
 using UnityEngine;
 using System.Collections.Generic;
 using Utilities;
+using Utilities.Audio;
 
 namespace FastAndFractured
 {
@@ -62,6 +63,7 @@ namespace FastAndFractured
         [SerializeField] private StatsController mariaAntoniaStatsController;
 
         private ITimer _timer;
+        private IAudioVoice _abilitySound;
 
         private List<GameObject> _croquetteList = new List<GameObject>();
         private List<float> _croquetteAngleList = new List<float>();
@@ -90,14 +92,20 @@ namespace FastAndFractured
             RotateCroquettes();
         }
 
+        public void StopAbilityAudio() => GameplayAudio.Stop(ref _abilitySound);
+
+        private void OnDisable()
+        {
+            StopAbilityAudio();
+        }
+
         public override bool ActivateAbility()
         {
             if (!base.ActivateAbility())
                 return false;
 
-            base.ActivateAbility();
-
-            SoundManager.Instance.PlayOneShot(ssjUltiReference, transform.position);
+            GameplayAudio.Stop(ref _abilitySound);
+            _abilitySound = GameplayAudio.StartAttached(GameAudioCues.SpecialAbilityEventsSuperSaiyanMariaAntonia, gameObject);
 
             if (mariaAntoniaStatsController == null)
             {
@@ -120,7 +128,7 @@ namespace FastAndFractured
                 {
                     StopVFX();
                     ActivateHairEmission(false);
-                    SoundManager.Instance.StopSound(ssjUltiReference);
+                    GameplayAudio.Stop(ref _abilitySound);
                     EndAbilityEffects();
                     ClearCroquettes();
                 });
@@ -129,7 +137,7 @@ namespace FastAndFractured
 
         private void OnDestroy()
         {
-            SoundManager.Instance?.StopSound(ssjUltiReference);
+            GameplayAudio.Stop(ref _abilitySound);
         }
 
         #region Croquette Methods

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Utilities;
@@ -136,10 +136,7 @@ public class TrafficLightUnit : MonoBehaviour
                     lampToActivate.TurnOn();
                 }
             }
-            else
-            {
-                Debug.LogWarning($"lamp {stateDef.activeLamp} in {gameObject.name}  not found for current state", gameObject);
-            }
+             
         }
     }
 

@@ -128,9 +128,6 @@ namespace FastAndFractured
         public GameObject lastEnemyThatPushedMe;
         private Vector3 _lastPosition;
 
-        public List<GameObjectStringPair> WinObjects { get => charDataSO.WinObjects; }
-        public List<GameObjectStringPair> LoseObjects { get => charDataSO.LoseObjects; }
-
         const string BULLET_EFFECT_NAME = "Bullet_Effect";
         const float TIME_IN_SCREEN = 0.2f;
 
@@ -139,7 +136,9 @@ namespace FastAndFractured
         {
             //just for try propouses
             charDataSO.Invulnerable = false;
+            if (transform.parent) { 
             _isPlayer = !transform.parent.TryGetComponent<EnemyAIBrain>(out var enemyAIBrain);
+            }
             //For Try Propouses. Delete when game manager call the function SetCharacter()
             InitCurrentStats();
             _lastPosition = transform.position;
@@ -149,12 +148,15 @@ namespace FastAndFractured
         }
         private void OnEnable()
         {
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
         }
 
         private void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         #endregion
@@ -176,6 +178,7 @@ namespace FastAndFractured
         {
             //Health
             currentEndurance = charDataSO.MaxEndurance;
+            _overflowDamage = 0f;
             //Movement
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
@@ -206,6 +209,10 @@ namespace FastAndFractured
 
 
         #region Health
+        private float _overflowDamage;
+        public float OverflowDamage { get => _overflowDamage; set => _overflowDamage = Mathf.Max(0f, value); }
+        public float DamagePercent => MaxEndurance > 0f ? (MaxEndurance - currentEndurance + _overflowDamage) / MaxEndurance * 100f : 0f;
+
         public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
             if (substract > 0)
@@ -213,13 +220,15 @@ namespace FastAndFractured
                 if (!IsInvulnerable)
                 {
                     totalDamageTaken += substract;
+                    float enduranceBefore = currentEndurance;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        if (!isProduct) _overflowDamage += Mathf.Max(0f, substract - (enduranceBefore - currentEndurance));
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
                         vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
-                            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateHealthBar(currentEndurance, charDataSO.MaxEndurance, _overflowDamage);
                             if (whoMadeTheDamage.GetComponent<CarMovementController>()!= null)
                             {
                                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
@@ -252,13 +261,16 @@ namespace FastAndFractured
         {
             if (sum > 0)
             {
-                if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                float healedOverflow = isProduct ? 0f : Mathf.Min(sum, _overflowDamage);
+                _overflowDamage -= healedOverflow;
+                float toEndurance = sum - healedOverflow;
+                if (toEndurance <= 0f || ChoseCharToMod(Stats.ENDURANCE, toEndurance, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
                     vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                     if(_isPlayer)
                     {
-                        HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        HUDManager.Instance.UpdateHealthBar(currentEndurance, charDataSO.MaxEndurance, _overflowDamage);
                     }
                 } else
                 {
@@ -267,28 +279,9 @@ namespace FastAndFractured
                 }
             }
         }
-        public GameObject GetWinObjectByString(string key)
+        public GameObject GetFinalAnimation(string characterCode, bool isWin)
         {
-            foreach (GameObjectStringPair pair in WinObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
-        }
-
-        public GameObject GetLoseObjectByString(string key)
-        {
-            foreach (GameObjectStringPair pair in LoseObjects)
-            {
-                if (pair.StringValue == key)
-                {
-                    return pair.GameObject;
-                }
-            }
-            return null;
+            return charDataSO.GetFinalAnimation(characterCode, isWin);
         }
 
         public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
@@ -369,7 +362,7 @@ namespace FastAndFractured
         }
         public void CelebrateKill()
         {
-            //Kill celebration audio or particles can be triggered here when we decide what to do
+            GameplayAudio.PlayPersonal(GameAudioCues.CommonKill, this);
         }
 
         public float GetEndurancePercentage()

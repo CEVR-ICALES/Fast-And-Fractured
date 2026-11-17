@@ -1,3 +1,4 @@
+using FastAndFractured.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using Utilities;
@@ -6,7 +7,7 @@ namespace FastAndFractured
     public class landingCheck : MonoBehaviour
     {
         public UnityEvent<float> onLanding;
-        private Rigidbody _rb;
+        private ICustomRigidbody _rb;
         private bool _startCheck = false;
         private ITimer _landingTimer;
         [SerializeField]
@@ -21,7 +22,7 @@ namespace FastAndFractured
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
             _landingTimer = TimerSystem.Instance.CreateTimer(100,Enums.TimerDirection.INCREASE);
         }
@@ -39,25 +40,28 @@ namespace FastAndFractured
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
+            // Networked variants can strip the ICustomRigidbody adapter: nothing to push then.
+            if (_rb == null) return;
             _rb.AddForce(force,forceMode);
             _startCheck = true;
             _rb.useGravity = true;
             applyForces = true;
         }
 
-        public Rigidbody GetRigidbody()
+        public ICustomRigidbody GetRigidbody()
         {
             if (_rb == null)
             {
-                _rb = GetComponent<Rigidbody>();
+                _rb = GetComponent<ICustomRigidbody>();
             }
             return _rb;
         }
 
         private void OnTriggerEnter(Collider other)
         {
+            if (_rb == null) return;
             if (!((ignoreLayer & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)) {
                 _rb.linearVelocity = Vector3.zero;
                 _rb.useGravity = false;

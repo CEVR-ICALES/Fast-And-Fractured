@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Utilities.Managers.PauseSystem;
 
 public class AnimationPausable : MonoBehaviour, IPausable
@@ -12,12 +12,15 @@ public class AnimationPausable : MonoBehaviour, IPausable
             animator = GetComponentInChildren<Animator>();
 
         }
-        PauseManager.Instance.RegisterPausable(this);
+        PauseManager.TryRegisterPausable(this);
     }
 
     void OnDestroy()
     {
-        PauseManager.Instance?.UnregisterPausable(this);
+        if (PauseManager.HasInstance)
+        {
+            PauseManager.TryUnregisterPausable(this);
+        }
     }
 
     public void OnPause()

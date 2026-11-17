@@ -20,7 +20,7 @@ public class CineMachineCameraPausable : MonoBehaviour, IPausable
         _normalSpeedX = inemachineCamera.m_XAxis.m_MaxSpeed;
         _normalSpeedY = inemachineCamera.m_YAxis.m_MaxSpeed;
 
-        PauseManager.Instance.RegisterPausable(this);
+        PauseManager.TryRegisterPausable(this);
 
     }
     public void OnPause()
@@ -37,6 +37,9 @@ public class CineMachineCameraPausable : MonoBehaviour, IPausable
 
     void OnDestroy()
     {
-        PauseManager.Instance?.UnregisterPausable(this);
+        if (PauseManager.HasInstance)
+        {
+            PauseManager.TryUnregisterPausable(this);
+        }
     }
 }

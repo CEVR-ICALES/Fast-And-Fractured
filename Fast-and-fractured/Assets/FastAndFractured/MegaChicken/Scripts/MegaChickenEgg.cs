@@ -47,7 +47,7 @@ namespace FastAndFractured
 
         void OnEnable()
         {
-            PauseManager.Instance?.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
             if (_agent == null)
             {
                 _ownRigidbody = GetComponent<Rigidbody>();
@@ -80,7 +80,10 @@ namespace FastAndFractured
         }
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void Update()
@@ -169,7 +172,7 @@ namespace FastAndFractured
             explosionParticles.SetActive(true);
             TimerSystem.Instance.CreateTimer(EXPLOSION_TIME, onTimerDecreaseComplete: () =>
             {
-                ObjectPoolManager.Instance.DesactivatePooledObject(this, gameObject);
+                ObjectPoolManager.Instance.DeactivatePooledObject(this, gameObject);
             });
         }
         public void OnPause()

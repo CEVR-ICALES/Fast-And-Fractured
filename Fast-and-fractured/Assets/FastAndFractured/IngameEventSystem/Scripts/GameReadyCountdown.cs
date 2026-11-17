@@ -5,15 +5,17 @@ using TMPro;
 using UnityEngine;
 using Utilities;
 
-public class GameReadyScript : MonoBehaviour
+public class GameReadyScript : AbstractAutoInitializableMonoBehaviour
 {
     [SerializeField] TMP_Text evenText;
     [SerializeField] EventReference soundReference;
     [SerializeField] EventReference soundReady;
 
     private const float downTextDuration = 0.7f;
-    void Start()
+
+    protected override void Initialize()
     {
+        base.Initialize();
         if (evenText == null) return;
         Invoke(nameof(StartEventCountdown),IngameEventsManager.EVENT_START_DELAY);
     
@@ -28,13 +30,15 @@ public class GameReadyScript : MonoBehaviour
     {
         evenText.rectTransform.DOLocalMoveY(300, downTextDuration).From();
         evenText.DOFade(0, TRANSITION_DURATION).From();
-        var playerReference = LevelControllerButBetter.Instance.LocalPlayer;
+        var playerReference = LevelController.Instance.LocalPlayer;
         if(playerReference){
-            SoundManager.Instance.PlayOneShot(soundReference,LevelControllerButBetter.Instance.LocalPlayer.transform.position);
+            SoundManager.Instance.PlayOneShot(soundReference,LevelController.Instance.LocalPlayer.transform.position);
         }
     }
     void StartEventCountdown()
     {
+        if (evenText == null) return;
+
         AnimateText();
         IngameEventsManager.Instance.CreateEvent("3", TRANSITION_DURATION, () =>
         {
@@ -60,4 +64,8 @@ public class GameReadyScript : MonoBehaviour
        
 
     }
+
+    protected override void Construct()
+    {
+     }
 }

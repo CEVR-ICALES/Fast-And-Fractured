@@ -5,7 +5,7 @@
 			<value>PerfumeSpraySFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{8a608e6b-0678-4308-b52b-4f0ba691fe5d}</destination>
@@ -56,7 +56,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{8962bf30-6afa-4aaa-9e25-b38c765c3e2f}" />
+	<object class="EventAutomatableProperties" id="{8962bf30-6afa-4aaa-9e25-b38c765c3e2f}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{d8083d93-68f6-42fd-a8c6-a7bbacc72b4d}" />
 	<object class="GroupTrack" id="{299eecca-96f9-49bc-81ac-303a0e9fb28b}">
 		<relationship name="modules">
@@ -229,6 +236,7 @@
 	<object class="MixerBusEffectChain" id="{e4460169-6631-475f-be8f-0a92f04ac38c}">
 		<relationship name="effects">
 			<destination>{674c9194-a86d-473a-b860-73787d14e299}</destination>
+			<destination>{4567b1ba-a47a-46cc-8a26-08217f981868}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{eb56c2b4-999e-4a4a-8404-8b5830c5243a}" />
@@ -296,6 +304,7 @@
 	</object>
 	<object class="MixerBusPanner" id="{e66d6bae-6645-4a3d-8ddf-d8a0f06eeec2}" />
 	<object class="MixerBusFader" id="{674c9194-a86d-473a-b860-73787d14e299}" />
+	<object class="SpatialiserEffect" id="{4567b1ba-a47a-46cc-8a26-08217f981868}" />
 	<object class="AutomationPoint" id="{9de8eefd-6ce1-4302-a6a1-dad85f2bf022}">
 		<property name="position">
 			<value>0.60999999999999999</value>

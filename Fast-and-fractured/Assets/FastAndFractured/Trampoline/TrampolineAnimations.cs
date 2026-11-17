@@ -6,12 +6,14 @@ using Utilities;
 
 public class TrampolineAnimations : MonoBehaviour
 {
+    private const float AUDIO_COOLDOWN_SECONDS = 0.15f;
     [SerializeField]
     private Animation trampolineAnimations;
     [SerializeField]
     private AnimationClip[] trampolines = new AnimationClip[2];
     public UnityEvent<float> releaseAnimation;
     private ITimer countdownTimer = null;
+    private float _lastAudioTime = -1f;
     [SerializeField]
     private landingCheck landingCheck;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -32,6 +34,11 @@ public class TrampolineAnimations : MonoBehaviour
    
     private void TrampolineReleaseAnimation(float countdownTime)
     {
+        if (Time.unscaledTime - _lastAudioTime > AUDIO_COOLDOWN_SECONDS)
+        {
+            GameplayAudio.Play(GameAudioCues.CommonTrampoline, transform.position);
+            _lastAudioTime = Time.unscaledTime;
+        }
         AnimateClip(trampolines[1]);
         countdownTimer = TimerSystem.Instance.CreateTimer(countdownTime,
             onTimerDecreaseComplete: () =>

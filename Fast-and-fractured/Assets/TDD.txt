@@ -1,0 +1,100 @@
+﻿TECHNICAL DESIGN DOCUMENT
+SIEMPRE SOLID, CLEAN CODE Y patrones de diseño
+
+DIRECTORY STRUCTURE
+Folder for each concept
+Example: Maria Antonia
+- Characters
+   - MariaAntonia
+        - Prefab
+        - Models
+        - Textures
+        - Animations
+        - Materials
+        - Scripts
+                - Respective divisions
+        - ScriptableObjects
+                - Respective divisions
+
+
+
+
+Common folder (Example: State Machine Controller, Base State class…)
+* Managers
+* Utils
+   * Libraries
+* …
+
+
+SCRIPTS
+Namespaces
+* Game
+* Libraries
+* StateMachine
+
+
+* Scripts:ObjectPoolingController
+* Class: ObjectPoolingController
+* Headers: Inside the header
+* public variables first: motorTorque
+* const ALL_CAPS
+* internal variables : motorTorque
+* protected: motorTorque
+* [Serializable] privates : motorTorque
+* private : _motorTorque
+* properties: Get/Set. Property references to a private variable
+* [Header for references]
+
+
+
+
+FUNCTIONS
+Use of regions by concept / functionality
+How functions will be ordered
+1. Custom Start
+2. Start events (OnEnable, Start, Awake…)
+3. Update()
+4. Functions()
+5. First methods that are in charge of calling other methods
+6. And methods that are only in charge of smaller functionalities of just returning / calculating values later
+Naming
+CalculatePushForce() //Comment or summary if the function requires it
+{
+        //internal comments on the function if necessary
+}
+Multiple returns
+Coroutines
+In case of using coroutines _Calculate…
+Interfaces
+ISaving
+Enums
+Enum name_> Like functions
+Variables-> All caps CAR_TYPE
+Scenes
+InteractablesTest/DevScene
+Prefab - Contains all managers
+UI
+PlayButton, VolumeSlider
+PREFABS
+Prefabs are edited in the scene, NOT in the prefab itself. Prefabs are only updated in IMPLEMENTATION days
+RESOURCES FOLDER
+1 Resources folder in “Fast and Fracture”.
+* Player Icons → Folder for each character
+* Unique Ability Icon and (maybe) normal and push shoot icons
+* Keyboard Input Icons
+* Xbox Input Icon
+* PlayStation Input Icon
+TOOLS & PACKAGES
+TOOLS STORED IN FAST & FRACTURED, WITH SHORTCUTS IF NECESSARY OR IN THE SCRIPTS DIRECTLY
+LIST OF TOOLS & PACKAGES
+* Cinemachine
+* DOTween
+* FMOD
+* AI Navigation
+* Text Mesh Pro
+* Canvas Toggler
+* Prefab Placer
+* New Input System
+* Fishnet PRO . THE PAID VERSION
+
+MULTIPLAYER CONTENT IN MULTIPLAYER ASSEMBLY AND IN FASTANDFRACTURED.MULTIPLAYER  NAMESPACE. NO CODE FROM SINGLEPLAYER SHOULD HAVE A USING REFERENCVE TO THIS NAMESPACE

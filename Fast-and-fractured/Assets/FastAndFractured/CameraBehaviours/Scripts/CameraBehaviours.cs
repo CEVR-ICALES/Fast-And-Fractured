@@ -28,7 +28,6 @@ namespace FastAndFractured
         [SerializeField]
         private ScreenShakeProfile defaultProfile;
         private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
-
          private int _shakeLayer;
 
         private const int LAYER_COMMON = 1;
@@ -38,10 +37,10 @@ namespace FastAndFractured
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            LevelController.Instance.onLevelPreStart.AddListener(
                 () => TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
             {
-                _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
+                _statsController = LevelController.Instance.LocalPlayer.GetComponent<StatsController>();
             }));
             if(commonCinemachineImpulseListener==null){
             commonCinemachineImpulseListener = GetComponent<CinemachineImpulseListener>();
@@ -53,14 +52,16 @@ namespace FastAndFractured
             _inputController = PlayerInputController.Instance;
             _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
             _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
-            PauseManager.Instance.RegisterPausable(this);
-            //Reset the camera position so the player look forward on the match start
+            PauseManager.TryRegisterPausable(this);
             ResetCameraPosition();
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void Update()
