@@ -421,7 +421,7 @@ namespace FastAndFractured.Multiplayer.Editor
 
         // Networked player/AI prefabs the migrated LevelController spawns instead of the singleplayer ones.
         private const string NETWORKED_PLAYER_PREFAB_PATH  = "Assets/Multiplayer/Player/Prefabs/NetworkedPlayer.prefab";
-        private const string NETWORKED_AI_PREFAB_PATH      = "Assets/FastAndFractured/EnemyAI/Prefabs/NetworkedEnemyAI.prefab";
+        private const string NETWORKED_AI_PREFAB_PATH      = "Assets/Multiplayer/EnemyAI/NetworkedEnemyAI.prefab";
 
         private const float PRIMARY_BUTTON_HEIGHT = 28f;
         private const float BUTTON_HEIGHT = 24f;
