@@ -12,6 +12,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _DISABLE_DECALS
+  - _DISABLE_SSR
   - _DISABLE_SSR_TRANSPARENT
   - _DOUBLESIDED_ON
   - _SURFACE_TYPE_TRANSPARENT
@@ -88,6 +90,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _NormalMapOS:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_a0f3e8a6cd1e449d88f81453d190ad81_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: de0fae515169ff246a20d58a8a440ed0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_dfaa31479b7a46039e600e6f58d9c24d_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 1d8481de16af723418a688958c41224b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_f0694eed79454e92bae5975dd01b9b26_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: de0fae515169ff246a20d58a8a440ed0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularColorMap:
@@ -209,7 +223,7 @@ Material:
     - _PPDPrimitiveWidth: 1
     - _PerPixelSorting: 0
     - _RayTracing: 0
-    - _ReceivesSSR: 1
+    - _ReceivesSSR: 0
     - _ReceivesSSRTransparent: 0
     - _RefractionModel: 0
     - _RenderQueueType: 4
@@ -232,7 +246,7 @@ Material:
     - _StencilWriteMaskGBuffer: 15
     - _StencilWriteMaskMV: 41
     - _SubsurfaceMask: 1
-    - _SupportDecals: 1
+    - _SupportDecals: 0
     - _SurfaceType: 1
     - _SwirlSpeed: 150
     - _SwirlStregth: 2
@@ -268,9 +282,9 @@ Material:
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
-    - _MainColor: {r: 0.3584906, g: 0.31541327, b: 0.07609471, a: 1}
-    - _RimColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SandColor: {r: 0.5471698, g: 0.39366692, b: 0.1264685, a: 1}
+    - _MainColor: {r: 0.35849056, g: 0.31541324, b: 0.076094694, a: 0}
+    - _RimColor: {r: 0, g: 0, b: 0, a: 0}
+    - _SandColor: {r: 0.5471698, g: 0.3936669, b: 0.12646845, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _SwirlSpeed: {r: 18.8, g: 14.04, b: 0, a: 0}
     - _SwirlSpeed2: {r: -16.8, g: -38.8, b: 0, a: 0}
