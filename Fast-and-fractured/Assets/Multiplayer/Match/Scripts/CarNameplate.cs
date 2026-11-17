@@ -166,7 +166,7 @@ namespace FastAndFractured.Multiplayer
 
             var cam = Camera.main;
             bool own = _carNob != null && _carNob.IsOwner;
-            bool alive = _car.gameObject.activeInHierarchy && (_stats == null || _stats.Endurance > 0f);
+            bool alive = _car.gameObject.activeInHierarchy && !NetworkedStatsController.IsDeadCar(_stats);
             bool wanted = _isHuman ? MultiplayerSettings.ShowPlayerNames : MultiplayerSettings.ShowBotNames;
             if (cam == null || own || !alive || !wanted)
             {

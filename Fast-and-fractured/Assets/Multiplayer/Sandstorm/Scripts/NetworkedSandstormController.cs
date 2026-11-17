@@ -31,6 +31,8 @@ namespace FastAndFractured.Multiplayer
         private readonly Dictionary<NetworkedStatsController, int> _victimOverlapCounts = new();
         private readonly Dictionary<NetworkedStatsController, float> _victimDamagePerSecond = new();
         private readonly Dictionary<NetworkedStatsController, GameObject> _victimObjects = new();
+        // Endurance 0 does not kill, so the storm kills when its time is up, like the singleplayer dead timer.
+        private readonly Dictionary<NetworkedStatsController, float> _victimSecondsLeft = new();
         private readonly Dictionary<GameObject, int> _itemOverlapCounts = new();
         private readonly Dictionary<GameObject, int> _safeZoneOverlapCounts = new();
         private readonly List<NetworkedStatsController> _victimRemovalBuffer = new();
@@ -741,6 +743,7 @@ namespace FastAndFractured.Multiplayer
             float killTime = Mathf.Max(MIN_KILL_TIME, _sandstormController.KillTime);
             float startingEndurance = Mathf.Max(0f, stats.GetSyncedEndurance());
             _victimDamagePerSecond.Add(stats, startingEndurance / killTime);
+            _victimSecondsLeft.Add(stats, killTime);
 
             List<GameObject> characters = _sandstormController.CharactersInsideSandstorm;
             if (characters != null && characterObject != null && !characters.Contains(characterObject))
@@ -771,6 +774,7 @@ namespace FastAndFractured.Multiplayer
 
             _victimOverlapCounts.Remove(stats);
             _victimDamagePerSecond.Remove(stats);
+            _victimSecondsLeft.Remove(stats);
             _victimObjects.Remove(stats);
         }
 
@@ -783,7 +787,7 @@ namespace FastAndFractured.Multiplayer
             foreach (KeyValuePair<NetworkedStatsController, float> entry in _victimDamagePerSecond)
             {
                 NetworkedStatsController stats = entry.Key;
-                if (stats == null || !stats.IsAlive())
+                if (stats == null || stats.IsDead)
                 {
                     _victimRemovalBuffer.Add(stats);
                     continue;
@@ -792,10 +796,19 @@ namespace FastAndFractured.Multiplayer
                 float damage = entry.Value * elapsed;
                 if (damage > 0f)
                     stats.DealDamageServerRpc(damage, null);
+
+                float secondsLeft = _victimSecondsLeft[stats] - elapsed;
+                _victimSecondsLeft[stats] = secondsLeft;
+                if (secondsLeft <= 0f)
+                    _victimRemovalBuffer.Add(stats);
             }
 
             for (int i = 0; i < _victimRemovalBuffer.Count; i++)
-                RemoveStormVictim(_victimRemovalBuffer[i]);
+            {
+                NetworkedStatsController stats = _victimRemovalBuffer[i];
+                RemoveStormVictim(stats);
+                if (stats != null && !stats.IsDead) stats.KillFromEnvironmentServer();
+            }
         }
 
         private static void RegisterListOverlap(
@@ -852,6 +865,7 @@ namespace FastAndFractured.Multiplayer
 
             _victimOverlapCounts.Clear();
             _victimDamagePerSecond.Clear();
+            _victimSecondsLeft.Clear();
             _victimObjects.Clear();
             _victimRemovalBuffer.Clear();
             _damageTickTimer = 0f;

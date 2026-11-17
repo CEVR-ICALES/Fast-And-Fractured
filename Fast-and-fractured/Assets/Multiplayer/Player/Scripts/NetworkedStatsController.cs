@@ -32,8 +32,36 @@ namespace FastAndFractured.Multiplayer
 
         #region SYNCED_STATE
         private readonly SyncVar<float> _syncedEndurance = new();
-        
+
+        private readonly SyncVar<float> _syncedOverflow = new();
+
+        [Server]
+        private void PushEndurance()
+        {
+            _syncedEndurance.Value = _coreStats.Endurance;
+            _syncedOverflow.Value = _coreStats.OverflowDamage;
+        }
+
+        private void OnOverflowChanged(float prev, float next, bool asServer)
+        {
+            if (_coreStats == null || IsServerInitialized) return;
+            _coreStats.OverflowDamage = next;
+            if (IsOwner && HUDManager.HasInstance)
+                HUDManager.Instance.UpdateHealthBar(_coreStats.Endurance, _coreStats.MaxEndurance, next);
+        }
+
         private readonly SyncVar<bool> _syncedInvulnerable = new();
+
+        // Endurance 0 is not death (it only maxes the knockback), so death is its own state.
+        private readonly SyncVar<bool> _syncedDead = new();
+        private bool _deathSeen;
+        public bool IsDead => _syncedDead.Value || _deathSeen;
+
+        public static bool IsDeadCar(StatsController stats)
+        {
+            var networked = stats != null ? stats.GetComponent<NetworkedStatsController>() : null;
+            return networked != null && networked.IsDead;
+        }
 
         /// <summary>Spawn character code (e.g. "Pepe_2"): the skin is a material swap only the server applies, so every peer re-applies it.</summary>
         private readonly SyncVar<string> _skinNameCode = new();
@@ -63,6 +91,7 @@ namespace FastAndFractured.Multiplayer
             }
 
             _syncedEndurance.OnChange += OnEnduranceChanged;
+            _syncedOverflow.OnChange += OnOverflowChanged;
             _syncedInvulnerable.OnChange += OnInvulnerabilityChanged;
             _skinNameCode.OnChange += OnSkinNameCodeChanged;
         }
@@ -99,12 +128,14 @@ namespace FastAndFractured.Multiplayer
         {
             base.OnStartServer();
 
-            _syncedEndurance.Value = _coreStats.Endurance;
+            PushEndurance();
             _syncedInvulnerable.Value = _coreStats.IsInvulnerable;
 
             _lastPosition = transform.position;
 
             InstallNetworkDeathListener();
+            _coreStats.onEnduranceDamageHealed.AddListener(OnServerHealed);
+            _coreStats.onEnduranceDamageTaken.AddListener(OnServerDamaged);
 
             if (verboseLogging)
                 Debug.Log($"<color=cyan>[NetworkedStatsController] Server initialized. Endurance: {_syncedEndurance.Value}</color>");
@@ -113,8 +144,37 @@ namespace FastAndFractured.Multiplayer
         public override void OnStopServer()
         {
             base.OnStopServer();
-            if (_coreStats != null && _coreStats.onDead != null)
-                _coreStats.onDead.RemoveListener(OnLocalStatsDeath);
+            if (_coreStats == null) return;
+            _coreStats.onDead?.RemoveListener(OnLocalStatsDeath);
+            _coreStats.onEnduranceDamageHealed?.RemoveListener(OnServerHealed);
+            _coreStats.onEnduranceDamageTaken?.RemoveListener(OnServerDamaged);
+        }
+
+        // Pickups, abilities and timed boosts change the endurance on the server only, outside the damage RPCs.
+        private void OnServerHealed(float amount) => SyncServerEndurance();
+        private void OnServerDamaged(float amount, GameObject attacker) => SyncServerEndurance();
+
+        private void SyncServerEndurance()
+        {
+            if (!IsServerInitialized) return;
+            PushEndurance();
+            // StatsController writes the HUD for every player car, and the host's HUD shows its own car only.
+            if (!IsOwner) RestoreLocalHud();
+        }
+
+        private static NetworkedStatsController _localOwner;
+
+        private static void RestoreLocalHud()
+        {
+            if (!HUDManager.HasInstance) return;
+            if (_localOwner == null || !_localOwner.IsOwner)
+            {
+                _localOwner = null;
+                foreach (var stats in FindObjectsByType<NetworkedStatsController>(FindObjectsSortMode.None))
+                    if (stats.IsOwner) { _localOwner = stats; break; }
+            }
+            if (_localOwner == null || _localOwner._coreStats == null || _localOwner.IsDead || _localOwner._coreStats.MaxEndurance <= 0f) return;
+            HUDManager.Instance.UpdateHealthBar(_localOwner._coreStats.Endurance, _localOwner._coreStats.MaxEndurance, _localOwner._coreStats.OverflowDamage);
         }
 
         public override void OnStopNetwork()
@@ -130,6 +190,7 @@ namespace FastAndFractured.Multiplayer
 
             if (!IsServerInitialized)
             {
+                _coreStats.OverflowDamage = _syncedOverflow.Value;
                 OnEnduranceChanged(0f, _syncedEndurance.Value, false);
                 OnInvulnerabilityChanged(false, _syncedInvulnerable.Value, false);
 
@@ -218,7 +279,7 @@ namespace FastAndFractured.Multiplayer
                     // Server-side writes (an environment kill sets 0) skip TakeEndurance: mirror the synced value to the host's HUD.
                     if (HUDManager.HasInstance && _coreStats.MaxEndurance > 0)
                     {
-                        HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, next, _coreStats.MaxEndurance);
+                        HUDManager.Instance.UpdateHealthBar(next, _coreStats.MaxEndurance, _coreStats.OverflowDamage);
                     }
 
                     var hostVfx = _coreStats.GetComponentInChildren<VehicleVfxController>();
@@ -241,7 +302,7 @@ namespace FastAndFractured.Multiplayer
 
                 if (HUDManager.HasInstance && _coreStats.MaxEndurance > 0)
                 {
-                    HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, next, _coreStats.MaxEndurance);
+                    HUDManager.Instance.UpdateHealthBar(next, _coreStats.MaxEndurance, _coreStats.OverflowDamage);
                 }
 
                 var ownerVfx = _coreStats.GetComponentInChildren<VehicleVfxController>();
@@ -390,7 +451,7 @@ namespace FastAndFractured.Multiplayer
             // Non-owner cars must not update the local HUD singleton.
             ApplyEnduranceDamage(damage, attackerObject ?? gameObject);
             
-            _syncedEndurance.Value = _coreStats.Endurance;
+            PushEndurance();
             
             TotalDamageTaken.Value += damage;
             
@@ -400,11 +461,6 @@ namespace FastAndFractured.Multiplayer
                 if (attackerStats == null) attackerStats = attackerCar.GetComponentInParent<NetworkedStatsController>();
                 if (attackerStats != null && attackerStats != this)
                     attackerStats.TotalDamageDealt.Value += damage;
-            }
-
-            if (_coreStats.Endurance <= 0f && IsServerInitialized)
-            {
-                HandleServerSideDeath(attacker);
             }
         }
         
@@ -449,7 +505,7 @@ namespace FastAndFractured.Multiplayer
             _coreStats.RecoverEndurance(amount, false);
             if (needsSuppress) IsPlayerField.SetValue(_coreStats, true);
             
-            _syncedEndurance.Value = _coreStats.Endurance;
+            PushEndurance();
             
             if (verboseLogging)
                 Debug.Log($"<color=green>[NetworkedStatsController] {gameObject.name} healed {amount:F1}. New endurance: {_syncedEndurance.Value:F1}</color>");
@@ -514,6 +570,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_serverDeathReported) return;
             _serverDeathReported = true;
+            _syncedDead.Value = true;
 
             // Environment kills do not drain endurance: force 0 so clients see a dead car.
             _syncedEndurance.Value = 0f;
@@ -560,6 +617,8 @@ namespace FastAndFractured.Multiplayer
         {
             // A client may have entered a local hazard before the report arrived: stop its countdown.
             CancelPendingSingleplayerDeath();
+            // The RPC can arrive before the SyncVar.
+            _deathSeen = true;
 
             string victimName = victim != null ? MatchNames.Of(victim.gameObject) : null;
             string killerName = killer != null ? MatchNames.Of(killer.gameObject) : null;
@@ -679,13 +738,13 @@ namespace FastAndFractured.Multiplayer
         
         public bool IsInvulnerable() => _syncedInvulnerable.Value;
         
-        public bool IsAlive() => _syncedEndurance.Value > 0f;
+        public bool IsAlive() => !IsDead;
         
         /// <summary>Re-reads the endurance into the SyncVar after a direct server-side heal.</summary>
         public void ForceEnduranceSync()
         {
             if (!IsServerInitialized) return;
-            _syncedEndurance.Value = _coreStats.Endurance;
+            PushEndurance();
         }
         #endregion
         

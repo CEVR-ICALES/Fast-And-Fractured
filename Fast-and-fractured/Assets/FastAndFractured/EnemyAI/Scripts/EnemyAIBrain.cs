@@ -578,7 +578,7 @@ namespace FastAndFractured
         {
             if (!character || !character.activeInHierarchy) return false;
             var stats = character.GetComponentInChildren<StatsController>();
-            return stats == null || stats.Endurance > 0f;
+            return !Multiplayer.NetworkedStatsController.IsDeadCar(stats);
         }
 
 

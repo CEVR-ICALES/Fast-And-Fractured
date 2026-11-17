@@ -168,7 +168,7 @@ namespace FastAndFractured.Multiplayer
                 if (character == null) continue;
                 var stats = character.GetComponent<StatsController>();
                 if (stats == null) stats = character.GetComponentInChildren<StatsController>(true);
-                if (stats == null || !stats.gameObject.activeInHierarchy || stats.Endurance <= 0f) continue;
+                if (stats == null || !stats.gameObject.activeInHierarchy || NetworkedStatsController.IsDeadCar(stats)) continue;
                 _alive.Add(stats.transform);
             }
         }

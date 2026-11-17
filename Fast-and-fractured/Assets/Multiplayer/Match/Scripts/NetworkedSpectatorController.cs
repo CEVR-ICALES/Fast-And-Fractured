@@ -415,7 +415,7 @@ namespace FastAndFractured.Multiplayer
                 var stats = character.GetComponent<StatsController>();
                 if (stats == null) stats = character.GetComponentInChildren<StatsController>(true);
                 if (stats == null) continue;
-                if (stats.Endurance <= 0f) continue;
+                if (NetworkedStatsController.IsDeadCar(stats)) continue;
 
                 Transform target = stats.transform;
 

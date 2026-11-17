@@ -124,7 +124,7 @@ namespace FastAndFractured
         #region Collision Feedback
         private void OnCollisionEnter(Collision collision)
         {
-            if (!_started || !GameplayAudio.CanPlay || _stats == null || _stats.Endurance <= 0 || Time.time < _nextCollision) return;
+            if (!_started || !GameplayAudio.CanPlay || _stats == null || _dead || Time.time < _nextCollision) return;
             float speed = collision.relativeVelocity.magnitude;
             if (speed < _settings.MinimumCollisionSpeed) return;
             var other = collision.collider.GetComponentInParent<VehicleAudioController>();

@@ -89,8 +89,6 @@ namespace FastAndFractured
 
         private void Update()
         {
-            if (mariaAntoniaStatsController != null && mariaAntoniaStatsController.Endurance <= 0)
-                GameplayAudio.Stop(ref _abilitySound);
             RotateCroquettes();
         }
 
