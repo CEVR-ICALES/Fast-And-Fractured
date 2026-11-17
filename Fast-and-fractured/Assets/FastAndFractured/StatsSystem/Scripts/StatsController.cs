@@ -178,6 +178,7 @@ namespace FastAndFractured
         {
             //Health
             currentEndurance = charDataSO.MaxEndurance;
+            _overflowDamage = 0f;
             //Movement
             currentMaxSpeed = charDataSO.MaxSpeed;
             currentMaxSpeedDashing = charDataSO.MaxSpeedDashing;
@@ -208,6 +209,10 @@ namespace FastAndFractured
 
 
         #region Health
+        private float _overflowDamage;
+        public float OverflowDamage { get => _overflowDamage; set => _overflowDamage = Mathf.Max(0f, value); }
+        public float DamagePercent => MaxEndurance > 0f ? (MaxEndurance - currentEndurance + _overflowDamage) / MaxEndurance * 100f : 0f;
+
         public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
             if (substract > 0)
@@ -215,13 +220,15 @@ namespace FastAndFractured
                 if (!IsInvulnerable)
                 {
                     totalDamageTaken += substract;
+                    float enduranceBefore = currentEndurance;
                     if (ChoseCharToMod(Stats.ENDURANCE, -substract, isProduct))
                     {
+                        if (!isProduct) _overflowDamage += Mathf.Max(0f, substract - (enduranceBefore - currentEndurance));
                         onEnduranceDamageTaken?.Invoke(substract,whoMadeTheDamage);
                         vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                         if (_isPlayer)
                         {
-                            HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                            HUDManager.Instance.UpdateHealthBar(currentEndurance, charDataSO.MaxEndurance, _overflowDamage);
                             if (whoMadeTheDamage.GetComponent<CarMovementController>()!= null)
                             {
                                 HUDManager.Instance.UpdateUIEffect(UIDynamicElementType.BULLET_EFFECT, ResourcesManager.Instance.GetResourcesSprite(BULLET_EFFECT_NAME), TIME_IN_SCREEN);
@@ -254,13 +261,16 @@ namespace FastAndFractured
         {
             if (sum > 0)
             {
-                if (ChoseCharToMod(Stats.ENDURANCE, sum, isProduct))
+                float healedOverflow = isProduct ? 0f : Mathf.Min(sum, _overflowDamage);
+                _overflowDamage -= healedOverflow;
+                float toEndurance = sum - healedOverflow;
+                if (toEndurance <= 0f || ChoseCharToMod(Stats.ENDURANCE, toEndurance, isProduct))
                 {
                     onEnduranceDamageHealed?.Invoke(sum);
                     vehicleVfxController.HandleOnEnduranceChanged(currentEndurance / MaxEndurance);
                     if(_isPlayer)
                     {
-                        HUDManager.Instance.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, currentEndurance, charDataSO.MaxEndurance);
+                        HUDManager.Instance.UpdateHealthBar(currentEndurance, charDataSO.MaxEndurance, _overflowDamage);
                     }
                 } else
                 {

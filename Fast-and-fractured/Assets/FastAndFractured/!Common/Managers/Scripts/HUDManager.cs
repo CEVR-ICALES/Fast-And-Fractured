@@ -25,6 +25,7 @@ namespace FastAndFractured
         private Image[] _badEffects;
         private Image[] _bulletEffects;
         private Image[] _effectIcons;
+        private DamagePercentText _damagePercent;
 
         private string selectedPlayer;
         private string selectedPlayerHalfBody;
@@ -93,6 +94,8 @@ namespace FastAndFractured
             
             var bulletEffectElement = GetUIElement(UIDynamicElementType.BULLET_EFFECT);
             _bulletEffects = bulletEffectElement != null ? bulletEffectElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+
+            _damagePercent = GetComponentInChildren<DamagePercentText>(true);
 		}
 
         void SetPlayerStartingSprites()
@@ -142,6 +145,14 @@ namespace FastAndFractured
                 
                 element.imageReference.fillAmount = fillAmount;
             }
+        }
+
+        public void UpdateHealthBar(float endurance, float maxEndurance, float overflowDamage)
+        {
+            if (maxEndurance <= 0f) return;
+            UpdateUIElement(UIDynamicElementType.HEALTH_BAR, endurance, maxEndurance);
+            if (_damagePercent != null)
+                _damagePercent.SetDamage((maxEndurance - Mathf.Clamp(endurance, 0f, maxEndurance) + Mathf.Max(0f, overflowDamage)) / maxEndurance);
         }
 
         public void UpdateUIElement(UIDynamicElementType type, bool isActive)

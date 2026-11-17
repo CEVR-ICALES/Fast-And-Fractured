@@ -89,7 +89,7 @@ namespace FastAndFractured.Multiplayer
             if (!_visible || !HUDManager.HasInstance) return;
             var hud = HUDManager.Instance;
             if (_stats != null && _stats.MaxEndurance > 0f)
-                hud.UpdateUIElement(UIDynamicElementType.HEALTH_BAR, _stats.Endurance, _stats.MaxEndurance);
+                hud.UpdateHealthBar(_stats.Endurance, _stats.MaxEndurance, _stats.OverflowDamage);
             if (_physics != null && _physics.Rb != null)
             {
                 string speed = (_physics.Rb.linearVelocity.magnitude * SPEED_TO_KMH).ToString("F1");
