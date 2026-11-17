@@ -105,11 +105,23 @@ public class AnimatorPanelHandle : PreMatchStep
 
     private bool FindPanel()
     {
-        if (tutorialImage == null)
+        if (tutorialImage == null || !IsShown(tutorialImage))
+        {
+            tutorialImage = null;
+            // Online every player's HUD carries a panel; the other players' canvases are disabled, not deactivated.
             foreach (GameObject panel in GameObject.FindGameObjectsWithTag(TUTORIAL_TAG))
-                if (panel.TryGetComponent(out tutorialImage)) break;
+                if (panel.TryGetComponent(out Image image) && IsShown(image)) { tutorialImage = image; break; }
+        }
         if (tutorialImage == null) return false;
         if (fadeOut == null) tutorialImage.TryGetComponent(out fadeOut);
+        return true;
+    }
+
+    private static bool IsShown(Image image)
+    {
+        if (!image.gameObject.activeInHierarchy) return false;
+        foreach (Canvas canvas in image.GetComponentsInParent<Canvas>(true))
+            if (!canvas.enabled) return false;
         return true;
     }
 
