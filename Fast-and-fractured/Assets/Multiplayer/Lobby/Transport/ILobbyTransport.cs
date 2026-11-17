@@ -60,10 +60,14 @@ namespace FastAndFractured.Multiplayer.Abstractions
         public FastAndFractured.Multiplayer.LinkKind HostLink;
         /// <summary>The room is playing a match; joining waits in the room for the next one.</summary>
         public bool InMatch;
+        public int ReservedSlots;
         public IReadOnlyDictionary<string, string> Metadata = new Dictionary<string, string>();
+
+        public int OpenSlots => System.Math.Max(0, MaxPlayers - CurrentPlayers - ReservedSlots);
 
         /// <summary>Lobby metadata key the host sets to "1" while its room plays a match.</summary>
         public const string KEY_IN_MATCH = "in_match";
+        public const string KEY_RESERVED = "reserved";
     }
 
     public interface ILobbyTransport

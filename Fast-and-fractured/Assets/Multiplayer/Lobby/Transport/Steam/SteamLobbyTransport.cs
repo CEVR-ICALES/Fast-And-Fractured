@@ -399,6 +399,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                     PingMs         = 0,
                     HostLink       = FastAndFractured.Multiplayer.NetworkLink.Parse(SteamMatchmaking.GetLobbyData(sid, KEY_HOST_LINK)),
                     InMatch        = SteamMatchmaking.GetLobbyData(sid, LobbyListing.KEY_IN_MATCH) == "1",
+                    ReservedSlots  = int.TryParse(SteamMatchmaking.GetLobbyData(sid, LobbyListing.KEY_RESERVED), out int reserved) ? reserved : 0,
                 });
             }
 

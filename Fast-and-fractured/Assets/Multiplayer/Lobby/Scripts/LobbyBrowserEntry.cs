@@ -30,7 +30,13 @@ namespace FastAndFractured.Multiplayer.Lobby
             _onJoin  = onJoin;
 
             if (_roomNameText != null) _roomNameText.text = listing.RoomName;
-            if (_playersText  != null) _playersText.text  = $"{listing.CurrentPlayers}/{listing.MaxPlayers}";
+            if (_playersText  != null)
+            {
+                _playersText.richText = true;
+                _playersText.text = listing.ReservedSlots > 0
+                    ? $"{listing.CurrentPlayers}/{listing.MaxPlayers} <size=65%><color=#8FB8FF>{LocalizationManager.Localize("MP.Browser.Reserved", listing.ReservedSlots)}</color></size>"
+                    : $"{listing.CurrentPlayers}/{listing.MaxPlayers}";
+            }
             SetPing(listing.PingMs > 0 ? listing.PingMs : -1);
         }
 

@@ -1153,7 +1153,10 @@ namespace FastAndFractured.Multiplayer
 
         [Server]
         private System.Collections.IEnumerator RevealThenEndGame(NetworkObject winner)
-        { 
+        {
+            // AI cars belong to the server and have no connection: only players count.
+            if (winner != null && winner.Owner != null && winner.Owner.IsValid)
+                LobbyLocator.GetLobbyManager()?.RecordWin(winner.Owner.ClientId);
             try { MatchResultsRpc(BuildMatchResults(winner)); }
             catch (Exception e) { Debug.LogException(e); }
             MatchDecidedRpc(winner);

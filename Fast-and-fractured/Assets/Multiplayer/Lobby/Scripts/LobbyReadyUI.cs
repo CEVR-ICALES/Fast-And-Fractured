@@ -53,6 +53,8 @@ namespace FastAndFractured.Multiplayer
         private const float SCREEN_TRANSITION_SECONDS = 0.5f;
         private const float BANNER_FONT_SIZE = 28f;
         private const float WATCH_FONT_SIZE = 24f;
+        private const float RESET_WINS_GAP = 8f;
+        private const float RESET_WINS_HEIGHT_RATIO = 0.55f;
         private static readonly Vector2 DEFAULT_SLOT_SIZE = new Vector2(400f, 120f);
         private static readonly Vector2 SLOT_SPACING = new Vector2(12f, 12f);
         private static readonly Color BANNER_COLOR = new Color(0.96f, 0.69f, 0.25f, 0.92f);
@@ -136,6 +138,9 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.OnMapVoteAnimationRequested       += HandleMapVoteAnimation;
             _lobbyManager.GameStarted.OnChange              += HandleGameStartedSync;
             _lobbyManager.MatchParticipants.OnChange        += HandleParticipantsSync;
+            _lobbyManager.PlayerWins.OnChange               += HandleWinsSync;
+            _lobbyManager.ReservedSlots.OnChange            += HandleReservedSync;
+            EnsureReservedSlotsPanel();
             UpdateRoomName(_lobbyManager.RoomName.Value);
 
             if (_readyButton != null)
@@ -164,6 +169,7 @@ namespace FastAndFractured.Multiplayer
 
             RefreshPlayerList();
             RefreshMatchState();
+            RefreshResetWinsButton();
             HideMapPickWhenIdle();
         }
 
@@ -189,6 +195,71 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.OnMapVoteAnimationRequested       -= HandleMapVoteAnimation;
             _lobbyManager.GameStarted.OnChange              -= HandleGameStartedSync;
             _lobbyManager.MatchParticipants.OnChange        -= HandleParticipantsSync;
+            _lobbyManager.PlayerWins.OnChange               -= HandleWinsSync;
+            _lobbyManager.ReservedSlots.OnChange            -= HandleReservedSync;
+        }
+
+        private void HandleReservedSync(int prev, int next, bool asServer)
+        {
+            if (asServer && InstanceFinder.IsClientStarted) return;   // the host hears it again as client
+            RefreshPlayerList();
+        }
+
+        private ReservedSlotsUI _reservedPanel;
+
+        private void EnsureReservedSlotsPanel()
+        {
+            if (_reservedPanel != null) return;
+            var screen = GetComponentInParent<MenuScreen>(true);
+            var aiPanel = screen != null ? screen.GetComponentInChildren<AiSlotsUI>(true) : GetComponentInChildren<AiSlotsUI>(true);
+            if (aiPanel != null) _reservedPanel = ReservedSlotsUI.CreateBelow(aiPanel);
+        }
+
+        private void HandleWinsSync(FishNet.Object.Synchronizing.SyncDictionaryOperation op, int key, int value, bool asServer)
+        {
+            if (asServer && InstanceFinder.IsClientStarted) return;   // the host hears it again as client
+            RefreshPlayerList();
+            RefreshResetWinsButton();
+        }
+
+        private Button _resetWinsButton;
+
+        private void EnsureResetWinsButton()
+        {
+            if (_resetWinsButton != null || _forceStartButton == null) return;
+            var go = Instantiate(_forceStartButton.gameObject, _forceStartButton.transform.parent);
+            go.name = "ResetWinsButton";
+            go.transform.SetSiblingIndex(_forceStartButton.transform.GetSiblingIndex());
+            var rect = (RectTransform)go.transform;
+            var source = (RectTransform)_forceStartButton.transform;
+            if (source.parent.GetComponent<LayoutGroup>() == null)
+            {
+                float height = source.rect.height * RESET_WINS_HEIGHT_RATIO;
+                rect.sizeDelta = new Vector2(source.sizeDelta.x, source.sizeDelta.y - (source.rect.height - height));
+                float offset = source.rect.height * (1f - source.pivot.y) + height * source.pivot.y + RESET_WINS_GAP;
+                rect.anchoredPosition = source.anchoredPosition + new Vector2(0f, offset);
+            }
+            foreach (var localized in go.GetComponentsInChildren<Assets.SimpleLocalization.Scripts.LocalizedText>(true)) DestroyImmediate(localized);
+            var label = go.GetComponentInChildren<TMP_Text>(true);
+            if (label != null) label.text = LocalizationManager.Localize("MP.Room.ResetWins");
+            _resetWinsButton = go.GetComponent<Button>();
+            _resetWinsButton.onClick.RemoveAllListeners();
+            _resetWinsButton.onClick.AddListener(OnResetWinsClicked);
+        }
+
+        private void RefreshResetWinsButton()
+        {
+            bool isHost = InstanceFinder.IsServerStarted;
+            if (isHost) EnsureResetWinsButton();
+            if (_resetWinsButton == null) return;
+            _resetWinsButton.gameObject.SetActive(isHost);
+            _resetWinsButton.interactable = _lobbyManager != null && !_lobbyManager.GameStarted.Value && _lobbyManager.AnyWins;
+        }
+
+        private void OnResetWinsClicked()
+        {
+            if (_lobbyManager == null || !InstanceFinder.IsServerStarted) return;
+            _lobbyManager.ResetWins();
         }
 
         /// <summary>A host migration spawns a new room object: bind to it as soon as it appears.</summary>
@@ -238,6 +309,7 @@ namespace FastAndFractured.Multiplayer
 
             if (_readyButton != null) _readyButton.interactable = !running;
             if (_forceStartButton != null) _forceStartButton.interactable = !running;
+            RefreshResetWinsButton();
             if (waiting && _readyButtonText != null) _readyButtonText.text = LocalizationManager.Localize("MP.Room.InProgress");
             else if (!running) UpdateReadyButtonVisual();
 
@@ -428,6 +500,10 @@ namespace FastAndFractured.Multiplayer
 
 
         private const int AI_SLOT_ID_BASE = -1000;
+        private const int RESERVED_SLOT_ID_BASE = -2000;
+
+        // Kick and reserve act on the server directly: only the host has those controls.
+        private static bool CanKick => InstanceFinder.IsServerStarted;
 
         private void RefreshPlayerList()
         {
@@ -471,8 +547,13 @@ namespace FastAndFractured.Multiplayer
                 if (slot != null)
                 {
                     slot.SetData(clientId, code, isReady, voteSprite, isLocal, displayName,
-                        MultiplayerSettings.ShowPlayerLevels ? _lobbyManager.GetPlayerLevel(clientId) : 0);
+                        MultiplayerSettings.ShowPlayerLevels ? _lobbyManager.GetPlayerLevel(clientId) : 0,
+                        _lobbyManager.GetPlayerWins(clientId));
                     slot.SetInMatch(_lobbyManager.IsInMatch(clientId));
+                    int kickedId = clientId;
+                    slot.SetKick(CanKick && !isLocal && !_lobbyManager.IsInMatch(clientId)
+                        ? () => _lobbyManager.KickPlayer(kickedId)
+                        : (System.Action)null);
                     var btn = slot.GetSelectButton();
                     if (btn != null && isLocal)
                     {
@@ -512,12 +593,34 @@ namespace FastAndFractured.Multiplayer
                 if (aiSlot != null)
                 {
                     aiSlot.SetData(slotId, aiName, isReady: true, mapVoteThumbnail: null, isLocal: false);
+                    // Bots have no identity of their own: removing any one drops the AI count by one.
+                    aiSlot.SetKick(CanKick && !_lobbyManager.GameStarted.Value
+                        ? () => _lobbyManager.ServerSetAiSlotCount(_lobbyManager.AiSlotCount.Value - 1)
+                        : (System.Action)null);
                 }
                 else
                 {
                     var label = aiEntry.GetComponentInChildren<TMP_Text>();
                     if (label != null) label.text = LocalizationManager.Localize("MP.Room.AiReady", aiName);
                 }
+            }
+
+            for (int i = 0; i < _lobbyManager.ReservedSlots.Value; i++)
+            {
+                int slotId = RESERVED_SLOT_ID_BASE - i;
+                currentPlayers.Add(slotId);
+                if (!_playerEntries.TryGetValue(slotId, out var reservedEntry) || reservedEntry == null)
+                {
+                    reservedEntry = Instantiate(_playerEntryPrefab, _playerListContainer);
+                    _playerEntries[slotId] = reservedEntry;
+                }
+                reservedEntry.transform.SetAsLastSibling();
+                var reservedSlot = reservedEntry.GetComponent<PlayerSlotUI>();
+                if (reservedSlot == null) continue;
+                reservedSlot.SetData(slotId, null, isReady: false, mapVoteThumbnail: null, isLocal: false,
+                    displayName: LocalizationManager.Localize("MP.Room.ReservedSeat"));
+                reservedSlot.SetReserved();
+                reservedSlot.SetKick(CanKick ? () => _lobbyManager.SetReservedSlots(_lobbyManager.ReservedSlots.Value - 1) : (System.Action)null);
             }
 
             var toRemove = new List<int>();

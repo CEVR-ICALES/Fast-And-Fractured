@@ -123,7 +123,7 @@ namespace FastAndFractured.Multiplayer.Lobby
         {
             if (_entryPrefab == null || _entryContainer == null) return;
             var entry = Instantiate(_entryPrefab, _entryContainer);
-            bool full = listing.CurrentPlayers >= listing.MaxPlayers;
+            bool full = listing.OpenSlots <= 0;
             entry.Populate(listing, OnJoinSelected);
             // A room in a match stays joinable: the newcomer waits in it for the next match.
             entry.SetJoinable(!full);

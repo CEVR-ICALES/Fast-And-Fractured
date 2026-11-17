@@ -216,11 +216,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
         private string BuildPayload(int playerCount) =>
             BuildPayload(_roomName, _gamePort, playerCount, Application.version, _maxPlayers,
-                FastAndFractured.Multiplayer.NetworkLink.Local, GetLobbyMetadata(LobbyListing.KEY_IN_MATCH) == "1");
+                FastAndFractured.Multiplayer.NetworkLink.Local, GetLobbyMetadata(LobbyListing.KEY_IN_MATCH) == "1",
+                int.TryParse(GetLobbyMetadata(LobbyListing.KEY_RESERVED), out int reserved) ? reserved : 0);
 
         public static string BuildPayload(string roomName, ushort port, int players, string version, int maxPlayers,
-                                          FastAndFractured.Multiplayer.LinkKind hostLink, bool inMatch) =>
-            string.Join(SEPARATOR.ToString(), roomName, port, players, version, maxPlayers, (byte)hostLink, inMatch ? 1 : 0);
+                                          FastAndFractured.Multiplayer.LinkKind hostLink, bool inMatch, int reserved = 0) =>
+            string.Join(SEPARATOR.ToString(), roomName, port, players, version, maxPlayers, (byte)hostLink, inMatch ? 1 : 0, reserved);
 
         public static LobbyListing ParsePayload(byte[] data, IPEndPoint remote)
         {
@@ -241,6 +242,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                     PingMs         = 0,
                     HostLink       = parts.Length > 5 ? FastAndFractured.Multiplayer.NetworkLink.Parse(parts[5]) : FastAndFractured.Multiplayer.LinkKind.Unknown,
                     InMatch        = parts.Length > 6 && parts[6] == "1",
+                    ReservedSlots  = parts.Length > 7 && int.TryParse(parts[7], out int reserved) ? reserved : 0,
                 };
             }
             catch { return null; }

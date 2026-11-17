@@ -28,14 +28,14 @@ namespace FastAndFractured.Multiplayer
         [SerializeField] private Button     _selectButton;
         [SerializeField] private GameObject _selectButtonRoot;   // hidden on remote slots
 
-        /// <summary>Fills the slot; <paramref name="level"/> 0 hides the level.</summary>
-        public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null, int level = 0)
+        public void SetData(int clientId, string characterCode, bool isReady, Sprite mapVoteThumbnail, bool isLocal, string displayName = null, int level = 0, int wins = -1)
         {
             // AI slots use negative ids and have no connection to show.
             _networkClientId = clientId;
             _networkVersion = -1;
             string playerName = string.IsNullOrEmpty(displayName) ? $"Player {clientId}" : displayName;
             if (level > 0) playerName = $"{playerName}  <color=#FFC759>{LocalizationManager.Localize("MP.Room.Level", level)}</color>";
+            if (wins >= 0) playerName = $"{playerName}  <nobr><color=#7CE38B>{LocalizationManager.Localize(wins == 1 ? "MP.Room.Win" : "MP.Room.Wins", wins)}</color></nobr>";
 
             if (_nameLabel != null)
                 _nameLabel.text = string.IsNullOrEmpty(characterCode)
@@ -126,5 +126,64 @@ namespace FastAndFractured.Multiplayer
         }
 
         public Button GetSelectButton() => _selectButton;
+
+        private static readonly Color ReservedColor = new Color(0.12f, 0.20f, 0.36f, 0.80f);
+        private static readonly Color KickColor = new Color(0.78f, 0.18f, 0.16f, 0.95f);
+        private static readonly Vector2 KickSize = new Vector2(30f, 30f);
+        private const float KICK_FONT_SIZE = 20f;
+        private Button _kickButton;
+
+        public void SetReserved()
+        {
+            if (_readyBadge != null) _readyBadge.SetActive(false);
+            if (_readyLabel != null) _readyLabel.text = string.Empty;
+            if (_backgroundTint != null) _backgroundTint.color = ReservedColor;
+            if (_charIcon != null) _charIcon.enabled = false;
+        }
+
+        public void SetKick(System.Action onKick)
+        {
+            if (onKick == null)
+            {
+                if (_kickButton != null) _kickButton.gameObject.SetActive(false);
+                return;
+            }
+            if (_kickButton == null) _kickButton = CreateKickButton();
+            _kickButton.gameObject.SetActive(true);
+            _kickButton.onClick.RemoveAllListeners();
+            _kickButton.onClick.AddListener(() => onKick());
+        }
+
+        // Top-left corner of the seat, outside its layout (the network signal holds the top-right one).
+        private Button CreateKickButton()
+        {
+            var go = new GameObject("KickButton", typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(transform, false);
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(4f, -4f);
+            rect.sizeDelta = KickSize;
+            var image = go.AddComponent<Image>();
+            image.color = KickColor;
+            var button = go.AddComponent<Button>();
+            button.targetGraphic = image;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.SetParent(rect, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (_nameLabel != null) label.font = _nameLabel.font;
+            label.fontSize = KICK_FONT_SIZE;
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            label.text = "X";
+            return button;
+        }
     }
 }

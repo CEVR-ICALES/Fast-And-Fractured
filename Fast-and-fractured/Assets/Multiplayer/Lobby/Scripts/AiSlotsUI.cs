@@ -21,6 +21,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_lobby == null) return;
 
             _lobby.AiSlotCount.OnChange += OnAiCountChanged;
+            _lobby.ReservedSlots.OnChange += OnAiCountChanged;
             // Humans joining or leaving change the total too.
             _lobby.PlayerReadyStates.OnChange += OnReadyStatesChanged;
             _decButton?.onClick.AddListener(() => ChangeAi(-1));
@@ -34,6 +35,7 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_lobby != null)
             {
                 _lobby.AiSlotCount.OnChange -= OnAiCountChanged;
+                _lobby.ReservedSlots.OnChange -= OnAiCountChanged;
                 _lobby.PlayerReadyStates.OnChange -= OnReadyStatesChanged;
             }
 

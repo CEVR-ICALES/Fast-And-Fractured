@@ -49,6 +49,36 @@ namespace FastAndFractured.Multiplayer
         /// <summary>The player's level, or 0 when it has not arrived yet.</summary>
         public int GetPlayerLevel(int clientId) => PlayerLevels.TryGetValue(clientId, out int level) ? level : 0;
 
+        public readonly SyncDictionary<int, int> PlayerWins = new SyncDictionary<int, int>();
+
+        public int GetPlayerWins(int clientId) => PlayerWins.TryGetValue(clientId, out int wins) ? wins : 0;
+
+        public bool AnyWins
+        {
+            get
+            {
+                foreach (var kv in PlayerWins) if (kv.Value > 0) return true;
+                return false;
+            }
+        }
+
+        [Server]
+        public void RecordWin(int clientId)
+        {
+            if (!PlayerReadyStates.ContainsKey(clientId)) return;
+            PlayerWins[clientId] = GetPlayerWins(clientId) + 1;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ServerResetWins(NetworkConnection conn = null)
+        {
+            if (conn != null && conn.ClientId != 0 && !conn.IsHost) return;
+            ResetWins();
+        }
+
+        [Server]
+        public void ResetWins() => PlayerWins.Clear();
+
         public string GetPlayerName(int clientId) =>
             PlayerNames.TryGetValue(clientId, out var n) && !string.IsNullOrEmpty(n) ? n : $"Player {clientId}";
 
@@ -94,9 +124,96 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Server: a participant went back to the room before the match ended.</summary>
         public event Action<NetworkConnection> OnParticipantLeftMatch;
 
+        public readonly SyncVar<int> ReservedSlots = new SyncVar<int>(0);
+
         public int HumanPlayerCount => PlayerReadyStates.Count;
-        public int TotalSlotCount   => HumanPlayerCount + AiSlotCount.Value;
+        public int TotalSlotCount   => HumanPlayerCount + AiSlotCount.Value + ReservedSlots.Value;
         public int FreeSlotCount    => Mathf.Max(0, MAX_PLAYERS - TotalSlotCount);
+        private int MaxAiSlots      => Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount - ReservedSlots.Value);
+
+        // A reserved seat goes before an AI: the guest it was kept for has come.
+        [Server]
+        private void FitSeats()
+        {
+            int ai = AiSlotCount.Value, reserved = ReservedSlots.Value;
+            FitSeats(HumanPlayerCount, ref ai, ref reserved);
+            if (reserved != ReservedSlots.Value) ReservedSlots.Value = reserved;
+            if (ai != AiSlotCount.Value) AiSlotCount.Value = ai;
+        }
+
+        public static void FitSeats(int humans, ref int ai, ref int reserved)
+        {
+            int over = humans + ai + reserved - MAX_PLAYERS;
+            if (over <= 0) return;
+            int fromReserved = Mathf.Min(over, reserved);
+            reserved -= fromReserved;
+            ai = Mathf.Max(0, ai - (over - fromReserved));
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ServerSetReservedSlots(int count, NetworkConnection conn = null)
+        {
+            if (conn != null && conn.ClientId != 0 && !conn.IsHost) return;
+            SetReservedSlots(count);
+        }
+
+        [Server]
+        public void SetReservedSlots(int count)
+        {
+            int max = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount - AiSlotCount.Value);
+            ReservedSlots.Value = Mathf.Clamp(count, 0, max);
+        }
+
+        private void HandleReservedChangeServer(int prev, int next, bool asServer)
+        {
+            if (!asServer) return;
+            try { Abstractions.LobbyServiceLocator.Transport?.SetLobbyMetadata(Abstractions.LobbyListing.KEY_RESERVED, next.ToString()); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        private readonly HashSet<string> _kickedTokens = new HashSet<string>();
+        private const float KICK_DISCONNECT_SECONDS = 2f;
+        private const float KICK_TOKEN_RECHECK_SECONDS = 2f;
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ServerKickPlayer(int clientId, NetworkConnection conn = null)
+        {
+            if (conn != null && conn.ClientId != 0 && !conn.IsHost) return;
+            KickPlayer(clientId);
+        }
+
+        [Server]
+        public void KickPlayer(int clientId)
+        {
+            if (!ServerManager.Clients.TryGetValue(clientId, out NetworkConnection target) || target == null) return;
+            if (target.IsLocalClient) return;
+            string token = HostMigration.HostMigrationNetwork.TokenOf(target);
+            if (!string.IsNullOrEmpty(token)) _kickedTokens.Add(token);
+            TargetKicked(target);
+            StartCoroutine(DisconnectLater(target));
+        }
+
+        private System.Collections.IEnumerator DisconnectLater(NetworkConnection target)
+        {
+            yield return new WaitForSecondsRealtime(KICK_DISCONNECT_SECONDS);
+            if (target != null && target.IsActive) target.Disconnect(false);
+        }
+
+        [TargetRpc]
+        private void TargetKicked(NetworkConnection target) => RoomKick.LeaveKicked();
+
+        [Server]
+        private bool IsKicked(NetworkConnection conn)
+        {
+            string token = HostMigration.HostMigrationNetwork.TokenOf(conn);
+            return !string.IsNullOrEmpty(token) && _kickedTokens.Contains(token);
+        }
+
+        private System.Collections.IEnumerator RecheckKickedLater(NetworkConnection conn)
+        {
+            yield return new WaitForSecondsRealtime(KICK_TOKEN_RECHECK_SECONDS);
+            if (conn != null && conn.IsActive && IsKicked(conn)) KickPlayer(conn.ClientId);
+        }
         #endregion
 
         #region SERVER_STATE
@@ -114,6 +231,7 @@ namespace FastAndFractured.Multiplayer
             PlayerMapVotes.OnChange += HandleMapVoteChange;
             AiSlotCount.OnChange   += HandleAiSlotChange;
             GameStarted.OnChange   += HandleGameStartedServer;
+            ReservedSlots.OnChange += HandleReservedChangeServer;
             AdvertiseMatchState(false);
         }
 
@@ -128,6 +246,7 @@ namespace FastAndFractured.Multiplayer
             PlayerMapVotes.OnChange -= HandleMapVoteChange;
             AiSlotCount.OnChange   -= HandleAiSlotChange;
             GameStarted.OnChange   -= HandleGameStartedServer;
+            ReservedSlots.OnChange -= HandleReservedChangeServer;
         }
 
         public override void OnStartClient()
@@ -242,9 +361,7 @@ namespace FastAndFractured.Multiplayer
             {
                 PlayerReadyStates[conn.ClientId] = false;
                 PlayerCharacterSelections[conn.ClientId] = "";
-                int maxAi = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount);
-                if (AiSlotCount.Value > maxAi)
-                    AiSlotCount.Value = maxAi;
+                FitSeats();
             }
             else if (args.ConnectionState == FishNet.Transporting.RemoteConnectionState.Stopped)
             {
@@ -252,6 +369,7 @@ namespace FastAndFractured.Multiplayer
                 PlayerCharacterSelections.Remove(conn.ClientId);
                 PlayerNames.Remove(conn.ClientId);
                 PlayerLevels.Remove(conn.ClientId);
+                PlayerWins.Remove(conn.ClientId);
                 PlayerMapVotes.Remove(conn.ClientId);
                 MatchParticipants.Remove(conn.ClientId);
                 MatchSpectators.Remove(conn.ClientId);
@@ -719,8 +837,11 @@ namespace FastAndFractured.Multiplayer
             PlayerNames[conn.ClientId] = string.IsNullOrWhiteSpace(displayName) ? $"Player {conn.ClientId}" : displayName;
             PlayerLevels[conn.ClientId] = ClampLevel(level);
 
-            int maxAi = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount);
-            if (AiSlotCount.Value > maxAi) AiSlotCount.Value = maxAi;
+            FitSeats();
+
+            if (IsKicked(conn)) KickPlayer(conn.ClientId);
+            // The token can arrive after this RPC.
+            else if (HostMigration.HostMigrationNetwork.TokenOf(conn) == null) StartCoroutine(RecheckKickedLater(conn));
         }
 
         /// <summary>Host sets the number of AI slots. Clamps to available free slots.</summary>
@@ -734,8 +855,7 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            int maxAi = Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount);
-            AiSlotCount.Value = Mathf.Clamp(count, 0, maxAi);
+            AiSlotCount.Value = Mathf.Clamp(count, 0, MaxAiSlots);
         }
 
         [ServerRpc(RequireOwnership = false)]
