@@ -98,6 +98,16 @@ namespace FastAndFractured.Multiplayer
 
         private int _dashSettleTicks;
 
+        // 2.5 s at 50 Hz: covers any round trip a match can survive.
+        private const int POSE_HISTORY_TICKS = 128;
+        private readonly PredictedPoseHistory _ownerHistory = new PredictedPoseHistory(POSE_HISTORY_TICKS);
+        private uint _lastOwnerReplicateTick;
+
+        public static bool ReconcileAgainstHistory = true;
+        public int HistoryHits { get; private set; }
+        public int HistoryMisses { get; private set; }
+        public float LastCorrectionError { get; private set; }
+
         private bool _cameraTargetChecked;
 
         [Header("Multiplayer Runtime Guards")]
@@ -500,6 +510,19 @@ namespace FastAndFractured.Multiplayer
             {
                  CreateReconcile();
             }
+            else if (base.IsOwner)
+            {
+                // Same point in the tick as the server's CreateReconcile, so the two states compare like for like.
+                RecordOwnerPose();
+            }
+        }
+
+        private void RecordOwnerPose()
+        {
+            var adapter = _customRigidbody as MultiplayerRigidbodyAdapter;
+            if (adapter == null || _lastOwnerReplicateTick == 0) return;
+            Rigidbody rb = adapter.PredictionRigidbody.Rigidbody;
+            _ownerHistory.Record(_lastOwnerReplicateTick, rb.position, rb.rotation, rb.linearVelocity, rb.angularVelocity);
         }
 
         public override void CreateReconcile()
@@ -575,6 +598,9 @@ namespace FastAndFractured.Multiplayer
             // Under PhysicsMode.Unity a replay never steps physics, so anything it adds lands on top of the live ticks.
             if (isReplaying)
                 return;
+
+            if (base.IsOwner && state.ContainsCreated())
+                _lastOwnerReplicateTick = md.GetTick();
 
             if (!base.IsOwner)
                 md = ContinueLastInputIfMissing(md, state);
@@ -804,6 +830,14 @@ namespace FastAndFractured.Multiplayer
         /// <summary>Returns true if it hard-snapped. During a dash the report trails the car without a real desync, so the snap distance is relaxed.</summary>
         private bool ApplyServerPose(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd)
         {
+            if (ReconcileAgainstHistory && _ownerHistory.TryGet(rd.GetTick(), out var predicted))
+            {
+                HistoryHits++;
+                ApplyServerPoseAgainstHistory(adapter, rb, rd, predicted);
+                return false;
+            }
+            HistoryMisses++;
+
             Vector3 positionError = rd.WorldPosition - rb.position;
             float angleError = Quaternion.Angle(rb.rotation, rd.WorldRotation);
 
@@ -844,6 +878,46 @@ namespace FastAndFractured.Multiplayer
             rb.rotation = Quaternion.Slerp(rb.rotation, rd.WorldRotation, RotationBlend);
             rb.position += positionError * PositionBlend;
             return false;
+        }
+
+        // Comparing a round-trip-old state with the present pulled the car back every tick: the delay players feel.
+        private void ApplyServerPoseAgainstHistory(MultiplayerRigidbodyAdapter adapter, Rigidbody rb, ReconcileData rd, PredictedPoseHistory.Sample predicted)
+        {
+            if (rd.PredictionRigidbody != null && !ReferenceEquals(rd.PredictionRigidbody, adapter.PredictionRigidbody))
+                GameKit.Dependencies.Utilities.ResettableObjectCaches<PredictionRigidbody>.Store(rd.PredictionRigidbody);
+
+            Vector3 positionError = rd.WorldPosition - predicted.Position;
+            Quaternion rotationError = rd.WorldRotation * Quaternion.Inverse(predicted.Rotation);
+            Vector3 velocityError = rd.WorldVelocity - predicted.Velocity;
+            Vector3 angularVelocityError = rd.WorldAngularVelocity - predicted.AngularVelocity;
+            LastCorrectionError = positionError.magnitude;
+
+            if (rd.DashTicksRemaining > 0)
+                _dashSettleTicks = DashSettleTicks;
+            bool dashInFlight = _dashTicksRemaining > 0 || _dashSettleTicks > 0;
+            float snapDistance = dashInFlight ? DashSnapDistance : SnapDistance;
+            bool snap = positionError.sqrMagnitude > snapDistance * snapDistance ||
+                        Quaternion.Angle(Quaternion.identity, rotationError) > SnapAngleDegrees;
+
+            float positionShare = snap ? 1f : PositionBlend;
+            float rotationShare = snap ? 1f : RotationBlend;
+            // During a dash the server's report trails the impulse: leave the velocity alone.
+            float velocityShare = snap ? 1f : (rd.DashTicksRemaining <= 0 && _dashTicksRemaining <= 0 ? VelocityBlend : 0f);
+
+            Vector3 positionShift = positionError * positionShare;
+            Quaternion rotationShift = Quaternion.Slerp(Quaternion.identity, rotationError, rotationShare);
+            Vector3 velocityShift = velocityError * velocityShare;
+            Vector3 angularVelocityShift = angularVelocityError * velocityShare;
+
+            rb.position += positionShift;
+            rb.rotation = rotationShift * rb.rotation;
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity += velocityShift;
+                rb.angularVelocity += angularVelocityShift;
+            }
+            if (snap) adapter.PredictionRigidbody.ClearPendingForces();
+            _ownerHistory.ShiftAfter(rd.GetTick(), positionShift, rotationShift, velocityShift, angularVelocityShift);
         }
 
         /// <summary>
