@@ -85,7 +85,6 @@ namespace FastAndFractured
         #endregion
 
         Camera _camera;
-        HDAdditionalCameraData _hdAdditionalCameraData;
 
         private MenuScreen _menuScreen;
 
@@ -106,7 +105,7 @@ namespace FastAndFractured
             sfxVolumeSlider.onValueChanged.AddListener(delegate { SetSFXVolume(sfxVolumeSlider.value); });
             displayModeDropdown.onValueChanged.AddListener(delegate { SetDisplayMode(displayModeDropdown.value); });
             upscalingDropdown.onValueChanged.AddListener(delegate { SetUpscalingMode(upscalingDropdown.value); });
-            upscalingResolutionDropdown.onValueChanged.AddListener(delegate { SetUpscalingResolutionMode(DictionaryLibrary.TranslationDynamicResolution[upscalingResolutionDropdown.value]); });
+            upscalingResolutionDropdown.onValueChanged.AddListener(delegate { SetUpscalingResolutionMode(upscalingResolutionDropdown.value); });
 
             brightnessSlider.onValueChanged.AddListener(delegate { SetBrightness(); });
             minimapSlider.onValueChanged.AddListener(delegate { SetMinimapScale(); });
@@ -159,7 +158,6 @@ namespace FastAndFractured
         private void SetStartValues()
         {
             _camera = Camera.main;
-            _hdAdditionalCameraData = _camera.GetComponent<HDAdditionalCameraData>();
 
             //Master volume
             float masterVolume = PlayerPrefs.GetFloat("MasterVolume", MASTER_VOLUME_DEFAULT);
@@ -317,7 +315,7 @@ namespace FastAndFractured
             MinimapScaler scaler = FindFirstObjectByType<MinimapScaler>();
             if (scaler != null)
             {
-                scaler.setCurrentScale();
+                scaler.SetCurrentScale();
             }
         }
 
@@ -364,6 +362,7 @@ namespace FastAndFractured
                 antiAliasingDropdown.value = 0;
 
             antiAliasingDropdown.RefreshShownValue();
+            GraphicsQuality.ApplySavedAntiAliasing(_camera);
         }
 
         private void SetAntiAliasing(int dropdownIndex)
@@ -525,23 +524,13 @@ namespace FastAndFractured
         #region DLSS/FSR2
         private void LoadUpscalingOptions()
         {
-            List<string> upscalingModes = new List<string>();
-            upscalingModes.Add("NONE");
-
-            if (SystemInfo.graphicsDeviceName.ToLower().Contains("nvidia"))
-            {
-                upscalingModes.Add("DLSS");
-            }
-
-            if (SystemInfo.graphicsDeviceName.ToLower().Contains("amd"))
-            {
-                upscalingModes.Add("FSR2");
-            }
+            List<string> upscalingModes = new List<string> { Upscaling.NONE };
+            if (Upscaling.IsAvailable(Upscaling.DLSS)) upscalingModes.Add(Upscaling.DLSS);
+            if (Upscaling.IsAvailable(Upscaling.FSR2)) upscalingModes.Add(Upscaling.FSR2);
 
             upscalingDropdown.ClearOptions();
             upscalingDropdown.AddOptions(upscalingModes);
-
-            upscalingDropdown.value = upscalingModes.IndexOf(PlayerPrefs.GetString("UpscalingMode", "NONE"));
+            upscalingDropdown.value = Mathf.Max(0, upscalingModes.IndexOf(Upscaling.SavedMode));
             SetUpscalingMode(upscalingDropdown.value);
             upscalingDropdown.RefreshShownValue();
         }
@@ -549,85 +538,24 @@ namespace FastAndFractured
         private void LoadUpscalingResolutionOptions()
         {
             upscalingResolutionDropdown.ClearOptions();
-            upscalingResolutionDropdown.AddOptions(DictionaryLibrary.DynamicResolutionMode.Keys.ToList());
-            upscalingResolutionDropdown.value = PlayerPrefs.GetInt("upscalingResolutionMode", DictionaryLibrary.DynamicResolutionMode["Balanced"]);
-            SetUpscalingResolutionMode(DictionaryLibrary.TranslationDynamicResolution[upscalingResolutionDropdown.value]);
+            upscalingResolutionDropdown.AddOptions(Upscaling.PRESET_NAMES.ToList());
+            upscalingResolutionDropdown.value = Upscaling.SavedPreset;
+            upscalingResolutionDropdown.RefreshShownValue();
         }
 
         public void SetUpscalingMode(int value)
         {
-            switch (upscalingDropdown.options[value].text)
-            {
-                case "DLSS":
-                    PlayerPrefs.SetString("UpscalingMode", "DLSS");
-                    ToggleFSR2(false);
-                    ToggleDLSS(true);
-                    break;
-                case "FSR2":
-                    PlayerPrefs.SetString("UpscalingMode", "FSR2");
-                    ToggleDLSS(false);
-                    ToggleFSR2(true);
-                    break;
-                case "None":
-                default:
-                    PlayerPrefs.SetString("UpscalingMode", "NONE");
-                    ToggleDLSS(false);
-                    ToggleFSR2(false);
-                    break;
-            }
-
+            string mode = upscalingDropdown.options[value].text;
+            Upscaling.SaveMode(mode);
+            Upscaling.Apply(_camera, mode, upscalingResolutionDropdown.value);
+            upscalingResolutionDropdown.interactable = mode != Upscaling.NONE;
         }
 
-        public void ToggleDLSS(bool value)
+        public void SetUpscalingResolutionMode(int preset)
         {
-            _camera.allowDynamicResolution = value;
-            _hdAdditionalCameraData.allowDynamicResolution = value;
-            _hdAdditionalCameraData.allowDeepLearningSuperSampling = value;
-            _hdAdditionalCameraData.deepLearningSuperSamplingUseCustomAttributes = value;
-            _hdAdditionalCameraData.deepLearningSuperSamplingUseCustomQualitySettings = value;
-            _hdAdditionalCameraData.deepLearningSuperSamplingUseOptimalSettings = value;
-            upscalingResolutionDropdown.interactable = value;
+            Upscaling.SavePreset(preset);
+            Upscaling.Apply(_camera, Upscaling.SavedMode, preset);
         }
-
-        public void ToggleFSR2(bool value)
-        {
-            _camera.allowDynamicResolution = value;
-            _hdAdditionalCameraData.allowDynamicResolution = value;
-            _hdAdditionalCameraData.allowFidelityFX2SuperResolution = value;
-            _hdAdditionalCameraData.fidelityFX2SuperResolutionUseCustomAttributes = value;
-            _hdAdditionalCameraData.fidelityFX2SuperResolutionUseCustomQualitySettings = value;
-            _hdAdditionalCameraData.fidelityFX2SuperResolutionUseOptimalSettings = value;
-            upscalingResolutionDropdown.interactable = value;
-        }
-
-
-        public void SetUpscalingResolutionMode(int value)
-        {
-            switch (PlayerPrefs.GetString("UpscalingMode", "NONE"))
-            {
-                case "DLSS":
-                    SetDLSSMode(value);
-                    break;
-                case "FSR2":
-                    SetFSR2Mode(value);
-                    break;
-                case "NONE":
-                default:
-                    break;
-            }
-        }
-
-        public void SetDLSSMode(int value)
-        {
-            _hdAdditionalCameraData.deepLearningSuperSamplingQuality = (uint)value;
-            PlayerPrefs.SetInt("upscalingResolutionMode", value);
-        }
-        public void SetFSR2Mode(int value)
-        {
-            _hdAdditionalCameraData.fidelityFX2SuperResolutionQuality = (uint)value;
-            PlayerPrefs.SetInt("upscalingResolutionMode", value);
-        }
-
         #endregion
 
         #endregion

@@ -64,7 +64,6 @@ namespace UnityEditor.Recorder.Examples
                 if (_ffmpegVideoPipe != null)
                 {
                     _ffmpegVideoPipe.Dispose();
-                    _ffmpegVideoPipe.Dispose();
                 }
 
                 if (_ffmpegAudioPipe != null)

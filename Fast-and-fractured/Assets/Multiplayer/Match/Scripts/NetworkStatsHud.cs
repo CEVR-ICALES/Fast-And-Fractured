@@ -1,0 +1,209 @@
+using Assets.SimpleLocalization.Scripts;
+using System.Collections.Generic;
+using FishNet;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using Utilities.Managers.PauseSystem;
+
+namespace FastAndFractured.Multiplayer
+{
+    /// <summary>
+    /// Match overlay with every player's connection (see <see cref="NetworkQuality"/>), local row first. F3
+    /// toggles it; hidden while the pause menu is open.
+    /// </summary>
+    public sealed class NetworkStatsHud : MonoBehaviour
+    {
+        private const float ROW_HEIGHT = 20f;
+        private const float REFRESH_SECONDS = 0.25f;
+        private const float ROW_SPACING = 3f;
+        private const float COLUMN_SPACING = 10f;
+        private const float NAME_WIDTH = 130f;
+        private const float FONT_TO_ROW_HEIGHT = 0.85f;
+        private const int SORTING_ORDER = 40;
+        private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
+        private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
+        private static readonly Color BACKGROUND_COLOR = new Color(0.04f, 0.05f, 0.07f, 0.55f);
+        private static readonly Color REMOTE_NAME_COLOR = new Color(1f, 1f, 1f, 0.8f);
+
+        private static NetworkStatsHud _instance;
+        private static bool _hiddenByUser;
+
+        private Canvas _canvas;
+        private RectTransform _list;
+        private readonly List<Row> _rows = new List<Row>();
+        private float _nextRefresh;
+
+        private sealed class Row
+        {
+            public GameObject Root;
+            public TMP_Text Name;
+            public NetworkSignalIndicator Signal;
+            public TMP_Text Frames;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _instance = null;
+            _hiddenByUser = false;
+            MultiplayerSettings.Changed -= ApplySetting;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Bootstrap()
+        {
+            if (_instance != null) return;
+            var go = new GameObject("[NetworkStatsHud]");
+            DontDestroyOnLoad(go);
+            _instance = go.AddComponent<NetworkStatsHud>();
+        }
+
+        private void Awake()
+        {
+            Build();
+            ApplySetting();
+            MultiplayerSettings.Changed += ApplySetting;
+        }
+
+        private void OnDestroy() => MultiplayerSettings.Changed -= ApplySetting;
+
+        /// <summary>Settings ▸ Multiplayer decides whether it starts shown; F3 still toggles it in a match.</summary>
+        private static void ApplySetting() => _hiddenByUser = !MultiplayerSettings.ShowNetworkStats;
+
+        private void Update()
+        {
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null && keyboard.f3Key.wasPressedThisFrame) _hiddenByUser = !_hiddenByUser;
+
+            bool show = !_hiddenByUser && InMatch() && !Paused();
+            if (_canvas.enabled != show) _canvas.enabled = show;
+            if (!show || Time.unscaledTime < _nextRefresh) return;
+            _nextRefresh = Time.unscaledTime + REFRESH_SECONDS;
+            Refresh();
+        }
+
+        private static bool InMatch()
+        {
+            var nm = InstanceFinder.NetworkManager;
+            if (nm == null || !nm.IsClientStarted) return false;
+            return SceneManager.GetActiveScene().name.StartsWith("Networked");
+        }
+
+        private static bool Paused()
+        {
+            var pause = PauseManager.ExistingInstance;
+            return pause != null && pause.IsGamePaused;
+        }
+
+        private void Refresh()
+        {
+            var nm = InstanceFinder.NetworkManager;
+            int localId = nm.ClientManager.Connection != null ? nm.ClientManager.Connection.ClientId : -1;
+
+            var entries = new List<KeyValuePair<int, NetworkQualityReport>>();
+            // The local row uses this peer's own numbers (the table lags a second).
+            entries.Add(new KeyValuePair<int, NetworkQualityReport>(localId, NetworkQuality.Local));
+            foreach (var pair in NetworkQuality.Players)
+                if (pair.Key != localId) entries.Add(pair);
+            entries.Sort((a, b) => a.Key == localId ? -1 : b.Key == localId ? 1 : a.Key.CompareTo(b.Key));
+
+            while (_rows.Count < entries.Count) _rows.Add(NewRow());
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                bool used = i < entries.Count;
+                _rows[i].Root.SetActive(used);
+                if (used) Fill(_rows[i], entries[i].Value, entries[i].Key == localId, entries[i].Key);
+            }
+        }
+
+        private static void Fill(Row row, NetworkQualityReport report, bool local, int clientId)
+        {
+            string name = string.IsNullOrEmpty(report.Name) ? $"Player {clientId}" : report.Name;
+            row.Name.text = local ? $"<b>{name}</b>" : name;
+            row.Name.color = local ? Color.white : REMOTE_NAME_COLOR;
+            row.Signal.Set((LinkKind)report.Link, report.PingMs, report.IsHost ? LocalizationManager.Localize("MP.Host") : null);
+
+            if (report.IsHost)
+                row.Frames.text = $"<color=#9aa0a6>{LocalizationManager.Localize("MP.Stats.Frames", 0, 0)}</color>";
+            else
+                row.Frames.text =
+                    LocalizationManager.Localize("MP.Stats.Frames", Colored(report.DelayFrames, 3, 6), Colored(report.RollbackFrames, 4, 8)) +
+                    $" <color=#9aa0a6>{LocalizationManager.Localize("MP.Stats.Max", report.RollbackMaxFrames)}</color>";
+        }
+
+        private static string Colored(int value, int warn, int bad)
+        {
+            string color = value >= bad ? "#ff6b5e" : value >= warn ? "#f5b041" : "#7ee08a";
+            return $"<color={color}>{value}</color>";
+        }
+
+        private void Build()
+        {
+            _canvas = gameObject.AddComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _canvas.sortingOrder = SORTING_ORDER;
+            var scaler = gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = REFERENCE_RESOLUTION;
+            scaler.matchWidthOrHeight = MATCH_WIDTH_OR_HEIGHT;
+
+            var panel = new GameObject("Panel", typeof(RectTransform));
+            panel.transform.SetParent(transform, false);
+            var background = panel.AddComponent<Image>();
+            background.color = BACKGROUND_COLOR;
+            background.raycastTarget = false;
+            _list = (RectTransform)panel.transform;
+            // Top right, under the minimap and the match timer.
+            _list.anchorMin = _list.anchorMax = _list.pivot = new Vector2(1f, 1f);
+            _list.anchoredPosition = new Vector2(-16f, -315f);
+            var layout = panel.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(8, 8, 6, 6);
+            layout.spacing = ROW_SPACING;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            var fitter = panel.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            _canvas.enabled = false;
+        }
+
+        private Row NewRow()
+        {
+            var root = new GameObject("Row", typeof(RectTransform));
+            root.transform.SetParent(_list, false);
+            var layout = root.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = COLUMN_SPACING;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+
+            var row = new Row { Root = root };
+            row.Name = NewText(root.transform, NAME_WIDTH);
+            row.Signal = NetworkSignalIndicator.Create(root.transform, row.Name, ROW_HEIGHT);
+            row.Frames = NewText(root.transform, -1f);
+            return row;
+        }
+
+        private static TMP_Text NewText(Transform parent, float width)
+        {
+            var go = new GameObject("Text", typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var text = go.AddComponent<TextMeshProUGUI>();
+            text.fontSize = ROW_HEIGHT * FONT_TO_ROW_HEIGHT;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.alignment = TextAlignmentOptions.MidlineLeft;
+            text.raycastTarget = false;
+            text.richText = true;
+            if (width > 0f)
+            {
+                var element = go.AddComponent<LayoutElement>();
+                element.preferredWidth = element.minWidth = width;
+            }
+            return text;
+        }
+    }
+}

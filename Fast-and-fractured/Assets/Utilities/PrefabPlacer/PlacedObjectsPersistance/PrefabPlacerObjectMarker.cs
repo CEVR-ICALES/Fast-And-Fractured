@@ -15,7 +15,8 @@ public class PrefabPlacerObjectMarker : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (!EditorApplication.isPlayingOrWillChangePlaymode && trackingSO != null)
+        if (!EditorApplication.isPlayingOrWillChangePlaymode && trackingSO != null
+            && !UnityEditor.SceneManagement.EditorSceneManager.IsPreviewScene(gameObject.scene))
         {
             trackingSO.RemoveByUniqueID(uniqueID);
             EditorUtility.SetDirty(trackingSO); // save the SO so this actually persists

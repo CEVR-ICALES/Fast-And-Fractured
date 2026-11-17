@@ -6,7 +6,7 @@ QualitySettings:
   serializedVersion: 5
   m_CurrentQuality: 5
   m_QualitySettings:
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: Very Low
     pixelLightCount: 0
     shadows: 0
@@ -34,9 +34,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 0.3
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -47,18 +48,18 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
-    terrainQualityOverrides: 0
-    terrainPixelError: 1
-    terrainDetailDensityScale: 1
+    customRenderPipeline: {fileID: 11400000, guid: 7360b844d8c748b46ac49b1afc2cf822, type: 2}
+    terrainQualityOverrides: 29
+    terrainPixelError: 15
+    terrainDetailDensityScale: 0.25
     terrainBasemapDistance: 1000
-    terrainDetailDistance: 80
-    terrainTreeDistance: 5000
+    terrainDetailDistance: 50
+    terrainTreeDistance: 400
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
     excludedTargetPlatforms: []
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: Low
     pixelLightCount: 0
     shadows: 0
@@ -86,9 +87,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 0.4
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -99,18 +101,18 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
-    terrainQualityOverrides: 0
-    terrainPixelError: 1
-    terrainDetailDensityScale: 1
+    customRenderPipeline: {fileID: 11400000, guid: 7c604a6bf9ce8e04193a58a27b814a5a, type: 2}
+    terrainQualityOverrides: 29
+    terrainPixelError: 10
+    terrainDetailDensityScale: 0.4
     terrainBasemapDistance: 1000
     terrainDetailDistance: 80
-    terrainTreeDistance: 5000
+    terrainTreeDistance: 600
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
     excludedTargetPlatforms: []
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: Medium
     pixelLightCount: 1
     shadows: 1
@@ -138,9 +140,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 0.7
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -151,18 +154,18 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
-    terrainQualityOverrides: 0
-    terrainPixelError: 1
-    terrainDetailDensityScale: 1
+    customRenderPipeline: {fileID: 11400000, guid: e854fc6c057e47143a8b5064a9281aca, type: 2}
+    terrainQualityOverrides: 28
+    terrainPixelError: 5
+    terrainDetailDensityScale: 0.6
     terrainBasemapDistance: 1000
-    terrainDetailDistance: 80
-    terrainTreeDistance: 5000
+    terrainDetailDistance: 120
+    terrainTreeDistance: 1000
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
     excludedTargetPlatforms: []
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: High
     pixelLightCount: 2
     shadows: 2
@@ -190,9 +193,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 1
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -203,18 +207,18 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
-    terrainQualityOverrides: 0
-    terrainPixelError: 1
-    terrainDetailDensityScale: 1
+    customRenderPipeline: {fileID: 11400000, guid: 99a66d72ce9fbf94589d678caa23826d, type: 2}
+    terrainQualityOverrides: 28
+    terrainPixelError: 5
+    terrainDetailDensityScale: 0.8
     terrainBasemapDistance: 1000
-    terrainDetailDistance: 80
-    terrainTreeDistance: 5000
+    terrainDetailDistance: 150
+    terrainTreeDistance: 1500
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
     excludedTargetPlatforms: []
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: Very High
     pixelLightCount: 3
     shadows: 2
@@ -242,9 +246,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 1.5
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -255,18 +260,18 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
-    terrainQualityOverrides: 0
-    terrainPixelError: 1
+    customRenderPipeline: {fileID: 11400000, guid: 228b8e3ee3c3d464280ffd9ae804c63d, type: 2}
+    terrainQualityOverrides: 28
+    terrainPixelError: 5
     terrainDetailDensityScale: 1
     terrainBasemapDistance: 1000
-    terrainDetailDistance: 80
-    terrainTreeDistance: 5000
+    terrainDetailDistance: 250
+    terrainTreeDistance: 2500
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
     excludedTargetPlatforms: []
-  - serializedVersion: 4
+  - serializedVersion: 5
     name: Ultra
     pixelLightCount: 4
     shadows: 2
@@ -294,9 +299,10 @@ QualitySettings:
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 1
+    meshLodThreshold: 1
     maximumLODLevel: 0
     enableLODCrossFade: 1
-    streamingMipmapsActive: 0
+    streamingMipmapsActive: 1
     streamingMipmapsAddAllCameras: 1
     streamingMipmapsMemoryBudget: 512
     streamingMipmapsRenderersPerFrame: 512
@@ -307,7 +313,7 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 0}
+    customRenderPipeline: {fileID: 11400000, guid: b9f3086da92434da0bc1518f19f0ce86, type: 2}
     terrainQualityOverrides: 0
     terrainPixelError: 1
     terrainDetailDensityScale: 1

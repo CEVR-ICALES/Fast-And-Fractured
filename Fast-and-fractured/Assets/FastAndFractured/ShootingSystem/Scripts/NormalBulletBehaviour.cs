@@ -23,24 +23,24 @@ namespace FastAndFractured
             }
             _callForDestroy = true;
         }
-
-        protected override void FixedUpdate()
+        public override void OnSimulateTick(float deltaTime)
         {
-            if ((transform.position - initPosition).magnitude >= range&&_callForDestroy)
+            if ((transform.position - initPosition).magnitude >= range && _callForDestroy)
             {
                 OnBulletEndTrayectory();
-                _callForDestroy=false;
+                _callForDestroy = false;
             }
         }
-
-        protected override void OnTriggerEnter(Collider other)
+        public override void OnSimulateTriggerEnter(Collider other)
         {
+            base.OnSimulateTriggerEnter(other);
             if (other.gameObject.layer == LayerMask.NameToLayer(LAYER_SHIELD))
             {
                 if (_ignoreCollider != null && other.transform.IsChildOf(_ignoreCollider.gameObject.transform))
                 {
                     return;
                 }
+                GameplayAudio.Play(GameAudioCues.CommonShieldImpact, transform.position);
                 Vector3 contactPoint = other.ClosestPoint(transform.position);
                 Vector3 normal = (contactPoint - other.transform.position).normalized;
                 Vector3 incomingDirection = rb.linearVelocity.normalized;
@@ -55,16 +55,19 @@ namespace FastAndFractured
             }
             else if (other.TryGetComponent<StatsController>(out var statsController))
             {
+                GameplayAudio.Play(GameAudioCues.CommonCharacterBulletImpact, transform.position);
                 statsController.TakeEndurance(damage, false, _ignoreCollider.gameObject);
                 if (_ignoreCollider != null && _ignoreCollider.TryGetComponent<StatsController>(out var ownerStatsController))
                 {
                     ownerStatsController.AddDealtDamage(damage);
                 }
-
                 OnBulletEndTrayectory();
             }
             else
+            {
+                GameplayAudio.Play(GameAudioCues.CommonWorldBulletImpact, transform.position);
                 OnBulletEndTrayectory();
+            }
         }
         protected override void OnBulletEndTrayectory()
         {

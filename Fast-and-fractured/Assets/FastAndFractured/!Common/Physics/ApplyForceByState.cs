@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using FastAndFractured.Utilities;
 using UnityEngine;
 
 namespace FastAndFractured {
@@ -9,7 +10,7 @@ namespace FastAndFractured {
         [SerializeField] private StatsController statsController;
 
         private bool _canApplyRollPrevention = false;
-        private Rigidbody _rb;
+        private ICustomRigidbody _rb;
         private float _steeringInputMagnitude;
         private bool _canApplyAirFricction = false;
         private bool _canApplyCustomGravity = false;
@@ -23,7 +24,7 @@ namespace FastAndFractured {
 
         private void Start()
         {
-            _rb = GetComponent<Rigidbody>();
+            _rb = GetComponent<ICustomRigidbody>();
         }
         private void FixedUpdate()
         {

@@ -4,7 +4,9 @@ using FishNet.Object;
 using FishNet.Utility.Extension;
 using GameKit.Dependencies.Utilities;
 using System.Collections.Generic;
+using FishNet.Configuring.EditorCloning;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,7 +30,7 @@ namespace FishNet.Editing
         #endregion
 
         #region QOL Attributes
-#if DISABLE_QOL_ATTRIBUTES
+        #if DISABLE_QOL_ATTRIBUTES
         [MenuItem("Tools/Fish-Networking/Utility/Quality of Life Attributes/Enable", false, -999)]
         private static void EnableQOLAttributes()
         {
@@ -36,7 +38,7 @@ namespace FishNet.Editing
             if (result)
                 Debug.LogWarning($"Quality of Life Attributes have been enabled.");
         }
-#else
+        #else
         [MenuItem("Tools/Fish-Networking/Utility/Quality of Life Attributes/Disable", false, 0)]
         private static void DisableQOLAttributes()
         {
@@ -44,16 +46,25 @@ namespace FishNet.Editing
             if (result)
                 Debug.LogWarning($"Quality of Life Attributes have been disabled. {DEVELOPER_ONLY_WARNING}");
         }
-#endif
+        #endif
         #endregion
 
         internal static bool RemoveOrAddDefine(string define, bool removeDefine)
         {
+            #if UNITY_6000_1_OR_NEWER
+            NamedBuildTarget activeTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            #endif
+
+            #if UNITY_6000_1_OR_NEWER
+            string currentDefines = PlayerSettings.GetScriptingDefineSymbols(activeTarget);
+            #else
             string currentDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            #endif
+            
             HashSet<string> definesHs = new();
             string[] currentArr = currentDefines.Split(';');
 
-            //Add any define which doesn't contain MIRROR.
+            // Add any define which doesn't contain MIRROR.
             foreach (string item in currentArr)
                 definesHs.Add(item);
 
@@ -64,11 +75,15 @@ namespace FishNet.Editing
             else
                 definesHs.Add(define);
 
-            bool modified = (definesHs.Count != startingCount);
+            bool modified = definesHs.Count != startingCount;
             if (modified)
             {
                 string changedDefines = string.Join(";", definesHs);
+                #if UNITY_6000_1_OR_NEWER
+                PlayerSettings.SetScriptingDefineSymbols(activeTarget, changedDefines);
+                #else
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, changedDefines);
+                #endif
             }
 
             return modified;
@@ -83,18 +98,15 @@ namespace FishNet.Editing
         [MenuItem("Tools/Fish-Networking/Utility/Refresh Default Prefabs", false, 300)]
         public static void RebuildDefaultPrefabs()
         {
-#if PARRELSYNC
-            if (ParrelSync.ClonesManager.IsClone() && ParrelSync.Preferences.AssetModPref.Value)
+            if (!CloneChecker.CanGenerateFiles())
             {
-                Debug.Log("Cannot perform this operation on a ParrelSync clone");
+                Debug.Log("Skipping prefab generation as clone settings does not allow it.");
                 return;
             }
-#endif
             Debug.Log("Refreshing default prefabs.");
             Generator.GenerateFull(null, true);
         }
     }
-
 }
 
 #endif

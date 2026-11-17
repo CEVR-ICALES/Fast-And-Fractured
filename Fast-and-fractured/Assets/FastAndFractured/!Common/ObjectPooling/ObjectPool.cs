@@ -35,6 +35,7 @@ namespace Utilities
             IpooledObject = null;
             if (_objPoolList.Count > 0)
             {
+                if (_index >= _objPoolList.Count) _index = 0;
                 GameObject gameObjectPooled = _objPoolList[_index];
                 if (gameObjectPooled == null)
                     Debug.LogError("ObjectPool of type " + _type + " list is returning a null gameObject.");
@@ -48,10 +49,14 @@ namespace Utilities
             }
         }
 
+        // Wrap at the objects actually in the pool: fewer than _maxCapacity can have been created,
+        // and wrapping at the capacity indexed past the end of the list.
+        private int Size => Mathf.Max(1, Mathf.Min(_maxCapacity, _objPoolList.Count));
+
         public void NextIndex()
         {
            _index++;
-            if (_index >= _maxCapacity)
+            if (_index >= Size)
             {
                 _index = 0;
             }
@@ -60,7 +65,7 @@ namespace Utilities
         public bool IsNextObjectActive()
         {
             var nextIndex = _index + 1;
-            if(nextIndex >= _maxCapacity)
+            if(nextIndex >= Size)
             {
                 nextIndex = 0;
             }

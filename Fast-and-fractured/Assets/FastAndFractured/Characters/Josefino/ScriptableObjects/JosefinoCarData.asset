@@ -16,7 +16,7 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 2552904999676308011, guid: fa3ad5ce8d988434b8f0812ee7da9053, type: 3}
   MaxEndurance: 1200
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 155
   MaxSpeedDashing: 230
   MaxSpeedAscend: 135
@@ -58,9 +58,14 @@ MonoBehaviour:
   PushShootRange: 15
   PushShootGravityMultiplier: 30
   PushShootBounceNum: 2
-  PushShootBounceForce: 50
+  PushShootBounceForce: 80
   MineShootAngle: 40
   MineShootRange: 10
+  Position: {x: 0, y: 41.1, z: 0}
+  MinAnchor: {x: 0.5, y: 0.5}
+  MaxAnchor: {x: 0.5, y: 0.5}
+  Pivot: {x: 0.5, y: 0.5}
+  Scale: {x: 1.5, y: 1.5, z: 1.5}
   DashCooldown: 4
   PushShootCooldown: 6
   MineExplosionTime: 5
@@ -84,17 +89,7 @@ MonoBehaviour:
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
     marginToFleeFromSandstorm: 300
-  WinObjects:
-  - GameObject: {fileID: 8929485945919532771, guid: 352b5740b9121db47ab741aff76fd2de, type: 3}
-    StringValue: Josefino_0
-  - GameObject: {fileID: 4889075022116190059, guid: b4f349ddcc130c4449e3ad5a50ac9590, type: 3}
-    StringValue: Josefino_1
-  - GameObject: {fileID: 8560216666131263596, guid: fc6e95b2beb1d52439e7728eeac9cd41, type: 3}
-    StringValue: Josefino_2
-  LoseObjects:
-  - GameObject: {fileID: 8665009037830383912, guid: 7d343e5bf7d46ad4e90fce35445d754b, type: 3}
-    StringValue: Josefino_0
-  - GameObject: {fileID: 2547003088129276055, guid: f68bbc51aefda2749ac3e91dd707a8d0, type: 3}
-    StringValue: Josefino_1
-  - GameObject: {fileID: 7609097445270826124, guid: bcb439e50fbee864eaf7ef57808dcefe, type: 3}
-    StringValue: Josefino_2
+  WinAnimation: {fileID: 8929485945919532771, guid: 352b5740b9121db47ab741aff76fd2de, type: 3}
+  LoseAnimation: {fileID: 8665009037830383912, guid: 7d343e5bf7d46ad4e90fce35445d754b, type: 3}
+  WinAnimationOverrides: []
+  LoseAnimationOverrides: []

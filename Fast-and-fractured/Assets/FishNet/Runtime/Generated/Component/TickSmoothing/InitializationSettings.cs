@@ -45,22 +45,31 @@ namespace FishNet.Component.Transforming.Beta
         /// </summary>
         [System.NonSerialized]
         internal TimeManager InitializingTimeManager;
+        /// <summary>
+        /// True to disable smoothing when the NetworkObject enables prediction, specifies a NetworkTransform to use, and that NetworkTransform is currently smoothing.
+        /// </summary>
+        [System.NonSerialized]
+        internal bool FavorPredictionNetworkTransform;
 
-        public void SetNetworkedRuntimeValues(NetworkBehaviour initializingNetworkBehaviour, Transform graphicalTransform)
+        public void SetNetworkedRuntimeValues(NetworkBehaviour initializingNetworkBehaviour, Transform graphicalTransform, bool favorPredictionNetworkTransform)
         {
             InitializingNetworkBehaviour = initializingNetworkBehaviour;
-            GraphicalTransform = graphicalTransform;
             InitializingTimeManager = initializingNetworkBehaviour.TimeManager;
+            GraphicalTransform = graphicalTransform;
+            
+            FavorPredictionNetworkTransform = favorPredictionNetworkTransform;
         }
+
         /// <summary>
         /// Sets values used at runtime. NetworkBehaviour is nullified when calling this method.
         /// </summary>
         public void SetOfflineRuntimeValues(TimeManager timeManager, Transform graphicalTransform)
         {
-            InitializingNetworkBehaviour = null;
             GraphicalTransform = graphicalTransform;
             InitializingTimeManager = timeManager;
+            
+            InitializingNetworkBehaviour = null;
+            FavorPredictionNetworkTransform = false;
         }
-     
     }
 }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Unity.Cinemachine;
-using Unity.Cinemachine.Editor;
 using UnityEngine;
 using Utilities;
 using Utilities.Managers.PauseSystem;
@@ -29,20 +28,19 @@ namespace FastAndFractured
         [SerializeField]
         private ScreenShakeProfile defaultProfile;
         private CinemachineImpulseDefinition _cinemachineImpulseDefinition;
-         [SerializeField]
-         private CinemachineImpulseChannels _cinemachineImpulseChanels;
-
          private int _shakeLayer;
 
         private const int LAYER_COMMON = 1;
         private const int INIT_CHARACTER_COUNT = 1;
+
+        private const float RESET_CAMERA_POSITION_TIME = 2f;
         protected override void Initialize()
         {
             base.Initialize();
-            LevelControllerButBetter.Instance.onLevelPreStart.AddListener(
+            LevelController.Instance.onLevelPreStart.AddListener(
                 () => TimerSystem.Instance.CreateTimer(0.01f, onTimerDecreaseComplete: () =>
             {
-                _statsController = LevelControllerButBetter.Instance.LocalPlayer.GetComponent<StatsController>();
+                _statsController = LevelController.Instance.LocalPlayer.GetComponent<StatsController>();
             }));
             if(commonCinemachineImpulseListener==null){
             commonCinemachineImpulseListener = GetComponent<CinemachineImpulseListener>();
@@ -54,12 +52,16 @@ namespace FastAndFractured
             _inputController = PlayerInputController.Instance;
             _cameraSpeedX = freeLookCamera.m_XAxis.m_MaxSpeed;
             _cameraSpeedY = freeLookCamera.m_YAxis.m_MaxSpeed;
-            PauseManager.Instance.RegisterPausable(this);
+            PauseManager.TryRegisterPausable(this);
+            ResetCameraPosition();
         }
 
         void OnDisable()
         {
-            PauseManager.Instance?.UnregisterPausable(this);
+            if (PauseManager.HasInstance)
+            {
+                PauseManager.TryUnregisterPausable(this);
+            }
         }
 
         void Update()
@@ -109,7 +111,7 @@ namespace FastAndFractured
                 freeLookCamera.m_RecenterToTargetHeading.m_enabled = true;
                 _inputController.IsResettingCamera = true;
 
-                TimerSystem.Instance.CreateTimer(3f, onTimerDecreaseComplete: () =>
+                TimerSystem.Instance.CreateTimer(RESET_CAMERA_POSITION_TIME, onTimerDecreaseComplete: () =>
                 {
                     freeLookCamera.m_YAxisRecentering.m_enabled = false;
                     freeLookCamera.m_RecenterToTargetHeading.m_enabled = false;

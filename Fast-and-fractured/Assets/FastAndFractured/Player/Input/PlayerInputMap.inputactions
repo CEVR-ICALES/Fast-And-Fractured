@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "PlayerInputMap",
     "maps": [
         {
@@ -10,7 +11,7 @@
                     "type": "Value",
                     "id": "017e8e69-ccd5-4d28-b82c-187068865d4f",
                     "expectedControlType": "Vector2",
-                    "processors": "",
+                    "processors": "StickDeadzone",
                     "interactions": "",
                     "initialStateCheck": true
                 },
@@ -19,7 +20,7 @@
                     "type": "Value",
                     "id": "2f11717d-ef60-4557-bdaa-c65a52510283",
                     "expectedControlType": "Axis",
-                    "processors": "",
+                    "processors": "AxisDeadzone",
                     "interactions": "",
                     "initialStateCheck": true
                 },
@@ -28,7 +29,7 @@
                     "type": "Value",
                     "id": "38a23e7d-4f3d-4eda-bf26-222fccc54458",
                     "expectedControlType": "Axis",
-                    "processors": "",
+                    "processors": "AxisDeadzone",
                     "interactions": "",
                     "initialStateCheck": true
                 },
@@ -55,7 +56,7 @@
                     "type": "Value",
                     "id": "a8e50b16-4e0f-41f4-8335-eb73eb98a9cc",
                     "expectedControlType": "Vector2",
-                    "processors": "",
+                    "processors": "StickDeadzone",
                     "interactions": "",
                     "initialStateCheck": true
                 },
@@ -144,6 +145,15 @@
                     "name": "DebugRemoveUltimateAbilityCooldown",
                     "type": "Button",
                     "id": "909adfcd-465a-471b-a7b7-80d412a8ccda",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleMinimap",
+                    "type": "Button",
+                    "id": "25714570-a528-4777-b984-dcccca7ca5e8",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -467,6 +477,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "DebugRemoveUltimateAbilityCooldown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1d075c87-e0a2-4c9b-8780-ffb62a8a515e",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleMinimap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1f2b3c4-5d6e-4f70-8192-a3b4c5d6e7f8",
+                    "path": "<Gamepad>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleMinimap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b2c3d4e5-6f70-4181-92a3-b4c5d6e7f809",
+                    "path": "<Gamepad>/touchpadButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleMinimap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

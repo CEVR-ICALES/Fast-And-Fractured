@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Utilities;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using GameKit.Dependencies.Utilities;
 
 namespace FastAndFractured
 {
@@ -24,6 +25,7 @@ namespace FastAndFractured
         private Image[] _badEffects;
         private Image[] _bulletEffects;
         private Image[] _effectIcons;
+        private DamagePercentText _damagePercent;
 
         private string selectedPlayer;
         private string selectedPlayerHalfBody;
@@ -35,21 +37,36 @@ namespace FastAndFractured
 
         #region Unity Methods
 
-        protected override void Awake()
+        protected override void Construct()
         {
-            base.Awake();
+            base.Construct();
             RegisterUIElements();
+            if (LevelController.HasInstance)
+            {
+                LevelController.Instance.onLevelPreStart.AddListener(RegisterSelectedPlayer);
+            }
+            RegisterSelectedPlayer();
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
+            
         }
 
-        private void Start()
+        void RegisterSelectedPlayer()
         {
             selectedPlayer = PlayerPrefs.GetString("Selected_Player");
+            if (string.IsNullOrEmpty(selectedPlayer))
+            {
+                return;
+            }
             selectedPlayerHalfBody = selectedPlayer + "_HALFBODY";
             string splittedPlayer = selectedPlayer.Split('_')[0];
             selectedPlayerUA = splittedPlayer + "_UA";
             selectedPlayerPush = splittedPlayer + "_PUSH";
             selectedPlayerShoot = splittedPlayer + "_SHOOT";
             SetPlayerStartingSprites();
+
         }
 
         #endregion
@@ -58,19 +75,32 @@ namespace FastAndFractured
 
         void RegisterUIElements()
         {
-            foreach (UIDynamicElement element in FindObjectsOfType<UIDynamicElement>(true))
+            foreach (UIDynamicElement element in GetComponentsInChildren<UIDynamicElement>(true))
             {
                 _uiElements[element.elementType] = element;
             }
-            _goodEffects = GetUIElement(UIDynamicElementType.GOOD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _normalEffects = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _badEffects = GetUIElement(UIDynamicElementType.BAD_EFFECTS).gameObject.GetComponentsInChildren<Image>(true);
-            _effectIcons = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER).gameObject.GetComponentsInChildren<Image>(true);
-            _bulletEffects = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject.GetComponentsInChildren<Image>(true);
+            
+            var goodEffectsElement = GetUIElement(UIDynamicElementType.GOOD_EFFECTS);
+            _goodEffects = goodEffectsElement != null ? goodEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var normalEffectsElement = GetUIElement(UIDynamicElementType.NORMAL_EFFECTS);
+            _normalEffects = normalEffectsElement != null ? normalEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var badEffectsElement = GetUIElement(UIDynamicElementType.BAD_EFFECTS);
+            _badEffects = badEffectsElement != null ? badEffectsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var effectIconsElement = GetUIElement(UIDynamicElementType.EFFECT_ICONS_CONTAINER);
+            _effectIcons = effectIconsElement != null ? effectIconsElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+            
+            var bulletEffectElement = GetUIElement(UIDynamicElementType.BULLET_EFFECT);
+            _bulletEffects = bulletEffectElement != null ? bulletEffectElement.gameObject.GetComponentsInChildren<Image>(true) : new Image[0];
+
+            _damagePercent = GetComponentInChildren<DamagePercentText>(true);
 		}
 
         void SetPlayerStartingSprites()
         {
+            if (!ResourcesManager.HasInstance) return;
             UpdateUIElement(UIDynamicElementType.SHOOT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerShoot));
             UpdateUIElement(UIDynamicElementType.PUSH_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerPush));
             UpdateUIElement(UIDynamicElementType.ULT_ICON, ResourcesManager.Instance.GetResourcesSprite(selectedPlayerUA));
@@ -117,11 +147,47 @@ namespace FastAndFractured
             }
         }
 
+        public void UpdateHealthBar(float endurance, float maxEndurance, float overflowDamage)
+        {
+            if (maxEndurance <= 0f) return;
+            UpdateUIElement(UIDynamicElementType.HEALTH_BAR, endurance, maxEndurance);
+            if (_damagePercent != null)
+                _damagePercent.SetDamage((maxEndurance - Mathf.Clamp(endurance, 0f, maxEndurance) + Mathf.Max(0f, overflowDamage)) / maxEndurance);
+        }
+
         public void UpdateUIElement(UIDynamicElementType type, bool isActive)
         {
             if (TryGetUIElement(type, out UIDynamicElement element))
             {
                 element.gameObject.SetActive(isActive);
+            }
+        }
+
+        public void UpdateImageUIElement(UIDynamicElementType type, bool isActive,float fadeTime)
+        {
+            if (TryGetUIElement(type, out UIDynamicElement element))
+            {
+                if(!element.TryGetComponent(out Image image))
+                    return;
+                if(isActive)
+                    FadeInEffectSprites(image,fadeTime);
+                else
+                    FadeOutEffectSprites(image,fadeTime);
+            }
+        }
+
+        public void UpdateUIElement(UIDynamicElementType type, Vector3 position, Vector2 minAnchor, Vector2 maxAnchor, Vector2 pivot, Vector3 scale)
+        {
+            if(TryGetUIElement(type, out UIDynamicElement element))
+            {
+                element.gameObject.TryGetComponent<RectTransform>(out var rectTransform);
+                if(rectTransform==null)
+                    return;
+                rectTransform.localPosition = position;
+                rectTransform.anchorMax = maxAnchor;
+                rectTransform.anchorMin = minAnchor;
+                rectTransform.pivot = pivot;
+                rectTransform.localScale = scale;
             }
         }
 
@@ -131,9 +197,9 @@ namespace FastAndFractured
         /// </summary>
         public void UpdateUIEffect(UIDynamicElementType type, Sprite newSprite, float timeInscreen){
             GameObject effectGameObj = null;
-            
             switch (type)
             {
+
                 case UIDynamicElementType.GOOD_EFFECTS:
                     effectGameObj = UpdateEffectSprites(_goodEffects, newSprite);
                     break;
@@ -145,7 +211,8 @@ namespace FastAndFractured
                     break;
                 case UIDynamicElementType.BULLET_EFFECT:
                     effectGameObj = UpdateEffectSprites(_bulletEffects, newSprite);
-                    GameObject bulletContainer = GetUIElement(UIDynamicElementType.BULLET_EFFECT).gameObject;
+                    var bulletElement = GetUIElement(UIDynamicElementType.BULLET_EFFECT);
+                    GameObject bulletContainer = bulletElement != null ? bulletElement.gameObject : null;
                     if (bulletContainer != null && effectGameObj != null)
                     {
                         RectTransform containerRect = bulletContainer.GetComponent<RectTransform>();
@@ -169,6 +236,10 @@ namespace FastAndFractured
             if(timeInscreen > 0f)
             {
                 GameObject newSpriteGameObject = effectGameObj;
+                if (newSpriteGameObject == null || !TimerSystem.HasInstance)
+                {
+                    return;
+                }
                 newSpriteGameObject.SetActive(true);
                 TimerSystem.Instance.CreateTimer(timeInscreen, onTimerDecreaseComplete: () =>
                 {
@@ -255,6 +326,15 @@ namespace FastAndFractured
                     hudEffect.gameObject.SetActive(false);
                     hudEffect.CrossFadeAlpha(1f, 0f, true);
                 });
+            }
+        }
+
+        private void FadeInEffectSprites(Image hudEffect, float fadeInTime)
+        {
+            if (hudEffect != null)
+            {
+                hudEffect.gameObject.SetActive(true);
+                hudEffect.CrossFadeAlpha(1f, fadeInTime, true);
             }
         }
         #endregion

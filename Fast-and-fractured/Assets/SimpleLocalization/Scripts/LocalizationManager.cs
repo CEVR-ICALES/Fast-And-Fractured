@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -151,7 +151,7 @@ namespace Assets.SimpleLocalization.Scripts
             }
 
             // Making uGUI line breaks to work in asian texts.
-            text = text.Replace("ã€‚", "ã€‚ ").Replace("ã€", "ã€ ").Replace("ï¼š", "ï¼š ").Replace("ï¼", "ï¼ ").Replace("ï¼ˆ", " ï¼ˆ").Replace("ï¼‰", "ï¼‰ ").Trim();
+            text = text.Replace("B", "B ").Replace("A", "A ").Replace("F", "F ").Replace("I", "I ").Replace("i", " i").Replace("j", "j ").Trim();
 
             return text.Split('\n').Where(i => i != "").ToList();
         }

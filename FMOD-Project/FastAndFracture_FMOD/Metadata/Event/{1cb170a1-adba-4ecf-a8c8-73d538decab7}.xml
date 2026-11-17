@@ -57,16 +57,17 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{f0870542-3907-41da-bf3d-bc363cb42f36}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
 		<property name="maximumDistance">
-			<value>45</value>
+			<value>100</value>
 		</property>
 	</object>
 	<object class="MarkerTrack" id="{61c13c93-24d5-4548-96e1-950a9283a794}" />
 	<object class="GroupTrack" id="{9a3fa76a-909f-47fe-9492-ff210b8cd466}">
 		<relationship name="modules">
 			<destination>{a9507401-52cf-4e9e-be58-e18742c00b01}</destination>
-			<destination>{f1b0c908-a51a-47c1-8580-03d595ff0ab6}</destination>
-			<destination>{28a823d5-4a01-4a96-948c-418dd53c527e}</destination>
 		</relationship>
 		<relationship name="mixerGroup">
 			<destination>{ab826129-1c58-41bb-a3ab-0f7155698493}</destination>
@@ -75,8 +76,6 @@
 	<object class="Timeline" id="{b51c0545-fbd0-4aea-a657-3c71d86c032c}">
 		<relationship name="modules">
 			<destination>{a9507401-52cf-4e9e-be58-e18742c00b01}</destination>
-			<destination>{28a823d5-4a01-4a96-948c-418dd53c527e}</destination>
-			<destination>{f1b0c908-a51a-47c1-8580-03d595ff0ab6}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{ac8f7bbd-702b-4f6d-a98d-6799c7cce306}">
@@ -107,41 +106,10 @@
 			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
 		</relationship>
 	</object>
-	<object class="SingleSound" id="{f1b0c908-a51a-47c1-8580-03d595ff0ab6}">
-		<property name="start">
-			<value>2.5500000000000003</value>
-		</property>
-		<property name="length">
-			<value>0.85000000000000009</value>
-		</property>
-		<property name="timelockedOffset">
-			<value>3.6999999999999997</value>
-		</property>
-		<property name="pitch">
-			<value>-2</value>
-		</property>
-		<relationship name="audioFile">
-			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
-		</relationship>
-	</object>
-	<object class="SingleSound" id="{28a823d5-4a01-4a96-948c-418dd53c527e}">
-		<property name="start">
-			<value>1.25</value>
-		</property>
-		<property name="length">
-			<value>1.3000000000000003</value>
-		</property>
-		<property name="timelockedOffset">
-			<value>1.9445449359070168</value>
-		</property>
-		<property name="pitch">
-			<value>-2</value>
-		</property>
-		<relationship name="audioFile">
-			<destination>{7e39dac8-76f1-4242-95b3-c38790f4b9f2}</destination>
-		</relationship>
-	</object>
 	<object class="EventMixerGroup" id="{ab826129-1c58-41bb-a3ab-0f7155698493}">
+		<property name="volume">
+			<value>-10</value>
+		</property>
 		<property name="name">
 			<value>Audio 1</value>
 		</property>

@@ -5,7 +5,7 @@
 			<value>WindmillSFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{844f9e68-26e6-4261-b075-c0fad6b04709}</destination>
@@ -56,7 +56,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{4a16151e-d0e1-442e-b1ea-3c3599259cbe}" />
+	<object class="EventAutomatableProperties" id="{4a16151e-d0e1-442e-b1ea-3c3599259cbe}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{7380cbec-f7cc-4966-96df-f029e75cae2d}" />
 	<object class="GroupTrack" id="{266ec7f5-0f00-43d0-a90f-f05447c02a9e}">
 		<relationship name="modules">
@@ -136,6 +143,7 @@
 	<object class="MixerBusEffectChain" id="{6caa13bd-e3d1-438a-b9c2-cd83aa214e4c}">
 		<relationship name="effects">
 			<destination>{5304d3fc-600a-409e-9d4e-8fa53c371a67}</destination>
+			<destination>{0320e1f3-7808-4501-b6bd-ddfb50e041e9}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{645e707f-c40b-4594-8a54-321e377a7798}" />
@@ -147,5 +155,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{17f3bc9b-0988-461f-8991-a85918327bfb}" />
 	<object class="MixerBusFader" id="{5304d3fc-600a-409e-9d4e-8fa53c371a67}" />
+	<object class="SpatialiserEffect" id="{0320e1f3-7808-4501-b6bd-ddfb50e041e9}" />
 	<object class="MixerBusFader" id="{18b3a9fd-6464-4d5f-8da5-f609600e7e4f}" />
 </objects>

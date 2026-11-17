@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using FastAndFractured;
-using FastAndFractured.Core;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Events;
@@ -22,6 +21,9 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
 
     [Header("HitMark")]
     [SerializeField] private GameObject hitMark;
+    private Renderer _hitMarkRenderer;
+    [SerializeField] private UnityEngine.Color activeMatColor;
+    [SerializeField] private UnityEngine.Color notActiveColor;
     private LayerMask _hitMarkMask;
     [SerializeField] private LayerMask[] layerMasksForHitMark;
 
@@ -47,20 +49,20 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
     {
         
     }
-    protected override void Initialize()
+    public void Setup()
     {
         base.Initialize();
         if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
-        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>();
+        if (!pushShootHandle) pushShootHandle = transform.parent.GetComponentInChildren<PushShootHandle>(true);
         _pushShootPoint = pushShootHandle.PushShootPoint;
-        _hitMarkMask = layerMasksForHitMark[0];
-
+        _hitMarkMask = layerMasksForHitMark[0]; 
         for (int i = 1; i < layerMasksForHitMark.Length; i++)
         {
             _hitMarkMask |= layerMasksForHitMark[i];
         }
         CalculateTrayectory();
         hitMark.SetActive(false);
+        _hitMarkRenderer = hitMark.GetComponentInChildren<Renderer>();
         _initialVelocity = pushShootHandle.GetCurrentParabolicMovementOfPushShoot(out _currentCustomGravity);
         _calculateTracePoints = false;
         RaycastToSetHitMark();
@@ -161,20 +163,23 @@ public class AimPushShootTrace : AbstractAutoInitializableMonoBehaviour
         return listWithRemovedPoints;
     }
 
-    private void SetHitMark()
+    private void SetHitMark(bool isOnCooldown)
     {
-        hitMark.SetActive(true);
-        lineRenderer.enabled = true;
         _currentIndex = FindClosestPointAbove(_currentContactPoint,ReturnCurrentHighestPointIndex());
         List<Vector3> filteredCurrentPoints = RemovePointsInLowerPos(new List<Vector3>(_points), _points[_currentIndex].y);
+        lineRenderer.enabled = true;
+        hitMark.SetActive(true);
         hitMark.transform.position = _points[_currentIndex];
+        if(_hitMarkRenderer!=null)
+            _hitMarkRenderer.material.color = isOnCooldown ? notActiveColor : activeMatColor;
+        lineRenderer.material.color = isOnCooldown ? notActiveColor : activeMatColor;
         lineRenderer.positionCount = filteredCurrentPoints.Count;
         lineRenderer.SetPositions(filteredCurrentPoints.ToArray());
     }
 
-    public void DrawTrayectory(bool draw)
+    public void DrawTrayectory(bool draw,bool isOnCooldown)
     {
-        if (draw) SetHitMark();
+        if (draw) SetHitMark(isOnCooldown);
         else UnsetHitMark();
         _calculateTracePoints = draw;
     }

@@ -18,6 +18,9 @@ public class BreakablePlatform : MonoBehaviour
     private int currentCharacters = 0;
     private ITimer breakTimeTimer = null;
     private ITimer semiBreakTimeTimer = null;
+    private ITimer crackAudioTimer;
+
+    private const float CRACK_AUDIO_DELAY = 1.75f;
 
     private const int BREAKABLE_PlATFORM_FASES = 3;
 
@@ -49,7 +52,21 @@ public class BreakablePlatform : MonoBehaviour
             // Store entry time
             if (breakTimeTimer == null)
             {
-                    breakTimeTimer = TimerSystem.Instance.CreateTimer(breakTime, onTimerDecreaseComplete: () =>
+                    breakTimeTimer = TimerSystem.Instance.CreateTimer(breakTime, onTimerDecreaseUpdate:(float time)=> 
+                    {
+                        if (other.GetComponent<StatsController>())
+                        {
+                            if (crackAudioTimer == null)
+                            {
+                               crackAudioTimer = TimerSystem.Instance.CreateTimer(CRACK_AUDIO_DELAY, onTimerDecreaseComplete: () =>
+                                {
+                                    if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+                                        GameplayAudio.Play(GameAudioCues.CommonPlatformCrack, transform.position);
+                                    crackAudioTimer = null;
+                                });
+                            }
+                        }
+                    }, onTimerDecreaseComplete: () =>
                     {
                         BreakPlatform();
                     });
@@ -64,6 +81,7 @@ public class BreakablePlatform : MonoBehaviour
                 {
                     breakTimeTimer.ResumeTimer();
                     semiBreakTimeTimer.ResumeTimer();
+                    crackAudioTimer?.ResumeTimer();
                 }
             }
             currentCharacters++;
@@ -80,6 +98,7 @@ public class BreakablePlatform : MonoBehaviour
             {
                 breakTimeTimer.PauseTimer();
                 semiBreakTimeTimer.PauseTimer();
+                crackAudioTimer?.PauseTimer();
             }
         }
     }
@@ -101,6 +120,8 @@ public class BreakablePlatform : MonoBehaviour
 
     private void BreakPlatform()
     {
+        if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+            GameplayAudio.Play(GameAudioCues.CommonPlatformSplinter, transform.position);
         isBreaking = true;
         _platformFaces[_platformIndex - 1].enabled = false;
         _platformFaces[_platformIndex].enabled = true;
@@ -109,6 +130,8 @@ public class BreakablePlatform : MonoBehaviour
 
     private void SemiBreakPlatform()
     {
+        if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted)
+            GameplayAudio.Play(GameAudioCues.CommonPlatformSplinter, transform.position);
         _platformIndex++;
         _platformFaces[_platformIndex-1].enabled = false;
         _platformFaces[_platformIndex].enabled = true;

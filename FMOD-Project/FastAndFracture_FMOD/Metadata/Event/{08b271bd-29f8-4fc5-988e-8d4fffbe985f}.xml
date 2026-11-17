@@ -5,7 +5,7 @@
 			<value>TomatoImpactSFX</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{8a608e6b-0678-4308-b52b-4f0ba691fe5d}</destination>
@@ -56,7 +56,14 @@
 			<destination>{f32063ba-11f5-48cb-a1b8-99cb565cbccd}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{77a5d87d-5b62-44c9-b542-992479a61715}" />
+	<object class="EventAutomatableProperties" id="{77a5d87d-5b62-44c9-b542-992479a61715}">
+		<property name="minimumDistance">
+			<value>8</value>
+		</property>
+		<property name="maximumDistance">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="MarkerTrack" id="{1dc7f878-b91f-4796-ad1f-e74ebef97e93}" />
 	<object class="GroupTrack" id="{2f4be100-b1cd-41f5-8162-d095d37d7f28}">
 		<relationship name="modules">
@@ -116,6 +123,7 @@
 	<object class="MixerBusEffectChain" id="{edd44f33-6fdb-4f32-9c9b-dcd201f17a0e}">
 		<relationship name="effects">
 			<destination>{6c5481c6-59b2-4088-8423-6cdd0ead577c}</destination>
+			<destination>{12ea5200-561d-4004-97e2-a82904971951}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{92d638d8-7af1-4757-b3af-595a16dbaee1}" />
@@ -127,5 +135,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{38c58a8f-d971-451d-9aa0-e9fe527bc251}" />
 	<object class="MixerBusFader" id="{6c5481c6-59b2-4088-8423-6cdd0ead577c}" />
+	<object class="SpatialiserEffect" id="{12ea5200-561d-4004-97e2-a82904971951}" />
 	<object class="MixerBusFader" id="{93c0219e-c086-4882-ae5e-cf2daa6321b7}" />
 </objects>

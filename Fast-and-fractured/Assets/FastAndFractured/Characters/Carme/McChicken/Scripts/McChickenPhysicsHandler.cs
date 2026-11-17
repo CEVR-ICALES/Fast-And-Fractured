@@ -52,7 +52,8 @@ namespace FastAndFractured
                     HandleWallCollision(collision);
                 } else
                 {
-                    // TODO handle collision when climbing
+                    _movementHandler.StopIsOnCeiling();
+                    HandleWallCollision(collision);
                 }
             }
 

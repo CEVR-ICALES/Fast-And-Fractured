@@ -1,4 +1,4 @@
-Ôªøusing UnityEditor;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,13 +10,13 @@ namespace Assets.SimpleLocalization.Scripts.Editor
 
         private static LocalizationSettings Settings => LocalizationSettings.Instance;
 
-        [MenuItem("Window/‚óÜ Simple Localization/Settings")]
+        [MenuItem("Window/Åü Simple Localization/Settings")]
         public static void ShowWindow()
         {
             GetWindow<LocalizationSettingsWindow>("Localization Settings");
         }
 
-        [MenuItem("Window/‚óÜ Simple Localization/Reset")]
+        [MenuItem("Window/Åü Simple Localization/Reset")]
         public static void ResetSettings()
         {
             if (EditorUtility.DisplayDialog("Simple Localization", "Do you want to reset settings?", "Yes", "No"))
@@ -25,7 +25,7 @@ namespace Assets.SimpleLocalization.Scripts.Editor
             }
         }
 
-        [MenuItem("Window/‚óÜ Simple Localization/Help")]
+        [MenuItem("Window/Åü Simple Localization/Help")]
         public static void Help()
         {
             Application.OpenURL("https://github.com/hippogamesunity/SimpleLocalization/wiki");

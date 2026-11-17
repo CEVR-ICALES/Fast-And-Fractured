@@ -12,6 +12,15 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     public MainMenuSelectionScreenCharacters mainMenuSelectionScreenCharacters;
     public CharacterMenuData[] AllCharacters {get=>mainMenuSelectionScreenCharacters.allMainMenuCharactersData.ToArray();}
 
+    /// <summary>Fired whenever the local character/skin display changes. Emits the canonical code, e.g. "Pepe_0".</summary>
+    public event Action<string> OnCharacterCodeChanged;
+
+    /// <summary>Canonical code of the currently displayed character, e.g. "MariaAntonia_2".</summary>
+    public string CurrentCharacterCode =>
+        AllCharacters != null && AllCharacters.Length > 0
+            ? $"{AllCharacters[_currentCharacterIndex].CharacterName}_{_currentSkinIndex}"
+            : string.Empty;
+
     // all information we want to show...
     [Header("Canvas")]
     public Image charIcon;
@@ -125,6 +134,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         _currentCharacterIndex = newIndex;
         _currentSkinIndex = 0;
         UpdateCharacterDisplay();
+        OnCharacterCodeChanged?.Invoke(CurrentCharacterCode);
     }
 
     private void UpdateCharacterDisplay()
@@ -194,6 +204,7 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
         _currentModelInstance.name = character.Models[_currentSkinIndex].name;
         _currentModelInstance.GetComponent<CharSelectionSimulatedMovement>().MoveCarForward();
         selectAndStartButton.interactable = CheckIfSkinUnlocked();
+        OnCharacterCodeChanged?.Invoke(CurrentCharacterCode);
     }
     public bool CheckIfSkinUnlocked()
     {

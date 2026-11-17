@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using FishNet.Object;
 using FishNet.Object.Prediction;
 using FishNet.Transporting;
 using FishNet.Utility.Template;
@@ -21,9 +20,7 @@ namespace FishNet.Demo.Prediction.CharacterControllers
             /// Tick is set at runtime. There is no need to manually assign this value.
             /// </summary>
             private uint _tick;
-
             public void Dispose() { }
-
             public uint GetTick() => _tick;
             public void SetTick(uint value) => _tick = value;
         }
@@ -46,12 +43,10 @@ namespace FishNet.Demo.Prediction.CharacterControllers
             /// </summary>
             /// <remarks>Used to simulate jumps and falls.</remarks>
             public byte GoalIndex;
-
             /// <summary>
             /// Tick is set at runtime. There is no need to manually assign this value.
             /// </summary>
             private uint _tick;
-
             public void Dispose() { }
             public uint GetTick() => _tick;
             public void SetTick(uint value) => _tick = value;
@@ -79,7 +74,7 @@ namespace FishNet.Demo.Prediction.CharacterControllers
 
         public override void OnStartNetwork()
         {
-            base.SetTickCallbacks(TickCallback.Tick);
+            SetTickCallbacks(TickCallback.Tick);
         }
 
         protected override void TimeManager_OnTick()
@@ -122,8 +117,8 @@ namespace FishNet.Demo.Prediction.CharacterControllers
             // if (state.IsFuture())
             //     return;
 
-            //Always use the tickDelta as your delta when performing actions inside replicate.
-            float delta = (float)base.TimeManager.TickDelta;
+            // Always use the tickDelta as your delta when performing actions inside replicate.
+            float delta = (float)TimeManager.TickDelta;
 
             Vector3 goal = _goals[_goalIndex];
             Vector3 next = Vector3.MoveTowards(transform.position, goal, delta * _moveRate);
@@ -137,13 +132,12 @@ namespace FishNet.Demo.Prediction.CharacterControllers
                     _goalIndex = 0;
             }
         }
-
+        
         [Reconcile]
         private void PerformReconcile(ReconcileData rd, Channel channel = Channel.Unreliable)
         {
             transform.position = rd.Position;
             _goalIndex = rd.GoalIndex;
         }
-
     }
 }

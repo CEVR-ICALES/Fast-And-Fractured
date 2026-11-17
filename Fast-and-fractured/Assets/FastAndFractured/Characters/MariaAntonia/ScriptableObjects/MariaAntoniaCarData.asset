@@ -16,7 +16,7 @@ MonoBehaviour:
   CarDefaultPrefab: {fileID: 1921552221463974689, guid: 606fb42dee595a94585a2ced483bd83c, type: 3}
   MaxEndurance: 900
   MinEndurance: 0
-  Invulnerable: 0
+  Invulnerable: 1
   MaxSpeed: 200
   MaxSpeedDashing: 260
   MaxSpeedAscend: 185
@@ -53,14 +53,19 @@ MonoBehaviour:
   NormalShootSpeed: 120
   NormalShootCadenceTime: 0.2
   NormalShootMaxRange: 150
-  NormalShootAngle: 90
+  NormalShootAngle: 120
   PushShootAngle: 40
   PushShootRange: 15
   PushShootGravityMultiplier: 30
   PushShootBounceNum: 2
-  PushShootBounceForce: 50
+  PushShootBounceForce: 80
   MineShootAngle: 40
   MineShootRange: 5
+  Position: {x: -5, y: -10, z: 0}
+  MinAnchor: {x: 0.5, y: 0.5}
+  MaxAnchor: {x: 0.5, y: 0.5}
+  Pivot: {x: 0.5, y: 0.5}
+  Scale: {x: 1.5, y: 1.5, z: 1.5}
   DashCooldown: 4
   PushShootCooldown: 6
   MineExplosionTime: 5
@@ -84,17 +89,7 @@ MonoBehaviour:
     decisionPercentagePushShoot: 10
     decisionPercentageCooldown: 10
     marginToFleeFromSandstorm: 200
-  WinObjects:
-  - GameObject: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
-    StringValue: MariaAntonia_0
-  - GameObject: {fileID: 7559195656437023497, guid: 3a567dae7b3819f4aab0b02265518819, type: 3}
-    StringValue: MariaAntonia_1
-  - GameObject: {fileID: 4710033694140581016, guid: 16a1efb12f6be6040918158e578d9110, type: 3}
-    StringValue: MariaAntonia_2
-  LoseObjects:
-  - GameObject: {fileID: 3297815704724157779, guid: 0a0781605152f0b4784883c2b6fac456, type: 3}
-    StringValue: MariaAntonia_0
-  - GameObject: {fileID: 6278665350653037024, guid: 8113ed478f0f44746af8da56500a8a29, type: 3}
-    StringValue: MariaAntonia_1
-  - GameObject: {fileID: 2508495496778248647, guid: e6111fb867613104a9527768cd97de61, type: 3}
-    StringValue: MariaAntonia_2
+  WinAnimation: {fileID: 7408331500945941149, guid: 2d3eed9ad5cb5864a82c9752888587ed, type: 3}
+  LoseAnimation: {fileID: 3297815704724157779, guid: 0a0781605152f0b4784883c2b6fac456, type: 3}
+  WinAnimationOverrides: []
+  LoseAnimationOverrides: []

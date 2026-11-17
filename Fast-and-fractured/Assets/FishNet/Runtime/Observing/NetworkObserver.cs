@@ -35,7 +35,7 @@ namespace FishNet.Observing
             /// <summary>
             /// Keep current conditions, ignore manager conditions.
             /// </summary>
-            IgnoreManager = 3,
+            IgnoreManager = 3
         }
         #endregion
 
@@ -48,7 +48,6 @@ namespace FishNet.Observing
 
         #region Serialized.
         /// <summary>
-        /// 
         /// </summary>
         [Tooltip("How ObserverManager conditions are used.")]
         [SerializeField]
@@ -61,9 +60,7 @@ namespace FishNet.Observing
             get => _overrideType;
             internal set => _overrideType = value;
         }
-
         /// <summary>
-        /// 
         /// </summary>
         [Tooltip("True to update visibility for clientHost based on if they are an observer or not.")]
         [SerializeField]
@@ -77,7 +74,6 @@ namespace FishNet.Observing
             private set => _updateHostVisibility = value;
         }
         /// <summary>
-        /// 
         /// </summary>
         [Tooltip("Conditions connections must met to be added as an observer. Multiple conditions may be used.")]
         [SerializeField]
@@ -141,7 +137,7 @@ namespace FishNet.Observing
         /// <summary>
         /// Deinitializes for reuse or clean up.
         /// </summary>
-        /// <param name="destroyed"></param>
+        /// <param name = "destroyed"></param>
         internal void Deinitialize(bool destroyed)
         {
             _lastParentVisible = false;
@@ -159,14 +155,22 @@ namespace FishNet.Observing
                 foreach (ObserverCondition item in _observerConditions)
                 {
                     item.Deinitialize(destroyed);
-                    /* Use GetInstanceId to ensure the object is actually
-                     * instantiated. If Id is negative, then it's instantiated
-                     * and not a reference to the original object. */
+                    /* Conditions in this list are always Instantiate() clones once
+                     * _conditionsInitializedPreviously is set (see Initialize), so any item
+                     * here is a runtime copy and never a source asset.
+                     * Pre-6.5 the negative-InstanceID check confirms the object is a clone;
+                     * GetInstanceID() is obsolete on Unity 6000.5+, where the clone invariant
+                     * alone gates the destroy. */
+#if UNITY_6000_5_OR_NEWER
+                    if (destroyed)
+                        Destroy(item);
+#else
                     if (destroyed && item.GetInstanceID() < 0)
                         Destroy(item);
+#endif
                 }
 
-                //Clean up lists.
+                // Clean up lists.
                 if (destroyed)
                 {
                     _observerConditions.Clear();
@@ -197,9 +201,9 @@ namespace FishNet.Observing
             if (!_conditionsInitializedPreviously)
             {
                 _conditionsInitializedPreviously = true;
-                bool ignoringManager = (OverrideType == ConditionOverrideType.IgnoreManager);
+                bool ignoringManager = OverrideType == ConditionOverrideType.IgnoreManager;
 
-                //Check to override SetHostVisibility.
+                // Check to override SetHostVisibility.
                 if (!ignoringManager)
                     UpdateHostVisibility = networkObject.ObserverManager.UpdateHostVisibility;
 
@@ -220,12 +224,12 @@ namespace FishNet.Observing
                  * by simply not exiting early when a condition fails but that's going to
                  * cost hotpath performance where sorting is only done once. */
 
-                //Initialize collections.
+                // Initialize collections.
                 _nonTimedMet = CollectionCaches<NetworkConnection>.RetrieveHashSet();
                 //Caches for ordering.
                 List<ObserverCondition> nonTimedConditions = CollectionCaches<ObserverCondition>.RetrieveList();
                 List<ObserverCondition> timedConditions = CollectionCaches<ObserverCondition>.RetrieveList();
-                
+
                 foreach (ObserverCondition condition in _observerConditions)
                 {
                     if (condition == null)
@@ -276,10 +280,10 @@ namespace FishNet.Observing
                 //Initialize conditions.
                 for (int i = 0; i < _observerConditions.Count; i++)
                     _observerConditions[i].Initialize(_networkObject);
-                
+
                 RegisterTimedConditions();
             }
-            
+
             _initialized = true;
         }
 
@@ -312,17 +316,20 @@ namespace FishNet.Observing
         {
             if (!_initialized)
             {
-                string goName = (gameObject == null) ? "Empty" : gameObject.name;
-                NetworkManagerExtensions.LogError($"{GetType().Name} is not initialized on NetworkObject [{goName}]. RebuildObservers should not be called. If you are able to reproduce this error consistently please report this issue.");
+                string goName = gameObject == null ? "Empty" : gameObject.name;
+                
+                NetworkManager nm = _networkObject == null ? null : _networkObject.NetworkManager;
+                nm.LogError($"{GetType().Name} is not initialized on NetworkObject [{goName}]. RebuildObservers should not be called. If you are able to reproduce this error consistently please report this issue.");
+                
                 return ObserverStateChange.Unchanged;
             }
 
-            bool currentlyAdded = (_networkObject.Observers.Contains(connection));
+            bool currentlyAdded = _networkObject.Observers.Contains(connection);
 
             //True if all conditions are met.
             bool allConditionsMet = true;
             /* If cnnection is owner then they can see the object. */
-            bool notOwner = (connection != _networkObject.Owner);
+            bool notOwner = connection != _networkObject.Owner;
             /* Only check conditions if not owner. Owner will always
              * have visibility. */
             if (notOwner)
@@ -352,7 +359,7 @@ namespace FishNet.Observing
                     {
                         /* True if all conditions are timed or
                          * if connection has met non timed. */
-                        bool startNonTimedMet = (!_hasNormalConditions || _nonTimedMet.Contains(connection));
+                        bool startNonTimedMet = !_hasNormalConditions || _nonTimedMet.Contains(connection);
                         /* If a timed update an1d nonTimed
                          * have not been met then there's
                          * no reason to check timed. */
@@ -365,7 +372,7 @@ namespace FishNet.Observing
                             //Becomes true if a non-timed condition fails.
                             bool nonTimedMet = true;
 
-                            List<ObserverCondition> collection = (timedOnly) ? _timedConditions : _observerConditions;
+                            List<ObserverCondition> collection = timedOnly ? _timedConditions : _observerConditions;
                             for (int i = 0; i < collection.Count; i++)
                             {
                                 ObserverCondition condition = collection[i];
@@ -376,7 +383,7 @@ namespace FishNet.Observing
                                  *
                                  * A condition is automatically met if it's not enabled. */
                                 bool notProcessed = false;
-                                bool conditionMet = (!condition.GetIsEnabled() || condition.ConditionMet(connection, currentlyAdded, out notProcessed));
+                                bool conditionMet = !condition.GetIsEnabled() || condition.ConditionMet(connection, currentlyAdded, out notProcessed);
 
                                 if (notProcessed)
                                     conditionMet = currentlyAdded;
@@ -449,7 +456,7 @@ namespace FishNet.Observing
         /// <summary>
         /// Returns an ObserverStateChange when a condition fails.
         /// </summary>
-        /// <param name="currentlyAdded"></param>
+        /// <param name = "currentlyAdded"></param>
         /// <returns></returns>
         private ObserverStateChange ReturnFailedCondition(bool currentlyAdded)
         {
@@ -462,7 +469,7 @@ namespace FishNet.Observing
         /// <summary>
         /// Returns an ObserverStateChange when all conditions pass.
         /// </summary>
-        /// <param name="currentlyAdded"></param>
+        /// <param name = "currentlyAdded"></param>
         /// <returns></returns>
         private ObserverStateChange ReturnPassedConditions(bool currentlyAdded)
         {
@@ -486,7 +493,7 @@ namespace FishNet.Observing
         /// This does not immediately update renderers.
         /// You may need to combine with NetworkObject.SetRenderersVisible(bool).
         /// </summary>
-        /// <param name="value">New value.</param>
+        /// <param name = "value">New value.</param>
         public void SetUpdateHostVisibility(bool value)
         {
             //Unchanged.
