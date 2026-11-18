@@ -58,6 +58,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -79,9 +84,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &5359239444659894601
 GameObject:
@@ -233,6 +240,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -254,9 +266,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &645797119100982632
 MonoBehaviour:
@@ -289,7 +303,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: trafficUnits.Array.data[0]
+      propertyPath: 'trafficUnits.Array.data[0]'
       value: 
       objectReference: {fileID: 270910189495180408}
     - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
@@ -357,11 +371,11 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8097499063316585523, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: lightMeshRenderer.Array.data[0]
+      propertyPath: 'lightMeshRenderer.Array.data[0]'
       value: 
       objectReference: {fileID: 5110282406718552725}
     - target: {fileID: 8097499063316585523, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: lightMeshRenderer.Array.data[1]
+      propertyPath: 'lightMeshRenderer.Array.data[1]'
       value: 
       objectReference: {fileID: 3613307788274715764}
     m_RemovedComponents: []
@@ -374,9 +388,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8762623312767875630}
-    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3584462186854456426}
   m_SourcePrefab: {fileID: 100100000, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
 --- !u!4 &5509835101330562501 stripped
 Transform:
@@ -409,19 +420,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.45304972, y: 9.482253, z: 0.44470683}
   m_Center: {x: 0.006889552, y: 4.5768228, z: -0.060802266}
---- !u!208 &3584462186854456426
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6724453752769030530}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 0.22652486, y: 4.7411265, z: 0.22235341}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0.006889552, y: 4.5768228, z: -0.060802266}
-  m_TimeToStationary: 0.5
