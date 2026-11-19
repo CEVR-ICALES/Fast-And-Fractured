@@ -59,6 +59,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -80,9 +85,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1313186917898096272
 MonoBehaviour:
@@ -224,6 +231,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -245,9 +257,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &3000466732561827754
 MonoBehaviour:
@@ -322,6 +336,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -343,9 +362,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &3242919807008599228
 MonoBehaviour:
@@ -419,6 +440,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
@@ -440,9 +466,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1001 &8806624700254783138
 PrefabInstance:
@@ -461,7 +489,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 266702824720625360, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: trafficUnits.Array.data[0]
+      propertyPath: 'trafficUnits.Array.data[0]'
       value: 
       objectReference: {fileID: 2552387320318984049}
     - target: {fileID: 682831402575489623, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
@@ -541,15 +569,15 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8097499063316585523, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: lightState.Array.data[0].statesThatTheLightCanHave.Array.data[0]
+      propertyPath: 'lightState.Array.data[0].statesThatTheLightCanHave.Array.data[0]'
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8097499063316585523, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: lightState.Array.data[0].statesThatTheLightCanHave.Array.data[1]
+      propertyPath: 'lightState.Array.data[0].statesThatTheLightCanHave.Array.data[1]'
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8097499063316585523, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      propertyPath: lightState.Array.data[0].statesThatTheLightCanHave.Array.data[2]
+      propertyPath: 'lightState.Array.data[0].statesThatTheLightCanHave.Array.data[2]'
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -565,9 +593,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2049831348753597955}
-    - targetCorrespondingSourceObject: {fileID: 1752902136969420183, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3555518159382451803}
   m_SourcePrefab: {fileID: 100100000, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}
 --- !u!1 &7090044281905994549 stripped
 GameObject:
@@ -595,22 +620,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.44040522, y: 11.203131, z: 0.5070311}
   m_Center: {x: -0.01980035, y: 5.6780987, z: -0.025211692}
---- !u!208 &3555518159382451803
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7090044281905994549}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 0.22020261, y: 5.6015654, z: 0.25351554}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: -0.01980035, y: 5.6780987, z: -0.025211692}
-  m_TimeToStationary: 0.5
 --- !u!4 &8304698666431917938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 682117148500011472, guid: 316cfb8886ed71144b21414d66bd509b, type: 3}

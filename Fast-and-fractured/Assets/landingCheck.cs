@@ -17,6 +17,8 @@ namespace FastAndFractured
         private bool applyForces;
         [SerializeField]
         private LayerMask ignoreLayer;
+
+        private const float DESTROY_AFTER_THIS_TIME = 10f;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -48,6 +50,7 @@ namespace FastAndFractured
             _startCheck = true;
             _rb.useGravity = true;
             applyForces = true;
+            Destroy(gameObject, DESTROY_AFTER_THIS_TIME);
         }
 
         public ICustomRigidbody GetRigidbody()
@@ -68,6 +71,14 @@ namespace FastAndFractured
                 onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
                 _landingTimer.StopTimer();
                 applyForces = false;
+            }
+        }
+        private void OnDestroy()
+        {
+            if (applyForces)
+            {
+                onLanding?.Invoke(_landingTimer.GetData().CurrentTime);
+                _landingTimer.StopTimer();
             }
         }
     }
