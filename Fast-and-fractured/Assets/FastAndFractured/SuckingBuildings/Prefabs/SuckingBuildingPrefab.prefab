@@ -48,8 +48,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57cc03f4613b264896d206c5f70a5e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRadius: 50
-  pullForce: 50
+  detectionRadius: 40
+  distanceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pullForce: 6000
+  y_offset: 0.7
+  pullOverTime: 0.7
+  pullDuration: 0.3
+  maxPosibleSpeedForTheCar: 400
   vfx: {fileID: 4446521115536488995}
 --- !u!65 &6374179114561900603
 BoxCollider:
@@ -134,6 +162,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -155,9 +185,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &2009022567809874357
 MeshCollider:

@@ -9,11 +9,24 @@ namespace FastAndFractured
     public class SuckingBuilding : MonoBehaviour, IPausable
     {
         public float detectionRadius = 40f;
+        [SerializeField]
+        private AnimationCurve distanceCurve;
         public float pullForce = 30f;
+        [SerializeField]
+        private float y_offset = 0.5f;
+        [SerializeField]
+        private float pullOverTime = 0.5f;
+        [SerializeField]
+        private float pullDuration = 0.2f;
+        [SerializeField]
+        private float maxPosibleSpeedForTheCar = 400f;
         [SerializeField] private ParticleSystem vfx;
         private bool _isPaused = false;
         private List<GameObject> _charactersList = new List<GameObject>();
+        private Dictionary<GameObject, ITimer> _timerCharacterList = new Dictionary<GameObject, ITimer>();
         private System.Predicate<GameObject> _pullFilter;
+
+
 
         public void SetPullFilter(System.Predicate<GameObject> pullFilter)
         {
@@ -37,21 +50,18 @@ namespace FastAndFractured
         {
             if (_isPaused)
                 return;
-            if (_charactersList != null)
-            {
+            if (_charactersList == null)
+                return;
+            
                 HandleVfx();
                 foreach (GameObject obj in _charactersList)
                 {
                     if(obj!=null && (_pullFilter == null || _pullFilter(obj)))
                     {
                         float distance = Vector3.Distance(transform.position, obj.transform.position);
-                        if(distance<=detectionRadius)
-                        {
-                            PullCharacter(obj, distance);
-                        }
+                        PullCharacter(obj, distance, _timerCharacterList[obj]);
                     }
                 }
-            }
         }
 
         private void HandleVfx()
@@ -73,13 +83,18 @@ namespace FastAndFractured
             }
         }
 
-        void PullCharacter(GameObject character, float distance)
+        void PullCharacter(GameObject character, float distance,ITimer pullRate)
         {
-            Rigidbody rb = character.GetComponent<Rigidbody>();
+            PhysicsBehaviour rb = character.GetComponent<PhysicsBehaviour>();
             Vector3 directionToTarget = (character.transform.position - transform.position).normalized;
-            float forceMultiplier = Mathf.Clamp01((detectionRadius - distance) / detectionRadius);
-            Vector3 pullDirection = (transform.position - character.transform.position).normalized;
-            rb.AddForce(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration); 
+            float forceMultiplier = distanceCurve.Evaluate((detectionRadius - distance) / detectionRadius);
+            Vector3 pullDirection = (transform.position - character.transform.position).normalized + y_offset*Vector3.up;
+            if (pullRate == null)
+            {
+                rb.ApplyImpulse(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration, true, pullDuration, false, maxPosibleSpeedForTheCar, false);
+                pullRate = TimerSystem.Instance.CreateTimer(pullOverTime, onTimerDecreaseComplete: () => { pullRate = null; });
+            }
+          
         }
         private void OnTriggerEnter(Collider other)
         {
@@ -89,6 +104,7 @@ namespace FastAndFractured
                 if (!_charactersList.Contains(other.gameObject))
                 {
                     _charactersList.Add(other.gameObject);
+                    _timerCharacterList.Add(other.gameObject, null);
                 }
             }
         }
@@ -100,6 +116,9 @@ namespace FastAndFractured
                 if (_charactersList.Contains(other.gameObject))
                 {
                     _charactersList.Remove(other.gameObject);
+                    if (_timerCharacterList[other.gameObject] != null)
+                        _timerCharacterList[other.gameObject].StopTimer();
+                    _timerCharacterList.Remove(other.gameObject);
                 }
             }
         }

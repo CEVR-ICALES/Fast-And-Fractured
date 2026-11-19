@@ -257,7 +257,7 @@ namespace FastAndFractured
             }
         }
 
-        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum, float speedLimit)
+        public void ApplyImpulse(Vector3 force, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum, float speedLimit, bool stopOnTouchingGround = true)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
@@ -267,7 +267,7 @@ namespace FastAndFractured
             _rb.AddForce(force, forceMode);
          ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
-                     if (_isTouchingGround)
+                     if (_isTouchingGround&&stopOnTouchingGround)
                      {
                          _carMovementController.SetMaxRbSpeedDelayed();
                          _carMovementController.IsBeenImpulsed = false;
@@ -281,7 +281,7 @@ namespace FastAndFractured
                 });
         }
 
-        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum,float speedLimit)
+        public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum,float speedLimit, bool stopOnTouchingGround = true)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
@@ -291,7 +291,7 @@ namespace FastAndFractured
             ApplyForce(forceDirection, forcePoint, forceToApply, forceMode);
             ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
-                     if (_isTouchingGround)
+                     if (_isTouchingGround&&stopOnTouchingGround)
                      {
                          _carMovementController.SetMaxRbSpeedDelayed();
                          _carMovementController.IsBeenImpulsed = false;
