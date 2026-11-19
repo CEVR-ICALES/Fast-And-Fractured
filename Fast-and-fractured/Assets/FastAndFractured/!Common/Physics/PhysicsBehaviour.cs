@@ -69,6 +69,8 @@ namespace FastAndFractured
         public CharacterKinematicReactionsController CharacterKinematicReactionsController { get => _characterKinematicReactionsController; } 
         private CharacterKinematicReactionsController _characterKinematicReactionsController;
 
+        private ITimer _impulseTimer = null;
+
         [Header("Events")]
         public UnityEvent<Vector3> onForceCollision;
 
@@ -261,47 +263,55 @@ namespace FastAndFractured
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
-            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : float.MaxValue;
             _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
             _carMovementController.IsBeenImpulsed = true;
             _rb.AddForce(force, forceMode);
-         ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
-                {
-                     if (_isTouchingGround&&stopOnTouchingGround)
-                     {
-                         _carMovementController.SetMaxRbSpeedDelayed();
-                         _carMovementController.IsBeenImpulsed = false;
-                         impulseTimer = null;
-                     }
-                }, onTimerDecreaseComplete: () =>
+            if (_impulseTimer != null)
+            {
+                _impulseTimer.StopTimer();
+            }
+            _impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate: (float time) =>
+            {
+                if (_isTouchingGround && stopOnTouchingGround)
                 {
                     _carMovementController.SetMaxRbSpeedDelayed();
                     _carMovementController.IsBeenImpulsed = false;
-                    impulseTimer = null;
-                });
+                    _impulseTimer = null;
+                }
+            }, onTimerDecreaseComplete: () =>
+            {
+                _carMovementController.SetMaxRbSpeedDelayed();
+                _carMovementController.IsBeenImpulsed = false;
+                _impulseTimer = null;
+            });
         }
 
         public void ApplyImpulse(Vector3 forceDirection, Vector3 forcePoint, float forceToApply, ForceMode forceMode, bool limitRbSpeed, float forceTime, bool stopMomentum,float speedLimit, bool stopOnTouchingGround = true)
         {
             if (stopMomentum)
                 _rb.linearVelocity = Vector3.zero;
-            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : Mathf.Infinity;
+            float maxRBSpeedOnImpulse = limitRbSpeed ? speedLimit : float.MaxValue;
             _carMovementController.SetMaxRbSpeed(maxRBSpeedOnImpulse);
             _carMovementController.IsBeenImpulsed = true;
             ApplyForce(forceDirection, forcePoint, forceToApply, forceMode);
-            ITimer impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
+            if (_impulseTimer != null)
+            {
+                _impulseTimer.StopTimer();
+            }
+            _impulseTimer = TimerSystem.Instance.CreateTimer(forceTime, onTimerDecreaseUpdate:(float time) =>
                 {
                      if (_isTouchingGround&&stopOnTouchingGround)
                      {
                          _carMovementController.SetMaxRbSpeedDelayed();
                          _carMovementController.IsBeenImpulsed = false;
-                         impulseTimer = null;
+                         _impulseTimer = null;
                      }
                 }, onTimerDecreaseComplete: () =>
                 {
                     _carMovementController.SetMaxRbSpeedDelayed();
                     _carMovementController.IsBeenImpulsed = false;
-                    impulseTimer = null;
+                    _impulseTimer = null;
                 });
         }
 

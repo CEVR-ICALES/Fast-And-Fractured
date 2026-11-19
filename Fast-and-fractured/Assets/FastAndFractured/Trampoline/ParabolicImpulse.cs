@@ -1,5 +1,6 @@
 using FastAndFractured.Utilities;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 namespace FastAndFractured {
     public class ParabolicImpulse : MonoBehaviour
@@ -10,6 +11,8 @@ namespace FastAndFractured {
         private float angle = 45f;
         [SerializeField]
         private float countdown = 0.5f;
+        [SerializeField]
+        private float waitTillImpulse = 0.2f;
         private bool isOnCountdown = false;
 
         [Header("Range Dependent values")]
@@ -46,6 +49,7 @@ namespace FastAndFractured {
 
         private const float TRAMPOLINE_SPEED_LIMIT = 600f;
 
+        public UnityEvent<GameObject> onImpulse;
 
 
 
@@ -60,45 +64,45 @@ namespace FastAndFractured {
             }
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
         private void OnTriggerEnter(Collider other)
         {
-            if (!isOnCountdown)
+            if (!isOnCountdown&&(other.TryGetComponent<PhysicsBehaviour>(out var characterCar) ||
+                other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline)))
             {
-                isOnCountdown = true;
-                if (other.TryGetComponent<PhysicsBehaviour>(out var characterCar))
+                TimerSystem.Instance.CreateTimer(waitTillImpulse, onTimerDecreaseComplete: () =>
                 {
-                    if (!rangeDependent)
+                    isOnCountdown = true;
+                    onImpulse?.Invoke(other.gameObject);
+                    if (other.TryGetComponent<PhysicsBehaviour>(out var characterCar))
                     {
-                        Vector3 currentVelocity = characterCar.Rb.linearVelocity;
-                        ImpulseRigydbody(characterCar.Rb, currentVelocity, maxThrowableWeightForCars,characterCar);
+                        if (!rangeDependent)
+                        {
+                            Vector3 currentVelocity = characterCar.Rb.linearVelocity;
+                            ImpulseRigydbody(characterCar.Rb, currentVelocity, maxThrowableWeightForCars, characterCar);
+                        }
+                        else
+                        {
+                            ParabolicRangeMovement(characterCar.Rb, characterCar);
+                        }
                     }
-                    else
+                    else if (other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline))
                     {
-                        ParabolicRangeMovement(characterCar.Rb,characterCar);
+                        ICustomRigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
+                        if (!rangeDependent)
+                        {
+                            ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
+                        }
+                        else
+                        {
+                            ParabolicRangeMovement(rb);
+                        }
                     }
-                }
-                else if (other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline))
-                {
-                    ICustomRigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
-                    if (!rangeDependent)
+                    if(trampolineAnimations!= null)
+                    trampolineAnimations.releaseAnimation.Invoke(countdown);
+                    TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
                     {
-                        ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
-                    }
-                    else
-                    {
-                        ParabolicRangeMovement(rb);
-                    }
-                }
-                trampolineAnimations.releaseAnimation.Invoke(countdown);
-                TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
-                {
-                    isOnCountdown = false;
+                        isOnCountdown = false;
+                    });
                 });
             }
         }
@@ -129,7 +133,7 @@ namespace FastAndFractured {
         private void ParabolicRangeMovement(ICustomRigidbody rb,PhysicsBehaviour physicsBehaviour)
         {
             Vector3 force = ParabolicForce(rb);
-            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true,TRAMPOLINE_SPEED_LIMIT);
+            physicsBehaviour.ApplyImpulse(force, ForceMode.VelocityChange, false, _landingTime,true,TRAMPOLINE_SPEED_LIMIT,false);
         }
 
         private void ParabolicRangeMovement(ICustomRigidbody rb)
@@ -140,7 +144,7 @@ namespace FastAndFractured {
 
         private Vector3 ParabolicForce(ICustomRigidbody rb)
         {
-            float target_Velocity = Mathf.Sqrt((range * Mathf.Abs(Physics.gravity.y)) / Mathf.Sin(2 * angle * Mathf.Deg2Rad));
+            float target_Velocity = Mathf.Sqrt((range * Mathf.Abs(Physics.gravity.y*maxVelocityMultiplicatorFactor)) / Mathf.Sin(2 * angle * Mathf.Deg2Rad));
 
             float Vx = target_Velocity * Mathf.Cos(angle * Mathf.Deg2Rad);
             float Vy = target_Velocity * Mathf.Sin(angle * Mathf.Deg2Rad);

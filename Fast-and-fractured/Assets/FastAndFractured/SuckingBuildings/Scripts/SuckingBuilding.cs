@@ -25,6 +25,8 @@ namespace FastAndFractured
         private List<GameObject> _charactersList = new List<GameObject>();
         private Dictionary<GameObject, ITimer> _timerCharacterList = new Dictionary<GameObject, ITimer>();
         private System.Predicate<GameObject> _pullFilter;
+        [SerializeField]
+        private ParabolicImpulse parabolicImpulse;
 
 
 
@@ -44,6 +46,13 @@ namespace FastAndFractured
             {
                 PauseManager.TryUnregisterPausable(this);
             }
+        }
+
+        void Start()
+        {
+            if(parabolicImpulse == null)
+                parabolicImpulse = GetComponentInChildren<ParabolicImpulse>();
+            parabolicImpulse.onImpulse.AddListener(RemovePlayerFromList);
         }
 
         void FixedUpdate()
@@ -91,10 +100,22 @@ namespace FastAndFractured
             Vector3 pullDirection = (transform.position - character.transform.position).normalized + y_offset*Vector3.up;
             if (pullRate == null)
             {
-                rb.ApplyImpulse(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration, true, pullDuration, false, maxPosibleSpeedForTheCar, false);
+                rb.ApplyImpulse(pullDirection * (pullForce * forceMultiplier), ForceMode.Acceleration, false, pullDuration, false, maxPosibleSpeedForTheCar, false);
                 pullRate = TimerSystem.Instance.CreateTimer(pullOverTime, onTimerDecreaseComplete: () => { pullRate = null; });
             }
           
+        }
+
+        private void RemovePlayerFromList(GameObject character)
+        {
+            if(character == null) return;
+            if (_charactersList.Contains(character))
+            {
+                _charactersList.Remove(character);
+                if (_timerCharacterList[character] != null)
+                    _timerCharacterList[character].StopTimer();
+                _timerCharacterList.Remove(character);
+            }
         }
         private void OnTriggerEnter(Collider other)
         {
