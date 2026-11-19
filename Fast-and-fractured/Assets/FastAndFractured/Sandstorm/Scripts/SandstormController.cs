@@ -281,11 +281,8 @@ namespace FastAndFractured
             {
                 if (!other.GetComponent<Rigidbody>().isKinematic&&!_isPaused)
                 {
-                    if (other.GetComponentInParent<StatsBoostInteractable>() != null)
-                    {
-                        CharacterEscapedDead(statsController);
-                        _charactersInsideSandstorm.Remove(other.gameObject);
-                    }
+                    CharacterEscapedDead(statsController);
+                    _charactersInsideSandstorm.Remove(other.gameObject);
                 }
             }
             else
@@ -303,8 +300,8 @@ namespace FastAndFractured
 
         public void StartKillNotify(StatsController statsController)
        {
-         float damageXFrame = statsController.Endurance/_currentCharacterKillTime;
-         statsController.GetKilledNotify(this,false,damageXFrame);
+         float damageXSecond = statsController.Endurance/_currentCharacterKillTime;
+         statsController.GetKilledNotify(this,false,damageXSecond);
        }
 
       public void CharacterEscapedDead(StatsController statsController)

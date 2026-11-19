@@ -284,7 +284,7 @@ namespace FastAndFractured
             return charDataSO.GetFinalAnimation(characterCode, isWin);
         }
 
-        public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
+        public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXSecond)
         {
             if (killer == _currentKiller)
             {
@@ -306,19 +306,19 @@ namespace FastAndFractured
                             _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
-                            SetDeadTimer(killer, newTime,damageXFrame);
+                            SetDeadTimer(killer, newTime,damageXSecond);
                         }
                     }
                 }
                 else
                 {
                     _currentKiller = killer;
-                    SetDeadTimer(killer, killer.KillTime,damageXFrame);
+                    SetDeadTimer(killer, killer.KillTime,damageXSecond);
                 }
             }
         }
 
-        private void SetDeadTimer(IKillCharacters killer,float time,float damageXFrame)
+        private void SetDeadTimer(IKillCharacters killer,float time,float damageXSecond)
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
@@ -326,9 +326,9 @@ namespace FastAndFractured
                 _deadTimer = null;
             }, onTimerDecreaseUpdate : (float time) =>
             {
-                if (damageXFrame > 0)
+                if (damageXSecond > 0)
                 {
-                    TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
+                    TakeEndurance(damageXSecond * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
             });
         }
