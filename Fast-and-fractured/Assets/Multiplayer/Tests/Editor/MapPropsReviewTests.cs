@@ -43,6 +43,34 @@ namespace FastAndFractured.Multiplayer.Tests
             Assert.AreEqual(expected, NetworkedSuckingBuilding.ShouldPull(isServer, isLocallyOwned));
         }
 
+        [TestCase(true, true, false, true)]
+        [TestCase(true, false, false, true)]
+        [TestCase(false, true, true, true)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, true, false)]
+        public void SuckingBuildingLaunchesOnlyWhatThisPeerSimulates(bool isServer, bool isCar, bool isLocallyOwned, bool expected)
+        {
+            Assert.AreEqual(expected, NetworkedSuckingBuilding.ShouldLaunch(isServer, isCar, isLocallyOwned));
+        }
+
+        [TestCase("Assets/FastAndFractured/SuckingBuildings/Prefabs/SuckingBuildingPrefab.prefab")]
+        [TestCase("Assets/FastAndFractured/SuckingBuildings/Prefabs/BigSuckingBuildingPrefab Variant.prefab")]
+        [TestCase("Assets/FastAndFractured/SuckingBuildings/Prefabs/MediumSuckingBuildingPrefab Variant.prefab")]
+        [TestCase("Assets/FastAndFractured/SuckingBuildings/Prefabs/SmallSuckingBuildingPrefab Variant.prefab")]
+        public void EverySuckingBuildingHasANetworkedVariantThatLaunchesInsteadOfKilling(string singleplayerPath)
+        {
+            var singleplayer = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(singleplayerPath);
+            Assert.IsNotNull(singleplayer, singleplayerPath);
+            var networked = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                $"Assets/Multiplayer/Props/Networked{singleplayer.name}.prefab");
+            Assert.IsNotNull(networked, $"Networked{singleplayer.name} is missing: the scene migration falls back to the base building and loses its size.");
+            Assert.AreEqual(singleplayer, UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(networked));
+            Assert.IsNotNull(networked.GetComponent<NetworkedSuckingBuilding>());
+            Assert.IsNotNull(networked.GetComponentInChildren<ParabolicImpulse>(true));
+            Assert.IsNull(networked.GetComponentInChildren<NetworkedTrampoline>(true), "A server-only launcher would leave the owner pulling its car back in.");
+            Assert.IsNull(networked.GetComponentInChildren<NetworkedBuildingDeadZone>(true), "The building no longer kills.");
+        }
+
         [Test]
         public void SuckingBuildingKeepsTheSingleplayerPullOnClients()
         {
