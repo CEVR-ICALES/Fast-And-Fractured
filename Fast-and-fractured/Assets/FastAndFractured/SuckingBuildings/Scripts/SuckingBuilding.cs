@@ -20,7 +20,8 @@ namespace FastAndFractured
         private float pullDuration = 0.2f;
         [SerializeField]
         private float maxPosibleSpeedForTheCar = 400f;
-        [SerializeField] private ParticleSystem vfx;
+        [SerializeField] private ParticleSystem suckingVfx;
+        [SerializeField] private ParticleSystem explodeVFX;
         private bool _isPaused = false;
         private List<GameObject> _charactersList = new List<GameObject>();
         private Dictionary<GameObject, ITimer> _timerCharacterList = new Dictionary<GameObject, ITimer>();
@@ -61,9 +62,7 @@ namespace FastAndFractured
                 return;
             if (_charactersList == null)
                 return;
-            
-                HandleVfx();
-                foreach (GameObject obj in _charactersList)
+            foreach (GameObject obj in _charactersList)
                 {
                     if(obj!=null && (_pullFilter == null || _pullFilter(obj)))
                     {
@@ -73,22 +72,28 @@ namespace FastAndFractured
                 }
         }
 
+        void LateUpdate()
+        {
+            HandleVfx();
+        }
+
         private void HandleVfx()
         {
             // Some map dead zones intentionally have no particle effect assigned. Treat VFX as
             // optional instead of throwing every FixedUpdate (exception logging can stall the
             // game completely when several zones are active at once).
-            if (vfx == null)
+            if (suckingVfx == null)
                 return;
 
             if(_charactersList.Count > 0)
             {
-                if(!vfx.isPlaying)
-                   vfx.Play();
-            } else
+                if(!suckingVfx.isPlaying)
+                   suckingVfx.Play();
+            } 
+            else
             {
-                if(vfx.isPlaying)
-                    vfx.Stop();
+                if(suckingVfx.isPlaying)
+                    suckingVfx.Stop();
             }
         }
 
@@ -115,6 +120,8 @@ namespace FastAndFractured
                 if (_timerCharacterList[character] != null)
                     _timerCharacterList[character].StopTimer();
                 _timerCharacterList.Remove(character);
+                suckingVfx?.Stop();
+                explodeVFX.Play();
             }
         }
         private void OnTriggerEnter(Collider other)

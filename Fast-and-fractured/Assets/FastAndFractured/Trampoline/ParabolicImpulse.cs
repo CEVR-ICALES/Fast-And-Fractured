@@ -51,6 +51,8 @@ namespace FastAndFractured {
 
         public UnityEvent<GameObject> onImpulse;
 
+        private ITimer _startImpulseTime = null;
+
 
 
         private const float GENERIC_MASS = 5;
@@ -69,42 +71,58 @@ namespace FastAndFractured {
             if (!isOnCountdown&&(other.TryGetComponent<PhysicsBehaviour>(out var characterCar) ||
                 other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline)))
             {
-                TimerSystem.Instance.CreateTimer(waitTillImpulse, onTimerDecreaseComplete: () =>
-                {
-                    isOnCountdown = true;
-                    onImpulse?.Invoke(other.gameObject);
-                    if (other.TryGetComponent<PhysicsBehaviour>(out var characterCar))
-                    {
-                        if (!rangeDependent)
-                        {
-                            Vector3 currentVelocity = characterCar.Rb.linearVelocity;
-                            ImpulseRigydbody(characterCar.Rb, currentVelocity, maxThrowableWeightForCars, characterCar);
-                        }
-                        else
-                        {
-                            ParabolicRangeMovement(characterCar.Rb, characterCar);
-                        }
-                    }
-                    else if (other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline))
-                    {
-                        ICustomRigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
-                        if (!rangeDependent)
-                        {
-                            ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
-                        }
-                        else
-                        {
-                            ParabolicRangeMovement(rb);
-                        }
-                    }
-                    if(trampolineAnimations!= null)
-                    trampolineAnimations.releaseAnimation.Invoke(countdown);
-                    TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
-                    {
-                        isOnCountdown = false;
-                    });
-                });
+                if (waitTillImpulse > 0)
+                    _startImpulseTime = TimerSystem.Instance.CreateTimer(waitTillImpulse, onTimerDecreaseComplete: () =>
+                     {
+                         _startImpulseTime = null;
+                         ParabolicImpulseCollisionHandle(other);
+                     });
+                else
+                    ParabolicImpulseCollisionHandle(other);
             }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (!other.TryGetComponent<PhysicsBehaviour>(out PhysicsBehaviour physicsBehaviour) && _startImpulseTime == null)
+                return;
+            _startImpulseTime.StopTimer();
+        }
+
+        private void ParabolicImpulseCollisionHandle(Collider other)
+        {
+            isOnCountdown = true;
+            onImpulse?.Invoke(other.gameObject);
+            if (other.TryGetComponent<PhysicsBehaviour>(out var characterCar))
+            {
+                if (!rangeDependent)
+                {
+                    Vector3 currentVelocity = characterCar.Rb.linearVelocity;
+                    ImpulseRigydbody(characterCar.Rb, currentVelocity, maxThrowableWeightForCars, characterCar);
+                }
+                else
+                {
+                    ParabolicRangeMovement(characterCar.Rb, characterCar);
+                }
+            }
+            else if (other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline))
+            {
+                ICustomRigidbody rb = canBeImpulseByTrampoline.GetRigidbody();
+                if (!rangeDependent)
+                {
+                    ImpulseRigydbody(rb, rb.linearVelocity, canBeImpulseByTrampoline.GetMassReference());
+                }
+                else
+                {
+                    ParabolicRangeMovement(rb);
+                }
+            }
+            if (trampolineAnimations != null)
+                trampolineAnimations.releaseAnimation.Invoke(countdown);
+            TimerSystem.Instance.CreateTimer(countdown, onTimerDecreaseComplete: () =>
+            {
+                isOnCountdown = false;
+            });
         }
 
         private void ImpulseRigydbody(ICustomRigidbody rb, Vector3 startingVelocity, float maxWeightReference)
