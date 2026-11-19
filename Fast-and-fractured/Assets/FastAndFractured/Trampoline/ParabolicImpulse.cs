@@ -52,7 +52,12 @@ namespace FastAndFractured {
         public UnityEvent<GameObject> onImpulse;
 
         private ITimer _startImpulseTime = null;
+        private System.Predicate<GameObject> _impulseFilter;
 
+        public void SetImpulseFilter(System.Predicate<GameObject> impulseFilter)
+        {
+            _impulseFilter = impulseFilter;
+        }
 
 
         private const float GENERIC_MASS = 5;
@@ -69,7 +74,8 @@ namespace FastAndFractured {
         private void OnTriggerEnter(Collider other)
         {
             if (!isOnCountdown&&(other.TryGetComponent<PhysicsBehaviour>(out var characterCar) ||
-                other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline)))
+                other.TryGetComponent<ICanBeImpulseByTrampoline>(out var canBeImpulseByTrampoline)) &&
+                (_impulseFilter == null || _impulseFilter(other.gameObject)))
             {
                 if (waitTillImpulse > 0)
                     _startImpulseTime = TimerSystem.Instance.CreateTimer(waitTillImpulse, onTimerDecreaseComplete: () =>
@@ -84,9 +90,11 @@ namespace FastAndFractured {
 
         private void OnTriggerExit(Collider other)
         {
-            if (!other.TryGetComponent<PhysicsBehaviour>(out PhysicsBehaviour physicsBehaviour) && _startImpulseTime == null)
+            // The timer is null once the impulse fired, and always when waitTillImpulse is 0.
+            if (_startImpulseTime == null || !other.TryGetComponent<PhysicsBehaviour>(out _))
                 return;
             _startImpulseTime.StopTimer();
+            _startImpulseTime = null;
         }
 
         private void ParabolicImpulseCollisionHandle(Collider other)

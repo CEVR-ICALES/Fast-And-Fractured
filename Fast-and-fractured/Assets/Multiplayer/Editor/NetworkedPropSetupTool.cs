@@ -34,6 +34,8 @@ namespace FastAndFractured.Multiplayer.Editor
             public string SceneOnlyNote;     // non-null if this may not exist as a prefab
             // A prefab variant gets its own networked variant: a pickup variant (RecoverHealth) is a different pickup.
             public bool   VariantsGetOwnPrefab;
+            // Left to this parent's wrapper: the launcher inside a sucking building is not a standalone trampoline.
+            public Type   HandledByParent;
         }
 
         private static readonly HazardDef[] HAZARD_DEFS =
@@ -70,6 +72,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 DisplayName      = "Trampoline  (ParabolicImpulse)",
                 SingleplayerType = typeof(ParabolicImpulse),
                 WrapperType      = typeof(NetworkedTrampoline),
+                HandledByParent  = typeof(SuckingBuilding),
             },
             new HazardDef
             {
@@ -94,6 +97,7 @@ namespace FastAndFractured.Multiplayer.Editor
             new HazardDef
             {
                 DisplayName      = "Sucking Building",
+                VariantsGetOwnPrefab = true,
                 SingleplayerType = typeof(SuckingBuilding),
                 WrapperType      = typeof(NetworkedSuckingBuilding),
             },
@@ -173,7 +177,7 @@ namespace FastAndFractured.Multiplayer.Editor
                     var spComponent = FindOwnedComponentInPrefab(prefab, def.SingleplayerType);
                     if (spComponent == null && def.VariantsGetOwnPrefab)
                         spComponent = FindVariantRootComponent(prefab, def.SingleplayerType);
-                    if (spComponent == null) continue;
+                    if (spComponent == null || IsHandledByParent(def, spComponent)) continue;
 
                     if (prefab.GetComponentInChildren(def.WrapperType, includeInactive: true) != null) continue;
 
@@ -400,7 +404,7 @@ namespace FastAndFractured.Multiplayer.Editor
             {
                 foreach (Component wrapper in root.GetComponentsInChildren(def.WrapperType, true))
                 {
-                    if (wrapper.GetComponent(def.SingleplayerType) != null) continue;
+                    if (wrapper.GetComponent(def.SingleplayerType) != null && !IsHandledByParent(def, wrapper)) continue;
                     strippedObjects.Add(wrapper.gameObject);
                     UnityEngine.Object.DestroyImmediate(wrapper, true);
                     changes++;
@@ -410,7 +414,7 @@ namespace FastAndFractured.Multiplayer.Editor
                 Component hazard = root.GetComponentsInChildren(def.SingleplayerType, true).FirstOrDefault(c =>
                 {
                     GameObject owner = PrefabUtility.GetNearestPrefabInstanceRoot(c.gameObject);
-                    return owner == null || owner == root;
+                    return (owner == null || owner == root) && !IsHandledByParent(def, c);
                 });
                 if (hazard == null) continue;
 
@@ -483,6 +487,9 @@ namespace FastAndFractured.Multiplayer.Editor
             if (!AssetDatabase.IsValidFolder(OUTPUT_FOLDER))
                 AssetDatabase.CreateFolder(OUTPUT_FOLDER_PARENT, OUTPUT_SUBFOLDER);
         }
+
+        private static bool IsHandledByParent(HazardDef def, Component component) =>
+            def.HandledByParent != null && component.GetComponentInParent(def.HandledByParent, true) != null;
 
         /// <summary>The hazard component on a prefab variant's own root (inherited from its base).</summary>
         private static Component FindVariantRootComponent(GameObject prefab, Type spType)
