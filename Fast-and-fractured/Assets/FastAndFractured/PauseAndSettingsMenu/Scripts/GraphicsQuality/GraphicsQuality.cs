@@ -135,6 +135,7 @@ namespace FastAndFractured
                 return;
             ApplySavedAntiAliasing(camera);
             Upscaling.ApplySaved(camera);
+            UiOutsideUpscaling.MoveToOverlay(camera);
         }
 
         private static void ForgetCameras(Scene scene, LoadSceneMode mode) => _camerasWithSavedSettings.Clear();
