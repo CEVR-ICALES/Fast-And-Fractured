@@ -1754,6 +1754,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2355938903064280616}
+    - targetCorrespondingSourceObject: {fileID: 4417372150632784795, guid: 894d66a72a5753242b8adf852622d607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9013864116770242053}
     - targetCorrespondingSourceObject: {fileID: 2739815113383047756, guid: 894d66a72a5753242b8adf852622d607, type: 3}
       insertIndex: -1
       addedObject: {fileID: -7733546647236705992}
@@ -1832,32 +1835,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <IsNested>k__BackingField: 0
-  WasActiveDuringEdit: 0
-  WasActiveDuringEdit_Set1: 1
-  <ComponentIndex>k__BackingField: 0
-  <PredictedSpawn>k__BackingField: {fileID: 0}
-  <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours:
-  - {fileID: -2355938903064280616}
-  - {fileID: 1684147260850289039}
-  - {fileID: 6817672403571990665}
-  - {fileID: 588369211927331189}
-  - {fileID: 5931791629501013527}
-  - {fileID: 322889612377877140}
-  - {fileID: 3653709284683339280}
-  - {fileID: 0}
-  InitializedParentNetworkBehaviour: {fileID: 0}
-  InitializedNestedNetworkObjects: []
-  RuntimeParentNetworkBehaviour: {fileID: 0}
-  RuntimeChildNetworkBehaviours: []
-  _isNetworked: 1
-  _isSpawnable: 1
-  _isGlobal: 0
-  _initializeOrder: 0
-  _preventDespawnOnDisconnect: 0
-  _defaultDespawnType: 0
-  _initializedTimestamp: -8584108346749749954
   _localLevelOfDetailCalculationType: 0
   _useLevelOfDetail: 0
   _useRootLevelOfDetail: 1
@@ -1885,6 +1862,32 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 0
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours:
+  - {fileID: -2355938903064280616}
+  - {fileID: 1684147260850289039}
+  - {fileID: 6817672403571990665}
+  - {fileID: 588369211927331189}
+  - {fileID: 5931791629501013527}
+  - {fileID: 322889612377877140}
+  - {fileID: 3653709284683339280}
+  - {fileID: 0}
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  _initializedTimestamp: -8584108346749749954
 --- !u!114 &-2355938903064280616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1900,6 +1903,23 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 5386894792522378641}
   _networkObjectCache: {fileID: 5386894792522378641}
+--- !u!114 &9013864116770242053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6605284544878791150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ce375ec9dd47948ae74eb1032c3faa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FastAndFractured.Multiplayer.GhostShot
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 5386894792522378641}
+  _networkObjectCache: {fileID: 0}
+  _trailMaterial: {fileID: 2100000, guid: f6fa4c8e3d8871949b68e013cb6f9f3c, type: 2}
+  _impactVfx: {fileID: 2489603042514872764, guid: ca5ab319049fb6340abbd780b7dd5734, type: 3}
 --- !u!114 &6753778889211814184 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4277638721388137309, guid: 894d66a72a5753242b8adf852622d607, type: 3}
