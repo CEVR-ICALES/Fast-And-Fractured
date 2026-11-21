@@ -262,9 +262,30 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.ResetWins();
         }
 
+        private RoomJoiningOverlay _joiningOverlay;
+
+        // A client sees the room before the host has registered it: without this the screen looks frozen.
+        private void RefreshJoiningOverlay()
+        {
+            if (_playerListContainer == null) return;
+            int localId = InstanceFinder.ClientManager?.Connection?.ClientId ?? -1;
+            bool joining = IsJoining(InstanceFinder.IsServerStarted, InstanceFinder.IsClientStarted,
+                _lobbyManager != null && localId >= 0 && _lobbyManager.PlayerReadyStates.ContainsKey(localId));
+            if (_joiningOverlay == null)
+            {
+                if (!joining) return;
+                var area = _playerListContainer.parent as RectTransform ?? (RectTransform)_playerListContainer;
+                _joiningOverlay = RoomJoiningOverlay.Create(area, _roomNameLabel);
+            }
+            _joiningOverlay.Show(joining);
+        }
+
+        internal static bool IsJoining(bool isHost, bool isClient, bool registered) => !isHost && isClient && !registered;
+
         /// <summary>A host migration spawns a new room object: bind to it as soon as it appears.</summary>
         private void Update()
         {
+            RefreshJoiningOverlay();
             if (!_subscribed || _lobbyManager != null) return;
             _subscribed = false;
             foreach (var entry in _playerEntries.Values)
