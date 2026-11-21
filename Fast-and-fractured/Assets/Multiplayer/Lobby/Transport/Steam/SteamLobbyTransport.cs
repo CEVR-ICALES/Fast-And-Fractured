@@ -126,7 +126,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             // FishNet raises no OnRemoteConnectionState for the host's own client.
             nm.ClientManager.OnClientConnectionState += HandleLocalClientState;
 
-            await StartServerAsync(nm, ct);
+            try { await StartServerAsync(nm, ct); }
+            catch
+            {
+                LeaveCurrentLobby();
+                throw;
+            }
             if (MultiplayerTransport.SteamRelayAvailable)
                 SteamMatchmaking.SetLobbyData(_currentLobbyId, KEY_RELAY_HOST, MultiplayerTransport.LocalSteamId);
 
@@ -153,7 +158,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
         {
             // A non-Steam id is a direct IP join (LobbyHandle.FromAddress): connect straight away.
             if (!ulong.TryParse(handle.PlatformId, out ulong lobbyRaw))
-                return !string.IsNullOrEmpty(handle.Address) && await JoinAddressAsync(handle.Address, handle.Port, ct);
+            {
+                bool direct = !string.IsNullOrEmpty(handle.Address) && await JoinAddressAsync(handle.Address, handle.Port, ct);
+                if (!direct) InstanceFinder.ClientManager?.StopConnection();
+                return direct;
+            }
 
             if (!SteamManager.Initialized) return false;
 
@@ -168,7 +177,12 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             using (ct.Register(() => joinTcs.TrySetCanceled()))
             {
                 try { entered = await joinTcs.Task; }
-                catch { return false; }
+                catch
+                {
+                    // Steam may still let us in after the cancel: leave, or we stay a member nobody sees.
+                    SteamMatchmaking.LeaveLobby(new CSteamID(lobbyRaw));
+                    return false;
+                }
                 finally
                 {
                     _lobbyEnterCallback?.Dispose();
@@ -178,6 +192,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
 
             if (entered.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
                 return false;
+            if (entered.m_ulSteamIDLobby != lobbyRaw)
+            {
+                SteamMatchmaking.LeaveLobby(new CSteamID(entered.m_ulSteamIDLobby));
+                return false;
+            }
 
             _currentLobbyId = new CSteamID(entered.m_ulSteamIDLobby);
 
@@ -216,7 +235,11 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             finally
             {
                 if (joined) WatchJoinedClient();
-                else LeaveCurrentLobby();
+                else
+                {
+                    InstanceFinder.ClientManager?.StopConnection();
+                    LeaveCurrentLobby();
+                }
             }
             return joined;
         }
