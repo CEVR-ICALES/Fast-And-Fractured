@@ -768,6 +768,10 @@ namespace FastAndFractured.Multiplayer
                 HostDisconnectWatchdog.NotifyMatchStarted();
                 MultiplayerRoomReturn.NotifyMatchStarted();
             }
+            else if (prev && !next)
+            {
+                MultiplayerRoomReturn.NotifyMatchOver();
+            }
         }
         #endregion
 

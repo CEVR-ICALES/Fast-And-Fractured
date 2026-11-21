@@ -38,6 +38,34 @@ namespace FastAndFractured.Multiplayer
             ShowDecidedResult = null;
         }
 
+        public const float STRANDED_SECONDS = 20f;
+
+        internal static void NotifyMatchOver()
+        {
+            var go = new GameObject("[MatchOverCheck]");
+            Object.DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideInHierarchy;
+            go.AddComponent<StrandedCheck>();
+        }
+
+        public static bool IsStranded(bool online, bool inMenuScene, bool newMatchStarted) => online && !inMenuScene && !newMatchStarted;
+
+        private sealed class StrandedCheck : MonoBehaviour
+        {
+            private IEnumerator Start()
+            {
+                yield return new WaitForSecondsRealtime(STRANDED_SECONDS);
+                var lobby = LobbyLocator.GetLobbyManager();
+                bool newMatch = lobby != null && lobby.GameStarted.Value;
+                if (IsStranded(Online, InMenuScene, newMatch))
+                {
+                    MpCanary.Mark("Still in the map after the match ended - back to the room");
+                    MultiplayerSceneTeardown.LoadMainMenu(ScreensType.LOBBY_ROOM);
+                }
+                Destroy(gameObject);
+            }
+        }
+
         private static bool Online => InstanceFinder.IsClientStarted || InstanceFinder.IsServerStarted;
 
         private static bool InMenuScene =>

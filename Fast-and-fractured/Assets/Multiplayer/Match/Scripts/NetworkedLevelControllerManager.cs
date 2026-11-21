@@ -1539,7 +1539,7 @@ namespace FastAndFractured.Multiplayer
             HostDisconnectWatchdog.NotifyMatchEnded();
 
             // Left during the last seconds (Esc while the end was on its way): already heading to the room.
-            if (MultiplayerRoomReturn.LeftMatch) return;
+            if (MultiplayerRoomReturn.LeftMatch && !MatchSpectatorCamera.IsSpectating) return;
 
             if (MatchSpectatorCamera.IsSpectating)
             {
