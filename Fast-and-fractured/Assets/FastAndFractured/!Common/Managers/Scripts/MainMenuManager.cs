@@ -36,6 +36,7 @@ namespace FastAndFractured
         private Dictionary<ScreensType, MenuScreen> _menuScreens = new Dictionary<ScreensType, MenuScreen>();
         private MenuScreen _currentScreen; 
         private bool isCurrentScreenInteractable;
+        private const float VISIBLE_ALPHA = 1f;
         private ITimer _fadeInTimer;
         private ITimer _fadeOutTimer;
         EventSystem _eventSystem;
@@ -121,7 +122,9 @@ namespace FastAndFractured
                 return;
             }
 
-            if (fadeDuration == -1)
+            StopFade();
+
+            if (fadeDuration == -1 || _currentScreen == null)
             {
                 if (_currentScreen != null)
                 {
@@ -129,6 +132,8 @@ namespace FastAndFractured
                     _currentScreen.DeactivateCamera();
                 }
                 _currentScreen = targetScreen;
+                // A screen that left with a fade keeps alpha 0: opened without one it was there but invisible.
+                _currentScreen.SetAlpha(VISIBLE_ALPHA);
                 _currentScreen.SetInteractable(true);
                 isCurrentScreenInteractable = true;
                 _currentScreen.gameObject.SetActive(true);
@@ -137,13 +142,14 @@ namespace FastAndFractured
                 return;
             }
 
-            _currentScreen.SetInteractable(false);
+            MenuScreen leavingScreen = _currentScreen;
+            leavingScreen.SetInteractable(false);
             isCurrentScreenInteractable = false;
             _fadeOutTimer = TimerSystem.Instance.CreateTimer(fadeDuration,
              onTimerDecreaseComplete: () =>
              {
-                 _currentScreen.gameObject.SetActive(false);
-                 _currentScreen.DeactivateCamera();
+                 leavingScreen.gameObject.SetActive(false);
+                 leavingScreen.DeactivateCamera();
                  _currentScreen = targetScreen;
                  _currentScreen.gameObject.SetActive(true);
                  _currentScreen.ActivateCamera();
@@ -154,25 +160,35 @@ namespace FastAndFractured
                  _fadeInTimer = TimerSystem.Instance.CreateTimer(fadeDuration, TimerDirection.INCREASE,
                      onTimerIncreaseComplete: () =>
                      {
-                         _currentScreen.SetInteractable(true);
+                         targetScreen.SetInteractable(true);
                          LockFocusOnButton();
                          isCurrentScreenInteractable = true;
                      },
                      onTimerIncreaseUpdate: (progress) =>
                      {
-                         _currentScreen.SetAlpha(progress / fadeDuration);
+                         targetScreen.SetAlpha(progress / fadeDuration);
                      });
              },
              onTimerDecreaseUpdate: (progress) =>
              {
-                 _currentScreen.SetAlpha(progress / fadeDuration);
+                 leavingScreen.SetAlpha(progress / fadeDuration);
              });
         }
 
         public void CloseScreen()
         {
+            StopFade();
             _currentScreen?.gameObject.SetActive(false);
             _currentScreen = null;
+        }
+
+        // A fade left running threw every frame once its screen was closed, and no later timer ran.
+        private void StopFade()
+        {
+            _fadeOutTimer?.StopTimer();
+            _fadeInTimer?.StopTimer();
+            _fadeOutTimer = null;
+            _fadeInTimer = null;
         }
 
         #endregion
