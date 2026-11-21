@@ -98,19 +98,20 @@ namespace FastAndFractured
             {
                 return;
             }
-            int i = 0;
-            foreach (GameObject character in levelController.InGameCharacters)
+            int used = UsedIconSlots(inGameCharactersTopIcons.Count, levelController.InGameCharacters.Count, levelController.InGameCharactersNameCodes.Count);
+            for (int i = 0; i < inGameCharactersTopIcons.Count; i++)
             {
-                if (i >= inGameCharactersTopIcons.Count || i >= levelController.InGameCharactersNameCodes.Count)
-                {
-                    break;
-                }
-                inGameCharactersTopIcons[i].GetComponent<CharacterIcon>().SetCharacterIcon(character, levelController.InGameCharactersNameCodes[i]);
-                inGameCharactersTopIcons[i].gameObject.SetActive(true);
-                i++;
+                CharacterIcon icon = inGameCharactersTopIcons[i];
+                if (i < used)
+                    icon.SetCharacterIcon(levelController.InGameCharacters[i], levelController.InGameCharactersNameCodes[i]);
+                icon.gameObject.SetActive(i < used);
             }
             levelController.characterIcons = inGameCharactersTopIcons;
         }
+
+        public static int UsedIconSlots(int slots, int characters, int nameCodes) =>
+            Mathf.Max(0, Mathf.Min(slots, Mathf.Min(characters, nameCodes)));
+
         public void SetAlert()
         {
             tomatoAlertUI.SetActive(true);
