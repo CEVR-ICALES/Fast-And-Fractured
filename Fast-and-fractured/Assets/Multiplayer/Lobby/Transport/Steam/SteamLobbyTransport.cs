@@ -345,6 +345,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
             Debug.Log($"[SteamLobbyTransport] Listing lobbies | filterVersion='{Application.version}' | " +
                       $"appId={SteamUtils.GetAppID()} | versionFilter={(_filterByVersion ? "ON" : "OFF")}");
 
+            SteamMatchmaking.AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide);
             if (_filterByVersion)
                 SteamMatchmaking.AddRequestLobbyListStringFilter(
                     KEY_VERSION, Application.version, ELobbyComparison.k_ELobbyComparisonEqual);
