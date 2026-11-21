@@ -150,7 +150,9 @@ namespace FastAndFractured
             if (option == AUTO_OPTION)
             {
                 GraphicsQuality.SetAuto();
-                GraphicsQualityDetector.Run();
+                // Benchmarking mid-match would stutter the game: a map runs it on the next menu load.
+                if (GraphicsQualityDetector.CanRunHere)
+                    GraphicsQualityDetector.Run();
             }
             else
             {

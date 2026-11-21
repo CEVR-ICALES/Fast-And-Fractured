@@ -44,6 +44,7 @@ namespace FastAndFractured
         private TextMeshProUGUI _notice;
 
         public static bool IsRunning => _running != null;
+        public static bool CanRunHere => SceneManager.GetActiveScene().buildIndex == MAIN_MENU_BUILD_INDEX;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
