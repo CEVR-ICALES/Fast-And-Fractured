@@ -113,7 +113,7 @@ namespace FastAndFractured
 
         private static bool AnySettingsOpen()
         {
-            foreach (var settings in FindObjectsByType<SettingsMenuBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            foreach (var settings in MenuScan.SettingsMenus)
                 if (settings != null && settings.isActiveAndEnabled) return true;
             return false;
         }
