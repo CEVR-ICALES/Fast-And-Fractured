@@ -206,7 +206,6 @@ namespace FastAndFractured.Multiplayer.Abstractions.Steam
                     }
                     if (!joined)
                     {
-                        FastAndFractured.Multiplayer.HostDisconnectWatchdog.NotifyIntentionalLeave();
                         InstanceFinder.ClientManager?.StopConnection();
                         Debug.LogWarning("[SteamLobbyTransport] Could not reach the host through Steam's relay; trying its IP.");
                     }
