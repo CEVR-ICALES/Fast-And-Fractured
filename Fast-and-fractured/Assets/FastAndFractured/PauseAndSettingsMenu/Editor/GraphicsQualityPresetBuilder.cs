@@ -29,6 +29,7 @@ namespace FastAndFractured.EditorTools
             public bool BloomHighQuality;
             public TerrainQualityOverrides TerrainOverrides;
             public float TerrainDetailDistance, TerrainDetailDensity, TerrainTreeDistance, TerrainPixelError;
+            public float RenderScale;
         }
 
         private const float FULL_RESOLUTION = 1f;
@@ -52,7 +53,7 @@ namespace FastAndFractured.EditorTools
                 MaxDirectionalShadowResolution = 512, MaxPunctualShadowResolution = 512, DecalAtlas = 1024, CookieAtlas = COOKIE_ATLAS,
                 BloomResolution = BLOOM_QUARTER, BloomHighQuality = false, MotionBlurSamples = 4, ChromaticAberrationSamples = 3,
                 TerrainOverrides = TERRAIN_DISTANCES | TerrainQualityOverrides.PixelError, TerrainDetailDistance = 50f,
-                TerrainDetailDensity = 0.25f, TerrainTreeDistance = 400f, TerrainPixelError = 15f,
+                TerrainDetailDensity = 0.25f, TerrainTreeDistance = 400f, TerrainPixelError = 15f, RenderScale = 0.67f,
             },
             new Preset
             {
@@ -63,7 +64,7 @@ namespace FastAndFractured.EditorTools
                 MaxDirectionalShadowResolution = 1024, MaxPunctualShadowResolution = 512, DecalAtlas = 1024, CookieAtlas = COOKIE_ATLAS,
                 BloomResolution = BLOOM_QUARTER, BloomHighQuality = false, MotionBlurSamples = 4, ChromaticAberrationSamples = 3,
                 TerrainOverrides = TERRAIN_DISTANCES | TerrainQualityOverrides.PixelError, TerrainDetailDistance = 80f,
-                TerrainDetailDensity = 0.4f, TerrainTreeDistance = 600f, TerrainPixelError = 10f,
+                TerrainDetailDensity = 0.4f, TerrainTreeDistance = 600f, TerrainPixelError = 10f, RenderScale = 0.8f,
             },
             new Preset
             {
@@ -74,7 +75,7 @@ namespace FastAndFractured.EditorTools
                 MaxDirectionalShadowResolution = 1024, MaxPunctualShadowResolution = 1024, DecalAtlas = 2048, CookieAtlas = COOKIE_ATLAS,
                 BloomResolution = BLOOM_QUARTER, BloomHighQuality = false, MotionBlurSamples = 4, ChromaticAberrationSamples = 3,
                 TerrainOverrides = TERRAIN_DISTANCES, TerrainDetailDistance = 120f, TerrainDetailDensity = 0.6f,
-                TerrainTreeDistance = 1000f, TerrainPixelError = 5f,
+                TerrainTreeDistance = 1000f, TerrainPixelError = 5f, RenderScale = 0.9f,
             },
             new Preset
             {
@@ -85,7 +86,7 @@ namespace FastAndFractured.EditorTools
                 MaxDirectionalShadowResolution = 2048, MaxPunctualShadowResolution = 1024, DecalAtlas = 2048, CookieAtlas = COOKIE_ATLAS,
                 BloomResolution = BLOOM_HALF, BloomHighQuality = false, MotionBlurSamples = 6, ChromaticAberrationSamples = 6,
                 TerrainOverrides = TERRAIN_DISTANCES, TerrainDetailDistance = 150f, TerrainDetailDensity = 0.8f,
-                TerrainTreeDistance = 1500f, TerrainPixelError = 5f,
+                TerrainTreeDistance = 1500f, TerrainPixelError = 5f, RenderScale = FULL_RESOLUTION,
             },
             new Preset
             {
@@ -96,7 +97,7 @@ namespace FastAndFractured.EditorTools
                 MaxDirectionalShadowResolution = 2048, MaxPunctualShadowResolution = 2048, DecalAtlas = 4096, CookieAtlas = COOKIE_ATLAS,
                 BloomResolution = BLOOM_HALF, BloomHighQuality = true, MotionBlurSamples = 8, ChromaticAberrationSamples = 6,
                 TerrainOverrides = TERRAIN_DISTANCES, TerrainDetailDistance = 250f, TerrainDetailDensity = 1f,
-                TerrainTreeDistance = 2500f, TerrainPixelError = 5f,
+                TerrainTreeDistance = 2500f, TerrainPixelError = 5f, RenderScale = FULL_RESOLUTION,
             },
         };
 
@@ -190,6 +191,11 @@ namespace FastAndFractured.EditorTools
             SetInt(so, "decalSettings.atlasWidth", preset.DecalAtlas);
             SetInt(so, "decalSettings.atlasHeight", preset.DecalAtlas);
             SetInt(so, "lightLoopSettings.cookieAtlasSize", preset.CookieAtlas);
+            bool reduced = preset.RenderScale < FULL_RESOLUTION;
+            SetBool(so, "dynamicResolutionSettings.forceResolution", reduced);
+            Find(so, "dynamicResolutionSettings.forcedPercentage").floatValue = (reduced ? preset.RenderScale : FULL_RESOLUTION) * PERCENT;
+            if (reduced)
+                SetInt(so, "dynamicResolutionSettings.upsampleFilter", (int)DynamicResUpscaleFilter.EdgeAdaptiveScalingUpres);
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(asset);
             return asset;

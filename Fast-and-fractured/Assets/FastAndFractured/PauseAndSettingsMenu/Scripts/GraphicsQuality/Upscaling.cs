@@ -61,8 +61,9 @@ namespace FastAndFractured
             bool dlss = mode == DLSS && IsAvailable(DLSS);
             bool fsr2 = mode == FSR2 && IsAvailable(FSR2);
 
-            camera.allowDynamicResolution = dlss || fsr2;
-            data.allowDynamicResolution = dlss || fsr2;
+            // Always on: the low quality levels render at a forced lower resolution even without DLSS/FSR2.
+            camera.allowDynamicResolution = true;
+            data.allowDynamicResolution = true;
 
             data.allowDeepLearningSuperSampling = dlss;
             data.deepLearningSuperSamplingUseCustomAttributes = dlss;

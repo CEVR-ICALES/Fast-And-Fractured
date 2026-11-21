@@ -78,13 +78,12 @@ namespace FastAndFractured.Tests
             {
                 var camera = cameraObject.GetComponent<Camera>();
                 var data = cameraObject.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
-                data.allowDynamicResolution = true;
                 data.allowDeepLearningSuperSampling = true;
                 data.allowFidelityFX2SuperResolution = true;
 
                 Upscaling.Apply(camera, Upscaling.NONE, PERFORMANCE);
 
-                Assert.IsFalse(data.allowDynamicResolution);
+                Assert.IsTrue(data.allowDynamicResolution, "The low quality levels' forced resolution needs it.");
                 Assert.IsFalse(data.allowDeepLearningSuperSampling);
                 Assert.IsFalse(data.allowFidelityFX2SuperResolution);
                 Assert.AreEqual(Upscaling.DlssQuality(PERFORMANCE), data.deepLearningSuperSamplingQuality);
