@@ -20,15 +20,18 @@ namespace FastAndFractured
         private float startYPosition;
         private bool _fastMode = false;
         
+        // Moved in the canvas's own units: the menu canvas is camera space, where one world unit is hundreds of pixels.
+        private RectTransform ListRect => (RectTransform)creditsListContainer.transform;
+
         void Start()
         {
             InsertCreditsData();
-            startYPosition = creditsListContainer.transform.position.y;
+            startYPosition = ListRect.anchoredPosition.y;
         }
         void OnDisable()
         {
             _fastMode = false;
-            creditsListContainer.transform.position = new Vector3(creditsListContainer.transform.position.x, startYPosition, creditsListContainer.transform.position.z);
+            ListRect.anchoredPosition = new Vector2(ListRect.anchoredPosition.x, startYPosition);
         }
         private void InsertCreditsData()
         {
@@ -74,9 +77,9 @@ namespace FastAndFractured
         private void MoveCredits()
         {
             float scrollAmount;
-            float containerHeight = creditsListContainer.GetComponent<RectTransform>().rect.height;
+            float containerHeight = ListRect.rect.height;
             float canvasHeight = creditsCanvasGroup.GetComponent<RectTransform>().rect.height;
-            float currentY = creditsListContainer.transform.localPosition.y;
+            float currentY = ListRect.localPosition.y;
             if (currentY >= containerHeight - canvasHeight)
             {
                 return;
@@ -92,7 +95,7 @@ namespace FastAndFractured
             {
                 scrollAmount = scrollSpeed * Time.deltaTime;
             }
-            creditsListContainer.transform.position += new Vector3(0, scrollAmount, 0);
+            ListRect.anchoredPosition += new Vector2(0f, scrollAmount);
         }
     }
 }
