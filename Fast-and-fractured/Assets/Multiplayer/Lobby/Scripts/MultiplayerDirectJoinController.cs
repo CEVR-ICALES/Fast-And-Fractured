@@ -24,9 +24,11 @@ namespace FastAndFractured.Multiplayer.Lobby
 
         private bool _busy;
         private CancellationTokenSource _cts;
+        private SearchingIndicator _connectingIndicator;
 
         private void Awake()
         {
+            if (_statusLabel != null) _connectingIndicator = SearchingIndicator.Create(_statusLabel);
             if (_portInput != null) _portInput.text = "7777";
             _joinButton?.onClick.AddListener(OnJoinClicked);
             _backButton?.onClick.AddListener(() => MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.MULTIPLAYER_HUB, _fadeDuration));
@@ -39,7 +41,8 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_busy) return;
             _busy = true;
             SetInteractable(false);
-            SetStatus(string.Empty);
+            SetStatus(LocalizationManager.Localize("MP.Connecting"));
+            SetConnecting(true);
 
             string ip = _ipInput != null && !string.IsNullOrWhiteSpace(_ipInput.text)
                 ? _ipInput.text.Trim()
@@ -55,7 +58,10 @@ namespace FastAndFractured.Multiplayer.Lobby
                     LobbyHandle.FromAddress(ip, port), _cts.Token);
 
                 if (ok)
+                {
+                    SetStatus(string.Empty);
                     MainMenuManager.Instance.TransitionBetweenScreens(ScreensType.LOBBY_ROOM, _fadeDuration);
+                }
                 else
                     SetStatus(LocalizationManager.Localize("MP.Join.Failed"));
             }
@@ -64,8 +70,16 @@ namespace FastAndFractured.Multiplayer.Lobby
             finally
             {
                 _busy = false;
+                SetConnecting(false);
                 SetInteractable(true);
             }
+        }
+
+        private void SetConnecting(bool connecting)
+        {
+            if (_connectingIndicator == null) return;
+            if (connecting) _connectingIndicator.FollowText(_statusLabel);
+            _connectingIndicator.gameObject.SetActive(connecting);
         }
 
         private void SetStatus(string msg)

@@ -165,7 +165,9 @@ namespace FastAndFractured.Multiplayer.Lobby
             if (_joining) return;
             _joining = true;
             SetRefreshInteractable(false);
+            SetEntriesInteractable(false);
             SetStatus(LocalizationManager.Localize("MP.Connecting"));
+            SetSearching(true);
 
             _cts?.Cancel();
             _cts = new CancellationTokenSource(TimeSpan.FromSeconds(JOIN_TIMEOUT_SECONDS));
@@ -182,8 +184,18 @@ namespace FastAndFractured.Multiplayer.Lobby
             finally
             {
                 _joining = false;
+                SetSearching(false);
+                SetEntriesInteractable(true);
                 SetRefreshInteractable(true);
             }
+        }
+
+        private void SetEntriesInteractable(bool value)
+        {
+            if (_entryContainer == null) return;
+            if (!_entryContainer.TryGetComponent(out CanvasGroup group))
+                group = _entryContainer.gameObject.AddComponent<CanvasGroup>();
+            group.interactable = value;
         }
 
         private void SetStatus(string msg)
