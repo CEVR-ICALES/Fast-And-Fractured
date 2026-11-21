@@ -64,6 +64,7 @@ namespace FastAndFractured
         private float minCharacterKillTime = 3;
         public int KillPriority { get => killCharacterPriority;}
         public float KillTime { get => _currentCharacterKillTime;}
+        public bool OverflowsBeforeKilling => true;
         private float _currentCharacterKillTime;
         private float _reductionKillTime;
         [SerializeField]

@@ -209,6 +209,7 @@ namespace FastAndFractured
 
 
         #region Health
+        private const float PERCENT = 100f;
         private float _overflowDamage;
         public float OverflowDamage { get => _overflowDamage; set => _overflowDamage = Mathf.Max(0f, value); }
         public float DamagePercent => MaxEndurance > 0f ? (MaxEndurance - currentEndurance + _overflowDamage) / MaxEndurance * 100f : 0f;
@@ -322,14 +323,29 @@ namespace FastAndFractured
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                Dead();
                 _deadTimer = null;
+                if (killer.OverflowsBeforeKilling) SetOverflowTimer(killer);
+                else Dead();
             }, onTimerDecreaseUpdate : (float time) =>
             {
                 if (damageXSecond > 0)
                 {
                     TakeEndurance(damageXSecond * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
+            });
+        }
+
+        private void SetOverflowTimer(IKillCharacters killer)
+        {
+            _deadTimer = TimerSystem.Instance.CreateTimer(StormOverflow.SecondsToExplode(DamagePercent / PERCENT), onTimerDecreaseComplete: () =>
+            {
+                _deadTimer = null;
+                Dead();
+            }, onTimerDecreaseUpdate: (float timeLeft) =>
+            {
+                float damage = DamagePercent / PERCENT;
+                float grown = StormOverflow.Grow(damage, Time.deltaTime);
+                if (grown > damage) TakeEndurance((grown - damage) * MaxEndurance, false, killer.GetKillerGameObject());
             });
         }
 

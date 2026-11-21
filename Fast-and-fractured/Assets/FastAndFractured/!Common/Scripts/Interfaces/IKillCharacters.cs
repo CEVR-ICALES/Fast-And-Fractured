@@ -8,6 +8,7 @@ namespace FastAndFractured
     {
         public int KillPriority { get; }
         public float KillTime { get; }
+        public bool OverflowsBeforeKilling => false;
         public void StartKillNotify(StatsController statsController)
         {
 
