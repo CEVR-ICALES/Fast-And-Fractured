@@ -59,6 +59,79 @@ namespace FastAndFractured.Multiplayer
             if (_mapVoteContainer != null) _mapVoteContainer.SetActive(mapVoteThumbnail != null);
 
             if (_selectButtonRoot != null) _selectButtonRoot.SetActive(isLocal);
+            SetLocalMarker(isLocal);
+        }
+
+        private static readonly Color YouColor = new Color(1f, 0.78f, 0.22f, 1f);
+        private static readonly Color YouTextColor = new Color(0.12f, 0.08f, 0.04f, 1f);
+        private static readonly Vector2 YouTagSize = new Vector2(58f, 22f);
+        private static readonly Vector2 YouTagOffset = new Vector2(12f, -6f);
+        private const float YOU_ARROW_SIZE = 12f;
+        private const float YOU_FONT_SIZE = 15f;
+        private const float YOU_OUTLINE_WIDTH = 3f;
+        private GameObject _youTag;
+        private Outline _youOutline;
+
+        private void SetLocalMarker(bool isLocal)
+        {
+            if (!isLocal)
+            {
+                if (_youTag != null) _youTag.SetActive(false);
+                if (_youOutline != null) _youOutline.enabled = false;
+                return;
+            }
+            if (_youTag == null) _youTag = CreateYouTag();
+            _youTag.SetActive(true);
+            _youTag.transform.SetAsLastSibling();
+            if (_backgroundTint != null)
+            {
+                if (_youOutline == null) _youOutline = _backgroundTint.gameObject.AddComponent<Outline>();
+                _youOutline.effectColor = YouColor;
+                _youOutline.effectDistance = new Vector2(YOU_OUTLINE_WIDTH, -YOU_OUTLINE_WIDTH);
+                _youOutline.enabled = true;
+            }
+        }
+
+        private GameObject CreateYouTag()
+        {
+            var go = new GameObject("YouTag", typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(transform, false);
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = YouTagOffset;
+            rect.sizeDelta = YouTagSize;
+
+            var arrow = new GameObject("Arrow", typeof(RectTransform));
+            var arrowRect = (RectTransform)arrow.transform;
+            arrowRect.SetParent(rect, false);
+            arrowRect.anchorMin = arrowRect.anchorMax = new Vector2(0.5f, 0f);
+            arrowRect.sizeDelta = new Vector2(YOU_ARROW_SIZE, YOU_ARROW_SIZE);
+            arrowRect.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            var arrowImage = arrow.AddComponent<Image>();
+            arrowImage.color = YouColor;
+            arrowImage.raycastTarget = false;
+
+            var pill = go.AddComponent<Image>();
+            pill.color = YouColor;
+            pill.raycastTarget = false;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.SetParent(rect, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (_nameLabel != null) label.font = _nameLabel.font;
+            label.fontSize = YOU_FONT_SIZE;
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = YouTextColor;
+            label.raycastTarget = false;
+            label.text = LocalizationManager.Localize("MP.Room.You");
+            return go;
         }
 
         private static readonly Color InMatchColor = new Color(0.45f, 0.30f, 0.08f, 0.85f);
