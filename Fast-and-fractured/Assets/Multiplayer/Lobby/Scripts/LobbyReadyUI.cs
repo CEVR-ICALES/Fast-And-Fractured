@@ -575,6 +575,9 @@ namespace FastAndFractured.Multiplayer
                     slot.SetKick(CanKick && !isLocal && !_lobbyManager.IsInMatch(clientId)
                         ? () => _lobbyManager.KickPlayer(kickedId)
                         : (System.Action)null);
+                    slot.SetMakeHost(!isLocal && HostMigration.RoomMigration.CanHandOverTo(clientId)
+                        ? () => HostMigration.RoomMigration.HandOverTo(kickedId)
+                        : (System.Action)null);
                     var btn = slot.GetSelectButton();
                     if (btn != null && isLocal)
                     {

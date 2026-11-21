@@ -24,6 +24,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         public ushort Port;
         /// <summary>A match is running and match migration is on: the match's own migration takes over.</summary>
         public bool MatchMigrationTakesOver;
+        public bool Handover;
         public string[] SuccessorTokens;
         public string[] SuccessorAddresses;
     }
@@ -46,12 +47,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private const float MENU_LOAD_TIMEOUT = 15f;
         private const float ROOM_TRANSITION_SECONDS = 0.25f;
         private const float HUB_TRANSITION_SECONDS = 0.5f;
+        private const float HANDOVER_FLUSH_SECONDS = 0.3f;
 
         public static bool Migrating { get; private set; }
 
         private static RoomSnapshotBroadcast? _latest;
         private static float _latestTime;
         private static RoomMigration _instance;
+        private static int _chosenSuccessor = -1;
 
         private NetworkManager _hooked;
         private float _nextSend;
@@ -62,6 +65,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             Migrating = false;
             _latest = null;
             _instance = null;
+            _chosenSuccessor = -1;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -96,7 +100,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             foreach (var conn in nm.ServerManager.Clients.Values)
                 if (conn != null && conn.IsActive && !conn.IsLocalClient)
                     remotes.Add(conn);
-            var order = RoomSuccession.Order(remotes.ConvertAll(c => c.ClientId), lobby.MatchParticipants, HostMigrationNetwork.UnwillingToHost);
+            var order = RoomSuccession.Order(remotes.ConvertAll(c => c.ClientId), lobby.MatchParticipants, HostMigrationNetwork.UnwillingToHost, _chosenSuccessor);
 
             var tokens = new List<string>(order.Count);
             var addresses = new List<string>(order.Count);
@@ -111,11 +115,12 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
             return new RoomSnapshotBroadcast
             {
-                Enabled = HostMigrationSettings.RoomMigrationEnabled,
+                Enabled = HostMigrationSettings.RoomMigrationEnabled || _chosenSuccessor >= 0,
                 RoomName = lobby.RoomName.Value,
                 AiSlots = lobby.AiSlotCount.Value,
                 Port = MultiplayerTransport.Port != 0 ? MultiplayerTransport.Port : DEFAULT_PORT,
                 MatchMigrationTakesOver = lobby.GameStarted.Value && HostMigrationSettings.Enabled,
+                Handover = _chosenSuccessor >= 0,
                 SuccessorTokens = tokens.ToArray(),
                 SuccessorAddresses = addresses.ToArray(),
             };
@@ -125,6 +130,49 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             _latest = snapshot;
             _latestTime = Time.unscaledTime;
+        }
+
+        private const string DEFAULT_ROOM_NAME = "Room";
+
+        public static string LastRoomName =>
+            _latest.HasValue && !string.IsNullOrEmpty(_latest.Value.RoomName) ? _latest.Value.RoomName : DEFAULT_ROOM_NAME;
+
+        public static bool CanHandOverTo(int clientId)
+        {
+            var nm = InstanceFinder.NetworkManager;
+            var lobby = LobbyLocator.GetLobbyManager();
+            if (Migrating || _instance == null || nm == null || !nm.IsServerStarted || lobby == null || lobby.GameStarted.Value)
+                return false;
+            if (HostMigrationNetwork.UnwillingToHost.Contains(clientId)) return false;
+            return nm.ServerManager.Clients.TryGetValue(clientId, out var conn) && !conn.IsLocalClient &&
+                   !string.IsNullOrEmpty(HostMigrationNetwork.TokenOf(conn));
+        }
+
+        public static bool HandOverTo(int clientId)
+        {
+            if (!CanHandOverTo(clientId)) return false;
+            var nm = InstanceFinder.NetworkManager;
+            _chosenSuccessor = clientId;
+            var snapshot = BuildSnapshot(nm, LobbyLocator.GetLobbyManager());
+            if (snapshot.SuccessorTokens.Length == 0)
+            {
+                _chosenSuccessor = -1;
+                return false;
+            }
+            nm.ServerManager.Broadcast(snapshot, requireAuthenticated: true);
+            Migrating = true;
+            MpCanary.Mark($"RoomMigration: handing the room over to client {clientId}");
+            _instance.StartCoroutine(_instance.HandOver(snapshot));
+            return true;
+        }
+
+        private IEnumerator HandOver(RoomSnapshotBroadcast snapshot)
+        {
+            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.HandingOver"));
+            yield return new WaitForSecondsRealtime(HANDOVER_FLUSH_SECONDS);
+            _chosenSuccessor = -1;
+            HostDisconnectWatchdog.NotifyIntentionalLeave();
+            yield return Rejoin(snapshot);
         }
 
         /// <summary>HostDisconnectWatchdog, unexpected host loss: true when this peer rebuilds or rejoins the room.</summary>
@@ -148,7 +196,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         private IEnumerator BecomeHost(RoomSnapshotBroadcast snapshot)
         {
             MpCanary.Mark($"RoomMigration: the host left, this peer opens '{snapshot.RoomName}' on port {snapshot.Port}");
-            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.NewHost"));
+            ConnectionLostNotifier.Show(LocalizationManager.Localize(snapshot.Handover ? "MP.RoomMigration.HandedToYou" : "MP.RoomMigration.NewHost"));
             yield return BackToMenu();
             yield return WaitFor(LobbyServiceLocator.Transport.LeaveLobbyAsync());
 
@@ -187,7 +235,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         {
             string address = snapshot.SuccessorAddresses[0];
             MpCanary.Mark($"RoomMigration: the host left, rejoining the room at {address}:{snapshot.Port}");
-            ConnectionLostNotifier.Show(LocalizationManager.Localize("MP.RoomMigration.Joining"));
+            ConnectionLostNotifier.Show(LocalizationManager.Localize(snapshot.Handover ? "MP.RoomMigration.HandingOver" : "MP.RoomMigration.Joining"));
             yield return BackToMenu();
             yield return WaitFor(LobbyServiceLocator.Transport.LeaveLobbyAsync());
             yield return new WaitForSecondsRealtime(SUCCESSOR_HEAD_START);
@@ -268,13 +316,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
         /// connection order.
         /// </summary>
         public static List<int> Order(IEnumerable<int> remoteClientIds, IEnumerable<int> matchParticipants,
-                                      IEnumerable<int> unwillingToHost = null)
+                                      IEnumerable<int> unwillingToHost = null, int chosen = -1)
         {
             var playing = new HashSet<int>(matchParticipants ?? Array.Empty<int>());
             var unwilling = new HashSet<int>(unwillingToHost ?? Array.Empty<int>());
             var order = new List<int>(remoteClientIds);
             order.Sort((a, b) =>
             {
+                if (a == chosen || b == chosen) return a == b ? 0 : (a == chosen ? -1 : 1);
                 bool ua = unwilling.Contains(a), ub = unwilling.Contains(b);
                 if (ua != ub) return ua ? 1 : -1;
                 bool pa = playing.Contains(a), pb = playing.Contains(b);
