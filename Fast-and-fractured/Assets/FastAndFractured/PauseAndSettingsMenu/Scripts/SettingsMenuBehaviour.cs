@@ -148,12 +148,18 @@ namespace FastAndFractured
 
         private void SetDefaultSelectedButton()
         {
+            // The prefab has every panel closed: a menu that was never hidden before opened with only its tabs.
+            if (!IsAnyPanelOpen()) OpenAudioSettings();
 
             if (audioSettingsUI.activeSelf) { _menuScreen.defaultInteractable = audioSettingsButton; audioSettingsButton.onClick.Invoke(); return; }
             if (videoSettingsUI.activeSelf) { _menuScreen.defaultInteractable = videoSettingsButton; videoSettingsButton.onClick.Invoke(); return; }
             if (accessibilitySettingsUI.activeSelf) { _menuScreen.defaultInteractable = accessibilitySettingsButton; accessibilitySettingsButton.onClick.Invoke(); return; }
 
         }
+
+        private bool IsAnyPanelOpen() =>
+            audioSettingsUI.activeSelf || videoSettingsUI.activeSelf || accessibilitySettingsUI.activeSelf ||
+            gamepadRemappingWindow.activeSelf || keyboardRemappingWindow.activeSelf;
 
         private void SetStartValues()
         {
