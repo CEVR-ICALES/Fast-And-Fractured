@@ -62,6 +62,11 @@ namespace FastAndFractured
         {
             if (_running != null)
                 return;
+            if (GraphicsQuality.IsSteamDeck)
+            {
+                GraphicsQuality.ApplySteamDeckProfile();
+                return;
+            }
             var go = new GameObject("[GraphicsQualityDetector]");
             _running = go.AddComponent<GraphicsQualityDetector>();
         }
