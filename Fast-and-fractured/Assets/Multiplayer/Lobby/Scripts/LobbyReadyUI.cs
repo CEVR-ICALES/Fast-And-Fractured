@@ -531,6 +531,11 @@ namespace FastAndFractured.Multiplayer
             if (_lobbyManager == null || _playerListContainer == null || _playerEntryPrefab == null) return;
 
             int  localClientId = InstanceFinder.ClientManager?.Connection?.ClientId ?? -1;
+            if (_lobbyManager.PlayerReadyStates.TryGetValue(localClientId, out bool serverReady) && serverReady != _isReady)
+            {
+                _isReady = serverReady;
+                UpdateReadyButtonVisual();
+            }
             var  catalog       = MapCatalogLoader.Get();
             var  currentPlayers = new HashSet<int>();
 
