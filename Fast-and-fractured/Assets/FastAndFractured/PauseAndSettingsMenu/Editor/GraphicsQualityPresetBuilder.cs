@@ -113,6 +113,13 @@ namespace FastAndFractured.EditorTools
             if (!AssetDatabase.IsValidFolder(PRESET_FOLDER))
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(PRESET_FOLDER).Replace('\\', '/'), Path.GetFileName(PRESET_FOLDER));
 
+            // Off, the Options menu still offered DLSS and the frame was drawn at 33% with a plain upscale.
+            var baseSettings = new SerializedObject(baseAsset);
+            SetBool(baseSettings, "dynamicResolutionSettings.enableDLSS", true);
+            SetBool(baseSettings, "dynamicResolutionSettings.enabled", true);
+            baseSettings.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(baseAsset);
+
             var quality = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath(QUALITY_SETTINGS_PATH)[0]);
             var levels = quality.FindProperty("m_QualitySettings");
             for (int level = 0; level < levels.arraySize; level++)
