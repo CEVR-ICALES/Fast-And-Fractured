@@ -1,30 +1,27 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Text;
+using System.Threading;
 using UnityEngine;
 
 namespace FastAndFractured.Multiplayer
 {
     /// <summary>
-    /// Freeze forensics: flushed one-liners to &lt;project&gt;/mp_canary.log, a ~1 Hz heartbeat plus stage markers, so
+    /// Freeze forensics: one-liners to &lt;project&gt;/mp_canary.log, a ~1 Hz heartbeat plus stage markers, so
     /// the last line after a hang shows the stage. Editor and development builds only.
     /// </summary>
     public static class MpCanary
     {
-        private static readonly bool Enabled = Application.isEditor || Debug.isDebugBuild;
+        public static readonly bool Enabled = Application.isEditor || Debug.isDebugBuild;
         private static string _path;
         private static bool _failed;
 
-        private static string PathToLog
-        {
-            get
-            {
-                if (_path == null)
-                {
-                    _path = System.IO.Path.Combine(Application.dataPath, "..", "mp_canary.log");
-                }
-                return _path;
-            }
-        }
+        // Lines are written by a background thread: a write per mark cost several file opens per frame.
+        private static readonly ConcurrentQueue<string> Pending = new ConcurrentQueue<string>();
+        private static readonly AutoResetEvent Signal = new AutoResetEvent(false);
+        private static Thread _writer;
+        private const int WRITER_IDLE_MILLISECONDS = 250;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -38,6 +35,8 @@ namespace FastAndFractured.Multiplayer
         private static void Bootstrap()
         {
             if (!Enabled) return;
+            Application.quitting -= Flush;
+            Application.quitting += Flush;
             Mark($"=== play session start (unity {Application.unityVersion}) ===");
             var go = new GameObject("[MpCanary]");
             UnityEngine.Object.DontDestroyOnLoad(go);
@@ -56,13 +55,58 @@ namespace FastAndFractured.Multiplayer
             if (_failed || !Enabled) return;
             try
             {
-                File.AppendAllText(PathToLog,
-                    $"[{DateTime.Now:HH:mm:ss.fff}] {ProcessTag}f={Time.frameCount} {message}\n");
-                _consecutiveFailures = 0;
+                if (_path == null) _path = Path.Combine(Application.dataPath, "..", "mp_canary.log");
+                Pending.Enqueue(FormatLine(DateTime.Now, ProcessTag, Time.frameCount, message));
+                EnsureWriter();
+                Signal.Set();
             }
             catch
             {
                 // Never let forensics take the game down (or spam retries).
+                if (++_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) _failed = true;
+            }
+        }
+
+        internal static string FormatLine(DateTime now, string processTag, int frame, string message) =>
+            $"[{now:HH:mm:ss.fff}] {processTag}f={frame} {message}\n";
+
+        internal static string Drain(ConcurrentQueue<string> queue)
+        {
+            if (queue.IsEmpty) return string.Empty;
+            var block = new StringBuilder();
+            while (queue.TryDequeue(out string line)) block.Append(line);
+            return block.ToString();
+        }
+
+        private static void EnsureWriter()
+        {
+            if (_writer != null && _writer.IsAlive) return;
+            _writer = new Thread(WriteLoop) { IsBackground = true, Name = "MpCanary" };
+            _writer.Start();
+        }
+
+        private static void WriteLoop()
+        {
+            while (true)
+            {
+                Signal.WaitOne(WRITER_IDLE_MILLISECONDS);
+                Flush();
+            }
+        }
+
+        private static void Flush()
+        {
+            string path = _path;
+            if (path == null) return;
+            string block = Drain(Pending);
+            if (block.Length == 0) return;
+            try
+            {
+                File.AppendAllText(path, block);
+                _consecutiveFailures = 0;
+            }
+            catch
+            {
                 if (++_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) _failed = true;
             }
         }
