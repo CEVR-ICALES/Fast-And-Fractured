@@ -26,6 +26,53 @@ namespace FastAndFractured.Multiplayer.Lobby
             IsRoutingForLobby = true;
 
             LoadingManager.SceneLoadOverride = HandleSceneLoadAttempt;
+            EnsureGuard();
+        }
+
+        public enum GuardAction { None, ReturnToRoom, EndFlow }
+
+        // Back on the character screen led to the mode menu with the player still connected: a ghost seat in a room it could no longer find.
+        public static GuardAction GuardFor(bool routing, bool connected, bool hasScreen, ScreensType screen)
+        {
+            if (!routing) return GuardAction.None;
+            if (!connected) return GuardAction.EndFlow;
+            if (!hasScreen) return GuardAction.None;
+            bool leftTheRoom = screen == ScreensType.GAMEMODE_SELECTION || screen == ScreensType.MAIN_MENU ||
+                               screen == ScreensType.MULTIPLAYER_HUB || screen == ScreensType.MULTIPLAYER_BROWSER ||
+                               screen == ScreensType.MULTIPLAYER_DIRECT_JOIN || screen == ScreensType.MULTIPLAYER_HOST_SETUP;
+            return leftTheRoom ? GuardAction.ReturnToRoom : GuardAction.None;
+        }
+
+        private static Guard _guard;
+
+        private static void EnsureGuard()
+        {
+            if (_guard != null) return;
+            var go = new GameObject("[MultiplayerMenuRouter]");
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideInHierarchy;
+            _guard = go.AddComponent<Guard>();
+        }
+
+        private sealed class Guard : MonoBehaviour
+        {
+            private void Update()
+            {
+                if (!IsRoutingForLobby) return;
+                MainMenuManager menu = MainMenuManager.ExistingInstance;
+                MenuScreen screen = menu != null ? menu.CurrentScreen : null;
+                bool connected = FishNet.InstanceFinder.IsClientStarted || FishNet.InstanceFinder.IsServerStarted;
+                switch (GuardFor(true, connected, screen != null, screen != null ? screen.screenType : default))
+                {
+                    case GuardAction.ReturnToRoom:
+                        EndLobbyFlow();
+                        ReturnToLobbyRoom();
+                        break;
+                    case GuardAction.EndFlow:
+                        EndLobbyFlow();
+                        break;
+                }
+            }
         }
 
         public static void EndLobbyFlow()
