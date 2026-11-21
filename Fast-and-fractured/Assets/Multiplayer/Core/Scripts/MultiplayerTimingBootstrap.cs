@@ -20,6 +20,10 @@ namespace FastAndFractured.Multiplayer
             .GetField("_allowPredictedSpawning", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo ReservedObjectIdsField = typeof(FishNet.Managing.Server.ServerManager)
             .GetField("_reservedObjectIds", BindingFlags.NonPublic | BindingFlags.Instance);
+        internal static readonly FieldInfo ReduceReconcilesField = typeof(FishNet.Managing.Predicting.PredictionManager)
+            .GetField("_reduceReconcilesWithFramerate", BindingFlags.NonPublic | BindingFlags.Instance);
+        internal static readonly FieldInfo DropExcessiveReplicatesField = typeof(FishNet.Managing.Predicting.PredictionManager)
+            .GetField("_dropExcessiveReplicates", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static NetworkManager _configured;
 
@@ -63,8 +67,24 @@ namespace FastAndFractured.Multiplayer
             // These Pro settings have no public API: set them on the menu NetworkManager at runtime.
             AllowPredictedSpawningField?.SetValue(nm.ServerManager, true);
             ReservedObjectIdsField?.SetValue(nm.ServerManager, PREDICTED_SPAWN_RESERVED_IDS);
+            KeepReconcilingAtLowFrameRates(nm);
+            CatchUpOnLateInputs(nm);
             MpCanary.Mark($"TimingBootstrap: TickRate={TICK_RATE} on '{nm.name}' (PhysicsMode={nm.TimeManager.PhysicsMode})");
             Debug.Log($"[MultiplayerTimingBootstrap] TickRate={TICK_RATE}, predicted spawning enabled, reservedIds={PREDICTED_SPAWN_RESERVED_IDS} on '{nm.name}'.");
+        }
+
+        // FishNet cuts a slow client to four reconciles a second to spare physics replays this project does not run.
+        internal static void KeepReconcilingAtLowFrameRates(NetworkManager nm)
+        {
+            var prediction = nm.GetComponent<FishNet.Managing.Predicting.PredictionManager>();
+            if (prediction != null) ReduceReconcilesField?.SetValue(prediction, false);
+        }
+
+        // By default the server never catches up on late inputs: a Wi-Fi or sub-50-FPS client ended 240 ms behind.
+        internal static void CatchUpOnLateInputs(NetworkManager nm)
+        {
+            var prediction = nm.GetComponent<FishNet.Managing.Predicting.PredictionManager>();
+            if (prediction != null) DropExcessiveReplicatesField?.SetValue(prediction, false);
         }
     }
 }
