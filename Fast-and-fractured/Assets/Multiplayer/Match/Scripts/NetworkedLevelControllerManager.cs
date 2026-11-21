@@ -393,10 +393,18 @@ namespace FastAndFractured.Multiplayer
             snapshot.PlatformStages = NetworkedBreakablePlatform.DescribeStages();
             snapshot.VolumeIndex = _serverVolumeIndex;
             snapshot.GolfBallPositions = NetworkedGolfBall.DescribePositions();
-            var pickups = FindFirstObjectByType<NetworkedInteractableHandler>();
-            snapshot.InteractablePool = pickups != null ? pickups.ServerDescribePool() : new int[0];
+            if (_snapshotPickups == null && !_snapshotPickupsSearched)
+            {
+                // Once: this runs twice a second and a scene-wide search costs over a millisecond in a map.
+                _snapshotPickupsSearched = true;
+                _snapshotPickups = FindFirstObjectByType<NetworkedInteractableHandler>();
+            }
+            snapshot.InteractablePool = _snapshotPickups != null ? _snapshotPickups.ServerDescribePool() : new int[0];
             return true;
         }
+
+        private NetworkedInteractableHandler _snapshotPickups;
+        private bool _snapshotPickupsSearched;
         #endregion
 
         public override void OnStopNetwork()

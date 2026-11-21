@@ -46,8 +46,16 @@ namespace FastAndFractured.Multiplayer
             _reflectionCached = true;
         }
 
+        private static readonly List<NetworkedBreakablePlatform> Instances = new List<NetworkedBreakablePlatform>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetInstances() => Instances.Clear();
+
+        private void OnDestroy() => Instances.Remove(this);
+
         private void Awake()
         {
+            Instances.Add(this);
             _wrapped = GetComponent<BreakablePlatform>();
             EnsureReflectionCached();
 
@@ -145,9 +153,12 @@ namespace FastAndFractured.Multiplayer
 
         private static List<NetworkedBreakablePlatform> AllInHierarchyOrder()
         {
-            var list = new List<NetworkedBreakablePlatform>(FindObjectsByType<NetworkedBreakablePlatform>(FindObjectsSortMode.None));
+            // Kept by the platforms themselves: the host's snapshot searched the whole map twice a second.
+            var list = new List<NetworkedBreakablePlatform>(Instances.Count);
+            foreach (var platform in Instances)
+                if (platform != null && platform.gameObject.activeInHierarchy) list.Add(platform);
             var keys = new Dictionary<NetworkedBreakablePlatform, string>();
-            foreach (var p in list) keys[p] = NetworkedWorldBreakables.PathKey(p.transform);
+            foreach (var p in list) keys[p] = NetworkedWorldBreakables.CachedPathKey(p.transform);
             list.Sort((a, b) => string.CompareOrdinal(keys[a], keys[b]));
             return list;
         }

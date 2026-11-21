@@ -172,6 +172,29 @@ namespace FastAndFractured.Multiplayer
             trees = treeList.ConvertAll(kv => kv.Value).ToArray();
         }
 
+        private static readonly Dictionary<Transform, string> PathKeys = new Dictionary<Transform, string>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetPathKeys()
+        {
+            PathKeys.Clear();
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
+        }
+
+        private static void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene) => PathKeys.Clear();
+
+        // Map props keep their place in the hierarchy: the host's snapshot asked for every path twice a second.
+        public static string CachedPathKey(Transform t)
+        {
+            if (!PathKeys.TryGetValue(t, out string key))
+            {
+                key = PathKey(t);
+                PathKeys[t] = key;
+            }
+            return key;
+        }
+
         /// <summary>"Root[0]/Child[2]": names plus the ordinal among same-named siblings.</summary>
         public static string PathKey(Transform t)
         {
