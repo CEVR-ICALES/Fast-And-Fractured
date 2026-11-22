@@ -92,6 +92,7 @@ namespace FastAndFractured.Multiplayer
 
             if (InstanceFinder.IsServerStarted)
             {
+                if (HostMigration.HostMigrationNetwork.TryLeaveMatchAsHost()) return;
                 // The host's map only goes once its curtain has shut, by then everyone's too.
                 MpCanary.Mark("Host left the match - ending it for everyone");
                 lobby.ServerAbortMatch();

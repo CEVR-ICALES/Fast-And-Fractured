@@ -40,6 +40,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
             }
         }
 
+        public static bool ContinueWhenHostLeaves => Enabled && _config != null && _config.ContinueWhenHostLeaves;
+
         /// <summary>Editor / tests: forget the cached asset so a toggle is seen immediately.</summary>
         public static void Reload() => _loaded = false;
     }

@@ -126,6 +126,34 @@ namespace FastAndFractured.Multiplayer.HostMigration
             return true;
         }
 
+        private const float LEAVE_FLUSH_SECONDS = 0.3f;
+
+        public static bool TryLeaveMatchAsHost()
+        {
+            if (!HostMigrationSettings.ContinueWhenHostLeaves || Migrating || _instance == null || !InstanceFinder.IsServerStarted) return false;
+            var manager = FindFirstObjectByType<NetworkedLevelControllerManager>();
+            if (manager == null || !manager.TryBuildMigrationSnapshot(out MatchSnapshotBroadcast snapshot)) return false;
+            if (!CanCarryOnWithout(snapshot)) return false;
+
+            InstanceFinder.ServerManager.Broadcast(snapshot);
+            MpCanary.Mark("HostMigration: the host leaves the match, the others carry on");
+            _instance.StartCoroutine(_instance.LeaveMatchAsHost());
+            return true;
+        }
+
+        public static bool CanCarryOnWithout(MatchSnapshotBroadcast snapshot) =>
+            snapshot.MigrationEnabled && snapshot.SuccessorTokens != null && snapshot.SuccessorTokens.Length > 0 &&
+            snapshot.SuccessorAddresses != null && snapshot.SuccessorAddresses.Length > 0;
+
+        private IEnumerator LeaveMatchAsHost()
+        {
+            yield return new WaitForSecondsRealtime(LEAVE_FLUSH_SECONDS);
+            HostDisconnectWatchdog.NotifyIntentionalLeave();
+            var leave = Abstractions.LobbyServiceLocator.Transport.LeaveLobbyAsync();
+            while (leave != null && !leave.IsCompleted) yield return null;
+            MultiplayerSceneTeardown.LoadMainMenu(Enums.ScreensType.MULTIPLAYER_HUB);
+        }
+
         private const string TRANSIT_SCENE = "HostMigrationTransit";
 
         /// <summary>Freezes the last frame and drops the old map into an empty scene (faster than via the main menu).</summary>
