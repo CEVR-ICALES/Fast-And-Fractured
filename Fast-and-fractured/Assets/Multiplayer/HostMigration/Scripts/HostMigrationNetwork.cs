@@ -27,7 +27,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public static MatchSnapshotBroadcast? LatestSnapshot { get; private set; }
         private static float _latestSnapshotTime;
-        private const float MAX_SNAPSHOT_AGE = 5f;
+        // A crashed host is only noticed after the client timeout (5 s direct, about 10 s by Steam relay): a limit under that discarded every abrupt loss.
+        public const float MAX_SNAPSHOT_AGE = 20f;
         private const float SERVER_START_TIMEOUT = 5f;
         private const float MAX_RECONNECT_WAIT = 5f;
         private const float CLIENT_START_TIMEOUT = 3f;
@@ -105,12 +106,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public static void ClearSnapshot() => LatestSnapshot = null;
 
+        public static bool IsSnapshotUsable(float ageSeconds) => ageSeconds <= MAX_SNAPSHOT_AGE;
+
         /// <summary>HostDisconnectWatchdog, unexpected host loss in a match: true when this peer migrates.</summary>
         public static bool TryHandleHostLoss()
         {
             if (!HostMigrationSettings.Enabled || Migrating || _instance == null) return false;
             if (!LatestSnapshot.HasValue || !LatestSnapshot.Value.MigrationEnabled) return false;
-            if (Time.unscaledTime - _latestSnapshotTime > MAX_SNAPSHOT_AGE) return false;
+            if (!IsSnapshotUsable(Time.unscaledTime - _latestSnapshotTime)) return false;
             // A client that runs the server is the host that left.
             if (InstanceFinder.IsServerStarted) return false;
 

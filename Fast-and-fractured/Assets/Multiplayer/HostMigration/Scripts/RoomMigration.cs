@@ -37,7 +37,6 @@ namespace FastAndFractured.Multiplayer.HostMigration
     public sealed class RoomMigration : MonoBehaviour
     {
         private const float SEND_INTERVAL = 1f;
-        private const float MAX_SNAPSHOT_AGE = 6f;
         private const float RECONNECT_TIMEOUT = 15f;
         private const float SUCCESSOR_HEAD_START = 0.75f;
         private const ushort DEFAULT_PORT = 7777;
@@ -186,7 +185,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
         public static bool TryHandleHostLoss()
         {
             if (Migrating || _instance == null || InstanceFinder.IsServerStarted) return false;
-            if (!_latest.HasValue || Time.unscaledTime - _latestTime > MAX_SNAPSHOT_AGE) return false;
+            if (!_latest.HasValue || !HostMigrationNetwork.IsSnapshotUsable(Time.unscaledTime - _latestTime)) return false;
             var snapshot = _latest.Value;
             if (!snapshot.Enabled || snapshot.MatchMigrationTakesOver) return false;
 
