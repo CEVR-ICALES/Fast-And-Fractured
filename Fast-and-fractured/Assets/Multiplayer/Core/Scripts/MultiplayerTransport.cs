@@ -70,6 +70,18 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
+        public static string SteamPersonaName
+        {
+            get
+            {
+#if STEAMWORKS_NET
+                return SteamManager.Initialized ? SteamFriends.GetPersonaName() : null;
+#else
+                return null;
+#endif
+            }
+        }
+
         public static Tugboat Tugboat => Find<Tugboat>();
         public static global::FishySteamworks.FishySteamworks Steam => Find<global::FishySteamworks.FishySteamworks>();
 
