@@ -290,7 +290,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         private static void ConfigureAddress(FishNet.Managing.NetworkManager nm, string address, ushort port)
             => MultiplayerTransport.SetClientTarget(address, port);
 
-        private static string GetLocalIP()
+        public static string GetLocalIP()
         {
             try
             {
