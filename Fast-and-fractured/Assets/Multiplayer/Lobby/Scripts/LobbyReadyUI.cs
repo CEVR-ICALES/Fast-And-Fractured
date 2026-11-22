@@ -429,8 +429,25 @@ namespace FastAndFractured.Multiplayer
 
         private void UpdateRoomName(string name)
         {
-            if (_roomNameLabel != null)
-                _roomNameLabel.text = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
+            if (_roomNameLabel == null) return;
+            // Started after the name arrived, the label's LocalizedText wrote the default title over it.
+            if (_roomNameLabel.TryGetComponent(out LocalizedText localized))
+            {
+                localized.enabled = false;
+                Destroy(localized);
+            }
+            string title = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
+            _roomNameLabel.text = RoomTitle(title, HostLanAddress());
+        }
+
+        public static string RoomTitle(string name, string lanAddress) =>
+            string.IsNullOrEmpty(lanAddress) ? name : name + " (" + lanAddress + ")";
+
+        private static string HostLanAddress()
+        {
+            if (Abstractions.LobbyNetwork.Mode != Abstractions.LobbyNetworkMode.Lan || !FishNet.InstanceFinder.IsServerStarted)
+                return null;
+            return Abstractions.Tugboat.TugboatLobbyTransport.GetLocalIP() + ":" + MultiplayerTransport.Port;
         }
 
         #region UI_CALLBACKS
