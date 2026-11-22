@@ -109,7 +109,8 @@ namespace FastAndFractured.Multiplayer
             if (networkManager.TransportManager.Transport is Multipass multipass)
             {
                 StartServerOn(multipass, Tugboat);
-                if (SteamRelayAvailable) StartServerOn(multipass, Steam);
+                if (SteamRelayAvailable && Abstractions.LobbyNetwork.Mode == Abstractions.LobbyNetworkMode.Steam)
+                    StartServerOn(multipass, Steam);
                 return;
             }
             networkManager.ServerManager.StartConnection();
