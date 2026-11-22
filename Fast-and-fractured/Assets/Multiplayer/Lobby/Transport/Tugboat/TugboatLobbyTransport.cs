@@ -47,6 +47,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
             _gamePort  = options.Port;
             _maxPlayers = options.MaxPlayers;
 
+            // One transport serves every room of the session: the last room's "in match" must not leak into this one.
+            _metadata.Clear();
             if (options.Metadata != null)
                 foreach (var kv in options.Metadata)
                     _metadata[kv.Key] = kv.Value;
@@ -56,6 +58,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
             ConfigurePort(nm, _gamePort);
 
+            nm.ServerManager.OnRemoteConnectionState -= HandleRemoteState;
             nm.ServerManager.OnRemoteConnectionState += HandleRemoteState;
 
             var tcs = new TaskCompletionSource<bool>();
@@ -119,6 +122,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                 catch (OperationCanceledException) { result = false; }
             }
             nm.ClientManager.OnClientConnectionState -= OnClientState;
+            // A join given up on must not connect later, behind a menu that already moved on.
+            if (!result) nm.ClientManager.StopConnection();
             return result;
         }
 
