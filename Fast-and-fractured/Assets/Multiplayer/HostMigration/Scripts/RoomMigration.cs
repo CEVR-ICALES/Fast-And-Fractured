@@ -85,6 +85,7 @@ namespace FastAndFractured.Multiplayer.HostMigration
             {
                 _hooked = nm;
                 nm.ClientManager.RegisterBroadcast<RoomSnapshotBroadcast>(OnSnapshotReceived);
+                nm.ClientManager.OnClientConnectionState += ForgetOnNewConnection;
             }
 
             if (!nm.IsServerStarted || Time.unscaledTime < _nextSend) return;
@@ -124,6 +125,12 @@ namespace FastAndFractured.Multiplayer.HostMigration
                 SuccessorTokens = tokens.ToArray(),
                 SuccessorAddresses = addresses.ToArray(),
             };
+        }
+
+        // Joining another room right after leaving one: the old room's snapshot must not be migrated.
+        private static void ForgetOnNewConnection(ClientConnectionStateArgs args)
+        {
+            if (args.ConnectionState == LocalConnectionState.Started && !Migrating) _latest = null;
         }
 
         private static void OnSnapshotReceived(RoomSnapshotBroadcast snapshot, Channel channel)
