@@ -23,7 +23,8 @@ namespace FastAndFractured
         private ITimer _cooldownTimer;
         #endregion
         public bool IsAbilityActive => _isAbilityActive;
-        public bool IsOnCooldown => _isOnCooldown;
+        public bool IsOnCooldown => _isOnCooldown && !DebugNoCooldown;
+        public bool DebugNoCooldown { get; set; }
 
         public UnityEvent<float, float> onCooldownUpdate;
         public bool isAbilityActive;
@@ -45,7 +46,7 @@ namespace FastAndFractured
         [ContextMenu(nameof(ActivateAbility))]
         public virtual bool ActivateAbility()
         {
-            if (_isAbilityActive || _isOnCooldown)
+            if (_isAbilityActive || IsOnCooldown)
             {
                 return false;
             }
@@ -71,6 +72,7 @@ namespace FastAndFractured
         }  
         protected void StartCooldown()
         {
+            if (DebugNoCooldown) return;
             _currentCooldownTime = abilityData.CooldownDuration;  
             _cooldownTimer = TimerSystem.Instance.CreateTimer(abilityData.CooldownDuration,
                 onTimerDecreaseUpdate:OnUniqueAbilityCooldownDecrease, 

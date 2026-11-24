@@ -46,6 +46,7 @@ namespace FastAndFractured
         [SerializeField]
         private int numberOfPoints = 18;
         public bool MoveSandStorm { get => _moveSandStorm; set => _moveSandStorm = value; }
+        public float DebugSpeed { get; set; } = 1f;
         private bool _moveSandStorm = false;
 
         [SerializeField]
@@ -200,12 +201,11 @@ namespace FastAndFractured
         private void ExpandFogs()
         {
 
-            if (_currentGrowth < _maxGrowth)
+            float growth = Mathf.Clamp(_currentGrowth + _growthSpeed * Time.deltaTime * DebugSpeed, 0f, _maxGrowth);
+            if (!Mathf.Approximately(growth, _currentGrowth))
             {
-                _currentGrowth += _growthSpeed * Time.deltaTime;
-
-                if (_currentGrowth > _maxGrowth)
-                    _currentGrowth = _maxGrowth;
+                float moved = growth - _currentGrowth;
+                _currentGrowth = growth;
 
                 float newZSizeCollider = _initialColliderSize.z + _currentGrowth /** colliderLessGrowMultiplicator*/;
 
@@ -214,10 +214,10 @@ namespace FastAndFractured
                 primaryFog.position = new Vector3(_initialVolumeSizeMain.x, _initialVolumeSizeMain.y, _initialVolumeSizeMain.z) + newPrimaryFogPositionZ;
 
                 boxVolumeCollider.size = _stormCollider.size;
-                Vector3 offset = _direction * _growthSpeed*0.5f * Time.deltaTime;
+                Vector3 offset = _direction * (moved * 0.5f);
 
 
-                if ((fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
+                if (moved < 0f || (fogParent.transform.position - _spawnPoint).magnitude < _maxGrowth / 2)
                 {
                     fogParent.transform.position += offset;
                 }

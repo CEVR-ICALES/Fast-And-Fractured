@@ -206,6 +206,7 @@ namespace FastAndFractured
         {
             Dead();
         }
+        public bool DebugGodMode { get; set; }
 
 
         #region Health
@@ -216,6 +217,7 @@ namespace FastAndFractured
 
         public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
+            if (DebugGodMode) return;
             if (substract > 0)
             {
                 if (!IsInvulnerable)
@@ -367,6 +369,7 @@ namespace FastAndFractured
 
         public void Dead()
         {
+            if (DebugGodMode) return;
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die suckingVfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);

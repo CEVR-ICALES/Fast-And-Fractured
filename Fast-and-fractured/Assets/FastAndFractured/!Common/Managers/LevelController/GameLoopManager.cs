@@ -118,6 +118,12 @@ namespace FastAndFractured
             }
         }
 
+        public void CallStormNow()
+        {
+            if (_callStormTimer == null || TimerSystem.ExistingInstance == null || !TimerSystem.ExistingInstance.HasTimer(_callStormTimer)) return;
+            TimerSystem.ExistingInstance.ModifyTimer(_callStormTimer, newCurrentTime: 0f);
+        }
+
         private void HandleStormCall()
         {
             if (_sandStormController != null)

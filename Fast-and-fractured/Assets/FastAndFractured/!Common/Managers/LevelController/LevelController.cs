@@ -17,6 +17,8 @@ namespace FastAndFractured
         private List<CharacterData> _charactersData;
         [SerializeField] private string playerCharacter = "Pepe_0";
         public int MaxCharactersInGame { get => maxCharactersInGame; set => maxCharactersInGame = value; }
+        public static int? NextMatchCharacters { get; set; }
+        public static int? NextMatchPlayerSpawn { get; set; }
         [SerializeField] private int maxCharactersInGame = 8;
 
         // Set by the multiplayer wrapper with the server's name-code list.
@@ -217,6 +219,7 @@ namespace FastAndFractured
             int actualCurrentPlayers = justSpawnAI ? 0 : PlayerPrefs.GetInt("Player_Num", availablePlayer.Count);
 
 
+            ApplyNextMatchRequest();
             bool spawnSucceeded = _characterSpawner.TrySpawnCharacters(
                 maxCharactersInGame,
                 _playersCharacterNameCodes,
@@ -334,6 +337,23 @@ namespace FastAndFractured
         {
             _isStormActive = true;
         }
+
+        public void CallStormNow() => _gameLoopManager?.CallStormNow();
+
+        private void ApplyNextMatchRequest()
+        {
+            if (NextMatchCharacters.HasValue)
+            {
+                int iconSlots = characterIcons != null && characterIcons.Count > 0 ? characterIcons.Count : spawnPoints.Length;
+                maxCharactersInGame = CharactersThatFit(NextMatchCharacters.Value, Mathf.Min(spawnPoints.Length, iconSlots));
+            }
+            int spawn = NextMatchPlayerSpawn ?? -1;
+            _characterSpawner.PlayerSpawnPoint = spawn >= 0 && spawn < spawnPoints.Length ? spawnPoints[spawn] : null;
+            NextMatchCharacters = null;
+            NextMatchPlayerSpawn = null;
+        }
+
+        public static int CharactersThatFit(int requested, int slots) => Mathf.Clamp(requested, 1, Mathf.Max(1, slots));
 
         public bool IsInsideSandstorm(GameObject target, float marginError = 0f)
         {

@@ -52,8 +52,11 @@ namespace FastAndFractured
         }
 
         
+        public bool DebugCannotShoot { get; set; }
+
         protected void ShootBullet(Vector3 velocity, float range)
         {
+             if (DebugCannotShoot) return;
              BulletSpawnParameters spawnParams = PopulateBaseSpawnParameters(velocity, range);
 
              if (this is PushShootHandle pushHandle)

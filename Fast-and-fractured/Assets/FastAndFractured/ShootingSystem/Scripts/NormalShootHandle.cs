@@ -26,8 +26,9 @@ namespace FastAndFractured
         public Transform ShootPoint => shootPoint;
         public bool IsOverHeat
         {
-            get => _isOverHeat;
+            get => _isOverHeat && !DebugNoOverheat;
         }
+        public bool DebugNoOverheat { get; set; }
 
         private bool _isOverHeat = false;
 
@@ -85,7 +86,7 @@ namespace FastAndFractured
 
         public void NormalShooting()
         {
-            if (_isOverHeat)
+            if (IsOverHeat)
             {
                 return;
             }
