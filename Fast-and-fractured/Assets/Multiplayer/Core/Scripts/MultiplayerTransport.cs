@@ -70,6 +70,18 @@ namespace FastAndFractured.Multiplayer
             }
         }
 
+        public static string SteamPersonaName
+        {
+            get
+            {
+#if STEAMWORKS_NET
+                return SteamManager.Initialized ? SteamFriends.GetPersonaName() : null;
+#else
+                return null;
+#endif
+            }
+        }
+
         public static Tugboat Tugboat => Find<Tugboat>();
         public static global::FishySteamworks.FishySteamworks Steam => Find<global::FishySteamworks.FishySteamworks>();
 
@@ -100,12 +112,17 @@ namespace FastAndFractured.Multiplayer
             if (transport != null) transport.SetPort(port);
         }
 
+        // Tugboat's own 30 minutes left a player who crashed or lost the network in the match and the room all that time.
+        public const int SERVER_TIMEOUT_SECONDS = 60;
+
         public static void StartServer(NetworkManager networkManager)
         {
+            SetTimeout(SERVER_TIMEOUT_SECONDS, asServer: true);
             if (networkManager.TransportManager.Transport is Multipass multipass)
             {
                 StartServerOn(multipass, Tugboat);
-                if (SteamRelayAvailable) StartServerOn(multipass, Steam);
+                if (SteamRelayAvailable && Abstractions.LobbyNetwork.Mode == Abstractions.LobbyNetworkMode.Steam)
+                    StartServerOn(multipass, Steam);
                 return;
             }
             networkManager.ServerManager.StartConnection();

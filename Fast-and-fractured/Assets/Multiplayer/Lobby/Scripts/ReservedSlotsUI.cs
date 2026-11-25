@@ -20,6 +20,8 @@ namespace FastAndFractured.Multiplayer.Lobby
         public static ReservedSlotsUI CreateBelow(AiSlotsUI aiPanel)
         {
             var copy = Instantiate(aiPanel.gameObject, aiPanel.transform.parent);
+            // Inactive until wired: OnEnable ran before the label and buttons were set and clients kept the AI panel's.
+            copy.SetActive(false);
             copy.name = "ReservedSlots";
             DestroyImmediate(copy.GetComponent<AiSlotsUI>());
             foreach (var localized in copy.GetComponentsInChildren<LocalizedText>(true)) DestroyImmediate(localized);

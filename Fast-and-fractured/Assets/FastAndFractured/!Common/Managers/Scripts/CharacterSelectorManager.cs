@@ -1,6 +1,7 @@
 using Assets.SimpleLocalization.Scripts;
 using FastAndFractured;
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -222,6 +223,27 @@ public class CharacterSelectorManager : AbstractSingleton<CharacterSelectorManag
     {
         CharacterMenuData character = AllCharacters[_currentCharacterIndex];
         PlayerPrefs.SetString(SELECTED_PLAYER_KEY, character.CharacterName + "_" + _currentSkinIndex);
+    }
+
+    public static List<string> SkinKeys(IEnumerable<CharacterMenuData> characters)
+    {
+        var keys = new List<string>();
+        if (characters == null) return keys;
+        foreach (CharacterMenuData character in characters)
+        {
+            if (character == null || character.Models == null) continue;
+            foreach (GameObject model in character.Models)
+                if (model != null) keys.Add(model.name);
+        }
+        return keys;
+    }
+
+    public void UnlockEverySkin()
+    {
+        foreach (string key in SkinKeys(AllCharacters))
+            PlayerPrefs.SetInt(key, FULLY_UNLOCKED_VALUE);
+        PlayerPrefs.Save();
+        if (_currentModelInstance != null) selectAndStartButton.interactable = CheckIfSkinUnlocked();
     }
 
     public void FullUnlockSkins()

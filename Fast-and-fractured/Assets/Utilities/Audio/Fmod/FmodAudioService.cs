@@ -10,6 +10,7 @@ namespace Utilities.Audio.Fmod
     {
         private readonly Dictionary<AudioBackendReference, EventReference> _events = new Dictionary<AudioBackendReference, EventReference>();
         private readonly HashSet<AudioBackendReference> _missing = new HashSet<AudioBackendReference>();
+        private readonly HashSet<FMOD.GUID> _notLoops = new HashSet<FMOD.GUID>();
         private readonly List<FmodAudioVoice> _voices = new List<FmodAudioVoice>();
         private readonly List<EventInstance> _external = new List<EventInstance>();
         private readonly Dictionary<FMOD.GUID, FmodAudioVoice> _latest = new Dictionary<FMOD.GUID, FmodAudioVoice>();
@@ -51,12 +52,14 @@ namespace Utilities.Audio.Fmod
         public FmodAudioVoice PlayNative(EventReference reference, AudioPlaybackOptions options)
         {
             if (reference.IsNull || !IsReady) return null;
-            var description = RuntimeManager.GetEventDescription(reference);
             if (options.LoopPolicy == AudioLoopPolicy.RequireLoop)
             {
-                description.isOneshot(out bool oneShot);
+                // Callers retry every frame while they have no voice: answer from memory and warn once.
+                if (_notLoops.Contains(reference.Guid)) return null;
+                RuntimeManager.GetEventDescription(reference).isOneshot(out bool oneShot);
                 if (oneShot)
                 {
+                    _notLoops.Add(reference.Guid);
                     Debug.LogWarning("Audio cue requires an authored loop: " + reference.Guid);
                     return null;
                 }

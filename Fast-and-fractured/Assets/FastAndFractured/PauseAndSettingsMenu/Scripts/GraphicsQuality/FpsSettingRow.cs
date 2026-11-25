@@ -14,17 +14,16 @@ namespace FastAndFractured
         private const string CONTENT = "SettingsContainer/VideoContainer/Viewport/Content";
         private const string TEMPLATE_ROW = "VSync";
         private const string SEPARATOR = "Separator6";
-        private const float CHECK_EVERY = 0.5f;
 
         private sealed class Finder : MonoBehaviour
         {
-            private float _next;
+            private int _seen = -1;
 
             private void Update()
             {
-                if (Time.unscaledTime < _next) return;
-                _next = Time.unscaledTime + CHECK_EVERY;
-                foreach (var settings in FindObjectsByType<SettingsMenuBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (_seen == MenuScan.Version) return;
+                _seen = MenuScan.Version;
+                foreach (var settings in MenuScan.SettingsMenus)
                     if (settings != null && settings.gameObject.scene.IsValid() && settings.GetComponent<FpsSettingRow>() == null)
                         settings.gameObject.AddComponent<FpsSettingRow>();
             }

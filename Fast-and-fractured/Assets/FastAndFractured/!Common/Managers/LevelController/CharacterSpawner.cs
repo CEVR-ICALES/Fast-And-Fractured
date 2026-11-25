@@ -176,6 +176,8 @@ namespace FastAndFractured
         }
 
 
+        public GameObject PlayerSpawnPoint { get; set; }
+
         public bool TrySpawnCharacters(int maxCharactersInGame, List<string> playersCharacterNameCodes, int currentPlayers, bool spawnOnlyAIs, out GameObject playerReferenceForAI)
         {
             playerReferenceForAI = null;
@@ -195,6 +197,8 @@ namespace FastAndFractured
             }
 
             _spawnPoints.ShuffleList(DeterministicRandom.Instance);
+            int playerSpawn = PlayerSpawnPoint != null ? System.Array.IndexOf(_spawnPoints, PlayerSpawnPoint) : -1;
+            if (playerSpawn > 0) (_spawnPoints[0], _spawnPoints[playerSpawn]) = (_spawnPoints[playerSpawn], _spawnPoints[0]);
 
             int characterSpawnIndex = 0;
             GameObject playerCarInstance = null;

@@ -18,7 +18,7 @@ namespace FastAndFractured.Multiplayer.Testing
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
-            if (_runner != null) return;
+            if (_runner != null || !DiagnosticsSwitch.Enabled) return;
             var go = new GameObject("[VehicleDiagnosticsAutoRunner]");
             Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;

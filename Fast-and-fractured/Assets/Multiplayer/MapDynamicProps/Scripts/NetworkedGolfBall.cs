@@ -28,8 +28,16 @@ namespace FastAndFractured.Multiplayer
         private Quaternion _targetRotation;
         private float _targetTime;
 
+        private static readonly System.Collections.Generic.List<NetworkedGolfBall> Instances = new System.Collections.Generic.List<NetworkedGolfBall>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetInstances() => Instances.Clear();
+
+        private void OnDestroy() => Instances.Remove(this);
+
         private void Awake()
         {
+            Instances.Add(this);
             _rb = GetComponent<Rigidbody>();
         }
 
@@ -104,9 +112,11 @@ namespace FastAndFractured.Multiplayer
 
         private static System.Collections.Generic.List<NetworkedGolfBall> AllInHierarchyOrder()
         {
-            var list = new System.Collections.Generic.List<NetworkedGolfBall>(FindObjectsByType<NetworkedGolfBall>(FindObjectsSortMode.None));
+            var list = new System.Collections.Generic.List<NetworkedGolfBall>(Instances.Count);
+            foreach (var ball in Instances)
+                if (ball != null && ball.gameObject.activeInHierarchy) list.Add(ball);
             var keys = new System.Collections.Generic.Dictionary<NetworkedGolfBall, string>();
-            foreach (var b in list) keys[b] = NetworkedWorldBreakables.PathKey(b.transform);
+            foreach (var b in list) keys[b] = NetworkedWorldBreakables.CachedPathKey(b.transform);
             list.Sort((a, b) => string.CompareOrdinal(keys[a], keys[b]));
             return list;
         }

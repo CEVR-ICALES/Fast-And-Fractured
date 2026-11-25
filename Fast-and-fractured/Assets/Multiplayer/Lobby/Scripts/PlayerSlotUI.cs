@@ -59,6 +59,79 @@ namespace FastAndFractured.Multiplayer
             if (_mapVoteContainer != null) _mapVoteContainer.SetActive(mapVoteThumbnail != null);
 
             if (_selectButtonRoot != null) _selectButtonRoot.SetActive(isLocal);
+            SetLocalMarker(isLocal);
+        }
+
+        private static readonly Color YouColor = new Color(1f, 0.78f, 0.22f, 1f);
+        private static readonly Color YouTextColor = new Color(0.12f, 0.08f, 0.04f, 1f);
+        private static readonly Vector2 YouTagSize = new Vector2(58f, 22f);
+        private static readonly Vector2 YouTagOffset = new Vector2(12f, -6f);
+        private const float YOU_ARROW_SIZE = 12f;
+        private const float YOU_FONT_SIZE = 15f;
+        private const float YOU_OUTLINE_WIDTH = 3f;
+        private GameObject _youTag;
+        private Outline _youOutline;
+
+        private void SetLocalMarker(bool isLocal)
+        {
+            if (!isLocal)
+            {
+                if (_youTag != null) _youTag.SetActive(false);
+                if (_youOutline != null) _youOutline.enabled = false;
+                return;
+            }
+            if (_youTag == null) _youTag = CreateYouTag();
+            _youTag.SetActive(true);
+            _youTag.transform.SetAsLastSibling();
+            if (_backgroundTint != null)
+            {
+                if (_youOutline == null) _youOutline = _backgroundTint.gameObject.AddComponent<Outline>();
+                _youOutline.effectColor = YouColor;
+                _youOutline.effectDistance = new Vector2(YOU_OUTLINE_WIDTH, -YOU_OUTLINE_WIDTH);
+                _youOutline.enabled = true;
+            }
+        }
+
+        private GameObject CreateYouTag()
+        {
+            var go = new GameObject("YouTag", typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(transform, false);
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = YouTagOffset;
+            rect.sizeDelta = YouTagSize;
+
+            var arrow = new GameObject("Arrow", typeof(RectTransform));
+            var arrowRect = (RectTransform)arrow.transform;
+            arrowRect.SetParent(rect, false);
+            arrowRect.anchorMin = arrowRect.anchorMax = new Vector2(0.5f, 0f);
+            arrowRect.sizeDelta = new Vector2(YOU_ARROW_SIZE, YOU_ARROW_SIZE);
+            arrowRect.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            var arrowImage = arrow.AddComponent<Image>();
+            arrowImage.color = YouColor;
+            arrowImage.raycastTarget = false;
+
+            var pill = go.AddComponent<Image>();
+            pill.color = YouColor;
+            pill.raycastTarget = false;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.SetParent(rect, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (_nameLabel != null) label.font = _nameLabel.font;
+            label.fontSize = YOU_FONT_SIZE;
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = YouTextColor;
+            label.raycastTarget = false;
+            label.text = LocalizationManager.Localize("MP.Room.You");
+            return go;
         }
 
         private static readonly Color InMatchColor = new Color(0.45f, 0.30f, 0.08f, 0.85f);
@@ -152,6 +225,85 @@ namespace FastAndFractured.Multiplayer
             _kickButton.gameObject.SetActive(true);
             _kickButton.onClick.RemoveAllListeners();
             _kickButton.onClick.AddListener(() => onKick());
+        }
+
+        private static readonly Color MakeHostColor = new Color(0.96f, 0.69f, 0.25f, 0.95f);
+        private static readonly Vector2 MakeHostSize = new Vector2(150f, 30f);
+        private const float MAKE_HOST_FONT_SIZE = 15f;
+        private const float MAKE_HOST_CONFIRM_SECONDS = 3f;
+        private Button _makeHostButton;
+        private TMP_Text _makeHostLabel;
+        private float _makeHostArmedUntil;
+
+        // A second press within a few seconds confirms: handing the room over reconnects everyone.
+        public void SetMakeHost(System.Action onMakeHost)
+        {
+            if (onMakeHost == null)
+            {
+                if (_makeHostButton != null) _makeHostButton.gameObject.SetActive(false);
+                return;
+            }
+            if (_makeHostButton == null) _makeHostButton = CreateMakeHostButton();
+            _makeHostButton.gameObject.SetActive(true);
+            _makeHostArmedUntil = 0f;
+            _makeHostLabel.text = LocalizationManager.Localize("MP.Room.MakeHost");
+            _makeHostButton.onClick.RemoveAllListeners();
+            _makeHostButton.onClick.AddListener(() =>
+            {
+                if (Time.unscaledTime < _makeHostArmedUntil)
+                {
+                    _makeHostArmedUntil = 0f;
+                    onMakeHost();
+                    return;
+                }
+                _makeHostArmedUntil = Time.unscaledTime + MAKE_HOST_CONFIRM_SECONDS;
+                _makeHostLabel.text = LocalizationManager.Localize("MP.Room.MakeHostConfirm");
+            });
+        }
+
+        private void LateUpdate()
+        {
+            if (_makeHostButton == null || _makeHostArmedUntil <= 0f || Time.unscaledTime < _makeHostArmedUntil) return;
+            _makeHostArmedUntil = 0f;
+            _makeHostLabel.text = LocalizationManager.Localize("MP.Room.MakeHost");
+        }
+
+        private Button CreateMakeHostButton()
+        {
+            var button = CreateCornerButton("MakeHostButton", MakeHostColor, MakeHostSize, MAKE_HOST_FONT_SIZE, new Vector2(0f, 0f), new Vector2(4f, 4f));
+            _makeHostLabel = button.GetComponentInChildren<TMP_Text>();
+            _makeHostLabel.color = YouTextColor;
+            return button;
+        }
+
+        private Button CreateCornerButton(string name, Color color, Vector2 size, float fontSize, Vector2 corner, Vector2 offset)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(transform, false);
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
+            rect.anchorMin = rect.anchorMax = rect.pivot = corner;
+            rect.anchoredPosition = offset;
+            rect.sizeDelta = size;
+            var image = go.AddComponent<Image>();
+            image.color = color;
+            var button = go.AddComponent<Button>();
+            button.targetGraphic = image;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.SetParent(rect, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (_nameLabel != null) label.font = _nameLabel.font;
+            label.fontSize = fontSize;
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            return button;
         }
 
         // Top-left corner of the seat, outside its layout (the network signal holds the top-right one).

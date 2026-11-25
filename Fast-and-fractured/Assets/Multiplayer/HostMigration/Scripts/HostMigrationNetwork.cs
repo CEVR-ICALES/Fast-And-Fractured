@@ -27,7 +27,8 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public static MatchSnapshotBroadcast? LatestSnapshot { get; private set; }
         private static float _latestSnapshotTime;
-        private const float MAX_SNAPSHOT_AGE = 5f;
+        // A crashed host is only noticed after the client timeout (5 s direct, about 10 s by Steam relay): a limit under that discarded every abrupt loss.
+        public const float MAX_SNAPSHOT_AGE = 20f;
         private const float SERVER_START_TIMEOUT = 5f;
         private const float MAX_RECONNECT_WAIT = 5f;
         private const float CLIENT_START_TIMEOUT = 3f;
@@ -105,12 +106,14 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
         public static void ClearSnapshot() => LatestSnapshot = null;
 
+        public static bool IsSnapshotUsable(float ageSeconds) => ageSeconds <= MAX_SNAPSHOT_AGE;
+
         /// <summary>HostDisconnectWatchdog, unexpected host loss in a match: true when this peer migrates.</summary>
         public static bool TryHandleHostLoss()
         {
             if (!HostMigrationSettings.Enabled || Migrating || _instance == null) return false;
             if (!LatestSnapshot.HasValue || !LatestSnapshot.Value.MigrationEnabled) return false;
-            if (Time.unscaledTime - _latestSnapshotTime > MAX_SNAPSHOT_AGE) return false;
+            if (!IsSnapshotUsable(Time.unscaledTime - _latestSnapshotTime)) return false;
             // A client that runs the server is the host that left.
             if (InstanceFinder.IsServerStarted) return false;
 
@@ -121,6 +124,34 @@ namespace FastAndFractured.Multiplayer.HostMigration
             Migrating = true;
             _instance.StartCoroutine(successor ? _instance.BecomeHost(snapshot) : _instance.RejoinNewHost(snapshot));
             return true;
+        }
+
+        private const float LEAVE_FLUSH_SECONDS = 0.3f;
+
+        public static bool TryLeaveMatchAsHost()
+        {
+            if (!HostMigrationSettings.ContinueWhenHostLeaves || Migrating || _instance == null || !InstanceFinder.IsServerStarted) return false;
+            var manager = FindFirstObjectByType<NetworkedLevelControllerManager>();
+            if (manager == null || !manager.TryBuildMigrationSnapshot(out MatchSnapshotBroadcast snapshot)) return false;
+            if (!CanCarryOnWithout(snapshot)) return false;
+
+            InstanceFinder.ServerManager.Broadcast(snapshot);
+            MpCanary.Mark("HostMigration: the host leaves the match, the others carry on");
+            _instance.StartCoroutine(_instance.LeaveMatchAsHost());
+            return true;
+        }
+
+        public static bool CanCarryOnWithout(MatchSnapshotBroadcast snapshot) =>
+            snapshot.MigrationEnabled && snapshot.SuccessorTokens != null && snapshot.SuccessorTokens.Length > 0 &&
+            snapshot.SuccessorAddresses != null && snapshot.SuccessorAddresses.Length > 0;
+
+        private IEnumerator LeaveMatchAsHost()
+        {
+            yield return new WaitForSecondsRealtime(LEAVE_FLUSH_SECONDS);
+            HostDisconnectWatchdog.NotifyIntentionalLeave();
+            var leave = Abstractions.LobbyServiceLocator.Transport.LeaveLobbyAsync();
+            while (leave != null && !leave.IsCompleted) yield return null;
+            MultiplayerSceneTeardown.LoadMainMenu(Enums.ScreensType.MULTIPLAYER_HUB);
         }
 
         private const string TRANSIT_SCENE = "HostMigrationTransit";
@@ -161,17 +192,12 @@ namespace FastAndFractured.Multiplayer.HostMigration
 
             HostMigrationResume.Pending = snapshot;
             var nm = InstanceFinder.NetworkManager;
-            MultiplayerTransport.SetPort(snapshot.Port);
-            MultiplayerTransport.StartServer(nm);
-            float waited = 0f;
-            while (!nm.ServerManager.Started && waited < SERVER_START_TIMEOUT) { waited += Time.unscaledDeltaTime; yield return null; }
+            yield return OpenRoomServer(nm, snapshot);
             if (!nm.ServerManager.Started) { Fail("could not open a server"); yield break; }
-            MultiplayerTransport.SetLocalHostTarget();
-            nm.ClientManager.StartConnection();
 
             var expected = new HashSet<string>();
             for (int i = 1; i < snapshot.SuccessorTokens.Length; i++) expected.Add(snapshot.SuccessorTokens[i]);
-            waited = 0f;
+            float waited = 0f;
             // Later arrivals join the reloaded map as spectators.
             float timeout = Mathf.Min(MAX_RECONNECT_WAIT, ConfigReconnectTimeout());
             while (waited < timeout)
@@ -191,10 +217,57 @@ namespace FastAndFractured.Multiplayer.HostMigration
             Migrating = false;
         }
 
+        // Through the lobby transport, so the room is listed again (Steam lobby, LAN broadcast); straight on the socket if that fails.
+        private IEnumerator OpenRoomServer(NetworkManager nm, MatchSnapshotBroadcast snapshot)
+        {
+            using (var cancel = new System.Threading.CancellationTokenSource())
+            {
+                System.Threading.Tasks.Task create = CreateRoom(snapshot, cancel.Token);
+                float waited = 0f;
+                while (create != null && !create.IsCompleted && waited < SERVER_START_TIMEOUT) { waited += Time.unscaledDeltaTime; yield return null; }
+                if (nm.ServerManager.Started) yield break;
+
+                cancel.Cancel();
+                MpCanary.Mark("HostMigration: the room could not be listed again, opening the server directly");
+                MultiplayerTransport.SetPort(snapshot.Port);
+                MultiplayerTransport.StartServer(nm);
+                waited = 0f;
+                while (!nm.ServerManager.Started && waited < SERVER_START_TIMEOUT) { waited += Time.unscaledDeltaTime; yield return null; }
+                if (!nm.ServerManager.Started) yield break;
+                MultiplayerTransport.SetLocalHostTarget();
+                nm.ClientManager.StartConnection();
+            }
+        }
+
+        private static System.Threading.Tasks.Task CreateRoom(MatchSnapshotBroadcast snapshot, System.Threading.CancellationToken ct)
+        {
+            try
+            {
+                var transport = Abstractions.LobbyServiceLocator.Transport;
+                if (transport == null) return null;
+                transport.LeaveLobbyAsync();
+                return transport.CreateLobbyAsync(new Abstractions.LobbyCreateOptions
+                {
+                    RoomName = RoomMigration.LastRoomName,
+                    Port = snapshot.Port,
+                    MaxPlayers = NetworkedLobbyManager.MAX_PLAYERS,
+                    IsPublic = true,
+                }, ct);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+                return null;
+            }
+        }
+
         private IEnumerator RejoinNewHost(MatchSnapshotBroadcast snapshot)
         {
             yield return LeaveCurrentMatchScene(becomingHost: false);
             var nm = InstanceFinder.NetworkManager;
+            // The old room's Steam lobby has no host any more: left empty it stops being listed.
+            try { Abstractions.LobbyServiceLocator.Transport?.LeaveLobbyAsync(); }
+            catch (System.Exception e) { Debug.LogException(e); }
             string address = snapshot.SuccessorAddresses[0];
             MpCanary.Mark($"HostMigration: reconnecting to the new host at {address}:{snapshot.Port}");
 

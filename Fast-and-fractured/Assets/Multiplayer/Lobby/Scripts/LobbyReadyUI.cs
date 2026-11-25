@@ -262,9 +262,30 @@ namespace FastAndFractured.Multiplayer
             _lobbyManager.ResetWins();
         }
 
+        private RoomJoiningOverlay _joiningOverlay;
+
+        // A client sees the room before the host has registered it: without this the screen looks frozen.
+        private void RefreshJoiningOverlay()
+        {
+            if (_playerListContainer == null) return;
+            int localId = InstanceFinder.ClientManager?.Connection?.ClientId ?? -1;
+            bool joining = IsJoining(InstanceFinder.IsServerStarted, InstanceFinder.IsClientStarted,
+                _lobbyManager != null && localId >= 0 && _lobbyManager.PlayerReadyStates.ContainsKey(localId));
+            if (_joiningOverlay == null)
+            {
+                if (!joining) return;
+                var area = _playerListContainer.parent as RectTransform ?? (RectTransform)_playerListContainer;
+                _joiningOverlay = RoomJoiningOverlay.Create(area, _roomNameLabel);
+            }
+            _joiningOverlay.Show(joining);
+        }
+
+        internal static bool IsJoining(bool isHost, bool isClient, bool registered) => !isHost && isClient && !registered;
+
         /// <summary>A host migration spawns a new room object: bind to it as soon as it appears.</summary>
         private void Update()
         {
+            RefreshJoiningOverlay();
             if (!_subscribed || _lobbyManager != null) return;
             _subscribed = false;
             foreach (var entry in _playerEntries.Values)
@@ -408,8 +429,25 @@ namespace FastAndFractured.Multiplayer
 
         private void UpdateRoomName(string name)
         {
-            if (_roomNameLabel != null)
-                _roomNameLabel.text = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
+            if (_roomNameLabel == null) return;
+            // Started after the name arrived, the label's LocalizedText wrote the default title over it.
+            if (_roomNameLabel.TryGetComponent(out LocalizedText localized))
+            {
+                localized.enabled = false;
+                Destroy(localized);
+            }
+            string title = string.IsNullOrEmpty(name) ? LocalizationManager.Localize("MP.Room.Room") : name;
+            _roomNameLabel.text = RoomTitle(title, HostLanAddress());
+        }
+
+        public static string RoomTitle(string name, string lanAddress) =>
+            string.IsNullOrEmpty(lanAddress) ? name : name + " (" + lanAddress + ")";
+
+        private static string HostLanAddress()
+        {
+            if (Abstractions.LobbyNetwork.Mode != Abstractions.LobbyNetworkMode.Lan || !FishNet.InstanceFinder.IsServerStarted)
+                return null;
+            return Abstractions.Tugboat.TugboatLobbyTransport.GetLocalIP() + ":" + MultiplayerTransport.Port;
         }
 
         #region UI_CALLBACKS
@@ -510,6 +548,11 @@ namespace FastAndFractured.Multiplayer
             if (_lobbyManager == null || _playerListContainer == null || _playerEntryPrefab == null) return;
 
             int  localClientId = InstanceFinder.ClientManager?.Connection?.ClientId ?? -1;
+            if (_lobbyManager.PlayerReadyStates.TryGetValue(localClientId, out bool serverReady) && serverReady != _isReady)
+            {
+                _isReady = serverReady;
+                UpdateReadyButtonVisual();
+            }
             var  catalog       = MapCatalogLoader.Get();
             var  currentPlayers = new HashSet<int>();
 
@@ -553,6 +596,9 @@ namespace FastAndFractured.Multiplayer
                     int kickedId = clientId;
                     slot.SetKick(CanKick && !isLocal && !_lobbyManager.IsInMatch(clientId)
                         ? () => _lobbyManager.KickPlayer(kickedId)
+                        : (System.Action)null);
+                    slot.SetMakeHost(!isLocal && HostMigration.RoomMigration.CanHandOverTo(clientId)
+                        ? () => HostMigration.RoomMigration.HandOverTo(kickedId)
                         : (System.Action)null);
                     var btn = slot.GetSelectButton();
                     if (btn != null && isLocal)

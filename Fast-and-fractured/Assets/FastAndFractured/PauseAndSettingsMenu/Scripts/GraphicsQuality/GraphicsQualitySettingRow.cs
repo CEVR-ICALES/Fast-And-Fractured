@@ -18,17 +18,16 @@ namespace FastAndFractured
         private const string ROW_ABOVE = "Brightness";
         private const string SEPARATOR_BELOW_ROW_ABOVE = "Separator";
         private const int AUTO_OPTION = 0;
-        private const float CHECK_EVERY = 0.5f;
 
         private sealed class Finder : MonoBehaviour
         {
-            private float _next;
+            private int _seen = -1;
 
             private void Update()
             {
-                if (Time.unscaledTime < _next) return;
-                _next = Time.unscaledTime + CHECK_EVERY;
-                foreach (var settings in FindObjectsByType<SettingsMenuBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (_seen == MenuScan.Version) return;
+                _seen = MenuScan.Version;
+                foreach (var settings in MenuScan.SettingsMenus)
                     if (settings != null && settings.gameObject.scene.IsValid() && settings.GetComponent<GraphicsQualitySettingRow>() == null)
                         settings.gameObject.AddComponent<GraphicsQualitySettingRow>();
             }
@@ -151,7 +150,9 @@ namespace FastAndFractured
             if (option == AUTO_OPTION)
             {
                 GraphicsQuality.SetAuto();
-                GraphicsQualityDetector.Run();
+                // Benchmarking mid-match would stutter the game: a map runs it on the next menu load.
+                if (GraphicsQualityDetector.CanRunHere)
+                    GraphicsQualityDetector.Run();
             }
             else
             {

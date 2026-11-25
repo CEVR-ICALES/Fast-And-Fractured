@@ -12,6 +12,9 @@ namespace FastAndFractured.Multiplayer
     {
         private Controller _controller;
         private bool _ready;
+        // Bound once: MethodInfo.Invoke allocated on every tick of every car.
+        private System.Action _updateStateActions;
+        private System.Action _evaluateStateTransitions;
 
         public bool IsReady => _ready;
 
@@ -26,6 +29,10 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
+            _updateStateActions = (System.Action)System.Delegate.CreateDelegate(
+                typeof(System.Action), _controller, SingleplayerReflectionCache.Controller_UpdateStateActions);
+            _evaluateStateTransitions = (System.Action)System.Delegate.CreateDelegate(
+                typeof(System.Action), _controller, SingleplayerReflectionCache.Controller_EvaluateStateTransitions);
             _ready = true;
         }
 
@@ -73,14 +80,14 @@ namespace FastAndFractured.Multiplayer
             if (state == null) return;
 
             // State transitions go to the canary: the last one before the log stops is the hanging state.
-            if (!ReferenceEquals(state, _lastLoggedState))
+            if (MpCanary.Enabled && !ReferenceEquals(state, _lastLoggedState))
             {
                 _lastLoggedState = state;
                 MpCanary.Mark($"SM '{gameObject.name}' -> {state.name}");
             }
 
-            SingleplayerReflectionCache.Controller_UpdateStateActions.Invoke(_controller, null);
-            SingleplayerReflectionCache.Controller_EvaluateStateTransitions.Invoke(_controller, null);
+            _updateStateActions();
+            _evaluateStateTransitions();
         }
 
         private Object _lastLoggedState;

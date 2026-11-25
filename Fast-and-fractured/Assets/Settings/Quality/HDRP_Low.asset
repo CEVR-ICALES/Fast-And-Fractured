@@ -287,7 +287,7 @@ MonoBehaviour:
     supportVFXRayTracing: 0
     supportedRayTracingMode: 3
     lightLoopSettings:
-      cookieAtlasSize: 512
+      cookieAtlasSize: 2048
       cookieFormat: 74
       cookieAtlasLastValidMip: 0
       cookieTexArraySize: 1
@@ -393,14 +393,14 @@ MonoBehaviour:
       maxPercentage: 100
       minPercentage: 33
       dynResType: 0
-      upsampleFilter: 1
-      forceResolution: 0
-      forcedPercentage: 100
+      upsampleFilter: 4
+      forceResolution: 1
+      forcedPercentage: 80
       lowResTransparencyMinimumThreshold: 0
       rayTracingHalfResThreshold: 50
       lowResSSGIMinimumThreshold: 0
       lowResVolumetricCloudsMinimumThreshold: 50
-      enableDLSS: 0
+      enableDLSS: 1
     lowresTransparentSettings:
       enabled: 1
       checkerboardDepthBuffer: 1

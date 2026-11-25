@@ -83,7 +83,7 @@ namespace FastAndFractured
                 {
                     currentSpeed = airSpeed;
                     ApplyCustomGravity();
-                    _rb.angularVelocity = Vector3.zero;
+                    if (!_rb.isKinematic) _rb.angularVelocity = Vector3.zero;
                 } else
                 {
                     currentSpeed = initialMoveSpeed;
@@ -133,7 +133,7 @@ namespace FastAndFractured
                     _canSendIsGrounded = true;
                     _canSendIsNotGrounded = false;
                 }
-                _rb.angularVelocity = Vector3.zero;
+                if (!_rb.isKinematic) _rb.angularVelocity = Vector3.zero;
             }
 
             transform.position += _currentMoveDirection * currentSpeed * Time.fixedDeltaTime;

@@ -26,6 +26,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         // Any public address: connecting a UDP socket only picks the outgoing interface.
         private const string ROUTE_PROBE_ADDRESS = "8.8.8.8";
         private const int ROUTE_PROBE_PORT = 65530;
+        public const string KEY_VERSION = "version";
 
         private string _roomName;
         private ushort _gamePort;
@@ -46,6 +47,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
             _gamePort  = options.Port;
             _maxPlayers = options.MaxPlayers;
 
+            // One transport serves every room of the session: the last room's "in match" must not leak into this one.
+            _metadata.Clear();
             if (options.Metadata != null)
                 foreach (var kv in options.Metadata)
                     _metadata[kv.Key] = kv.Value;
@@ -55,6 +58,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
             ConfigurePort(nm, _gamePort);
 
+            nm.ServerManager.OnRemoteConnectionState -= HandleRemoteState;
             nm.ServerManager.OnRemoteConnectionState += HandleRemoteState;
 
             var tcs = new TaskCompletionSource<bool>();
@@ -118,6 +122,8 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                 catch (OperationCanceledException) { result = false; }
             }
             nm.ClientManager.OnClientConnectionState -= OnClientState;
+            // A join given up on must not connect later, behind a menu that already moved on.
+            if (!result) nm.ClientManager.StopConnection();
             return result;
         }
 
@@ -162,7 +168,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
                         var packet  = receiveTask.Result;
                         var listing = ParsePayload(packet.Buffer, packet.RemoteEndPoint);
-                        if (listing != null && seen.Add(listing.Handle.PlatformId))
+                        if (listing != null && IsSameVersion(listing, filter) && seen.Add(listing.Handle.PlatformId))
                             results.Add(listing);
                     }
                     catch (OperationCanceledException) { break; }
@@ -243,9 +249,16 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
                     HostLink       = parts.Length > 5 ? FastAndFractured.Multiplayer.NetworkLink.Parse(parts[5]) : FastAndFractured.Multiplayer.LinkKind.Unknown,
                     InMatch        = parts.Length > 6 && parts[6] == "1",
                     ReservedSlots  = parts.Length > 7 && int.TryParse(parts[7], out int reserved) ? reserved : 0,
+                    Metadata       = new Dictionary<string, string> { { KEY_VERSION, parts[3] } },
                 };
             }
             catch { return null; }
+        }
+
+        public static bool IsSameVersion(LobbyListing listing, LobbyFilter filter)
+        {
+            if (filter == null || string.IsNullOrEmpty(filter.GameVersion)) return true;
+            return listing.Metadata != null && listing.Metadata.TryGetValue(KEY_VERSION, out string version) && version == filter.GameVersion;
         }
 
         private void HandleServerStopped(ServerConnectionStateArgs args)
@@ -277,7 +290,7 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
         private static void ConfigureAddress(FishNet.Managing.NetworkManager nm, string address, ushort port)
             => MultiplayerTransport.SetClientTarget(address, port);
 
-        private static string GetLocalIP()
+        public static string GetLocalIP()
         {
             try
             {

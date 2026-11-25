@@ -127,6 +127,8 @@ namespace FastAndFractured.Multiplayer
         public readonly SyncVar<int> ReservedSlots = new SyncVar<int>(0);
 
         public int HumanPlayerCount => PlayerReadyStates.Count;
+
+        public static bool IsRoomFullFor(int humansInRoom, bool alreadyInRoom) => !alreadyInRoom && humansInRoom >= MAX_PLAYERS;
         public int TotalSlotCount   => HumanPlayerCount + AiSlotCount.Value + ReservedSlots.Value;
         public int FreeSlotCount    => Mathf.Max(0, MAX_PLAYERS - TotalSlotCount);
         private int MaxAiSlots      => Mathf.Max(0, MAX_PLAYERS - HumanPlayerCount - ReservedSlots.Value);
@@ -359,6 +361,12 @@ namespace FastAndFractured.Multiplayer
         {
             if (args.ConnectionState == FishNet.Transporting.RemoteConnectionState.Started)
             {
+                if (IsRoomFullFor(HumanPlayerCount, PlayerReadyStates.ContainsKey(conn.ClientId)))
+                {
+                    Debug.LogWarning($"[NetworkedLobbyManager] Room full: client {conn.ClientId} turned away.");
+                    conn.Disconnect(false);
+                    return;
+                }
                 PlayerReadyStates[conn.ClientId] = false;
                 PlayerCharacterSelections[conn.ClientId] = "";
                 FitSeats();
@@ -759,6 +767,10 @@ namespace FastAndFractured.Multiplayer
                 // From now on an unexpected client stop means the host is gone.
                 HostDisconnectWatchdog.NotifyMatchStarted();
                 MultiplayerRoomReturn.NotifyMatchStarted();
+            }
+            else if (prev && !next)
+            {
+                MultiplayerRoomReturn.NotifyMatchOver();
             }
         }
         #endregion

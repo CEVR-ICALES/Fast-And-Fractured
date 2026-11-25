@@ -206,15 +206,18 @@ namespace FastAndFractured
         {
             Dead();
         }
+        public bool DebugGodMode { get; set; }
 
 
         #region Health
+        private const float PERCENT = 100f;
         private float _overflowDamage;
         public float OverflowDamage { get => _overflowDamage; set => _overflowDamage = Mathf.Max(0f, value); }
         public float DamagePercent => MaxEndurance > 0f ? (MaxEndurance - currentEndurance + _overflowDamage) / MaxEndurance * 100f : 0f;
 
         public void TakeEndurance(float substract, bool isProduct,GameObject whoMadeTheDamage)
         {
+            if (DebugGodMode) return;
             if (substract > 0)
             {
                 if (!IsInvulnerable)
@@ -284,7 +287,7 @@ namespace FastAndFractured
             return charDataSO.GetFinalAnimation(characterCode, isWin);
         }
 
-        public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXFrame)
+        public void GetKilledNotify(IKillCharacters killer, bool escapedDead,float damageXSecond)
         {
             if (killer == _currentKiller)
             {
@@ -306,30 +309,45 @@ namespace FastAndFractured
                             _currentKiller = killer;
                             float newTime = _deadTimer.GetData().CurrentTime >= killer.KillTime ? killer.KillTime : _deadTimer.GetData().CurrentTime;
                             _deadTimer.StopTimer();
-                            SetDeadTimer(killer, newTime,damageXFrame);
+                            SetDeadTimer(killer, newTime,damageXSecond);
                         }
                     }
                 }
                 else
                 {
                     _currentKiller = killer;
-                    SetDeadTimer(killer, killer.KillTime,damageXFrame);
+                    SetDeadTimer(killer, killer.KillTime,damageXSecond);
                 }
             }
         }
 
-        private void SetDeadTimer(IKillCharacters killer,float time,float damageXFrame)
+        private void SetDeadTimer(IKillCharacters killer,float time,float damageXSecond)
         {
             _deadTimer = TimerSystem.Instance.CreateTimer(time, onTimerDecreaseComplete: () =>
             {
-                Dead();
                 _deadTimer = null;
+                if (killer.OverflowsBeforeKilling) SetOverflowTimer(killer);
+                else Dead();
             }, onTimerDecreaseUpdate : (float time) =>
             {
-                if (damageXFrame > 0)
+                if (damageXSecond > 0)
                 {
-                    TakeEndurance(damageXFrame * Time.deltaTime,false,killer.GetKillerGameObject());
+                    TakeEndurance(damageXSecond * Time.deltaTime,false,killer.GetKillerGameObject());
                 }
+            });
+        }
+
+        private void SetOverflowTimer(IKillCharacters killer)
+        {
+            _deadTimer = TimerSystem.Instance.CreateTimer(StormOverflow.SecondsToExplode(DamagePercent / PERCENT), onTimerDecreaseComplete: () =>
+            {
+                _deadTimer = null;
+                Dead();
+            }, onTimerDecreaseUpdate: (float timeLeft) =>
+            {
+                float damage = DamagePercent / PERCENT;
+                float grown = StormOverflow.Grow(damage, Time.deltaTime);
+                if (grown > damage) TakeEndurance((grown - damage) * MaxEndurance, false, killer.GetKillerGameObject());
             });
         }
 
@@ -351,6 +369,7 @@ namespace FastAndFractured
 
         public void Dead()
         {
+            if (DebugGodMode) return;
             charDataSO.Invulnerable = true;
             vehicleVfxController.OnDead(); // charDataSO.DelayTime has to match the die suckingVfx timer more or less so that it can be fully seen
             onDead?.Invoke(charDataSO.DeadDelay,transform.gameObject,_isPlayer);

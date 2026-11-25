@@ -25,33 +25,55 @@ namespace FastAndFractured.Multiplayer.Abstractions.Tugboat
 
     public sealed class TugboatPlayerIdentityProvider : IPlayerIdentityProvider
     {
+        private const string ID_KEY = "LAN_PlatformId";
+        private const int ID_LENGTH = 8;
+        private const int NAME_TAG_LENGTH = 4;
+        private const char ID_SEPARATOR = '_';
+        private const string GENERIC_PLAYER = "Player";
+        // Every Steam Deck and every Proton prefix logs in with the same account name.
+        private static readonly string[] SHARED_ACCOUNT_NAMES = { "steamuser", "deck" };
+
+        private static string _cachedName;
         private static string _cachedPlatformId;
 
-        private static string GetOrCreatePlatformId()
+        private static string LocalId()
         {
-            if (_cachedPlatformId != null) return _cachedPlatformId;
+            if (!PlayerPrefs.HasKey(ID_KEY))
+                PlayerPrefs.SetString(ID_KEY, Guid.NewGuid().ToString("N").Substring(0, ID_LENGTH));
+            return PlayerPrefs.GetString(ID_KEY);
+        }
 
-            const string key = "LAN_PlatformId";
-            if (!PlayerPrefs.HasKey(key))
-                PlayerPrefs.SetString(key, Guid.NewGuid().ToString("N").Substring(0, 8));
+        private static void EnsureLocal()
+        {
+            string name = LocalName(MultiplayerTransport.SteamPersonaName, Environment.UserName, LocalId());
+            if (name == _cachedName && _cachedPlatformId != null) return;
+            _cachedName = name;
+            _cachedPlatformId = name + ID_SEPARATOR + LocalId();
+        }
 
-            _cachedPlatformId = $"{Environment.UserName}_{PlayerPrefs.GetString(key)}";
-            return _cachedPlatformId;
+        public static string LocalName(string steamName, string accountName, string id)
+        {
+            if (!string.IsNullOrWhiteSpace(steamName)) return steamName.Trim();
+            bool shared = string.IsNullOrWhiteSpace(accountName);
+            foreach (string name in SHARED_ACCOUNT_NAMES)
+                shared |= string.Equals(accountName, name, StringComparison.OrdinalIgnoreCase);
+            if (!shared) return accountName;
+            string tag = string.IsNullOrEmpty(id) ? string.Empty : id.Substring(0, Mathf.Min(NAME_TAG_LENGTH, id.Length));
+            return GENERIC_PLAYER + "-" + tag;
         }
 
         public Task<IPlayerIdentity> GetLocalIdentityAsync(CancellationToken ct = default)
         {
-            IPlayerIdentity identity = new TugboatPlayerIdentity(
-                Environment.UserName,
-                GetOrCreatePlatformId());
+            EnsureLocal();
+            IPlayerIdentity identity = new TugboatPlayerIdentity(_cachedName, _cachedPlatformId);
             return Task.FromResult(identity);
         }
 
         public Task<IPlayerIdentity> GetIdentityAsync(string platformId, CancellationToken ct = default)
         {
-            string displayName = !string.IsNullOrEmpty(platformId) && platformId.Contains("_")
-                ? platformId.Substring(0, platformId.LastIndexOf('_'))
-                : platformId ?? "Player";
+            string displayName = !string.IsNullOrEmpty(platformId) && platformId.IndexOf(ID_SEPARATOR) >= 0
+                ? platformId.Substring(0, platformId.LastIndexOf(ID_SEPARATOR))
+                : platformId ?? GENERIC_PLAYER;
 
             IPlayerIdentity identity = new TugboatPlayerIdentity(displayName, platformId ?? string.Empty);
             return Task.FromResult(identity);

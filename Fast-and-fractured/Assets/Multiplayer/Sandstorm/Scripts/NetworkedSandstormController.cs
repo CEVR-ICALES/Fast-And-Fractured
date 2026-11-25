@@ -33,6 +33,8 @@ namespace FastAndFractured.Multiplayer
         private readonly Dictionary<NetworkedStatsController, GameObject> _victimObjects = new();
         // Endurance 0 does not kill, so the storm kills when its time is up, like the singleplayer dead timer.
         private readonly Dictionary<NetworkedStatsController, float> _victimSecondsLeft = new();
+        private readonly Dictionary<NetworkedStatsController, StatsController> _victimsOverflowing = new();
+        private const float PERCENT = 100f;
         private readonly Dictionary<GameObject, int> _itemOverlapCounts = new();
         private readonly Dictionary<GameObject, int> _safeZoneOverlapCounts = new();
         private readonly List<NetworkedStatsController> _victimRemovalBuffer = new();
@@ -775,6 +777,7 @@ namespace FastAndFractured.Multiplayer
             _victimOverlapCounts.Remove(stats);
             _victimDamagePerSecond.Remove(stats);
             _victimSecondsLeft.Remove(stats);
+            _victimsOverflowing.Remove(stats);
             _victimObjects.Remove(stats);
         }
 
@@ -793,15 +796,32 @@ namespace FastAndFractured.Multiplayer
                     continue;
                 }
 
-                float damage = entry.Value * elapsed;
-                if (damage > 0f)
-                    stats.DealDamageServerRpc(damage, null);
+                bool overflowing = _victimsOverflowing.TryGetValue(stats, out StatsController core);
+                if (overflowing)
+                {
+                    float damage01 = core.DamagePercent / PERCENT;
+                    float grown = StormOverflow.Grow(damage01, elapsed);
+                    if (grown > damage01) stats.DealEnvironmentDamageServer((grown - damage01) * core.MaxEndurance);
+                }
+                else
+                {
+                    float damage = entry.Value * elapsed;
+                    if (damage > 0f)
+                        stats.DealDamageServerRpc(damage, null);
+                }
 
                 float secondsLeft = _victimSecondsLeft[stats] - elapsed;
                 _victimSecondsLeft[stats] = secondsLeft;
-                if (secondsLeft <= 0f)
+                if (secondsLeft > 0f) continue;
+                if (overflowing || !TryStartOverflow(stats))
                     _victimRemovalBuffer.Add(stats);
             }
+            foreach (KeyValuePair<NetworkedStatsController, StatsController> started in _overflowStartBuffer)
+            {
+                _victimsOverflowing[started.Key] = started.Value;
+                _victimSecondsLeft[started.Key] = StormOverflow.SecondsToExplode(started.Value.DamagePercent / PERCENT);
+            }
+            _overflowStartBuffer.Clear();
 
             for (int i = 0; i < _victimRemovalBuffer.Count; i++)
             {
@@ -809,6 +829,17 @@ namespace FastAndFractured.Multiplayer
                 RemoveStormVictim(stats);
                 if (stats != null && !stats.IsDead) stats.KillFromEnvironmentServer();
             }
+        }
+
+        // Queued: the victim tables cannot change while they are being walked.
+        private readonly List<KeyValuePair<NetworkedStatsController, StatsController>> _overflowStartBuffer = new();
+
+        private bool TryStartOverflow(NetworkedStatsController stats)
+        {
+            StatsController core = stats.GetComponent<StatsController>();
+            if (core == null || core.CharacterData == null) return false;
+            _overflowStartBuffer.Add(new KeyValuePair<NetworkedStatsController, StatsController>(stats, core));
+            return true;
         }
 
         private static void RegisterListOverlap(
@@ -866,6 +897,7 @@ namespace FastAndFractured.Multiplayer
             _victimOverlapCounts.Clear();
             _victimDamagePerSecond.Clear();
             _victimSecondsLeft.Clear();
+            _victimsOverflowing.Clear();
             _victimObjects.Clear();
             _victimRemovalBuffer.Clear();
             _damageTickTimer = 0f;

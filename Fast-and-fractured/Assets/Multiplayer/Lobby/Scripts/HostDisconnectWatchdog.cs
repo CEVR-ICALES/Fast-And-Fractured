@@ -18,6 +18,7 @@ namespace FastAndFractured.Multiplayer
         private static HostDisconnectWatchdog _instance;
         private static bool _intentionalLeave;
         private static bool _inMatch;
+        private static bool _connected;
 
         private bool _hooked;
 
@@ -48,6 +49,9 @@ namespace FastAndFractured.Multiplayer
             _inMatch = false;
         }
 
+        // A join that never got through is not a lost host: the join screen reports it and the player stays there.
+        public static bool ShouldReport(bool wasIntentional, bool wasConnected) => !wasIntentional && wasConnected;
+
         private void Update()
         {
             // The NetworkManager may not exist until a scene with one loads.
@@ -55,6 +59,7 @@ namespace FastAndFractured.Multiplayer
             var nm = InstanceFinder.NetworkManager;
             if (nm == null) return;
             nm.ClientManager.OnClientConnectionState += OnClientConnectionState;
+            _connected = nm.ClientManager.Started;
             _hooked = true;
         }
 
@@ -68,8 +73,16 @@ namespace FastAndFractured.Multiplayer
 
         private void OnClientConnectionState(ClientConnectionStateArgs args)
         {
+            if (args.ConnectionState == LocalConnectionState.Started)
+            {
+                _connected = true;
+                // A leave announced before this connection existed is stale: it would swallow the next real host loss.
+                _intentionalLeave = false;
+            }
             if (args.ConnectionState != LocalConnectionState.Stopped) return;
 
+            bool wasConnected = _connected;
+            _connected = false;
             bool wasIntentional = _intentionalLeave;
             // A player waiting in the room while the others play is not in that match.
             bool wasInMatch = _inMatch &&
@@ -77,7 +90,7 @@ namespace FastAndFractured.Multiplayer
             _intentionalLeave = false;
             _inMatch = false;
 
-            if (wasIntentional)
+            if (!ShouldReport(wasIntentional, wasConnected))
                 return;
 
             // A migration is reconnecting: its failed attempts stop the client too.

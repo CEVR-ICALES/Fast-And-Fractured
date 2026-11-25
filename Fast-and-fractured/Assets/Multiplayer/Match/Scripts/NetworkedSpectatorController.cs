@@ -103,6 +103,13 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
+            bool overUi = UnityEngine.EventSystems.EventSystem.current != null &&
+                          UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+            if ((Mouse.current?.leftButton.wasPressedThisFrame == true && !overUi) ||
+                pad != null && pad.rightTrigger.wasPressedThisFrame)
+                FireGhostShot();
+            RefreshGhostHint();
+
             if (kb.fKey.wasPressedThisFrame)
             {
                 if (_freeCam) DisableFreeCam();
@@ -123,11 +130,9 @@ namespace FastAndFractured.Multiplayer
                 return;
             }
 
-            // Cycle target (a click on the overlay's buttons is not a cycle).
-            bool click = Mouse.current?.leftButton.wasPressedThisFrame == true &&
-                         (UnityEngine.EventSystems.EventSystem.current == null ||
-                          !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject());
-            if (kb.tabKey.wasPressedThisFrame || click)
+            // The left click fires the ghost shot: cycling moved to the right click.
+            bool rightClick = Mouse.current?.rightButton.wasPressedThisFrame == true && !overUi;
+            if (kb.tabKey.wasPressedThisFrame || rightClick || pad != null && pad.rightShoulder.wasPressedThisFrame)
             {
                 CycleToNextTarget();
                 UpdateUiText();
@@ -618,6 +623,29 @@ namespace FastAndFractured.Multiplayer
             return txt;
         }
 
+        private int _shownGhostSeconds = -1;
+
+        private void FireGhostShot()
+        {
+            var ghost = GhostShot.Local;
+            if (ghost == null || _mainCamera == null) return;
+            Transform view = _mainCamera.transform;
+            if (ghost.TryFire(view.position, view.forward)) RefreshGhostHint();
+        }
+
+        private void RefreshGhostHint()
+        {
+            int seconds = GhostShot.Local != null ? Mathf.CeilToInt(GhostShot.Local.CooldownLeft) : -1;
+            if (seconds == _shownGhostSeconds) return;
+            _shownGhostSeconds = seconds;
+            UpdateUiText();
+        }
+
+        private string GhostHint =>
+            GhostShot.Local == null ? string.Empty
+            : _shownGhostSeconds <= 0 ? "   " + LocalizationManager.Localize("MP.Spectator.GhostReady")
+            : "   " + LocalizationManager.Localize("MP.Spectator.GhostCooldown", _shownGhostSeconds);
+
         private void UpdateUiText()
         {
             if (_statusLabel == null || _controlsLabel == null) return;
@@ -625,7 +653,7 @@ namespace FastAndFractured.Multiplayer
             if (_freeCam)
             {
                 _statusLabel.text = LocalizationManager.Localize("MP.Spectator.FreeCamera");
-                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.FreeControls") + "   " + LeaveHint;
+                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.FreeControls") + GhostHint + "   " + LeaveHint;
             }
             else
             {
@@ -635,7 +663,7 @@ namespace FastAndFractured.Multiplayer
                     targetName = MatchNames.Of(_aliveTargets[_currentTargetIndex].gameObject);
                 }
                 _statusLabel.text = LocalizationManager.Localize("MP.Spectator.Spectating", targetName, _aliveTargets.Count);
-                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.Controls") + "   " + LeaveHint;
+                _controlsLabel.text = LocalizationManager.Localize("MP.Spectator.Controls") + GhostHint + "   " + LeaveHint;
             }
         }
     }

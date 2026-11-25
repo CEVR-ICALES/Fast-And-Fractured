@@ -40,6 +40,7 @@ namespace FastAndFractured
 
         private void LateUpdate()
         {
+            if (Time.deltaTime <= 0f) return;
             UpdateContinuousLean();
             ComposeFinalRotation();
         }

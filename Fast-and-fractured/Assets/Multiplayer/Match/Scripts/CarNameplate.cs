@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using FishNet.Object;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace FastAndFractured.Multiplayer
 {
@@ -24,6 +25,14 @@ namespace FastAndFractured.Multiplayer
         private const float OUTLINE_WIDTH = 0.25f;
         private const float MATCH_WIDTH_OR_HEIGHT = 0.5f;
         private static readonly Vector2 NAMEPLATE_SIZE = new Vector2(420f, 50f);
+        private const float NEAR_PERCENT_SIZE = 42f;
+        private const float FAR_PERCENT_SIZE = 26f;
+        private const float PERCENT_ROW_HEIGHT = 1.1f;
+        private const float FALLBACK_PERCENT_FONT_SIZE = 54f;
+        private const float ATTACH_CHECK_SECONDS = 0.5f;
+        private const float ATTACH_GIVE_UP_SECONDS = 60f;
+        private static readonly Vector2 CENTRE = new Vector2(0.5f, 0.5f);
+        private static readonly Vector2 BOTTOM_CENTRE = new Vector2(0.5f, 0f);
         private static readonly Vector2 REFERENCE_RESOLUTION = new Vector2(1920f, 1080f);
         private static readonly Color32 OUTLINE_COLOR = new Color32(20, 16, 24, 255);
         // Fades out towards Settings > Multiplayer > name distance.
@@ -44,10 +53,60 @@ namespace FastAndFractured.Multiplayer
         private NetworkObject _carNob;
         private CanvasGroup _group;
         private TextMeshProUGUI _text;
+        private RectTransform _nameRect;
+        private RectTransform _percentHolder;
+        private DamagePercentText _percent;
+        private float _percentFontSize = FALLBACK_PERCENT_FONT_SIZE;
+        private float _shownDamage = float.NaN;
+        private bool _everShown;
         private float _nextNameRefresh;
         private float _height = 3.5f;
         private bool _isHuman;
+        private bool _isLocalCar;
         private static TMP_FontAsset _font;
+        private static DamagePercentText _hudPercent;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Bootstrap()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            WatchScene(SceneManager.GetActiveScene());
+        }
+
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) => WatchScene(scene);
+
+        private static void WatchScene(Scene scene)
+        {
+            if (!scene.IsValid() || scene.buildIndex == LevelConstants.MAIN_MENU_SCENE_BUILD_INDEX) return;
+            var go = new GameObject("[CarNameplateAttacher]");
+            SceneManager.MoveGameObjectToScene(go, scene);
+            go.hideFlags = HideFlags.HideInHierarchy;
+            go.AddComponent<Attacher>();
+        }
+
+        // A single player match has no network wrapper to call AttachAll: wait for its characters.
+        private sealed class Attacher : MonoBehaviour
+        {
+            private float _next;
+            private float _giveUp;
+
+            private void OnEnable() => _giveUp = Time.unscaledTime + ATTACH_GIVE_UP_SECONDS;
+
+            private void Update()
+            {
+                float now = Time.unscaledTime;
+                if (now < _next) return;
+                _next = now + ATTACH_CHECK_SECONDS;
+                LevelController level = LevelController.ExistingInstance;
+                bool ready = level != null && level.LocalPlayer != null && level.InGameCharacters.Count > 0;
+                if (ready) AttachAll(level.InGameCharacters);
+                if (ready || now > _giveUp) Destroy(gameObject);
+            }
+        }
 
         /// <summary>One nameplate per character of the match (idempotent).</summary>
         public static void AttachAll(IEnumerable<GameObject> characters)
@@ -91,9 +150,9 @@ namespace FastAndFractured.Multiplayer
             var textGo = new GameObject("Name", typeof(RectTransform));
             var textRect = (RectTransform)textGo.transform;
             textRect.SetParent(rect, false);
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = textRect.offsetMax = Vector2.zero;
+            textRect.anchorMin = textRect.anchorMax = textRect.pivot = BOTTOM_CENTRE;
+            textRect.sizeDelta = NAMEPLATE_SIZE;
+            _nameRect = textRect;
             _text = textGo.AddComponent<TextMeshProUGUI>();
             var font = HudFont();
             if (font != null) _text.font = font;
@@ -104,7 +163,81 @@ namespace FastAndFractured.Multiplayer
             _text.raycastTarget = false;
             _text.outlineWidth = OUTLINE_WIDTH;
             _text.outlineColor = OUTLINE_COLOR;
+
+            _percent = CreateDamagePercent(rect, HudDamagePercent(), HudFont());
+            _percentHolder = (RectTransform)_percent.transform.parent;
+            _percentFontSize = Mathf.Max(1f, _percent.GetComponent<TMP_Text>().fontSize);
+            _shownDamage = DamageOf(_stats);
+            _percent.SnapTo(_shownDamage);
             RefreshName();
+        }
+
+        public static DamagePercentText CreateDamagePercent(RectTransform plate, DamagePercentText hudPercent, TMP_FontAsset fallbackFont)
+        {
+            // Inactive while it is laid out: DamagePercentText keeps the position and scale it wakes up with.
+            var holderGo = new GameObject("Damage", typeof(RectTransform));
+            holderGo.SetActive(false);
+            var holder = (RectTransform)holderGo.transform;
+            holder.SetParent(plate, false);
+            holder.anchorMin = holder.anchorMax = holder.pivot = BOTTOM_CENTRE;
+            holder.anchoredPosition = Vector2.zero;
+
+            GameObject textGo;
+            TextMeshProUGUI created = null;
+            if (hudPercent != null)
+            {
+                textGo = Instantiate(hudPercent.gameObject, holder);
+            }
+            else
+            {
+                textGo = new GameObject("Percent", typeof(RectTransform));
+                textGo.transform.SetParent(holder, false);
+                created = textGo.AddComponent<TextMeshProUGUI>();
+                if (fallbackFont != null) created.font = fallbackFont;
+                created.fontSize = FALLBACK_PERCENT_FONT_SIZE;
+                textGo.AddComponent<DamagePercentText>();
+            }
+            textGo.name = "Percent";
+            textGo.SetActive(true);
+
+            var text = textGo.GetComponent<TMP_Text>();
+            text.alignment = TextAlignmentOptions.Center;
+            text.enableWordWrapping = false;
+            text.raycastTarget = false;
+            float rowHeight = text.fontSize * PERCENT_ROW_HEIGHT;
+            holder.sizeDelta = new Vector2(NAMEPLATE_SIZE.x, rowHeight);
+            var rect = (RectTransform)textGo.transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = CENTRE;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = holder.sizeDelta;
+            rect.localRotation = Quaternion.identity;
+            rect.localScale = Vector3.one;
+
+            holderGo.SetActive(true);
+            if (created != null && created.fontSharedMaterial != null)
+            {
+                created.outlineWidth = OUTLINE_WIDTH;
+                created.outlineColor = OUTLINE_COLOR;
+            }
+            return textGo.GetComponent<DamagePercentText>();
+        }
+
+        public static float Damage01(float damagePercent) => Mathf.Max(0f, damagePercent) / 100f;
+
+        private static float DamageOf(StatsController stats) =>
+            stats != null && stats.CharacterData != null ? Damage01(stats.DamagePercent) : 0f;
+
+        public static float PercentScale(float farFraction, float fontSize) =>
+            Mathf.Lerp(NEAR_PERCENT_SIZE, FAR_PERCENT_SIZE, farFraction) / Mathf.Max(1f, fontSize);
+
+        public static bool IsSameCar(Transform car, Transform other) =>
+            car != null && other != null && (car == other || car.IsChildOf(other) || other.IsChildOf(car));
+
+        private static DamagePercentText HudDamagePercent()
+        {
+            if (_hudPercent != null) return _hudPercent;
+            HUDManager hud = HUDManager.ExistingInstance;
+            return _hudPercent = hud != null ? hud.GetComponentInChildren<DamagePercentText>(true) : null;
         }
 
         private static Canvas _canvas;
@@ -157,6 +290,11 @@ namespace FastAndFractured.Multiplayer
             _isHuman = human;
             _text.text = MatchNames.Of(_car.gameObject) ?? string.Empty;
             _text.color = human ? HumanColor : BotColor;
+            if (_carNob == null)
+            {
+                LevelController level = LevelController.ExistingInstance;
+                _isLocalCar = level != null && level.LocalPlayer != null && IsSameCar(_car, level.LocalPlayer.transform);
+            }
         }
 
         private void LateUpdate()
@@ -164,15 +302,25 @@ namespace FastAndFractured.Multiplayer
             if (_car == null) { Destroy(gameObject); return; }
             if (Time.unscaledTime >= _nextNameRefresh) RefreshName();
 
+            float damage = DamageOf(_stats);
+            if (!Mathf.Approximately(damage, _shownDamage))
+            {
+                _shownDamage = damage;
+                // Nobody saw the old value: no hit or heal effect for the change.
+                if (_everShown) _percent.SetDamage(damage);
+                else _percent.SnapTo(damage);
+            }
+
             var cam = Camera.main;
-            bool own = _carNob != null && _carNob.IsOwner;
+            bool own = _carNob != null ? _carNob.IsOwner : _isLocalCar;
             bool alive = _car.gameObject.activeInHierarchy && !NetworkedStatsController.IsDeadCar(_stats);
-            bool wanted = _isHuman ? MultiplayerSettings.ShowPlayerNames : MultiplayerSettings.ShowBotNames;
-            if (cam == null || own || !alive || !wanted)
+            if (cam == null || own || !alive)
             {
                 _group.alpha = 0f;
                 return;
             }
+            bool named = _isHuman ? MultiplayerSettings.ShowPlayerNames : MultiplayerSettings.ShowBotNames;
+            if (_text.enabled != named) _text.enabled = named;
 
             Vector3 position = SmoothedPoint() + Vector3.up * _height;
             Vector3 screen = cam.WorldToScreenPoint(position);
@@ -185,7 +333,12 @@ namespace FastAndFractured.Multiplayer
             float fadeEnd = MultiplayerSettings.NameTagDistance;
             _group.alpha = 1f - Mathf.InverseLerp(fadeEnd * FADE_START_FRACTION, fadeEnd, distance);
             transform.position = new Vector3(screen.x, screen.y, 0f);
-            _text.fontSize = Mathf.Lerp(NEAR_FONT_SIZE, FAR_FONT_SIZE, Mathf.InverseLerp(NEAR_DISTANCE, fadeEnd, distance));
+            if (_group.alpha > 0f) _everShown = true;
+            float far = Mathf.InverseLerp(NEAR_DISTANCE, fadeEnd, distance);
+            _text.fontSize = Mathf.Lerp(NEAR_FONT_SIZE, FAR_FONT_SIZE, far);
+            float percentScale = PercentScale(far, _percentFontSize);
+            _percentHolder.localScale = new Vector3(percentScale, percentScale, 1f);
+            _nameRect.anchoredPosition = new Vector2(0f, _percentHolder.sizeDelta.y * percentScale);
         }
 
         /// <summary>The followed point smoothed per frame; a jump its own motion does not explain snaps.</summary>

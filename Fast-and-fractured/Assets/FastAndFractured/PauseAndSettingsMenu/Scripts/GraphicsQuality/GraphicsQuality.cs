@@ -52,6 +52,31 @@ namespace FastAndFractured
 
         public static int ClampLevel(int level, int levelCount) => Mathf.Clamp(level, 0, Mathf.Max(0, levelCount - 1));
 
+        public const int STEAM_DECK_LEVEL = 0;
+        public const int STEAM_DECK_FPS = 40;
+        private const string STEAM_DECK_ENV = "SteamDeck";
+        private static readonly string[] STEAM_DECK_GPUS = { "VANGOGH", "Custom GPU 0405", "Custom GPU 0932" };
+
+        public static bool IsSteamDeck =>
+            IsSteamDeckDevice(Environment.GetEnvironmentVariable(STEAM_DECK_ENV), SystemInfo.graphicsDeviceName);
+
+        // Steam sets SteamDeck=1 on the Deck; under Proton the APU's name is the fallback.
+        public static bool IsSteamDeckDevice(string steamDeckEnv, string gpuName)
+        {
+            if (steamDeckEnv == "1") return true;
+            if (string.IsNullOrEmpty(gpuName)) return false;
+            foreach (var deckGpu in STEAM_DECK_GPUS)
+                if (gpuName.IndexOf(deckGpu, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            return false;
+        }
+
+        public static void ApplySteamDeckProfile()
+        {
+            if (!PlayerPrefs.HasKey(MAX_FPS_KEY))
+                PlayerPrefs.SetInt(MAX_FPS_KEY, STEAM_DECK_FPS);
+            SaveDetected(STEAM_DECK_LEVEL);
+        }
+
         public static string LevelNameKey(int level) =>
             level >= 0 && level < LEVEL_NAME_KEYS.Length ? LEVEL_NAME_KEYS[level] : null;
 
@@ -135,6 +160,7 @@ namespace FastAndFractured
                 return;
             ApplySavedAntiAliasing(camera);
             Upscaling.ApplySaved(camera);
+            UiOutsideUpscaling.MoveToOverlay(camera);
         }
 
         private static void ForgetCameras(Scene scene, LoadSceneMode mode) => _camerasWithSavedSettings.Clear();
